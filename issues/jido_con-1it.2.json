@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:47Z",
+  "description": "Add a generated action for conversations.info with scope-aware access across public, private, IM, and MPIM conversations.",
+  "id": "jido_con-1it.2",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 2,
+  "status": "open",
+  "title": "Slack action: get conversation info",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:47Z"
+}
