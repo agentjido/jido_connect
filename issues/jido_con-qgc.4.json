@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for listing commits for a repository/ref/path with pagination and normalized commit output.",
+  "id": "jido_con-qgc.4",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub action: list commits",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
