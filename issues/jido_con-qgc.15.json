@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for fetching pull request details, mergeability metadata, refs, and linked issue context.",
+  "id": "jido_con-qgc.15",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub action: get pull request",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
