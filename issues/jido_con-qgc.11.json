@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for editing title, body, state, labels, milestone, assignees, and issue type where available.",
+  "id": "jido_con-qgc.11",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub action: update issue",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
