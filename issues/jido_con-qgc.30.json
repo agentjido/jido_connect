@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T19:23:02Z",
+  "close_reason": "Implemented in 73108b2",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for GitHub issue search with query helpers, pagination, and normalized issue/PR results.",
   "id": "jido_con-qgc.30",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: search issues and pull requests",
   "type": "action",
-  "updated_at": "2026-04-29T19:18:58Z"
+  "updated_at": "2026-04-29T19:23:02Z"
 }
