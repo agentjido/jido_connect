@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:47Z",
+  "description": "Add a generated action for users.list with pagination and normalized user output.",
+  "id": "jido_con-1it.11",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 1,
+  "status": "open",
+  "title": "Slack action: list users",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:47Z"
+}
