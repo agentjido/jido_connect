@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a high-confirmation generated action for dispatching a workflow with ref and typed inputs.",
+  "id": "jido_con-qgc.23",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub action: dispatch workflow",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
