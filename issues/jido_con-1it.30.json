@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:48Z",
+  "description": "Add a generated action for pins.list with normalized pinned item output.",
+  "id": "jido_con-1it.30",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 2,
+  "status": "open",
+  "title": "Slack action: list pinned items",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:48Z"
+}
