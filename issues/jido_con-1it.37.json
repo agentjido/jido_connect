@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:48Z",
+  "description": "Add Events API normalization for reaction_removed with item metadata and actor identity.",
+  "id": "jido_con-1it.37",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 2,
+  "status": "open",
+  "title": "Slack trigger: event reaction removed",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:48Z"
+}
