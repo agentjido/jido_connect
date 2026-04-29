@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T19:02:43Z",
+  "close_reason": "Implemented in 05ac329",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a high-confirmation generated action for merging pull requests with merge method, commit title/body, sha guard, and tests.",
   "id": "jido_con-qgc.18",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: merge pull request",
   "type": "action",
-  "updated_at": "2026-04-29T18:59:04Z"
+  "updated_at": "2026-04-29T19:02:43Z"
 }
