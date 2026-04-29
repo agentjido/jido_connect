@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for GitHub App installation connections to list accessible repositories and permissions.",
+  "id": "jido_con-qgc.32",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub action: list installation repositories",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
