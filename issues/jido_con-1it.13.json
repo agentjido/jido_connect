@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:47Z",
+  "description": "Add a generated action for users.lookupByEmail with scope tests and not-found normalization.",
+  "id": "jido_con-1it.13",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 1,
+  "status": "open",
+  "title": "Slack action: lookup user by email",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:47Z"
+}
