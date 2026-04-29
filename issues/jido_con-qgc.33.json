@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add webhook normalization for push events into stable signals, including repository, ref, commits, pusher, and delivery metadata.",
+  "id": "jido_con-qgc.33",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub trigger: webhook push",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
