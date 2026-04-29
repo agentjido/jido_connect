@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:47Z",
+  "description": "Add a high-confirmation generated action for conversations.kick with policy/risk metadata.",
+  "id": "jido_con-1it.9",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 2,
+  "status": "open",
+  "title": "Slack action: remove user from channel",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:47Z"
+}
