@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add webhook normalization for workflow_run requested, in_progress, completed, and failure-oriented signal metadata.",
+  "id": "jido_con-qgc.38",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub trigger: webhook workflow run",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
