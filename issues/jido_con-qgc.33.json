@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T21:16:53Z",
+  "close_reason": "Implemented in 55f63c2",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add webhook normalization for push events into stable signals, including repository, ref, commits, pusher, and delivery metadata.",
   "id": "jido_con-qgc.33",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub trigger: webhook push",
   "type": "trigger",
-  "updated_at": "2026-04-29T21:13:42Z"
+  "updated_at": "2026-04-29T21:16:53Z"
 }
