@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for listing comments on an issue or pull request with pagination and normalized comment output.",
+  "id": "jido_con-qgc.9",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub action: list issue comments",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
