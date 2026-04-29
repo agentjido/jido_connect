@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:47Z",
+  "description": "Add a generated action for conversations.replies with pagination, dynamic scopes, and normalized thread output.",
+  "id": "jido_con-1it.19",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 1,
+  "status": "open",
+  "title": "Slack action: get thread replies",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:47Z"
+}
