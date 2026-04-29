@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T21:19:39Z",
+  "close_reason": "Implemented in 655175f",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add webhook normalization for issues opened, edited, closed, reopened, assigned, labeled, and unlabeled.",
   "id": "jido_con-qgc.34",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub trigger: webhook issue lifecycle",
   "type": "trigger",
-  "updated_at": "2026-04-29T21:16:55Z"
+  "updated_at": "2026-04-29T21:19:39Z"
 }
