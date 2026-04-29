@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for listing changed files on a pull request with pagination and normalized file stats.",
+  "id": "jido_con-qgc.20",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub action: list pull request files",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
