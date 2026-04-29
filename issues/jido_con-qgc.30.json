@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for GitHub issue search with query helpers, pagination, and normalized issue/PR results.",
+  "id": "jido_con-qgc.30",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub action: search issues and pull requests",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
