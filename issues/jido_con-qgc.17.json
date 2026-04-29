@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T18:59:02Z",
+  "close_reason": "Implemented in 766c9da",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for updating pull request title, body, base, state, draft readiness, and maintainer edit settings.",
   "id": "jido_con-qgc.17",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: update pull request",
   "type": "action",
-  "updated_at": "2026-04-29T18:57:04Z"
+  "updated_at": "2026-04-29T18:59:02Z"
 }
