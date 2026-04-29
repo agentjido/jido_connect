@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for rerunning workflow runs or failed jobs with confirmation metadata.",
+  "id": "jido_con-qgc.25",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub action: rerun workflow run",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
