@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:48Z",
+  "description": "Add Events API verification and normalization for app_mention into stable Jido signals.",
+  "id": "jido_con-1it.31",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 1,
+  "status": "open",
+  "title": "Slack trigger: event app mention",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:48Z"
+}
