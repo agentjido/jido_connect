@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for listing GitHub Actions workflow runs by repository, workflow, branch, status, event, and pagination.",
+  "id": "jido_con-qgc.22",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub action: list workflow runs",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
