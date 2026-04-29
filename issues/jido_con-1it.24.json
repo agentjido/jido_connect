@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:47Z",
+  "description": "Add a generated action for sharing existing files to channels with title/comment support.",
+  "id": "jido_con-1it.24",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 2,
+  "status": "open",
+  "title": "Slack action: share file",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:47Z"
+}
