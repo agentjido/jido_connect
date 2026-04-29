@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T17:41:43Z",
+  "close_reason": "Implemented in 9584af1",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for editing title, body, state, labels, milestone, assignees, and issue type where available.",
   "id": "jido_con-qgc.11",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: update issue",
   "type": "action",
-  "updated_at": "2026-04-29T17:10:20Z"
+  "updated_at": "2026-04-29T17:41:43Z"
 }
