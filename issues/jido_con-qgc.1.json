@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for listing repositories visible to the connection, supporting OAuth and installation auth, pagination, tests, and normalized repository output.",
+  "id": "jido_con-qgc.1",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub action: list repositories",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
