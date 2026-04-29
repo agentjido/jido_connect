@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:48Z",
+  "description": "Add Events API normalization for app_uninstalled, tokens_revoked, scope_denied, and app_home_opened where useful.",
+  "id": "jido_con-1it.41",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 2,
+  "status": "open",
+  "title": "Slack trigger: event app lifecycle",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:48Z"
+}
