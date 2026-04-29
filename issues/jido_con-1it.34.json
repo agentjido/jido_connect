@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:48Z",
+  "description": "Add Events API normalization for message.im and message.mpim with user/conversation metadata.",
+  "id": "jido_con-1it.34",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 1,
+  "status": "open",
+  "title": "Slack trigger: event direct message",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:48Z"
+}
