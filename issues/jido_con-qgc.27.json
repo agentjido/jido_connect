@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for listing releases and tags with pagination and normalized release output.",
+  "id": "jido_con-qgc.27",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub action: list releases",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
