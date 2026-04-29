@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for creating pull requests with title, body, head, base, draft, maintainer edit, risk, and confirmation metadata.",
+  "id": "jido_con-qgc.16",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub action: create pull request",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
