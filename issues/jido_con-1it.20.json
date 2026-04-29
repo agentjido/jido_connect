@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:47Z",
+  "description": "Add a generated action for reactions.add with channel/timestamp/name validation and tests.",
+  "id": "jido_con-1it.20",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 1,
+  "status": "open",
+  "title": "Slack action: add reaction",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:47Z"
+}
