@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a high-confirmation generated action for merging pull requests with merge method, commit title/body, sha guard, and tests.",
+  "id": "jido_con-qgc.18",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub action: merge pull request",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
