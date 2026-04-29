@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add webhook normalization for pull_request opened, synchronized, reopened, closed, merged, ready_for_review, and converted_to_draft.",
+  "id": "jido_con-qgc.36",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub trigger: webhook pull request lifecycle",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
