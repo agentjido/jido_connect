@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add webhook normalization for issue_comment created, edited, and deleted, including PR comment distinction.",
+  "id": "jido_con-qgc.35",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub trigger: webhook issue comment",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
