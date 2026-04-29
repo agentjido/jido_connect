@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for fetching repository metadata by owner/name, with permissions and error normalization tests.",
+  "id": "jido_con-qgc.2",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub action: get repository",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
