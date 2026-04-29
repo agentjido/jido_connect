@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T17:09:29Z",
+  "close_reason": "Implemented in 02a8905",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for creating issue or pull request comments with high-risk metadata and tests.",
   "id": "jido_con-qgc.10",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: create issue comment",
   "type": "action",
-  "updated_at": "2026-04-29T17:06:23Z"
+  "updated_at": "2026-04-29T17:09:29Z"
 }
