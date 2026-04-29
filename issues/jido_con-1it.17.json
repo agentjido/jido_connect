@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:47Z",
+  "description": "Add a generated action for chat.scheduleMessage with post_at validation and generated schedule metadata.",
+  "id": "jido_con-1it.17",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 2,
+  "status": "open",
+  "title": "Slack action: schedule message",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:47Z"
+}
