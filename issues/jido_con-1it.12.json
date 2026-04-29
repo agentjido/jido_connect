@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:47Z",
+  "description": "Add a generated action for users.info with bot/user distinctions and normalized profile output.",
+  "id": "jido_con-1it.12",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 1,
+  "status": "open",
+  "title": "Slack action: get user info",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:47Z"
+}
