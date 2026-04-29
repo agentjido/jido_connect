@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for listing pull requests by repository, state, head, base, sort, and pagination.",
+  "id": "jido_con-qgc.14",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 1,
+  "status": "open",
+  "title": "GitHub action: list pull requests",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
