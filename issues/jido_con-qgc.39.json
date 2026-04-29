@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add webhook normalization for release published, edited, unpublished, deleted, prereleased, and released events.",
+  "id": "jido_con-qgc.39",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub trigger: webhook release lifecycle",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
