@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for uploading a release asset using the upload URL boundary and safe content handling.",
+  "id": "jido_con-qgc.29",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub action: upload release asset",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
