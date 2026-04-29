@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add webhook normalization for pull_request_review and pull_request_review_comment events.",
+  "id": "jido_con-qgc.37",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub trigger: webhook pull request review",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
