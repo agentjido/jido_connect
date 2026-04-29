@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:48Z",
+  "description": "Add Events API normalization for file_created, file_shared, file_public, file_deleted, and file_change.",
+  "id": "jido_con-1it.38",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 2,
+  "status": "open",
+  "title": "Slack trigger: event file lifecycle",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:48Z"
+}
