@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T21:05:14Z",
+  "close_reason": "Implemented in a1f7ff7",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for GitHub App installation connections to list accessible repositories and permissions.",
   "id": "jido_con-qgc.32",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: list installation repositories",
   "type": "action",
-  "updated_at": "2026-04-29T19:27:16Z"
+  "updated_at": "2026-04-29T21:05:14Z"
 }
