@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T19:11:09Z",
+  "close_reason": "Implemented in 0927e39",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a high-confirmation generated action for dispatching a workflow with ref and typed inputs.",
   "id": "jido_con-qgc.23",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: dispatch workflow",
   "type": "action",
-  "updated_at": "2026-04-29T19:08:02Z"
+  "updated_at": "2026-04-29T19:11:09Z"
 }
