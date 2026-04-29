@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for fetching jobs and steps for a workflow run with normalized CI status output.",
+  "id": "jido_con-qgc.24",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub action: get workflow run jobs",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
