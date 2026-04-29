@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a focused generated action for adding labels to an issue with scope and validation tests.",
+  "id": "jido_con-qgc.12",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub action: add labels to issue",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
