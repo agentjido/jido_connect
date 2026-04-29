@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T21:25:15Z",
+  "close_reason": "Implemented in 403d03b",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add webhook normalization for pull_request opened, synchronized, reopened, closed, merged, ready_for_review, and converted_to_draft.",
   "id": "jido_con-qgc.36",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub trigger: webhook pull request lifecycle",
   "type": "trigger",
-  "updated_at": "2026-04-29T21:22:23Z"
+  "updated_at": "2026-04-29T21:25:15Z"
 }
