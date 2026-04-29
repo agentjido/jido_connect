@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:48Z",
+  "description": "Add Events API normalization for member_joined_channel and member_left_channel.",
+  "id": "jido_con-1it.40",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 2,
+  "status": "open",
+  "title": "Slack trigger: event channel membership",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:48Z"
+}
