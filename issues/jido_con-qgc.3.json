@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for listing repository branches with pagination and normalized branch output.",
+  "id": "jido_con-qgc.3",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub action: list branches",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
