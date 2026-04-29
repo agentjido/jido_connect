@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a generated action for repository search with query helpers, pagination, and normalized repository results.",
+  "id": "jido_con-qgc.31",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub action: search repositories",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
