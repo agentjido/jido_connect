@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:46Z",
+  "description": "Add a poll trigger that emits pull request update signals with checkpoint continuity and duplicate prevention tests.",
+  "id": "jido_con-qgc.40",
+  "labels": [],
+  "parent": "jido_con-qgc",
+  "priority": 2,
+  "status": "open",
+  "title": "GitHub trigger: poll pull requests updated since checkpoint",
+  "type": "trigger",
+  "updated_at": "2026-04-29T15:52:46Z"
+}
