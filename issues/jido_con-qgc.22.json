@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T19:07:43Z",
+  "close_reason": "Implemented in 1e061e6",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for listing GitHub Actions workflow runs by repository, workflow, branch, status, event, and pagination.",
   "id": "jido_con-qgc.22",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: list workflow runs",
   "type": "action",
-  "updated_at": "2026-04-29T19:02:44Z"
+  "updated_at": "2026-04-29T19:07:43Z"
 }
