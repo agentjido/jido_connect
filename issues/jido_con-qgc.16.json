@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-29T18:56:58Z",
+  "close_reason": "Implemented in 4cf70cd",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for creating pull requests with title, body, head, base, draft, maintainer edit, risk, and confirmation metadata.",
   "id": "jido_con-qgc.16",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: create pull request",
   "type": "action",
-  "updated_at": "2026-04-29T18:54:34Z"
+  "updated_at": "2026-04-29T18:56:58Z"
 }
