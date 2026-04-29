@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-29T15:52:47Z",
+  "description": "Add generated actions for auth.test and team.info so hosts can validate tokens, team identity, enterprise identity, and bot/user context.",
+  "id": "jido_con-1it.1",
+  "labels": [],
+  "parent": "jido_con-1it",
+  "priority": 1,
+  "status": "open",
+  "title": "Slack action: auth test and team info",
+  "type": "action",
+  "updated_at": "2026-04-29T15:52:47Z"
+}
