@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T17:12:40Z",
+  "close_reason": "Implemented in 680ae57",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a generated action for chat.deleteScheduledMessage with confirmation metadata.",
   "id": "jido_con-1it.18",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: unschedule message",
   "type": "action",
-  "updated_at": "2026-04-30T17:10:27Z"
+  "updated_at": "2026-04-30T17:12:40Z"
 }
