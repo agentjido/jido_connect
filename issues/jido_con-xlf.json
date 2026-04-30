@@ -5,7 +5,11 @@
   "created": "2026-04-30T19:00:23Z",
   "description": "Capture the current foundation hardening pass from review findings. These issues should improve runtime clarity, error hygiene, and long-term maintainability before the connector catalog grows much further.",
   "id": "jido_con-xlf",
-  "labels": [],
+  "labels": [
+    "foundation",
+    "hardening",
+    "review"
+  ],
   "priority": 2,
   "status": "open",
   "title": "Roadmap: harden connector foundation after connector surface expansion",
