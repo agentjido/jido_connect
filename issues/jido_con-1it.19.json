@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T13:03:54Z",
+  "close_reason": "Implemented in 32cd3ff",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a generated action for conversations.replies with pagination, dynamic scopes, and normalized thread output.",
   "id": "jido_con-1it.19",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: get thread replies",
   "type": "action",
-  "updated_at": "2026-04-30T12:58:59Z"
+  "updated_at": "2026-04-30T13:03:54Z"
 }
