@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T17:58:27Z",
+  "close_reason": "Implemented in 57b22c8",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a high-confirmation generated action for conversations.kick with policy/risk metadata.",
   "id": "jido_con-1it.9",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: remove user from channel",
   "type": "action",
-  "updated_at": "2026-04-30T17:55:16Z"
+  "updated_at": "2026-04-30T17:58:27Z"
 }
