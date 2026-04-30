@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T13:42:11Z",
+  "close_reason": "Implemented in 49d783f",
   "created": "2026-04-29T15:52:48Z",
   "description": "Add Events API normalization for message.im and message.mpim with user/conversation metadata.",
   "id": "jido_con-1it.34",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack trigger: event direct message",
   "type": "trigger",
-  "updated_at": "2026-04-30T13:39:00Z"
+  "updated_at": "2026-04-30T13:42:11Z"
 }
