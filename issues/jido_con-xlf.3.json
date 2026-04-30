@@ -2,6 +2,7 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T19:22:18Z",
   "created": "2026-04-30T19:00:23Z",
   "description": "Finding: provider clients and tests grew large after the connector surface expansion. GitHub client is about 1.8k LOC and Slack client is about 1.2k LOC, with very large provider test files.\n\nScope:\n- Split GitHub client by API area behind a stable facade: Issues, PullRequests, Repositories, Actions, Releases, Contents/Search/Installations as appropriate.\n- Split Slack client by API area behind a stable facade: Conversations, Messages, Files, Reactions, Pins, Users, Search/Auth as appropriate.\n- Split large provider tests along the same resource boundaries.\n- Avoid behavior changes; this is an organization/refactor issue.\n\nPrimary files:\n- apps/jido_connect_github/lib/jido_connect/github/client.ex\n- apps/jido_connect_slack/lib/jido_connect/slack/client.ex\n- apps/jido_connect_github/test/jido_connect_github_test.exs\n- apps/jido_connect_slack/test/jido_connect_slack_test.exs\n- apps/jido_connect_github/test/jido_connect/github/client_test.exs\n- apps/jido_connect_slack/test/jido_connect/slack/client_test.exs\n\nAcceptance:\n- Existing public client functions remain callable or have deliberate compatibility shims.\n- No single provider client module remains the dumping ground for all endpoint logic.\n- Tests are split enough that future Beadwork issues touch focused files.\n- mix format --check-formatted, mix compile --warnings-as-errors, and mix test pass.",
   "id": "jido_con-xlf.3",
@@ -12,8 +13,8 @@
   ],
   "parent": "jido_con-xlf",
   "priority": 3,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Refactor large provider clients and tests by API area",
   "type": "task",
-  "updated_at": "2026-04-30T19:18:31Z"
+  "updated_at": "2026-04-30T19:22:18Z"
 }
