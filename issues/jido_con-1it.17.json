@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T17:10:24Z",
+  "close_reason": "Implemented in ad71661",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a generated action for chat.scheduleMessage with post_at validation and generated schedule metadata.",
   "id": "jido_con-1it.17",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: schedule message",
   "type": "action",
-  "updated_at": "2026-04-30T17:07:31Z"
+  "updated_at": "2026-04-30T17:10:24Z"
 }
