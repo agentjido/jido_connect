@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
   "created": "2026-04-30T19:00:23Z",
@@ -13,8 +13,8 @@
   ],
   "parent": "jido_con-xlf",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "Harden generated webhook sensor runtime contract",
   "type": "task",
-  "updated_at": "2026-04-30T19:00:23Z"
+  "updated_at": "2026-04-30T19:12:04Z"
 }
