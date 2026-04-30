@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T14:05:40Z",
+  "close_reason": "Implemented in a7d1d1d",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for listing changed files on a pull request with pagination and normalized file stats.",
   "id": "jido_con-qgc.20",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: list pull request files",
   "type": "action",
-  "updated_at": "2026-04-30T14:02:27Z"
+  "updated_at": "2026-04-30T14:05:40Z"
 }
