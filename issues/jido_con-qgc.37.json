@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T16:39:22Z",
+  "close_reason": "Implemented in dcfb692",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add webhook normalization for pull_request_review and pull_request_review_comment events.",
   "id": "jido_con-qgc.37",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub trigger: webhook pull request review",
   "type": "trigger",
-  "updated_at": "2026-04-30T16:37:29Z"
+  "updated_at": "2026-04-30T16:39:22Z"
 }
