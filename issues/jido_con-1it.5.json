@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T17:44:08Z",
+  "close_reason": "Implemented in e3984b7",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a high-confirmation generated action for conversations.archive with policy/risk metadata.",
   "id": "jido_con-1it.5",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: archive channel",
   "type": "action",
-  "updated_at": "2026-04-30T17:40:56Z"
+  "updated_at": "2026-04-30T17:44:08Z"
 }
