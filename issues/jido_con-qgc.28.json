@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T15:24:46Z",
+  "close_reason": "Implemented in 8ff6cc7",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a high-confirmation generated action for creating releases with draft/prerelease/latest settings and generated notes support.",
   "id": "jido_con-qgc.28",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: create release",
   "type": "action",
-  "updated_at": "2026-04-30T15:21:13Z"
+  "updated_at": "2026-04-30T15:24:46Z"
 }
