@@ -2,6 +2,7 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T19:18:19Z",
   "created": "2026-04-30T19:00:23Z",
   "description": "Finding: provider HTTP errors store raw provider response bodies in public error details. Error.to_map/1 sanitizes transport output, but raw error structs may still leak Slack/GitHub user content if logged or rendered directly.\n\nScope:\n- Introduce a public/private error detail boundary or sanitize and bound provider bodies at construction time.\n- Keep enough provider error context for debugging status, provider reason, retry_after, and compact message.\n- Ensure tokens, secrets, user message content, GitHub file contents, issue bodies, and Slack profile/message payloads are not retained in public details by default.\n- Update tests for Jido.Connect.Http.provider_error/2 and provider client invalid response paths.\n\nPrimary files:\n- apps/jido_connect/lib/jido_connect/provider/http.ex\n- apps/jido_connect/lib/jido_connect/support/error.ex\n- apps/jido_connect/lib/jido_connect/support/sanitizer.ex\n- apps/jido_connect_github/lib/jido_connect/github/client.ex\n- apps/jido_connect_slack/lib/jido_connect/slack/client.ex\n\nAcceptance:\n- Public error structs and Error.to_map/1 expose bounded sanitized details only.\n- Provider raw response bodies are either absent, redacted, or kept only in an explicitly private/debug-only field that is not returned by default.",
   "id": "jido_con-xlf.2",
@@ -12,8 +13,8 @@
   ],
   "parent": "jido_con-xlf",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Sanitize provider error detail boundary",
   "type": "task",
-  "updated_at": "2026-04-30T19:14:53Z"
+  "updated_at": "2026-04-30T19:18:19Z"
 }
