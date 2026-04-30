@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T15:17:57Z",
+  "close_reason": "Implemented in 662e9ea",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a high-confirmation generated action for canceling a workflow run with tests.",
   "id": "jido_con-qgc.26",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: cancel workflow run",
   "type": "action",
-  "updated_at": "2026-04-30T15:15:20Z"
+  "updated_at": "2026-04-30T15:17:57Z"
 }
