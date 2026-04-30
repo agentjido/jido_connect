@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-30T19:00:23Z",
+  "description": "Finding: generated webhook sensor modules exist and plugin availability can surface them, but non-poll events currently fall through to a no-op in Jido.Connect.JidoSensorRuntime.\n\nScope:\n- Decide and implement the explicit contract for generated webhook sensors.\n- Either add a webhook runtime path that delegates to provider webhook normalizers and emits Jido signals, or mark generated webhook sensors as metadata-only with docs and projection metadata.\n- Keep provider-specific signature verification in provider packages.\n- Add tests proving Slack/GitHub webhook trigger projections do not appear operational unless the runtime path is implemented.\n\nPrimary files:\n- apps/jido_connect/lib/jido_connect/jido/sensor_runtime.ex\n- apps/jido_connect/lib/jido_connect/jido/sensor_projection.ex\n- apps/jido_connect_github/lib/jido_connect/github/webhook.ex\n- apps/jido_connect_slack/lib/jido_connect/slack/webhook.ex\n\nAcceptance:\n- No silent no-op for webhook sensor events unless the projection explicitly declares metadata-only behavior.\n- Docs clarify host responsibilities for webhook delivery, signature verification, idempotency, and signal emission.",
+  "id": "jido_con-xlf.1",
+  "labels": [],
+  "parent": "jido_con-xlf",
+  "priority": 2,
+  "status": "open",
+  "title": "Harden generated webhook sensor runtime contract",
+  "type": "task",
+  "updated_at": "2026-04-30T19:00:23Z"
+}
