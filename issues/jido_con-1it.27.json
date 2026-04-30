@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T18:07:19Z",
+  "close_reason": "Implemented in ea7da4a",
   "created": "2026-04-29T15:52:48Z",
   "description": "Add a generated action for search.files with query helpers, pagination, and normalized file output.",
   "id": "jido_con-1it.27",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: search files",
   "type": "action",
-  "updated_at": "2026-04-30T18:02:40Z"
+  "updated_at": "2026-04-30T18:07:19Z"
 }
