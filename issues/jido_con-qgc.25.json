@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T15:15:18Z",
+  "close_reason": "Implemented in fb46bc3",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for rerunning workflow runs or failed jobs with confirmation metadata.",
   "id": "jido_con-qgc.25",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: rerun workflow run",
   "type": "action",
-  "updated_at": "2026-04-30T15:12:04Z"
+  "updated_at": "2026-04-30T15:15:18Z"
 }
