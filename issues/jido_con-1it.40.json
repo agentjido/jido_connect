@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T18:33:57Z",
+  "close_reason": "Implemented in 8dfbcf6",
   "created": "2026-04-29T15:52:48Z",
   "description": "Add Events API normalization for member_joined_channel and member_left_channel.",
   "id": "jido_con-1it.40",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack trigger: event channel membership",
   "type": "trigger",
-  "updated_at": "2026-04-30T18:30:41Z"
+  "updated_at": "2026-04-30T18:33:57Z"
 }
