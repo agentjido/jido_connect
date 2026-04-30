@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T18:38:33Z",
+  "close_reason": "Implemented in 13e22f7",
   "created": "2026-04-29T15:52:48Z",
   "description": "Add Events API normalization for app_uninstalled, tokens_revoked, scope_denied, and app_home_opened where useful.",
   "id": "jido_con-1it.41",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack trigger: event app lifecycle",
   "type": "trigger",
-  "updated_at": "2026-04-30T18:33:59Z"
+  "updated_at": "2026-04-30T18:38:33Z"
 }
