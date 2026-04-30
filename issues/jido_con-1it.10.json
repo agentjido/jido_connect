@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T17:04:22Z",
+  "close_reason": "Implemented in b60e3c7",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a generated action for conversations.members with pagination and dynamic scope requirements.",
   "id": "jido_con-1it.10",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: list conversation members",
   "type": "action",
-  "updated_at": "2026-04-30T17:00:51Z"
+  "updated_at": "2026-04-30T17:04:22Z"
 }
