@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-30T19:02:02Z",
+  "description": "Recommendation: preserve the current baseline and make release readiness explicit before broader connector expansion.\n\nScope:\n- Add or update a release-readiness checklist for the umbrella and individual provider packages.\n- Include current verification commands for root packages and dev/demo.\n- Note that the repository should be pushed before beginning the next large connector wave.\n- Do not implement Hex publishing automation in this issue; keep it as guidance/checklist only.\n\nPrimary files:\n- README.md\n- CHANGELOG.md or RELEASE.md if present/appropriate\n- package docs for apps/jido_connect, apps/jido_connect_github, apps/jido_connect_slack, apps/jido_connect_mcp if needed\n\nAcceptance:\n- There is a clear baseline checklist for future release prep.\n- Hex publishing details are not overbuilt yet.\n- The current ahead-of-origin state is called out as an operator action, not hidden in code.",
+  "id": "jido_con-xlf.5",
+  "labels": [],
+  "parent": "jido_con-xlf",
+  "priority": 3,
+  "status": "open",
+  "title": "Add release baseline and verification checklist",
+  "type": "task",
+  "updated_at": "2026-04-30T19:02:02Z"
+}
