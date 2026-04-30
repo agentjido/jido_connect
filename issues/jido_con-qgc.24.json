@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T15:12:02Z",
+  "close_reason": "Implemented in 05ddde7",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for fetching jobs and steps for a workflow run with normalized CI status output.",
   "id": "jido_con-qgc.24",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: get workflow run jobs",
   "type": "action",
-  "updated_at": "2026-04-30T15:08:19Z"
+  "updated_at": "2026-04-30T15:12:02Z"
 }
