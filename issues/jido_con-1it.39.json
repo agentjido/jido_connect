@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T18:30:39Z",
+  "close_reason": "Implemented in 44f0e2c",
   "created": "2026-04-29T15:52:48Z",
   "description": "Add Events API normalization for channel_created, channel_rename, channel_archive, and channel_unarchive.",
   "id": "jido_con-1it.39",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack trigger: event channel lifecycle",
   "type": "trigger",
-  "updated_at": "2026-04-30T18:25:24Z"
+  "updated_at": "2026-04-30T18:30:39Z"
 }
