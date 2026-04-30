@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T13:47:34Z",
+  "close_reason": "Implemented in c211df1",
   "created": "2026-04-29T15:52:48Z",
   "description": "Add Events API normalization for reaction_added with item metadata and actor identity.",
   "id": "jido_con-1it.36",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack trigger: event reaction added",
   "type": "trigger",
-  "updated_at": "2026-04-30T13:45:13Z"
+  "updated_at": "2026-04-30T13:47:34Z"
 }
