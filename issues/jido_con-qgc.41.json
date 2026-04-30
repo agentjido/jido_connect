@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T18:02:38Z",
+  "close_reason": "Implemented in c49a3d5",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a poll trigger that emits workflow run update/completion signals with checkpoint continuity tests.",
   "id": "jido_con-qgc.41",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub trigger: poll workflow runs since checkpoint",
   "type": "trigger",
-  "updated_at": "2026-04-30T17:58:29Z"
+  "updated_at": "2026-04-30T18:02:38Z"
 }
