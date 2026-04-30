@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T12:48:22Z",
+  "close_reason": "Implemented in 710162d",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a generated action for users.lookupByEmail with scope tests and not-found normalization.",
   "id": "jido_con-1it.13",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: lookup user by email",
   "type": "action",
-  "updated_at": "2026-04-30T12:40:49Z"
+  "updated_at": "2026-04-30T12:48:22Z"
 }
