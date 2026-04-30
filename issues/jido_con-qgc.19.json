@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T13:59:36Z",
+  "close_reason": "Implemented in 0a1ca6e",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for requesting users or teams as reviewers with scope tests and normalized errors.",
   "id": "jido_con-qgc.19",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: request pull request reviewers",
   "type": "action",
-  "updated_at": "2026-04-30T13:56:04Z"
+  "updated_at": "2026-04-30T13:59:36Z"
 }
