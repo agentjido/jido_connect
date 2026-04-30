@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T12:22:53Z",
+  "close_reason": "Implemented in 128c1d1",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a high-confirmation generated action for creating/updating repository file contents with branch, message, sha, committer, and tests.",
   "id": "jido_con-qgc.7",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: create or update file contents",
   "type": "action",
-  "updated_at": "2026-04-30T12:17:42Z"
+  "updated_at": "2026-04-30T12:22:53Z"
 }
