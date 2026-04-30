@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T16:47:45Z",
+  "close_reason": "Implemented in b6b2066",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for listing commits for a repository/ref/path with pagination and normalized commit output.",
   "id": "jido_con-qgc.4",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: list commits",
   "type": "action",
-  "updated_at": "2026-04-30T16:44:29Z"
+  "updated_at": "2026-04-30T16:47:45Z"
 }
