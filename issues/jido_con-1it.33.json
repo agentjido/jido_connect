@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T13:38:58Z",
+  "close_reason": "Implemented in 0f71c7b",
   "created": "2026-04-29T15:52:48Z",
   "description": "Add Events API normalization for message.groups with dynamic scope documentation.",
   "id": "jido_con-1it.33",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack trigger: event private channel message",
   "type": "trigger",
-  "updated_at": "2026-04-30T13:35:24Z"
+  "updated_at": "2026-04-30T13:38:58Z"
 }
