@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T12:32:41Z",
+  "close_reason": "Implemented in 2726658",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add generated actions for auth.test and team.info so hosts can validate tokens, team identity, enterprise identity, and bot/user context.",
   "id": "jido_con-1it.1",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: auth test and team info",
   "type": "action",
-  "updated_at": "2026-04-30T12:28:16Z"
+  "updated_at": "2026-04-30T12:32:41Z"
 }
