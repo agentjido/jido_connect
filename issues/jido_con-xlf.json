@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-04-30T19:00:23Z",
+  "description": "Capture the current foundation hardening pass from review findings. These issues should improve runtime clarity, error hygiene, and long-term maintainability before the connector catalog grows much further.",
+  "id": "jido_con-xlf",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "Roadmap: harden connector foundation after connector surface expansion",
+  "type": "epic",
+  "updated_at": "2026-04-30T19:00:23Z"
+}
