@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T13:27:39Z",
+  "close_reason": "Implemented in d45da9f",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a generated action for Slack external upload flow using files.getUploadURLExternal and files.completeUploadExternal.",
   "id": "jido_con-1it.23",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: upload file",
   "type": "action",
-  "updated_at": "2026-04-30T13:22:24Z"
+  "updated_at": "2026-04-30T13:27:39Z"
 }
