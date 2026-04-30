@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T13:54:07Z",
+  "close_reason": "Implemented in 0ceab02",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a focused generated action for assigning users to an issue with validation and error normalization.",
   "id": "jido_con-qgc.13",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: assign issue",
   "type": "action",
-  "updated_at": "2026-04-30T13:51:12Z"
+  "updated_at": "2026-04-30T13:54:07Z"
 }
