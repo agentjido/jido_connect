@@ -2,6 +2,7 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T19:23:50Z",
   "created": "2026-04-30T19:02:02Z",
   "description": "Recommendation: document the host-app story now that provider packages self-register and the umbrella can be consumed selectively.\n\nScope:\n- Document how a Phoenix app depends on only the desired provider package, such as jido_connect_github, from Hex or GitHub.\n- Explain that the umbrella remains a repo/publishing organization tool, while each app is a separate package/dependency.\n- Document catalog discovery behavior: provider package app env registration, optional manual catalog_modules override, and when to use Catalog.discover_with_diagnostics/1.\n- Include a short example showing a host app discovering only GitHub when Slack is not installed.\n\nPrimary files:\n- README.md\n- docs or package docs under apps/jido_connect, if present\n- apps/jido_connect/lib/jido_connect/catalog/discovery.ex docs if needed\n\nAcceptance:\n- A host Phoenix app author can tell which dependency to add for GitHub-only usage.\n- Catalog discovery and diagnostics are explained without requiring the user to read source code.",
   "id": "jido_con-xlf.4",
@@ -12,8 +13,8 @@
   ],
   "parent": "jido_con-xlf",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Document host install and catalog discovery story",
   "type": "task",
-  "updated_at": "2026-04-30T19:22:29Z"
+  "updated_at": "2026-04-30T19:23:50Z"
 }
