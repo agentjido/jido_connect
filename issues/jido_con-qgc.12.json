@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T13:51:10Z",
+  "close_reason": "Implemented in cceb92e",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a focused generated action for adding labels to an issue with scope and validation tests.",
   "id": "jido_con-qgc.12",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: add labels to issue",
   "type": "action",
-  "updated_at": "2026-04-30T13:47:37Z"
+  "updated_at": "2026-04-30T13:51:10Z"
 }
