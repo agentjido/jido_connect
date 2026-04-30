@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T12:36:18Z",
+  "close_reason": "Implemented in dad293e",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a generated action for users.list with pagination and normalized user output.",
   "id": "jido_con-1it.11",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: list users",
   "type": "action",
-  "updated_at": "2026-04-30T12:32:44Z"
+  "updated_at": "2026-04-30T12:36:18Z"
 }
