@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T17:28:57Z",
+  "close_reason": "Implemented in c60342a",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a high-confirmation generated action for files.delete with risk metadata.",
   "id": "jido_con-1it.25",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: delete file",
   "type": "action",
-  "updated_at": "2026-04-30T17:26:37Z"
+  "updated_at": "2026-04-30T17:28:57Z"
 }
