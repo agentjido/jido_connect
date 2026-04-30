@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T16:37:27Z",
+  "close_reason": "Implemented in 6bd9006",
   "created": "2026-04-29T15:52:46Z",
   "description": "Add a generated action for repository search with query helpers, pagination, and normalized repository results.",
   "id": "jido_con-qgc.31",
   "labels": [],
   "parent": "jido_con-qgc",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "GitHub action: search repositories",
   "type": "action",
-  "updated_at": "2026-04-30T15:32:41Z"
+  "updated_at": "2026-04-30T16:37:27Z"
 }
