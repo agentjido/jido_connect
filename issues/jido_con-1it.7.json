@@ -2,14 +2,16 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-04-30T17:50:30Z",
+  "close_reason": "Implemented in 1ce40e4",
   "created": "2026-04-29T15:52:47Z",
   "description": "Add a generated action for conversations.rename with validation and confirmation metadata.",
   "id": "jido_con-1it.7",
   "labels": [],
   "parent": "jido_con-1it",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Slack action: rename channel",
   "type": "action",
-  "updated_at": "2026-04-30T17:47:01Z"
+  "updated_at": "2026-04-30T17:50:30Z"
 }
