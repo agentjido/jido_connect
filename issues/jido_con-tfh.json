@@ -9,6 +9,8 @@
     "jido_con-b9n",
     "jido_con-vbg"
   ],
+  "closed_at": "2026-05-04T20:08:38Z",
+  "close_reason": "Completed Google Sheets connector epic",
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G03\nSource: MILESTONE_2.md\nPurpose: prove the Google foundation with a useful, relatively low-risk action-first product connector.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-tfh",
@@ -17,8 +19,8 @@
     "milestone-2"
   ],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G03] Google Sheets Connector",
   "type": "epic",
-  "updated_at": "2026-05-04T19:22:16Z"
+  "updated_at": "2026-05-04T20:08:38Z"
 }
