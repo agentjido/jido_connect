@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-yfx.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-yfx.6"
+  ],
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G01-S05\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G01-S01\n\nAcceptance:\nCommon Google headers, base URL handling, Req options, and generated-client boundary are testable.",
   "id": "jido_con-yfx.5",
