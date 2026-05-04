@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:05Z",
+  "description": "Planning ID: G08-S07\nEpic: G08 Google Meet Connector\nSource: MILESTONE_2.md\nDepends on: G08-S06\n\nAcceptance:\nReader and scheduler packs expose action-first surface and mark triggers as later.",
+  "id": "jido_con-9sn.7",
+  "labels": [],
+  "parent": "jido_con-9sn",
+  "priority": 1,
+  "status": "open",
+  "title": "[G08-S07] Add Meet catalog packs and docs",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:05Z"
+}
