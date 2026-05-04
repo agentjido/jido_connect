@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-yfx.9"
   ],
+  "closed_at": "2026-05-04T19:40:02Z",
+  "close_reason": "Added shared Google scope catalog helpers",
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G01-S07\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G01-S02\n\nAcceptance:\nProduct packages can declare static and dynamic Google scopes consistently.",
   "id": "jido_con-yfx.7",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-yfx",
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G01-S07] Add shared scope catalog helpers",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:17Z"
+  "updated_at": "2026-05-04T19:40:02Z"
 }
