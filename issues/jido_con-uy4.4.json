@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-uy4.3"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G07-S04\nEpic: G07 Google Contacts Connector\nSource: MILESTONE_2.md\nDepends on: G07-S03\n\nAcceptance:\nMutations validate names, emails, phones, organizations, and risk metadata.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G07-S04] Implement contact create/update/delete actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:04Z"
+  "updated_at": "2026-05-04T19:20:15Z"
 }
