@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5z7.4"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-tfh.1"
+  ],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G02-S05\nEpic: G02 Generated-Client Spike\nSource: MILESTONE_2.md\nDepends on: G02-S04\n\nAcceptance:\nADR recommends runtime dependency, dev/reference-only usage, or handwritten clients for first wave.",
   "id": "jido_con-5z7.5",
