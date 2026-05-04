@@ -9,11 +9,14 @@
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G03-S05\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G03-S04\n\nAcceptance:\n`sheet.add`, `sheet.delete`, and `sheet.rename` are covered by unit and generated-action tests.",
   "id": "jido_con-tfh.5",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-tfh",
   "priority": 1,
   "status": "open",
   "title": "[G03-S05] Implement sheet management actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:11Z"
+  "updated_at": "2026-05-04T19:22:19Z"
 }
