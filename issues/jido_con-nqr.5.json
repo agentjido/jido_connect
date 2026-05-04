@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-nqr.4"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G10-S05\nEpic: G10 Google Search Console Connector\nSource: MILESTONE_2.md\nDepends on: G10-S04\n\nAcceptance:\nSitemap actions normalize sitemap metadata and submission result.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G10-S05] Implement sitemap list/submit actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:06Z"
+  "updated_at": "2026-05-04T19:20:17Z"
 }
