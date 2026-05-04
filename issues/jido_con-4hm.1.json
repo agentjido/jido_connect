@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-tfh.8"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-4hm.2"
+  ],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G04-S01\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G03-S08\n\nAcceptance:\nPackage compiles and uses shared Google foundation.",
   "id": "jido_con-4hm.1",

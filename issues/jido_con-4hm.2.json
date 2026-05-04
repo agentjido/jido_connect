@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-4hm.1"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G04-S02\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G04-S01\n\nAcceptance:\nMessage/thread/label/draft structs avoid raw body leakage by default and document sensitive fields.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G04-S02] Add Gmail schemas and privacy boundaries",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:03Z"
+  "updated_at": "2026-05-04T19:20:12Z"
 }
