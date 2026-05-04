@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-tfh.1"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G03-S02\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G03-S01\n\nAcceptance:\nSpreadsheet, sheet, range, value range, and update result structs validate with Zoi.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G03-S02] Add Sheets normalized structs and schemas",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:02Z"
+  "updated_at": "2026-05-04T19:20:11Z"
 }
