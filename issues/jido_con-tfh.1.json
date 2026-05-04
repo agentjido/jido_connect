@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-yfx.9"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G03-S01\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G01-S09, G02-S05\n\nAcceptance:\nPackage compiles and depends on `jido_connect_google` only for shared Google behavior.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G03-S01] Scaffold jido_connect_google_sheets",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:02Z"
+  "updated_at": "2026-05-04T19:20:11Z"
 }
