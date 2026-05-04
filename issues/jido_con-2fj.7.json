@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:03Z",
+  "description": "Planning ID: G05-S07\nEpic: G05 Google Drive Connector\nSource: MILESTONE_2.md\nDepends on: G05-S03\n\nAcceptance:\nPoll trigger uses checkpoint continuity and normalized change signals.",
+  "id": "jido_con-2fj.7",
+  "labels": [],
+  "parent": "jido_con-2fj",
+  "priority": 1,
+  "status": "open",
+  "title": "[G05-S07] Add google.drive.file.changed poll trigger",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:03Z"
+}
