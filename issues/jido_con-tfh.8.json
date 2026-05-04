@@ -10,6 +10,8 @@
     "jido_con-jxj.1",
     "jido_con-vbg.1"
   ],
+  "closed_at": "2026-05-04T20:08:27Z",
+  "close_reason": "Documented Google Sheets setup scopes catalog examples and packs",
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G03-S08\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G03-S07\n\nAcceptance:\nDocs show dependency setup, OAuth scopes, catalog search, describe, and call examples.",
   "id": "jido_con-tfh.8",
@@ -19,8 +21,8 @@
   ],
   "parent": "jido_con-tfh",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G03-S08] Add Sheets README and demo snippets",
   "type": "task",
-  "updated_at": "2026-05-04T20:07:46Z"
+  "updated_at": "2026-05-04T20:08:27Z"
 }
