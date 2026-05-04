@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-8ma.3"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G00-S04\nEpic: G00 Milestone Orchestration\nSource: MILESTONE_2.md\nDepends on: G00-S03\n\nAcceptance:\nGraph stays accurate after each package wave; completed stories are not left ambiguous.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G00-S04] Maintain dependency graph as work lands",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:01Z"
+  "updated_at": "2026-05-04T19:20:09Z"
 }
