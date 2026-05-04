@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-2fj.1",
     "jido_con-4hm.1",
+    "jido_con-b9n.1",
     "jido_con-vbg.1"
   ],
   "created": "2026-05-04T19:20:02Z",
@@ -17,5 +18,5 @@
   "status": "open",
   "title": "[G03-S08] Add Sheets README and demo snippets",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:13Z"
+  "updated_at": "2026-05-04T19:20:16Z"
 }
