@@ -9,11 +9,14 @@
   "created": "2026-05-04T19:20:07Z",
   "description": "Planning ID: G11-S06\nEpic: G11 Cross-Google Hardening And Demo\nSource: MILESTONE_2.md\nDepends on: G11-S05\n\nAcceptance:\nADR defines what belongs in package contracts versus host-owned configuration/storage.",
   "id": "jido_con-jxj.6",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-jxj",
   "priority": 1,
   "status": "open",
   "title": "[G11-S06] Write service account/domain delegation ADR",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:19Z"
+  "updated_at": "2026-05-04T19:22:29Z"
 }
