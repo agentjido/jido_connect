@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-uy4.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-uy4.3"
+  ],
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G07-S02\nEpic: G07 Google Contacts Connector\nSource: MILESTONE_2.md\nDepends on: G07-S01\n\nAcceptance:\nPerson, group, email, phone, and organization structs validate with Zoi.",
   "id": "jido_con-uy4.2",
