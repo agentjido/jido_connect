@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:06Z",
+  "description": "Planning ID: G10-S06\nEpic: G10 Google Search Console Connector\nSource: MILESTONE_2.md\nDepends on: G10-S05\n\nAcceptance:\nURL inspection returns sanitized, normalized inspection results.",
+  "id": "jido_con-nqr.6",
+  "labels": [],
+  "parent": "jido_con-nqr",
+  "priority": 1,
+  "status": "open",
+  "title": "[G10-S06] Implement URL inspection action",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:06Z"
+}
