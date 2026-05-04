@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-b9n.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-b9n.4"
+  ],
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G09-S03\nEpic: G09 Google Analytics Connector\nSource: MILESTONE_2.md\nDepends on: G09-S02\n\nAcceptance:\nMetadata action exposes available dimensions/metrics for a property.",
   "id": "jido_con-b9n.3",
