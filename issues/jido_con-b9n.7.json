@@ -4,6 +4,7 @@
     "jido_con-b9n.6"
   ],
   "blocks": [
+    "jido_con-jxj.2",
     "jido_con-nqr.1"
   ],
   "created": "2026-05-04T19:20:06Z",
@@ -15,5 +16,5 @@
   "status": "open",
   "title": "[G09-S07] Add Analytics catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:16Z"
+  "updated_at": "2026-05-04T19:20:18Z"
 }
