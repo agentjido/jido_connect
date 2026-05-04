@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-tfh.3"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-tfh",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G03-S04] Implement Sheets value write actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:19Z"
+  "updated_at": "2026-05-04T19:54:31Z"
 }
