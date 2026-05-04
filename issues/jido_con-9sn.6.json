@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-9sn.5"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G08-S06\nEpic: G08 Google Meet Connector\nSource: MILESTONE_2.md\nDepends on: G08-S05\n\nAcceptance:\nEvent subscription design is documented without adding durable persistence yet.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G08-S06] Spike Workspace Events for Meet triggers",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:05Z"
+  "updated_at": "2026-05-04T19:20:15Z"
 }
