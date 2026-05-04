@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-tfh"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-uy4"
+  ],
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G04\nSource: MILESTONE_2.md\nPurpose: add high-value email automation with strict scope separation and privacy boundaries.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-4hm",
@@ -12,5 +14,5 @@
   "status": "open",
   "title": "[G04] Gmail Connector",
   "type": "epic",
-  "updated_at": "2026-05-04T19:20:07Z"
+  "updated_at": "2026-05-04T19:20:08Z"
 }
