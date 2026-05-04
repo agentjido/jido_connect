@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:02Z",
+  "description": "Planning ID: G03-S06\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G03-S05\n\nAcceptance:\nBatch operation has strict input validation and confirmation/risk metadata if needed.",
+  "id": "jido_con-tfh.6",
+  "labels": [],
+  "parent": "jido_con-tfh",
+  "priority": 1,
+  "status": "open",
+  "title": "[G03-S06] Implement google.sheets.batch_update",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:02Z"
+}
