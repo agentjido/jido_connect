@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-2fj.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-2fj.3"
+  ],
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G05-S02\nEpic: G05 Google Drive Connector\nSource: MILESTONE_2.md\nDepends on: G05-S01\n\nAcceptance:\nFile, folder, permission, and change structs validate with Zoi.",
   "id": "jido_con-2fj.2",
