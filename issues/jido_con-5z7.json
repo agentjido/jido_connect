@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-yfx"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G02\nSource: MILESTONE_2.md\nPurpose: decide whether generated `google_api_*` packages should be runtime dependencies, implementation references, or avoided for hand-written clients.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
@@ -10,5 +12,5 @@
   "status": "open",
   "title": "[G02] Generated-Client Spike",
   "type": "epic",
-  "updated_at": "2026-05-04T19:20:00Z"
+  "updated_at": "2026-05-04T19:20:07Z"
 }

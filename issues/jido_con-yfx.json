@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-8ma"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5z7"
+  ],
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G01\nSource: MILESTONE_2.md\nPurpose: create the reusable package that every Google product connector depends on.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-yfx",
