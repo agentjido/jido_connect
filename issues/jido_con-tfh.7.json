@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-tfh.6"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-tfh.8"
+  ],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G03-S07\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G03-S06\n\nAcceptance:\n`google_sheets_readonly` and `google_sheets_writer` restrict search/describe/call correctly.",
   "id": "jido_con-tfh.7",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G03-S07] Add Sheets catalog packs",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:11Z"
+  "updated_at": "2026-05-04T19:20:12Z"
 }
