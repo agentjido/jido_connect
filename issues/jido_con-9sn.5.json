@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-9sn.4"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G08-S05\nEpic: G08 Google Meet Connector\nSource: MILESTONE_2.md\nDepends on: G08-S04\n\nAcceptance:\nRecording and transcript metadata actions avoid fetching sensitive content by default.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G08-S05] Implement recording/transcript list actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:05Z"
+  "updated_at": "2026-05-04T19:20:15Z"
 }

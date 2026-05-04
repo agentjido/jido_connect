@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-9sn.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-9sn.5"
+  ],
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G08-S04\nEpic: G08 Google Meet Connector\nSource: MILESTONE_2.md\nDepends on: G08-S03\n\nAcceptance:\nConference record list/get actions return normalized records.",
   "id": "jido_con-9sn.4",
