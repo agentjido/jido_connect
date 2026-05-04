@@ -2,13 +2,15 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-04T18:50:32Z",
+  "close_reason": "Completed tracked Slack connector surface expansion",
   "created": "2026-04-29T15:52:46Z",
   "description": "Build out the Slack connector beyond the MVP into a broad production surface covering conversations, messages, users, reactions, files, search, pins, scheduled messages, and Events API triggers.",
   "id": "jido_con-1it",
   "labels": [],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "Roadmap: expand Slack connector surface",
   "type": "epic",
-  "updated_at": "2026-04-29T15:52:46Z"
+  "updated_at": "2026-05-04T18:50:32Z"
 }
