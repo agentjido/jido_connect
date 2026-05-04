@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-8ma.1"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G00-S02\nEpic: G00 Milestone Orchestration\nSource: MILESTONE_2.md\nDepends on: G00-S01\n\nAcceptance:\nBeadwork has epics for G01 through G11 with dependency edges.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G00-S02] Create Beadwork epics from this plan",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:01Z"
+  "updated_at": "2026-05-04T19:20:09Z"
 }
