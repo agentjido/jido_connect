@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-yfx.9"
   ],
+  "closed_at": "2026-05-04T19:40:02Z",
+  "close_reason": "Added Google provider error mapping through transport helpers",
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G01-S06\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G01-S05\n\nAcceptance:\nGoogle HTTP/API errors map to sanitized `Jido.Connect.Error` values with no raw response leakage.",
   "id": "jido_con-yfx.6",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-yfx",
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G01-S06] Add Google error mapping",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:18Z"
+  "updated_at": "2026-05-04T19:40:02Z"
 }
