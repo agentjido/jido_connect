@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-tfh.8"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-b9n.2"
+  ],
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G09-S01\nEpic: G09 Google Analytics Connector\nSource: MILESTONE_2.md\nDepends on: G03-S08\n\nAcceptance:\nPackage compiles and uses shared Google auth/transport.",
   "id": "jido_con-b9n.1",
