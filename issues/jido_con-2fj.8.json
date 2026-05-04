@@ -4,7 +4,8 @@
     "jido_con-2fj.7"
   ],
   "blocks": [
-    "jido_con-jxj.1"
+    "jido_con-jxj.1",
+    "jido_con-jxj.2"
   ],
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G05-S08\nEpic: G05 Google Drive Connector\nSource: MILESTONE_2.md\nDepends on: G05-S07\n\nAcceptance:\nReadonly and file-writer packs restrict broad actions.",
