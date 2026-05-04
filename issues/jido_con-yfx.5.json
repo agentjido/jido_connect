@@ -11,11 +11,14 @@
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G01-S05\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G01-S01\n\nAcceptance:\nCommon Google headers, base URL handling, Req options, and generated-client boundary are testable.",
   "id": "jido_con-yfx.5",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-yfx",
   "priority": 1,
   "status": "open",
   "title": "[G01-S05] Add Google transport/facade boundary",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:10Z"
+  "updated_at": "2026-05-04T19:22:17Z"
 }
