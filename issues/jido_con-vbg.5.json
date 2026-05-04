@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-vbg.4"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G06-S05\nEpic: G06 Google Calendar Connector\nSource: MILESTONE_2.md\nDepends on: G06-S04\n\nAcceptance:\nAvailability helper returns normalized candidate windows.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G06-S05] Implement freebusy and availability actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:04Z"
+  "updated_at": "2026-05-04T19:20:14Z"
 }

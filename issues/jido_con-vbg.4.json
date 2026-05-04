@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-vbg.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-vbg.5"
+  ],
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G06-S04\nEpic: G06 Google Calendar Connector\nSource: MILESTONE_2.md\nDepends on: G06-S03\n\nAcceptance:\nEvent mutations validate times, attendees, recurrence, and dynamic scopes.",
   "id": "jido_con-vbg.4",
