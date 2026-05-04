@@ -5,6 +5,7 @@
   ],
   "blocks": [
     "jido_con-9sn.1",
+    "jido_con-jxj.1",
     "jido_con-uy4.1"
   ],
   "created": "2026-05-04T19:20:04Z",
@@ -16,5 +17,5 @@
   "status": "open",
   "title": "[G06-S07] Add Calendar catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:15Z"
+  "updated_at": "2026-05-04T19:20:18Z"
 }
