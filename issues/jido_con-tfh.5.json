@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-tfh.4"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-tfh.6"
+  ],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G03-S05\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G03-S04\n\nAcceptance:\n`sheet.add`, `sheet.delete`, and `sheet.rename` are covered by unit and generated-action tests.",
   "id": "jido_con-tfh.5",
