@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-5z7.1"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G02-S03\nEpic: G02 Generated-Client Spike\nSource: MILESTONE_2.md\nDepends on: G02-S01\n\nAcceptance:\nSame operation works through shared Google transport with equivalent normalized output.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G02-S03] Spike handwritten Sheets Req client",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:02Z"
+  "updated_at": "2026-05-04T19:20:10Z"
 }
