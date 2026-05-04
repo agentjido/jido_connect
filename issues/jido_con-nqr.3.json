@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:06Z",
+  "description": "Planning ID: G10-S03\nEpic: G10 Google Search Console Connector\nSource: MILESTONE_2.md\nDepends on: G10-S02\n\nAcceptance:\nSite actions validate URL/property inputs and scopes.",
+  "id": "jido_con-nqr.3",
+  "labels": [],
+  "parent": "jido_con-nqr",
+  "priority": 1,
+  "status": "open",
+  "title": "[G10-S03] Implement site list/add actions",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:06Z"
+}
