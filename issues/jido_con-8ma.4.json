@@ -7,11 +7,14 @@
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G00-S04\nEpic: G00 Milestone Orchestration\nSource: MILESTONE_2.md\nDepends on: G00-S03\n\nAcceptance:\nGraph stays accurate after each package wave; completed stories are not left ambiguous.",
   "id": "jido_con-8ma.4",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-8ma",
   "priority": 1,
   "status": "open",
   "title": "[G00-S04] Maintain dependency graph as work lands",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:09Z"
+  "updated_at": "2026-05-04T19:22:18Z"
 }
