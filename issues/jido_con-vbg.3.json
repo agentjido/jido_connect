@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:04Z",
+  "description": "Planning ID: G06-S03\nEpic: G06 Google Calendar Connector\nSource: MILESTONE_2.md\nDepends on: G06-S02\n\nAcceptance:\n`calendar.list`, `event.list`, and `event.get` work with readonly scopes.",
+  "id": "jido_con-vbg.3",
+  "labels": [],
+  "parent": "jido_con-vbg",
+  "priority": 1,
+  "status": "open",
+  "title": "[G06-S03] Implement calendar and event read actions",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:04Z"
+}
