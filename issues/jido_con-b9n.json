@@ -10,10 +10,13 @@
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G09\nSource: MILESTONE_2.md\nPurpose: add GA4 reporting for marketing and product analytics workflows.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-b9n",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G09] Google Analytics Connector",
   "type": "epic",
-  "updated_at": "2026-05-04T19:20:08Z"
+  "updated_at": "2026-05-04T19:22:15Z"
 }
