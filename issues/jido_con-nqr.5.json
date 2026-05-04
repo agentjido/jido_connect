@@ -9,11 +9,14 @@
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G10-S05\nEpic: G10 Google Search Console Connector\nSource: MILESTONE_2.md\nDepends on: G10-S04\n\nAcceptance:\nSitemap actions normalize sitemap metadata and submission result.",
   "id": "jido_con-nqr.5",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-nqr",
   "priority": 1,
   "status": "open",
   "title": "[G10-S05] Implement sitemap list/submit actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:17Z"
+  "updated_at": "2026-05-04T19:22:28Z"
 }
