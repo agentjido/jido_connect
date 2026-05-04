@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:01Z",
+  "description": "Planning ID: G00-S03\nEpic: G00 Milestone Orchestration\nSource: MILESTONE_2.md\nDepends on: G00-S02\n\nAcceptance:\n`MILESTONE_2.md` or a linked status doc tracks each package wave and verification result.",
+  "id": "jido_con-8ma.3",
+  "labels": [],
+  "parent": "jido_con-8ma",
+  "priority": 1,
+  "status": "open",
+  "title": "[G00-S03] Add milestone status checklist",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:01Z"
+}
