@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-9sn.3"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G08-S04\nEpic: G08 Google Meet Connector\nSource: MILESTONE_2.md\nDepends on: G08-S03\n\nAcceptance:\nConference record list/get actions return normalized records.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G08-S04] Implement conference record actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:05Z"
+  "updated_at": "2026-05-04T19:20:15Z"
 }
