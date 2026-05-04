@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-vbg.3"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G06-S06\nEpic: G06 Google Calendar Connector\nSource: MILESTONE_2.md\nDepends on: G06-S03\n\nAcceptance:\nPoll trigger emits normalized event-change signals and maintains checkpoint.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G06-S06] Add google.calendar.event.changed poll trigger",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:04Z"
+  "updated_at": "2026-05-04T19:20:14Z"
 }
