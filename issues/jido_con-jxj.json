@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:00Z",
+  "description": "Planning ID: G11\nSource: MILESTONE_2.md\nPurpose: make the Google family feel coherent, safe, and shippable after the first product waves.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
+  "id": "jido_con-jxj",
+  "labels": [],
+  "priority": 1,
+  "status": "open",
+  "title": "[G11] Cross-Google Hardening And Demo",
+  "type": "epic",
+  "updated_at": "2026-05-04T19:20:00Z"
+}
