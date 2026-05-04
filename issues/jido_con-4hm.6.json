@@ -7,11 +7,14 @@
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G04-S06\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G04-S05\n\nAcceptance:\nLabel mutations have focused tests and normalized outputs.",
   "id": "jido_con-4hm.6",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-4hm",
   "priority": 1,
   "status": "open",
   "title": "[G04-S06] Implement label create/apply actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:12Z"
+  "updated_at": "2026-05-04T19:22:22Z"
 }
