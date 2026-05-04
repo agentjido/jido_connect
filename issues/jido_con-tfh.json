@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5z7"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-4hm"
+  ],
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G03\nSource: MILESTONE_2.md\nPurpose: prove the Google foundation with a useful, relatively low-risk action-first product connector.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-tfh",
