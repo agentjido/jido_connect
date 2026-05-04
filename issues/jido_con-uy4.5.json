@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-uy4.4"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G07-S05\nEpic: G07 Google Contacts Connector\nSource: MILESTONE_2.md\nDepends on: G07-S04\n\nAcceptance:\nGroup list/create/update actions have focused tests.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G07-S05] Implement contact group actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:05Z"
+  "updated_at": "2026-05-04T19:20:15Z"
 }
