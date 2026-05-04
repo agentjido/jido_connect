@@ -9,11 +9,14 @@
   "created": "2026-05-04T19:20:07Z",
   "description": "Planning ID: G11-S04\nEpic: G11 Cross-Google Hardening And Demo\nSource: MILESTONE_2.md\nDepends on: G11-S03\n\nAcceptance:\nDemo shows OAuth, connection resolver, catalog search, describe, and call for at least Sheets, Gmail, Drive, and Calendar.",
   "id": "jido_con-jxj.4",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-jxj",
   "priority": 1,
   "status": "open",
   "title": "[G11-S04] Add Google demo integration",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:19Z"
+  "updated_at": "2026-05-04T19:22:28Z"
 }
