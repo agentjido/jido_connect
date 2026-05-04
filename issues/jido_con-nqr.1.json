@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-b9n.7"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-nqr.2"
+  ],
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G10-S01\nEpic: G10 Google Search Console Connector\nSource: MILESTONE_2.md\nDepends on: G09-S07\n\nAcceptance:\nPackage compiles and can share report/date-range patterns with Analytics.",
   "id": "jido_con-nqr.1",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G10-S01] Scaffold jido_connect_google_search_console",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:16Z"
+  "updated_at": "2026-05-04T19:20:17Z"
 }
