@@ -5,7 +5,8 @@
   ],
   "blocks": [
     "jido_con-2fj",
-    "jido_con-4hm"
+    "jido_con-4hm",
+    "jido_con-vbg"
   ],
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G03\nSource: MILESTONE_2.md\nPurpose: prove the Google foundation with a useful, relatively low-risk action-first product connector.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
@@ -15,5 +16,5 @@
   "status": "open",
   "title": "[G03] Google Sheets Connector",
   "type": "epic",
-  "updated_at": "2026-05-04T19:20:07Z"
+  "updated_at": "2026-05-04T19:20:08Z"
 }
