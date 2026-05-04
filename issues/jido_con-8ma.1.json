@@ -2,7 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [
-    "jido_con-8ma.2"
+    "jido_con-8ma.2",
+    "jido_con-yfx.1"
   ],
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G00-S01\nEpic: G00 Milestone Orchestration\nSource: MILESTONE_2.md\nDepends on: None\n\nAcceptance:\nFinal package list is documented; first-wave and later-wave packages are explicitly separated.",
