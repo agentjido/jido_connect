@@ -9,10 +9,13 @@
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G08\nSource: MILESTONE_2.md\nPurpose: add meeting-space and conference-record workflows, then prepare for Workspace Events-backed triggers.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-9sn",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G08] Google Meet Connector",
   "type": "epic",
-  "updated_at": "2026-05-04T19:20:08Z"
+  "updated_at": "2026-05-04T19:22:15Z"
 }
