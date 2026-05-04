@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-tfh.3"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G03-S04\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G03-S03\n\nAcceptance:\n`values.update`, `values.append`, and `values.clear` support dynamic scopes and normalized results.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G03-S04] Implement Sheets value write actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:02Z"
+  "updated_at": "2026-05-04T19:20:11Z"
 }
