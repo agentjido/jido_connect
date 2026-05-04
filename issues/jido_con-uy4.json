@@ -9,10 +9,13 @@
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G07\nSource: MILESTONE_2.md\nPurpose: add People API-backed contacts for enrichment and cross-product workflows.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-uy4",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G07] Google Contacts Connector",
   "type": "epic",
-  "updated_at": "2026-05-04T19:20:08Z"
+  "updated_at": "2026-05-04T19:22:16Z"
 }
