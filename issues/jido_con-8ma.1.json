@@ -5,14 +5,16 @@
     "jido_con-8ma.2",
     "jido_con-yfx.1"
   ],
+  "closed_at": "2026-05-04T19:21:37Z",
+  "close_reason": "Completed in MILESTONE_2 planning doc",
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G00-S01\nEpic: G00 Milestone Orchestration\nSource: MILESTONE_2.md\nDepends on: None\n\nAcceptance:\nFinal package list is documented; first-wave and later-wave packages are explicitly separated.",
   "id": "jido_con-8ma.1",
   "labels": [],
   "parent": "jido_con-8ma",
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G00-S01] Confirm Google package boundaries",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:09Z"
+  "updated_at": "2026-05-04T19:21:37Z"
 }
