@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5z7.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5z7.4"
+  ],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G02-S02\nEpic: G02 Generated-Client Spike\nSource: MILESTONE_2.md\nDepends on: G02-S01\n\nAcceptance:\nOne read operation works through a Jido facade with sanitized errors and test fixtures.",
   "id": "jido_con-5z7.2",
