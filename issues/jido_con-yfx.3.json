@@ -7,11 +7,14 @@
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G01-S03\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G01-S02\n\nAcceptance:\nZoi structs normalize account id, email, display name, hosted domain, avatar URL, and raw provider metadata boundaries.",
   "id": "jido_con-yfx.3",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-yfx",
   "priority": 1,
   "status": "open",
   "title": "[G01-S03] Add Google account/profile structs",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:09Z"
+  "updated_at": "2026-05-04T19:22:18Z"
 }
