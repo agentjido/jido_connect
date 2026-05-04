@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-tfh.7"
   ],
@@ -19,8 +19,8 @@
   ],
   "parent": "jido_con-tfh",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G03-S08] Add Sheets README and demo snippets",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:19Z"
+  "updated_at": "2026-05-04T20:07:46Z"
 }
