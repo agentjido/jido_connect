@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:04Z",
+  "description": "Planning ID: G07-S02\nEpic: G07 Google Contacts Connector\nSource: MILESTONE_2.md\nDepends on: G07-S01\n\nAcceptance:\nPerson, group, email, phone, and organization structs validate with Zoi.",
+  "id": "jido_con-uy4.2",
+  "labels": [],
+  "parent": "jido_con-uy4",
+  "priority": 1,
+  "status": "open",
+  "title": "[G07-S02] Add People/Contacts normalized structs",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:04Z"
+}
