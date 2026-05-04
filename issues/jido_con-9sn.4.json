@@ -9,11 +9,14 @@
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G08-S04\nEpic: G08 Google Meet Connector\nSource: MILESTONE_2.md\nDepends on: G08-S03\n\nAcceptance:\nConference record list/get actions return normalized records.",
   "id": "jido_con-9sn.4",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-9sn",
   "priority": 1,
   "status": "open",
   "title": "[G08-S04] Implement conference record actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:15Z"
+  "updated_at": "2026-05-04T19:22:26Z"
 }
