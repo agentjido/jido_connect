@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-4hm.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-4hm.4"
+  ],
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G04-S03\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G04-S02\n\nAcceptance:\n`profile.get` and `label.list` work with narrow scopes.",
   "id": "jido_con-4hm.3",
