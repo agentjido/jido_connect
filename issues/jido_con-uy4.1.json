@@ -4,7 +4,9 @@
     "jido_con-4hm.8",
     "jido_con-vbg.7"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-uy4.2"
+  ],
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G07-S01\nEpic: G07 Google Contacts Connector\nSource: MILESTONE_2.md\nDepends on: G04-S08, G06-S07\n\nAcceptance:\nPackage compiles and shares account/scope helpers with Gmail and Calendar.",
   "id": "jido_con-uy4.1",
