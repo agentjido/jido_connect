@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-tfh.7"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-4hm.1"
+  ],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G03-S08\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G03-S07\n\nAcceptance:\nDocs show dependency setup, OAuth scopes, catalog search, describe, and call examples.",
   "id": "jido_con-tfh.8",
