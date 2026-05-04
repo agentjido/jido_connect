@@ -9,11 +9,14 @@
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G05-S01\nEpic: G05 Google Drive Connector\nSource: MILESTONE_2.md\nDepends on: G03-S08\n\nAcceptance:\nPackage compiles and uses shared Google foundation.",
   "id": "jido_con-2fj.1",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-2fj",
   "priority": 1,
   "status": "open",
   "title": "[G05-S01] Scaffold jido_connect_google_drive",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:13Z"
+  "updated_at": "2026-05-04T19:22:22Z"
 }
