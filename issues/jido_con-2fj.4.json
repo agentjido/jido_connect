@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:03Z",
+  "description": "Planning ID: G05-S04\nEpic: G05 Google Drive Connector\nSource: MILESTONE_2.md\nDepends on: G05-S03\n\nAcceptance:\nMutations support `drive.file` where possible and normalized outputs.",
+  "id": "jido_con-2fj.4",
+  "labels": [],
+  "parent": "jido_con-2fj",
+  "priority": 1,
+  "status": "open",
+  "title": "[G05-S04] Implement file create/copy/update actions",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:03Z"
+}
