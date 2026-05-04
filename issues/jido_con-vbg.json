@@ -10,10 +10,13 @@
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G06\nSource: MILESTONE_2.md\nPurpose: add scheduling workflows with clean event schemas and practical availability helpers.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-vbg",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G06] Google Calendar Connector",
   "type": "epic",
-  "updated_at": "2026-05-04T19:20:08Z"
+  "updated_at": "2026-05-04T19:22:16Z"
 }
