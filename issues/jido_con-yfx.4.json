@@ -9,11 +9,14 @@
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G01-S04\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G01-S02\n\nAcceptance:\nHelper can refresh user OAuth tokens and return lease-ready credential material without storing it.",
   "id": "jido_con-yfx.4",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-yfx",
   "priority": 1,
   "status": "open",
   "title": "[G01-S04] Add token refresh helper",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:10Z"
+  "updated_at": "2026-05-04T19:22:18Z"
 }
