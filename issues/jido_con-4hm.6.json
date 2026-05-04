@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-4hm.5"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G04-S06\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G04-S05\n\nAcceptance:\nLabel mutations have focused tests and normalized outputs.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G04-S06] Implement label create/apply actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:03Z"
+  "updated_at": "2026-05-04T19:20:12Z"
 }
