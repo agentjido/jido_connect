@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-4hm.8"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:07Z",
   "description": "Planning ID: G11-S02\nEpic: G11 Cross-Google Hardening And Demo\nSource: MILESTONE_2.md\nDepends on: G04-S08, G05-S08, G06-S07, G07-S06, G08-S07, G09-S07, G10-S07\n\nAcceptance:\nEvery action has static or dynamic scopes documented and tested.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G11-S02] Run cross-product scope audit",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:07Z"
+  "updated_at": "2026-05-04T19:20:18Z"
 }
