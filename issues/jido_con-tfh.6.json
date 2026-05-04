@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-tfh.7"
   ],
+  "closed_at": "2026-05-04T20:05:16Z",
+  "close_reason": "Implemented Google Sheets generic batch update action with validation",
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G03-S06\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G03-S05\n\nAcceptance:\nBatch operation has strict input validation and confirmation/risk metadata if needed.",
   "id": "jido_con-tfh.6",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-tfh",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G03-S06] Implement google.sheets.batch_update",
   "type": "task",
-  "updated_at": "2026-05-04T20:02:45Z"
+  "updated_at": "2026-05-04T20:05:16Z"
 }
