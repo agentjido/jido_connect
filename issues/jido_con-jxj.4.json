@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-jxj.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-jxj.5"
+  ],
   "created": "2026-05-04T19:20:07Z",
   "description": "Planning ID: G11-S04\nEpic: G11 Cross-Google Hardening And Demo\nSource: MILESTONE_2.md\nDepends on: G11-S03\n\nAcceptance:\nDemo shows OAuth, connection resolver, catalog search, describe, and call for at least Sheets, Gmail, Drive, and Calendar.",
   "id": "jido_con-jxj.4",
