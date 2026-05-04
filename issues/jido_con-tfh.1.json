@@ -7,6 +7,8 @@
   "blocks": [
     "jido_con-tfh.2"
   ],
+  "closed_at": "2026-05-04T19:48:42Z",
+  "close_reason": "Scaffolded jido_connect_google_sheets provider package",
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G03-S01\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G01-S09, G02-S05\n\nAcceptance:\nPackage compiles and depends on `jido_connect_google` only for shared Google behavior.",
   "id": "jido_con-tfh.1",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-tfh",
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G03-S01] Scaffold jido_connect_google_sheets",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:20Z"
+  "updated_at": "2026-05-04T19:48:42Z"
 }
