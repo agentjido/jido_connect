@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-tfh.8"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G06-S01\nEpic: G06 Google Calendar Connector\nSource: MILESTONE_2.md\nDepends on: G03-S08\n\nAcceptance:\nPackage compiles and uses shared Google foundation.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G06-S01] Scaffold jido_connect_google_calendar",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:04Z"
+  "updated_at": "2026-05-04T19:20:13Z"
 }
