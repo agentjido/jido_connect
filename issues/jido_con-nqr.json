@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-b9n"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-jxj"
+  ],
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G10\nSource: MILESTONE_2.md\nPurpose: add SEO/search reporting workflows that pair naturally with Analytics.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-nqr",
@@ -12,5 +14,5 @@
   "status": "open",
   "title": "[G10] Google Search Console Connector",
   "type": "epic",
-  "updated_at": "2026-05-04T19:20:08Z"
+  "updated_at": "2026-05-04T19:20:09Z"
 }
