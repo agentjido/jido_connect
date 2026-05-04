@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:03Z",
+  "description": "Planning ID: G04-S05\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G04-S04\n\nAcceptance:\nSend/draft actions validate recipients, body inputs, and dynamic scopes.",
+  "id": "jido_con-4hm.5",
+  "labels": [],
+  "parent": "jido_con-4hm",
+  "priority": 1,
+  "status": "open",
+  "title": "[G04-S05] Implement send and draft actions",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:03Z"
+}
