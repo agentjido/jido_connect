@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-2fj.5"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G05-S06\nEpic: G05 Google Drive Connector\nSource: MILESTONE_2.md\nDepends on: G05-S05\n\nAcceptance:\nPermission changes validate role/type inputs and expose risk.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G05-S06] Implement permission list/create actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:03Z"
+  "updated_at": "2026-05-04T19:20:13Z"
 }
