@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-yfx"
+  ],
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G00\nSource: MILESTONE_2.md\nPurpose: keep the milestone coherent while implementation happens in many small issues.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-8ma",
@@ -10,5 +12,5 @@
   "status": "open",
   "title": "[G00] Milestone Orchestration",
   "type": "epic",
-  "updated_at": "2026-05-04T19:20:00Z"
+  "updated_at": "2026-05-04T19:20:07Z"
 }
