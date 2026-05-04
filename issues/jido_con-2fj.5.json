@@ -9,11 +9,14 @@
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G05-S05\nEpic: G05 Google Drive Connector\nSource: MILESTONE_2.md\nDepends on: G05-S04\n\nAcceptance:\nDestructive operations include risk/confirmation metadata.",
   "id": "jido_con-2fj.5",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-2fj",
   "priority": 1,
   "status": "open",
   "title": "[G05-S05] Implement file delete/export actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:13Z"
+  "updated_at": "2026-05-04T19:22:21Z"
 }
