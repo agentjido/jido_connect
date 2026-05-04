@@ -2,13 +2,15 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-04T18:50:32Z",
+  "close_reason": "Completed tracked GitHub connector surface expansion",
   "created": "2026-04-29T15:52:46Z",
   "description": "Build out the GitHub connector beyond the MVP into a broad production surface covering repositories, issues, pull requests, Actions, releases, search, installations, poll triggers, and webhook triggers.",
   "id": "jido_con-qgc",
   "labels": [],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "Roadmap: expand GitHub connector surface",
   "type": "epic",
-  "updated_at": "2026-04-29T15:52:46Z"
+  "updated_at": "2026-05-04T18:50:32Z"
 }
