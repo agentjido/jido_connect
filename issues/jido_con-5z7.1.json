@@ -7,6 +7,8 @@
     "jido_con-5z7.2",
     "jido_con-5z7.3"
   ],
+  "closed_at": "2026-05-04T19:41:40Z",
+  "close_reason": "Added generated-client spike evaluation harness and ADR template",
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G02-S01\nEpic: G02 Generated-Client Spike\nSource: MILESTONE_2.md\nDepends on: G01-S05\n\nAcceptance:\nSpike criteria cover auth, Req/Tesla friction, tests, error mapping, normalized structs, and dependency weight.",
   "id": "jido_con-5z7.1",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-5z7",
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G02-S01] Define generated-client evaluation harness",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:17Z"
+  "updated_at": "2026-05-04T19:41:40Z"
 }
