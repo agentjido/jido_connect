@@ -9,11 +9,14 @@
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G10-S04\nEpic: G10 Google Search Console Connector\nSource: MILESTONE_2.md\nDepends on: G10-S03\n\nAcceptance:\nQuery action validates date range, dimensions, filters, search type, and row limits.",
   "id": "jido_con-nqr.4",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-nqr",
   "priority": 1,
   "status": "open",
   "title": "[G10-S04] Implement search analytics query action",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:17Z"
+  "updated_at": "2026-05-04T19:22:28Z"
 }
