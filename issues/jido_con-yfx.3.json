@@ -4,6 +4,8 @@
     "jido_con-yfx.2"
   ],
   "blocks": [],
+  "closed_at": "2026-05-04T19:40:01Z",
+  "close_reason": "Added normalized Google account/profile structs",
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G01-S03\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G01-S02\n\nAcceptance:\nZoi structs normalize account id, email, display name, hosted domain, avatar URL, and raw provider metadata boundaries.",
   "id": "jido_con-yfx.3",
@@ -13,8 +15,8 @@
   ],
   "parent": "jido_con-yfx",
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G01-S03] Add Google account/profile structs",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:18Z"
+  "updated_at": "2026-05-04T19:40:01Z"
 }
