@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-2fj.7"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-jxj.1"
+  ],
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G05-S08\nEpic: G05 Google Drive Connector\nSource: MILESTONE_2.md\nDepends on: G05-S07\n\nAcceptance:\nReadonly and file-writer packs restrict broad actions.",
   "id": "jido_con-2fj.8",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G05-S08] Add Drive catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:13Z"
+  "updated_at": "2026-05-04T19:20:18Z"
 }
