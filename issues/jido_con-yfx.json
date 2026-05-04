@@ -9,10 +9,13 @@
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G01\nSource: MILESTONE_2.md\nPurpose: create the reusable package that every Google product connector depends on.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-yfx",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G01] Shared Google Foundation",
   "type": "epic",
-  "updated_at": "2026-05-04T19:20:07Z"
+  "updated_at": "2026-05-04T19:22:16Z"
 }
