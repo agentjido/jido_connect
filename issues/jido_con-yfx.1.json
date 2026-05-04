@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:01Z",
+  "description": "Planning ID: G01-S01\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G00-S01\n\nAcceptance:\nUmbrella app exists, compiles, has README, tests, formatter config, and no empty supervisor unless needed.",
+  "id": "jido_con-yfx.1",
+  "labels": [],
+  "parent": "jido_con-yfx",
+  "priority": 1,
+  "status": "open",
+  "title": "[G01-S01] Scaffold jido_connect_google",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:01Z"
+}
