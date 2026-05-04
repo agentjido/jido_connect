@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-04T19:20:05Z",
+  "description": "Planning ID: G08-S01\nEpic: G08 Google Meet Connector\nSource: MILESTONE_2.md\nDepends on: G06-S07\n\nAcceptance:\nPackage compiles and aligns with Calendar scheduling workflows.",
+  "id": "jido_con-9sn.1",
+  "labels": [],
+  "parent": "jido_con-9sn",
+  "priority": 1,
+  "status": "open",
+  "title": "[G08-S01] Scaffold jido_connect_google_meet",
+  "type": "task",
+  "updated_at": "2026-05-04T19:20:05Z"
+}
