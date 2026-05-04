@@ -8,6 +8,8 @@
   "blocks": [
     "jido_con-tfh.1"
   ],
+  "closed_at": "2026-05-04T19:40:02Z",
+  "close_reason": "Added foundation README and host guide examples",
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G01-S09\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G01-S04, G01-S06, G01-S07\n\nAcceptance:\nHost docs show OAuth, refresh, connection creation, lease minting, and provider package usage.",
   "id": "jido_con-yfx.9",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-yfx",
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G01-S09] Add foundation README and host guide",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:19Z"
+  "updated_at": "2026-05-04T19:40:02Z"
 }
