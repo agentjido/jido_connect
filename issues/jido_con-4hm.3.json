@@ -9,11 +9,14 @@
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G04-S03\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G04-S02\n\nAcceptance:\n`profile.get` and `label.list` work with narrow scopes.",
   "id": "jido_con-4hm.3",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-4hm",
   "priority": 1,
   "status": "open",
   "title": "[G04-S03] Implement profile and label list actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:12Z"
+  "updated_at": "2026-05-04T19:22:22Z"
 }
