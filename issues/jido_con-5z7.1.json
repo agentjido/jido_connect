@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-yfx.5"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5z7.2"
+  ],
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G02-S01\nEpic: G02 Generated-Client Spike\nSource: MILESTONE_2.md\nDepends on: G01-S05\n\nAcceptance:\nSpike criteria cover auth, Req/Tesla friction, tests, error mapping, normalized structs, and dependency weight.",
   "id": "jido_con-5z7.1",

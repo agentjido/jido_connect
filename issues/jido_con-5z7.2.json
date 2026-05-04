@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-5z7.1"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G02-S02\nEpic: G02 Generated-Client Spike\nSource: MILESTONE_2.md\nDepends on: G02-S01\n\nAcceptance:\nOne read operation works through a Jido facade with sanitized errors and test fixtures.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G02-S02] Spike google_api_sheets behind facade",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:02Z"
+  "updated_at": "2026-05-04T19:20:10Z"
 }
