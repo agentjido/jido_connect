@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-tfh.2"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G03-S03\nEpic: G03 Google Sheets Connector\nSource: MILESTONE_2.md\nDepends on: G03-S02\n\nAcceptance:\n`spreadsheet.get` and `values.get` execute through `Jido.Connect.invoke/4` with scope checks.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G03-S03] Implement Sheets read-only actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:02Z"
+  "updated_at": "2026-05-04T19:20:11Z"
 }
