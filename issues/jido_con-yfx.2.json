@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-yfx.1"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G01-S02\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G01-S01\n\nAcceptance:\n`:user`, `:service_account`, and `:domain_delegated_service_account` are modeled without forcing service account implementation.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G01-S02] Add Google auth profiles",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:01Z"
+  "updated_at": "2026-05-04T19:20:09Z"
 }
