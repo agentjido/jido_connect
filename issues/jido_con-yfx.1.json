@@ -7,6 +7,8 @@
     "jido_con-yfx.2",
     "jido_con-yfx.5"
   ],
+  "closed_at": "2026-05-04T19:33:00Z",
+  "close_reason": "Scaffolded apps/jido_connect_google with README, tests, formatter, and library-only app config",
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G01-S01\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G00-S01\n\nAcceptance:\nUmbrella app exists, compiles, has README, tests, formatter config, and no empty supervisor unless needed.",
   "id": "jido_con-yfx.1",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-yfx",
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G01-S01] Scaffold jido_connect_google",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:17Z"
+  "updated_at": "2026-05-04T19:33:00Z"
 }
