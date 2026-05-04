@@ -4,7 +4,8 @@
     "jido_con-8ma.1"
   ],
   "blocks": [
-    "jido_con-yfx.2"
+    "jido_con-yfx.2",
+    "jido_con-yfx.5"
   ],
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G01-S01\nEpic: G01 Shared Google Foundation\nSource: MILESTONE_2.md\nDepends on: G00-S01\n\nAcceptance:\nUmbrella app exists, compiles, has README, tests, formatter config, and no empty supervisor unless needed.",
