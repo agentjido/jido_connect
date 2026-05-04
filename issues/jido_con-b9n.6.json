@@ -9,11 +9,14 @@
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G09-S06\nEpic: G09 Google Analytics Connector\nSource: MILESTONE_2.md\nDepends on: G09-S05\n\nAcceptance:\nProperty discovery returns normalized summaries.",
   "id": "jido_con-b9n.6",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-b9n",
   "priority": 1,
   "status": "open",
   "title": "[G09-S06] Implement property summary list action",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:16Z"
+  "updated_at": "2026-05-04T19:22:28Z"
 }
