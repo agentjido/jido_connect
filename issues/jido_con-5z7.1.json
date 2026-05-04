@@ -10,11 +10,14 @@
   "created": "2026-05-04T19:20:01Z",
   "description": "Planning ID: G02-S01\nEpic: G02 Generated-Client Spike\nSource: MILESTONE_2.md\nDepends on: G01-S05\n\nAcceptance:\nSpike criteria cover auth, Req/Tesla friction, tests, error mapping, normalized structs, and dependency weight.",
   "id": "jido_con-5z7.1",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-5z7",
   "priority": 1,
   "status": "open",
   "title": "[G02-S01] Define generated-client evaluation harness",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:10Z"
+  "updated_at": "2026-05-04T19:22:17Z"
 }
