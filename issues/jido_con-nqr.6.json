@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-nqr.5"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-nqr.7"
+  ],
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G10-S06\nEpic: G10 Google Search Console Connector\nSource: MILESTONE_2.md\nDepends on: G10-S05\n\nAcceptance:\nURL inspection returns sanitized, normalized inspection results.",
   "id": "jido_con-nqr.6",

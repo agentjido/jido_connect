@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-nqr.6"
+  ],
   "blocks": [],
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G10-S07\nEpic: G10 Google Search Console Connector\nSource: MILESTONE_2.md\nDepends on: G10-S06\n\nAcceptance:\nReader and SEO packs restrict write/admin actions correctly.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G10-S07] Add Search Console catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:06Z"
+  "updated_at": "2026-05-04T19:20:17Z"
 }
