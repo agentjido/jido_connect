@@ -4,6 +4,7 @@
     "jido_con-4hm.7"
   ],
   "blocks": [
+    "jido_con-jxj.1",
     "jido_con-uy4.1"
   ],
   "created": "2026-05-04T19:20:03Z",
@@ -15,5 +16,5 @@
   "status": "open",
   "title": "[G04-S08] Add Gmail catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-04T19:20:14Z"
+  "updated_at": "2026-05-04T19:20:17Z"
 }
