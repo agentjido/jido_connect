@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-yfx"
   ],
+  "closed_at": "2026-05-04T19:31:40Z",
+  "close_reason": "Milestone orchestration imported and initialized",
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G00\nSource: MILESTONE_2.md\nPurpose: keep the milestone coherent while implementation happens in many small issues.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-8ma",
@@ -12,8 +14,8 @@
     "milestone-2"
   ],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G00] Milestone Orchestration",
   "type": "epic",
-  "updated_at": "2026-05-04T19:22:15Z"
+  "updated_at": "2026-05-04T19:31:40Z"
 }
