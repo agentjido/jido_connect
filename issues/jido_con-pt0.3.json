@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-pt0.4"
   ],
+  "closed_at": "2026-05-06T21:22:19Z",
   "created": "2026-05-06T21:09:14Z",
   "description": "Acceptance: Gmail history IDs, Drive change tokens, and Calendar sync tokens expose consistent page draining, dedupe, expired or invalid checkpoint error shapes, and reset guidance in tests/docs.",
   "id": "jido_con-pt0.3",
@@ -15,8 +16,8 @@
   ],
   "parent": "jido_con-pt0",
   "priority": 0,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G12-S03] Unify Google poller checkpoint behavior",
   "type": "task",
-  "updated_at": "2026-05-06T21:18:16Z"
+  "updated_at": "2026-05-06T21:22:19Z"
 }
