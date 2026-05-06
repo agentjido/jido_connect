@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-4hm.4"
   ],
+  "closed_at": "2026-05-06T13:56:03Z",
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G04-S03\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G04-S02\n\nAcceptance:\n`profile.get` and `label.list` work with narrow scopes.",
   "id": "jido_con-4hm.3",
@@ -15,8 +16,8 @@
   ],
   "parent": "jido_con-4hm",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G04-S03] Implement profile and label list actions",
   "type": "task",
-  "updated_at": "2026-05-06T13:53:22Z"
+  "updated_at": "2026-05-06T13:56:03Z"
 }
