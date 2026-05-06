@@ -3,7 +3,7 @@
   "blocked_by": [],
   "blocks": [],
   "created": "2026-05-06T18:45:20Z",
-  "description": "Review and harden the newly built Google Calendar connector before continuing other Google epics: freebusy partial failures, scope precision, event time validation, and poll checkpoint behavior.",
+  "description": "Review and harden the Google connector work before continuing other Google epics: Calendar freebusy partial failures, scope precision, event time validation, poll checkpoint behavior, generated module coverage, normalized struct defaults, resolver branches, and package quality gates across Gmail, Sheets, Drive, Calendar, and shared Google.",
   "id": "jido_con-jxj.8",
   "labels": [
     "google",
@@ -12,7 +12,7 @@
   "parent": "jido_con-jxj",
   "priority": 1,
   "status": "in_progress",
-  "title": "Harden Google Calendar connector edge cases",
+  "title": "Harden Google connector edge cases and quality gates",
   "type": "task",
-  "updated_at": "2026-05-06T18:45:23Z"
+  "updated_at": "2026-05-06T19:09:50Z"
 }
