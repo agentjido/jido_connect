@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-2fj.6"
   ],
+  "closed_at": "2026-05-06T01:56:22Z",
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G05-S05\nEpic: G05 Google Drive Connector\nSource: MILESTONE_2.md\nDepends on: G05-S04\n\nAcceptance:\nDestructive operations include risk/confirmation metadata.",
   "id": "jido_con-2fj.5",
@@ -15,8 +16,8 @@
   ],
   "parent": "jido_con-2fj",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G05-S05] Implement file delete/export actions",
   "type": "task",
-  "updated_at": "2026-05-06T01:52:00Z"
+  "updated_at": "2026-05-06T01:56:22Z"
 }
