@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-jxj"
   ],
+  "closed_at": "2026-05-06T02:05:54Z",
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G05\nSource: MILESTONE_2.md\nPurpose: add file and folder workflows while minimizing broad Drive scopes.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-2fj",
@@ -14,8 +15,8 @@
     "milestone-2"
   ],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G05] Google Drive Connector",
   "type": "epic",
-  "updated_at": "2026-05-04T19:22:16Z"
+  "updated_at": "2026-05-06T02:05:54Z"
 }
