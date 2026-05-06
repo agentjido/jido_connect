@@ -7,6 +7,7 @@
     "jido_con-4hm.5",
     "jido_con-4hm.7"
   ],
+  "closed_at": "2026-05-06T13:59:27Z",
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G04-S04\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G04-S03\n\nAcceptance:\nList/get metadata actions avoid full message body scopes unless explicitly added later.",
   "id": "jido_con-4hm.4",
@@ -16,8 +17,8 @@
   ],
   "parent": "jido_con-4hm",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G04-S04] Implement metadata-only message/thread reads",
   "type": "task",
-  "updated_at": "2026-05-06T13:56:21Z"
+  "updated_at": "2026-05-06T13:59:27Z"
 }
