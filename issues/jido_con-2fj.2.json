@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-2fj.1"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-2fj",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G05-S02] Add Drive normalized structs and schemas",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:22Z"
+  "updated_at": "2026-05-06T01:41:25Z"
 }
