@@ -7,6 +7,8 @@
     "jido_con-9sn",
     "jido_con-jxj"
   ],
+  "closed_at": "2026-05-06T17:09:04Z",
+  "close_reason": "Completed Google Calendar connector epic with package, schemas, read/write/freebusy/availability actions, poll trigger, catalog packs, and docs.",
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G06\nSource: MILESTONE_2.md\nPurpose: add scheduling workflows with clean event schemas and practical availability helpers.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-vbg",
@@ -15,8 +17,8 @@
     "milestone-2"
   ],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G06] Google Calendar Connector",
   "type": "epic",
-  "updated_at": "2026-05-04T19:22:16Z"
+  "updated_at": "2026-05-06T17:09:04Z"
 }
