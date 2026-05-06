@@ -5,7 +5,10 @@
   "created": "2026-05-06T21:09:14Z",
   "description": "Purpose: harden the completed Google foundation, Gmail, Sheets, Drive, and Calendar packages without live credentials or demos, and prepare the codebase for more Google actions/triggers.\n\nScope:\n- Extract shared offline connector contract tests.\n- Normalize Google naming/catalog conventions.\n- Unify poller/checkpoint behavior.\n- Add explicit scope matrix coverage per package.\n- Audit privacy/data-classification boundaries.\n- Prepare extension patterns for additional actions/triggers.\n- Add offline provider fixture tests from realistic API payloads.\n\nNo live tests or demo integration in this epic.",
   "id": "jido_con-pt0",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "priority": 0,
   "status": "open",
   "title": "[G12] Offline Google Hardening And Expansion Contracts",
