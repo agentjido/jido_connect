@@ -1,6 +1,7 @@
 {
   "assignee": "",
   "blocked_by": [
+    "jido_con-pt0",
     "jido_con-vbg"
   ],
   "blocks": [
@@ -17,5 +18,5 @@
   "status": "open",
   "title": "[G08] Google Meet Connector",
   "type": "epic",
-  "updated_at": "2026-05-04T19:22:15Z"
+  "updated_at": "2026-05-06T21:09:17Z"
 }
