@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-pt0.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-pt0.5"
+  ],
   "created": "2026-05-06T21:09:14Z",
   "description": "Acceptance: each existing Google product package tests missing scope, narrow read scope, broad read/write scope, mutation scope, and legacy accepted scopes where relevant.",
   "id": "jido_con-pt0.4",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[G12-S04] Add per-package Google scope matrix tests",
   "type": "task",
-  "updated_at": "2026-05-06T21:09:16Z"
+  "updated_at": "2026-05-06T21:09:17Z"
 }
