@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [
     "jido_con-pt0.2"
@@ -13,8 +13,8 @@
   ],
   "parent": "jido_con-pt0",
   "priority": 0,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G12-S01] Extract shared Google connector contract tests",
   "type": "task",
-  "updated_at": "2026-05-06T21:09:16Z"
+  "updated_at": "2026-05-06T21:10:21Z"
 }
