@@ -5,11 +5,14 @@
   "created": "2026-05-06T21:09:14Z",
   "description": "Acceptance: reusable helper(s) cover generated action/sensor/plugin modules, Spark DSL fragments, catalog pack delegates, normalized struct defaults, and scope resolver shape without hiding package-specific expectations.",
   "id": "jido_con-pt0.1",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-pt0",
   "priority": 0,
   "status": "open",
   "title": "[G12-S01] Extract shared Google connector contract tests",
   "type": "task",
-  "updated_at": "2026-05-06T21:09:14Z"
+  "updated_at": "2026-05-06T21:09:15Z"
 }
