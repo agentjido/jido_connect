@@ -2,6 +2,8 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-06T19:10:33Z",
+  "close_reason": "Hardened Google connector edge cases and quality gates across shared Google, Gmail, Sheets, Drive, and Calendar; full mix quality now passes.",
   "created": "2026-05-06T18:45:20Z",
   "description": "Review and harden the Google connector work before continuing other Google epics: Calendar freebusy partial failures, scope precision, event time validation, poll checkpoint behavior, generated module coverage, normalized struct defaults, resolver branches, and package quality gates across Gmail, Sheets, Drive, Calendar, and shared Google.",
   "id": "jido_con-jxj.8",
@@ -11,8 +13,8 @@
   ],
   "parent": "jido_con-jxj",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Harden Google connector edge cases and quality gates",
   "type": "task",
-  "updated_at": "2026-05-06T19:09:50Z"
+  "updated_at": "2026-05-06T19:10:33Z"
 }
