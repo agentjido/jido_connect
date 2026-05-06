@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-4hm.8"
   ],
+  "closed_at": "2026-05-06T14:16:09Z",
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G04-S07\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G04-S04\n\nAcceptance:\nPoll trigger updates checkpoint and does not emit duplicate signals across ticks.",
   "id": "jido_con-4hm.7",
@@ -15,8 +16,8 @@
   ],
   "parent": "jido_con-4hm",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G04-S07] Add google.gmail.message.received poll trigger",
   "type": "task",
-  "updated_at": "2026-05-06T14:08:40Z"
+  "updated_at": "2026-05-06T14:16:09Z"
 }
