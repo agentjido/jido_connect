@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-vbg.2"
   ],
+  "closed_at": "2026-05-06T16:47:48Z",
+  "close_reason": "Scaffolded Google Calendar connector package using shared Google OAuth foundation.",
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G06-S01\nEpic: G06 Google Calendar Connector\nSource: MILESTONE_2.md\nDepends on: G03-S08\n\nAcceptance:\nPackage compiles and uses shared Google foundation.",
   "id": "jido_con-vbg.1",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-vbg",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G06-S01] Scaffold jido_connect_google_calendar",
   "type": "task",
-  "updated_at": "2026-05-06T16:43:18Z"
+  "updated_at": "2026-05-06T16:47:48Z"
 }
