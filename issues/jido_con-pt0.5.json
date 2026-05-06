@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-06T21:09:15Z",
+  "description": "Acceptance: each action/trigger is classified as metadata/content/personal/external write/destructive as appropriate; content-fetching or sensitive actions have explicit names, risk metadata, and no raw body leakage.",
+  "id": "jido_con-pt0.5",
+  "labels": [],
+  "parent": "jido_con-pt0",
+  "priority": 0,
+  "status": "open",
+  "title": "[G12-S05] Audit Google privacy and data classification boundaries",
+  "type": "task",
+  "updated_at": "2026-05-06T21:09:15Z"
+}
