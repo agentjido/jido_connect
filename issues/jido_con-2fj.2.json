@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-2fj.3"
   ],
+  "closed_at": "2026-05-06T01:43:33Z",
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G05-S02\nEpic: G05 Google Drive Connector\nSource: MILESTONE_2.md\nDepends on: G05-S01\n\nAcceptance:\nFile, folder, permission, and change structs validate with Zoi.",
   "id": "jido_con-2fj.2",
@@ -15,8 +16,8 @@
   ],
   "parent": "jido_con-2fj",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G05-S02] Add Drive normalized structs and schemas",
   "type": "task",
-  "updated_at": "2026-05-06T01:41:25Z"
+  "updated_at": "2026-05-06T01:43:33Z"
 }
