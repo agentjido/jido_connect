@@ -7,6 +7,7 @@
     "jido_con-2fj.4",
     "jido_con-2fj.7"
   ],
+  "closed_at": "2026-05-06T01:46:51Z",
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G05-S03\nEpic: G05 Google Drive Connector\nSource: MILESTONE_2.md\nDepends on: G05-S02\n\nAcceptance:\nRead actions prefer narrow metadata/file scopes.",
   "id": "jido_con-2fj.3",
@@ -16,8 +17,8 @@
   ],
   "parent": "jido_con-2fj",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G05-S03] Implement file list and metadata actions",
   "type": "task",
-  "updated_at": "2026-05-06T01:43:37Z"
+  "updated_at": "2026-05-06T01:46:51Z"
 }
