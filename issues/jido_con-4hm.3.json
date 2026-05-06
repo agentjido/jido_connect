@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-4hm.2"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-4hm",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G04-S03] Implement profile and label list actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:22Z"
+  "updated_at": "2026-05-06T13:53:22Z"
 }
