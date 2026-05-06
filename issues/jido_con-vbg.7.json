@@ -9,6 +9,8 @@
     "jido_con-jxj.2",
     "jido_con-uy4.1"
   ],
+  "closed_at": "2026-05-06T17:09:04Z",
+  "close_reason": "Added Google Calendar reader and scheduler catalog packs plus package docs.",
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G06-S07\nEpic: G06 Google Calendar Connector\nSource: MILESTONE_2.md\nDepends on: G06-S06\n\nAcceptance:\nReader and scheduler packs expose the right operations.",
   "id": "jido_con-vbg.7",
@@ -18,8 +20,8 @@
   ],
   "parent": "jido_con-vbg",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G06-S07] Add Calendar catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-06T17:07:37Z"
+  "updated_at": "2026-05-06T17:09:04Z"
 }
