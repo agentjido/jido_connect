@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-06T18:45:20Z",
+  "description": "Review and harden the newly built Google Calendar connector before continuing other Google epics: freebusy partial failures, scope precision, event time validation, and poll checkpoint behavior.",
+  "id": "jido_con-jxj.8",
+  "labels": [],
+  "parent": "jido_con-jxj",
+  "priority": 1,
+  "status": "open",
+  "title": "Harden Google Calendar connector edge cases",
+  "type": "task",
+  "updated_at": "2026-05-06T18:45:20Z"
+}
