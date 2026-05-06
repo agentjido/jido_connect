@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-pt0.2"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-pt0",
   "priority": 0,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G12-S03] Unify Google poller checkpoint behavior",
   "type": "task",
-  "updated_at": "2026-05-06T21:09:16Z"
+  "updated_at": "2026-05-06T21:18:16Z"
 }
