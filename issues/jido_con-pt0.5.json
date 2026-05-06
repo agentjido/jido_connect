@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-pt0.4"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-pt0.6"
+  ],
   "created": "2026-05-06T21:09:15Z",
   "description": "Acceptance: each action/trigger is classified as metadata/content/personal/external write/destructive as appropriate; content-fetching or sensitive actions have explicit names, risk metadata, and no raw body leakage.",
   "id": "jido_con-pt0.5",
