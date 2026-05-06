@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-uy4.4"
   ],
+  "closed_at": "2026-05-06T21:58:16Z",
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G07-S03\nEpic: G07 Google Contacts Connector\nSource: MILESTONE_2.md\nDepends on: G07-S02\n\nAcceptance:\nRead/search actions support narrow contacts/profile scopes.",
   "id": "jido_con-uy4.3",
@@ -15,8 +16,8 @@
   ],
   "parent": "jido_con-uy4",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G07-S03] Implement person list/get/search actions",
   "type": "task",
-  "updated_at": "2026-05-06T21:50:32Z"
+  "updated_at": "2026-05-06T21:58:16Z"
 }
