@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-pt0.1"
+  ],
   "blocks": [],
   "created": "2026-05-06T21:09:14Z",
   "description": "Acceptance: documented or validated conventions cover action ids, generated module names, sensor names, pack ids, labels, data classifications, and risk metadata across Gmail, Sheets, Drive, Calendar, and future Google packages.",
@@ -14,5 +16,5 @@
   "status": "open",
   "title": "[G12-S02] Standardize Google naming and catalog conventions",
   "type": "task",
-  "updated_at": "2026-05-06T21:09:15Z"
+  "updated_at": "2026-05-06T21:09:16Z"
 }
