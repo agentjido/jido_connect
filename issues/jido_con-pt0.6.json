@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-06T21:09:15Z",
+  "description": "Acceptance: action/trigger extension guidance covers client modules, handler validation, response normalization, catalog pack placement, dynamic scopes, and checkpoint contracts for future action families.",
+  "id": "jido_con-pt0.6",
+  "labels": [],
+  "parent": "jido_con-pt0",
+  "priority": 0,
+  "status": "open",
+  "title": "[G12-S06] Prepare patterns for additional Google actions and triggers",
+  "type": "task",
+  "updated_at": "2026-05-06T21:09:15Z"
+}
