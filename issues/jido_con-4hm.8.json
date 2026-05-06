@@ -8,6 +8,7 @@
     "jido_con-jxj.2",
     "jido_con-uy4.1"
   ],
+  "closed_at": "2026-05-06T14:18:41Z",
   "created": "2026-05-04T19:20:03Z",
   "description": "Planning ID: G04-S08\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G04-S07\n\nAcceptance:\nSend, triage, and metadata packs expose only intended tools.",
   "id": "jido_con-4hm.8",
@@ -17,8 +18,8 @@
   ],
   "parent": "jido_con-4hm",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G04-S08] Add Gmail catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-06T14:16:23Z"
+  "updated_at": "2026-05-06T14:18:41Z"
 }
