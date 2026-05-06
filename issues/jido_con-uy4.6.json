@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-jxj.2"
   ],
+  "closed_at": "2026-05-06T22:12:24Z",
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G07-S06\nEpic: G07 Google Contacts Connector\nSource: MILESTONE_2.md\nDepends on: G07-S05\n\nAcceptance:\nReadonly and manager packs restrict mutation tools correctly.",
   "id": "jido_con-uy4.6",
@@ -15,8 +16,8 @@
   ],
   "parent": "jido_con-uy4",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G07-S06] Add Contacts catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-06T22:09:28Z"
+  "updated_at": "2026-05-06T22:12:24Z"
 }
