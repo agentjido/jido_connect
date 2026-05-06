@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-4hm.2"
   ],
+  "closed_at": "2026-05-06T13:50:29Z",
   "created": "2026-05-04T19:20:02Z",
   "description": "Planning ID: G04-S01\nEpic: G04 Gmail Connector\nSource: MILESTONE_2.md\nDepends on: G03-S08\n\nAcceptance:\nPackage compiles and uses shared Google foundation.",
   "id": "jido_con-4hm.1",
@@ -15,8 +16,8 @@
   ],
   "parent": "jido_con-4hm",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G04-S01] Scaffold jido_connect_gmail",
   "type": "task",
-  "updated_at": "2026-05-06T13:49:10Z"
+  "updated_at": "2026-05-06T13:50:29Z"
 }
