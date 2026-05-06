@@ -7,6 +7,7 @@
     "jido_con-vbg.7"
   ],
   "blocks": [],
+  "closed_at": "2026-05-06T21:38:27Z",
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G11-S01\nEpic: G11 Cross-Google Hardening And Demo\nSource: MILESTONE_2.md\nDepends on: G03-S08, G04-S08, G05-S08, G06-S07\n\nAcceptance:\nShared fixture helpers reduce duplicated fake Google responses without hiding request shape.",
   "id": "jido_con-jxj.1",
@@ -16,8 +17,8 @@
   ],
   "parent": "jido_con-jxj",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G11-S01] Consolidate shared Google fixtures",
   "type": "task",
-  "updated_at": "2026-05-06T21:35:57Z"
+  "updated_at": "2026-05-06T21:38:27Z"
 }
