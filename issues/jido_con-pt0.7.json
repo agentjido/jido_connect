@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-06T21:09:15Z",
+  "description": "Acceptance: realistic offline JSON fixtures cover common and edge provider payloads for Gmail, Sheets, Drive, Calendar; tests stay credential-free and avoid live API/demo flows.",
+  "id": "jido_con-pt0.7",
+  "labels": [],
+  "parent": "jido_con-pt0",
+  "priority": 0,
+  "status": "open",
+  "title": "[G12-S07] Add offline provider fixture coverage",
+  "type": "task",
+  "updated_at": "2026-05-06T21:09:15Z"
+}
