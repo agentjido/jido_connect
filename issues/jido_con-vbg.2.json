@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-vbg.3"
   ],
+  "closed_at": "2026-05-06T16:50:39Z",
+  "close_reason": "Added Calendar, Event, Attendee, and FreeBusy Zoi structs with API payload normalizers.",
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G06-S02\nEpic: G06 Google Calendar Connector\nSource: MILESTONE_2.md\nDepends on: G06-S01\n\nAcceptance:\nCalendar, event, attendee, and freebusy structs validate with Zoi.",
   "id": "jido_con-vbg.2",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-vbg",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G06-S02] Add Calendar normalized structs and schemas",
   "type": "task",
-  "updated_at": "2026-05-06T16:47:48Z"
+  "updated_at": "2026-05-06T16:50:39Z"
 }
