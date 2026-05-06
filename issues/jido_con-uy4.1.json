@@ -7,6 +7,7 @@
   "blocks": [
     "jido_con-uy4.2"
   ],
+  "closed_at": "2026-05-06T21:47:13Z",
   "created": "2026-05-04T19:20:04Z",
   "description": "Planning ID: G07-S01\nEpic: G07 Google Contacts Connector\nSource: MILESTONE_2.md\nDepends on: G04-S08, G06-S07\n\nAcceptance:\nPackage compiles and shares account/scope helpers with Gmail and Calendar.",
   "id": "jido_con-uy4.1",
@@ -16,8 +17,8 @@
   ],
   "parent": "jido_con-uy4",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G07-S01] Scaffold jido_connect_google_contacts",
   "type": "task",
-  "updated_at": "2026-05-06T21:41:47Z"
+  "updated_at": "2026-05-06T21:47:13Z"
 }
