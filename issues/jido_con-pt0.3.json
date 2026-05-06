@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-pt0.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-pt0.4"
+  ],
   "created": "2026-05-06T21:09:14Z",
   "description": "Acceptance: Gmail history IDs, Drive change tokens, and Calendar sync tokens expose consistent page draining, dedupe, expired or invalid checkpoint error shapes, and reset guidance in tests/docs.",
   "id": "jido_con-pt0.3",
