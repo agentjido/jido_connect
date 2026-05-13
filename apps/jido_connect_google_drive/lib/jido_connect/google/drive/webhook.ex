@@ -22,14 +22,19 @@ defmodule Jido.Connect.Google.Drive.Webhook do
   }
 
   @doc "Extracts normalized Google Drive push notification headers."
-  def parse_headers(headers) when is_map(headers) do
-    Map.new(@header_keys, fn {key, header} -> {key, CoreWebhook.header(headers, header)} end)
+  def parse_headers(headers) when is_map(headers) or is_list(headers) do
+    Map.new(@header_keys, fn {key, header} -> {key, header(headers, header)} end)
   end
 
   @doc "Verifies an optional channel token using constant-time comparison."
   def verify_token(headers, expected_token)
 
-  def verify_token(_headers, expected_token) when expected_token in [nil, ""], do: :ok
+  def verify_token(_headers, expected_token) when expected_token in [nil, ""] do
+    {:error,
+     Error.auth("Google Drive webhook expected channel token is required",
+       reason: :missing_expected_token
+     )}
+  end
 
   def verify_token(headers, expected_token) when is_binary(expected_token) do
     token = headers |> parse_headers() |> Map.get(:channel_token)
@@ -49,7 +54,9 @@ defmodule Jido.Connect.Google.Drive.Webhook do
   end
 
   @doc "Builds a normalized provider-neutral delivery from Google Drive headers."
-  def normalize_delivery(headers, body \\ nil, opts \\ []) when is_map(headers) do
+  def normalize_delivery(headers, body \\ nil, opts \\ [])
+      when is_map(headers) or is_list(headers) do
+    headers = header_map(headers)
     parsed = parse_headers(headers)
     delivery_id = delivery_id(parsed)
 
@@ -65,7 +72,7 @@ defmodule Jido.Connect.Google.Drive.Webhook do
       payload: decode_body(body),
       metadata: %{
         channel_id: parsed.channel_id,
-        channel_token: parsed.channel_token,
+        channel_token_present: present?(parsed.channel_token),
         channel_expiration: parsed.channel_expiration,
         resource_id: parsed.resource_id,
         resource_uri: parsed.resource_uri,
@@ -91,7 +98,7 @@ defmodule Jido.Connect.Google.Drive.Webhook do
   defp signal_from_headers(parsed, %WebhookDelivery{} = delivery) do
     %{
       channel_id: parsed.channel_id,
-      channel_token: parsed.channel_token,
+      channel_token_present: present?(parsed.channel_token),
       channel_expiration: parsed.channel_expiration,
       resource_id: parsed.resource_id,
       resource_uri: parsed.resource_uri,
@@ -116,6 +123,13 @@ defmodule Jido.Connect.Google.Drive.Webhook do
 
   defp delivery_id(%{channel_id: channel_id}) when is_binary(channel_id), do: channel_id
   defp delivery_id(_parsed), do: nil
+
+  defp header(headers, key), do: CoreWebhook.header(header_map(headers), key)
+
+  defp header_map(headers) when is_map(headers), do: headers
+  defp header_map(headers) when is_list(headers), do: Map.new(headers)
+
+  defp present?(value), do: value not in [nil, ""]
 
   defp changed_fields(nil), do: []
 

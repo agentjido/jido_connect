@@ -13,6 +13,10 @@ unless Code.ensure_loaded?(Jido.Action.Catalog) do
        }}
     end
 
+    def register(%__MODULE__{} = _catalog, nil, _overrides) do
+      {:error, :invalid_module}
+    end
+
     def register(%__MODULE__{} = catalog, module, overrides) do
       entry = Map.merge(%{module: module}, overrides)
       {:ok, %{catalog | entries: Map.put(catalog.entries, entry.id, entry)}}
@@ -355,6 +359,11 @@ defmodule Jido.Connect.CatalogTest do
     assert entry.scopes == ["read"]
     assert entry.read_only? == true
     assert entry.metadata.provider == :generated_catalog
+  end
+
+  test "action catalog bridge skips non-generated catalog tools" do
+    assert {:ok, catalog} = Catalog.action_catalog(modules: [CatalogFixtures.Integration])
+    assert catalog.entries == %{}
   end
 
   test "ranked tool search prefers exact matches and combines with filters" do

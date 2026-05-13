@@ -572,6 +572,7 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
                  file_id: "file123",
                  channel_id: "channel123",
                  address: "https://example.com/webhooks/drive",
+                 type: "webhook",
                  token: "secret",
                  supports_all_drives: true
                },

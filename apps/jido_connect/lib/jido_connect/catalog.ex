@@ -400,7 +400,7 @@ defmodule Jido.Connect.Catalog do
       opts
       |> Keyword.put(:type, :action)
       |> tools()
-      |> Enum.filter(&is_atom(&1.module))
+      |> Enum.filter(&generated_action_module?/1)
       |> Enum.reduce_while({:ok, catalog}, fn tool, {:ok, acc} ->
         case apply(catalog_module, :register, [acc, tool.module, action_catalog_overrides(tool)]) do
           {:ok, updated} -> {:cont, {:ok, updated}}
@@ -409,6 +409,9 @@ defmodule Jido.Connect.Catalog do
       end)
     end
   end
+
+  defp generated_action_module?(%ToolEntry{module: module}),
+    do: is_atom(module) and not is_nil(module)
 
   defp action_catalog_overrides(%ToolEntry{} = tool) do
     %{

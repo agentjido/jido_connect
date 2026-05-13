@@ -290,7 +290,7 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   def channel_body(params) do
     %{
       id: Data.get(params, :channel_id),
-      type: Data.get(params, :type, "web_hook"),
+      type: normalize_channel_type(Data.get(params, :type, "web_hook")),
       address: Data.get(params, :address),
       token: Data.get(params, :token),
       expiration: Data.get(params, :expiration),
@@ -319,4 +319,7 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
 
   defp revision_list_fields,
     do: "nextPageToken,revisions(#{default_revision_fields()})"
+
+  defp normalize_channel_type("webhook"), do: "web_hook"
+  defp normalize_channel_type(type), do: type
 end

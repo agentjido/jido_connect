@@ -26,6 +26,19 @@ defmodule Jido.Connect.Google.Drive.WebhookTest do
            } = Webhook.parse_headers(@headers)
   end
 
+  test "parses list-style request headers" do
+    assert %{
+             channel_id: "channel123",
+             channel_token: "secret",
+             resource_id: "resource123"
+           } = Webhook.parse_headers(Map.to_list(@headers))
+
+    assert {:ok, %WebhookDelivery{delivery_id: "channel123:7"}} =
+             @headers
+             |> Map.to_list()
+             |> Webhook.verify_delivery("secret")
+  end
+
   test "verifies token and normalizes delivery" do
     assert {:ok, %WebhookDelivery{} = delivery} = Webhook.verify_delivery(@headers, "secret")
 
@@ -37,13 +50,25 @@ defmodule Jido.Connect.Google.Drive.WebhookTest do
     assert %{
              channel_id: "channel123",
              resource_id: "resource123",
+             channel_token_present: true,
              changed: ["content", "parents"],
              delivery: %{id: "channel123:7"}
            } = delivery.normalized_signal
+
+    refute Map.has_key?(delivery.normalized_signal, :channel_token)
+    refute Map.has_key?(delivery.metadata, :channel_token)
+
+    public = WebhookDelivery.to_public_map(delivery)
+    assert public.headers["x-goog-channel-token"] == "[redacted]"
   end
 
   test "rejects invalid channel token" do
     assert {:error, %Jido.Connect.Error.AuthError{reason: :invalid_token}} =
              Webhook.verify_delivery(@headers, "different")
+  end
+
+  test "does not mark delivery verified when no expected token is configured" do
+    assert {:error, %Jido.Connect.Error.AuthError{reason: :missing_expected_token}} =
+             Webhook.verify_delivery(@headers, nil)
   end
 end

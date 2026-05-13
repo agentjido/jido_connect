@@ -70,7 +70,7 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
 
       signal do
         field(:channel_id, :string)
-        field(:channel_token, :string)
+        field(:channel_token_present, :boolean, default: false)
         field(:channel_expiration, :string)
         field(:resource_id, :string)
         field(:resource_uri, :string)

@@ -518,6 +518,12 @@ defmodule Jido.Connect.Google.DriveTest do
              "anyone"
            ]
 
+    watch_file = Enum.find(spec.actions, &(&1.id == "google.drive.file.watch"))
+    watch_changes = Enum.find(spec.actions, &(&1.id == "google.drive.changes.watch"))
+
+    assert Enum.find(watch_file.input, &(&1.name == :type)).enum == ["web_hook"]
+    assert Enum.find(watch_changes.input, &(&1.name == :type)).enum == ["web_hook"]
+
     assert {:ok,
             %{
               id: "google.drive.file.changed",
