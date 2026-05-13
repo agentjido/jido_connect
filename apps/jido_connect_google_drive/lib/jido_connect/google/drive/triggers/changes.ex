@@ -45,5 +45,40 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
         field(:file, :map)
       end
     end
+
+    webhook :file_changed_webhook do
+      id("google.drive.file.changed.webhook")
+      resource(:file)
+      verb(:watch)
+      data_classification(:workspace_metadata)
+      label("File changed webhook")
+      description("Normalize Google Drive push notifications for file and change resources.")
+      verification(%{kind: :google_drive_channel_token, header: "x-goog-channel-token"})
+      dedupe(%{key: [:channel_id, :message_number]})
+      handler(Jido.Connect.Google.Drive.Handlers.Triggers.FileChangedWebhook)
+
+      access do
+        auth(:user)
+        scopes([@metadata_scope], resolver: @scope_resolver)
+      end
+
+      config do
+        field(:channel_id, :string)
+        field(:resource_id, :string)
+        field(:token, :string)
+      end
+
+      signal do
+        field(:channel_id, :string)
+        field(:channel_token, :string)
+        field(:channel_expiration, :string)
+        field(:resource_id, :string)
+        field(:resource_uri, :string)
+        field(:resource_state, :string)
+        field(:message_number, :string)
+        field(:changed, {:array, :string}, default: [])
+        field(:delivery, :map)
+      end
+    end
   end
 end

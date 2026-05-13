@@ -9,6 +9,9 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
     ConnectorContracts.assert_privacy_matrix(
       Drive,
       [
+        action("google.drive.about.get", :workspace_metadata, :read, :none,
+          text_includes: ["metadata"]
+        ),
         action("google.drive.files.list", :workspace_metadata, :read, :none),
         action("google.drive.file.get", :workspace_metadata, :read, :none,
           text_includes: ["metadata"]
@@ -33,11 +36,37 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
         ),
         action("google.drive.permission.create", :personal_data, :external_write, :always,
           text_includes: ["permission"]
+        ),
+        action("google.drive.revisions.list", :workspace_metadata, :read, :none,
+          text_includes: ["revisions"]
+        ),
+        action("google.drive.revision.get", :workspace_metadata, :read, :none,
+          text_includes: ["revision"]
+        ),
+        action("google.drive.file.watch", :workspace_metadata, :external_write, :required_for_ai,
+          text_includes: ["notification channel"]
+        ),
+        action(
+          "google.drive.changes.watch",
+          :workspace_metadata,
+          :external_write,
+          :required_for_ai,
+          text_includes: ["notification channel"]
+        ),
+        action(
+          "google.drive.channel.stop",
+          :workspace_metadata,
+          :external_write,
+          :required_for_ai,
+          text_includes: ["notification channel"]
         )
       ],
       [
         trigger("google.drive.file.changed", :workspace_metadata,
           text_includes: ["file", "changed"]
+        ),
+        trigger("google.drive.file.changed.webhook", :workspace_metadata,
+          text_includes: ["push notifications"]
         )
       ]
     )

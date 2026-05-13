@@ -1,13 +1,15 @@
 defmodule Jido.Connect.Google.Drive.Client.Files do
   @moduledoc "Google Drive files API boundary."
 
-  alias Jido.Connect.Google.Drive.Client.{Params, Response, Transport}
+  alias Jido.Connect.Google.Drive.{Client.Params, Client.Response, Client.Transport, Query}
 
   def list_files(params, access_token) when is_map(params) and is_binary(access_token) do
-    access_token
-    |> Transport.request()
-    |> Req.get(url: "/v3/files", params: Params.list_files_params(params))
-    |> Response.handle_file_list_response()
+    with {:ok, params} <- Query.normalize_list_params(params) do
+      access_token
+      |> Transport.request()
+      |> Req.get(url: "/v3/files", params: Params.list_files_params(params))
+      |> Response.handle_file_list_response()
+    end
   end
 
   def get_file(%{file_id: file_id} = params, access_token)

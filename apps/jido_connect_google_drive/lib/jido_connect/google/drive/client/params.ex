@@ -43,6 +43,29 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     "changeType",
     "file(#{Enum.join(@default_file_fields, ",")})"
   ]
+  @default_revision_fields [
+    "id",
+    "mimeType",
+    "modifiedTime",
+    "keepForever",
+    "published",
+    "publishAuto",
+    "publishedOutsideDomain",
+    "lastModifyingUser",
+    "originalFilename",
+    "md5Checksum",
+    "size",
+    "exportLinks"
+  ]
+  @default_about_fields [
+    "user",
+    "storageQuota",
+    "importFormats",
+    "exportFormats",
+    "maxUploadSize",
+    "appInstalled",
+    "folderColorPalette"
+  ]
 
   @doc "Default file metadata fields used by read actions."
   def default_file_fields, do: Enum.join(@default_file_fields, ",")
@@ -52,6 +75,12 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
 
   @doc "Default change metadata fields used by Drive change pollers."
   def default_change_fields, do: Enum.join(@default_change_fields, ",")
+
+  @doc "Default revision metadata fields used by revision read actions."
+  def default_revision_fields, do: Enum.join(@default_revision_fields, ",")
+
+  @doc "Default about fields used by Drive about reads."
+  def default_about_fields, do: Enum.join(@default_about_fields, ",")
 
   @doc "Builds query params for `files.list`."
   def list_files_params(params) do
@@ -75,6 +104,33 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     %{
       fields: Data.get(params, :fields, default_file_fields()),
       supportsAllDrives: Data.get(params, :supports_all_drives)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `about.get`."
+  def about_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_about_fields())
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `revisions.list`."
+  def list_revisions_params(params) do
+    %{
+      pageSize: Data.get(params, :page_size, 100),
+      pageToken: Data.get(params, :page_token),
+      fields: Data.get(params, :fields, revision_list_fields())
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `revisions.get`."
+  def get_revision_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_revision_fields()),
+      acknowledgeAbuse: Data.get(params, :acknowledge_abuse)
     }
     |> Data.compact()
   end
@@ -201,11 +257,66 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     |> Data.compact()
   end
 
-  defp list_fields, do: "nextPageToken,files(#{default_file_fields()})"
+  @doc "Builds query params for `files.watch`."
+  def watch_file_params(params) do
+    %{
+      supportsAllDrives: Data.get(params, :supports_all_drives),
+      acknowledgeAbuse: Data.get(params, :acknowledge_abuse),
+      includePermissionsForView: Data.get(params, :include_permissions_for_view),
+      includeLabels: Data.get(params, :include_labels)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `changes.watch`."
+  def watch_changes_params(params) do
+    %{
+      pageToken: Data.get(params, :page_token),
+      pageSize: Data.get(params, :page_size),
+      spaces: Data.get(params, :spaces, "drive"),
+      driveId: Data.get(params, :drive_id),
+      includeCorpusRemovals: Data.get(params, :include_corpus_removals),
+      includeItemsFromAllDrives: Data.get(params, :include_items_from_all_drives),
+      includeRemoved: Data.get(params, :include_removed),
+      restrictToMyDrive: Data.get(params, :restrict_to_my_drive),
+      supportsAllDrives: Data.get(params, :supports_all_drives),
+      includePermissionsForView: Data.get(params, :include_permissions_for_view),
+      includeLabels: Data.get(params, :include_labels)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a JSON body for Drive notification channel watch requests."
+  def channel_body(params) do
+    %{
+      id: Data.get(params, :channel_id),
+      type: Data.get(params, :type, "web_hook"),
+      address: Data.get(params, :address),
+      token: Data.get(params, :token),
+      expiration: Data.get(params, :expiration),
+      payload: Data.get(params, :payload),
+      params: Data.get(params, :params)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a JSON body for `channels.stop`."
+  def stop_channel_body(params) do
+    %{
+      id: Data.get(params, :channel_id),
+      resourceId: Data.get(params, :resource_id)
+    }
+    |> Data.compact()
+  end
+
+  defp list_fields, do: "nextPageToken,incompleteSearch,files(#{default_file_fields()})"
 
   defp permission_list_fields,
     do: "nextPageToken,permissions(#{default_permission_fields()})"
 
   defp change_list_fields,
     do: "nextPageToken,newStartPageToken,changes(#{default_change_fields()})"
+
+  defp revision_list_fields,
+    do: "nextPageToken,revisions(#{default_revision_fields()})"
 end

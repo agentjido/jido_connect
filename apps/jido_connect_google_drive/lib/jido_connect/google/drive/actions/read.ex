@@ -24,6 +24,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Read do
 
       input do
         field(:query, :string)
+        field(:filter, :map)
         field(:page_size, :integer, default: 25)
         field(:page_token, :string)
         field(:fields, :string)
@@ -38,6 +39,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Read do
       output do
         field(:files, {:array, :map})
         field(:next_page_token, :string)
+        field(:incomplete_search, :boolean)
       end
     end
 

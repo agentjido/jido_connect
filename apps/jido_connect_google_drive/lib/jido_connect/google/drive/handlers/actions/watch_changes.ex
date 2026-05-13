@@ -1,28 +1,23 @@
-defmodule Jido.Connect.Google.Drive.Handlers.Actions.ListFiles do
+defmodule Jido.Connect.Google.Drive.Handlers.Actions.WatchChanges do
   @moduledoc false
 
   alias Jido.Connect.Google.Drive.Client
 
   def run(input, %{credentials: credentials}) do
     with {:ok, client} <- fetch_client(credentials),
-         {:ok, result} <-
-           client.list_files(normalize_input(input), Map.get(credentials, :access_token)) do
-      {:ok,
-       %{
-         files: Enum.map(Map.get(result, :files, []), &public_map/1),
-         next_page_token: Map.get(result, :next_page_token),
-         incomplete_search: Map.get(result, :incomplete_search)
-       }
-       |> Enum.reject(fn {_key, value} -> is_nil(value) end)
-       |> Map.new()}
+         {:ok, channel} <-
+           client.watch_changes(normalize_input(input), Map.get(credentials, :access_token)) do
+      {:ok, %{channel: public_map(channel)}}
     end
   end
 
   defp normalize_input(input) do
     input
-    |> Map.put_new(:page_size, 25)
+    |> Map.put_new(:type, "web_hook")
     |> Map.put_new(:spaces, "drive")
     |> Map.put_new(:include_items_from_all_drives, false)
+    |> Map.put_new(:include_removed, true)
+    |> Map.put_new(:restrict_to_my_drive, false)
     |> Map.put_new(:supports_all_drives, false)
   end
 

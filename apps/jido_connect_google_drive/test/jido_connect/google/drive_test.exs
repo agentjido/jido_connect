@@ -6,6 +6,7 @@ defmodule Jido.Connect.Google.DriveTest do
   alias Jido.Connect.Google.Drive
 
   @drive_action_modules [
+    Jido.Connect.Google.Drive.Actions.GetAbout,
     Jido.Connect.Google.Drive.Actions.ListFiles,
     Jido.Connect.Google.Drive.Actions.GetFile,
     Jido.Connect.Google.Drive.Actions.CreateFile,
@@ -16,18 +17,34 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.DownloadFile,
     Jido.Connect.Google.Drive.Actions.DeleteFile,
     Jido.Connect.Google.Drive.Actions.ListPermissions,
-    Jido.Connect.Google.Drive.Actions.CreatePermission
+    Jido.Connect.Google.Drive.Actions.CreatePermission,
+    Jido.Connect.Google.Drive.Actions.ListRevisions,
+    Jido.Connect.Google.Drive.Actions.GetRevision,
+    Jido.Connect.Google.Drive.Actions.WatchFile,
+    Jido.Connect.Google.Drive.Actions.WatchChanges,
+    Jido.Connect.Google.Drive.Actions.StopChannel
   ]
 
   @drive_dsl_fragments [
+    Jido.Connect.Google.Drive.Actions.About,
     Jido.Connect.Google.Drive.Actions.Read,
     Jido.Connect.Google.Drive.Actions.Write,
     Jido.Connect.Google.Drive.Actions.FileContent,
     Jido.Connect.Google.Drive.Actions.Permissions,
+    Jido.Connect.Google.Drive.Actions.Revisions,
+    Jido.Connect.Google.Drive.Actions.Watch,
     Jido.Connect.Google.Drive.Triggers.Changes
   ]
 
   defmodule FakeDriveClient do
+    def get_about(%{}, "token") do
+      {:ok,
+       Drive.About.new!(%{
+         user: %{"emailAddress" => "owner@example.com"},
+         storage_quota: %{"limit" => "1000", "usage" => "25"}
+       })}
+    end
+
     def list_files(
           %{
             query: "mimeType = 'application/pdf'",
@@ -199,6 +216,81 @@ defmodule Jido.Connect.Google.DriveTest do
          role: "reader",
          email_address: "reader@example.com"
        })}
+    end
+
+    def list_revisions(%{file_id: "file123", page_size: 100}, "token") do
+      {:ok,
+       %{
+         revisions: [
+           Drive.Revision.new!(%{
+             revision_id: "rev123",
+             mime_type: "application/pdf",
+             modified_time: "2026-05-05T12:00:00Z"
+           })
+         ],
+         next_page_token: "next-rev"
+       }}
+    end
+
+    def get_revision(
+          %{file_id: "file123", revision_id: "rev123", acknowledge_abuse: false},
+          "token"
+        ) do
+      {:ok,
+       Drive.Revision.new!(%{
+         revision_id: "rev123",
+         mime_type: "application/pdf",
+         modified_time: "2026-05-05T12:00:00Z"
+       })}
+    end
+
+    def watch_file(
+          %{
+            file_id: "file123",
+            channel_id: "channel123",
+            address: "https://example.com/webhooks/drive",
+            type: "web_hook",
+            supports_all_drives: false,
+            acknowledge_abuse: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.Channel.new!(%{
+         channel_id: "channel123",
+         resource_id: "resource123",
+         resource_uri: "https://www.googleapis.com/drive/v3/files/file123",
+         type: "web_hook",
+         address: "https://example.com/webhooks/drive"
+       })}
+    end
+
+    def watch_changes(
+          %{
+            page_token: "start-token",
+            channel_id: "channel123",
+            address: "https://example.com/webhooks/drive",
+            type: "web_hook",
+            spaces: "drive",
+            include_items_from_all_drives: false,
+            include_removed: true,
+            restrict_to_my_drive: false,
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.Channel.new!(%{
+         channel_id: "channel123",
+         resource_id: "resource123",
+         resource_uri: "https://www.googleapis.com/drive/v3/changes",
+         type: "web_hook",
+         address: "https://example.com/webhooks/drive"
+       })}
+    end
+
+    def stop_channel(%{channel_id: "channel123", resource_id: "resource123"}, "token") do
+      {:ok, %{channel_id: "channel123", resource_id: "resource123", stopped?: true}}
     end
 
     def get_start_page_token(%{supports_all_drives: false}, "token") do
@@ -392,6 +484,7 @@ defmodule Jido.Connect.Google.DriveTest do
     assert "https://www.googleapis.com/auth/drive.readonly" in profile.optional_scopes
 
     assert Enum.map(spec.actions, & &1.id) == [
+             "google.drive.about.get",
              "google.drive.files.list",
              "google.drive.file.get",
              "google.drive.file.create",
@@ -402,7 +495,12 @@ defmodule Jido.Connect.Google.DriveTest do
              "google.drive.file.download",
              "google.drive.file.delete",
              "google.drive.permissions.list",
-             "google.drive.permission.create"
+             "google.drive.permission.create",
+             "google.drive.revisions.list",
+             "google.drive.revision.get",
+             "google.drive.file.watch",
+             "google.drive.changes.watch",
+             "google.drive.channel.stop"
            ]
 
     delete_action = Enum.find(spec.actions, &(&1.id == "google.drive.file.delete"))
@@ -429,6 +527,15 @@ defmodule Jido.Connect.Google.DriveTest do
               scope_resolver: Jido.Connect.Google.Drive.ScopeResolver
             }} =
              Connect.trigger(spec, "google.drive.file.changed")
+
+    assert {:ok,
+            %{
+              id: "google.drive.file.changed.webhook",
+              kind: :webhook,
+              dedupe: %{key: [:channel_id, :message_number]},
+              verification: %{kind: :google_drive_channel_token}
+            }} =
+             Connect.trigger(spec, "google.drive.file.changed.webhook")
   end
 
   test "compiles generated Jido modules for actions, sensors, and plugin" do
@@ -441,6 +548,12 @@ defmodule Jido.Connect.Google.DriveTest do
           name: "google_drive_file_changed",
           trigger_id: "google.drive.file.changed",
           signal_type: "google.drive.file.changed"
+        },
+        %{
+          module: Jido.Connect.Google.Drive.Sensors.FileChangedWebhook,
+          name: "google_drive_file_changed_webhook",
+          trigger_id: "google.drive.file.changed.webhook",
+          signal_type: "google.drive.file.changed.webhook"
         }
       ],
       plugin_module: Jido.Connect.Google.Drive.Plugin,
@@ -526,6 +639,25 @@ defmodule Jido.Connect.Google.DriveTest do
                Drive.integration(),
                "google.drive.file.get",
                %{file_id: "file123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes Drive about through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              about: %{
+                user: %{"emailAddress" => "owner@example.com"},
+                storage_quota: %{"limit" => "1000", "usage" => "25"}
+              }
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.about.get",
+               %{},
                context: context,
                credential_lease: lease
              )
@@ -747,6 +879,83 @@ defmodule Jido.Connect.Google.DriveTest do
                Drive.integration(),
                "google.drive.permissions.list",
                %{file_id: "file123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes revisions through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              revisions: [
+                %{
+                  revision_id: "rev123",
+                  mime_type: "application/pdf"
+                }
+              ],
+              next_page_token: "next-rev"
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.revisions.list",
+               %{file_id: "file123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{revision: %{revision_id: "rev123", mime_type: "application/pdf"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.revision.get",
+               %{file_id: "file123", revision_id: "rev123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes watch lifecycle through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              channel: %{
+                channel_id: "channel123",
+                resource_id: "resource123",
+                address: "https://example.com/webhooks/drive"
+              }
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.watch",
+               %{
+                 file_id: "file123",
+                 channel_id: "channel123",
+                 address: "https://example.com/webhooks/drive"
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{channel: %{channel_id: "channel123", resource_id: "resource123"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.changes.watch",
+               %{
+                 page_token: "start-token",
+                 channel_id: "channel123",
+                 address: "https://example.com/webhooks/drive"
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{channel_id: "channel123", stopped?: true}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.channel.stop",
+               %{channel_id: "channel123", resource_id: "resource123"},
                context: context,
                credential_lease: lease
              )

@@ -1,4 +1,4 @@
-defmodule Jido.Connect.Google.Drive.Handlers.Actions.ListFiles do
+defmodule Jido.Connect.Google.Drive.Handlers.Actions.ListRevisions do
   @moduledoc false
 
   alias Jido.Connect.Google.Drive.Client
@@ -6,25 +6,18 @@ defmodule Jido.Connect.Google.Drive.Handlers.Actions.ListFiles do
   def run(input, %{credentials: credentials}) do
     with {:ok, client} <- fetch_client(credentials),
          {:ok, result} <-
-           client.list_files(normalize_input(input), Map.get(credentials, :access_token)) do
+           client.list_revisions(normalize_input(input), Map.get(credentials, :access_token)) do
       {:ok,
        %{
-         files: Enum.map(Map.get(result, :files, []), &public_map/1),
-         next_page_token: Map.get(result, :next_page_token),
-         incomplete_search: Map.get(result, :incomplete_search)
+         revisions: Enum.map(Map.get(result, :revisions, []), &public_map/1),
+         next_page_token: Map.get(result, :next_page_token)
        }
        |> Enum.reject(fn {_key, value} -> is_nil(value) end)
        |> Map.new()}
     end
   end
 
-  defp normalize_input(input) do
-    input
-    |> Map.put_new(:page_size, 25)
-    |> Map.put_new(:spaces, "drive")
-    |> Map.put_new(:include_items_from_all_drives, false)
-    |> Map.put_new(:supports_all_drives, false)
-  end
+  defp normalize_input(input), do: Map.put_new(input, :page_size, 100)
 
   defp fetch_client(%{google_drive_client: client}) when is_atom(client), do: {:ok, client}
   defp fetch_client(_credentials), do: {:ok, Client}

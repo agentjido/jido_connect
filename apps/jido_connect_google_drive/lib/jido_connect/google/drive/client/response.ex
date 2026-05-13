@@ -16,7 +16,8 @@ defmodule Jido.Connect.Google.Drive.Client.Response do
       {:ok,
        %{
          files: files,
-         next_page_token: Data.get(body, "nextPageToken")
+         next_page_token: Data.get(body, "nextPageToken"),
+         incomplete_search: Data.get(body, "incompleteSearch")
        }
        |> Data.compact()}
     end
@@ -40,6 +41,55 @@ defmodule Jido.Connect.Google.Drive.Client.Response do
   end
 
   def handle_file_response(response), do: Transport.handle_error_response(response)
+
+  def handle_about_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.about/1, "Google Drive about response was invalid")
+  end
+
+  def handle_about_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Drive about response was invalid", body)
+  end
+
+  def handle_about_response(response), do: Transport.handle_error_response(response)
+
+  def handle_revision_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, revisions} <-
+           normalize_items(
+             body,
+             "revisions",
+             &Normalizer.revision/1,
+             "Google Drive revision list response was invalid"
+           ) do
+      {:ok,
+       %{
+         revisions: revisions,
+         next_page_token: Data.get(body, "nextPageToken")
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_revision_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Drive revision list response was invalid", body)
+  end
+
+  def handle_revision_list_response(response), do: Transport.handle_error_response(response)
+
+  def handle_revision_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.revision/1, "Google Drive revision response was invalid")
+  end
+
+  def handle_revision_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Drive revision response was invalid", body)
+  end
+
+  def handle_revision_response(response), do: Transport.handle_error_response(response)
 
   def handle_file_content_response({:ok, %{status: status, body: body, headers: headers}}, params)
       when status in 200..299 and is_binary(body) do
@@ -148,6 +198,30 @@ defmodule Jido.Connect.Google.Drive.Client.Response do
   end
 
   def handle_change_list_response(response), do: Transport.handle_error_response(response)
+
+  def handle_channel_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.channel/1, "Google Drive channel response was invalid")
+  end
+
+  def handle_channel_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Drive channel response was invalid", body)
+  end
+
+  def handle_channel_response(response), do: Transport.handle_error_response(response)
+
+  def handle_channel_stop_response({:ok, %{status: status}}, params) when status in 200..299 do
+    {:ok,
+     %{
+       channel_id: Data.get(params, :channel_id),
+       resource_id: Data.get(params, :resource_id),
+       stopped?: true
+     }}
+  end
+
+  def handle_channel_stop_response(response, _params),
+    do: Transport.handle_error_response(response)
 
   def file_to_folder({:ok, file}) do
     %{

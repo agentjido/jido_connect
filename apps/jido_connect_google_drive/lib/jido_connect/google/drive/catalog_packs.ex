@@ -4,12 +4,16 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
   alias Jido.Connect.Catalog.Pack
 
   @readonly_tools [
+    "google.drive.about.get",
     "google.drive.files.list",
     "google.drive.file.get",
     "google.drive.file.export",
     "google.drive.file.download",
     "google.drive.permissions.list",
-    "google.drive.file.changed"
+    "google.drive.revisions.list",
+    "google.drive.revision.get",
+    "google.drive.file.changed",
+    "google.drive.file.changed.webhook"
   ]
 
   @file_writer_tools @readonly_tools ++
@@ -17,7 +21,10 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
                          "google.drive.file.create",
                          "google.drive.folder.create",
                          "google.drive.file.copy",
-                         "google.drive.file.update"
+                         "google.drive.file.update",
+                         "google.drive.file.watch",
+                         "google.drive.changes.watch",
+                         "google.drive.channel.stop"
                        ]
 
   @doc "Returns all built-in Google Drive catalog packs."

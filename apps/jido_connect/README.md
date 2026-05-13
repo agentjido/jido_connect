@@ -59,6 +59,14 @@ For host UI discovery, use `Jido.Connect.spec/1`, `actions/1`, `triggers/1`,
 returns provider entries; `Catalog.tools/1` returns a flattened action/trigger
 catalog for search and tool pickers, including filters such as `:tag`,
 `:resource`, `:verb`, `:auth_kind`, `:auth_profile`, and `:scope`.
+`Catalog.tool_availability/1` evaluates that catalog against a connection before
+a credential lease exists, returning `:available`, `:missing_scopes`,
+`:connection_required`, `:disabled_by_policy`, or `:configuration_error`.
+
+When `jido_action` includes `Jido.Action.Catalog`, `Catalog.action_catalog/1`
+projects generated connector action modules into the canonical action catalog
+shape. Until that dependency release is present, the function returns a config
+error instead of forcing a git dependency.
 
 ## Catalog Plugin, Search, And Tool Calling
 

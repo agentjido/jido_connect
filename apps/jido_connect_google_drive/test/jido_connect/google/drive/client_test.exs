@@ -1,7 +1,16 @@
 defmodule Jido.Connect.Google.Drive.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Google.Drive.{Change, Client, File, Folder, Permission}
+  alias Jido.Connect.Google.Drive.{
+    About,
+    Change,
+    Channel,
+    Client,
+    File,
+    Folder,
+    Permission,
+    Revision
+  }
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -52,6 +61,36 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     assert file.name == "Budget.pdf"
   end
 
+  test "lists files with provider-specific filters" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files"
+
+      assert conn.query_params["q"] ==
+               "(mimeType = 'application/pdf') and (name contains 'Budget' and 'root' in parents and trashed = false)"
+
+      Req.Test.json(conn, %{
+        "files" => [
+          %{
+            "id" => "file123",
+            "name" => "Budget.pdf",
+            "mimeType" => "application/pdf"
+          }
+        ],
+        "incompleteSearch" => true
+      })
+    end)
+
+    assert {:ok, %{files: [%File{}], incomplete_search: true}} =
+             Client.list_files(
+               %{
+                 query: "mimeType = 'application/pdf'",
+                 filter: %{parent_id: "root", trashed: false, name_contains: "Budget"}
+               },
+               "token"
+             )
+  end
+
   test "returns provider errors for malformed Drive list items" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
@@ -89,6 +128,24 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
 
     assert file.file_id == "file123"
     assert file.name == "Budget.pdf"
+  end
+
+  test "gets Drive about metadata" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/about"
+      assert conn.query_params["fields"] =~ "storageQuota"
+
+      Req.Test.json(conn, %{
+        "user" => %{"emailAddress" => "owner@example.com"},
+        "storageQuota" => %{"limit" => "1000", "usage" => "25"},
+        "maxUploadSize" => "12345"
+      })
+    end)
+
+    assert {:ok, %About{} = about} = Client.get_about(%{}, "token")
+    assert about.user == %{"emailAddress" => "owner@example.com"}
+    assert about.storage_quota == %{"limit" => "1000", "usage" => "25"}
   end
 
   test "returns provider errors for malformed Drive single-object responses" do
@@ -326,6 +383,49 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     assert permission.email_address == "reader@example.com"
   end
 
+  test "lists and gets file revisions" do
+    Req.Test.stub(__MODULE__, fn
+      %{request_path: "/v3/files/file123/revisions"} = conn ->
+        assert conn.method == "GET"
+        assert conn.query_params["pageSize"] == "50"
+        assert conn.query_params["fields"] =~ "revisions(id,mimeType"
+
+        Req.Test.json(conn, %{
+          "revisions" => [
+            %{
+              "id" => "rev123",
+              "mimeType" => "application/pdf",
+              "modifiedTime" => "2026-05-05T12:00:00Z"
+            }
+          ],
+          "nextPageToken" => "next-rev"
+        })
+
+      %{request_path: "/v3/files/file123/revisions/rev123"} = conn ->
+        assert conn.method == "GET"
+        assert conn.query_params["acknowledgeAbuse"] == "false"
+
+        Req.Test.json(conn, %{
+          "id" => "rev123",
+          "mimeType" => "application/pdf",
+          "modifiedTime" => "2026-05-05T12:00:00Z"
+        })
+    end)
+
+    assert {:ok, %{revisions: [%Revision{} = revision], next_page_token: "next-rev"}} =
+             Client.list_revisions(%{file_id: "file123", page_size: 50}, "token")
+
+    assert revision.revision_id == "rev123"
+
+    assert {:ok, %Revision{} = revision} =
+             Client.get_revision(
+               %{file_id: "file123", revision_id: "rev123", acknowledge_abuse: false},
+               "token"
+             )
+
+    assert revision.revision_id == "rev123"
+  end
+
   test "creates file permissions" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "POST"
@@ -419,5 +519,81 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
 
     assert change.change_id == "change123"
     assert change.file.file_id == "file123"
+  end
+
+  test "creates and stops Drive watch channels" do
+    Req.Test.stub(__MODULE__, fn
+      %{request_path: "/v3/files/file123/watch"} = conn ->
+        assert conn.method == "POST"
+        assert conn.query_params["supportsAllDrives"] == "true"
+
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+        assert Jason.decode!(body) == %{
+                 "id" => "channel123",
+                 "type" => "web_hook",
+                 "address" => "https://example.com/webhooks/drive",
+                 "token" => "secret"
+               }
+
+        Req.Test.json(conn, %{
+          "id" => "channel123",
+          "resourceId" => "resource123",
+          "resourceUri" => "https://www.googleapis.com/drive/v3/files/file123",
+          "type" => "web_hook",
+          "address" => "https://example.com/webhooks/drive"
+        })
+
+      %{request_path: "/v3/changes/watch"} = conn ->
+        assert conn.method == "POST"
+        assert conn.query_params["pageToken"] == "start-token"
+        assert conn.query_params["includeRemoved"] == "true"
+
+        Req.Test.json(conn, %{
+          "id" => "channel456",
+          "resourceId" => "resource456",
+          "resourceUri" => "https://www.googleapis.com/drive/v3/changes",
+          "type" => "web_hook",
+          "address" => "https://example.com/webhooks/drive"
+        })
+
+      %{request_path: "/v3/channels/stop"} = conn ->
+        assert conn.method == "POST"
+
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+        assert Jason.decode!(body) == %{"id" => "channel123", "resourceId" => "resource123"}
+
+        Plug.Conn.resp(conn, 204, "")
+    end)
+
+    assert {:ok, %Channel{} = channel} =
+             Client.watch_file(
+               %{
+                 file_id: "file123",
+                 channel_id: "channel123",
+                 address: "https://example.com/webhooks/drive",
+                 token: "secret",
+                 supports_all_drives: true
+               },
+               "token"
+             )
+
+    assert channel.channel_id == "channel123"
+
+    assert {:ok, %Channel{} = channel} =
+             Client.watch_changes(
+               %{
+                 page_token: "start-token",
+                 channel_id: "channel456",
+                 address: "https://example.com/webhooks/drive",
+                 include_removed: true
+               },
+               "token"
+             )
+
+    assert channel.channel_id == "channel456"
+
+    assert {:ok, %{channel_id: "channel123", resource_id: "resource123", stopped?: true}} =
+             Client.stop_channel(%{channel_id: "channel123", resource_id: "resource123"}, "token")
   end
 end

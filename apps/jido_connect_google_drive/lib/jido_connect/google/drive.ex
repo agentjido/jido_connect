@@ -5,10 +5,13 @@ defmodule Jido.Connect.Google.Drive do
 
   use Jido.Connect,
     fragments: [
+      Jido.Connect.Google.Drive.Actions.About,
       Jido.Connect.Google.Drive.Actions.Read,
       Jido.Connect.Google.Drive.Actions.Write,
       Jido.Connect.Google.Drive.Actions.FileContent,
       Jido.Connect.Google.Drive.Actions.Permissions,
+      Jido.Connect.Google.Drive.Actions.Revisions,
+      Jido.Connect.Google.Drive.Actions.Watch,
       Jido.Connect.Google.Drive.Triggers.Changes
     ]
 

@@ -1,8 +1,17 @@
 defmodule Jido.Connect.Google.Drive.Client do
   @moduledoc "Google Drive API client facade."
 
-  alias Jido.Connect.Google.Drive.Client.{Changes, Files, Permissions}
+  alias Jido.Connect.Google.Drive.Client.{
+    About,
+    Changes,
+    Channels,
+    Files,
+    Permissions,
+    Revisions,
+    Watch
+  }
 
+  defdelegate get_about(params, access_token), to: About
   defdelegate list_files(params, access_token), to: Files
   defdelegate get_file(params, access_token), to: Files
   defdelegate create_file(params, access_token), to: Files
@@ -16,4 +25,9 @@ defmodule Jido.Connect.Google.Drive.Client do
   defdelegate create_permission(params, access_token), to: Permissions
   defdelegate get_start_page_token(params, access_token), to: Changes
   defdelegate list_changes(params, access_token), to: Changes
+  defdelegate list_revisions(params, access_token), to: Revisions
+  defdelegate get_revision(params, access_token), to: Revisions
+  defdelegate watch_file(params, access_token), to: Watch
+  defdelegate watch_changes(params, access_token), to: Watch
+  defdelegate stop_channel(params, access_token), to: Channels
 end

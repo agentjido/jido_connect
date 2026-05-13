@@ -1,3 +1,25 @@
+unless Code.ensure_loaded?(Jido.Action.Catalog) do
+  defmodule Jido.Action.Catalog do
+    defstruct id: nil, name: nil, description: "", entries: %{}, metadata: %{}
+
+    def new(attrs) when is_map(attrs) do
+      {:ok,
+       %__MODULE__{
+         id: Map.fetch!(attrs, :id),
+         name: Map.get(attrs, :name),
+         description: Map.get(attrs, :description, ""),
+         entries: %{},
+         metadata: Map.get(attrs, :metadata, %{})
+       }}
+    end
+
+    def register(%__MODULE__{} = catalog, module, overrides) do
+      entry = Map.merge(%{module: module}, overrides)
+      {:ok, %{catalog | entries: Map.put(catalog.entries, entry.id, entry)}}
+    end
+  end
+end
+
 defmodule Jido.Connect.CatalogTest do
   use ExUnit.Case, async: false
 
@@ -19,6 +41,65 @@ defmodule Jido.Connect.CatalogTest do
 
   defmodule ExplodingRanker do
     def rank(_query, _candidates), do: raise("ranker exploded")
+  end
+
+  defmodule Handler do
+    def run(input, _context), do: {:ok, input}
+  end
+
+  defmodule GeneratedIntegration do
+    use Jido.Connect
+
+    integration do
+      id :generated_catalog
+      name "Generated Catalog"
+      category :test
+    end
+
+    catalog do
+      package :jido_connect_generated_catalog
+      tags [:generated_catalog_test]
+    end
+
+    auth do
+      api_key :user do
+        default? true
+        owner :app_user
+        subject :user
+        label "User API key"
+        setup :api_key
+        credential_fields [:api_key]
+        lease_fields [:api_key]
+        scopes ["read"]
+        default_scopes ["read"]
+      end
+    end
+
+    actions do
+      action :get_item do
+        id "generated.item.get"
+        resource :item
+        verb :get
+        data_classification :workspace_metadata
+        label "Get generated item"
+        description "Fetch an item through a generated action."
+        handler Handler
+        effect :read
+
+        access do
+          auth :user
+          scopes ["read"]
+        end
+
+        input do
+          field :id, :string, required?: true
+        end
+
+        output do
+          field :id, :string
+        end
+      end
+    end
   end
 
   test "catalog entries derive host-facing metadata from specs" do
@@ -192,6 +273,88 @@ defmodule Jido.Connect.CatalogTest do
              %Catalog.ToolEntry{id: "catalog.item.get"},
              %Catalog.ToolEntry{id: "catalog.item.created"}
            ] = Catalog.tools(modules: [CatalogFixtures.Integration])
+  end
+
+  test "tool availability evaluates connection scopes without a credential lease" do
+    {context, _lease} = CatalogFixtures.context_and_lease()
+
+    assert [
+             %{tool: "catalog.item.get", state: :available, connection_id: "conn_catalog"},
+             %{tool: "catalog.item.created", state: :available, connection_id: "conn_catalog"}
+           ] =
+             Catalog.tool_availability(
+               modules: [CatalogFixtures.Integration],
+               connection: context.connection
+             )
+
+    missing_scope_connection = %{context.connection | scopes: []}
+
+    assert [
+             %{tool: "catalog.item.get", state: :missing_scopes, missing_scopes: ["read"]},
+             %{tool: "catalog.item.created", state: :missing_scopes, missing_scopes: ["read"]}
+           ] =
+             Catalog.tool_availability(
+               modules: [CatalogFixtures.Integration],
+               connection: missing_scope_connection
+             )
+  end
+
+  test "tool availability reports missing connections and allow-list restrictions" do
+    assert [
+             %{tool: "catalog.item.get", state: :connection_required},
+             %{tool: "catalog.item.created", state: :connection_required}
+           ] = Catalog.tool_availability(modules: [CatalogFixtures.Integration])
+
+    assert [
+             %{tool: "catalog.item.get", state: :disabled_by_policy},
+             %{tool: "catalog.item.created", state: :connection_required}
+           ] =
+             Catalog.tool_availability(
+               modules: [CatalogFixtures.Integration],
+               allowed_actions: []
+             )
+
+    assert [
+             %{tool: "catalog.item.get", state: :connection_required},
+             %{tool: "catalog.item.created", state: :disabled_by_policy}
+           ] =
+             Catalog.tool_availability(
+               modules: [CatalogFixtures.Integration],
+               allowed_triggers: []
+             )
+  end
+
+  test "tool availability treats disconnected provider connections as unavailable" do
+    {context, _lease} = CatalogFixtures.context_and_lease()
+    disconnected = %{context.connection | status: :revoked}
+
+    assert [
+             %{
+               tool: "catalog.item.get",
+               state: :connection_required,
+               connection_id: "conn_catalog"
+             },
+             %{
+               tool: "catalog.item.created",
+               state: :connection_required,
+               connection_id: "conn_catalog"
+             }
+           ] =
+             Catalog.tool_availability(
+               modules: [CatalogFixtures.Integration],
+               connection: disconnected
+             )
+  end
+
+  test "action catalog bridge projects generated action modules" do
+    assert {:ok, catalog} = Catalog.action_catalog(modules: [GeneratedIntegration])
+    assert %{entries: %{"generated.item.get" => entry}} = catalog
+    assert entry.module == GeneratedIntegration.Actions.GetItem
+    assert entry.title == "Get generated item"
+    assert entry.namespace == "generated_catalog"
+    assert entry.scopes == ["read"]
+    assert entry.read_only? == true
+    assert entry.metadata.provider == :generated_catalog
   end
 
   test "ranked tool search prefers exact matches and combines with filters" do

@@ -33,6 +33,9 @@ defmodule Jido.Connect.Catalog do
     ToolSearchResult
   }
 
+  alias Jido.Connect.{Authorization, Connection, Context, Error}
+  alias Jido.Connect.Jido.ToolAvailability
+
   @spec entry(module(), keyword()) :: Entry.t()
   defdelegate entry(integration_module, opts \\ []), to: Builder
 
@@ -77,6 +80,52 @@ defmodule Jido.Connect.Catalog do
 
       {:error, _error} ->
         []
+    end
+  end
+
+  @doc """
+  Returns connection-aware availability for catalog tools.
+
+  This is the plain `Jido.Connect` counterpart to generated plugin
+  `tool_availability/1`: host UIs can render actions and triggers before they
+  have a credential lease, while still seeing missing scopes and policy blocks.
+  """
+  @spec tool_availability(keyword() | map()) :: [ToolAvailability.t()]
+  def tool_availability(opts \\ []) do
+    opts = normalize_opts(opts)
+    allowed_actions = allowed_set(opts, :allowed_actions)
+    allowed_triggers = allowed_set(opts, :allowed_triggers)
+    connection = connection_from_opts(opts)
+
+    opts
+    |> tools()
+    |> Enum.map(fn tool ->
+      catalog_tool_availability(tool, opts, connection, allowed_actions, allowed_triggers)
+    end)
+  end
+
+  @doc """
+  Projects generated connector action modules into `Jido.Action.Catalog`.
+
+  `Jido.Action.Catalog` landed after the currently published `jido_action`
+  2.2.1. Until a Hex release includes it, this returns a config error instead
+  of requiring a git dependency.
+  """
+  @spec action_catalog(keyword() | map()) :: {:ok, struct()} | {:error, Error.error()}
+  def action_catalog(opts \\ []) do
+    opts = normalize_opts(opts)
+    catalog_module = Jido.Action.Catalog
+
+    case Code.ensure_loaded(catalog_module) do
+      {:module, module} ->
+        build_action_catalog(module, opts)
+
+      {:error, reason} ->
+        {:error,
+         Error.config("Jido.Action.Catalog is not available",
+           key: :jido_action_catalog,
+           details: %{dependency: :jido_action, reason: reason}
+         )}
     end
   end
 
@@ -181,9 +230,245 @@ defmodule Jido.Connect.Catalog do
   defp call_lookup_opts(opts) when is_map(opts), do: Map.to_list(opts)
   defp call_lookup_opts(_opts), do: []
 
+  defp catalog_tool_availability(
+         %ToolEntry{} = tool,
+         opts,
+         connection,
+         allowed_actions,
+         allowed_triggers
+       ) do
+    cond do
+      disabled_by_allowed_set?(tool, allowed_actions, allowed_triggers) ->
+        ToolAvailability.new!(%{tool: tool.id, state: :disabled_by_policy})
+
+      match?(%Connection{}, connection) ->
+        with {:ok, operation} <- operation_for_tool(tool) do
+          operation_connection_availability(
+            tool,
+            operation,
+            connection,
+            input_for_tool(tool, opts),
+            opts
+          )
+        else
+          {:error, %_{} = error} -> configuration_unavailable(tool, error)
+        end
+
+      true ->
+        ToolAvailability.new!(%{tool: tool.id, state: :connection_required})
+    end
+  end
+
+  defp operation_connection_availability(tool, operation, connection, input, opts) do
+    case Authorization.connection_availability(operation, connection, input,
+           context: Keyword.get(opts, :context),
+           policy: Keyword.get(opts, :policy),
+           policy_context: Keyword.get(opts, :policy_context, %{})
+         ) do
+      {:available, _required_scopes} ->
+        ToolAvailability.new!(%{tool: tool.id, state: :available, connection_id: connection.id})
+
+      {:missing_scopes, missing_scopes} ->
+        ToolAvailability.new!(%{
+          tool: tool.id,
+          state: :missing_scopes,
+          connection_id: connection.id,
+          missing_scopes: missing_scopes
+        })
+
+      :disabled_by_policy ->
+        ToolAvailability.new!(%{
+          tool: tool.id,
+          state: :disabled_by_policy,
+          connection_id: connection.id
+        })
+
+      :connection_required ->
+        ToolAvailability.new!(%{
+          tool: tool.id,
+          state: :connection_required,
+          connection_id: connection.id
+        })
+
+      {:configuration_error, error} ->
+        configuration_unavailable(tool, error, connection.id)
+    end
+  end
+
+  defp operation_for_tool(%ToolEntry{
+         integration_module: integration_module,
+         type: :action,
+         id: id
+       }) do
+    integration_module
+    |> Jido.Connect.actions()
+    |> case do
+      {:ok, actions} ->
+        case Enum.find(actions, &(&1.id == id)) do
+          nil -> {:error, Error.unknown_action(id)}
+          action -> {:ok, action}
+        end
+
+      {:error, _error} = error ->
+        error
+    end
+  end
+
+  defp operation_for_tool(%ToolEntry{
+         integration_module: integration_module,
+         type: :trigger,
+         id: id
+       }) do
+    integration_module
+    |> Jido.Connect.triggers()
+    |> case do
+      {:ok, triggers} ->
+        case Enum.find(triggers, &(&1.id == id)) do
+          nil -> {:error, Error.unknown_trigger(id)}
+          trigger -> {:ok, trigger}
+        end
+
+      {:error, _error} = error ->
+        error
+    end
+  end
+
+  defp configuration_unavailable(tool, error, connection_id \\ nil) do
+    %{
+      tool: tool.id,
+      state: :configuration_error,
+      connection_id: connection_id,
+      metadata: %{error: Error.to_map(error)}
+    }
+    |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+    |> Map.new()
+    |> ToolAvailability.new!()
+  end
+
+  defp input_for_tool(%ToolEntry{} = tool, opts) do
+    inputs = Keyword.get(opts, :inputs, %{})
+
+    Map.get(inputs, tool.id) ||
+      maybe_get(inputs, tool.name) ||
+      Keyword.get(opts, :input, %{})
+  end
+
+  defp connection_from_opts(opts) do
+    Keyword.get(opts, :connection) || context_connection(Keyword.get(opts, :context))
+  end
+
+  defp context_connection(%Context{connection: connection}), do: connection
+  defp context_connection(%{connection: connection}), do: connection
+  defp context_connection(_context), do: nil
+
+  defp disabled_by_allowed_set?(
+         %ToolEntry{type: :action, id: id},
+         allowed_actions,
+         _allowed_triggers
+       ),
+       do: allowed_actions && not MapSet.member?(allowed_actions, id)
+
+  defp disabled_by_allowed_set?(
+         %ToolEntry{type: :trigger, id: id},
+         _allowed_actions,
+         allowed_triggers
+       ),
+       do: allowed_triggers && not MapSet.member?(allowed_triggers, id)
+
+  defp allowed_set(opts, key) do
+    case Keyword.get(opts, key) do
+      nil -> nil
+      values when is_list(values) -> MapSet.new(values)
+      value -> MapSet.new([value])
+    end
+  end
+
+  defp build_action_catalog(catalog_module, opts) do
+    attrs = %{
+      id: Keyword.get(opts, :id, "jido-connect-actions"),
+      name: Keyword.get(opts, :name, "Jido Connect Actions"),
+      description:
+        Keyword.get(
+          opts,
+          :description,
+          "Generated Jido actions exposed by installed Jido Connect providers."
+        ),
+      metadata: Keyword.get(opts, :metadata, %{})
+    }
+
+    with {:ok, catalog} <- apply(catalog_module, :new, [attrs]) do
+      opts
+      |> Keyword.put(:type, :action)
+      |> tools()
+      |> Enum.filter(&is_atom(&1.module))
+      |> Enum.reduce_while({:ok, catalog}, fn tool, {:ok, acc} ->
+        case apply(catalog_module, :register, [acc, tool.module, action_catalog_overrides(tool)]) do
+          {:ok, updated} -> {:cont, {:ok, updated}}
+          {:error, _error} = error -> {:halt, error}
+        end
+      end)
+    end
+  end
+
+  defp action_catalog_overrides(%ToolEntry{} = tool) do
+    %{
+      id: tool.id,
+      title: tool.label,
+      description: tool.description || tool.label,
+      summary: tool.description || tool.label,
+      namespace: to_string(tool.provider),
+      package: maybe_to_string(tool.package),
+      category: maybe_to_string(tool.category),
+      tags: action_catalog_tags(tool),
+      capabilities: action_catalog_capabilities(tool),
+      visibility: :public,
+      risk: action_catalog_risk(tool.risk),
+      read_only?: tool.risk in [:read, :metadata],
+      requires_confirmation?: tool.confirmation not in [nil, :none],
+      scopes: tool.scopes,
+      metadata: %{
+        provider: tool.provider,
+        provider_name: tool.provider_name,
+        integration_module: inspect(tool.integration_module),
+        resource: tool.resource,
+        verb: tool.verb,
+        data_classification: tool.data_classification,
+        auth_profile: tool.auth_profile,
+        auth_profiles: tool.auth_profiles,
+        auth_kinds: tool.auth_kinds,
+        policies: tool.policies,
+        jido_connect_risk: tool.risk,
+        confirmation: tool.confirmation
+      }
+    }
+  end
+
+  defp action_catalog_tags(%ToolEntry{} = tool) do
+    [tool.provider, tool.category, tool.resource, tool.verb]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&to_string/1)
+  end
+
+  defp action_catalog_capabilities(%ToolEntry{} = tool) do
+    [tool.resource, tool.verb, tool.data_classification]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&to_string/1)
+  end
+
+  defp action_catalog_risk(risk) when risk in [:read, :metadata], do: :low
+  defp action_catalog_risk(risk) when risk in [:write, :external_write], do: :medium
+  defp action_catalog_risk(:destructive), do: :high
+  defp action_catalog_risk(_risk), do: :medium
+
+  defp maybe_to_string(nil), do: nil
+  defp maybe_to_string(value), do: to_string(value)
+
   defp normalize_opts(opts) when is_list(opts), do: opts
   defp normalize_opts(opts) when is_map(opts), do: Map.to_list(opts)
   defp normalize_opts(_opts), do: []
+
+  defp maybe_get(map, key) when is_map(map), do: Map.get(map, key)
+  defp maybe_get(_map, _key), do: nil
 
   defp type_name(value) when is_map(value), do: :map
   defp type_name(value) when is_list(value), do: :list
