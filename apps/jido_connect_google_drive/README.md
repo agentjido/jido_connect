@@ -19,14 +19,27 @@ schemas, normalized structs, and tests in this package.
 - `google.drive.file.delete`
 - `google.drive.permissions.list`
 - `google.drive.permission.create`
+- `google.drive.changes.watch`
+- `google.drive.file.watch`
+- `google.drive.channel.stop`
 
 ## Triggers
 
 - `google.drive.file.changed`
+- `google.drive.file.changed.push`
 
 The change poller initializes from Drive `startPageToken` without replaying
 history, then advances checkpoints through `nextPageToken` or
 `newStartPageToken`.
+
+The push trigger normalizes Google Drive `X-Goog-*` channel headers for
+notifications created with `google.drive.changes.watch` or
+`google.drive.file.watch`. Hosts remain responsible for verifying the HTTPS
+delivery and the channel token before calling the normalizer.
+
+Drive channels are provider resources. There is no automatic renew endpoint;
+renewal is modeled as creating a replacement watch channel with a new
+`channel_id`, then stopping the old channel with `google.drive.channel.stop`.
 
 ## Auth Profiles
 
@@ -76,9 +89,11 @@ fields.metadata.presets.with_permissions
 ## Catalog Packs
 
 - `:google_drive_readonly` includes metadata reads, content reads, permission
-  reads, and file-change polling.
+  reads, file-change polling, and file-change webhook metadata.
 - `:google_drive_file_writer` adds common file metadata writes and folder
   creation. It intentionally excludes destructive delete and permission sharing.
+- `:google_drive_watch` adds Drive push channel lifecycle actions for file and
+  change notifications. It excludes file deletion and permission sharing.
 
 ```elixir
 Jido.Connect.Catalog.search_tools("drive",
@@ -93,6 +108,6 @@ Jido.Connect.Catalog.search_tools("drive",
 The connector prefers narrow Drive scopes:
 
 - `drive.metadata.readonly` for metadata reads, permission listing, and change
-  polling.
+  polling or push channel lifecycle.
 - `drive.readonly` for file content export/download.
 - `drive.file` for app-managed file writes, deletes, and permission creation.

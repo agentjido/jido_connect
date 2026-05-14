@@ -36,6 +36,8 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
     assert "google.drive.file.get" in ids
     assert "google.drive.file.export" in ids
     assert "google.drive.file.changed" in ids
+    assert "google.drive.file.changed.push" in ids
+    refute "google.drive.changes.watch" in ids
     refute "google.drive.file.create" in ids
 
     assert {:ok, descriptor} =
@@ -77,6 +79,49 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
                modules: [Drive],
                packs: Drive.catalog_packs(),
                pack: :google_drive_file_writer
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.drive.changes.watch",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_file_writer
+             )
+  end
+
+  test "watch pack exposes Drive channel lifecycle and webhook metadata" do
+    assert {:ok, descriptor} =
+             Catalog.describe_tool("google.drive.changes.watch",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_watch
+             )
+
+    assert descriptor.tool.id == "google.drive.changes.watch"
+
+    assert {:ok, file_descriptor} =
+             Catalog.describe_tool("google.drive.file.watch",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_watch
+             )
+
+    assert file_descriptor.tool.id == "google.drive.file.watch"
+
+    assert {:ok, webhook_descriptor} =
+             Catalog.describe_tool("google.drive.file.changed.push",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_watch
+             )
+
+    assert webhook_descriptor.tool.id == "google.drive.file.changed.push"
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.drive.file.delete",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_watch
              )
   end
 

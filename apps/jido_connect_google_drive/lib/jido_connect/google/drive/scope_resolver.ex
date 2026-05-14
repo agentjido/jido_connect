@@ -17,6 +17,11 @@ defmodule Jido.Connect.Google.Drive.ScopeResolver do
     "google.drive.file.delete",
     "google.drive.permission.create"
   ]
+  @watch_actions [
+    "google.drive.changes.watch",
+    "google.drive.file.watch",
+    "google.drive.channel.stop"
+  ]
   @content_actions [
     "google.drive.file.export",
     "google.drive.file.download"
@@ -31,6 +36,9 @@ defmodule Jido.Connect.Google.Drive.ScopeResolver do
   defp required_for_operation(operation_id, _connection) when operation_id in @write_actions,
     do: [@file_scope]
 
+  defp required_for_operation(operation_id, connection) when operation_id in @watch_actions,
+    do: metadata_or_broader_scope(connection)
+
   defp required_for_operation(operation_id, %{scopes: scopes})
        when operation_id in @content_actions do
     cond do
@@ -40,7 +48,10 @@ defmodule Jido.Connect.Google.Drive.ScopeResolver do
     end
   end
 
-  defp required_for_operation(_operation_id, %{scopes: scopes}) when is_list(scopes) do
+  defp required_for_operation(_operation_id, connection),
+    do: metadata_or_broader_scope(connection)
+
+  defp metadata_or_broader_scope(%{scopes: scopes}) when is_list(scopes) do
     cond do
       @readonly_scope in scopes -> [@readonly_scope]
       @file_scope in scopes -> [@file_scope]
@@ -48,7 +59,7 @@ defmodule Jido.Connect.Google.Drive.ScopeResolver do
     end
   end
 
-  defp required_for_operation(_operation_id, _connection), do: [@metadata_scope]
+  defp metadata_or_broader_scope(_connection), do: [@metadata_scope]
 
   defp operation_id(%{id: id}), do: id
   defp operation_id(%{action_id: action_id}), do: action_id

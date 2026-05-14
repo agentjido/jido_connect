@@ -24,4 +24,16 @@ defmodule Jido.Connect.Google.Drive.Client.Changes do
     )
     |> Response.handle_change_list_response()
   end
+
+  def watch_changes(%{page_token: page_token} = params, access_token)
+      when is_binary(page_token) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.post(
+      url: "/v3/changes/watch",
+      params: Params.watch_changes_params(params),
+      json: Params.watch_channel_body(params)
+    )
+    |> Response.handle_channel_response()
+  end
 end

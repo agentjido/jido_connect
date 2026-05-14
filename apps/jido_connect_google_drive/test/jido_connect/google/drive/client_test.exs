@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Drive.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Google.Drive.{Change, Client, Fields, File, Folder, Permission}
+  alias Jido.Connect.Google.Drive.{Change, Channel, Client, Fields, File, Folder, Permission}
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -498,5 +498,115 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
 
     assert change.change_id == "change123"
     assert change.file.file_id == "file123"
+  end
+
+  test "starts a changes watch channel" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v3/changes/watch"
+      assert conn.query_params["pageToken"] == "start-token"
+      assert conn.query_params["pageSize"] == "100"
+      assert conn.query_params["spaces"] == "drive"
+      assert conn.query_params["includeRemoved"] == "true"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "id" => "channel-123",
+               "type" => "web_hook",
+               "address" => "https://example.com/drive/webhook",
+               "token" => "route=drive",
+               "expiration" => 1_770_000_000_000
+             }
+
+      Req.Test.json(conn, %{
+        "kind" => "api#channel",
+        "id" => "channel-123",
+        "resourceId" => "resource-123",
+        "resourceUri" => "https://www.googleapis.com/drive/v3/changes",
+        "token" => "route=drive",
+        "expiration" => 1_770_000_000_000
+      })
+    end)
+
+    assert {:ok, %Channel{} = channel} =
+             Client.watch_changes(
+               %{
+                 page_token: "start-token",
+                 page_size: 100,
+                 spaces: "drive",
+                 include_removed: true,
+                 channel_id: "channel-123",
+                 address: "https://example.com/drive/webhook",
+                 token: "route=drive",
+                 expiration_ms: 1_770_000_000_000
+               },
+               "token"
+             )
+
+    assert channel.channel_id == "channel-123"
+    assert channel.resource_id == "resource-123"
+    assert channel.expiration == "1770000000000"
+  end
+
+  test "starts a file watch channel" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v3/files/file123/watch"
+      assert conn.query_params["supportsAllDrives"] == "true"
+      assert conn.query_params["includePermissionsForView"] == "published"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "id" => "file-channel-123",
+               "type" => "web_hook",
+               "address" => "https://example.com/drive/file-webhook"
+             }
+
+      Req.Test.json(conn, %{
+        "kind" => "api#channel",
+        "id" => "file-channel-123",
+        "resourceId" => "file-resource-123",
+        "resourceUri" => "https://www.googleapis.com/drive/v3/files/file123"
+      })
+    end)
+
+    assert {:ok, %Channel{} = channel} =
+             Client.watch_file(
+               %{
+                 file_id: "file123",
+                 channel_id: "file-channel-123",
+                 address: "https://example.com/drive/file-webhook",
+                 supports_all_drives: true,
+                 include_permissions_for_view: "published"
+               },
+               "token"
+             )
+
+    assert channel.channel_id == "file-channel-123"
+    assert channel.resource_uri == "https://www.googleapis.com/drive/v3/files/file123"
+  end
+
+  test "stops a watch channel" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v3/channels/stop"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "id" => "channel-123",
+               "resourceId" => "resource-123"
+             }
+
+      Req.Test.json(conn, %{})
+    end)
+
+    assert {:ok, %{channel_id: "channel-123", resource_id: "resource-123", stopped?: true}} =
+             Client.stop_channel(
+               %{channel_id: "channel-123", resource_id: "resource-123"},
+               "token"
+             )
   end
 end

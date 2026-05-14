@@ -100,5 +100,17 @@ defmodule Jido.Connect.Google.Drive.Client.Files do
     |> Response.handle_file_delete_response(params)
   end
 
+  def watch_file(%{file_id: file_id} = params, access_token)
+      when is_binary(file_id) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.post(
+      url: "/v3/files/#{encode_id(file_id)}/watch",
+      params: Params.watch_file_params(params),
+      json: Params.watch_channel_body(params)
+    )
+    |> Response.handle_channel_response()
+  end
+
   defp encode_id(file_id), do: URI.encode(file_id, &URI.char_unreserved?/1)
 end

@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Drive.NormalizerTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Google.Drive.{Change, File, Folder, Normalizer, Permission}
+  alias Jido.Connect.Google.Drive.{Change, Channel, File, Folder, Normalizer, Permission}
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
 
   test "normalizes file payloads" do
@@ -82,6 +82,24 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
     refute change.removed?
   end
 
+  test "normalizes channel payloads" do
+    assert {:ok, %Channel{} = channel} =
+             Normalizer.channel(%{
+               "kind" => "api#channel",
+               "id" => "channel-123",
+               "resourceId" => "resource-123",
+               "resourceUri" => "https://www.googleapis.com/drive/v3/changes",
+               "token" => "route=drive",
+               "expiration" => 1_770_000_000_000
+             })
+
+    assert channel.channel_id == "channel-123"
+    assert channel.resource_id == "resource-123"
+    assert channel.resource_uri == "https://www.googleapis.com/drive/v3/changes"
+    assert channel.token == "route=drive"
+    assert channel.expiration == "1770000000000"
+  end
+
   test "returns errors instead of raising for malformed embedded change files" do
     assert {:error, _error} =
              Normalizer.change(%{
@@ -127,5 +145,10 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
     assert {:error, _error} = Permission.new(%{permission_id: "perm123"})
 
     ConnectorContracts.assert_struct_defaults(Change, %{}, removed?: false, metadata: %{})
+
+    ConnectorContracts.assert_struct_defaults(Channel, %{channel_id: "channel-123"},
+      params: %{},
+      metadata: %{}
+    )
   end
 end

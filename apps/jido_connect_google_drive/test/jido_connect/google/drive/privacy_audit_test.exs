@@ -33,11 +33,23 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
         ),
         action("google.drive.permission.create", :personal_data, :external_write, :always,
           text_includes: ["permission"]
+        ),
+        action("google.drive.changes.watch", :workspace_metadata, :write, :required_for_ai,
+          text_includes: ["push", "notification"]
+        ),
+        action("google.drive.file.watch", :workspace_metadata, :write, :required_for_ai,
+          text_includes: ["push", "notification"]
+        ),
+        action("google.drive.channel.stop", :workspace_metadata, :write, :required_for_ai,
+          text_includes: ["push", "notification"]
         )
       ],
       [
         trigger("google.drive.file.changed", :workspace_metadata,
           text_includes: ["file", "changed"]
+        ),
+        trigger("google.drive.file.changed.push", :workspace_metadata,
+          text_includes: ["push", "notification"]
         )
       ]
     )

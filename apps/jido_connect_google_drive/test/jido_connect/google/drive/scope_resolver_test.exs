@@ -57,6 +57,24 @@ defmodule Jido.Connect.Google.Drive.ScopeResolverTest do
         operation: "google.drive.permission.create",
         granted: [],
         expected: @file_scope
+      },
+      %{
+        label: "changes watch defaults to metadata read scope",
+        operation: "google.drive.changes.watch",
+        granted: [],
+        expected: @metadata_scope
+      },
+      %{
+        label: "file watch accepts drive.file for app-owned files",
+        operation: "google.drive.file.watch",
+        granted: [@file_scope],
+        expected: @file_scope
+      },
+      %{
+        label: "channel stop accepts broad readonly grant",
+        operation: "google.drive.channel.stop",
+        granted: [@readonly_scope],
+        expected: @readonly_scope
       }
     ])
   end

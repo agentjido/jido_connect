@@ -173,6 +173,58 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     |> Data.compact()
   end
 
+  @doc "Builds query params for `changes.watch`."
+  def watch_changes_params(params) do
+    %{
+      driveId: Data.get(params, :drive_id),
+      includeCorpusRemovals: Data.get(params, :include_corpus_removals),
+      includeItemsFromAllDrives: Data.get(params, :include_items_from_all_drives),
+      includeRemoved: Data.get(params, :include_removed),
+      pageSize: Data.get(params, :page_size),
+      pageToken: Data.get(params, :page_token),
+      restrictToMyDrive: Data.get(params, :restrict_to_my_drive),
+      spaces: Data.get(params, :spaces),
+      supportsAllDrives: Data.get(params, :supports_all_drives),
+      includePermissionsForView: Data.get(params, :include_permissions_for_view),
+      includeLabels: Data.get(params, :include_labels)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `files.watch`."
+  def watch_file_params(params) do
+    %{
+      supportsAllDrives: Data.get(params, :supports_all_drives),
+      acknowledgeAbuse: Data.get(params, :acknowledge_abuse),
+      includePermissionsForView: Data.get(params, :include_permissions_for_view),
+      includeLabels: Data.get(params, :include_labels)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a channel JSON body for Drive watch requests."
+  def watch_channel_body(params) do
+    %{
+      id: Data.get(params, :channel_id),
+      type: Data.get(params, :channel_type, "web_hook"),
+      address: Data.get(params, :address),
+      token: Data.get(params, :token),
+      expiration: Data.get(params, :expiration_ms),
+      payload: Data.get(params, :payload),
+      params: Data.get(params, :delivery_params)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a channel JSON body for `channels.stop`."
+  def stop_channel_body(params) do
+    %{
+      id: Data.get(params, :channel_id),
+      resourceId: Data.get(params, :resource_id)
+    }
+    |> Data.compact()
+  end
+
   defp list_fields, do: Fields.file_list()
 
   defp permission_list_fields, do: Fields.permission_list()

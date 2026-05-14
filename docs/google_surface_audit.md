@@ -32,13 +32,14 @@ live-test readiness, and Beadwork sequencing.
 | --- | --- | ---: | ---: | ---: | --- |
 | `jido_connect_google_sheets` | `google_sheets` | 9 | 0 | 2 | `user` |
 | `jido_connect_gmail` | `gmail` | 11 | 1 | 3 | `user` |
-| `jido_connect_google_drive` | `google_drive` | 11 | 1 | 2 | `user`, `service_account`, `domain_delegated_service_account` |
+| `jido_connect_google_drive` | `google_drive` | 14 | 2 | 3 | `user`, `service_account`, `domain_delegated_service_account` |
 | `jido_connect_google_calendar` | `google_calendar` | 8 | 1 | 2 | `user` |
 | `jido_connect_google_contacts` | `google_contacts` | 9 | 0 | 2 | `user` |
 
 ## Cross-Package Notes
 
-- Poll triggers currently exist for Gmail, Drive, and Calendar only.
+- Poll triggers currently exist for Gmail, Drive, and Calendar only. Gmail and
+  Drive also expose webhook trigger metadata for provider push deliveries.
 - Drive is the only package that declares service-account and delegated
   service-account auth profiles.
 - Mutating write actions consistently require AI confirmation, destructive
@@ -62,7 +63,7 @@ action families. Do not move Google filter/query semantics into
 | --- | --- |
 | Sheets | Spreadsheet create, value batch operations, data-filter operations, developer metadata, and sheet copy. |
 | Gmail | Watch/stop lifecycle, explicit history action, attachments, draft lifecycle, batch message triage, label lifecycle, and destructive message/thread operations outside default packs. |
-| Drive | Watch/channel lifecycle, webhook metadata, revisions, permission lifecycle, comments/replies, shared drives, and file labels. |
+| Drive | Revisions, permission lifecycle, comments/replies, shared drives, file labels, and further channel renewal helpers as host patterns emerge. |
 | Calendar | Watch/channel lifecycle, calendar CRUD, calendar-list item CRUD, ACL lifecycle, event instances, and event move. |
 | Contacts | Batch contact operations, directory people, other contacts, group lifecycle, group membership, and sync-token polling trigger. |
 
@@ -214,19 +215,24 @@ Auth profiles: `user`, `service_account`,
 | `google.drive.file.delete` | destructive | `workspace_metadata` | `drive.file` | `file_id` | `result` |
 | `google.drive.permissions.list` | read | `personal_data` | `drive.metadata.readonly` | `file_id` | `permissions`, `next_page_token` |
 | `google.drive.permission.create` | external_write | `personal_data` | `drive.file` | `file_id`, `type`, `role` | `permission` |
+| `google.drive.changes.watch` | write | `workspace_metadata` | `drive.metadata.readonly` | `page_token`, `channel_id`, `address` | `channel` |
+| `google.drive.file.watch` | write | `workspace_metadata` | `drive.metadata.readonly` | `file_id`, `channel_id`, `address` | `channel` |
+| `google.drive.channel.stop` | write | `workspace_metadata` | `drive.metadata.readonly` | `channel_id`, `resource_id` | `result` |
 
-### Trigger
+### Triggers
 
 | ID | Kind | Checkpoint | Dedupe | Scope | Signal |
 | --- | --- | --- | --- | --- | --- |
 | `google.drive.file.changed` | poll | `page_token` | `change_id`, `file_id` | `drive.metadata.readonly` | `change_id`, `file_id`, removed, time, drive ID, change type, file |
+| `google.drive.file.changed.push` | webhook | none | `channel_id`, `resource_id`, `message_number` | `drive.metadata.readonly` | channel id, resource id, resource URI, state, changed parts, optional file id, delivery metadata |
 
 ### Catalog Packs
 
 | Pack | Surface |
 | --- | --- |
-| `google_drive_readonly` | File list/get, export/download, permission list, and file-changed polling. |
+| `google_drive_readonly` | File list/get, export/download, permission list, file-changed polling, and file-changed webhook metadata. |
 | `google_drive_file_writer` | Read-only pack plus file create, folder create, file copy, and file update. |
+| `google_drive_watch` | Read-only pack plus Drive changes/file watch creation and channel stop lifecycle actions. |
 
 ## Calendar
 

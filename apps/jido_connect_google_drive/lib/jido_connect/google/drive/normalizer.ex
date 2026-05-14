@@ -2,7 +2,7 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
   @moduledoc "Normalizes Google Drive API payloads into stable package structs."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Google.Drive.{Change, File, Folder, Permission}
+  alias Jido.Connect.Google.Drive.{Change, Channel, File, Folder, Permission}
 
   @folder_mime_type "application/vnd.google-apps.folder"
 
@@ -97,6 +97,27 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
   end
 
   def change(_payload), do: {:error, :invalid_change_payload}
+
+  @doc "Normalizes a Google Drive notification channel payload."
+  @spec channel(map()) :: {:ok, Channel.t()} | {:error, term()}
+  def channel(payload) when is_map(payload) do
+    %{
+      channel_id: Data.get(payload, "id"),
+      resource_id: Data.get(payload, "resourceId"),
+      resource_uri: Data.get(payload, "resourceUri"),
+      token: Data.get(payload, "token"),
+      expiration: normalize_string(Data.get(payload, "expiration")),
+      type: Data.get(payload, "type"),
+      address: Data.get(payload, "address"),
+      kind: Data.get(payload, "kind"),
+      payload?: Data.get(payload, "payload"),
+      params: Data.get(payload, "params", %{})
+    }
+    |> Data.compact()
+    |> Channel.new()
+  end
+
+  def channel(_payload), do: {:error, :invalid_channel_payload}
 
   @doc "Returns true when a Drive payload is a folder."
   @spec folder?(map()) :: boolean()

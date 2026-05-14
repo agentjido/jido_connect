@@ -16,7 +16,10 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.DownloadFile,
     Jido.Connect.Google.Drive.Actions.DeleteFile,
     Jido.Connect.Google.Drive.Actions.ListPermissions,
-    Jido.Connect.Google.Drive.Actions.CreatePermission
+    Jido.Connect.Google.Drive.Actions.CreatePermission,
+    Jido.Connect.Google.Drive.Actions.WatchChanges,
+    Jido.Connect.Google.Drive.Actions.WatchFile,
+    Jido.Connect.Google.Drive.Actions.StopChannel
   ]
 
   @drive_dsl_fragments [
@@ -24,6 +27,7 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.Write,
     Jido.Connect.Google.Drive.Actions.FileContent,
     Jido.Connect.Google.Drive.Actions.Permissions,
+    Jido.Connect.Google.Drive.Actions.Watch,
     Jido.Connect.Google.Drive.Triggers.Changes
   ]
 
@@ -199,6 +203,62 @@ defmodule Jido.Connect.Google.DriveTest do
          role: "reader",
          email_address: "reader@example.com"
        })}
+    end
+
+    def watch_changes(
+          %{
+            page_token: "start-token",
+            channel_id: "channel-123",
+            address: "https://example.com/drive/webhook",
+            channel_type: "web_hook",
+            token: "route=drive",
+            expiration_ms: 1_770_000_000_000,
+            page_size: 100,
+            spaces: "drive",
+            include_corpus_removals: false,
+            include_items_from_all_drives: false,
+            include_removed: true,
+            restrict_to_my_drive: false,
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.Channel.new!(%{
+         channel_id: "channel-123",
+         resource_id: "resource-123",
+         resource_uri: "https://www.googleapis.com/drive/v3/changes",
+         token: "route=drive",
+         expiration: "1770000000000",
+         kind: "api#channel"
+       })}
+    end
+
+    def watch_file(
+          %{
+            file_id: "file123",
+            channel_id: "file-channel-123",
+            address: "https://example.com/drive/file-webhook",
+            channel_type: "web_hook",
+            acknowledge_abuse: false,
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.Channel.new!(%{
+         channel_id: "file-channel-123",
+         resource_id: "file-resource-123",
+         resource_uri: "https://www.googleapis.com/drive/v3/files/file123",
+         kind: "api#channel"
+       })}
+    end
+
+    def stop_channel(
+          %{channel_id: "channel-123", resource_id: "resource-123"},
+          "token"
+        ) do
+      {:ok, %{channel_id: "channel-123", resource_id: "resource-123", stopped?: true}}
     end
 
     def get_start_page_token(%{supports_all_drives: false}, "token") do
@@ -428,7 +488,10 @@ defmodule Jido.Connect.Google.DriveTest do
              "google.drive.file.download",
              "google.drive.file.delete",
              "google.drive.permissions.list",
-             "google.drive.permission.create"
+             "google.drive.permission.create",
+             "google.drive.changes.watch",
+             "google.drive.file.watch",
+             "google.drive.channel.stop"
            ]
 
     list_files = Enum.find(spec.actions, &(&1.id == "google.drive.files.list"))
@@ -465,6 +528,17 @@ defmodule Jido.Connect.Google.DriveTest do
     assert create_permission.risk == :external_write
     assert create_permission.confirmation == :always
 
+    watch_changes = Enum.find(spec.actions, &(&1.id == "google.drive.changes.watch"))
+    watch_file = Enum.find(spec.actions, &(&1.id == "google.drive.file.watch"))
+    stop_channel = Enum.find(spec.actions, &(&1.id == "google.drive.channel.stop"))
+
+    assert watch_changes.risk == :write
+    assert watch_file.risk == :write
+    assert stop_channel.risk == :write
+    assert watch_changes.confirmation == :required_for_ai
+    assert watch_file.confirmation == :required_for_ai
+    assert stop_channel.confirmation == :required_for_ai
+
     create_permission_fields = Enum.find(create_permission.input, &(&1.name == :fields))
 
     assert create_permission_fields.metadata.presets.default ==
@@ -496,6 +570,20 @@ defmodule Jido.Connect.Google.DriveTest do
               scope_resolver: Jido.Connect.Google.Drive.ScopeResolver
             }} =
              Connect.trigger(spec, "google.drive.file.changed")
+
+    assert {:ok,
+            %{
+              id: "google.drive.file.changed.push",
+              kind: :webhook,
+              dedupe: %{key: [:channel_id, :resource_id, :message_number]},
+              verification: %{
+                kind: :google_drive_channel,
+                token: :host_verified,
+                headers: :x_goog_channel
+              },
+              scope_resolver: Jido.Connect.Google.Drive.ScopeResolver
+            }} =
+             Connect.trigger(spec, "google.drive.file.changed.push")
   end
 
   test "compiles generated Jido modules for actions, sensors, and plugin" do
@@ -508,6 +596,12 @@ defmodule Jido.Connect.Google.DriveTest do
           name: "google_drive_file_changed",
           trigger_id: "google.drive.file.changed",
           signal_type: "google.drive.file.changed"
+        },
+        %{
+          module: Jido.Connect.Google.Drive.Sensors.FileChangedPush,
+          name: "google_drive_file_changed_push",
+          trigger_id: "google.drive.file.changed.push",
+          signal_type: "google.drive.file.changed.push"
         }
       ],
       plugin_module: Jido.Connect.Google.Drive.Plugin,
@@ -516,7 +610,8 @@ defmodule Jido.Connect.Google.DriveTest do
 
     ConnectorContracts.assert_catalog_pack_delegates(Drive,
       readonly_pack: :google_drive_readonly,
-      file_writer_pack: :google_drive_file_writer
+      file_writer_pack: :google_drive_file_writer,
+      watch_pack: :google_drive_watch
     )
   end
 
@@ -548,6 +643,12 @@ defmodule Jido.Connect.Google.DriveTest do
              %{},
              %{scopes: []}
            ) == ["https://www.googleapis.com/auth/drive.readonly"]
+
+    assert resolver.required_scopes(
+             %{id: "google.drive.changes.watch"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/drive.file"]}
+           ) == ["https://www.googleapis.com/auth/drive.file"]
 
     assert resolver.required_scopes(%{}, %{}, %{}) == [
              "https://www.googleapis.com/auth/drive.metadata.readonly"
@@ -858,6 +959,116 @@ defmodule Jido.Connect.Google.DriveTest do
                  type: "user",
                  role: "reader",
                  email_address: " reader@example.com "
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes changes watch through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              channel: %{
+                channel_id: "channel-123",
+                resource_id: "resource-123",
+                resource_uri: "https://www.googleapis.com/drive/v3/changes",
+                token: "route=drive",
+                expiration: "1770000000000"
+              }
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.changes.watch",
+               %{
+                 page_token: "start-token",
+                 channel_id: " channel-123 ",
+                 address: " https://example.com/drive/webhook ",
+                 token: "route=drive",
+                 expiration_ms: 1_770_000_000_000
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes file watch through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              channel: %{
+                channel_id: "file-channel-123",
+                resource_id: "file-resource-123",
+                resource_uri: "https://www.googleapis.com/drive/v3/files/file123"
+              }
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.watch",
+               %{
+                 file_id: "file123",
+                 channel_id: "file-channel-123",
+                 address: "https://example.com/drive/file-webhook"
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes channel stop through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              result: %{
+                channel_id: "channel-123",
+                resource_id: "resource-123",
+                stopped?: true
+              }
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.channel.stop",
+               %{channel_id: "channel-123", resource_id: "resource-123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "watch actions validate Google channel requirements before client calls" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_drive_channel,
+              details: %{field: :address}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.changes.watch",
+               %{
+                 page_token: "start-token",
+                 channel_id: "channel-123",
+                 address: "http://example.com/drive/webhook"
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_drive_channel,
+              details: %{field: :channel_id, max_length: 64}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.watch",
+               %{
+                 file_id: "file123",
+                 channel_id: String.duplicate("a", 65),
+                 address: "https://example.com/drive/webhook"
                },
                context: context,
                credential_lease: lease

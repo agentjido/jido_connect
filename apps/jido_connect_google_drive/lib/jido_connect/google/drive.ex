@@ -9,6 +9,7 @@ defmodule Jido.Connect.Google.Drive do
       Jido.Connect.Google.Drive.Actions.Write,
       Jido.Connect.Google.Drive.Actions.FileContent,
       Jido.Connect.Google.Drive.Actions.Permissions,
+      Jido.Connect.Google.Drive.Actions.Watch,
       Jido.Connect.Google.Drive.Triggers.Changes
     ]
 
@@ -81,4 +82,5 @@ defmodule Jido.Connect.Google.Drive do
   defdelegate catalog_packs, to: Jido.Connect.Google.Drive.CatalogPacks, as: :all
   defdelegate readonly_pack, to: Jido.Connect.Google.Drive.CatalogPacks, as: :readonly
   defdelegate file_writer_pack, to: Jido.Connect.Google.Drive.CatalogPacks, as: :file_writer
+  defdelegate watch_pack, to: Jido.Connect.Google.Drive.CatalogPacks, as: :watch
 end
