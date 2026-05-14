@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-nmq.4"
+  ],
   "blocks": [],
   "created": "2026-05-14T14:35:48Z",
   "description": "Update Beadwork dependencies and comments so the cross-Google hardening/demo epic waits on the completed audit and newly accepted Google package epics.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G13-S05] Reconcile cross-Google hardening dependencies",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:48Z"
+  "updated_at": "2026-05-14T14:35:53Z"
 }

@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-nmq.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-nmq.5"
+  ],
   "created": "2026-05-14T14:35:47Z",
   "description": "Write docs/google_surface_audit.md with the current surface matrix, gap recommendations, live-test readiness, and implementation sequencing.",
   "id": "jido_con-nmq.4",
