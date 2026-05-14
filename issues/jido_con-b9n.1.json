@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-b9n.2"
   ],
+  "closed_at": "2026-05-14T20:39:55Z",
+  "close_reason": "completed",
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G09-S01\nEpic: G09 Google Analytics Connector\nSource: MILESTONE_2.md\nDepends on: G03-S08\n\nAcceptance:\nPackage compiles and uses shared Google auth/transport.",
   "id": "jido_con-b9n.1",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-b9n",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G09-S01] Scaffold jido_connect_google_analytics",
   "type": "task",
-  "updated_at": "2026-05-14T20:28:13Z"
+  "updated_at": "2026-05-14T20:39:55Z"
 }
