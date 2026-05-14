@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-nmq.3"
+  ],
   "blocks": [],
   "created": "2026-05-14T14:35:47Z",
   "description": "Write docs/google_surface_audit.md with the current surface matrix, gap recommendations, live-test readiness, and implementation sequencing.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G13-S04] Write Google surface audit document",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:47Z"
+  "updated_at": "2026-05-14T14:35:53Z"
 }
