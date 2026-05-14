@@ -5,11 +5,15 @@
   "created": "2026-05-14T14:58:13Z",
   "description": "Add People API batch get/create/update/delete, directory people list/search, and otherContacts list/search/copy action families.",
   "id": "jido_con-5zt.10",
-  "labels": [],
+  "labels": [
+    "expansion",
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-5zt",
   "priority": 1,
   "status": "open",
   "title": "[G18-S10] Add Contacts batch directory and other-contact actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:58:13Z"
+  "updated_at": "2026-05-14T14:58:16Z"
 }
