@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:58:13Z",
+  "description": "Add Calendar events/calendarList/ACL/settings watch lifecycle actions, channels.stop, webhook payload normalization/verification primitives, and discoverable trigger metadata.",
+  "id": "jido_con-5zt.8",
+  "labels": [],
+  "parent": "jido_con-5zt",
+  "priority": 1,
+  "status": "open",
+  "title": "[G18-S08] Add Calendar watch channel lifecycle actions",
+  "type": "task",
+  "updated_at": "2026-05-14T14:58:13Z"
+}
