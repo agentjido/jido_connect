@@ -1,7 +1,18 @@
 defmodule Jido.Connect.Gmail.NormalizerTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Gmail.{Draft, Label, Message, Normalizer, Privacy, Profile, Thread}
+  alias Jido.Connect.Gmail.{
+    Attachment,
+    Draft,
+    Label,
+    Message,
+    Normalizer,
+    Privacy,
+    Profile,
+    Thread,
+    Watch
+  }
+
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
 
   test "normalizes profile payloads" do
@@ -110,6 +121,30 @@ defmodule Jido.Connect.Gmail.NormalizerTest do
     refute inspect(draft) =~ "body-bytes"
   end
 
+  test "normalizes watch responses" do
+    assert {:ok, %Watch{} = watch} =
+             Normalizer.watch(%{
+               "historyId" => 126,
+               "expiration" => 1_710_000_000_000
+             })
+
+    assert watch.history_id == "126"
+    assert watch.expiration == "1710000000000"
+  end
+
+  test "normalizes attachment payloads without decoding provider data" do
+    assert {:ok, %Attachment{} = attachment} =
+             Normalizer.attachment(%{
+               "attachmentId" => "att123",
+               "size" => "12",
+               "data" => "Ym9keS1ieXRlcw"
+             })
+
+    assert attachment.attachment_id == "att123"
+    assert attachment.size == 12
+    assert attachment.data == "Ym9keS1ieXRlcw"
+  end
+
   test "documents raw body keys and content fields" do
     assert Privacy.raw_body_key?("raw")
     assert Privacy.raw_body_key?(:data)
@@ -123,6 +158,8 @@ defmodule Jido.Connect.Gmail.NormalizerTest do
     assert {:error, :invalid_message_payload} = Normalizer.message(:bad)
     assert {:error, :invalid_thread_payload} = Normalizer.thread(:bad)
     assert {:error, :invalid_draft_payload} = Normalizer.draft(:bad)
+    assert {:error, :invalid_watch_payload} = Normalizer.watch(:bad)
+    assert {:error, :invalid_attachment_payload} = Normalizer.attachment(:bad)
 
     assert {:ok, %Draft{message: nil}} = Normalizer.draft(%{"id" => "draft123"})
     assert Normalizer.summarize_payload(:bad) == %{}
@@ -174,6 +211,14 @@ defmodule Jido.Connect.Gmail.NormalizerTest do
 
     ConnectorContracts.assert_struct_defaults(Draft, %{draft_id: "draft123"}, metadata: %{})
     assert {:error, _error} = Draft.new(%{})
+
+    ConnectorContracts.assert_struct_defaults(Watch, %{history_id: "126"}, metadata: %{})
+    assert {:error, _error} = Watch.new(%{})
+
+    ConnectorContracts.assert_struct_defaults(Attachment, %{},
+      size: 0,
+      metadata: %{}
+    )
   end
 
   defp message_payload do

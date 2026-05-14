@@ -162,5 +162,60 @@ defmodule Jido.Connect.Gmail.Actions.Read do
         field(:thread, :map)
       end
     end
+
+    action :list_history do
+      id("google.gmail.history.list")
+      resource(:history)
+      verb(:list)
+      data_classification(:message_content)
+      label("List Gmail history")
+      description("List Gmail mailbox history records from a starting history id.")
+      handler(Jido.Connect.Gmail.Handlers.Actions.ListHistory)
+      effect(:read)
+
+      access do
+        auth(:user)
+        scopes([@metadata_scope], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:start_history_id, :string, required?: true, example: "123456")
+        field(:label_id, :string)
+        field(:history_types, {:array, :string}, default: [])
+        field(:page_size, :integer, default: 100)
+        field(:page_token, :string)
+      end
+
+      output do
+        field(:history, {:array, :map})
+        field(:next_page_token, :string)
+        field(:history_id, :string)
+      end
+    end
+
+    action :get_attachment do
+      id("google.gmail.message.attachment.get")
+      resource(:attachment)
+      verb(:get)
+      data_classification(:message_content)
+      label("Get Gmail message attachment")
+      description("Fetch base64url-encoded Gmail attachment data for a message attachment id.")
+      handler(Jido.Connect.Gmail.Handlers.Actions.GetAttachment)
+      effect(:read)
+
+      access do
+        auth(:user)
+        scopes(["https://www.googleapis.com/auth/gmail.readonly"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:message_id, :string, required?: true, example: "18c...")
+        field(:attachment_id, :string, required?: true, example: "ANGjdJ...")
+      end
+
+      output do
+        field(:attachment, :map)
+      end
+    end
   end
 end

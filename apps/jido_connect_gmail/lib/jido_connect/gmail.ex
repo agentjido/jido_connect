@@ -7,13 +7,18 @@ defmodule Jido.Connect.Gmail do
     fragments: [
       Jido.Connect.Gmail.Actions.Read,
       Jido.Connect.Gmail.Actions.Write,
+      Jido.Connect.Gmail.Actions.Watch,
       Jido.Connect.Gmail.Triggers.Messages
     ]
 
   integration do
     id(:gmail)
     name("Gmail")
-    description("Gmail mailbox, message, draft, send, label, and poll tools.")
+
+    description(
+      "Gmail mailbox, message, draft, send, label, watch, attachment, and trigger tools."
+    )
+
     category(:email)
     docs(["https://developers.google.com/gmail/api/guides"])
   end

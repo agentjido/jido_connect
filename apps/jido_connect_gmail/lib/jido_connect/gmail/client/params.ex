@@ -27,6 +27,15 @@ defmodule Jido.Connect.Gmail.Client.Params do
     |> put_repeated(:historyTypes, Map.get(params, :history_types, []))
   end
 
+  def watch_body(params) when is_map(params) do
+    %{
+      topicName: Map.fetch!(params, :topic_name),
+      labelIds: Map.get(params, :label_ids, []),
+      labelFilterBehavior: Map.get(params, :label_filter_behavior)
+    }
+    |> compact()
+  end
+
   def send_message_body(params) when is_map(params) do
     %{
       raw: Map.fetch!(params, :raw),

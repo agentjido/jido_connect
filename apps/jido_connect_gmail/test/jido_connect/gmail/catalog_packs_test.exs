@@ -38,7 +38,11 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
 
     assert "google.gmail.profile.get" in ids
     assert "google.gmail.message.get" in ids
+    assert "google.gmail.history.list" in ids
     assert "google.gmail.message.received" in ids
+    assert "google.gmail.mailbox.changed" in ids
+    refute "google.gmail.message.attachment.get" in ids
+    refute "google.gmail.watch.start" in ids
     refute "google.gmail.message.send" in ids
     refute "google.gmail.label.create" in ids
 
@@ -59,7 +63,7 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
              )
   end
 
-  test "triage pack allows label mutations and rejects send tools" do
+  test "triage pack allows label mutations, watch, and attachments and rejects send tools" do
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.gmail.message.labels.apply",
                modules: [Gmail],
@@ -68,6 +72,24 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.gmail.message.labels.apply"
+
+    assert {:ok, watch_descriptor} =
+             Catalog.describe_tool("google.gmail.watch.start",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_triage
+             )
+
+    assert watch_descriptor.tool.id == "google.gmail.watch.start"
+
+    assert {:ok, attachment_descriptor} =
+             Catalog.describe_tool("google.gmail.message.attachment.get",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_triage
+             )
+
+    assert attachment_descriptor.tool.id == "google.gmail.message.attachment.get"
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("google.gmail.message.send",
@@ -98,6 +120,20 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("google.gmail.label.create",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_send
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.gmail.watch.start",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_send
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.gmail.message.attachment.get",
                modules: [Gmail],
                packs: Gmail.catalog_packs(),
                pack: :google_gmail_send

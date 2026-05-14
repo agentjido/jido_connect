@@ -61,6 +61,32 @@ defmodule Jido.Connect.Gmail.Client.Users do
     |> Response.handle_history_list_response()
   end
 
+  def get_attachment(%{message_id: message_id, attachment_id: attachment_id}, access_token)
+      when is_binary(message_id) and is_binary(attachment_id) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.get(
+      url:
+        "/gmail/v1/users/me/messages/#{encode_path_segment(message_id)}/attachments/#{encode_path_segment(attachment_id)}"
+    )
+    |> Response.handle_attachment_response()
+  end
+
+  def start_watch(%{topic_name: topic_name} = params, access_token)
+      when is_binary(topic_name) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.post(url: "/gmail/v1/users/me/watch", json: Params.watch_body(params))
+    |> Response.handle_watch_response()
+  end
+
+  def stop_watch(params, access_token) when is_map(params) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.post(url: "/gmail/v1/users/me/stop", json: %{})
+    |> Response.handle_stop_watch_response()
+  end
+
   def send_message(%{raw: raw} = params, access_token)
       when is_binary(raw) and is_binary(access_token) do
     access_token

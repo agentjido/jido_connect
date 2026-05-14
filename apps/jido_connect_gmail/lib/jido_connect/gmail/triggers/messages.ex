@@ -41,5 +41,44 @@ defmodule Jido.Connect.Gmail.Triggers.Messages do
         field(:message, :map)
       end
     end
+
+    webhook :mailbox_changed do
+      id("google.gmail.mailbox.changed")
+      resource(:mailbox)
+      verb(:watch)
+      data_classification(:personal_data)
+      label("Mailbox changed")
+
+      description(
+        "Receive Gmail Cloud Pub/Sub push notifications containing mailbox history ids."
+      )
+
+      verification(%{
+        kind: :google_pubsub_push,
+        oidc: :host_verified,
+        payload: :pubsub_message
+      })
+
+      dedupe(%{key: [:history_id]})
+      handler(Jido.Connect.Gmail.Handlers.Triggers.MailboxChangedWebhook)
+
+      access do
+        auth(:user)
+        scopes([@metadata_scope], resolver: @scope_resolver)
+      end
+
+      config do
+        field(:topic_name, :string, required?: true)
+        field(:subscription_name, :string)
+      end
+
+      signal do
+        field(:email_address, :string)
+        field(:history_id, :string)
+        field(:message_id, :string)
+        field(:publish_time, :string)
+        field(:subscription, :string)
+      end
+    end
   end
 end

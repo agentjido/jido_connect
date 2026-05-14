@@ -2,7 +2,7 @@ defmodule Jido.Connect.Gmail.Normalizer do
   @moduledoc "Normalizes Gmail API payloads into stable, body-safe package structs."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Gmail.{Draft, Label, Message, Privacy, Profile, Thread}
+  alias Jido.Connect.Gmail.{Attachment, Draft, Label, Message, Privacy, Profile, Thread, Watch}
 
   @doc "Normalizes a Gmail profile payload."
   @spec profile(map()) :: {:ok, Profile.t()} | {:error, term()}
@@ -93,6 +93,33 @@ defmodule Jido.Connect.Gmail.Normalizer do
   end
 
   def draft(_payload), do: {:error, :invalid_draft_payload}
+
+  @doc "Normalizes a Gmail watch response."
+  @spec watch(map()) :: {:ok, Watch.t()} | {:error, term()}
+  def watch(payload) when is_map(payload) do
+    %{
+      history_id: normalize_string(Data.get(payload, "historyId")),
+      expiration: normalize_string(Data.get(payload, "expiration"))
+    }
+    |> Data.compact()
+    |> Watch.new()
+  end
+
+  def watch(_payload), do: {:error, :invalid_watch_payload}
+
+  @doc "Normalizes a Gmail message attachment response."
+  @spec attachment(map()) :: {:ok, Attachment.t()} | {:error, term()}
+  def attachment(payload) when is_map(payload) do
+    %{
+      attachment_id: Data.get(payload, "attachmentId"),
+      size: normalize_integer(Data.get(payload, "size")),
+      data: Data.get(payload, "data")
+    }
+    |> Data.compact()
+    |> Attachment.new()
+  end
+
+  def attachment(_payload), do: {:error, :invalid_attachment_payload}
 
   @doc "Builds a body-safe summary of a Gmail MIME payload."
   def summarize_payload(payload) when is_map(payload) do

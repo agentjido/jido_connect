@@ -59,6 +59,24 @@ defmodule Jido.Connect.Gmail.ScopeResolverTest do
         operation: "google.gmail.message.labels.apply",
         granted: [@readonly_scope],
         expected: @modify_scope
+      },
+      %{
+        label: "attachment read requires readonly when only metadata is granted",
+        operation: "google.gmail.message.attachment.get",
+        granted: [@metadata_scope],
+        expected: @readonly_scope
+      },
+      %{
+        label: "attachment read accepts modify as a broader content grant",
+        operation: "google.gmail.message.attachment.get",
+        granted: [@modify_scope],
+        expected: @modify_scope
+      },
+      %{
+        label: "watch lifecycle stays in Gmail metadata scope",
+        operation: "google.gmail.watch.start",
+        granted: [@metadata_scope],
+        expected: @metadata_scope
       }
     ])
   end

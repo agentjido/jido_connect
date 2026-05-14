@@ -12,16 +12,21 @@ defmodule Jido.Connect.GmailTest do
     Jido.Connect.Gmail.Actions.GetMessage,
     Jido.Connect.Gmail.Actions.ListThreads,
     Jido.Connect.Gmail.Actions.GetThread,
+    Jido.Connect.Gmail.Actions.ListHistory,
+    Jido.Connect.Gmail.Actions.GetAttachment,
     Jido.Connect.Gmail.Actions.SendMessage,
     Jido.Connect.Gmail.Actions.CreateDraft,
     Jido.Connect.Gmail.Actions.SendDraft,
     Jido.Connect.Gmail.Actions.CreateLabel,
-    Jido.Connect.Gmail.Actions.ApplyMessageLabels
+    Jido.Connect.Gmail.Actions.ApplyMessageLabels,
+    Jido.Connect.Gmail.Actions.StartWatch,
+    Jido.Connect.Gmail.Actions.StopWatch
   ]
 
   @gmail_dsl_fragments [
     Jido.Connect.Gmail.Actions.Read,
     Jido.Connect.Gmail.Actions.Write,
+    Jido.Connect.Gmail.Actions.Watch,
     Jido.Connect.Gmail.Triggers.Messages
   ]
 
@@ -123,6 +128,15 @@ defmodule Jido.Connect.GmailTest do
              snippet: "Budget update"
            })
          ]
+       })}
+    end
+
+    def get_attachment(%{message_id: "msg123", attachment_id: "att123"}, "token") do
+      {:ok,
+       Gmail.Attachment.new!(%{
+         attachment_id: "att123",
+         size: 12,
+         data: "Ym9keS1ieXRlcw"
        })}
     end
 
@@ -250,6 +264,21 @@ defmodule Jido.Connect.GmailTest do
       {:ok, %{history: [], next_page_token: "loop-page", history_id: "loop-history"}}
     end
 
+    def start_watch(
+          %{
+            topic_name: "projects/project-1/topics/gmail",
+            label_ids: ["INBOX"],
+            label_filter_behavior: "include"
+          },
+          "token"
+        ) do
+      {:ok, Gmail.Watch.new!(%{history_id: "126", expiration: "1710000000000"})}
+    end
+
+    def stop_watch(%{}, "token") do
+      {:ok, %{stopped?: true}}
+    end
+
     def send_message(%{raw: raw, to: ["to@example.com"], subject: "Hello"}, "token")
         when is_binary(raw) do
       {:ok,
@@ -337,11 +366,15 @@ defmodule Jido.Connect.GmailTest do
              "google.gmail.message.get",
              "google.gmail.threads.list",
              "google.gmail.thread.get",
+             "google.gmail.history.list",
+             "google.gmail.message.attachment.get",
              "google.gmail.message.send",
              "google.gmail.draft.create",
              "google.gmail.draft.send",
              "google.gmail.label.create",
-             "google.gmail.message.labels.apply"
+             "google.gmail.message.labels.apply",
+             "google.gmail.watch.start",
+             "google.gmail.watch.stop"
            ]
 
     send_action = Enum.find(spec.actions, &(&1.id == "google.gmail.message.send"))
@@ -357,6 +390,16 @@ defmodule Jido.Connect.GmailTest do
               scope_resolver: Jido.Connect.Gmail.ScopeResolver
             }} =
              Connect.trigger(spec, "google.gmail.message.received")
+
+    assert {:ok,
+            %{
+              id: "google.gmail.mailbox.changed",
+              kind: :webhook,
+              verification: %{kind: :google_pubsub_push, oidc: :host_verified},
+              dedupe: %{key: [:history_id]},
+              scope_resolver: Jido.Connect.Gmail.ScopeResolver
+            }} =
+             Connect.trigger(spec, "google.gmail.mailbox.changed")
   end
 
   test "compiles generated Jido modules for actions, sensors, and plugin" do
@@ -369,6 +412,12 @@ defmodule Jido.Connect.GmailTest do
           name: "google_gmail_message_received",
           trigger_id: "google.gmail.message.received",
           signal_type: "google.gmail.message.received"
+        },
+        %{
+          module: Jido.Connect.Gmail.Sensors.MailboxChanged,
+          name: "google_gmail_mailbox_changed",
+          trigger_id: "google.gmail.mailbox.changed",
+          signal_type: "google.gmail.mailbox.changed"
         }
       ],
       plugin_module: Jido.Connect.Gmail.Plugin,
@@ -410,6 +459,18 @@ defmodule Jido.Connect.GmailTest do
              %{},
              %{scopes: ["https://www.googleapis.com/auth/gmail.readonly"]}
            ) == ["https://www.googleapis.com/auth/gmail.readonly"]
+
+    assert resolver.required_scopes(
+             %{id: "google.gmail.message.attachment.get"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/gmail.metadata"]}
+           ) == ["https://www.googleapis.com/auth/gmail.readonly"]
+
+    assert resolver.required_scopes(
+             %{id: "google.gmail.watch.start"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/gmail.metadata"]}
+           ) == ["https://www.googleapis.com/auth/gmail.metadata"]
 
     assert resolver.required_scopes(%{}, %{}, %{}) == [
              "https://www.googleapis.com/auth/gmail.metadata"
@@ -584,6 +645,135 @@ defmodule Jido.Connect.GmailTest do
                Gmail.integration(),
                "google.gmail.thread.get",
                %{thread_id: "thread123", metadata_headers: ["From", "Subject"]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes list history through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              history: [
+                %{
+                  history_id: "124",
+                  messages_added: [%{message_id: "msg123"}, %{message_id: "msg123"}]
+                }
+              ],
+              next_page_token: "page-2",
+              history_id: "125"
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.history.list",
+               %{
+                 start_history_id: "123",
+                 history_types: ["messageAdded"],
+                 label_id: "INBOX"
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "history list validates checkpoint inputs before client calls" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_start_history_id,
+              details: %{expected: "non-empty string"}
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.history.list",
+               %{start_history_id: "  "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_history_page_size,
+              details: %{max_page_size: 500}
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.history.list",
+               %{start_history_id: "123", page_size: 501},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes get attachment through injected client and lease" do
+    {context, lease} =
+      context_and_lease(
+        scopes: [
+          "openid",
+          "email",
+          "profile",
+          "https://www.googleapis.com/auth/gmail.readonly"
+        ]
+      )
+
+    assert {:ok,
+            %{
+              attachment: %{
+                message_id: "msg123",
+                attachment_id: "att123",
+                size: 12,
+                data: "Ym9keS1ieXRlcw"
+              }
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.message.attachment.get",
+               %{message_id: "msg123", attachment_id: "att123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes watch lifecycle through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{watch: %{history_id: "126", expiration: "1710000000000"}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.watch.start",
+               %{
+                 topic_name: "projects/project-1/topics/gmail",
+                 label_ids: ["INBOX"],
+                 label_filter_behavior: "include"
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{stopped?: true}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.watch.stop",
+               %{},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "watch start validates topic names before client calls" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_watch_topic_name,
+              details: %{expected: "projects/{project}/topics/{topic}"}
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.watch.start",
+               %{topic_name: ""},
                context: context,
                credential_lease: lease
              )

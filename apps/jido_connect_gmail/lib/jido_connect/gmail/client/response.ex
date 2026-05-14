@@ -150,6 +150,36 @@ defmodule Jido.Connect.Gmail.Client.Response do
 
   def handle_history_list_response(response), do: Transport.handle_error_response(response)
 
+  def handle_watch_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.watch/1, "Gmail watch response was invalid")
+  end
+
+  def handle_watch_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Gmail watch response was invalid", body)
+  end
+
+  def handle_watch_response(response), do: Transport.handle_error_response(response)
+
+  def handle_stop_watch_response({:ok, %{status: status}}) when status in 200..299 do
+    {:ok, %{stopped?: true}}
+  end
+
+  def handle_stop_watch_response(response), do: Transport.handle_error_response(response)
+
+  def handle_attachment_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.attachment/1, "Gmail attachment response was invalid")
+  end
+
+  def handle_attachment_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Gmail attachment response was invalid", body)
+  end
+
+  def handle_attachment_response(response), do: Transport.handle_error_response(response)
+
   def handle_draft_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
     normalize_one(body, &Normalizer.draft/1, "Gmail draft response was invalid")
@@ -190,19 +220,51 @@ defmodule Jido.Connect.Gmail.Client.Response do
   end
 
   defp history_record(payload) when is_map(payload) do
-    with {:ok, messages_added} <-
+    with {:ok, messages} <-
+           normalize_items(
+             payload,
+             "messages",
+             &Normalizer.message/1,
+             "Gmail history list response was invalid"
+           ),
+         {:ok, messages_added} <-
            normalize_items(
              payload,
              "messagesAdded",
              &message_added/1,
              "Gmail history list response was invalid"
+           ),
+         {:ok, messages_deleted} <-
+           normalize_items(
+             payload,
+             "messagesDeleted",
+             &message_added/1,
+             "Gmail history list response was invalid"
+           ),
+         {:ok, labels_added} <-
+           normalize_items(
+             payload,
+             "labelsAdded",
+             &label_change/1,
+             "Gmail history list response was invalid"
+           ),
+         {:ok, labels_removed} <-
+           normalize_items(
+             payload,
+             "labelsRemoved",
+             &label_change/1,
+             "Gmail history list response was invalid"
            ) do
       {:ok,
        %{
          history_id: normalize_string(Data.get(payload, "id")),
-         messages_added: messages_added
+         messages: messages,
+         messages_added: messages_added,
+         messages_deleted: messages_deleted,
+         labels_added: labels_added,
+         labels_removed: labels_removed
        }
-       |> Data.compact()}
+       |> compact_history_record()}
     end
   end
 
@@ -215,6 +277,36 @@ defmodule Jido.Connect.Gmail.Client.Response do
   end
 
   defp message_added(_payload), do: {:error, :invalid_message_added}
+
+  defp label_change(payload) when is_map(payload) do
+    with {:ok, message} <- payload |> Data.get("message", %{}) |> Normalizer.message(),
+         {:ok, label_ids} <- normalize_label_ids(Data.get(payload, "labelIds", [])) do
+      {:ok,
+       %{
+         message: message,
+         label_ids: label_ids
+       }
+       |> Data.compact()}
+    end
+  end
+
+  defp label_change(_payload), do: {:error, :invalid_label_change}
+
+  defp normalize_label_ids(label_ids) when is_list(label_ids) do
+    if Enum.all?(label_ids, &is_binary/1) do
+      {:ok, label_ids}
+    else
+      {:error, :invalid_label_ids}
+    end
+  end
+
+  defp normalize_label_ids(_label_ids), do: {:error, :invalid_label_ids}
+
+  defp compact_history_record(map) do
+    map
+    |> Enum.reject(fn {_key, value} -> is_nil(value) or value == [] end)
+    |> Map.new()
+  end
 
   defp normalize_string(nil), do: nil
   defp normalize_string(value) when is_binary(value), do: value

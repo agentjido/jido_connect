@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Gmail.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Gmail.{Client, Label, Message, Profile, Thread}
+  alias Jido.Connect.Gmail.{Attachment, Client, Label, Message, Profile, Thread, Watch}
   alias Jido.Connect.Gmail.Client.Response
 
   setup {Req.Test, :verify_on_exit!}
@@ -140,6 +140,12 @@ defmodule Jido.Connect.Gmail.ClientTest do
              Response.handle_thread_response({:ok, %{status: 200, body: "bad body"}})
 
     assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Response.handle_watch_response({:ok, %{status: 200, body: "bad body"}})
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Response.handle_attachment_response({:ok, %{status: 200, body: "bad body"}})
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
              Response.handle_draft_response({:ok, %{status: 200, body: "bad body"}})
   end
 
@@ -240,9 +246,29 @@ defmodule Jido.Connect.Gmail.ClientTest do
         "history" => [
           %{
             "id" => "124",
+            "messages" => [
+              %{"id" => "msg-summary", "threadId" => "thread-summary"}
+            ],
             "messagesAdded" => [
               %{
                 "message" => message_payload()
+              }
+            ],
+            "messagesDeleted" => [
+              %{
+                "message" => %{"id" => "msg-deleted", "threadId" => "thread-deleted"}
+              }
+            ],
+            "labelsAdded" => [
+              %{
+                "message" => %{"id" => "msg-labeled", "threadId" => "thread-labeled"},
+                "labelIds" => ["STARRED"]
+              }
+            ],
+            "labelsRemoved" => [
+              %{
+                "message" => %{"id" => "msg-unlabeled", "threadId" => "thread-unlabeled"},
+                "labelIds" => ["UNREAD"]
               }
             ]
           }
@@ -251,7 +277,29 @@ defmodule Jido.Connect.Gmail.ClientTest do
       })
     end)
 
-    assert {:ok, %{history: [%{history_id: "124", messages_added: [%Message{} = message]}]}} =
+    assert {:ok,
+            %{
+              history: [
+                %{
+                  history_id: "124",
+                  messages: [%Message{message_id: "msg-summary"}],
+                  messages_added: [%Message{} = message],
+                  messages_deleted: [%Message{message_id: "msg-deleted"}],
+                  labels_added: [
+                    %{
+                      message: %Message{message_id: "msg-labeled"},
+                      label_ids: ["STARRED"]
+                    }
+                  ],
+                  labels_removed: [
+                    %{
+                      message: %Message{message_id: "msg-unlabeled"},
+                      label_ids: ["UNREAD"]
+                    }
+                  ]
+                }
+              ]
+            }} =
              Client.list_history(
                %{
                  start_history_id: "123",
@@ -289,6 +337,66 @@ defmodule Jido.Connect.Gmail.ClientTest do
                %{start_history_id: "123", history_types: ["messageAdded"]},
                "token"
              )
+  end
+
+  test "gets Gmail message attachments" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/gmail/v1/users/me/messages/msg123/attachments/att123"
+
+      Req.Test.json(conn, %{
+        "attachmentId" => "att123",
+        "size" => 12,
+        "data" => "Ym9keS1ieXRlcw"
+      })
+    end)
+
+    assert {:ok, %Attachment{} = attachment} =
+             Client.get_attachment(%{message_id: "msg123", attachment_id: "att123"}, "token")
+
+    assert attachment.attachment_id == "att123"
+    assert attachment.size == 12
+    assert attachment.data == "Ym9keS1ieXRlcw"
+  end
+
+  test "starts and stops Gmail watches" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      case {conn.method, conn.request_path} do
+        {"POST", "/gmail/v1/users/me/watch"} ->
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+          assert Jason.decode!(body) == %{
+                   "topicName" => "projects/project-1/topics/gmail",
+                   "labelIds" => ["INBOX"],
+                   "labelFilterBehavior" => "include"
+                 }
+
+          Req.Test.json(conn, %{
+            "historyId" => "126",
+            "expiration" => "1710000000000"
+          })
+
+        {"POST", "/gmail/v1/users/me/stop"} ->
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+          assert Jason.decode!(body) == %{}
+          Req.Test.json(conn, %{})
+      end
+    end)
+
+    assert {:ok, %Watch{} = watch} =
+             Client.start_watch(
+               %{
+                 topic_name: "projects/project-1/topics/gmail",
+                 label_ids: ["INBOX"],
+                 label_filter_behavior: "include"
+               },
+               "token"
+             )
+
+    assert watch.history_id == "126"
+    assert watch.expiration == "1710000000000"
+
+    assert {:ok, %{stopped?: true}} = Client.stop_watch(%{}, "token")
   end
 
   test "sends Gmail messages" do
