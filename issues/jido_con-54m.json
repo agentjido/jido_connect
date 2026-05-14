@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:35:51Z",
+  "description": "Implement jido_connect_google_tasks as a provider-specific Google Tasks connector package using the shared Google foundation. Cover task list and task CRUD, task move/clear, polling where viable, catalog packs, and docs.",
+  "id": "jido_con-54m",
+  "labels": [],
+  "priority": 1,
+  "status": "open",
+  "title": "[G17] Google Tasks Connector",
+  "type": "epic",
+  "updated_at": "2026-05-14T14:35:51Z"
+}
