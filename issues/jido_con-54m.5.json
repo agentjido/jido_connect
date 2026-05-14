@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:35:52Z",
+  "description": "Determine whether Google Tasks metadata supports reliable changed/upcoming-task polling; implement a poll trigger only if checkpoint semantics are sound.",
+  "id": "jido_con-54m.5",
+  "labels": [],
+  "parent": "jido_con-54m",
+  "priority": 1,
+  "status": "open",
+  "title": "[G17-S05] Spike Tasks polling trigger",
+  "type": "task",
+  "updated_at": "2026-05-14T14:35:52Z"
+}
