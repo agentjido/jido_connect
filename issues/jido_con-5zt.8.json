@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5zt.7"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5zt.9"
+  ],
   "created": "2026-05-14T14:58:13Z",
   "description": "Add Calendar events/calendarList/ACL/settings watch lifecycle actions, channels.stop, webhook payload normalization/verification primitives, and discoverable trigger metadata.",
   "id": "jido_con-5zt.8",
