@@ -41,6 +41,8 @@ defmodule Jido.Connect.Google.ScopesTest do
     assert "https://www.googleapis.com/auth/contacts.other.readonly" in Scopes.product(:contacts)
     assert "https://www.googleapis.com/auth/directory.readonly" in Scopes.product(:contacts)
     assert "https://www.googleapis.com/auth/analytics.readonly" in Scopes.product(:analytics)
+    assert "https://www.googleapis.com/auth/meetings.space.created" in Scopes.product(:meet)
+    assert "https://www.googleapis.com/auth/meetings.space.readonly" in Scopes.product(:meet)
 
     assert "https://www.googleapis.com/auth/webmasters.readonly" in Scopes.product(
              :search_console
