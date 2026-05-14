@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-9sn.3"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-9sn",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G08-S04] Implement conference record actions",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:26Z"
+  "updated_at": "2026-05-14T19:51:42Z"
 }
