@@ -22,6 +22,7 @@ defmodule Jido.Connect.Google.Analytics.StructTest do
           description: "The country where activity occurred.",
           category: "Geography"
         },
+        deprecated_api_names: [],
         custom?: false,
         deprecated?: false,
         metadata: %{}
@@ -42,6 +43,8 @@ defmodule Jido.Connect.Google.Analytics.StructTest do
           display_name: "Active users",
           expression: "activeUsers"
         },
+        deprecated_api_names: [],
+        blocked_reasons: [],
         custom?: false,
         deprecated?: false,
         metadata: %{}

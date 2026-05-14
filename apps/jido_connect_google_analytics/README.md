@@ -45,10 +45,11 @@ configurable through application environment for tests.
 
 ## Tool Surface
 
-No Analytics actions or triggers are exposed by the scaffold yet. The generated
-plugin and provider metadata are present so later tasks can add metadata,
-reporting, realtime, and property-discovery action families without changing
-package wiring.
+- `google.analytics.metadata.get`
+
+No Analytics triggers are exposed yet. The generated plugin and provider
+metadata are present so later tasks can add reporting, realtime, and
+property-discovery action families without changing package wiring.
 
 ## Query Shape
 

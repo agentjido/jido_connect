@@ -6,7 +6,10 @@ defmodule Jido.Connect.Google.Analytics do
   Analytics surface is implemented.
   """
 
-  use Jido.Connect
+  use Jido.Connect,
+    fragments: [
+      Jido.Connect.Google.Analytics.Actions.Metadata
+    ]
 
   integration do
     id(:google_analytics)

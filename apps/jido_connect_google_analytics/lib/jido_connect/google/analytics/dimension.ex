@@ -9,6 +9,7 @@ defmodule Jido.Connect.Google.Analytics.Dimension do
               display_name: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               description: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               category: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              deprecated_api_names: Zoi.list(Zoi.string()) |> Zoi.default([]),
               custom?: Zoi.boolean() |> Zoi.default(false),
               deprecated?: Zoi.boolean() |> Zoi.default(false),
               metadata: Zoi.map() |> Zoi.default(%{})
