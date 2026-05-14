@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-5zt.3"
   ],
+  "closed_at": "2026-05-14T15:37:34Z",
+  "close_reason": "Added Sheets data-filter and developer metadata actions in PR #13",
   "created": "2026-05-14T14:58:12Z",
   "description": "Add Sheets data-filter read/write actions and developer metadata get/search actions. Keep data-filter schemas in jido_connect_google_sheets rather than core.",
   "id": "jido_con-5zt.2",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S02] Add Sheets data-filter and developer metadata actions",
   "type": "task",
-  "updated_at": "2026-05-14T15:20:47Z"
+  "updated_at": "2026-05-14T15:37:34Z"
 }
