@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-5zt.8"
   ],
@@ -16,8 +16,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G18-S09] Add Calendar calendar ACL and event utility actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:58:18Z"
+  "updated_at": "2026-05-14T17:49:44Z"
 }
