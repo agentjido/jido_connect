@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-5zt.11"
   ],
+  "closed_at": "2026-05-14T18:39:12Z",
+  "close_reason": "Added Contacts batch directory and other-contact actions in PR #21",
   "created": "2026-05-14T14:58:13Z",
   "description": "Add People API batch get/create/update/delete, directory people list/search, and otherContacts list/search/copy action families.",
   "id": "jido_con-5zt.10",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S10] Add Contacts batch directory and other-contact actions",
   "type": "task",
-  "updated_at": "2026-05-14T18:14:28Z"
+  "updated_at": "2026-05-14T18:39:12Z"
 }
