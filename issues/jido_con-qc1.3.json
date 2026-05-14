@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-qc1.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-qc1.4"
+  ],
   "created": "2026-05-14T14:35:49Z",
   "description": "Implement google.slides.presentation.get and google.slides.presentation.create with narrow scopes, normalized output, tests, and catalog metadata.",
   "id": "jido_con-qc1.3",
