@@ -33,7 +33,7 @@ Official references used for this comparison:
 | --- | --- | --- | --- |
 | Sheets | Strong single-range read/write and structural batch update coverage. | Spreadsheet create, value batch operations, data-filter operations, developer metadata, sheet copy. | No native Sheets watch surface in the REST reference; Drive file-change triggers can cover spreadsheet file changes. |
 | Gmail | Strong metadata, message/thread reads, send, draft create/send, label triage, and poll trigger coverage. | Watch/stop lifecycle, history action, attachments, draft management, batch modify/delete, label get/update/delete, message/thread trash/delete. | Settings and CSE surfaces are large and sensitive; keep them out of default packs. |
-| Drive | Strong file metadata/content, basic file writes, permission list/create, service-account profiles, and poll trigger coverage. | Watch/channel lifecycle, revisions, comments/replies, permission get/update/delete, shared drives, labels, about/apps. | No whole-drive count or whole-drive principals endpoint in Drive v3; counts/principals remain composed intents. |
+| Drive | Strong file metadata/content, basic file writes, permission lifecycle, revision lifecycle, service-account profiles, poll trigger coverage, and watch/channel lifecycle metadata. | Comments/replies, shared drives, labels, about/apps. | No whole-drive count or whole-drive principals endpoint in Drive v3; counts/principals remain composed intents. |
 | Calendar | Strong event list/get/create/update/delete, calendar list, free/busy, availability, and poll trigger coverage. | Watch/channel lifecycle, calendar CRUD, calendarList item CRUD, ACLs, event instances/move/quickAdd/import, colors/settings. | Event polling exists; provider push channels should be exposed as lifecycle actions/triggers. |
 | Contacts | Strong contact/group read and basic contact/group mutation coverage. | Batch contact operations, directory people, other contacts, group get/delete/member modify, contact photos, sync-token polling trigger. | People API exposes sync tokens for incremental connections but no generic watch endpoint. |
 
@@ -117,16 +117,15 @@ and approvals.
 
 - `files.list/get/create/copy/update/delete/export/download`
 - Folder creation through `files.create`
-- `permissions.list/create`
+- `permissions.list/create/get/update/delete`
+- `revisions.list/get/update/delete`
 - Polling trigger over `changes`.
+- Drive watch/channel lifecycle actions and webhook trigger metadata.
 
 ### Missing Provider Operations
 
 | Provider Operation | Candidate Action/Trigger | Priority | Rationale |
 | --- | --- | --- | --- |
-| `changes.getStartPageToken`, `changes.list`, `changes.watch`, `files.watch`, `channels.stop` | Drive watch/channel lifecycle actions plus webhook trigger metadata | High | Directly addresses the webhook gap and keeps lifecycle provider-specific. |
-| `revisions.list/get/update/delete` | Drive revision actions | High | Jacool specifically identified revisions; useful for Docs/Sheets/Slides file history. |
-| `permissions.get/update/delete` | Permission lifecycle actions | High | Completes the permission surface after list/create. |
 | `comments.list/get/create/update/delete` | Comment actions | Medium | Useful for document review workflows across Drive-backed files. |
 | `replies.list/get/create/update/delete` | Reply actions | Medium | Complements comments. |
 | `drives.list/get/create/update/delete/hide/unhide` | Shared-drive actions | Medium | Needed for Workspace/team-drive administration and listing roots. |
@@ -222,4 +221,3 @@ Official People API resources include `people`, `people.connections`,
 `jido_con-nmq.3` should convert the high-priority and selected medium-priority
 rows into package-specific tasks. Avoid creating tickets for every provider
 method; create tickets around coherent action families with a clear host value.
-

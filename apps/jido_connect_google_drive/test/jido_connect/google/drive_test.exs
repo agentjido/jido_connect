@@ -17,6 +17,13 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.DeleteFile,
     Jido.Connect.Google.Drive.Actions.ListPermissions,
     Jido.Connect.Google.Drive.Actions.CreatePermission,
+    Jido.Connect.Google.Drive.Actions.GetPermission,
+    Jido.Connect.Google.Drive.Actions.UpdatePermission,
+    Jido.Connect.Google.Drive.Actions.DeletePermission,
+    Jido.Connect.Google.Drive.Actions.ListRevisions,
+    Jido.Connect.Google.Drive.Actions.GetRevision,
+    Jido.Connect.Google.Drive.Actions.UpdateRevision,
+    Jido.Connect.Google.Drive.Actions.DeleteRevision,
     Jido.Connect.Google.Drive.Actions.WatchChanges,
     Jido.Connect.Google.Drive.Actions.WatchFile,
     Jido.Connect.Google.Drive.Actions.StopChannel
@@ -27,6 +34,7 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.Write,
     Jido.Connect.Google.Drive.Actions.FileContent,
     Jido.Connect.Google.Drive.Actions.Permissions,
+    Jido.Connect.Google.Drive.Actions.Revisions,
     Jido.Connect.Google.Drive.Actions.Watch,
     Jido.Connect.Google.Drive.Triggers.Changes
   ]
@@ -203,6 +211,101 @@ defmodule Jido.Connect.Google.DriveTest do
          role: "reader",
          email_address: "reader@example.com"
        })}
+    end
+
+    def get_permission(
+          %{
+            file_id: "file123",
+            permission_id: "perm123",
+            supports_all_drives: false,
+            use_domain_admin_access: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.Permission.new!(%{
+         permission_id: "perm123",
+         type: "user",
+         role: "reader",
+         email_address: "reader@example.com"
+       })}
+    end
+
+    def update_permission(
+          %{
+            file_id: "file123",
+            permission_id: "perm123",
+            role: "writer",
+            transfer_ownership: false,
+            supports_all_drives: false,
+            use_domain_admin_access: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.Permission.new!(%{
+         permission_id: "perm123",
+         type: "user",
+         role: "writer",
+         email_address: "reader@example.com"
+       })}
+    end
+
+    def delete_permission(
+          %{
+            file_id: "file123",
+            permission_id: "perm123",
+            supports_all_drives: false,
+            use_domain_admin_access: false
+          },
+          "token"
+        ) do
+      {:ok, %{file_id: "file123", permission_id: "perm123", deleted?: true}}
+    end
+
+    def list_revisions(%{file_id: "file123", page_size: 100}, "token") do
+      {:ok,
+       %{
+         revisions: [
+           Drive.Revision.new!(%{
+             revision_id: "rev1",
+             mime_type: "application/pdf",
+             keep_forever?: false,
+             modified_time: "2026-05-05T12:00:00Z"
+           })
+         ],
+         next_page_token: "next-rev"
+       }}
+    end
+
+    def get_revision(
+          %{file_id: "file123", revision_id: "rev1", acknowledge_abuse: false},
+          "token"
+        ) do
+      {:ok,
+       Drive.Revision.new!(%{
+         revision_id: "rev1",
+         mime_type: "application/pdf",
+         keep_forever?: false,
+         modified_time: "2026-05-05T12:00:00Z"
+       })}
+    end
+
+    def update_revision(
+          %{file_id: "file123", revision_id: "rev1", keep_forever: true},
+          "token"
+        ) do
+      {:ok,
+       Drive.Revision.new!(%{
+         revision_id: "rev1",
+         mime_type: "application/pdf",
+         keep_forever?: true,
+         modified_time: "2026-05-05T12:00:00Z"
+       })}
+    end
+
+    def delete_revision(%{file_id: "file123", revision_id: "rev1"}, "token") do
+      {:ok, %{file_id: "file123", revision_id: "rev1", deleted?: true}}
     end
 
     def watch_changes(
@@ -489,6 +592,13 @@ defmodule Jido.Connect.Google.DriveTest do
              "google.drive.file.delete",
              "google.drive.permissions.list",
              "google.drive.permission.create",
+             "google.drive.permission.get",
+             "google.drive.permission.update",
+             "google.drive.permission.delete",
+             "google.drive.revisions.list",
+             "google.drive.revision.get",
+             "google.drive.revision.update",
+             "google.drive.revision.delete",
              "google.drive.changes.watch",
              "google.drive.file.watch",
              "google.drive.channel.stop"
@@ -525,8 +635,26 @@ defmodule Jido.Connect.Google.DriveTest do
     assert delete_action.confirmation == :always
 
     create_permission = Enum.find(spec.actions, &(&1.id == "google.drive.permission.create"))
+    get_permission = Enum.find(spec.actions, &(&1.id == "google.drive.permission.get"))
+    update_permission = Enum.find(spec.actions, &(&1.id == "google.drive.permission.update"))
+    delete_permission = Enum.find(spec.actions, &(&1.id == "google.drive.permission.delete"))
+    list_revisions = Enum.find(spec.actions, &(&1.id == "google.drive.revisions.list"))
+    get_revision = Enum.find(spec.actions, &(&1.id == "google.drive.revision.get"))
+    update_revision = Enum.find(spec.actions, &(&1.id == "google.drive.revision.update"))
+    delete_revision = Enum.find(spec.actions, &(&1.id == "google.drive.revision.delete"))
     assert create_permission.risk == :external_write
     assert create_permission.confirmation == :always
+    assert get_permission.risk == :read
+    assert update_permission.risk == :external_write
+    assert update_permission.confirmation == :always
+    assert delete_permission.risk == :destructive
+    assert delete_permission.confirmation == :always
+    assert list_revisions.risk == :read
+    assert get_revision.risk == :read
+    assert update_revision.risk == :write
+    assert update_revision.confirmation == :required_for_ai
+    assert delete_revision.risk == :destructive
+    assert delete_revision.confirmation == :always
 
     watch_changes = Enum.find(spec.actions, &(&1.id == "google.drive.changes.watch"))
     watch_file = Enum.find(spec.actions, &(&1.id == "google.drive.file.watch"))
@@ -540,9 +668,21 @@ defmodule Jido.Connect.Google.DriveTest do
     assert stop_channel.confirmation == :required_for_ai
 
     create_permission_fields = Enum.find(create_permission.input, &(&1.name == :fields))
+    get_permission_fields = Enum.find(get_permission.input, &(&1.name == :fields))
+    list_revisions_fields = Enum.find(list_revisions.input, &(&1.name == :fields))
+    get_revision_fields = Enum.find(get_revision.input, &(&1.name == :fields))
 
     assert create_permission_fields.metadata.presets.default ==
              Jido.Connect.Google.Drive.Fields.permission_metadata()
+
+    assert get_permission_fields.metadata.presets.default ==
+             Jido.Connect.Google.Drive.Fields.permission_metadata()
+
+    assert list_revisions_fields.metadata.presets.default ==
+             Jido.Connect.Google.Drive.Fields.revision_list()
+
+    assert get_revision_fields.metadata.presets.default ==
+             Jido.Connect.Google.Drive.Fields.revision_metadata()
 
     for operation <- spec.actions ++ spec.triggers do
       assert operation.auth_profile == :user
@@ -965,6 +1105,128 @@ defmodule Jido.Connect.Google.DriveTest do
              )
   end
 
+  test "invokes get permission through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              permission: %{
+                permission_id: "perm123",
+                type: "user",
+                role: "reader",
+                email_address: "reader@example.com"
+              }
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.permission.get",
+               %{file_id: "file123", permission_id: "perm123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes update permission through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok,
+            %{
+              permission: %{
+                permission_id: "perm123",
+                role: "writer",
+                email_address: "reader@example.com"
+              }
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.permission.update",
+               %{file_id: "file123", permission_id: "perm123", role: "writer"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes delete permission through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{result: %{file_id: "file123", permission_id: "perm123", deleted?: true}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.permission.delete",
+               %{file_id: "file123", permission_id: "perm123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes revision actions through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              revisions: [
+                %{
+                  revision_id: "rev1",
+                  mime_type: "application/pdf",
+                  keep_forever?: false
+                }
+              ],
+              next_page_token: "next-rev"
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.revisions.list",
+               %{file_id: "file123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok,
+            %{
+              revision: %{
+                revision_id: "rev1",
+                mime_type: "application/pdf",
+                keep_forever?: false
+              }
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.revision.get",
+               %{file_id: "file123", revision_id: "rev1"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes revision mutations through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok,
+            %{
+              revision: %{
+                revision_id: "rev1",
+                mime_type: "application/pdf",
+                keep_forever?: true
+              }
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.revision.update",
+               %{file_id: "file123", revision_id: "rev1", keep_forever: true},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{file_id: "file123", revision_id: "rev1", deleted?: true}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.revision.delete",
+               %{file_id: "file123", revision_id: "rev1"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
   test "invokes changes watch through injected client and lease" do
     {context, lease} = context_and_lease()
 
@@ -1104,6 +1366,53 @@ defmodule Jido.Connect.Google.DriveTest do
                Drive.integration(),
                "google.drive.permission.create",
                %{file_id: "file123", type: "user", role: "reader", email_address: "  "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "permission update validates mutation inputs" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_permission,
+              details: %{field: :permission_update}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.permission.update",
+               %{file_id: "file123", permission_id: "perm123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_permission,
+              details: %{field: :transfer_ownership}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.permission.update",
+               %{file_id: "file123", permission_id: "perm123", role: "owner"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "revision update validates mutation inputs" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_revision,
+              details: %{field: :revision_update}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.revision.update",
+               %{file_id: "file123", revision_id: "rev1"},
                context: context,
                credential_lease: lease
              )

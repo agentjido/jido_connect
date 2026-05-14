@@ -34,6 +34,27 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
         action("google.drive.permission.create", :personal_data, :external_write, :always,
           text_includes: ["permission"]
         ),
+        action("google.drive.permission.get", :personal_data, :read, :none,
+          text_includes: ["permission"]
+        ),
+        action("google.drive.permission.update", :personal_data, :external_write, :always,
+          text_includes: ["permission"]
+        ),
+        action("google.drive.permission.delete", :personal_data, :destructive, :always,
+          text_includes: ["permission", "revoke"]
+        ),
+        action("google.drive.revisions.list", :workspace_metadata, :read, :none,
+          text_includes: ["revision"]
+        ),
+        action("google.drive.revision.get", :workspace_metadata, :read, :none,
+          text_includes: ["revision"]
+        ),
+        action("google.drive.revision.update", :workspace_metadata, :write, :required_for_ai,
+          text_includes: ["revision"]
+        ),
+        action("google.drive.revision.delete", :workspace_metadata, :destructive, :always,
+          text_includes: ["revision", "Permanently"]
+        ),
         action("google.drive.changes.watch", :workspace_metadata, :write, :required_for_ai,
           text_includes: ["push", "notification"]
         ),

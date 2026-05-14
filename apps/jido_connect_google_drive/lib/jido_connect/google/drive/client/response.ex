@@ -102,6 +102,68 @@ defmodule Jido.Connect.Google.Drive.Client.Response do
 
   def handle_permission_response(response), do: Transport.handle_error_response(response)
 
+  def handle_permission_delete_response({:ok, %{status: status}}, params)
+      when status in 200..299 do
+    {:ok,
+     %{
+       file_id: Data.get(params, :file_id),
+       permission_id: Data.get(params, :permission_id),
+       deleted?: true
+     }}
+  end
+
+  def handle_permission_delete_response(response, _params),
+    do: Transport.handle_error_response(response)
+
+  def handle_revision_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, revisions} <-
+           normalize_items(
+             body,
+             "revisions",
+             &Normalizer.revision/1,
+             "Google Drive revision list response was invalid"
+           ) do
+      {:ok,
+       %{
+         revisions: revisions,
+         next_page_token: Data.get(body, "nextPageToken")
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_revision_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Drive revision list response was invalid", body)
+  end
+
+  def handle_revision_list_response(response), do: Transport.handle_error_response(response)
+
+  def handle_revision_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.revision/1, "Google Drive revision response was invalid")
+  end
+
+  def handle_revision_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Drive revision response was invalid", body)
+  end
+
+  def handle_revision_response(response), do: Transport.handle_error_response(response)
+
+  def handle_revision_delete_response({:ok, %{status: status}}, params) when status in 200..299 do
+    {:ok,
+     %{
+       file_id: Data.get(params, :file_id),
+       revision_id: Data.get(params, :revision_id),
+       deleted?: true
+     }}
+  end
+
+  def handle_revision_delete_response(response, _params),
+    do: Transport.handle_error_response(response)
+
   def handle_start_page_token_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
     case Data.get(body, "startPageToken") do

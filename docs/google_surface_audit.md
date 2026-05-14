@@ -32,7 +32,7 @@ live-test readiness, and Beadwork sequencing.
 | --- | --- | ---: | ---: | ---: | --- |
 | `jido_connect_google_sheets` | `google_sheets` | 9 | 0 | 2 | `user` |
 | `jido_connect_gmail` | `gmail` | 11 | 1 | 3 | `user` |
-| `jido_connect_google_drive` | `google_drive` | 14 | 2 | 3 | `user`, `service_account`, `domain_delegated_service_account` |
+| `jido_connect_google_drive` | `google_drive` | 21 | 2 | 3 | `user`, `service_account`, `domain_delegated_service_account` |
 | `jido_connect_google_calendar` | `google_calendar` | 8 | 1 | 2 | `user` |
 | `jido_connect_google_contacts` | `google_contacts` | 9 | 0 | 2 | `user` |
 
@@ -63,7 +63,7 @@ action families. Do not move Google filter/query semantics into
 | --- | --- |
 | Sheets | Spreadsheet create, value batch operations, data-filter operations, developer metadata, and sheet copy. |
 | Gmail | Watch/stop lifecycle, explicit history action, attachments, draft lifecycle, batch message triage, label lifecycle, and destructive message/thread operations outside default packs. |
-| Drive | Revisions, permission lifecycle, comments/replies, shared drives, file labels, and further channel renewal helpers as host patterns emerge. |
+| Drive | Comments/replies, shared drives, file labels, and further channel renewal helpers as host patterns emerge. |
 | Calendar | Watch/channel lifecycle, calendar CRUD, calendar-list item CRUD, ACL lifecycle, event instances, and event move. |
 | Contacts | Batch contact operations, directory people, other contacts, group lifecycle, group membership, and sync-token polling trigger. |
 
@@ -87,7 +87,7 @@ for a wholesale pass.
 | --- | --- | --- |
 | Sheets | `spreadsheets.readonly`, `spreadsheets` | Existing reads/writes are ready for live smoke tests against a disposable spreadsheet. |
 | Gmail | `gmail.metadata`, `gmail.labels`, `gmail.modify`, `gmail.compose`, `gmail.send`, `https://mail.google.com/` | Sending and destructive mailbox actions need isolated test accounts and explicit confirmation. Permanent message/thread deletes require the full Gmail mailbox scope. |
-| Drive | `drive.metadata.readonly`, `drive.readonly`, `drive.file` | Current user OAuth flow is ready; service-account and delegated flows need separate live coverage. |
+| Drive | `drive.metadata.readonly`, `drive.readonly`, `drive.file` | Current user OAuth flow is ready for metadata/content/file lifecycle checks; service-account and delegated flows need separate live coverage. |
 | Calendar | `calendar.calendarlist.readonly`, `calendar.events.readonly`, `calendar.events`, `calendar.events.freebusy` | Use a disposable calendar for event mutation and delete checks. |
 | Contacts | `profile`, `contacts.readonly`, `contacts` | Use a test contact/group namespace to avoid mutating real address book data. |
 
@@ -215,6 +215,13 @@ Auth profiles: `user`, `service_account`,
 | `google.drive.file.delete` | destructive | `workspace_metadata` | `drive.file` | `file_id` | `result` |
 | `google.drive.permissions.list` | read | `personal_data` | `drive.metadata.readonly` | `file_id` | `permissions`, `next_page_token` |
 | `google.drive.permission.create` | external_write | `personal_data` | `drive.file` | `file_id`, `type`, `role` | `permission` |
+| `google.drive.permission.get` | read | `personal_data` | `drive.metadata.readonly` | `file_id`, `permission_id` | `permission` |
+| `google.drive.permission.update` | external_write | `personal_data` | `drive.file` | `file_id`, `permission_id` | `permission` |
+| `google.drive.permission.delete` | destructive | `personal_data` | `drive.file` | `file_id`, `permission_id` | `result` |
+| `google.drive.revisions.list` | read | `workspace_metadata` | `drive.metadata.readonly` | `file_id` | `revisions`, `next_page_token` |
+| `google.drive.revision.get` | read | `workspace_metadata` | `drive.metadata.readonly` | `file_id`, `revision_id` | `revision` |
+| `google.drive.revision.update` | write | `workspace_metadata` | `drive.file` | `file_id`, `revision_id` | `revision` |
+| `google.drive.revision.delete` | destructive | `workspace_metadata` | `drive.file` | `file_id`, `revision_id` | `result` |
 | `google.drive.changes.watch` | write | `workspace_metadata` | `drive.metadata.readonly` | `page_token`, `channel_id`, `address` | `channel` |
 | `google.drive.file.watch` | write | `workspace_metadata` | `drive.metadata.readonly` | `file_id`, `channel_id`, `address` | `channel` |
 | `google.drive.channel.stop` | write | `workspace_metadata` | `drive.metadata.readonly` | `channel_id`, `resource_id` | `result` |
@@ -230,8 +237,8 @@ Auth profiles: `user`, `service_account`,
 
 | Pack | Surface |
 | --- | --- |
-| `google_drive_readonly` | File list/get, export/download, permission list, file-changed polling, and file-changed webhook metadata. |
-| `google_drive_file_writer` | Read-only pack plus file create, folder create, file copy, and file update. |
+| `google_drive_readonly` | File list/get, export/download, permission list/get, revision list/get, file-changed polling, and file-changed webhook metadata. |
+| `google_drive_file_writer` | Read-only pack plus file create, folder create, file copy, and file update. Excludes destructive, permission mutation, and revision mutation tools. |
 | `google_drive_watch` | Read-only pack plus Drive changes/file watch creation and channel stop lifecycle actions. |
 
 ## Calendar

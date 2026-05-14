@@ -29,6 +29,18 @@ defmodule Jido.Connect.Google.Drive.ScopeResolverTest do
         expected: @readonly_scope
       },
       %{
+        label: "revision reads default to metadata read scope",
+        operation: "google.drive.revisions.list",
+        granted: [],
+        expected: @metadata_scope
+      },
+      %{
+        label: "permission get accepts drive.file for app-owned files",
+        operation: "google.drive.permission.get",
+        granted: [@file_scope],
+        expected: @file_scope
+      },
+      %{
         label: "drive.file grant can satisfy metadata reads for app-owned files",
         operation: "google.drive.file.get",
         granted: [@file_scope],
@@ -54,7 +66,13 @@ defmodule Jido.Connect.Google.Drive.ScopeResolverTest do
       },
       %{
         label: "permission mutation requires drive.file scope",
-        operation: "google.drive.permission.create",
+        operation: "google.drive.permission.update",
+        granted: [],
+        expected: @file_scope
+      },
+      %{
+        label: "revision mutation requires drive.file scope",
+        operation: "google.drive.revision.delete",
         granted: [],
         expected: @file_scope
       },

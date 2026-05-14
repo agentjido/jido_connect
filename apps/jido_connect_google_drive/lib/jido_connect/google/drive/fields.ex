@@ -40,6 +40,23 @@ defmodule Jido.Connect.Google.Drive.Fields do
     "expirationTime"
   ]
 
+  @revision_metadata [
+    "id",
+    "mimeType",
+    "kind",
+    "published",
+    "keepForever",
+    "md5Checksum",
+    "modifiedTime",
+    "publishAuto",
+    "publishedOutsideDomain",
+    "publishedLink",
+    "size",
+    "originalFilename",
+    "lastModifyingUser",
+    "exportLinks"
+  ]
+
   @permission_views ["published"]
 
   @doc "Google Drive permission views accepted by `includePermissionsForView`."
@@ -50,6 +67,9 @@ defmodule Jido.Connect.Google.Drive.Fields do
 
   @doc "Default Drive permission metadata fields."
   def permission_metadata, do: join(@permission_metadata)
+
+  @doc "Default Drive revision metadata fields."
+  def revision_metadata, do: join(@revision_metadata)
 
   @doc "Drive file metadata with embedded permission metadata."
   def file_with_permissions do
@@ -64,6 +84,9 @@ defmodule Jido.Connect.Google.Drive.Fields do
 
   @doc "Default `permissions.list` field expression."
   def permission_list, do: "nextPageToken,permissions(#{permission_metadata()})"
+
+  @doc "Default `revisions.list` field expression."
+  def revision_list, do: "nextPageToken,revisions(#{revision_metadata()})"
 
   @doc "Field presets for single-file metadata actions."
   def file_presets do
@@ -93,6 +116,21 @@ defmodule Jido.Connect.Google.Drive.Fields do
     %{
       default: permission_list(),
       permission_metadata: permission_metadata()
+    }
+  end
+
+  @doc "Field presets for single-revision actions."
+  def revision_presets do
+    %{
+      default: revision_metadata()
+    }
+  end
+
+  @doc "Field presets for `revisions.list`."
+  def revision_list_presets do
+    %{
+      default: revision_list(),
+      revision_metadata: revision_metadata()
     }
   end
 

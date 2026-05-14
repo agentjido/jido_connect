@@ -1,7 +1,16 @@
 defmodule Jido.Connect.Google.Drive.NormalizerTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Google.Drive.{Change, Channel, File, Folder, Normalizer, Permission}
+  alias Jido.Connect.Google.Drive.{
+    Change,
+    Channel,
+    File,
+    Folder,
+    Normalizer,
+    Permission,
+    Revision
+  }
+
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
 
   test "normalizes file payloads" do
@@ -60,6 +69,33 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
     assert permission.role == "reader"
     assert permission.email_address == "reader@example.com"
     refute permission.allow_file_discovery?
+  end
+
+  test "normalizes revision payloads" do
+    assert {:ok, %Revision{} = revision} =
+             Normalizer.revision(%{
+               "id" => "rev1",
+               "mimeType" => "application/pdf",
+               "kind" => "drive#revision",
+               "published" => false,
+               "keepForever" => true,
+               "md5Checksum" => "abc123",
+               "modifiedTime" => "2026-05-05T12:00:00Z",
+               "publishAuto" => false,
+               "publishedOutsideDomain" => false,
+               "publishedLink" => "https://docs.google.com/document/d/file123/pub",
+               "size" => "4096",
+               "originalFilename" => "Budget.pdf",
+               "lastModifyingUser" => %{"emailAddress" => "owner@example.com"},
+               "exportLinks" => %{"application/pdf" => "https://example.com/export"}
+             })
+
+    assert revision.revision_id == "rev1"
+    assert revision.mime_type == "application/pdf"
+    assert revision.keep_forever?
+    refute revision.published?
+    assert revision.size == 4096
+    assert revision.export_links == %{"application/pdf" => "https://example.com/export"}
   end
 
   test "normalizes change payloads with embedded files" do
@@ -150,5 +186,16 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
       params: %{},
       metadata: %{}
     )
+
+    ConnectorContracts.assert_struct_defaults(Revision, %{revision_id: "rev1"},
+      published?: false,
+      keep_forever?: false,
+      publish_auto?: false,
+      published_outside_domain?: false,
+      export_links: %{},
+      metadata: %{}
+    )
+
+    assert {:error, _error} = Revision.new(%{})
   end
 end

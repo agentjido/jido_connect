@@ -9,6 +9,9 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
     "google.drive.file.export",
     "google.drive.file.download",
     "google.drive.permissions.list",
+    "google.drive.permission.get",
+    "google.drive.revisions.list",
+    "google.drive.revision.get",
     "google.drive.file.changed",
     "google.drive.file.changed.push"
   ]
@@ -55,7 +58,14 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
       allowed_tools: @file_writer_tools,
       metadata: %{
         package: :jido_connect_google_drive,
-        excludes: ["google.drive.file.delete", "google.drive.permission.create"]
+        excludes: [
+          "google.drive.file.delete",
+          "google.drive.permission.create",
+          "google.drive.permission.update",
+          "google.drive.permission.delete",
+          "google.drive.revision.update",
+          "google.drive.revision.delete"
+        ]
       }
     })
   end

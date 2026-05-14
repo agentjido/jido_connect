@@ -19,6 +19,13 @@ schemas, normalized structs, and tests in this package.
 - `google.drive.file.delete`
 - `google.drive.permissions.list`
 - `google.drive.permission.create`
+- `google.drive.permission.get`
+- `google.drive.permission.update`
+- `google.drive.permission.delete`
+- `google.drive.revisions.list`
+- `google.drive.revision.get`
+- `google.drive.revision.update`
+- `google.drive.revision.delete`
 - `google.drive.changes.watch`
 - `google.drive.file.watch`
 - `google.drive.channel.stop`
@@ -70,6 +77,7 @@ Fields.file_metadata()
 Fields.file_with_permissions()
 Fields.file_list_with_permissions()
 Fields.permission_list()
+Fields.revision_list()
 ```
 
 For example, pass `Fields.file_list_with_permissions()` to
@@ -89,9 +97,10 @@ fields.metadata.presets.with_permissions
 ## Catalog Packs
 
 - `:google_drive_readonly` includes metadata reads, content reads, permission
-  reads, file-change polling, and file-change webhook metadata.
+  reads, revision reads, file-change polling, and file-change webhook metadata.
 - `:google_drive_file_writer` adds common file metadata writes and folder
-  creation. It intentionally excludes destructive delete and permission sharing.
+  creation. It intentionally excludes destructive delete, permission sharing,
+  permission lifecycle mutations, and revision lifecycle mutations.
 - `:google_drive_watch` adds Drive push channel lifecycle actions for file and
   change notifications. It excludes file deletion and permission sharing.
 
@@ -110,4 +119,5 @@ The connector prefers narrow Drive scopes:
 - `drive.metadata.readonly` for metadata reads, permission listing, and change
   polling or push channel lifecycle.
 - `drive.readonly` for file content export/download.
-- `drive.file` for app-managed file writes, deletes, and permission creation.
+- `drive.file` for app-managed file writes, deletes, permission lifecycle
+  mutations, and revision lifecycle mutations.

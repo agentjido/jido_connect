@@ -20,6 +20,9 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   @doc "Default permission metadata fields used by permission actions."
   defdelegate default_permission_fields, to: Fields, as: :permission_metadata
 
+  @doc "Default revision metadata fields used by revision actions."
+  defdelegate default_revision_fields, to: Fields, as: :revision_metadata
+
   @doc "Default change metadata fields used by Drive change pollers."
   def default_change_fields, do: Enum.join(@default_change_fields, ",")
 
@@ -135,6 +138,37 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     |> Data.compact()
   end
 
+  @doc "Builds query params for `permissions.get`."
+  def get_permission_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_permission_fields()),
+      supportsAllDrives: Data.get(params, :supports_all_drives),
+      useDomainAdminAccess: Data.get(params, :use_domain_admin_access)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `permissions.update`."
+  def update_permission_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_permission_fields()),
+      removeExpiration: Data.get(params, :remove_expiration),
+      transferOwnership: Data.get(params, :transfer_ownership),
+      supportsAllDrives: Data.get(params, :supports_all_drives),
+      useDomainAdminAccess: Data.get(params, :use_domain_admin_access)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `permissions.delete`."
+  def delete_permission_params(params) do
+    %{
+      supportsAllDrives: Data.get(params, :supports_all_drives),
+      useDomainAdminAccess: Data.get(params, :use_domain_admin_access)
+    }
+    |> Data.compact()
+  end
+
   @doc "Builds a JSON body for permission create requests."
   def permission_body(params) do
     %{
@@ -144,6 +178,54 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
       domain: Data.get(params, :domain),
       allowFileDiscovery: Data.get(params, :allow_file_discovery),
       expirationTime: Data.get(params, :expiration_time)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a JSON body for permission update requests."
+  def permission_update_body(params) do
+    %{
+      role: Data.get(params, :role),
+      allowFileDiscovery: Data.get(params, :allow_file_discovery),
+      expirationTime: Data.get(params, :expiration_time)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `revisions.list`."
+  def list_revisions_params(params) do
+    %{
+      pageSize: Data.get(params, :page_size, 100),
+      pageToken: Data.get(params, :page_token),
+      fields: Data.get(params, :fields, revision_list_fields())
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `revisions.get`."
+  def get_revision_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_revision_fields()),
+      acknowledgeAbuse: Data.get(params, :acknowledge_abuse)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `revisions.update`."
+  def update_revision_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_revision_fields())
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a JSON body for revision update requests."
+  def revision_body(params) do
+    %{
+      keepForever: Data.get(params, :keep_forever),
+      published: Data.get(params, :published),
+      publishAuto: Data.get(params, :publish_auto),
+      publishedOutsideDomain: Data.get(params, :published_outside_domain)
     }
     |> Data.compact()
   end
@@ -228,6 +310,8 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   defp list_fields, do: Fields.file_list()
 
   defp permission_list_fields, do: Fields.permission_list()
+
+  defp revision_list_fields, do: Fields.revision_list()
 
   defp change_list_fields,
     do: "nextPageToken,newStartPageToken,changes(#{default_change_fields()})"

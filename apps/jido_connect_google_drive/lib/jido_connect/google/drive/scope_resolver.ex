@@ -15,7 +15,11 @@ defmodule Jido.Connect.Google.Drive.ScopeResolver do
     "google.drive.file.copy",
     "google.drive.file.update",
     "google.drive.file.delete",
-    "google.drive.permission.create"
+    "google.drive.permission.create",
+    "google.drive.permission.update",
+    "google.drive.permission.delete",
+    "google.drive.revision.update",
+    "google.drive.revision.delete"
   ]
   @watch_actions [
     "google.drive.changes.watch",

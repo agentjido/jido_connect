@@ -2,7 +2,7 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
   @moduledoc "Normalizes Google Drive API payloads into stable package structs."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Google.Drive.{Change, Channel, File, Folder, Permission}
+  alias Jido.Connect.Google.Drive.{Change, Channel, File, Folder, Permission, Revision}
 
   @folder_mime_type "application/vnd.google-apps.folder"
 
@@ -118,6 +118,31 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
   end
 
   def channel(_payload), do: {:error, :invalid_channel_payload}
+
+  @doc "Normalizes a Google Drive revision payload."
+  @spec revision(map()) :: {:ok, Revision.t()} | {:error, term()}
+  def revision(payload) when is_map(payload) do
+    %{
+      revision_id: Data.get(payload, "id"),
+      mime_type: Data.get(payload, "mimeType"),
+      kind: Data.get(payload, "kind"),
+      published?: Data.get(payload, "published", false),
+      keep_forever?: Data.get(payload, "keepForever", false),
+      md5_checksum: Data.get(payload, "md5Checksum"),
+      modified_time: Data.get(payload, "modifiedTime"),
+      publish_auto?: Data.get(payload, "publishAuto", false),
+      published_outside_domain?: Data.get(payload, "publishedOutsideDomain", false),
+      published_link: Data.get(payload, "publishedLink"),
+      size: normalize_integer(Data.get(payload, "size")),
+      original_filename: Data.get(payload, "originalFilename"),
+      last_modifying_user: Data.get(payload, "lastModifyingUser"),
+      export_links: Data.get(payload, "exportLinks", %{})
+    }
+    |> Data.compact()
+    |> Revision.new()
+  end
+
+  def revision(_payload), do: {:error, :invalid_revision_payload}
 
   @doc "Returns true when a Drive payload is a folder."
   @spec folder?(map()) :: boolean()

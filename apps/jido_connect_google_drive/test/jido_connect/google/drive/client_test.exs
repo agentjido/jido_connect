@@ -1,7 +1,16 @@
 defmodule Jido.Connect.Google.Drive.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Google.Drive.{Change, Channel, Client, Fields, File, Folder, Permission}
+  alias Jido.Connect.Google.Drive.{
+    Change,
+    Channel,
+    Client,
+    Fields,
+    File,
+    Folder,
+    Permission,
+    Revision
+  }
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -443,6 +452,199 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
 
     assert permission.permission_id == "perm456"
     assert permission.role == "reader"
+  end
+
+  test "gets file permissions" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/file123/permissions/perm123"
+      assert conn.query_params["supportsAllDrives"] == "true"
+      assert conn.query_params["useDomainAdminAccess"] == "true"
+      assert conn.query_params["fields"] == Fields.permission_metadata()
+
+      Req.Test.json(conn, %{
+        "id" => "perm123",
+        "type" => "user",
+        "role" => "reader",
+        "emailAddress" => "reader@example.com"
+      })
+    end)
+
+    assert {:ok, %Permission{} = permission} =
+             Client.get_permission(
+               %{
+                 file_id: "file123",
+                 permission_id: "perm123",
+                 supports_all_drives: true,
+                 use_domain_admin_access: true
+               },
+               "token"
+             )
+
+    assert permission.permission_id == "perm123"
+    assert permission.role == "reader"
+  end
+
+  test "updates file permissions" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "PATCH"
+      assert conn.request_path == "/v3/files/file123/permissions/perm123"
+      assert conn.query_params["removeExpiration"] == "true"
+      assert conn.query_params["transferOwnership"] == "false"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "role" => "writer",
+               "allowFileDiscovery" => false
+             }
+
+      Req.Test.json(conn, %{
+        "id" => "perm123",
+        "type" => "user",
+        "role" => "writer",
+        "emailAddress" => "reader@example.com"
+      })
+    end)
+
+    assert {:ok, %Permission{} = permission} =
+             Client.update_permission(
+               %{
+                 file_id: "file123",
+                 permission_id: "perm123",
+                 role: "writer",
+                 allow_file_discovery: false,
+                 remove_expiration: true,
+                 transfer_ownership: false
+               },
+               "token"
+             )
+
+    assert permission.permission_id == "perm123"
+    assert permission.role == "writer"
+  end
+
+  test "deletes file permissions" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "DELETE"
+      assert conn.request_path == "/v3/files/file123/permissions/perm123"
+      assert conn.query_params["supportsAllDrives"] == "true"
+      assert conn.query_params["useDomainAdminAccess"] == "false"
+
+      Plug.Conn.resp(conn, 204, "")
+    end)
+
+    assert {:ok, %{file_id: "file123", permission_id: "perm123", deleted?: true}} =
+             Client.delete_permission(
+               %{
+                 file_id: "file123",
+                 permission_id: "perm123",
+                 supports_all_drives: true,
+                 use_domain_admin_access: false
+               },
+               "token"
+             )
+  end
+
+  test "lists file revisions" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/file123/revisions"
+      assert conn.query_params["pageSize"] == "25"
+      assert conn.query_params["pageToken"] == "page-1"
+      assert conn.query_params["fields"] == Fields.revision_list()
+
+      Req.Test.json(conn, %{
+        "revisions" => [
+          %{
+            "id" => "rev1",
+            "mimeType" => "application/pdf",
+            "keepForever" => true,
+            "modifiedTime" => "2026-05-05T12:00:00Z"
+          }
+        ],
+        "nextPageToken" => "next-rev"
+      })
+    end)
+
+    assert {:ok, %{revisions: [%Revision{} = revision], next_page_token: "next-rev"}} =
+             Client.list_revisions(
+               %{file_id: "file123", page_size: 25, page_token: "page-1"},
+               "token"
+             )
+
+    assert revision.revision_id == "rev1"
+    assert revision.keep_forever?
+  end
+
+  test "gets file revisions" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/file123/revisions/rev1"
+      assert conn.query_params["acknowledgeAbuse"] == "false"
+      assert conn.query_params["fields"] == Fields.revision_metadata()
+
+      Req.Test.json(conn, %{
+        "id" => "rev1",
+        "mimeType" => "application/pdf",
+        "published" => false,
+        "keepForever" => true,
+        "size" => "4096"
+      })
+    end)
+
+    assert {:ok, %Revision{} = revision} =
+             Client.get_revision(
+               %{file_id: "file123", revision_id: "rev1", acknowledge_abuse: false},
+               "token"
+             )
+
+    assert revision.revision_id == "rev1"
+    assert revision.size == 4096
+  end
+
+  test "updates file revisions" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "PATCH"
+      assert conn.request_path == "/v3/files/file123/revisions/rev1"
+      assert conn.query_params["fields"] == Fields.revision_metadata()
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "keepForever" => true,
+               "published" => false
+             }
+
+      Req.Test.json(conn, %{
+        "id" => "rev1",
+        "mimeType" => "application/pdf",
+        "published" => false,
+        "keepForever" => true
+      })
+    end)
+
+    assert {:ok, %Revision{} = revision} =
+             Client.update_revision(
+               %{file_id: "file123", revision_id: "rev1", keep_forever: true, published: false},
+               "token"
+             )
+
+    assert revision.revision_id == "rev1"
+    assert revision.keep_forever?
+    refute revision.published?
+  end
+
+  test "deletes file revisions" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "DELETE"
+      assert conn.request_path == "/v3/files/file123/revisions/rev1"
+
+      Plug.Conn.resp(conn, 204, "")
+    end)
+
+    assert {:ok, %{file_id: "file123", revision_id: "rev1", deleted?: true}} =
+             Client.delete_revision(%{file_id: "file123", revision_id: "rev1"}, "token")
   end
 
   test "gets a change start page token" do

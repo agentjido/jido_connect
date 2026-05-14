@@ -37,8 +37,13 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
     assert "google.drive.file.export" in ids
     assert "google.drive.file.changed" in ids
     assert "google.drive.file.changed.push" in ids
+    assert "google.drive.permission.get" in ids
+    assert "google.drive.revisions.list" in ids
+    assert "google.drive.revision.get" in ids
     refute "google.drive.changes.watch" in ids
     refute "google.drive.file.create" in ids
+    refute "google.drive.permission.update" in ids
+    refute "google.drive.revision.delete" in ids
 
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.drive.file.get",
@@ -76,6 +81,20 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("google.drive.permission.create",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_file_writer
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.drive.permission.update",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_file_writer
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.drive.revision.delete",
                modules: [Drive],
                packs: Drive.catalog_packs(),
                pack: :google_drive_file_writer
