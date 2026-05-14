@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-nmq"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-jxj"
+  ],
   "created": "2026-05-14T14:35:50Z",
   "description": "Implement jido_connect_google_forms as a provider-specific Google Forms connector package using the shared Google foundation. Cover form reads, creates, batch updates, response reads, watch lifecycle/triggers, catalog packs, and docs.",
   "id": "jido_con-uoi",
@@ -12,5 +14,5 @@
   "status": "open",
   "title": "[G16] Google Forms Connector",
   "type": "epic",
-  "updated_at": "2026-05-14T14:35:57Z"
+  "updated_at": "2026-05-14T14:35:58Z"
 }
