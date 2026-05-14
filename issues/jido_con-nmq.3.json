@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-nmq.2"
+  ],
   "blocks": [],
   "created": "2026-05-14T14:35:47Z",
   "description": "Create Beadwork follow-up tasks for the highest-value gaps discovered in the current package audit, grouped under the appropriate package or hardening epic.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G13-S03] Create follow-up tickets for current package gaps",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:47Z"
+  "updated_at": "2026-05-14T14:35:52Z"
 }
