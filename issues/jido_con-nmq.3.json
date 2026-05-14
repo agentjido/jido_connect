@@ -9,11 +9,14 @@
   "created": "2026-05-14T14:35:47Z",
   "description": "Create Beadwork follow-up tasks for the highest-value gaps discovered in the current package audit, grouped under the appropriate package or hardening epic.",
   "id": "jido_con-nmq.3",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-nmq",
   "priority": 1,
   "status": "open",
   "title": "[G13-S03] Create follow-up tickets for current package gaps",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:53Z"
+  "updated_at": "2026-05-14T14:35:59Z"
 }
