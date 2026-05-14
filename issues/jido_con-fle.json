@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-nmq"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-jxj"
+  ],
   "created": "2026-05-14T14:35:48Z",
   "description": "Implement jido_connect_google_docs as a provider-specific Google Docs connector package using the shared Google foundation. Cover document reads, creates, batch updates, normalized structs, catalog packs, docs, and Drive-backed trigger/export strategy where appropriate.",
   "id": "jido_con-fle",
@@ -12,5 +14,5 @@
   "status": "open",
   "title": "[G14] Google Docs Connector",
   "type": "epic",
-  "updated_at": "2026-05-14T14:35:57Z"
+  "updated_at": "2026-05-14T14:35:58Z"
 }
