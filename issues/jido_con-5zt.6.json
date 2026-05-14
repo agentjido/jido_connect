@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5zt.5"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5zt.7"
+  ],
   "created": "2026-05-14T14:58:12Z",
   "description": "Add Drive revisions list/get/update/delete and permissions get/update/delete action families with service-account profile coverage and risk metadata.",
   "id": "jido_con-5zt.6",

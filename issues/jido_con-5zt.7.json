@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-5zt.6"
+  ],
   "blocks": [],
   "created": "2026-05-14T14:58:13Z",
   "description": "Add Drive comments and replies CRUD actions plus shared-drive list/get/create/update/delete/hide/unhide actions where appropriate for Workspace hosts.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G18-S07] Add Drive comments replies and shared-drive actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:58:15Z"
+  "updated_at": "2026-05-14T14:58:18Z"
 }
