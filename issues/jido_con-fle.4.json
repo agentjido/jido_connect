@@ -9,11 +9,14 @@
   "created": "2026-05-14T14:35:48Z",
   "description": "Implement provider-specific document batchUpdate actions with safe schema boundaries for text/style/table/image operations where practical.",
   "id": "jido_con-fle.4",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-fle",
   "priority": 1,
   "status": "open",
   "title": "[G14-S04] Implement document batch update actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:54Z"
+  "updated_at": "2026-05-14T14:36:01Z"
 }
