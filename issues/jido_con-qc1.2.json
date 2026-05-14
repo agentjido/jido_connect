@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-qc1.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-qc1.3"
+  ],
   "created": "2026-05-14T14:35:49Z",
   "description": "Add normalized presentation, slide/page, page element, thumbnail, and batch update result structs with representative fixtures.",
   "id": "jido_con-qc1.2",
