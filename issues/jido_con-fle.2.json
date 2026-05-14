@@ -9,11 +9,14 @@
   "created": "2026-05-14T14:35:48Z",
   "description": "Add normalized document, tab/body/content, revision-safe request/result structs and fixture coverage for representative Google Docs payloads.",
   "id": "jido_con-fle.2",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-fle",
   "priority": 1,
   "status": "open",
   "title": "[G14-S02] Add Docs normalized structs and schemas",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:53Z"
+  "updated_at": "2026-05-14T14:36:00Z"
 }
