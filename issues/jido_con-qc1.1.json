@@ -7,11 +7,14 @@
   "created": "2026-05-14T14:35:49Z",
   "description": "Add the umbrella app, mix config, package README, provider module, catalog-pack shell, AGENTS guidance, and baseline compile/test wiring for Google Slides.",
   "id": "jido_con-qc1.1",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-qc1",
   "priority": 1,
   "status": "open",
   "title": "[G15-S01] Scaffold jido_connect_google_slides",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:54Z"
+  "updated_at": "2026-05-14T14:36:01Z"
 }
