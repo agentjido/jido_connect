@@ -9,10 +9,18 @@ added.
 
 ## Status
 
-This scaffold declares the provider package, user OAuth profile, initial Meet
-scope resolver, and generated Jido plugin shell. Meeting-space, conference
-record, recording/transcript, trigger, and catalog-pack work is intentionally
-split into later Beadwork tasks.
+This scaffold declares the provider package, user OAuth profile, Meet scope
+resolver, generated Jido plugin shell, and normalized Zoi-backed structs.
+Meeting-space, conference record, recording/transcript, trigger, and
+catalog-pack work is intentionally split into later Beadwork tasks.
+
+## Normalized Structs
+
+- `Jido.Connect.Google.Meet.Space`
+- `Jido.Connect.Google.Meet.ConferenceRecord`
+- `Jido.Connect.Google.Meet.Participant`
+- `Jido.Connect.Google.Meet.Recording`
+- `Jido.Connect.Google.Meet.Transcript`
 
 ## OAuth Scopes
 
