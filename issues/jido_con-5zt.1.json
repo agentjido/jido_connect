@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-nmq.5"
+  ],
   "blocks": [],
   "created": "2026-05-14T14:58:11Z",
   "description": "Add provider-specific Sheets actions for spreadsheet create, values batchGet, values batchUpdate, and values batchClear with focused Zoi schemas, risk metadata, fixtures, and catalog placement.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G18-S01] Add Sheets spreadsheet create and value batch actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:58:14Z"
+  "updated_at": "2026-05-14T14:58:16Z"
 }

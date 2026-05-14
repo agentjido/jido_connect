@@ -4,7 +4,8 @@
     "jido_con-nmq.4"
   ],
   "blocks": [
-    "jido_con-5zt"
+    "jido_con-5zt",
+    "jido_con-5zt.1"
   ],
   "created": "2026-05-14T14:35:48Z",
   "description": "Update Beadwork dependencies and comments so the cross-Google hardening/demo epic waits on the completed audit and newly accepted Google package epics.",
