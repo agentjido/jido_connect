@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-5zt.7"
   ],
+  "closed_at": "2026-05-14T16:59:44Z",
+  "close_reason": "Added Drive revision and permission lifecycle actions in PR #17",
   "created": "2026-05-14T14:58:12Z",
   "description": "Add Drive revisions list/get/update/delete and permissions get/update/delete action families with service-account profile coverage and risk metadata.",
   "id": "jido_con-5zt.6",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S06] Add Drive revision and permission lifecycle actions",
   "type": "task",
-  "updated_at": "2026-05-14T16:44:54Z"
+  "updated_at": "2026-05-14T16:59:44Z"
 }
