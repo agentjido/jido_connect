@@ -45,8 +45,9 @@ defmodule Jido.Connect.Google.Connections do
   @doc """
   Builds metadata for a service-account connection.
 
-  Service-account token minting is intentionally not implemented in this
-  milestone slice. This helper only gives hosts a consistent connection shape.
+  Host applications still own durable credential storage. Use
+  `Jido.Connect.Google.ServiceAccount.credential_lease/3` with the host-owned
+  credential payload to mint a short-lived access-token lease.
   """
   @spec service_account_connection(map(), keyword()) :: {:ok, Connection.t()} | {:error, term()}
   def service_account_connection(attrs, opts) when is_map(attrs) and is_list(opts) do
@@ -79,7 +80,9 @@ defmodule Jido.Connect.Google.Connections do
   @doc """
   Builds metadata for a domain-delegated service-account connection.
 
-  Hosts still own domain-wide delegation setup and token minting.
+  Hosts still own Workspace domain-wide delegation setup and durable credential
+  storage. Use `Jido.Connect.Google.ServiceAccount.credential_lease/3` to mint
+  a delegated short-lived access-token lease.
   """
   @spec domain_delegated_service_account_connection(map(), keyword()) ::
           {:ok, Connection.t()} | {:error, term()}

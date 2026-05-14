@@ -25,7 +25,13 @@ defmodule Jido.Connect.Dsl.Sections do
   defp auth_section do
     %Spark.Dsl.Section{
       name: :auth,
-      entities: [Auth.oauth2(), Auth.api_key(), Auth.app_installation()]
+      entities: [
+        Auth.oauth2(),
+        Auth.api_key(),
+        Auth.app_installation(),
+        Auth.service_account(),
+        Auth.domain_delegated_service_account()
+      ]
     }
   end
 

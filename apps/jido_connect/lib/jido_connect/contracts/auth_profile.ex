@@ -5,7 +5,15 @@ defmodule Jido.Connect.AuthProfile do
             __MODULE__,
             %{
               id: Zoi.atom(),
-              kind: Zoi.enum([:oauth2, :api_key, :app_installation, :none]),
+              kind:
+                Zoi.enum([
+                  :oauth2,
+                  :api_key,
+                  :app_installation,
+                  :service_account,
+                  :domain_delegated_service_account,
+                  :none
+                ]),
               owner: Zoi.enum([:user, :tenant, :org, :system, :installation, :app_user]),
               subject: Zoi.atom(),
               label: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),

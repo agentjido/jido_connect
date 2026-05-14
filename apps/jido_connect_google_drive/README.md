@@ -28,6 +28,19 @@ The change poller initializes from Drive `startPageToken` without replaying
 history, then advances checkpoints through `nextPageToken` or
 `newStartPageToken`.
 
+## Auth Profiles
+
+Drive declares user OAuth and Google service-account profiles:
+
+- `:user` for app-user OAuth authorization-code grants.
+- `:service_account` for server-owned service accounts.
+- `:domain_delegated_service_account` for Workspace domain-wide delegation.
+
+Every Drive action and trigger advertises these profiles through the Jido
+Connect action/trigger catalog. Service-account token minting lives in
+`jido_connect_google`; Drive stays responsible for Drive-specific scopes and
+endpoint behavior.
+
 ## Catalog Packs
 
 - `:google_drive_readonly` includes metadata reads, content reads, permission

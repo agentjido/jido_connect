@@ -24,7 +24,13 @@ defmodule Jido.Connect do
   @typedoc "Owner type for durable host-owned connections and credential leases."
   @type owner_type :: :user | :tenant | :org | :system | :installation | :app_user
   @typedoc "Auth profile kind supported by the core contract."
-  @type auth_kind :: :oauth2 | :api_key | :app_installation | :none
+  @type auth_kind ::
+          :oauth2
+          | :api_key
+          | :app_installation
+          | :service_account
+          | :domain_delegated_service_account
+          | :none
   @typedoc "Trigger transport supported by generated sensors."
   @type trigger_kind :: :webhook | :poll
   @typedoc "Provider module implementing `integration/0` or an already compiled spec."

@@ -50,7 +50,6 @@ defmodule Jido.Connect.Google.AuthProfiles do
       credential_fields: [:client_email, :private_key, :private_key_id],
       lease_fields: [:access_token],
       default_scopes: [],
-      implemented?: false,
       metadata: %{credential_mode: :service_account}
     })
   end
@@ -66,7 +65,6 @@ defmodule Jido.Connect.Google.AuthProfiles do
       credential_fields: [:client_email, :private_key, :private_key_id, :subject],
       lease_fields: [:access_token],
       default_scopes: [],
-      implemented?: false,
       metadata: %{credential_mode: :domain_delegated_service_account}
     })
   end

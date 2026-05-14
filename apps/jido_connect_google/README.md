@@ -13,6 +13,7 @@ This package owns:
 - Google auth profile constants and metadata.
 - Google account/profile normalization.
 - OAuth authorization URL and token exchange helpers.
+- Service-account JWT bearer token minting helpers.
 - Credential lease helpers for short-lived Google access tokens.
 - Shared Google scope, pagination, transport, and error helpers.
 
@@ -59,10 +60,9 @@ The shared package models three Google auth profiles:
 - `:service_account` for server-owned Google service accounts.
 - `:domain_delegated_service_account` for Workspace domain-wide delegation.
 
-Only user OAuth token exchange and refresh helpers are implemented in the first
-foundation slice. Service-account and domain-delegated profiles are modeled so
-product packages can declare future support without pretending token minting is
-complete.
+All three profiles can mint short-lived access-token leases. Host applications
+still own durable credential storage, OAuth callback state, and Workspace
+domain-wide delegation configuration.
 
 ```elixir
 Jido.Connect.Google.auth_profiles()
@@ -110,6 +110,42 @@ Refresh a token from host-owned durable credential storage:
     client_id: System.fetch_env!("GOOGLE_CLIENT_ID"),
     client_secret: System.fetch_env!("GOOGLE_CLIENT_SECRET")
   )
+```
+
+## Service Accounts
+
+Mint a service-account access-token lease from a host-owned service-account
+JSON credential payload:
+
+```elixir
+credentials = Jason.decode!(File.read!("service-account.json"))
+scopes = ["https://www.googleapis.com/auth/drive.metadata.readonly"]
+
+{:ok, connection} =
+  Jido.Connect.Google.Connections.service_account_connection(credentials,
+    tenant_id: "tenant_1",
+    scopes: scopes
+  )
+
+{:ok, lease} =
+  Jido.Connect.Google.ServiceAccount.credential_lease(connection, credentials)
+```
+
+For Workspace domain-wide delegation, shape the connection with the delegated
+subject. Google Admin Console delegation and API enablement remain host-owned
+setup:
+
+```elixir
+{:ok, connection} =
+  Jido.Connect.Google.Connections.domain_delegated_service_account_connection(
+    credentials,
+    tenant_id: "tenant_1",
+    subject: "admin@example.com",
+    scopes: scopes
+  )
+
+{:ok, lease} =
+  Jido.Connect.Google.ServiceAccount.credential_lease(connection, credentials)
 ```
 
 ## Connections And Leases

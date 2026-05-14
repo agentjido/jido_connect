@@ -383,13 +383,39 @@ defmodule Jido.Connect.Google.DriveTest do
       module_namespace: Jido.Connect.Google.Drive
     )
 
-    assert [%{id: :user, kind: :oauth2, refresh?: true, pkce?: true} = profile] =
-             spec.auth_profiles
+    auth_profiles = Map.new(spec.auth_profiles, &{&1.id, &1})
+
+    assert %{user: %{kind: :oauth2}, service_account: %{kind: :service_account}} =
+             auth_profiles
+
+    assert %{
+             id: :user,
+             kind: :oauth2,
+             refresh?: true,
+             pkce?: true
+           } = profile = auth_profiles.user
 
     assert "openid" in profile.default_scopes
     assert "https://www.googleapis.com/auth/drive.metadata.readonly" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/drive.file" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/drive.readonly" in profile.optional_scopes
+
+    assert auth_profiles.service_account.setup == :google_service_account_jwt
+
+    assert auth_profiles.service_account.credential_fields == [
+             :client_email,
+             :private_key,
+             :private_key_id
+           ]
+
+    assert auth_profiles.domain_delegated_service_account.setup == :google_domain_wide_delegation
+
+    assert auth_profiles.domain_delegated_service_account.credential_fields == [
+             :client_email,
+             :private_key,
+             :private_key_id,
+             :subject
+           ]
 
     assert Enum.map(spec.actions, & &1.id) == [
              "google.drive.files.list",
@@ -412,6 +438,16 @@ defmodule Jido.Connect.Google.DriveTest do
     create_permission = Enum.find(spec.actions, &(&1.id == "google.drive.permission.create"))
     assert create_permission.risk == :external_write
     assert create_permission.confirmation == :always
+
+    for operation <- spec.actions ++ spec.triggers do
+      assert operation.auth_profile == :user
+
+      assert operation.auth_profiles == [
+               :user,
+               :service_account,
+               :domain_delegated_service_account
+             ]
+    end
 
     assert Enum.find(create_permission.input, &(&1.name == :type)).enum == [
              "user",
@@ -502,6 +538,25 @@ defmodule Jido.Connect.Google.DriveTest do
               ],
               next_page_token: "next"
             }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.files.list",
+               %{query: "mimeType = 'application/pdf'"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes Drive actions with service-account leases" do
+    {context, lease} =
+      context_and_lease(
+        profile: :service_account,
+        owner_type: :system,
+        owner_id: "svc@example.iam.gserviceaccount.com",
+        scopes: ["https://www.googleapis.com/auth/drive.metadata.readonly"]
+      )
+
+    assert {:ok, %{files: [%{file_id: "file123", name: "Budget.pdf"}]}} =
              Connect.invoke(
                Drive.integration(),
                "google.drive.files.list",
@@ -950,14 +1005,18 @@ defmodule Jido.Connect.Google.DriveTest do
         "https://www.googleapis.com/auth/drive.metadata.readonly"
       ])
 
+    profile = Keyword.get(opts, :profile, :user)
+    owner_type = Keyword.get(opts, :owner_type, :app_user)
+    owner_id = Keyword.get(opts, :owner_id, "user_1")
+
     connection =
       Connect.Connection.new!(%{
         id: "conn_1",
         provider: :google,
-        profile: :user,
+        profile: profile,
         tenant_id: "tenant_1",
-        owner_type: :app_user,
-        owner_id: "user_1",
+        owner_type: owner_type,
+        owner_id: owner_id,
         status: :connected,
         scopes: scopes
       })
@@ -973,7 +1032,7 @@ defmodule Jido.Connect.Google.DriveTest do
       Connect.CredentialLease.new!(%{
         connection_id: "conn_1",
         provider: :google,
-        profile: :user,
+        profile: profile,
         expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
         fields: %{access_token: "token", google_drive_client: FakeDriveClient},
         scopes: scopes

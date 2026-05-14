@@ -8,6 +8,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Permissions do
   @permission_types ["user", "group", "domain", "anyone"]
   @permission_roles ["owner", "organizer", "fileOrganizer", "writer", "commenter", "reader"]
   @scope_resolver Jido.Connect.Google.Drive.ScopeResolver
+  @auth_profiles [:user, :service_account, :domain_delegated_service_account]
 
   actions do
     action :list_permissions do
@@ -21,7 +22,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Permissions do
       effect(:read)
 
       access do
-        auth(:user)
+        auth(@auth_profiles, default: :user)
         scopes([@metadata_scope], resolver: @scope_resolver)
       end
 
@@ -51,7 +52,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Permissions do
       effect(:external_write, confirmation: :always)
 
       access do
-        auth(:user)
+        auth(@auth_profiles, default: :user)
         scopes([@file_scope], resolver: @scope_resolver)
       end
 

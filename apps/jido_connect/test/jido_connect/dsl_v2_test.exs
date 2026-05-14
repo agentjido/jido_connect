@@ -157,6 +157,52 @@ defmodule Jido.Connect.DslV2Test do
     end
   end
 
+  defmodule ServiceAccountIntegration do
+    use Jido.Connect
+
+    integration do
+      id :service_account_demo
+      name "Service Account Demo"
+      description "Demo connector for service-account auth coverage."
+      category :productivity
+      docs ["https://example.test/docs"]
+    end
+
+    auth do
+      service_account :service_account do
+        owner :system
+        subject :service_account
+        label "Service account"
+        credential_fields [:client_email, :private_key]
+        lease_fields [:access_token]
+      end
+
+      domain_delegated_service_account :domain_delegated_service_account do
+        owner :tenant
+        subject :workspace_user
+        label "Domain delegated service account"
+        setup :google_domain_wide_delegation
+        credential_fields [:client_email, :private_key, :subject]
+        lease_fields [:access_token]
+      end
+    end
+
+    actions do
+      action :list_items do
+        id "service.item.list"
+        resource :item
+        verb :list
+        data_classification :workspace_metadata
+        handler Handler
+        effect :read
+
+        access do
+          auth [:service_account, :domain_delegated_service_account], default: :service_account
+        end
+      end
+    end
+  end
+
   test "V2 DSL compiles catalog, schemas, policy, requirements, and webhook metadata" do
     spec = Integration.integration()
 
@@ -212,6 +258,25 @@ defmodule Jido.Connect.DslV2Test do
              sensors: [Jido.Connect.DslV2Test.Integration.Sensors.ItemCreated],
              plugin: Jido.Connect.DslV2Test.Integration.Plugin
            }
+  end
+
+  test "V2 DSL compiles service-account auth profiles" do
+    spec = ServiceAccountIntegration.integration()
+
+    assert [
+             %{id: :service_account, kind: :service_account, setup: :service_account},
+             %{
+               id: :domain_delegated_service_account,
+               kind: :domain_delegated_service_account,
+               setup: :google_domain_wide_delegation
+             }
+           ] = spec.auth_profiles
+
+    assert {:ok,
+            %{
+              auth_profile: :service_account,
+              auth_profiles: [:service_account, :domain_delegated_service_account]
+            }} = Connect.action(spec, "service.item.list")
   end
 
   test "V2 projections expose policy and resource metadata" do

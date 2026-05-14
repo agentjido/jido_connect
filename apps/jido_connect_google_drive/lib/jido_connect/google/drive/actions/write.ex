@@ -5,6 +5,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Write do
 
   @file_scope "https://www.googleapis.com/auth/drive.file"
   @scope_resolver Jido.Connect.Google.Drive.ScopeResolver
+  @auth_profiles [:user, :service_account, :domain_delegated_service_account]
 
   actions do
     action :create_file do
@@ -18,7 +19,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Write do
       effect(:write, confirmation: :required_for_ai)
 
       access do
-        auth(:user)
+        auth(@auth_profiles, default: :user)
         scopes([@file_scope], resolver: @scope_resolver)
       end
 
@@ -48,7 +49,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Write do
       effect(:write, confirmation: :required_for_ai)
 
       access do
-        auth(:user)
+        auth(@auth_profiles, default: :user)
         scopes([@file_scope], resolver: @scope_resolver)
       end
 
@@ -75,7 +76,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Write do
       effect(:write, confirmation: :required_for_ai)
 
       access do
-        auth(:user)
+        auth(@auth_profiles, default: :user)
         scopes([@file_scope], resolver: @scope_resolver)
       end
 
@@ -108,7 +109,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Write do
       effect(:write, confirmation: :required_for_ai)
 
       access do
-        auth(:user)
+        auth(@auth_profiles, default: :user)
         scopes([@file_scope], resolver: @scope_resolver)
       end
 

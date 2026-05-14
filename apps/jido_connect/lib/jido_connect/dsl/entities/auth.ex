@@ -74,6 +74,28 @@ defmodule Jido.Connect.Dsl.Entities.Auth do
     }
   end
 
+  def service_account do
+    %Spark.Dsl.Entity{
+      name: :service_account,
+      target: Dsl.AuthProfile,
+      args: [:id],
+      identifier: :id,
+      auto_set_fields: [kind: :service_account],
+      schema: credential_auth_schema()
+    }
+  end
+
+  def domain_delegated_service_account do
+    %Spark.Dsl.Entity{
+      name: :domain_delegated_service_account,
+      target: Dsl.AuthProfile,
+      args: [:id],
+      identifier: :id,
+      auto_set_fields: [kind: :domain_delegated_service_account],
+      schema: credential_auth_schema()
+    }
+  end
+
   defp access_auth do
     %Spark.Dsl.Entity{
       name: :auth,

@@ -6,6 +6,7 @@ defmodule Jido.Connect.Google.Drive.Actions.FileContent do
   @file_scope "https://www.googleapis.com/auth/drive.file"
   @readonly_scope "https://www.googleapis.com/auth/drive.readonly"
   @scope_resolver Jido.Connect.Google.Drive.ScopeResolver
+  @auth_profiles [:user, :service_account, :domain_delegated_service_account]
 
   actions do
     action :export_file do
@@ -19,7 +20,7 @@ defmodule Jido.Connect.Google.Drive.Actions.FileContent do
       effect(:read)
 
       access do
-        auth(:user)
+        auth(@auth_profiles, default: :user)
         scopes([@readonly_scope], resolver: @scope_resolver)
       end
 
@@ -44,7 +45,7 @@ defmodule Jido.Connect.Google.Drive.Actions.FileContent do
       effect(:read)
 
       access do
-        auth(:user)
+        auth(@auth_profiles, default: :user)
         scopes([@readonly_scope], resolver: @scope_resolver)
       end
 
@@ -69,7 +70,7 @@ defmodule Jido.Connect.Google.Drive.Actions.FileContent do
       effect(:destructive, confirmation: :always)
 
       access do
-        auth(:user)
+        auth(@auth_profiles, default: :user)
         scopes([@file_scope], resolver: @scope_resolver)
       end
 

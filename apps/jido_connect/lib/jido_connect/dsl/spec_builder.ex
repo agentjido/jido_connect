@@ -335,6 +335,8 @@ defmodule Jido.Connect.Dsl.SpecBuilder do
   defp setup_for(:oauth2), do: :oauth2_authorization_code
   defp setup_for(:app_installation), do: :app_installation
   defp setup_for(:api_key), do: :api_key
+  defp setup_for(:service_account), do: :service_account
+  defp setup_for(:domain_delegated_service_account), do: :domain_delegated_service_account
   defp setup_for(:none), do: :none
 
   defp fields(%Dsl.FieldGroup{fields: fields}), do: fields || []

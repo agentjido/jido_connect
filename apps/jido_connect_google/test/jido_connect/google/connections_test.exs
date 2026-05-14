@@ -29,7 +29,7 @@ defmodule Jido.Connect.Google.ConnectionsTest do
     assert connection.metadata.mode == :google_oauth
   end
 
-  test "builds service account connection metadata without token minting" do
+  test "builds service account connection metadata" do
     assert {:ok, %Connection{} = connection} =
              Connections.service_account_connection(
                %{"client_email" => "svc@example.iam.gserviceaccount.com", "project_id" => "p1"},

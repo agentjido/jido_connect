@@ -52,6 +52,30 @@ defmodule Jido.Connect.Google.Drive do
       refresh?(true)
       revoke?(true)
     end
+
+    service_account :service_account do
+      owner(:system)
+      subject(:service_account)
+      label("Google service account")
+      setup(:google_service_account_jwt)
+      credential_fields([:client_email, :private_key, :private_key_id])
+      lease_fields([:access_token])
+      scopes(Jido.Connect.Google.Scopes.product(:drive))
+      default_scopes([])
+      optional_scopes(Jido.Connect.Google.Scopes.product(:drive))
+    end
+
+    domain_delegated_service_account :domain_delegated_service_account do
+      owner(:tenant)
+      subject(:workspace_user)
+      label("Google domain-delegated service account")
+      setup(:google_domain_wide_delegation)
+      credential_fields([:client_email, :private_key, :private_key_id, :subject])
+      lease_fields([:access_token])
+      scopes(Jido.Connect.Google.Scopes.product(:drive))
+      default_scopes([])
+      optional_scopes(Jido.Connect.Google.Scopes.product(:drive))
+    end
   end
 
   defdelegate catalog_packs, to: Jido.Connect.Google.Drive.CatalogPacks, as: :all

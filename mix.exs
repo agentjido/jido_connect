@@ -38,8 +38,8 @@ defmodule JidoConnect.MixProject do
     [
       q: ["quality"],
       quality: [
-        "format --check-formatted",
         "compile --warnings-as-errors",
+        "format --check-formatted",
         "test --cover"
       ]
     ]

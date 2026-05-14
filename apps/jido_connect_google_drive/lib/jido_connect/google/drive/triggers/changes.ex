@@ -5,6 +5,7 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
 
   @metadata_scope "https://www.googleapis.com/auth/drive.metadata.readonly"
   @scope_resolver Jido.Connect.Google.Drive.ScopeResolver
+  @auth_profiles [:user, :service_account, :domain_delegated_service_account]
 
   triggers do
     poll :file_changed do
@@ -20,7 +21,7 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
       handler(Jido.Connect.Google.Drive.Handlers.Triggers.FileChangedPoller)
 
       access do
-        auth(:user)
+        auth(@auth_profiles, default: :user)
         scopes([@metadata_scope], resolver: @scope_resolver)
       end
 

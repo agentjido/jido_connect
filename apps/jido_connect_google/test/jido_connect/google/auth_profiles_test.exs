@@ -3,7 +3,7 @@ defmodule Jido.Connect.Google.AuthProfilesTest do
 
   alias Jido.Connect.Google.{AuthProfile, AuthProfiles}
 
-  test "models user and future service account auth profiles" do
+  test "models user and service account auth profiles" do
     assert AuthProfiles.ids() == [:user, :service_account, :domain_delegated_service_account]
     assert Enum.map(AuthProfiles.all(), & &1.id) == AuthProfiles.ids()
 
@@ -19,14 +19,14 @@ defmodule Jido.Connect.Google.AuthProfilesTest do
     assert %AuthProfile{
              id: :service_account,
              kind: :service_account,
-             implemented?: false
+             implemented?: true
            } = AuthProfiles.fetch!(:service_account)
 
     assert %AuthProfile{
              id: :domain_delegated_service_account,
              kind: :domain_delegated_service_account,
              owner: :tenant,
-             implemented?: false
+             implemented?: true
            } = AuthProfiles.fetch!(:domain_delegated_service_account)
   end
 
