@@ -5,8 +5,9 @@ provider packages in the `jido_connect` ecosystem.
 
 It is intentionally not a product connector. Packages such as
 `jido_connect_google_sheets`, `jido_connect_gmail`,
-`jido_connect_google_drive`, and `jido_connect_google_calendar` should depend on
-this package for common Google contracts and helpers.
+`jido_connect_google_drive`, `jido_connect_google_calendar`, and
+`jido_connect_google_analytics` should depend on this package for common Google
+contracts and helpers.
 
 This package owns:
 
@@ -48,6 +49,7 @@ own package:
 - Gmail logic belongs in `jido_connect_gmail`.
 - Drive logic belongs in `jido_connect_google_drive`.
 - Calendar logic belongs in `jido_connect_google_calendar`.
+- Analytics logic belongs in `jido_connect_google_analytics`.
 
 Shared Google contracts and helpers belong here when they are genuinely
 reusable across product packages.
