@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-54m.4"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-54m.6"
+  ],
   "created": "2026-05-14T14:35:52Z",
   "description": "Determine whether Google Tasks metadata supports reliable changed/upcoming-task polling; implement a poll trigger only if checkpoint semantics are sound.",
   "id": "jido_con-54m.5",

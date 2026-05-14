@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-54m.5"
+  ],
   "blocks": [],
   "created": "2026-05-14T14:35:52Z",
   "description": "Add readonly/manager catalog packs, README usage, scope matrix tests, generated module checks, and live-test guidance.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G17-S06] Add Tasks catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:52Z"
+  "updated_at": "2026-05-14T14:35:56Z"
 }
