@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-5zt.2"
   ],
+  "closed_at": "2026-05-14T15:20:28Z",
+  "close_reason": "Added Sheets spreadsheet create and value batch actions in PR #12",
   "created": "2026-05-14T14:58:11Z",
   "description": "Add provider-specific Sheets actions for spreadsheet create, values batchGet, values batchUpdate, and values batchClear with focused Zoi schemas, risk metadata, fixtures, and catalog placement.",
   "id": "jido_con-5zt.1",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S01] Add Sheets spreadsheet create and value batch actions",
   "type": "task",
-  "updated_at": "2026-05-14T15:04:22Z"
+  "updated_at": "2026-05-14T15:20:28Z"
 }
