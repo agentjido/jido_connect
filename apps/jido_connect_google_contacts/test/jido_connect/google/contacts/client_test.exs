@@ -103,6 +103,130 @@ defmodule Jido.Connect.Google.Contacts.ClientTest do
     assert person.resource_name == "people/c123"
   end
 
+  test "batch gets people by resource names" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/people:batchGet"
+      assert conn.query_string =~ "resourceNames"
+      assert conn.query_string =~ "people%2Fc123"
+      assert conn.query_string =~ "people%2Fc456"
+      assert conn.query_params["personFields"] =~ "emailAddresses"
+      assert conn.query_params["fields"] =~ "responses"
+
+      Req.Test.json(conn, %{
+        "responses" => [
+          %{"person" => person_payload(), "status" => %{"code" => 0}}
+        ]
+      })
+    end)
+
+    assert {:ok, %{people: [%Person{} = person], responses: [%{person: %Person{}}]}} =
+             Client.batch_get_people(
+               %{resource_names: ["people/c123", "people/c456"]},
+               "token"
+             )
+
+    assert person.resource_name == "people/c123"
+  end
+
+  test "lists directory people" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/people:listDirectoryPeople"
+      assert conn.query_params["pageSize"] == "100"
+      assert conn.query_params["readMask"] =~ "emailAddresses"
+      assert conn.query_string =~ "DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE"
+      assert conn.query_string =~ "DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT"
+      assert conn.query_params["fields"] =~ "nextSyncToken"
+
+      Req.Test.json(conn, %{
+        "people" => [person_payload()],
+        "nextPageToken" => "directory-next",
+        "nextSyncToken" => "directory-sync"
+      })
+    end)
+
+    assert {:ok,
+            %{
+              people: [%Person{} = person],
+              next_page_token: "directory-next",
+              next_sync_token: "directory-sync"
+            }} = Client.list_directory_people(%{}, "token")
+
+    assert person.resource_name == "people/c123"
+  end
+
+  test "searches directory people" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/people:searchDirectoryPeople"
+      assert conn.query_params["query"] == "Ada"
+      assert conn.query_params["pageSize"] == "10"
+      assert conn.query_string =~ "DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE"
+      assert conn.query_params["fields"] =~ "totalSize"
+
+      Req.Test.json(conn, %{
+        "people" => [person_payload()],
+        "nextPageToken" => "directory-next",
+        "totalSize" => 1
+      })
+    end)
+
+    assert {:ok, %{people: [%Person{} = person], total_size: 1}} =
+             Client.search_directory_people(%{query: "Ada"}, "token")
+
+    assert person.resource_name == "people/c123"
+  end
+
+  test "lists other contacts" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/otherContacts"
+      assert conn.query_params["pageSize"] == "100"
+      assert conn.query_params["readMask"] == "names,emailAddresses,phoneNumbers,photos,metadata"
+      refute conn.query_params["readMask"] =~ "organizations"
+      assert conn.query_params["fields"] =~ "otherContacts"
+
+      Req.Test.json(conn, %{
+        "otherContacts" => [person_payload()],
+        "nextPageToken" => "other-next",
+        "nextSyncToken" => "other-sync",
+        "totalSize" => 1
+      })
+    end)
+
+    assert {:ok,
+            %{
+              people: [%Person{} = person],
+              next_page_token: "other-next",
+              next_sync_token: "other-sync",
+              total_size: 1
+            }} = Client.list_other_contacts(%{}, "token")
+
+    assert person.resource_name == "people/c123"
+  end
+
+  test "searches other contacts" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/otherContacts:search"
+      assert conn.query_params["query"] == "Ada"
+      assert conn.query_params["readMask"] == "names,emailAddresses,phoneNumbers,metadata"
+      refute conn.query_params["readMask"] =~ "organizations"
+
+      Req.Test.json(conn, %{
+        "results" => [
+          %{"person" => person_payload()}
+        ]
+      })
+    end)
+
+    assert {:ok, %{people: [%Person{} = person]}} =
+             Client.search_other_contacts(%{query: "Ada"}, "token")
+
+    assert person.resource_name == "people/c123"
+  end
+
   test "creates contacts" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "POST"
@@ -145,6 +269,34 @@ defmodule Jido.Connect.Google.Contacts.ClientTest do
     assert person.resource_name == "people/c123"
   end
 
+  test "batch creates contacts" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/people:batchCreateContacts"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      decoded = Jason.decode!(body)
+
+      assert decoded["contacts"] == [
+               %{"contactPerson" => %{"names" => [%{"givenName" => "Ada"}]}}
+             ]
+
+      assert decoded["readMask"] =~ "emailAddresses"
+
+      Req.Test.json(conn, %{
+        "createdPeople" => [
+          %{"person" => person_payload(), "status" => %{"code" => 0}}
+        ]
+      })
+    end)
+
+    assert {:ok, %{people: [%Person{} = person]}} =
+             Client.batch_create_contacts(%{contacts: [%{given_name: "Ada"}]}, "token")
+
+    assert person.resource_name == "people/c123"
+  end
+
   test "updates contacts" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "PATCH"
@@ -183,6 +335,45 @@ defmodule Jido.Connect.Google.Contacts.ClientTest do
     assert person.etag == "etag456"
   end
 
+  test "batch updates contacts" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/people:batchUpdateContacts"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "contacts" => %{
+                 "people/c123" => %{
+                   "resourceName" => "people/c123",
+                   "etag" => "etag123",
+                   "names" => [
+                     %{"givenName" => "Ada"}
+                   ]
+                 }
+               },
+               "updateMask" => "names,emailAddresses,phoneNumbers,organizations",
+               "readMask" =>
+                 "names,emailAddresses,phoneNumbers,organizations,memberships,photos,addresses,birthdays,urls,metadata"
+             }
+
+      Req.Test.json(conn, %{
+        "updateResult" => %{
+          "people/c123" => %{"person" => Map.put(person_payload(), "etag", "etag456")}
+        }
+      })
+    end)
+
+    assert {:ok,
+            %{people: [%Person{} = person], responses: %{"people/c123" => %{person: %Person{}}}}} =
+             Client.batch_update_contacts(
+               %{contacts: [%{resource_name: "people/c123", etag: "etag123", given_name: "Ada"}]},
+               "token"
+             )
+
+    assert person.etag == "etag456"
+  end
+
   test "deletes contacts" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "DELETE"
@@ -193,6 +384,47 @@ defmodule Jido.Connect.Google.Contacts.ClientTest do
 
     assert {:ok, %{resource_name: "people/c123", deleted?: true}} =
              Client.delete_contact(%{resource_name: "people/c123"}, "token")
+  end
+
+  test "batch deletes contacts" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/people:batchDeleteContacts"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "resourceNames" => ["people/c123", "people/c456"]
+             }
+
+      Plug.Conn.resp(conn, 200, "")
+    end)
+
+    assert {:ok, %{resource_names: ["people/c123", "people/c456"], deleted?: true}} =
+             Client.batch_delete_contacts(
+               %{resource_names: ["people/c123", "people/c456"]},
+               "token"
+             )
+  end
+
+  test "copies other contacts to my contacts" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/otherContacts/c123:copyOtherContactToMyContactsGroup"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "copyMask" => "names,emailAddresses,phoneNumbers"
+             }
+
+      Req.Test.json(conn, person_payload())
+    end)
+
+    assert {:ok, %Person{} = person} =
+             Client.copy_other_contact(%{resource_name: "otherContacts/c123"}, "token")
+
+    assert person.resource_name == "people/c123"
   end
 
   test "lists contact groups" do

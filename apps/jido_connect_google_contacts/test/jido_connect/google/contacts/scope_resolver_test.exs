@@ -6,6 +6,8 @@ defmodule Jido.Connect.Google.Contacts.ScopeResolverTest do
 
   @contacts_scope "https://www.googleapis.com/auth/contacts"
   @contacts_readonly_scope "https://www.googleapis.com/auth/contacts.readonly"
+  @contacts_other_readonly_scope "https://www.googleapis.com/auth/contacts.other.readonly"
+  @directory_readonly_scope "https://www.googleapis.com/auth/directory.readonly"
   @profile_scope "profile"
 
   test "declares Contacts read and mutation scope matrix" do
@@ -30,6 +32,30 @@ defmodule Jido.Connect.Google.Contacts.ScopeResolverTest do
         label: "contact mutation requires Contacts write scope",
         operation: "google.contacts.person.update",
         granted: [@contacts_readonly_scope],
+        expected: @contacts_scope
+      },
+      %{
+        label: "batch contact mutation requires Contacts write scope",
+        operation: "google.contacts.person.batch_update",
+        granted: [@contacts_readonly_scope],
+        expected: @contacts_scope
+      },
+      %{
+        label: "directory listing requires directory readonly scope",
+        operation: "google.contacts.directory.list",
+        granted: [@contacts_readonly_scope],
+        expected: @directory_readonly_scope
+      },
+      %{
+        label: "other contacts read requires other contacts readonly scope",
+        operation: "google.contacts.other.list",
+        granted: [@contacts_scope],
+        expected: @contacts_other_readonly_scope
+      },
+      %{
+        label: "copying other contacts accepts Contacts write scope",
+        operation: "google.contacts.other.copy",
+        granted: [@contacts_scope],
         expected: @contacts_scope
       },
       %{

@@ -9,14 +9,23 @@ handlers, schemas, normalized structs, and tests in this package.
 ## Status
 
 This package declares the Contacts provider, OAuth profile, Contacts scope
-resolver, normalized person/contact group structs, read and mutation actions,
-and curated catalog packs.
+resolver, normalized person/contact group structs, People API read, batch,
+directory, other-contact, and mutation actions, and curated catalog packs.
 
 ## Actions
 
 - `google.contacts.person.list`
 - `google.contacts.person.get`
 - `google.contacts.person.search`
+- `google.contacts.person.batch_get`
+- `google.contacts.person.batch_create`
+- `google.contacts.person.batch_update`
+- `google.contacts.person.batch_delete`
+- `google.contacts.directory.list`
+- `google.contacts.directory.search`
+- `google.contacts.other.list`
+- `google.contacts.other.search`
+- `google.contacts.other.copy`
 - `google.contacts.person.create`
 - `google.contacts.person.update`
 - `google.contacts.person.delete`
@@ -26,10 +35,12 @@ and curated catalog packs.
 
 ## Catalog Packs
 
-- `:google_contacts_readonly` includes person reads, person search, and contact
-  group reads without mutation tools.
+- `:google_contacts_readonly` includes person reads, person search, batch get,
+  directory reads, other-contact reads, and contact group reads without
+  mutation tools.
 - `:google_contacts_manager` includes the full Contacts surface: read tools,
-  contact create/update/delete, and contact group create/update.
+  batch contact create/update/delete, other-contact copy, contact
+  create/update/delete, and contact group create/update.
 
 ```elixir
 Jido.Connect.Catalog.search_tools("contacts",
@@ -46,3 +57,6 @@ scope catalog:
 
 - `contacts.readonly` for contact reads and search.
 - `contacts` for contact and contact group mutations.
+- `contacts.other.readonly` for other-contact list/search and, where Google
+  allows it, copying an other contact into myContacts.
+- `directory.readonly` for domain directory list/search.

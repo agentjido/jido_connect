@@ -6,6 +6,14 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacksTest do
   alias Jido.Connect.Google.Contacts
 
   defmodule FakeContactsClient do
+    def copy_other_contact(%{resource_name: "otherContacts/c123"}, "token") do
+      {:ok,
+       Contacts.Person.new!(%{
+         resource_name: "people/c123",
+         display_name: "Ada Other"
+       })}
+    end
+
     def create_contact_group(%{name: "Friends"}, "token") do
       {:ok,
        Contacts.Group.new!(%{
@@ -29,21 +37,28 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacksTest do
     assert "google.contacts.person.get" in ids
     assert "google.contacts.person.search" in ids
     assert "google.contacts.group.list" in ids
+    assert "google.contacts.person.batch_get" in ids
+    assert "google.contacts.directory.list" in ids
+    assert "google.contacts.directory.search" in ids
+    assert "google.contacts.other.list" in ids
+    assert "google.contacts.other.search" in ids
     refute "google.contacts.person.create" in ids
+    refute "google.contacts.person.batch_create" in ids
     refute "google.contacts.person.delete" in ids
+    refute "google.contacts.other.copy" in ids
     refute "google.contacts.group.create" in ids
 
     assert {:ok, descriptor} =
-             Catalog.describe_tool("google.contacts.person.get",
+             Catalog.describe_tool("google.contacts.other.search",
                modules: [Contacts],
                packs: Contacts.catalog_packs(),
                pack: :google_contacts_readonly
              )
 
-    assert descriptor.tool.id == "google.contacts.person.get"
+    assert descriptor.tool.id == "google.contacts.other.search"
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
-             Catalog.describe_tool("google.contacts.group.create",
+             Catalog.describe_tool("google.contacts.other.copy",
                modules: [Contacts],
                packs: Contacts.catalog_packs(),
                pack: :google_contacts_readonly
@@ -61,22 +76,22 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacksTest do
     assert descriptor.tool.id == "google.contacts.person.create"
 
     assert {:ok, descriptor} =
-             Catalog.describe_tool("google.contacts.person.delete",
+             Catalog.describe_tool("google.contacts.person.batch_delete",
                modules: [Contacts],
                packs: Contacts.catalog_packs(),
                pack: :google_contacts_manager
              )
 
-    assert descriptor.tool.id == "google.contacts.person.delete"
+    assert descriptor.tool.id == "google.contacts.person.batch_delete"
 
     assert {:ok, descriptor} =
-             Catalog.describe_tool("google.contacts.group.update",
+             Catalog.describe_tool("google.contacts.other.copy",
                modules: [Contacts],
                packs: Contacts.catalog_packs(),
                pack: :google_contacts_manager
              )
 
-    assert descriptor.tool.id == "google.contacts.group.update"
+    assert descriptor.tool.id == "google.contacts.other.copy"
   end
 
   test "pack restrictions apply to call_tool" do
@@ -93,10 +108,21 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacksTest do
                credential_lease: lease
              )
 
+    assert {:ok, %{person: %{resource_name: "people/c123"}}} =
+             Catalog.call_tool(
+               "google.contacts.other.copy",
+               %{resource_name: "otherContacts/c123"},
+               modules: [Contacts],
+               packs: Contacts.catalog_packs(),
+               pack: :google_contacts_manager,
+               context: context,
+               credential_lease: lease
+             )
+
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.call_tool(
-               "google.contacts.group.create",
-               %{name: "Friends"},
+               "google.contacts.other.copy",
+               %{resource_name: "otherContacts/c123"},
                modules: [Contacts],
                packs: Contacts.catalog_packs(),
                pack: :google_contacts_readonly,

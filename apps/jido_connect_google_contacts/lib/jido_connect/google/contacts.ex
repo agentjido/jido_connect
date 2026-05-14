@@ -9,6 +9,9 @@ defmodule Jido.Connect.Google.Contacts do
   use Jido.Connect,
     fragments: [
       Jido.Connect.Google.Contacts.Actions.Read,
+      Jido.Connect.Google.Contacts.Actions.Batch,
+      Jido.Connect.Google.Contacts.Actions.Directory,
+      Jido.Connect.Google.Contacts.Actions.OtherContacts,
       Jido.Connect.Google.Contacts.Actions.Write
     ]
 

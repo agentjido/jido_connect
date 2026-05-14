@@ -30,6 +30,32 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
     "name"
   ]
 
+  @default_directory_sources [
+    "DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE",
+    "DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT"
+  ]
+
+  @default_other_contact_fields [
+    "names",
+    "emailAddresses",
+    "phoneNumbers",
+    "photos",
+    "metadata"
+  ]
+
+  @default_other_contact_search_fields [
+    "names",
+    "emailAddresses",
+    "phoneNumbers",
+    "metadata"
+  ]
+
+  @default_other_contact_copy_fields [
+    "names",
+    "emailAddresses",
+    "phoneNumbers"
+  ]
+
   @doc "Default People API person fields used by Contacts read actions."
   def default_person_fields, do: Enum.join(@default_person_fields, ",")
 
@@ -38,6 +64,19 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
 
   @doc "Default People API contact group fields used by Contacts group actions."
   def default_group_fields, do: Enum.join(@default_group_fields, ",")
+
+  @doc "Default People API directory source types for directory actions."
+  def default_directory_sources, do: @default_directory_sources
+
+  @doc "Default People API other-contact read fields."
+  def default_other_contact_fields, do: Enum.join(@default_other_contact_fields, ",")
+
+  @doc "Default People API other-contact search fields."
+  def default_other_contact_search_fields,
+    do: Enum.join(@default_other_contact_search_fields, ",")
+
+  @doc "Default People API other-contact copy fields."
+  def default_other_contact_copy_fields, do: Enum.join(@default_other_contact_copy_fields, ",")
 
   @doc "Builds query params for `people.connections.list`."
   def list_people_params(params) do
@@ -51,7 +90,7 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
       requestSyncToken: Data.get(params, :request_sync_token),
       syncToken: Data.get(params, :sync_token)
     }
-    |> Data.compact()
+    |> query_params()
   end
 
   @doc "Builds query params for `people.get`."
@@ -61,7 +100,18 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
       fields: Data.get(params, :fields, person_response_fields()),
       sources: Data.get(params, :sources)
     }
-    |> Data.compact()
+    |> query_params()
+  end
+
+  @doc "Builds query params for `people.getBatchGet`."
+  def batch_get_people_params(params) do
+    %{
+      resourceNames: Data.get(params, :resource_names, []),
+      personFields: Data.get(params, :person_fields, default_person_fields()),
+      fields: Data.get(params, :fields, person_batch_response_fields()),
+      sources: Data.get(params, :sources)
+    }
+    |> query_params()
   end
 
   @doc "Builds query params for `people.searchContacts`."
@@ -73,6 +123,70 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
       fields: Data.get(params, :fields, people_search_fields()),
       sources: Data.get(params, :sources)
     }
+    |> query_params()
+  end
+
+  @doc "Builds query params for `people.listDirectoryPeople`."
+  def list_directory_people_params(params) do
+    %{
+      readMask: Data.get(params, :read_mask, default_person_fields()),
+      sources: Data.get(params, :sources, default_directory_sources()),
+      mergeSources: Data.get(params, :merge_sources),
+      pageSize: Data.get(params, :page_size, 100),
+      pageToken: Data.get(params, :page_token),
+      requestSyncToken: Data.get(params, :request_sync_token),
+      syncToken: Data.get(params, :sync_token),
+      fields: Data.get(params, :fields, directory_list_fields())
+    }
+    |> query_params()
+  end
+
+  @doc "Builds query params for `people.searchDirectoryPeople`."
+  def search_directory_people_params(params) do
+    %{
+      query: Data.get(params, :query),
+      readMask: Data.get(params, :read_mask, default_person_fields()),
+      sources: Data.get(params, :sources, default_directory_sources()),
+      mergeSources: Data.get(params, :merge_sources),
+      pageSize: Data.get(params, :page_size, 10),
+      pageToken: Data.get(params, :page_token),
+      fields: Data.get(params, :fields, directory_search_fields())
+    }
+    |> query_params()
+  end
+
+  @doc "Builds query params for `otherContacts.list`."
+  def list_other_contacts_params(params) do
+    %{
+      readMask: Data.get(params, :read_mask, default_other_contact_fields()),
+      sources: Data.get(params, :sources),
+      pageSize: Data.get(params, :page_size, 100),
+      pageToken: Data.get(params, :page_token),
+      requestSyncToken: Data.get(params, :request_sync_token),
+      syncToken: Data.get(params, :sync_token),
+      fields: Data.get(params, :fields, other_contacts_list_fields())
+    }
+    |> query_params()
+  end
+
+  @doc "Builds query params for `otherContacts.search`."
+  def search_other_contacts_params(params) do
+    %{
+      query: Data.get(params, :query),
+      readMask: Data.get(params, :read_mask, default_other_contact_search_fields()),
+      pageSize: Data.get(params, :page_size, 10),
+      fields: Data.get(params, :fields, people_search_fields())
+    }
+    |> query_params()
+  end
+
+  @doc "Builds a copy request body for `otherContacts.copyOtherContactToMyContactsGroup`."
+  def copy_other_contact_body(params) do
+    %{
+      copyMask: Data.get(params, :copy_mask, default_other_contact_copy_fields()),
+      readMask: Data.get(params, :read_mask),
+      sources: Data.get(params, :sources)
+    }
     |> Data.compact()
   end
 
@@ -81,6 +195,35 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
     %{
       personFields: Data.get(params, :person_fields, default_person_fields()),
       fields: Data.get(params, :fields, person_response_fields())
+    }
+    |> query_params()
+  end
+
+  @doc "Builds a Google People API batch contact create body."
+  def batch_create_contacts_body(params) do
+    %{
+      contacts: batch_contacts_to_create(Data.get(params, :contacts, [])),
+      readMask: Data.get(params, :person_fields, default_person_fields()),
+      sources: Data.get(params, :sources)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a Google People API batch contact update body."
+  def batch_update_contacts_body(params) do
+    %{
+      contacts: batch_contacts_to_update(Data.get(params, :contacts, [])),
+      updateMask: Data.get(params, :update_person_fields, default_update_person_fields()),
+      readMask: Data.get(params, :person_fields, default_person_fields()),
+      sources: Data.get(params, :sources)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a Google People API batch contact delete body."
+  def batch_delete_contacts_body(params) do
+    %{
+      resourceNames: Data.get(params, :resource_names, [])
     }
     |> Data.compact()
   end
@@ -92,7 +235,7 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
       personFields: Data.get(params, :person_fields, default_person_fields()),
       fields: Data.get(params, :fields, person_response_fields())
     }
-    |> Data.compact()
+    |> query_params()
   end
 
   @doc "Builds a Google People API contact mutation body."
@@ -117,7 +260,7 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
       groupFields: Data.get(params, :group_fields, default_group_fields()),
       fields: Data.get(params, :fields, contact_group_list_fields())
     }
-    |> Data.compact()
+    |> query_params()
   end
 
   @doc "Builds query params for `contactGroups.create`."
@@ -125,7 +268,7 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
     %{
       fields: Data.get(params, :fields, contact_group_response_fields())
     }
-    |> Data.compact()
+    |> query_params()
   end
 
   @doc "Builds query params for `contactGroups.update`."
@@ -134,7 +277,7 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
       updateGroupFields: Data.get(params, :update_group_fields, "name"),
       fields: Data.get(params, :fields, contact_group_response_fields())
     }
-    |> Data.compact()
+    |> query_params()
   end
 
   @doc "Builds a Google People API contact group mutation body."
@@ -150,12 +293,43 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
     }
   end
 
+  defp query_params(params) do
+    params
+    |> Data.compact()
+    |> Enum.flat_map(fn
+      {_key, []} ->
+        []
+
+      {key, values} when is_list(values) ->
+        Enum.map(values, &{key, &1})
+
+      pair ->
+        [pair]
+    end)
+  end
+
   defp people_list_fields do
     "nextPageToken,nextSyncToken,totalItems,connections(#{person_response_fields()})"
   end
 
   defp people_search_fields do
     "results(person(#{person_response_fields()}))"
+  end
+
+  defp directory_list_fields do
+    "nextPageToken,nextSyncToken,people(#{person_response_fields()})"
+  end
+
+  defp directory_search_fields do
+    "nextPageToken,totalSize,people(#{person_response_fields()})"
+  end
+
+  defp other_contacts_list_fields do
+    "nextPageToken,nextSyncToken,totalSize,otherContacts(#{person_response_fields()})"
+  end
+
+  defp person_batch_response_fields do
+    "responses(person(#{person_response_fields()}),status)"
   end
 
   defp person_response_fields do
@@ -169,6 +343,26 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
   defp contact_group_response_fields do
     "resourceName,etag,metadata,groupType,memberCount,name,formattedName"
   end
+
+  defp batch_contacts_to_create(contacts) when is_list(contacts) do
+    Enum.map(contacts, fn contact ->
+      %{contactPerson: contact_body(contact)}
+    end)
+  end
+
+  defp batch_contacts_to_create(_contacts), do: []
+
+  defp batch_contacts_to_update(contacts) when is_list(contacts) do
+    contacts
+    |> Enum.map(fn contact ->
+      resource_name = Data.get(contact, :resource_name)
+      {resource_name, contact_body(contact)}
+    end)
+    |> Enum.reject(fn {resource_name, _body} -> is_nil(resource_name) end)
+    |> Map.new()
+  end
+
+  defp batch_contacts_to_update(_contacts), do: %{}
 
   defp names_body(params) do
     case Data.get(params, :names) do

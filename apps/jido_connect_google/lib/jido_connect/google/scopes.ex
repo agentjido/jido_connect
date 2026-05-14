@@ -43,7 +43,9 @@ defmodule Jido.Connect.Google.Scopes do
     ],
     contacts: [
       "https://www.googleapis.com/auth/contacts.readonly",
-      "https://www.googleapis.com/auth/contacts"
+      "https://www.googleapis.com/auth/contacts",
+      "https://www.googleapis.com/auth/contacts.other.readonly",
+      "https://www.googleapis.com/auth/directory.readonly"
     ],
     meet: [
       "https://www.googleapis.com/auth/meetings.space.created",

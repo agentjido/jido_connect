@@ -7,14 +7,23 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacks do
     "google.contacts.person.list",
     "google.contacts.person.get",
     "google.contacts.person.search",
-    "google.contacts.group.list"
+    "google.contacts.group.list",
+    "google.contacts.person.batch_get",
+    "google.contacts.directory.list",
+    "google.contacts.directory.search",
+    "google.contacts.other.list",
+    "google.contacts.other.search"
   ]
 
   @manager_tools @readonly_tools ++
                    [
+                     "google.contacts.person.batch_create",
+                     "google.contacts.person.batch_update",
+                     "google.contacts.person.batch_delete",
                      "google.contacts.person.create",
                      "google.contacts.person.update",
                      "google.contacts.person.delete",
+                     "google.contacts.other.copy",
                      "google.contacts.group.create",
                      "google.contacts.group.update"
                    ]

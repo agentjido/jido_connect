@@ -35,7 +35,7 @@ Official references used for this comparison:
 | Gmail | Strong metadata, message/thread reads, send, draft create/send, label triage, and poll trigger coverage. | Watch/stop lifecycle, history action, attachments, draft management, batch modify/delete, label get/update/delete, message/thread trash/delete. | Settings and CSE surfaces are large and sensitive; keep them out of default packs. |
 | Drive | Strong file metadata/content, basic file writes, permission lifecycle, revision lifecycle, comments/replies, shared-drive lifecycle, service-account profiles, poll trigger coverage, and watch/channel lifecycle metadata. | Labels, about/apps, access proposals/approvals. | No whole-drive count or whole-drive principals endpoint in Drive v3; counts/principals remain composed intents. |
 | Calendar | Strong event list/get/create/update/delete/instances/move, calendar and CalendarList lifecycle, ACL lifecycle, free/busy, availability, poll trigger coverage, and watch/channel lifecycle metadata. | Event quickAdd/import, colors, and settings reads. | Event polling and provider push channel metadata now both exist. |
-| Contacts | Strong contact/group read and basic contact/group mutation coverage. | Batch contact operations, directory people, other contacts, group get/delete/member modify, contact photos, sync-token polling trigger. | People API exposes sync tokens for incremental connections but no generic watch endpoint. |
+| Contacts | Strong personal contact, batch contact, directory, other-contact, and contact-group read/mutation coverage. | Group get/delete/member modify, contact photos, sync-token polling trigger. | People API exposes sync tokens for incremental connections but no generic watch endpoint. |
 
 ## Sheets
 
@@ -187,6 +187,15 @@ Official People API resources include `people`, `people.connections`,
 - `people.connections.list`
 - `people.get`
 - `people.searchContacts`
+- `people.getBatchGet`
+- `people.batchCreateContacts`
+- `people.batchUpdateContacts`
+- `people.batchDeleteContacts`
+- `people.listDirectoryPeople`
+- `people.searchDirectoryPeople`
+- `otherContacts.list`
+- `otherContacts.search`
+- `otherContacts.copyOtherContactToMyContactsGroup`
 - `people.createContact`
 - `people.updateContact`
 - `people.deleteContact`
@@ -198,10 +207,6 @@ Official People API resources include `people`, `people.connections`,
 
 | Provider Operation | Candidate Action/Trigger | Priority | Rationale |
 | --- | --- | --- | --- |
-| `people.getBatchGet` | `google.contacts.person.batch_get` | High | Efficient contact hydration after search/list results. |
-| `people.batchCreateContacts`, `batchUpdateContacts`, `batchDeleteContacts` | Batch contact mutation actions | High | Important for sync/import workflows; destructive cases require confirmation. |
-| `people.listDirectoryPeople`, `people.searchDirectoryPeople` | Directory people actions | High | Common Workspace contact discovery surface not covered by personal contacts. |
-| `otherContacts.list/search/copyOtherContactToMyContactsGroup` | Other contacts actions | Medium | Useful for Gmail-discovered contacts and promotion into contacts. |
 | `contactGroups.get/batchGet/delete` | Group lifecycle actions | Medium | Completes group management beyond list/create/update. |
 | `contactGroups.members.modify` | Group membership action | Medium | Required for contact group assignment. |
 | `people.updateContactPhoto/deleteContactPhoto` | Contact photo actions | Low | Useful but content-heavy and likely not default pack material. |

@@ -10,6 +10,15 @@ defmodule Jido.Connect.Google.ContactsTest do
     Jido.Connect.Google.Contacts.Actions.GetPerson,
     Jido.Connect.Google.Contacts.Actions.SearchPeople,
     Jido.Connect.Google.Contacts.Actions.ListContactGroups,
+    Jido.Connect.Google.Contacts.Actions.BatchGetPeople,
+    Jido.Connect.Google.Contacts.Actions.BatchCreateContacts,
+    Jido.Connect.Google.Contacts.Actions.BatchUpdateContacts,
+    Jido.Connect.Google.Contacts.Actions.BatchDeleteContacts,
+    Jido.Connect.Google.Contacts.Actions.ListDirectoryPeople,
+    Jido.Connect.Google.Contacts.Actions.SearchDirectoryPeople,
+    Jido.Connect.Google.Contacts.Actions.ListOtherContacts,
+    Jido.Connect.Google.Contacts.Actions.SearchOtherContacts,
+    Jido.Connect.Google.Contacts.Actions.CopyOtherContact,
     Jido.Connect.Google.Contacts.Actions.CreateContact,
     Jido.Connect.Google.Contacts.Actions.UpdateContact,
     Jido.Connect.Google.Contacts.Actions.DeleteContact,
@@ -19,6 +28,9 @@ defmodule Jido.Connect.Google.ContactsTest do
 
   @contacts_dsl_fragments [
     Jido.Connect.Google.Contacts.Actions.Read,
+    Jido.Connect.Google.Contacts.Actions.Batch,
+    Jido.Connect.Google.Contacts.Actions.Directory,
+    Jido.Connect.Google.Contacts.Actions.OtherContacts,
     Jido.Connect.Google.Contacts.Actions.Write
   ]
 
@@ -59,6 +71,128 @@ defmodule Jido.Connect.Google.ContactsTest do
            })
          ]
        }}
+    end
+
+    def batch_get_people(%{resource_names: ["people/c123", "people/me"]}, "token") do
+      {:ok,
+       %{
+         people: [
+           Contacts.Person.new!(%{
+             resource_name: "people/c123",
+             display_name: "Ada Lovelace"
+           }),
+           Contacts.Person.new!(%{
+             resource_name: "people/me",
+             display_name: "Mike Hostetler"
+           })
+         ]
+       }}
+    end
+
+    def batch_create_contacts(%{contacts: [%{given_name: "Ada"}]}, "token") do
+      {:ok,
+       %{
+         people: [
+           Contacts.Person.new!(%{
+             resource_name: "people/c123",
+             display_name: "Ada Lovelace"
+           })
+         ]
+       }}
+    end
+
+    def batch_update_contacts(
+          %{contacts: [%{resource_name: "people/c123", etag: "etag123", given_name: "Ada"}]},
+          "token"
+        ) do
+      {:ok,
+       %{
+         people: [
+           Contacts.Person.new!(%{
+             resource_name: "people/c123",
+             etag: "etag456",
+             given_name: "Ada"
+           })
+         ],
+         responses: %{
+           "people/c123" => %{
+             person:
+               Contacts.Person.new!(%{
+                 resource_name: "people/c123",
+                 etag: "etag456",
+                 given_name: "Ada"
+               })
+           }
+         }
+       }}
+    end
+
+    def batch_delete_contacts(%{resource_names: ["people/c123", "people/c456"]}, "token") do
+      {:ok, %{resource_names: ["people/c123", "people/c456"], deleted?: true}}
+    end
+
+    def list_directory_people(%{page_size: 100, request_sync_token: false}, "token") do
+      {:ok,
+       %{
+         people: [
+           Contacts.Person.new!(%{
+             resource_name: "people/directory-123",
+             display_name: "Ada Directory"
+           })
+         ],
+         next_page_token: "directory-next"
+       }}
+    end
+
+    def search_directory_people(%{query: "Ada", page_size: 10}, "token") do
+      {:ok,
+       %{
+         people: [
+           Contacts.Person.new!(%{
+             resource_name: "people/directory-123",
+             display_name: "Ada Directory"
+           })
+         ],
+         total_size: 1
+       }}
+    end
+
+    def list_other_contacts(%{page_size: 100, request_sync_token: false}, "token") do
+      {:ok,
+       %{
+         people: [
+           Contacts.Person.new!(%{
+             resource_name: "otherContacts/c123",
+             display_name: "Ada Other"
+           })
+         ],
+         next_sync_token: "other-sync",
+         total_size: 1
+       }}
+    end
+
+    def search_other_contacts(%{query: "Ada", page_size: 10}, "token") do
+      {:ok,
+       %{
+         people: [
+           Contacts.Person.new!(%{
+             resource_name: "otherContacts/c123",
+             display_name: "Ada Other"
+           })
+         ]
+       }}
+    end
+
+    def search_other_contacts(%{query: "", page_size: 10}, "token") do
+      {:ok, %{people: []}}
+    end
+
+    def copy_other_contact(%{resource_name: "otherContacts/c123"}, "token") do
+      {:ok,
+       Contacts.Person.new!(%{
+         resource_name: "people/c123",
+         display_name: "Ada Other"
+       })}
     end
 
     def create_contact(
@@ -152,6 +286,15 @@ defmodule Jido.Connect.Google.ContactsTest do
              "google.contacts.person.get",
              "google.contacts.person.search",
              "google.contacts.group.list",
+             "google.contacts.person.batch_get",
+             "google.contacts.person.batch_create",
+             "google.contacts.person.batch_update",
+             "google.contacts.person.batch_delete",
+             "google.contacts.directory.list",
+             "google.contacts.directory.search",
+             "google.contacts.other.list",
+             "google.contacts.other.search",
+             "google.contacts.other.copy",
              "google.contacts.person.create",
              "google.contacts.person.update",
              "google.contacts.person.delete",
@@ -169,6 +312,8 @@ defmodule Jido.Connect.Google.ContactsTest do
     assert "profile" in profile.default_scopes
     assert "https://www.googleapis.com/auth/contacts.readonly" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/contacts" in profile.optional_scopes
+    assert "https://www.googleapis.com/auth/contacts.other.readonly" in profile.optional_scopes
+    assert "https://www.googleapis.com/auth/directory.readonly" in profile.optional_scopes
   end
 
   test "compiles generated Jido plugin surface" do
@@ -208,6 +353,100 @@ defmodule Jido.Connect.Google.ContactsTest do
              Connect.invoke(Contacts, "google.contacts.person.search", %{query: "Ada"},
                context: context,
                credential_lease: lease
+             )
+  end
+
+  test "invokes Contacts batch actions through the runtime" do
+    {context, lease} = context_and_lease(scopes: ["https://www.googleapis.com/auth/contacts"])
+
+    assert {:ok, %{people: [%{resource_name: "people/c123"}, %{resource_name: "people/me"}]}} =
+             Connect.invoke(
+               Contacts,
+               "google.contacts.person.batch_get",
+               %{resource_names: ["people/c123", "people/me"]},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{people: [%{resource_name: "people/c123"}]}} =
+             Connect.invoke(
+               Contacts,
+               "google.contacts.person.batch_create",
+               %{contacts: [%{given_name: "Ada"}]},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{people: [%{etag: "etag456"}], responses: %{"people/c123" => response}}} =
+             Connect.invoke(
+               Contacts,
+               "google.contacts.person.batch_update",
+               %{contacts: [%{resource_name: "people/c123", etag: "etag123", given_name: "Ada"}]},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert response.person.resource_name == "people/c123"
+
+    assert {:ok, %{result: %{resource_names: ["people/c123", "people/c456"], deleted?: true}}} =
+             Connect.invoke(
+               Contacts,
+               "google.contacts.person.batch_delete",
+               %{resource_names: ["people/c123", "people/c456"]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes Contacts directory and other-contact actions through the runtime" do
+    {directory_context, directory_lease} =
+      context_and_lease(scopes: ["https://www.googleapis.com/auth/directory.readonly"])
+
+    assert {:ok,
+            %{
+              people: [%{resource_name: "people/directory-123"}],
+              next_page_token: "directory-next"
+            }} =
+             Connect.invoke(Contacts, "google.contacts.directory.list", %{},
+               context: directory_context,
+               credential_lease: directory_lease
+             )
+
+    assert {:ok, %{people: [%{display_name: "Ada Directory"}], total_size: 1}} =
+             Connect.invoke(Contacts, "google.contacts.directory.search", %{query: "Ada"},
+               context: directory_context,
+               credential_lease: directory_lease
+             )
+
+    {other_context, other_lease} =
+      context_and_lease(scopes: ["https://www.googleapis.com/auth/contacts.other.readonly"])
+
+    assert {:ok,
+            %{people: [%{resource_name: "otherContacts/c123"}], next_sync_token: "other-sync"}} =
+             Connect.invoke(Contacts, "google.contacts.other.list", %{},
+               context: other_context,
+               credential_lease: other_lease
+             )
+
+    assert {:ok, %{people: [%{display_name: "Ada Other"}]}} =
+             Connect.invoke(Contacts, "google.contacts.other.search", %{query: "Ada"},
+               context: other_context,
+               credential_lease: other_lease
+             )
+
+    assert {:ok, %{people: []}} =
+             Connect.invoke(Contacts, "google.contacts.other.search", %{query: ""},
+               context: other_context,
+               credential_lease: other_lease
+             )
+
+    assert {:ok, %{person: %{resource_name: "people/c123", display_name: "Ada Other"}}} =
+             Connect.invoke(
+               Contacts,
+               "google.contacts.other.copy",
+               %{resource_name: "otherContacts/c123"},
+               context: other_context,
+               credential_lease: other_lease
              )
   end
 

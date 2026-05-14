@@ -34,7 +34,7 @@ live-test readiness, and Beadwork sequencing.
 | `jido_connect_gmail` | `gmail` | 11 | 1 | 3 | `user` |
 | `jido_connect_google_drive` | `google_drive` | 38 | 2 | 3 | `user`, `service_account`, `domain_delegated_service_account` |
 | `jido_connect_google_calendar` | `google_calendar` | 32 | 5 | 4 | `user` |
-| `jido_connect_google_contacts` | `google_contacts` | 9 | 0 | 2 | `user` |
+| `jido_connect_google_contacts` | `google_contacts` | 18 | 0 | 2 | `user` |
 
 ## Cross-Package Notes
 
@@ -66,7 +66,7 @@ action families. Do not move Google filter/query semantics into
 | Gmail | Watch/stop lifecycle, explicit history action, attachments, draft lifecycle, batch message triage, label lifecycle, and destructive message/thread operations outside default packs. |
 | Drive | File labels, about/apps/generateIds metadata utilities, access proposal/approval workflows, and further channel renewal helpers as host patterns emerge. |
 | Calendar | Event quickAdd/import, colors, and settings reads. |
-| Contacts | Batch contact operations, directory people, other contacts, group lifecycle, group membership, and sync-token polling trigger. |
+| Contacts | Group lifecycle, group membership, contact photos, and sync-token polling trigger. |
 
 Explicit non-goals from the audit:
 
@@ -90,7 +90,7 @@ for a wholesale pass.
 | Gmail | `gmail.metadata`, `gmail.labels`, `gmail.modify`, `gmail.compose`, `gmail.send`, `https://mail.google.com/` | Sending and destructive mailbox actions need isolated test accounts and explicit confirmation. Permanent message/thread deletes require the full Gmail mailbox scope. |
 | Drive | `drive.metadata.readonly`, `drive.readonly`, `drive.file`, `drive` | Current user OAuth flow is ready for metadata/content/file/comment/shared-drive checks; service-account and delegated flows need separate live coverage. |
 | Calendar | `calendar.calendarlist.readonly`, `calendar.calendarlist`, `calendar.calendars.readonly`, `calendar.calendars`, `calendar.events.readonly`, `calendar.events`, `calendar.events.freebusy`, `calendar.acls.readonly`, `calendar.acls`, `calendar.settings.readonly` | Use disposable calendars for calendar/event/ACL mutation checks and HTTPS webhook endpoints for channel lifecycle smoke tests. |
-| Contacts | `profile`, `contacts.readonly`, `contacts` | Use a test contact/group namespace to avoid mutating real address book data. |
+| Contacts | `profile`, `contacts.readonly`, `contacts`, `contacts.other.readonly`, `directory.readonly` | Use a test contact/group namespace to avoid mutating real address book data. Directory checks need a Google Workspace account with visible directory data. |
 
 ## Implementation Sequence
 
@@ -339,6 +339,15 @@ Auth profiles: `user`
 | `google.contacts.person.get` | read | `personal_data` | `profile`, `contacts.readonly` | `resource_name` | `person` |
 | `google.contacts.person.search` | read | `personal_data` | `contacts.readonly` | `query` | `people` |
 | `google.contacts.group.list` | read | `personal_data` | `contacts.readonly` | none | `groups`, `next_page_token`, `next_sync_token` |
+| `google.contacts.person.batch_get` | read | `personal_data` | `contacts.readonly` | `resource_names` | `people`, `responses` |
+| `google.contacts.person.batch_create` | write | `personal_data` | `contacts` | `contacts` | `people`, `responses` |
+| `google.contacts.person.batch_update` | write | `personal_data` | `contacts` | `contacts` | `people`, `responses` |
+| `google.contacts.person.batch_delete` | destructive | `personal_data` | `contacts` | `resource_names` | `result` |
+| `google.contacts.directory.list` | read | `personal_data` | `directory.readonly` | none | `people`, `next_page_token`, `next_sync_token` |
+| `google.contacts.directory.search` | read | `personal_data` | `directory.readonly` | `query` | `people`, `next_page_token`, `total_size` |
+| `google.contacts.other.list` | read | `personal_data` | `contacts.other.readonly` | none | `people`, `next_page_token`, `next_sync_token`, `total_size` |
+| `google.contacts.other.search` | read | `personal_data` | `contacts.other.readonly` | `query` | `people` |
+| `google.contacts.other.copy` | write | `personal_data` | `contacts.other.readonly`, `contacts` | `resource_name` | `person` |
 | `google.contacts.person.create` | write | `personal_data` | `contacts` | none | `person` |
 | `google.contacts.person.update` | write | `personal_data` | `contacts` | `resource_name`, `etag` | `person` |
 | `google.contacts.person.delete` | destructive | `personal_data` | `contacts` | `resource_name` | `result` |
@@ -349,8 +358,8 @@ Auth profiles: `user`
 
 | Pack | Surface |
 | --- | --- |
-| `google_contacts_readonly` | Person list/get/search and contact-group list. |
-| `google_contacts_manager` | Read-only pack plus person create/update/delete and group create/update. |
+| `google_contacts_readonly` | Person list/get/search, batch get, directory list/search, other-contact list/search, and contact-group list. |
+| `google_contacts_manager` | Read-only pack plus batch create/update/delete, other-contact copy, person create/update/delete, and group create/update. |
 
 ### Triggers
 

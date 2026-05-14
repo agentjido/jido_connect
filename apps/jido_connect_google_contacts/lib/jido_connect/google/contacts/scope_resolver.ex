@@ -9,16 +9,32 @@ defmodule Jido.Connect.Google.Contacts.ScopeResolver do
 
   @contacts_scope "https://www.googleapis.com/auth/contacts"
   @contacts_readonly_scope "https://www.googleapis.com/auth/contacts.readonly"
+  @contacts_other_readonly_scope "https://www.googleapis.com/auth/contacts.other.readonly"
+  @directory_readonly_scope "https://www.googleapis.com/auth/directory.readonly"
   @profile_scope "profile"
 
   @write_actions [
     "google.contacts.person.create",
     "google.contacts.person.update",
     "google.contacts.person.delete",
+    "google.contacts.person.batch_create",
+    "google.contacts.person.batch_update",
+    "google.contacts.person.batch_delete",
     "google.contacts.group.create",
     "google.contacts.group.update",
     "google.contacts.group.delete",
     "google.contacts.group.member.modify"
+  ]
+  @directory_actions [
+    "google.contacts.directory.list",
+    "google.contacts.directory.search"
+  ]
+  @other_contacts_actions [
+    "google.contacts.other.list",
+    "google.contacts.other.search"
+  ]
+  @other_contact_copy_actions [
+    "google.contacts.other.copy"
   ]
 
   def required_scopes(operation, input, connection) do
@@ -30,6 +46,46 @@ defmodule Jido.Connect.Google.Contacts.ScopeResolver do
   defp required_for_operation(operation_id, _input, _connection)
        when operation_id in @write_actions do
     [@contacts_scope]
+  end
+
+  defp required_for_operation(operation_id, _input, %{scopes: scopes})
+       when operation_id in @directory_actions and is_list(scopes) do
+    cond do
+      @directory_readonly_scope in scopes -> [@directory_readonly_scope]
+      true -> [@directory_readonly_scope]
+    end
+  end
+
+  defp required_for_operation(operation_id, _input, _connection)
+       when operation_id in @directory_actions do
+    [@directory_readonly_scope]
+  end
+
+  defp required_for_operation(operation_id, _input, %{scopes: scopes})
+       when operation_id in @other_contacts_actions and is_list(scopes) do
+    cond do
+      @contacts_other_readonly_scope in scopes -> [@contacts_other_readonly_scope]
+      true -> [@contacts_other_readonly_scope]
+    end
+  end
+
+  defp required_for_operation(operation_id, _input, _connection)
+       when operation_id in @other_contacts_actions do
+    [@contacts_other_readonly_scope]
+  end
+
+  defp required_for_operation(operation_id, _input, %{scopes: scopes})
+       when operation_id in @other_contact_copy_actions and is_list(scopes) do
+    cond do
+      @contacts_scope in scopes -> [@contacts_scope]
+      @contacts_other_readonly_scope in scopes -> [@contacts_other_readonly_scope]
+      true -> [@contacts_other_readonly_scope]
+    end
+  end
+
+  defp required_for_operation(operation_id, _input, _connection)
+       when operation_id in @other_contact_copy_actions do
+    [@contacts_other_readonly_scope]
   end
 
   defp required_for_operation("google.contacts.person.get", input, %{scopes: scopes})
