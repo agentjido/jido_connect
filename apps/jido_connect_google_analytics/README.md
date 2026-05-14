@@ -10,9 +10,18 @@ surfaces are added.
 ## Status
 
 This scaffold declares the provider package, user OAuth profile, Analytics
-scope resolver, generated Jido plugin shell, and shared Google transport
-boundary. Report, metadata, property discovery, catalog pack, and trigger work
-is intentionally split into later Beadwork tasks.
+scope resolver, generated Jido plugin shell, shared Google transport boundary,
+and normalized Zoi-backed structs. Metadata, report, property discovery,
+catalog pack, and trigger work is intentionally split into later Beadwork
+tasks.
+
+## Normalized Structs
+
+- `Jido.Connect.Google.Analytics.Report`
+- `Jido.Connect.Google.Analytics.Row`
+- `Jido.Connect.Google.Analytics.Dimension`
+- `Jido.Connect.Google.Analytics.Metric`
+- `Jido.Connect.Google.Analytics.PropertySummary`
 
 ## OAuth Scopes
 
