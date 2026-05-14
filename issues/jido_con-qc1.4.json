@@ -9,11 +9,14 @@
   "created": "2026-05-14T14:35:49Z",
   "description": "Implement provider-specific presentation batchUpdate and page thumbnail actions with safe schema boundaries and tests.",
   "id": "jido_con-qc1.4",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-qc1",
   "priority": 1,
   "status": "open",
   "title": "[G15-S04] Implement Slides batch update and thumbnail actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:54Z"
+  "updated_at": "2026-05-14T14:36:02Z"
 }
