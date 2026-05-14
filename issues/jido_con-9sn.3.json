@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-9sn.4"
   ],
+  "closed_at": "2026-05-14T19:51:19Z",
+  "close_reason": "completed",
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G08-S03\nEpic: G08 Google Meet Connector\nSource: MILESTONE_2.md\nDepends on: G08-S02\n\nAcceptance:\n`space.create` and `space.get` work with appropriate scopes.",
   "id": "jido_con-9sn.3",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-9sn",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G08-S03] Implement meeting space actions",
   "type": "task",
-  "updated_at": "2026-05-14T19:36:55Z"
+  "updated_at": "2026-05-14T19:51:19Z"
 }
