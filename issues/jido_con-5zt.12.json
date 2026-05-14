@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:58:14Z",
+  "description": "Update catalog packs, package docs, action catalog expectations, fixture coverage, and cross-product tests after the existing-package expansion tasks land.",
+  "id": "jido_con-5zt.12",
+  "labels": [],
+  "parent": "jido_con-5zt",
+  "priority": 1,
+  "status": "open",
+  "title": "[G18-S12] Refresh expansion catalog packs docs and action availability tests",
+  "type": "task",
+  "updated_at": "2026-05-14T14:58:14Z"
+}
