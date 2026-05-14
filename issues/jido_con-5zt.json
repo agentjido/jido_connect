@@ -13,6 +13,8 @@
     "jido_con-qc1",
     "jido_con-uoi"
   ],
+  "closed_at": "2026-05-14T19:12:04Z",
+  "close_reason": "Completed current Google package expansion through PR #23",
   "created": "2026-05-14T14:58:11Z",
   "description": "Implement the high-value action and trigger gaps discovered by the G13 provider API audit for existing Google packages: Sheets, Gmail, Drive, Calendar, and Contacts. Keep provider query/filter behavior package-specific and expose action availability through catalog metadata.",
   "id": "jido_con-5zt",
@@ -28,8 +30,8 @@
     }
   ],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G18] Current Google Package Expansion",
   "type": "epic",
-  "updated_at": "2026-05-14T15:03:46Z"
+  "updated_at": "2026-05-14T19:12:04Z"
 }
