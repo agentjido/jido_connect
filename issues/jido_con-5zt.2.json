@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5zt.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5zt.3"
+  ],
   "created": "2026-05-14T14:58:12Z",
   "description": "Add Sheets data-filter read/write actions and developer metadata get/search actions. Keep data-filter schemas in jido_connect_google_sheets rather than core.",
   "id": "jido_con-5zt.2",
