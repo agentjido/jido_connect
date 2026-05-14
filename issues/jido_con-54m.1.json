@@ -7,11 +7,14 @@
   "created": "2026-05-14T14:35:51Z",
   "description": "Add the umbrella app, mix config, package README, provider module, catalog-pack shell, AGENTS guidance, and baseline compile/test wiring for Google Tasks.",
   "id": "jido_con-54m.1",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-54m",
   "priority": 1,
   "status": "open",
   "title": "[G17-S01] Scaffold jido_connect_google_tasks",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:55Z"
+  "updated_at": "2026-05-14T14:36:04Z"
 }
