@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-nmq.3"
   ],
+  "closed_at": "2026-05-14T14:56:56Z",
+  "close_reason": "Compared current Google packages to official provider API surfaces in PR #10",
   "created": "2026-05-14T14:35:47Z",
   "description": "Compare current package surfaces against Google API capability areas and identify high-value missing actions/triggers. Keep provider-specific query/filter behavior in connector packages rather than core.",
   "id": "jido_con-nmq.2",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-nmq",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G13-S02] Compare current packages against provider APIs",
   "type": "task",
-  "updated_at": "2026-05-14T14:51:59Z"
+  "updated_at": "2026-05-14T14:56:56Z"
 }
