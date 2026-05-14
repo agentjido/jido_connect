@@ -11,6 +11,8 @@
     "jido_con-qc1",
     "jido_con-uoi"
   ],
+  "closed_at": "2026-05-14T15:04:05Z",
+  "close_reason": "Completed G13 current Google package surface audit and dependency reconciliation",
   "created": "2026-05-14T14:35:47Z",
   "description": "Audit the current Google package family before expanding further. Capture supported actions/triggers, missing provider-supported operations, scope requirements, catalog packs, risk classification, privacy boundaries, pagination/checkpoint behavior, fixture coverage, and live-test readiness for Sheets, Gmail, Drive, Calendar, and Contacts.",
   "id": "jido_con-nmq",
@@ -19,8 +21,8 @@
     "milestone-2"
   ],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G13] Current Google Package Surface Audit",
   "type": "epic",
-  "updated_at": "2026-05-14T14:35:59Z"
+  "updated_at": "2026-05-14T15:04:05Z"
 }
