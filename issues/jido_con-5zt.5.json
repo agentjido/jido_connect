@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-5zt.6"
   ],
+  "closed_at": "2026-05-14T16:44:19Z",
+  "close_reason": "Added Drive watch lifecycle and webhook metadata in PR #16",
   "created": "2026-05-14T14:58:12Z",
   "description": "Add Drive changes/files watch lifecycle, channels.stop, webhook payload normalization/verification primitives, and discoverable trigger metadata.",
   "id": "jido_con-5zt.5",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S05] Add Drive watch channel lifecycle and webhook trigger metadata",
   "type": "task",
-  "updated_at": "2026-05-14T16:24:58Z"
+  "updated_at": "2026-05-14T16:44:19Z"
 }
