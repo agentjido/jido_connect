@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:35:51Z",
+  "description": "Add normalized task list, task, link, and mutation result structs with representative fixtures.",
+  "id": "jido_con-54m.2",
+  "labels": [],
+  "parent": "jido_con-54m",
+  "priority": 1,
+  "status": "open",
+  "title": "[G17-S02] Add Tasks normalized structs and schemas",
+  "type": "task",
+  "updated_at": "2026-05-14T14:35:51Z"
+}
