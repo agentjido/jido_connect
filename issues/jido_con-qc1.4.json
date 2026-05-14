@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-qc1.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-qc1.5"
+  ],
   "created": "2026-05-14T14:35:49Z",
   "description": "Implement provider-specific presentation batchUpdate and page thumbnail actions with safe schema boundaries and tests.",
   "id": "jido_con-qc1.4",
