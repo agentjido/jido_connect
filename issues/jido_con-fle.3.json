@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-fle.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-fle.4"
+  ],
   "created": "2026-05-14T14:35:48Z",
   "description": "Implement google.docs.document.get and google.docs.document.create with narrow scopes, normalized output, tests, and catalog metadata.",
   "id": "jido_con-fle.3",
