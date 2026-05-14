@@ -2,7 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [
-    "jido_con-9sn"
+    "jido_con-9sn",
+    "jido_con-b9n"
   ],
   "created": "2026-05-14T14:35:47Z",
   "description": "Audit the current Google package family before expanding further. Capture supported actions/triggers, missing provider-supported operations, scope requirements, catalog packs, risk classification, privacy boundaries, pagination/checkpoint behavior, fixture coverage, and live-test readiness for Sheets, Gmail, Drive, Calendar, and Contacts.",
@@ -12,5 +13,5 @@
   "status": "open",
   "title": "[G13] Current Google Package Surface Audit",
   "type": "epic",
-  "updated_at": "2026-05-14T14:35:56Z"
+  "updated_at": "2026-05-14T14:35:57Z"
 }
