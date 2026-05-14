@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-nmq.5"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-jxj"
+  ],
   "created": "2026-05-14T14:58:11Z",
   "description": "Implement the high-value action and trigger gaps discovered by the G13 provider API audit for existing Google packages: Sheets, Gmail, Drive, Calendar, and Contacts. Keep provider query/filter behavior package-specific and expose action availability through catalog metadata.",
   "id": "jido_con-5zt",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[G18] Current Google Package Expansion",
   "type": "epic",
-  "updated_at": "2026-05-14T14:58:16Z"
+  "updated_at": "2026-05-14T14:58:17Z"
 }
