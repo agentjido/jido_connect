@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:58:12Z",
+  "description": "Add Gmail draft list/get/update/delete, message batch modify/trash/untrash/delete, thread modify/trash/untrash/delete, and label get/update/delete action families with conservative catalog placement.",
+  "id": "jido_con-5zt.4",
+  "labels": [],
+  "parent": "jido_con-5zt",
+  "priority": 1,
+  "status": "open",
+  "title": "[G18-S04] Add Gmail draft message thread and label lifecycle actions",
+  "type": "task",
+  "updated_at": "2026-05-14T14:58:12Z"
+}
