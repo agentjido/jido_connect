@@ -20,19 +20,35 @@ base64url-encoded attachment `data` field.
 
 - `google.gmail.profile.get`
 - `google.gmail.labels.list`
+- `google.gmail.label.get`
 - `google.gmail.messages.list`
 - `google.gmail.message.get`
 - `google.gmail.threads.list`
 - `google.gmail.thread.get`
+- `google.gmail.drafts.list`
+- `google.gmail.draft.get`
 - `google.gmail.history.list`
 - `google.gmail.message.attachment.get`
 - `google.gmail.watch.start`
 - `google.gmail.watch.stop`
 - `google.gmail.message.send`
 - `google.gmail.draft.create`
+- `google.gmail.draft.update`
 - `google.gmail.draft.send`
+- `google.gmail.draft.delete`
 - `google.gmail.label.create`
+- `google.gmail.label.update`
+- `google.gmail.label.delete`
 - `google.gmail.message.labels.apply`
+- `google.gmail.messages.batch_modify`
+- `google.gmail.message.trash`
+- `google.gmail.message.untrash`
+- `google.gmail.message.delete`
+- `google.gmail.messages.batch_delete`
+- `google.gmail.thread.modify`
+- `google.gmail.thread.trash`
+- `google.gmail.thread.untrash`
+- `google.gmail.thread.delete`
 
 ## Triggers
 
@@ -52,12 +68,17 @@ dedupe is based on Gmail `history_id`.
 
 ## Catalog Packs
 
-- `:google_gmail_metadata` includes read-only profile, label, message, thread,
+- `:google_gmail_metadata` includes read-only profile, label list, message, thread,
   history, received-message poll, and mailbox-changed webhook metadata tools.
-- `:google_gmail_triage` adds watch lifecycle, attachment get, label creation,
-  and message label mutation. It intentionally excludes send and draft tools.
-- `:google_gmail_send` adds message send and draft workflows plus webhook
-  metadata. It intentionally excludes label mutation and attachment tools.
+- `:google_gmail_triage` adds watch lifecycle, label get, attachment get, label
+  creation and update, message/thread label mutation, and reversible
+  trash/untrash workflows. It intentionally excludes send, draft, and permanent
+  delete tools.
+- `:google_gmail_send` adds message send and non-destructive draft workflows
+  plus webhook metadata. It intentionally excludes label mutation, attachment,
+  and delete tools.
+- `:google_gmail_destructive` exposes explicit draft, label, message, and
+  thread delete or trash operations behind destructive action metadata.
 
 ```elixir
 Jido.Connect.Catalog.search_tools("gmail",
@@ -71,13 +92,17 @@ Jido.Connect.Catalog.search_tools("gmail",
 
 The connector prefers narrow Gmail scopes:
 
-- `gmail.metadata` for profile, labels, metadata reads, received-message
+- `gmail.metadata` for profile, label list, metadata reads, received-message
   polling, history listing, and watch lifecycle operations.
+- `gmail.labels` for label definition create, update, and delete operations.
 - `gmail.readonly` or `gmail.modify` can satisfy metadata-read tools when a
   host already has broader grants.
-- `gmail.readonly` or `gmail.modify` for attachment body retrieval.
+- `gmail.readonly` or `gmail.modify` for label get and attachment body retrieval.
 - `gmail.send` for direct send, with `gmail.compose` or `gmail.modify` accepted
   when already granted.
-- `gmail.compose` for draft create/send, with `gmail.modify` accepted when
+- `gmail.compose` for draft list/get/create/update/send/delete, with
+  `gmail.modify` accepted when
   already granted.
-- `gmail.modify` for label creation and label application/removal.
+- `gmail.modify` for message/thread label application, batch modification,
+  and reversible trash/untrash workflows.
+- `https://mail.google.com/` only for permanent message and thread deletes.

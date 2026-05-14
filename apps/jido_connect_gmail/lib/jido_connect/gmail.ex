@@ -61,4 +61,5 @@ defmodule Jido.Connect.Gmail do
   defdelegate metadata_pack, to: Jido.Connect.Gmail.CatalogPacks, as: :metadata
   defdelegate triage_pack, to: Jido.Connect.Gmail.CatalogPacks, as: :triage
   defdelegate send_pack, to: Jido.Connect.Gmail.CatalogPacks, as: :send
+  defdelegate destructive_pack, to: Jido.Connect.Gmail.CatalogPacks, as: :destructive
 end

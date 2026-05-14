@@ -85,7 +85,7 @@ for a wholesale pass.
 | Package | Current Live Scope Needs | Readiness Notes |
 | --- | --- | --- |
 | Sheets | `spreadsheets.readonly`, `spreadsheets` | Existing reads/writes are ready for live smoke tests against a disposable spreadsheet. |
-| Gmail | `gmail.metadata`, `gmail.modify`, `gmail.compose`, `gmail.send` | Sending and destructive mailbox actions need isolated test accounts and explicit confirmation. |
+| Gmail | `gmail.metadata`, `gmail.labels`, `gmail.modify`, `gmail.compose`, `gmail.send`, `https://mail.google.com/` | Sending and destructive mailbox actions need isolated test accounts and explicit confirmation. Permanent message/thread deletes require the full Gmail mailbox scope. |
 | Drive | `drive.metadata.readonly`, `drive.readonly`, `drive.file` | Current user OAuth flow is ready; service-account and delegated flows need separate live coverage. |
 | Calendar | `calendar.calendarlist.readonly`, `calendar.events.readonly`, `calendar.events`, `calendar.events.freebusy` | Use a disposable calendar for event mutation and delete checks. |
 | Contacts | `profile`, `contacts.readonly`, `contacts` | Use a test contact/group namespace to avoid mutating real address book data. |
@@ -147,15 +147,33 @@ Auth profiles: `user`
 | --- | --- | --- | --- | --- | --- |
 | `google.gmail.profile.get` | read | `personal_data` | `gmail.metadata` | none | `profile` |
 | `google.gmail.labels.list` | read | `personal_data` | `gmail.metadata` | none | `labels` |
+| `google.gmail.label.get` | read | `personal_data` | `gmail.readonly` | `label_id` | `label` |
 | `google.gmail.messages.list` | read | `message_content` | `gmail.metadata` | none | `messages`, `next_page_token`, `result_size_estimate` |
 | `google.gmail.message.get` | read | `message_content` | `gmail.metadata` | `message_id` | `message` |
 | `google.gmail.threads.list` | read | `message_content` | `gmail.metadata` | none | `threads`, `next_page_token`, `result_size_estimate` |
 | `google.gmail.thread.get` | read | `message_content` | `gmail.metadata` | `thread_id` | `thread` |
+| `google.gmail.drafts.list` | read | `message_content` | `gmail.compose` | none | `drafts`, `next_page_token`, `result_size_estimate` |
+| `google.gmail.draft.get` | read | `message_content` | `gmail.compose` | `draft_id` | `draft` |
+| `google.gmail.history.list` | read | `message_content` | `gmail.metadata` | `start_history_id` | `history`, `next_page_token`, `history_id` |
+| `google.gmail.message.attachment.get` | read | `message_content` | `gmail.readonly` | `message_id`, `attachment_id` | `attachment` |
 | `google.gmail.message.send` | external_write | `message_content` | `gmail.send` | `to`, `subject` | `message` |
 | `google.gmail.draft.create` | write | `message_content` | `gmail.compose` | `to`, `subject` | `draft` |
+| `google.gmail.draft.update` | write | `message_content` | `gmail.compose` | `draft_id`, `to`, `subject` | `draft` |
 | `google.gmail.draft.send` | external_write | `message_content` | `gmail.compose` | `draft_id` | `message` |
-| `google.gmail.label.create` | write | `personal_data` | `gmail.modify` | `name` | `label` |
+| `google.gmail.draft.delete` | destructive | `message_content` | `gmail.compose` | `draft_id` | `result` |
+| `google.gmail.label.create` | write | `personal_data` | `gmail.labels` | `name` | `label` |
+| `google.gmail.label.update` | write | `personal_data` | `gmail.labels` | `label_id` | `label` |
+| `google.gmail.label.delete` | destructive | `personal_data` | `gmail.labels` | `label_id` | `result` |
 | `google.gmail.message.labels.apply` | write | `message_content` | `gmail.modify` | `message_id` | `message` |
+| `google.gmail.messages.batch_modify` | write | `message_content` | `gmail.modify` | `message_ids` | `result` |
+| `google.gmail.message.trash` | destructive | `message_content` | `gmail.modify` | `message_id` | `message` |
+| `google.gmail.message.untrash` | write | `message_content` | `gmail.modify` | `message_id` | `message` |
+| `google.gmail.message.delete` | destructive | `message_content` | `https://mail.google.com/` | `message_id` | `result` |
+| `google.gmail.messages.batch_delete` | destructive | `message_content` | `https://mail.google.com/` | `message_ids` | `result` |
+| `google.gmail.thread.modify` | write | `message_content` | `gmail.modify` | `thread_id` | `thread` |
+| `google.gmail.thread.trash` | destructive | `message_content` | `gmail.modify` | `thread_id` | `thread` |
+| `google.gmail.thread.untrash` | write | `message_content` | `gmail.modify` | `thread_id` | `thread` |
+| `google.gmail.thread.delete` | destructive | `message_content` | `https://mail.google.com/` | `thread_id` | `result` |
 
 ### Trigger
 
@@ -167,9 +185,10 @@ Auth profiles: `user`
 
 | Pack | Surface |
 | --- | --- |
-| `google_gmail_metadata` | Profile, labels, message/thread reads, and the received-message poll trigger. |
-| `google_gmail_triage` | Metadata pack plus label creation and message label application. |
-| `google_gmail_send` | Metadata pack plus send, draft create, and draft send. |
+| `google_gmail_metadata` | Profile, label list, message/thread reads, history, and mailbox webhook/poll triggers. |
+| `google_gmail_triage` | Metadata pack plus label get, watch lifecycle, attachment retrieval, label create/update, batch message label mutation, and reversible message/thread trash workflows. |
+| `google_gmail_send` | Metadata pack plus send and non-destructive draft list/get/create/update/send. |
+| `google_gmail_destructive` | Metadata pack plus explicit draft, label, message, and thread delete or trash operations. |
 
 ## Drive
 

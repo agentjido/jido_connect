@@ -4,6 +4,8 @@ defmodule Jido.Connect.Gmail.Actions.Read do
   use Spark.Dsl.Fragment, of: Jido.Connect
 
   @metadata_scope "https://www.googleapis.com/auth/gmail.metadata"
+  @readonly_scope "https://www.googleapis.com/auth/gmail.readonly"
+  @compose_scope "https://www.googleapis.com/auth/gmail.compose"
   @scope_resolver Jido.Connect.Gmail.ScopeResolver
 
   actions do
@@ -50,6 +52,30 @@ defmodule Jido.Connect.Gmail.Actions.Read do
 
       output do
         field(:labels, {:array, :map})
+      end
+    end
+
+    action :get_label do
+      id("google.gmail.label.get")
+      resource(:label)
+      verb(:get)
+      data_classification(:personal_data)
+      label("Get Gmail label")
+      description("Fetch Gmail label metadata by label id.")
+      handler(Jido.Connect.Gmail.Handlers.Actions.GetLabel)
+      effect(:read)
+
+      access do
+        auth(:user)
+        scopes([@readonly_scope], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:label_id, :string, required?: true, example: "Label_123")
+      end
+
+      output do
+        field(:label, :map)
       end
     end
 
@@ -160,6 +186,64 @@ defmodule Jido.Connect.Gmail.Actions.Read do
 
       output do
         field(:thread, :map)
+      end
+    end
+
+    action :list_drafts do
+      id("google.gmail.drafts.list")
+      resource(:draft)
+      verb(:list)
+      data_classification(:message_content)
+      label("List Gmail drafts")
+      description("List Gmail draft metadata summaries without fetching raw RFC822 bodies.")
+      handler(Jido.Connect.Gmail.Handlers.Actions.ListDrafts)
+      effect(:read)
+
+      access do
+        auth(:user)
+        scopes([@compose_scope], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:query, :string)
+        field(:page_size, :integer, default: 25)
+        field(:page_token, :string)
+        field(:include_spam_trash, :boolean, default: false)
+      end
+
+      output do
+        field(:drafts, {:array, :map})
+        field(:next_page_token, :string)
+        field(:result_size_estimate, :integer)
+      end
+    end
+
+    action :get_draft do
+      id("google.gmail.draft.get")
+      resource(:draft)
+      verb(:get)
+      data_classification(:message_content)
+      label("Get Gmail draft")
+
+      description(
+        "Fetch Gmail draft metadata with optional header allowlist and no raw body data."
+      )
+
+      handler(Jido.Connect.Gmail.Handlers.Actions.GetDraft)
+      effect(:read)
+
+      access do
+        auth(:user)
+        scopes([@compose_scope], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:draft_id, :string, required?: true, example: "r123...")
+        field(:metadata_headers, {:array, :string}, default: [])
+      end
+
+      output do
+        field(:draft, :map)
       end
     end
 

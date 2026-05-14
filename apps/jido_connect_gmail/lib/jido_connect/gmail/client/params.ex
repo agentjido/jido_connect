@@ -12,6 +12,14 @@ defmodule Jido.Connect.Gmail.Client.Params do
 
   def thread_list_params(params) when is_map(params), do: message_list_params(params)
 
+  def draft_list_params(params) when is_map(params) do
+    []
+    |> maybe_put(:q, Map.get(params, :query))
+    |> maybe_put(:maxResults, Map.get(params, :page_size, 25))
+    |> maybe_put(:pageToken, Map.get(params, :page_token))
+    |> maybe_put(:includeSpamTrash, Map.get(params, :include_spam_trash))
+  end
+
   def metadata_get_params(params) when is_map(params) do
     []
     |> maybe_put(:format, "metadata")
@@ -48,6 +56,8 @@ defmodule Jido.Connect.Gmail.Client.Params do
     %{message: send_message_body(params)}
   end
 
+  def update_draft_body(params) when is_map(params), do: create_draft_body(params)
+
   def send_draft_body(params) when is_map(params) do
     %{id: Map.fetch!(params, :draft_id)}
   end
@@ -68,6 +78,16 @@ defmodule Jido.Connect.Gmail.Client.Params do
       removeLabelIds: Map.get(params, :remove_label_ids, [])
     }
     |> compact()
+  end
+
+  def batch_modify_messages_body(params) when is_map(params) do
+    params
+    |> modify_labels_body()
+    |> Map.put(:ids, Map.fetch!(params, :message_ids))
+  end
+
+  def batch_delete_messages_body(params) when is_map(params) do
+    %{ids: Map.fetch!(params, :message_ids)}
   end
 
   defp put_repeated(params, _key, nil), do: params

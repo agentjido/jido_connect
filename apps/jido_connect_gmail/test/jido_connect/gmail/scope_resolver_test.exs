@@ -8,7 +8,9 @@ defmodule Jido.Connect.Gmail.ScopeResolverTest do
   @readonly_scope "https://www.googleapis.com/auth/gmail.readonly"
   @send_scope "https://www.googleapis.com/auth/gmail.send"
   @compose_scope "https://www.googleapis.com/auth/gmail.compose"
+  @labels_scope "https://www.googleapis.com/auth/gmail.labels"
   @modify_scope "https://www.googleapis.com/auth/gmail.modify"
+  @mail_scope "https://mail.google.com/"
 
   test "declares Gmail read, broad, mutation, and legacy-compatible scope matrix" do
     ConnectorContracts.assert_scope_matrix(ScopeResolver, [
@@ -55,10 +57,40 @@ defmodule Jido.Connect.Gmail.ScopeResolverTest do
         expected: @compose_scope
       },
       %{
-        label: "label mutation requires modify scope",
+        label: "label list accepts label scope",
+        operation: "google.gmail.labels.list",
+        granted: [@labels_scope],
+        expected: @labels_scope
+      },
+      %{
+        label: "label get requires readonly scope by default",
+        operation: "google.gmail.label.get",
+        granted: [@labels_scope],
+        expected: @readonly_scope
+      },
+      %{
+        label: "label definition mutation prefers label scope",
+        operation: "google.gmail.label.update",
+        granted: [@labels_scope],
+        expected: @labels_scope
+      },
+      %{
+        label: "message label mutation requires modify scope",
         operation: "google.gmail.message.labels.apply",
         granted: [@readonly_scope],
         expected: @modify_scope
+      },
+      %{
+        label: "batch message label mutation accepts full Gmail mailbox scope",
+        operation: "google.gmail.messages.batch_modify",
+        granted: [@mail_scope],
+        expected: @mail_scope
+      },
+      %{
+        label: "permanent message delete requires full Gmail mailbox scope",
+        operation: "google.gmail.message.delete",
+        granted: [@modify_scope],
+        expected: @mail_scope
       },
       %{
         label: "attachment read requires readonly when only metadata is granted",

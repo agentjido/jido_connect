@@ -41,10 +41,12 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
     assert "google.gmail.history.list" in ids
     assert "google.gmail.message.received" in ids
     assert "google.gmail.mailbox.changed" in ids
+    refute "google.gmail.label.get" in ids
     refute "google.gmail.message.attachment.get" in ids
     refute "google.gmail.watch.start" in ids
     refute "google.gmail.message.send" in ids
     refute "google.gmail.label.create" in ids
+    refute "google.gmail.message.delete" in ids
 
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.gmail.message.received",
@@ -63,7 +65,7 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
              )
   end
 
-  test "triage pack allows label mutations, watch, and attachments and rejects send tools" do
+  test "triage pack allows mailbox organization, watch, and attachments and rejects send and permanent delete tools" do
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.gmail.message.labels.apply",
                modules: [Gmail],
@@ -72,6 +74,33 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.gmail.message.labels.apply"
+
+    assert {:ok, label_descriptor} =
+             Catalog.describe_tool("google.gmail.label.get",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_triage
+             )
+
+    assert label_descriptor.tool.id == "google.gmail.label.get"
+
+    assert {:ok, batch_descriptor} =
+             Catalog.describe_tool("google.gmail.messages.batch_modify",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_triage
+             )
+
+    assert batch_descriptor.tool.id == "google.gmail.messages.batch_modify"
+
+    assert {:ok, thread_descriptor} =
+             Catalog.describe_tool("google.gmail.thread.trash",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_triage
+             )
+
+    assert thread_descriptor.tool.id == "google.gmail.thread.trash"
 
     assert {:ok, watch_descriptor} =
              Catalog.describe_tool("google.gmail.watch.start",
@@ -97,9 +126,16 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
                packs: Gmail.catalog_packs(),
                pack: :google_gmail_triage
              )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.gmail.message.delete",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_triage
+             )
   end
 
-  test "send pack allows send and draft tools and rejects triage mutations" do
+  test "send pack allows send and non-destructive draft tools and rejects triage mutations" do
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.gmail.message.send",
                modules: [Gmail],
@@ -117,6 +153,15 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
              )
 
     assert draft_descriptor.tool.id == "google.gmail.draft.create"
+
+    assert {:ok, update_draft_descriptor} =
+             Catalog.describe_tool("google.gmail.draft.update",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_send
+             )
+
+    assert update_draft_descriptor.tool.id == "google.gmail.draft.update"
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("google.gmail.label.create",
@@ -137,6 +182,49 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
                modules: [Gmail],
                packs: Gmail.catalog_packs(),
                pack: :google_gmail_send
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.gmail.draft.delete",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_send
+             )
+  end
+
+  test "destructive pack exposes explicit delete and trash tools" do
+    assert {:ok, descriptor} =
+             Catalog.describe_tool("google.gmail.message.delete",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_destructive
+             )
+
+    assert descriptor.tool.id == "google.gmail.message.delete"
+
+    assert {:ok, batch_descriptor} =
+             Catalog.describe_tool("google.gmail.messages.batch_delete",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_destructive
+             )
+
+    assert batch_descriptor.tool.id == "google.gmail.messages.batch_delete"
+
+    assert {:ok, draft_descriptor} =
+             Catalog.describe_tool("google.gmail.draft.delete",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_destructive
+             )
+
+    assert draft_descriptor.tool.id == "google.gmail.draft.delete"
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.gmail.message.send",
+               modules: [Gmail],
+               packs: Gmail.catalog_packs(),
+               pack: :google_gmail_destructive
              )
   end
 

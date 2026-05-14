@@ -36,6 +36,32 @@ defmodule Jido.Connect.Gmail.Client.Response do
 
   def handle_label_list_response(response), do: Transport.handle_error_response(response)
 
+  def handle_draft_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, drafts} <-
+           normalize_items(
+             body,
+             "drafts",
+             &Normalizer.draft/1,
+             "Gmail draft list response was invalid"
+           ) do
+      {:ok,
+       %{
+         drafts: drafts,
+         next_page_token: Data.get(body, "nextPageToken"),
+         result_size_estimate: Data.get(body, "resultSizeEstimate")
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_draft_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Gmail draft list response was invalid", body)
+  end
+
+  def handle_draft_list_response(response), do: Transport.handle_error_response(response)
+
   def handle_label_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
     normalize_one(body, &Normalizer.label/1, "Gmail label response was invalid")
@@ -167,6 +193,12 @@ defmodule Jido.Connect.Gmail.Client.Response do
   end
 
   def handle_stop_watch_response(response), do: Transport.handle_error_response(response)
+
+  def handle_empty_response({:ok, %{status: status}}, result) when status in 200..299 do
+    {:ok, result}
+  end
+
+  def handle_empty_response(response, _result), do: Transport.handle_error_response(response)
 
   def handle_attachment_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do

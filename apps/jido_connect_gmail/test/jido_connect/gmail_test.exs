@@ -8,17 +8,33 @@ defmodule Jido.Connect.GmailTest do
   @gmail_action_modules [
     Jido.Connect.Gmail.Actions.GetProfile,
     Jido.Connect.Gmail.Actions.ListLabels,
+    Jido.Connect.Gmail.Actions.GetLabel,
     Jido.Connect.Gmail.Actions.ListMessages,
     Jido.Connect.Gmail.Actions.GetMessage,
     Jido.Connect.Gmail.Actions.ListThreads,
     Jido.Connect.Gmail.Actions.GetThread,
+    Jido.Connect.Gmail.Actions.ListDrafts,
+    Jido.Connect.Gmail.Actions.GetDraft,
     Jido.Connect.Gmail.Actions.ListHistory,
     Jido.Connect.Gmail.Actions.GetAttachment,
     Jido.Connect.Gmail.Actions.SendMessage,
     Jido.Connect.Gmail.Actions.CreateDraft,
+    Jido.Connect.Gmail.Actions.UpdateDraft,
     Jido.Connect.Gmail.Actions.SendDraft,
+    Jido.Connect.Gmail.Actions.DeleteDraft,
     Jido.Connect.Gmail.Actions.CreateLabel,
+    Jido.Connect.Gmail.Actions.UpdateLabel,
+    Jido.Connect.Gmail.Actions.DeleteLabel,
     Jido.Connect.Gmail.Actions.ApplyMessageLabels,
+    Jido.Connect.Gmail.Actions.BatchModifyMessages,
+    Jido.Connect.Gmail.Actions.TrashMessage,
+    Jido.Connect.Gmail.Actions.UntrashMessage,
+    Jido.Connect.Gmail.Actions.DeleteMessage,
+    Jido.Connect.Gmail.Actions.BatchDeleteMessages,
+    Jido.Connect.Gmail.Actions.ModifyThread,
+    Jido.Connect.Gmail.Actions.TrashThread,
+    Jido.Connect.Gmail.Actions.UntrashThread,
+    Jido.Connect.Gmail.Actions.DeleteThread,
     Jido.Connect.Gmail.Actions.StartWatch,
     Jido.Connect.Gmail.Actions.StopWatch
   ]
@@ -52,6 +68,15 @@ defmodule Jido.Connect.GmailTest do
            })
          ]
        }}
+    end
+
+    def get_label(%{label_id: "Label_123"}, "token") do
+      {:ok,
+       Gmail.Label.new!(%{
+         label_id: "Label_123",
+         name: "Customers",
+         type: "user"
+       })}
     end
 
     def list_messages(
@@ -128,6 +153,44 @@ defmodule Jido.Connect.GmailTest do
              snippet: "Budget update"
            })
          ]
+       })}
+    end
+
+    def list_drafts(
+          %{
+            query: "to:to@example.com",
+            page_size: 25,
+            include_spam_trash: false
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         drafts: [
+           Gmail.Draft.new!(%{
+             draft_id: "draft123",
+             message:
+               Gmail.Message.new!(%{
+                 message_id: "draft-message123",
+                 thread_id: "thread123"
+               })
+           })
+         ],
+         next_page_token: "next-draft",
+         result_size_estimate: 1
+       }}
+    end
+
+    def get_draft(%{draft_id: "draft123", metadata_headers: ["Subject"]}, "token") do
+      {:ok,
+       Gmail.Draft.new!(%{
+         draft_id: "draft123",
+         message:
+           Gmail.Message.new!(%{
+             message_id: "draft-message123",
+             thread_id: "thread123",
+             headers: [%{name: "Subject", value: "Hello"}]
+           })
        })}
     end
 
@@ -302,6 +365,22 @@ defmodule Jido.Connect.GmailTest do
        })}
     end
 
+    def update_draft(
+          %{draft_id: "draft123", raw: raw, to: ["to@example.com"], subject: "Hello"},
+          "token"
+        )
+        when is_binary(raw) do
+      {:ok,
+       Gmail.Draft.new!(%{
+         draft_id: "draft123",
+         message:
+           Gmail.Message.new!(%{
+             message_id: "draft-message456",
+             thread_id: "thread123"
+           })
+       })}
+    end
+
     def send_draft(%{draft_id: "draft123"}, "token") do
       {:ok,
        Gmail.Message.new!(%{
@@ -309,6 +388,10 @@ defmodule Jido.Connect.GmailTest do
          thread_id: "thread123",
          label_ids: ["SENT"]
        })}
+    end
+
+    def delete_draft(%{draft_id: "draft123"}, "token") do
+      {:ok, %{deleted?: true, draft_id: "draft123"}}
     end
 
     def create_label(%{name: "Customers", message_list_visibility: "show"}, "token") do
@@ -321,6 +404,23 @@ defmodule Jido.Connect.GmailTest do
        })}
     end
 
+    def update_label(
+          %{label_id: "Label_123", name: "Customers VIP", message_list_visibility: "show"},
+          "token"
+        ) do
+      {:ok,
+       Gmail.Label.new!(%{
+         label_id: "Label_123",
+         name: "Customers VIP",
+         type: "user",
+         message_list_visibility: "show"
+       })}
+    end
+
+    def delete_label(%{label_id: "Label_123"}, "token") do
+      {:ok, %{deleted?: true, label_id: "Label_123"}}
+    end
+
     def apply_message_labels(
           %{message_id: "msg123", add_label_ids: ["Label_123"], remove_label_ids: []},
           "token"
@@ -331,6 +431,102 @@ defmodule Jido.Connect.GmailTest do
          thread_id: "thread123",
          label_ids: ["INBOX", "Label_123"]
        })}
+    end
+
+    def batch_modify_messages(
+          %{
+            message_ids: ["msg123", "msg456"],
+            add_label_ids: ["Label_123"],
+            remove_label_ids: ["UNREAD"]
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         modified?: true,
+         message_ids: ["msg123", "msg456"],
+         add_label_ids: ["Label_123"],
+         remove_label_ids: ["UNREAD"]
+       }}
+    end
+
+    def trash_message(%{message_id: "msg123"}, "token") do
+      {:ok,
+       Gmail.Message.new!(%{
+         message_id: "msg123",
+         thread_id: "thread123",
+         label_ids: ["TRASH"]
+       })}
+    end
+
+    def untrash_message(%{message_id: "msg123"}, "token") do
+      {:ok,
+       Gmail.Message.new!(%{
+         message_id: "msg123",
+         thread_id: "thread123",
+         label_ids: ["INBOX"]
+       })}
+    end
+
+    def delete_message(%{message_id: "msg123"}, "token") do
+      {:ok, %{deleted?: true, message_id: "msg123"}}
+    end
+
+    def batch_delete_messages(%{message_ids: ["msg123", "msg456"]}, "token") do
+      {:ok, %{deleted?: true, message_ids: ["msg123", "msg456"]}}
+    end
+
+    def modify_thread(
+          %{
+            thread_id: "thread123",
+            add_label_ids: ["Label_123"],
+            remove_label_ids: ["UNREAD"]
+          },
+          "token"
+        ) do
+      {:ok,
+       Gmail.Thread.new!(%{
+         thread_id: "thread123",
+         messages: [
+           Gmail.Message.new!(%{
+             message_id: "msg123",
+             thread_id: "thread123",
+             label_ids: ["Label_123"]
+           })
+         ]
+       })}
+    end
+
+    def trash_thread(%{thread_id: "thread123"}, "token") do
+      {:ok,
+       Gmail.Thread.new!(%{
+         thread_id: "thread123",
+         messages: [
+           Gmail.Message.new!(%{
+             message_id: "msg123",
+             thread_id: "thread123",
+             label_ids: ["TRASH"]
+           })
+         ]
+       })}
+    end
+
+    def untrash_thread(%{thread_id: "thread123"}, "token") do
+      {:ok,
+       Gmail.Thread.new!(%{
+         thread_id: "thread123",
+         messages: [
+           Gmail.Message.new!(%{
+             message_id: "msg123",
+             thread_id: "thread123",
+             label_ids: ["INBOX"]
+           })
+         ]
+       })}
+    end
+
+    def delete_thread(%{thread_id: "thread123"}, "token") do
+      {:ok, %{deleted?: true, thread_id: "thread123"}}
     end
   end
 
@@ -354,25 +550,43 @@ defmodule Jido.Connect.GmailTest do
 
     assert "openid" in profile.default_scopes
     assert "https://www.googleapis.com/auth/gmail.metadata" in profile.optional_scopes
+    assert "https://www.googleapis.com/auth/gmail.labels" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/gmail.readonly" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/gmail.send" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/gmail.compose" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/gmail.modify" in profile.optional_scopes
+    assert "https://mail.google.com/" in profile.optional_scopes
 
     assert Enum.map(spec.actions, & &1.id) == [
              "google.gmail.profile.get",
              "google.gmail.labels.list",
+             "google.gmail.label.get",
              "google.gmail.messages.list",
              "google.gmail.message.get",
              "google.gmail.threads.list",
              "google.gmail.thread.get",
+             "google.gmail.drafts.list",
+             "google.gmail.draft.get",
              "google.gmail.history.list",
              "google.gmail.message.attachment.get",
              "google.gmail.message.send",
              "google.gmail.draft.create",
+             "google.gmail.draft.update",
              "google.gmail.draft.send",
+             "google.gmail.draft.delete",
              "google.gmail.label.create",
+             "google.gmail.label.update",
+             "google.gmail.label.delete",
              "google.gmail.message.labels.apply",
+             "google.gmail.messages.batch_modify",
+             "google.gmail.message.trash",
+             "google.gmail.message.untrash",
+             "google.gmail.message.delete",
+             "google.gmail.messages.batch_delete",
+             "google.gmail.thread.modify",
+             "google.gmail.thread.trash",
+             "google.gmail.thread.untrash",
+             "google.gmail.thread.delete",
              "google.gmail.watch.start",
              "google.gmail.watch.stop"
            ]
@@ -427,7 +641,8 @@ defmodule Jido.Connect.GmailTest do
     ConnectorContracts.assert_catalog_pack_delegates(Gmail,
       metadata_pack: :google_gmail_metadata,
       triage_pack: :google_gmail_triage,
-      send_pack: :google_gmail_send
+      send_pack: :google_gmail_send,
+      destructive_pack: :google_gmail_destructive
     )
   end
 
@@ -453,6 +668,24 @@ defmodule Jido.Connect.GmailTest do
              %{},
              %{scopes: ["https://www.googleapis.com/auth/gmail.modify"]}
            ) == ["https://www.googleapis.com/auth/gmail.modify"]
+
+    assert resolver.required_scopes(
+             %{id: "google.gmail.label.update"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/gmail.labels"]}
+           ) == ["https://www.googleapis.com/auth/gmail.labels"]
+
+    assert resolver.required_scopes(
+             %{id: "google.gmail.messages.batch_modify"},
+             %{},
+             %{scopes: ["https://mail.google.com/"]}
+           ) == ["https://mail.google.com/"]
+
+    assert resolver.required_scopes(
+             %{id: "google.gmail.message.delete"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/gmail.modify"]}
+           ) == ["https://mail.google.com/"]
 
     assert resolver.required_scopes(
              %{id: "google.gmail.message.get"},
@@ -515,6 +748,19 @@ defmodule Jido.Connect.GmailTest do
                Gmail.integration(),
                "google.gmail.labels.list",
                %{},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes get label through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: readonly_scopes())
+
+    assert {:ok, %{label: %{label_id: "Label_123", name: "Customers"}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.label.get",
+               %{label_id: "Label_123"},
                context: context,
                credential_lease: lease
              )
@@ -645,6 +891,44 @@ defmodule Jido.Connect.GmailTest do
                Gmail.integration(),
                "google.gmail.thread.get",
                %{thread_id: "thread123", metadata_headers: ["From", "Subject"]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes draft read actions through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: compose_scopes())
+
+    assert {:ok,
+            %{
+              drafts: [
+                %{
+                  draft_id: "draft123",
+                  message: %{message_id: "draft-message123"}
+                }
+              ],
+              next_page_token: "next-draft",
+              result_size_estimate: 1
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.drafts.list",
+               %{query: "to:to@example.com"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok,
+            %{
+              draft: %{
+                draft_id: "draft123",
+                message: %{message_id: "draft-message123", headers: [%{name: "Subject"}]}
+              }
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.draft.get",
+               %{draft_id: "draft123", metadata_headers: ["Subject"]},
                context: context,
                credential_lease: lease
              )
@@ -805,6 +1089,33 @@ defmodule Jido.Connect.GmailTest do
              )
   end
 
+  test "invokes update and delete draft through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: compose_scopes())
+
+    assert {:ok, %{draft: %{draft_id: "draft123", message: %{message_id: "draft-message456"}}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.draft.update",
+               %{
+                 draft_id: "draft123",
+                 to: ["to@example.com"],
+                 subject: "Hello",
+                 body_text: "Body"
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{deleted?: true, draft_id: "draft123"}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.draft.delete",
+               %{draft_id: "draft123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
   test "invokes send draft through injected client and lease" do
     {context, lease} = context_and_lease(scopes: compose_scopes())
 
@@ -853,7 +1164,7 @@ defmodule Jido.Connect.GmailTest do
   end
 
   test "invokes create label through injected client and lease" do
-    {context, lease} = context_and_lease(scopes: modify_scopes())
+    {context, lease} = context_and_lease(scopes: labels_scopes())
 
     assert {:ok,
             %{
@@ -873,6 +1184,35 @@ defmodule Jido.Connect.GmailTest do
              )
   end
 
+  test "invokes update and delete label through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: labels_scopes())
+
+    assert {:ok,
+            %{
+              label: %{
+                label_id: "Label_123",
+                name: "Customers VIP",
+                message_list_visibility: "show"
+              }
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.label.update",
+               %{label_id: "Label_123", name: "Customers VIP", message_list_visibility: "show"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{deleted?: true, label_id: "Label_123"}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.label.delete",
+               %{label_id: "Label_123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
   test "invokes apply message labels through injected client and lease" do
     {context, lease} = context_and_lease(scopes: modify_scopes())
 
@@ -881,6 +1221,111 @@ defmodule Jido.Connect.GmailTest do
                Gmail.integration(),
                "google.gmail.message.labels.apply",
                %{message_id: "msg123", add_label_ids: [" Label_123 "]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes batch message and thread lifecycle actions through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: modify_scopes())
+
+    assert {:ok,
+            %{
+              result: %{
+                modified?: true,
+                message_ids: ["msg123", "msg456"],
+                add_label_ids: ["Label_123"],
+                remove_label_ids: ["UNREAD"]
+              }
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.messages.batch_modify",
+               %{
+                 message_ids: ["msg123", "msg456"],
+                 add_label_ids: ["Label_123"],
+                 remove_label_ids: ["UNREAD"]
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{message: %{message_id: "msg123", label_ids: ["TRASH"]}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.message.trash",
+               %{message_id: "msg123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{message: %{message_id: "msg123", label_ids: ["INBOX"]}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.message.untrash",
+               %{message_id: "msg123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{thread: %{thread_id: "thread123", messages: [%{label_ids: ["Label_123"]}]}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.thread.modify",
+               %{
+                 thread_id: "thread123",
+                 add_label_ids: ["Label_123"],
+                 remove_label_ids: ["UNREAD"]
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{thread: %{thread_id: "thread123", messages: [%{label_ids: ["TRASH"]}]}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.thread.trash",
+               %{thread_id: "thread123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{thread: %{thread_id: "thread123", messages: [%{label_ids: ["INBOX"]}]}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.thread.untrash",
+               %{thread_id: "thread123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes permanent message and thread deletes through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: mail_scopes())
+
+    assert {:ok, %{result: %{deleted?: true, message_id: "msg123"}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.message.delete",
+               %{message_id: "msg123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{deleted?: true, message_ids: ["msg123", "msg456"]}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.messages.batch_delete",
+               %{message_ids: ["msg123", "msg456"]},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{deleted?: true, thread_id: "thread123"}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.thread.delete",
+               %{thread_id: "thread123"},
                context: context,
                credential_lease: lease
              )
@@ -903,7 +1348,24 @@ defmodule Jido.Connect.GmailTest do
              )
   end
 
-  test "label mutations require modify scope" do
+  test "label lifecycle actions require label scope" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: ["https://www.googleapis.com/auth/gmail.labels"]
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.label.create",
+               %{name: "Customers"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "message label mutations require modify scope" do
     {context, lease} = context_and_lease()
 
     assert {:error,
@@ -913,8 +1375,25 @@ defmodule Jido.Connect.GmailTest do
             }} =
              Connect.invoke(
                Gmail.integration(),
-               "google.gmail.label.create",
-               %{name: "Customers"},
+               "google.gmail.message.labels.apply",
+               %{message_id: "msg123", add_label_ids: ["Label_123"]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "permanent deletes require full Gmail mailbox scope" do
+    {context, lease} = context_and_lease(scopes: modify_scopes())
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: ["https://mail.google.com/"]
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.message.delete",
+               %{message_id: "msg123"},
                context: context,
                credential_lease: lease
              )
@@ -1091,12 +1570,39 @@ defmodule Jido.Connect.GmailTest do
     ]
   end
 
+  defp labels_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/gmail.labels"
+    ]
+  end
+
+  defp readonly_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/gmail.readonly"
+    ]
+  end
+
   defp modify_scopes do
     [
       "openid",
       "email",
       "profile",
       "https://www.googleapis.com/auth/gmail.modify"
+    ]
+  end
+
+  defp mail_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      "https://mail.google.com/"
     ]
   end
 end

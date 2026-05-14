@@ -16,6 +16,8 @@ defmodule Jido.Connect.Google.ScopesTest do
   test "exposes initial product scope catalog" do
     assert "https://www.googleapis.com/auth/spreadsheets.readonly" in Scopes.product(:sheets)
     assert "https://www.googleapis.com/auth/gmail.metadata" in Scopes.product(:gmail)
+    assert "https://www.googleapis.com/auth/gmail.labels" in Scopes.product(:gmail)
+    assert "https://mail.google.com/" in Scopes.product(:gmail)
     assert "https://www.googleapis.com/auth/drive.file" in Scopes.product(:drive)
     assert "https://www.googleapis.com/auth/calendar.events" in Scopes.product(:calendar)
     assert "https://www.googleapis.com/auth/contacts.readonly" in Scopes.product(:contacts)

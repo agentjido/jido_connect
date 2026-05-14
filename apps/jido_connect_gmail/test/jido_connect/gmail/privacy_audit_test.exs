@@ -11,6 +11,7 @@ defmodule Jido.Connect.Gmail.PrivacyAuditTest do
       [
         action("google.gmail.profile.get", :personal_data, :read, :none),
         action("google.gmail.labels.list", :personal_data, :read, :none),
+        action("google.gmail.label.get", :personal_data, :read, :none),
         action("google.gmail.messages.list", :message_content, :read, :none,
           text_includes: ["metadata", "without fetching full message bodies"]
         ),
@@ -22,6 +23,12 @@ defmodule Jido.Connect.Gmail.PrivacyAuditTest do
         ),
         action("google.gmail.thread.get", :message_content, :read, :none,
           text_includes: ["thread metadata", "no body data"]
+        ),
+        action("google.gmail.drafts.list", :message_content, :read, :none,
+          text_includes: ["draft metadata", "without fetching raw"]
+        ),
+        action("google.gmail.draft.get", :message_content, :read, :none,
+          text_includes: ["draft metadata", "no raw body data"]
         ),
         action("google.gmail.history.list", :message_content, :read, :none,
           text_includes: ["history records"]
@@ -35,9 +42,24 @@ defmodule Jido.Connect.Gmail.PrivacyAuditTest do
         action("google.gmail.draft.create", :message_content, :write, :required_for_ai,
           text_includes: ["draft", "body content"]
         ),
+        action("google.gmail.draft.update", :message_content, :write, :required_for_ai,
+          text_includes: ["draft", "body content"]
+        ),
         action("google.gmail.draft.send", :message_content, :external_write, :required_for_ai),
+        action("google.gmail.draft.delete", :message_content, :destructive, :always),
         action("google.gmail.label.create", :personal_data, :write, :required_for_ai),
+        action("google.gmail.label.update", :personal_data, :write, :required_for_ai),
+        action("google.gmail.label.delete", :personal_data, :destructive, :always),
         action("google.gmail.message.labels.apply", :message_content, :write, :required_for_ai),
+        action("google.gmail.messages.batch_modify", :message_content, :write, :required_for_ai),
+        action("google.gmail.message.trash", :message_content, :destructive, :always),
+        action("google.gmail.message.untrash", :message_content, :write, :required_for_ai),
+        action("google.gmail.message.delete", :message_content, :destructive, :always),
+        action("google.gmail.messages.batch_delete", :message_content, :destructive, :always),
+        action("google.gmail.thread.modify", :message_content, :write, :required_for_ai),
+        action("google.gmail.thread.trash", :message_content, :destructive, :always),
+        action("google.gmail.thread.untrash", :message_content, :write, :required_for_ai),
+        action("google.gmail.thread.delete", :message_content, :destructive, :always),
         action("google.gmail.watch.start", :personal_data, :write, :required_for_ai,
           text_includes: ["push notifications"]
         ),
