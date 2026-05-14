@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-nmq.3"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-nmq",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G13-S04] Write Google surface audit document",
   "type": "task",
-  "updated_at": "2026-05-14T14:36:00Z"
+  "updated_at": "2026-05-14T14:59:03Z"
 }
