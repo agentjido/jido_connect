@@ -4,6 +4,8 @@
     "jido_con-5zt.11"
   ],
   "blocks": [],
+  "closed_at": "2026-05-14T19:11:48Z",
+  "close_reason": "Refreshed Google catalog docs and added generated plugin availability tests in PR #23",
   "created": "2026-05-14T14:58:14Z",
   "description": "Update catalog packs, package docs, action catalog expectations, fixture coverage, and cross-product tests after the existing-package expansion tasks land.",
   "id": "jido_con-5zt.12",
@@ -14,8 +16,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S12] Refresh expansion catalog packs docs and action availability tests",
   "type": "task",
-  "updated_at": "2026-05-14T18:56:22Z"
+  "updated_at": "2026-05-14T19:11:48Z"
 }
