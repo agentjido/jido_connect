@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:35:49Z",
+  "description": "Add normalized presentation, slide/page, page element, thumbnail, and batch update result structs with representative fixtures.",
+  "id": "jido_con-qc1.2",
+  "labels": [],
+  "parent": "jido_con-qc1",
+  "priority": 1,
+  "status": "open",
+  "title": "[G15-S02] Add Slides normalized structs and schemas",
+  "type": "task",
+  "updated_at": "2026-05-14T14:35:49Z"
+}
