@@ -5,11 +5,15 @@
   "created": "2026-05-14T14:58:13Z",
   "description": "Add contact group get/batchGet/delete, contactGroups.members.modify, and a host-owned polling trigger over People connections sync tokens.",
   "id": "jido_con-5zt.11",
-  "labels": [],
+  "labels": [
+    "expansion",
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-5zt",
   "priority": 1,
   "status": "open",
   "title": "[G18-S11] Add Contacts group membership and sync trigger",
   "type": "task",
-  "updated_at": "2026-05-14T14:58:13Z"
+  "updated_at": "2026-05-14T14:58:16Z"
 }
