@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5zt.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5zt.5"
+  ],
   "created": "2026-05-14T14:58:12Z",
   "description": "Add Gmail draft list/get/update/delete, message batch modify/trash/untrash/delete, thread modify/trash/untrash/delete, and label get/update/delete action families with conservative catalog placement.",
   "id": "jido_con-5zt.4",
