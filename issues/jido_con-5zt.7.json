@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-5zt.8"
   ],
+  "closed_at": "2026-05-14T17:25:39Z",
+  "close_reason": "Added Drive comments replies and shared-drive actions in PR #18",
   "created": "2026-05-14T14:58:13Z",
   "description": "Add Drive comments and replies CRUD actions plus shared-drive list/get/create/update/delete/hide/unhide actions where appropriate for Workspace hosts.",
   "id": "jido_con-5zt.7",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S07] Add Drive comments replies and shared-drive actions",
   "type": "task",
-  "updated_at": "2026-05-14T17:00:09Z"
+  "updated_at": "2026-05-14T17:25:39Z"
 }
