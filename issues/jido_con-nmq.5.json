@@ -15,9 +15,15 @@
     "milestone-2"
   ],
   "parent": "jido_con-nmq",
+  "comments": [
+    {
+      "text": "Reconciled sequence: G13 closes the audit gate; G18 existing-package expansion runs next and blocks Meet, Analytics, Search Console, Docs, Slides, Forms, Tasks, and the final G11 hardening/demo epic. Provider-specific filtering remains package-local per the audit.",
+      "timestamp": "2026-05-14T15:03:45Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "[G13-S05] Reconcile cross-Google hardening dependencies",
   "type": "task",
-  "updated_at": "2026-05-14T15:03:38Z"
+  "updated_at": "2026-05-14T15:03:45Z"
 }
