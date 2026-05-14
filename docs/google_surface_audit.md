@@ -1,10 +1,12 @@
 # Google Surface Audit
 
 This document captures the current Google connector surface from the compiled
-integration specs as of May 14, 2026. It is an inventory snapshot, not the
-provider API gap analysis. The next Beadwork tasks compare these surfaces to
-Google's APIs, create follow-up tickets, and fold the results into the broader
-Google hardening plan.
+integration specs as of May 14, 2026, summarizes the provider API gaps, and
+records the implementation sequence for the next Google connector work.
+
+Detailed provider comparison lives in `docs/google_provider_gap_audit.md`.
+This document is the G13 roll-up: current coverage, gap recommendations,
+live-test readiness, and Beadwork sequencing.
 
 ## Beadwork Plan
 
@@ -15,6 +17,14 @@ Google hardening plan.
 | `jido_con-nmq.3` | Create follow-up tickets for current package gaps. |
 | `jido_con-nmq.4` | Write final Google surface audit document. |
 | `jido_con-nmq.5` | Reconcile cross-Google hardening dependencies. |
+
+## Audit Outputs
+
+| Artifact | Purpose |
+| --- | --- |
+| `docs/google_surface_audit.md` | Roll-up document for current surface, recommendations, readiness, and sequencing. |
+| `docs/google_provider_gap_audit.md` | Detailed comparison against official Google REST resources. |
+| `jido_con-5zt` | Existing-package expansion epic generated from the provider gap audit. |
 
 ## Current Packages
 
@@ -41,6 +51,54 @@ Google hardening plan.
   risk.
 - This inventory is credential-free. Live API coverage remains a separate
   release-readiness step.
+
+## Gap Recommendations
+
+The highest-value follow-up work should be implemented as provider-specific
+action families. Do not move Google filter/query semantics into
+`jido_connect` core.
+
+| Package | Recommended Expansion |
+| --- | --- |
+| Sheets | Spreadsheet create, value batch operations, data-filter operations, developer metadata, and sheet copy. |
+| Gmail | Watch/stop lifecycle, explicit history action, attachments, draft lifecycle, batch message triage, label lifecycle, and destructive message/thread operations outside default packs. |
+| Drive | Watch/channel lifecycle, webhook metadata, revisions, permission lifecycle, comments/replies, shared drives, and file labels. |
+| Calendar | Watch/channel lifecycle, calendar CRUD, calendar-list item CRUD, ACL lifecycle, event instances, and event move. |
+| Contacts | Batch contact operations, directory people, other contacts, group lifecycle, group membership, and sync-token polling trigger. |
+
+Explicit non-goals from the audit:
+
+- No provider-neutral structured query/filter compiler in `jido_connect`.
+- No fake whole-drive stats endpoint. Counts remain composed over
+  provider pagination.
+- No fake whole-drive principals endpoint. Principal discovery remains composed
+  over file enumeration plus permission listing.
+- No default catalog exposure for destructive, broad batch, permission-sharing,
+  outbound-send, webhook lifecycle, or admin-like settings surfaces.
+
+## Live-Test Readiness
+
+The current package tests remain offline and credential-free. Live checks should
+be a separate release-readiness activity once the Google package wave is ready
+for a wholesale pass.
+
+| Package | Current Live Scope Needs | Readiness Notes |
+| --- | --- | --- |
+| Sheets | `spreadsheets.readonly`, `spreadsheets` | Existing reads/writes are ready for live smoke tests against a disposable spreadsheet. |
+| Gmail | `gmail.metadata`, `gmail.modify`, `gmail.compose`, `gmail.send` | Sending and destructive mailbox actions need isolated test accounts and explicit confirmation. |
+| Drive | `drive.metadata.readonly`, `drive.readonly`, `drive.file` | Current user OAuth flow is ready; service-account and delegated flows need separate live coverage. |
+| Calendar | `calendar.calendarlist.readonly`, `calendar.events.readonly`, `calendar.events`, `calendar.events.freebusy` | Use a disposable calendar for event mutation and delete checks. |
+| Contacts | `profile`, `contacts.readonly`, `contacts` | Use a test contact/group namespace to avoid mutating real address book data. |
+
+## Implementation Sequence
+
+1. Finish G13 by reconciling dependencies in `jido_con-nmq.5`.
+2. Work the existing-package expansion epic `jido_con-5zt` in dependency order:
+   Sheets, Gmail, Drive, Calendar, Contacts, then catalog/docs/tests.
+3. Continue the new Google package epics after the audit gate:
+   Meet, Analytics, Search Console, Docs, Slides, Forms, and Tasks.
+4. Keep `jido_con-jxj` as the final cross-Google hardening and demo gate after
+   existing-package expansion and new product packages land.
 
 ## Sheets
 
@@ -218,6 +276,27 @@ Auth profiles: `user`
 
 No trigger specs are currently exposed.
 
+## Existing-Package Expansion Epic
+
+The provider gap audit generated a new expansion epic for the current Google
+packages:
+
+| Ticket | Scope |
+| --- | --- |
+| `jido_con-5zt` | Existing Google package expansion. |
+| `jido_con-5zt.1` | Sheets spreadsheet create and value batch actions. |
+| `jido_con-5zt.2` | Sheets data-filter and developer metadata actions. |
+| `jido_con-5zt.3` | Gmail watch/history and attachment actions. |
+| `jido_con-5zt.4` | Gmail draft, message, thread, and label lifecycle actions. |
+| `jido_con-5zt.5` | Drive watch/channel lifecycle and webhook trigger metadata. |
+| `jido_con-5zt.6` | Drive revision and permission lifecycle actions. |
+| `jido_con-5zt.7` | Drive comments, replies, and shared-drive actions. |
+| `jido_con-5zt.8` | Calendar watch/channel lifecycle actions. |
+| `jido_con-5zt.9` | Calendar calendar, ACL, and event utility actions. |
+| `jido_con-5zt.10` | Contacts batch, directory, and other-contact actions. |
+| `jido_con-5zt.11` | Contacts group membership and sync trigger. |
+| `jido_con-5zt.12` | Expansion catalog packs, docs, and action availability tests. |
+
 ## Planned New Package Epics
 
 The current audit gates the next Google package epics so each new connector can
@@ -232,4 +311,3 @@ reuse the same conventions and hardening expectations:
 | `jido_con-qc1` | Google Slides |
 | `jido_con-uoi` | Google Forms |
 | `jido_con-54m` | Google Tasks |
-
