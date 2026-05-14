@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-5zt.10"
   ],
+  "closed_at": "2026-05-14T18:13:30Z",
+  "close_reason": "Added Calendar calendar ACL and event utility actions in PR #20",
   "created": "2026-05-14T14:58:13Z",
   "description": "Add Calendar calendars CRUD, calendarList item CRUD, ACL lifecycle, event instances, and event move actions with appropriate scopes and catalog placement.",
   "id": "jido_con-5zt.9",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S09] Add Calendar calendar ACL and event utility actions",
   "type": "task",
-  "updated_at": "2026-05-14T17:49:44Z"
+  "updated_at": "2026-05-14T18:13:30Z"
 }
