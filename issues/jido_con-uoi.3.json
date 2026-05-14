@@ -9,11 +9,14 @@
   "created": "2026-05-14T14:35:50Z",
   "description": "Implement google.forms.form.get, create, and batchUpdate actions with provider-specific request schemas and tests.",
   "id": "jido_con-uoi.3",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-uoi",
   "priority": 1,
   "status": "open",
   "title": "[G16-S03] Implement form read/create/update actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:55Z"
+  "updated_at": "2026-05-14T14:36:03Z"
 }
