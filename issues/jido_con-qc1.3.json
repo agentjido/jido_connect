@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:35:49Z",
+  "description": "Implement google.slides.presentation.get and google.slides.presentation.create with narrow scopes, normalized output, tests, and catalog metadata.",
+  "id": "jido_con-qc1.3",
+  "labels": [],
+  "parent": "jido_con-qc1",
+  "priority": 1,
+  "status": "open",
+  "title": "[G15-S03] Implement presentation read and create actions",
+  "type": "task",
+  "updated_at": "2026-05-14T14:35:49Z"
+}
