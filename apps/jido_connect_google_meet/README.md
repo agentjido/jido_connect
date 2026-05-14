@@ -50,6 +50,12 @@ wiring.
 Recording and transcript actions expose metadata only. They do not download
 recording media, Google Docs transcript content, or transcript entry text.
 
+## Workspace Events Spike
+
+Meet trigger subscriptions should be backed by Google Workspace Events and
+host-owned durable state. The design spike for that work lives in
+`../../docs/google_meet_workspace_events_spike.md`.
+
 ## Tool Availability
 
 Generated plugin availability is available from the scaffold and will report
