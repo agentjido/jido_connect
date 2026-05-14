@@ -23,9 +23,15 @@
     "google",
     "milestone-2"
   ],
+  "comments": [
+    {
+      "text": "G11 remains the final cross-Google hardening/demo gate and now waits on G18 existing-package expansion in addition to the new Google product package epics.",
+      "timestamp": "2026-05-14T15:03:46Z"
+    }
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G11] Cross-Google Hardening And Demo",
   "type": "epic",
-  "updated_at": "2026-05-14T14:58:17Z"
+  "updated_at": "2026-05-14T15:03:46Z"
 }
