@@ -9,10 +9,64 @@ defmodule Jido.Connect.Google.Calendar.PrivacyAuditTest do
       Calendar,
       [
         action("google.calendar.calendar.list", :personal_data, :read, :none),
+        action("google.calendar.calendar.get", :personal_data, :read, :none),
+        action("google.calendar.calendar.create", :personal_data, :write, :required_for_ai),
+        action("google.calendar.calendar.patch", :personal_data, :write, :required_for_ai),
+        action("google.calendar.calendar.update", :personal_data, :write, :required_for_ai),
+        action("google.calendar.calendar.delete", :personal_data, :destructive, :always),
+        action("google.calendar.calendar.clear", :personal_data, :destructive, :always),
+        action("google.calendar.calendar_list.get", :personal_data, :read, :none),
+        action(
+          "google.calendar.calendar_list.create",
+          :personal_data,
+          :write,
+          :required_for_ai
+        ),
+        action(
+          "google.calendar.calendar_list.patch",
+          :personal_data,
+          :write,
+          :required_for_ai
+        ),
+        action(
+          "google.calendar.calendar_list.update",
+          :personal_data,
+          :write,
+          :required_for_ai
+        ),
+        action(
+          "google.calendar.calendar_list.delete",
+          :personal_data,
+          :destructive,
+          :always
+        ),
+        action("google.calendar.acl.list", :personal_data, :read, :none),
+        action("google.calendar.acl.get", :personal_data, :read, :none),
+        action(
+          "google.calendar.acl.create",
+          :personal_data,
+          :external_write,
+          :required_for_ai
+        ),
+        action(
+          "google.calendar.acl.patch",
+          :personal_data,
+          :external_write,
+          :required_for_ai
+        ),
+        action(
+          "google.calendar.acl.update",
+          :personal_data,
+          :external_write,
+          :required_for_ai
+        ),
+        action("google.calendar.acl.delete", :personal_data, :destructive, :always),
         action("google.calendar.event.list", :personal_data, :read, :none),
         action("google.calendar.event.get", :personal_data, :read, :none),
+        action("google.calendar.event.instances", :personal_data, :read, :none),
         action("google.calendar.event.create", :personal_data, :write, :required_for_ai),
         action("google.calendar.event.update", :personal_data, :write, :required_for_ai),
+        action("google.calendar.event.move", :personal_data, :write, :required_for_ai),
         action("google.calendar.event.delete", :personal_data, :destructive, :always),
         action("google.calendar.event.watch", :personal_data, :write, :required_for_ai),
         action("google.calendar.calendar_list.watch", :personal_data, :write, :required_for_ai),

@@ -2,18 +2,21 @@ defmodule Jido.Connect.Google.Calendar.Normalizer do
   @moduledoc "Normalizes Google Calendar API payloads into stable package structs."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Google.Calendar.{Attendee, Calendar, Channel, Event, FreeBusy}
+  alias Jido.Connect.Google.Calendar.{AclRule, Attendee, Calendar, Channel, Event, FreeBusy}
 
   @doc "Normalizes a Google Calendar calendar-list entry payload."
   @spec calendar(map()) :: {:ok, Calendar.t()} | {:error, term()}
   def calendar(payload) when is_map(payload) do
     %{
       calendar_id: Data.get(payload, "id"),
+      etag: Data.get(payload, "etag"),
+      kind: Data.get(payload, "kind"),
       summary: Data.get(payload, "summary"),
       summary_override: Data.get(payload, "summaryOverride"),
       description: Data.get(payload, "description"),
       location: Data.get(payload, "location"),
       time_zone: Data.get(payload, "timeZone"),
+      data_owner: Data.get(payload, "dataOwner"),
       access_role: Data.get(payload, "accessRole"),
       background_color: Data.get(payload, "backgroundColor"),
       foreground_color: Data.get(payload, "foregroundColor"),
@@ -22,6 +25,8 @@ defmodule Jido.Connect.Google.Calendar.Normalizer do
       hidden?: Data.get(payload, "hidden", false),
       primary?: Data.get(payload, "primary", false),
       deleted?: Data.get(payload, "deleted", false),
+      auto_accept_invitations?: Data.get(payload, "autoAcceptInvitations"),
+      conference_properties: Data.get(payload, "conferenceProperties", %{}),
       default_reminders: Data.get(payload, "defaultReminders", []),
       notification_settings: Data.get(payload, "notificationSettings", %{})
     }
@@ -121,6 +126,28 @@ defmodule Jido.Connect.Google.Calendar.Normalizer do
   end
 
   def channel(_payload), do: {:error, :invalid_channel_payload}
+
+  @doc "Normalizes a Google Calendar ACL rule payload."
+  @spec acl_rule(map(), keyword()) :: {:ok, AclRule.t()} | {:error, term()}
+  def acl_rule(payload, opts \\ [])
+
+  def acl_rule(payload, opts) when is_map(payload) do
+    scope = Data.get(payload, "scope", %{}) || %{}
+
+    %{
+      acl_rule_id: Data.get(payload, "id"),
+      calendar_id: Keyword.get(opts, :calendar_id),
+      role: Data.get(payload, "role"),
+      scope_type: Data.get(scope, "type"),
+      scope_value: Data.get(scope, "value"),
+      etag: Data.get(payload, "etag"),
+      kind: Data.get(payload, "kind")
+    }
+    |> Data.compact()
+    |> AclRule.new()
+  end
+
+  def acl_rule(_payload, _opts), do: {:error, :invalid_acl_rule_payload}
 
   @doc "Normalizes a Google Calendar free/busy response payload."
   @spec free_busy(map()) :: {:ok, FreeBusy.t()} | {:error, term()}

@@ -73,6 +73,14 @@ defmodule Jido.Connect.Google.Calendar.Client.Params do
     |> Data.compact()
   end
 
+  @doc "Builds query params for calendar get-style requests."
+  def get_calendar_params(params) do
+    %{
+      fields: Data.get(params, :fields)
+    }
+    |> Data.compact()
+  end
+
   @doc "Builds query params for `events.list`."
   def list_events_params(params) do
     %{
@@ -113,6 +121,22 @@ defmodule Jido.Connect.Google.Calendar.Client.Params do
     |> Data.compact()
   end
 
+  @doc "Builds query params for `events.instances`."
+  def event_instances_params(params) do
+    %{
+      maxResults: Data.get(params, :page_size, 250),
+      pageToken: Data.get(params, :page_token),
+      fields: Data.get(params, :fields, event_list_fields()),
+      timeMin: Data.get(params, :time_min),
+      timeMax: Data.get(params, :time_max),
+      timeZone: Data.get(params, :time_zone),
+      originalStart: Data.get(params, :original_start),
+      showDeleted: Data.get(params, :show_deleted),
+      maxAttendees: Data.get(params, :max_attendees)
+    }
+    |> Data.compact()
+  end
+
   @doc "Builds query params for `events.insert` and `events.patch`."
   def event_mutation_params(params) do
     %{
@@ -133,6 +157,21 @@ defmodule Jido.Connect.Google.Calendar.Client.Params do
     |> Data.compact()
   end
 
+  @doc "Builds query params for `events.move`."
+  def event_move_params(params) do
+    %{
+      destination: destination_calendar_id(params),
+      sendNotifications: Data.get(params, :send_notifications),
+      sendUpdates: Data.get(params, :send_updates)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Returns the normalized destination calendar id for event moves."
+  def destination_calendar_id(params) do
+    Data.get(params, :destination_calendar_id) || Data.get(params, :destination)
+  end
+
   @doc "Builds a Google Calendar freeBusy request body."
   def free_busy_body(params) do
     %{
@@ -142,6 +181,80 @@ defmodule Jido.Connect.Google.Calendar.Client.Params do
       groupExpansionMax: Data.get(params, :group_expansion_max),
       calendarExpansionMax: Data.get(params, :calendar_expansion_max),
       items: free_busy_items(Data.get(params, :calendar_ids, []))
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a Calendars resource body."
+  def calendar_body(params) do
+    %{
+      summary: Data.get(params, :summary),
+      description: Data.get(params, :description),
+      location: Data.get(params, :location),
+      timeZone: Data.get(params, :time_zone),
+      conferenceProperties: Data.get(params, :conference_properties),
+      autoAcceptInvitations: Data.get(params, :auto_accept_invitations)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for CalendarList mutations."
+  def calendar_list_mutation_params(params) do
+    %{
+      colorRgbFormat: Data.get(params, :color_rgb_format)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a CalendarList entry body."
+  def calendar_list_entry_body(params) do
+    %{
+      id: Data.get(params, :calendar_id),
+      summaryOverride: Data.get(params, :summary_override),
+      colorId: Data.get(params, :color_id),
+      backgroundColor: Data.get(params, :background_color),
+      foregroundColor: Data.get(params, :foreground_color),
+      selected: Data.get(params, :selected),
+      hidden: Data.get(params, :hidden),
+      defaultReminders: Data.get(params, :default_reminders),
+      notificationSettings: Data.get(params, :notification_settings)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `acl.list`."
+  def list_acl_params(params) do
+    %{
+      maxResults: Data.get(params, :page_size, 100),
+      pageToken: Data.get(params, :page_token),
+      fields: Data.get(params, :fields, acl_list_fields()),
+      showDeleted: Data.get(params, :show_deleted),
+      syncToken: Data.get(params, :sync_token)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `acl.get`."
+  def get_acl_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_acl_fields())
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for ACL mutations."
+  def acl_mutation_params(params) do
+    %{
+      sendNotifications: Data.get(params, :send_notifications)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds an ACL rule body."
+  def acl_rule_body(params) do
+    %{
+      role: Data.get(params, :role),
+      scope: acl_scope_body(params)
     }
     |> Data.compact()
   end
@@ -182,6 +295,18 @@ defmodule Jido.Connect.Google.Calendar.Client.Params do
 
   defp event_list_fields,
     do: "nextPageToken,nextSyncToken,items(#{default_event_fields()})"
+
+  defp default_acl_fields, do: "id,etag,kind,role,scope"
+
+  defp acl_list_fields, do: "nextPageToken,nextSyncToken,items(#{default_acl_fields()})"
+
+  defp acl_scope_body(params) do
+    %{
+      type: Data.get(params, :scope_type),
+      value: Data.get(params, :scope_value)
+    }
+    |> Data.compact()
+  end
 
   defp event_body(params, opts) do
     base =

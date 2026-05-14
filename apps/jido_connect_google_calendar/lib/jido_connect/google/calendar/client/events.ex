@@ -14,6 +14,17 @@ defmodule Jido.Connect.Google.Calendar.Client.Events do
     |> Response.handle_event_list_response(params)
   end
 
+  def list_event_instances(%{calendar_id: calendar_id, event_id: event_id} = params, access_token)
+      when is_binary(calendar_id) and is_binary(event_id) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.get(
+      url: "/v3/calendars/#{encode_id(calendar_id)}/events/#{encode_id(event_id)}/instances",
+      params: Params.event_instances_params(params)
+    )
+    |> Response.handle_event_list_response(params)
+  end
+
   def watch_events(%{calendar_id: calendar_id} = params, access_token)
       when is_binary(calendar_id) and is_binary(access_token) do
     access_token
@@ -70,6 +81,19 @@ defmodule Jido.Connect.Google.Calendar.Client.Events do
       params: Params.delete_event_params(params)
     )
     |> Response.handle_event_delete_response(params)
+  end
+
+  def move_event(%{calendar_id: calendar_id, event_id: event_id} = params, access_token)
+      when is_binary(calendar_id) and is_binary(event_id) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.post(
+      url: "/v3/calendars/#{encode_id(calendar_id)}/events/#{encode_id(event_id)}/move",
+      params: Params.event_move_params(params)
+    )
+    |> Response.handle_event_response(
+      Map.put(params, :calendar_id, Params.destination_calendar_id(params))
+    )
   end
 
   defp encode_id(id), do: URI.encode(id, &URI.char_unreserved?/1)

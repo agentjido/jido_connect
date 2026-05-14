@@ -14,6 +14,25 @@ defmodule Jido.Connect.Google.CalendarTest do
     Jido.Connect.Google.Calendar.Actions.DeleteEvent,
     Jido.Connect.Google.Calendar.Actions.QueryFreeBusy,
     Jido.Connect.Google.Calendar.Actions.FindAvailability,
+    Jido.Connect.Google.Calendar.Actions.GetCalendar,
+    Jido.Connect.Google.Calendar.Actions.CreateCalendar,
+    Jido.Connect.Google.Calendar.Actions.PatchCalendar,
+    Jido.Connect.Google.Calendar.Actions.UpdateCalendar,
+    Jido.Connect.Google.Calendar.Actions.DeleteCalendar,
+    Jido.Connect.Google.Calendar.Actions.ClearCalendar,
+    Jido.Connect.Google.Calendar.Actions.GetCalendarListEntry,
+    Jido.Connect.Google.Calendar.Actions.CreateCalendarListEntry,
+    Jido.Connect.Google.Calendar.Actions.PatchCalendarListEntry,
+    Jido.Connect.Google.Calendar.Actions.UpdateCalendarListEntry,
+    Jido.Connect.Google.Calendar.Actions.DeleteCalendarListEntry,
+    Jido.Connect.Google.Calendar.Actions.ListAcl,
+    Jido.Connect.Google.Calendar.Actions.GetAcl,
+    Jido.Connect.Google.Calendar.Actions.CreateAcl,
+    Jido.Connect.Google.Calendar.Actions.PatchAcl,
+    Jido.Connect.Google.Calendar.Actions.UpdateAcl,
+    Jido.Connect.Google.Calendar.Actions.DeleteAcl,
+    Jido.Connect.Google.Calendar.Actions.ListEventInstances,
+    Jido.Connect.Google.Calendar.Actions.MoveEvent,
     Jido.Connect.Google.Calendar.Actions.WatchEvents,
     Jido.Connect.Google.Calendar.Actions.WatchCalendarList,
     Jido.Connect.Google.Calendar.Actions.WatchAcl,
@@ -25,6 +44,10 @@ defmodule Jido.Connect.Google.CalendarTest do
     Jido.Connect.Google.Calendar.Actions.Read,
     Jido.Connect.Google.Calendar.Actions.Write,
     Jido.Connect.Google.Calendar.Actions.FreeBusy,
+    Jido.Connect.Google.Calendar.Actions.Calendars,
+    Jido.Connect.Google.Calendar.Actions.CalendarList,
+    Jido.Connect.Google.Calendar.Actions.Acl,
+    Jido.Connect.Google.Calendar.Actions.EventUtilities,
     Jido.Connect.Google.Calendar.Actions.Watch,
     Jido.Connect.Google.Calendar.Triggers.Events,
     Jido.Connect.Google.Calendar.Triggers.Push
@@ -331,6 +354,242 @@ defmodule Jido.Connect.Google.CalendarTest do
       {:ok, %{calendar_id: "primary", event_id: "event123", deleted?: true}}
     end
 
+    def get_calendar(%{calendar_id: "primary"}, "token") do
+      {:ok,
+       Calendar.Calendar.new!(%{
+         calendar_id: "primary",
+         summary: "Primary Calendar",
+         time_zone: "America/Chicago",
+         conference_properties: %{"allowedConferenceSolutionTypes" => ["hangoutsMeet"]}
+       })}
+    end
+
+    def create_calendar(
+          %{summary: "Team", time_zone: "America/Chicago"},
+          "token"
+        ) do
+      {:ok,
+       Calendar.Calendar.new!(%{
+         calendar_id: "team@example.com",
+         summary: "Team",
+         time_zone: "America/Chicago"
+       })}
+    end
+
+    def patch_calendar(
+          %{calendar_id: "team@example.com", summary: "Team Updated"},
+          "token"
+        ) do
+      {:ok,
+       Calendar.Calendar.new!(%{
+         calendar_id: "team@example.com",
+         summary: "Team Updated"
+       })}
+    end
+
+    def update_calendar(
+          %{calendar_id: "team@example.com", summary: "Team Replaced"},
+          "token"
+        ) do
+      {:ok,
+       Calendar.Calendar.new!(%{
+         calendar_id: "team@example.com",
+         summary: "Team Replaced"
+       })}
+    end
+
+    def delete_calendar(%{calendar_id: "team@example.com"}, "token") do
+      {:ok, %{calendar_id: "team@example.com", deleted?: true}}
+    end
+
+    def clear_calendar(%{calendar_id: "primary"}, "token") do
+      {:ok, %{calendar_id: "primary", cleared?: true}}
+    end
+
+    def get_calendar_list_entry(%{calendar_id: "primary"}, "token") do
+      {:ok,
+       Calendar.Calendar.new!(%{
+         calendar_id: "primary",
+         summary: "Primary Calendar",
+         selected?: true
+       })}
+    end
+
+    def create_calendar_list_entry(
+          %{calendar_id: "team@example.com", summary_override: "Team Calendar"},
+          "token"
+        ) do
+      {:ok,
+       Calendar.Calendar.new!(%{
+         calendar_id: "team@example.com",
+         summary: "Team",
+         summary_override: "Team Calendar",
+         selected?: true
+       })}
+    end
+
+    def patch_calendar_list_entry(
+          %{calendar_id: "team@example.com", hidden: true},
+          "token"
+        ) do
+      {:ok,
+       Calendar.Calendar.new!(%{
+         calendar_id: "team@example.com",
+         summary: "Team",
+         hidden?: true
+       })}
+    end
+
+    def update_calendar_list_entry(
+          %{calendar_id: "team@example.com", selected: false},
+          "token"
+        ) do
+      {:ok,
+       Calendar.Calendar.new!(%{
+         calendar_id: "team@example.com",
+         summary: "Team",
+         selected?: false
+       })}
+    end
+
+    def delete_calendar_list_entry(%{calendar_id: "team@example.com"}, "token") do
+      {:ok, %{calendar_id: "team@example.com", removed?: true}}
+    end
+
+    def list_acl(
+          %{calendar_id: "primary", page_size: 100, show_deleted: false},
+          "token"
+        ) do
+      {:ok,
+       %{
+         acl_rules: [
+           Calendar.AclRule.new!(%{
+             acl_rule_id: "user:guest@example.com",
+             calendar_id: "primary",
+             role: "reader",
+             scope_type: "user",
+             scope_value: "guest@example.com"
+           })
+         ],
+         next_sync_token: "acl-sync"
+       }}
+    end
+
+    def get_acl(%{calendar_id: "primary", acl_rule_id: "user:guest@example.com"}, "token") do
+      {:ok,
+       Calendar.AclRule.new!(%{
+         acl_rule_id: "user:guest@example.com",
+         calendar_id: "primary",
+         role: "reader",
+         scope_type: "user",
+         scope_value: "guest@example.com"
+       })}
+    end
+
+    def create_acl(
+          %{
+            calendar_id: "primary",
+            role: "reader",
+            scope_type: "user",
+            scope_value: "guest@example.com"
+          },
+          "token"
+        ) do
+      {:ok,
+       Calendar.AclRule.new!(%{
+         acl_rule_id: "user:guest@example.com",
+         calendar_id: "primary",
+         role: "reader",
+         scope_type: "user",
+         scope_value: "guest@example.com"
+       })}
+    end
+
+    def patch_acl(
+          %{
+            calendar_id: "primary",
+            acl_rule_id: "user:guest@example.com",
+            role: "writer"
+          },
+          "token"
+        ) do
+      {:ok,
+       Calendar.AclRule.new!(%{
+         acl_rule_id: "user:guest@example.com",
+         calendar_id: "primary",
+         role: "writer",
+         scope_type: "user",
+         scope_value: "guest@example.com"
+       })}
+    end
+
+    def update_acl(
+          %{
+            calendar_id: "primary",
+            acl_rule_id: "user:guest@example.com",
+            role: "reader",
+            scope_type: "user",
+            scope_value: "guest@example.com"
+          },
+          "token"
+        ) do
+      {:ok,
+       Calendar.AclRule.new!(%{
+         acl_rule_id: "user:guest@example.com",
+         calendar_id: "primary",
+         role: "reader",
+         scope_type: "user",
+         scope_value: "guest@example.com"
+       })}
+    end
+
+    def delete_acl(%{calendar_id: "primary", acl_rule_id: "user:guest@example.com"}, "token") do
+      {:ok, %{calendar_id: "primary", acl_rule_id: "user:guest@example.com", deleted?: true}}
+    end
+
+    def list_event_instances(
+          %{
+            calendar_id: "primary",
+            event_id: "series123",
+            page_size: 250,
+            show_deleted: false
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         events: [
+           Calendar.Event.new!(%{
+             event_id: "instance123",
+             calendar_id: "primary",
+             recurring_event_id: "series123",
+             summary: "Standup",
+             start: "2026-05-06T09:00:00-05:00",
+             end: "2026-05-06T09:30:00-05:00"
+           })
+         ],
+         next_page_token: "instances-next"
+       }}
+    end
+
+    def move_event(
+          %{
+            calendar_id: "primary",
+            event_id: "event123",
+            destination_calendar_id: "team@example.com"
+          },
+          "token"
+        ) do
+      {:ok,
+       Calendar.Event.new!(%{
+         event_id: "event123",
+         calendar_id: "team@example.com",
+         summary: "Moved",
+         start: "2026-05-06T09:00:00-05:00",
+         end: "2026-05-06T10:00:00-05:00"
+       })}
+    end
+
     def watch_events(
           %{
             calendar_id: "primary",
@@ -492,6 +751,25 @@ defmodule Jido.Connect.Google.CalendarTest do
              "google.calendar.event.delete",
              "google.calendar.freebusy.query",
              "google.calendar.availability.find",
+             "google.calendar.calendar.get",
+             "google.calendar.calendar.create",
+             "google.calendar.calendar.patch",
+             "google.calendar.calendar.update",
+             "google.calendar.calendar.delete",
+             "google.calendar.calendar.clear",
+             "google.calendar.calendar_list.get",
+             "google.calendar.calendar_list.create",
+             "google.calendar.calendar_list.patch",
+             "google.calendar.calendar_list.update",
+             "google.calendar.calendar_list.delete",
+             "google.calendar.acl.list",
+             "google.calendar.acl.get",
+             "google.calendar.acl.create",
+             "google.calendar.acl.patch",
+             "google.calendar.acl.update",
+             "google.calendar.acl.delete",
+             "google.calendar.event.instances",
+             "google.calendar.event.move",
              "google.calendar.event.watch",
              "google.calendar.calendar_list.watch",
              "google.calendar.acl.watch",
@@ -506,6 +784,10 @@ defmodule Jido.Connect.Google.CalendarTest do
 
     assert "https://www.googleapis.com/auth/calendar" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/calendar.readonly" in profile.optional_scopes
+    assert "https://www.googleapis.com/auth/calendar.calendars" in profile.optional_scopes
+
+    assert "https://www.googleapis.com/auth/calendar.calendars.readonly" in profile.optional_scopes
+
     assert "https://www.googleapis.com/auth/calendar.calendarlist" in profile.optional_scopes
 
     assert "https://www.googleapis.com/auth/calendar.calendarlist.readonly" in profile.optional_scopes
@@ -588,7 +870,8 @@ defmodule Jido.Connect.Google.CalendarTest do
     ConnectorContracts.assert_catalog_pack_delegates(Calendar,
       reader_pack: :google_calendar_reader,
       scheduler_pack: :google_calendar_scheduler,
-      watch_pack: :google_calendar_watch
+      watch_pack: :google_calendar_watch,
+      manager_pack: :google_calendar_manager
     )
   end
 
@@ -632,6 +915,42 @@ defmodule Jido.Connect.Google.CalendarTest do
              %{},
              %{scopes: ["https://www.googleapis.com/auth/calendar.events.freebusy"]}
            ) == ["https://www.googleapis.com/auth/calendar.events.freebusy"]
+
+    assert resolver.required_scopes(
+             %{id: "google.calendar.calendar.get"},
+             %{},
+             %{scopes: []}
+           ) == ["https://www.googleapis.com/auth/calendar.calendars.readonly"]
+
+    assert resolver.required_scopes(
+             %{id: "google.calendar.calendar.create"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/calendar"]}
+           ) == ["https://www.googleapis.com/auth/calendar"]
+
+    assert resolver.required_scopes(
+             %{id: "google.calendar.calendar_list.create"},
+             %{},
+             %{scopes: []}
+           ) == ["https://www.googleapis.com/auth/calendar.calendarlist"]
+
+    assert resolver.required_scopes(
+             %{id: "google.calendar.acl.list"},
+             %{},
+             %{scopes: []}
+           ) == ["https://www.googleapis.com/auth/calendar.acls.readonly"]
+
+    assert resolver.required_scopes(
+             %{id: "google.calendar.acl.create"},
+             %{},
+             %{scopes: []}
+           ) == ["https://www.googleapis.com/auth/calendar.acls"]
+
+    assert resolver.required_scopes(
+             %{id: "google.calendar.event.move"},
+             %{},
+             %{scopes: []}
+           ) == ["https://www.googleapis.com/auth/calendar.events"]
 
     assert resolver.required_scopes(
              %{id: "google.calendar.acl.watch"},
@@ -873,6 +1192,212 @@ defmodule Jido.Connect.Google.CalendarTest do
                Calendar.integration(),
                "google.calendar.event.delete",
                %{calendar_id: "primary", event_id: "event123", send_updates: "all"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes calendar resource actions through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: calendar_management_scopes())
+
+    assert {:ok, %{calendar: %{calendar_id: "primary", summary: "Primary Calendar"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar.get",
+               %{calendar_id: " primary "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{calendar: %{calendar_id: "team@example.com", summary: "Team"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar.create",
+               %{summary: " Team ", time_zone: " America/Chicago "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{calendar: %{summary: "Team Updated"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar.patch",
+               %{calendar_id: " team@example.com ", summary: " Team Updated "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{calendar: %{summary: "Team Replaced"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar.update",
+               %{calendar_id: " team@example.com ", summary: " Team Replaced "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{calendar_id: "team@example.com", deleted?: true}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar.delete",
+               %{calendar_id: " team@example.com "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{calendar_id: "primary", cleared?: true}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar.clear",
+               %{calendar_id: " primary "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes calendar list entry actions through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: calendar_list_write_scopes())
+
+    assert {:ok, %{calendar: %{calendar_id: "primary", selected?: true}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar_list.get",
+               %{calendar_id: " primary "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{calendar: %{summary_override: "Team Calendar"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar_list.create",
+               %{calendar_id: " team@example.com ", summary_override: " Team Calendar "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{calendar: %{hidden?: true}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar_list.patch",
+               %{calendar_id: " team@example.com ", hidden: true},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{calendar: %{selected?: false}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar_list.update",
+               %{calendar_id: " team@example.com ", selected: false},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{calendar_id: "team@example.com", removed?: true}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar_list.delete",
+               %{calendar_id: " team@example.com "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes ACL lifecycle actions through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: acl_write_scopes())
+
+    assert {:ok, %{acl_rules: [%{acl_rule_id: "user:guest@example.com"}]}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.acl.list",
+               %{calendar_id: " primary "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{acl_rule: %{role: "reader"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.acl.get",
+               %{calendar_id: " primary ", acl_rule_id: " user:guest@example.com "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{acl_rule: %{scope_value: "guest@example.com"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.acl.create",
+               %{
+                 calendar_id: " primary ",
+                 role: "reader",
+                 scope_type: "user",
+                 scope_value: " guest@example.com "
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{acl_rule: %{role: "writer"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.acl.patch",
+               %{
+                 calendar_id: " primary ",
+                 acl_rule_id: " user:guest@example.com ",
+                 role: "writer"
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{acl_rule: %{role: "reader"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.acl.update",
+               %{
+                 calendar_id: " primary ",
+                 acl_rule_id: " user:guest@example.com ",
+                 role: "reader",
+                 scope_type: "user",
+                 scope_value: " guest@example.com "
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{acl_rule_id: "user:guest@example.com", deleted?: true}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.acl.delete",
+               %{calendar_id: " primary ", acl_rule_id: " user:guest@example.com "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes recurring event instances and move actions through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: event_write_scopes())
+
+    assert {:ok, %{events: [%{event_id: "instance123"}], next_page_token: "instances-next"}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.event.instances",
+               %{calendar_id: " primary ", event_id: " series123 "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{event: %{event_id: "event123", calendar_id: "team@example.com"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.event.move",
+               %{
+                 calendar_id: " primary ",
+                 event_id: " event123 ",
+                 destination_calendar_id: " team@example.com "
+               },
                context: context,
                credential_lease: lease
              )
@@ -1392,6 +1917,26 @@ defmodule Jido.Connect.Google.CalendarTest do
     ]
   end
 
+  defp calendar_management_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/calendar.calendars.readonly",
+      "https://www.googleapis.com/auth/calendar.calendars"
+    ]
+  end
+
+  defp calendar_list_write_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/calendar.calendarlist",
+      "https://www.googleapis.com/auth/calendar.calendarlist.readonly"
+    ]
+  end
+
   defp freebusy_scopes do
     [
       "openid",
@@ -1416,6 +1961,16 @@ defmodule Jido.Connect.Google.CalendarTest do
       "email",
       "profile",
       "https://www.googleapis.com/auth/calendar.acls.readonly"
+    ]
+  end
+
+  defp acl_write_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/calendar.acls.readonly",
+      "https://www.googleapis.com/auth/calendar.acls"
     ]
   end
 

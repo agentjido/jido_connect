@@ -8,6 +8,10 @@ defmodule Jido.Connect.Google.Calendar do
       Jido.Connect.Google.Calendar.Actions.Read,
       Jido.Connect.Google.Calendar.Actions.Write,
       Jido.Connect.Google.Calendar.Actions.FreeBusy,
+      Jido.Connect.Google.Calendar.Actions.Calendars,
+      Jido.Connect.Google.Calendar.Actions.CalendarList,
+      Jido.Connect.Google.Calendar.Actions.Acl,
+      Jido.Connect.Google.Calendar.Actions.EventUtilities,
       Jido.Connect.Google.Calendar.Actions.Watch,
       Jido.Connect.Google.Calendar.Triggers.Events,
       Jido.Connect.Google.Calendar.Triggers.Push
@@ -59,4 +63,5 @@ defmodule Jido.Connect.Google.Calendar do
   defdelegate reader_pack, to: Jido.Connect.Google.Calendar.CatalogPacks, as: :reader
   defdelegate scheduler_pack, to: Jido.Connect.Google.Calendar.CatalogPacks, as: :scheduler
   defdelegate watch_pack, to: Jido.Connect.Google.Calendar.CatalogPacks, as: :watch
+  defdelegate manager_pack, to: Jido.Connect.Google.Calendar.CatalogPacks, as: :manager
 end

@@ -34,7 +34,7 @@ Official references used for this comparison:
 | Sheets | Strong single-range read/write and structural batch update coverage. | Spreadsheet create, value batch operations, data-filter operations, developer metadata, sheet copy. | No native Sheets watch surface in the REST reference; Drive file-change triggers can cover spreadsheet file changes. |
 | Gmail | Strong metadata, message/thread reads, send, draft create/send, label triage, and poll trigger coverage. | Watch/stop lifecycle, history action, attachments, draft management, batch modify/delete, label get/update/delete, message/thread trash/delete. | Settings and CSE surfaces are large and sensitive; keep them out of default packs. |
 | Drive | Strong file metadata/content, basic file writes, permission lifecycle, revision lifecycle, comments/replies, shared-drive lifecycle, service-account profiles, poll trigger coverage, and watch/channel lifecycle metadata. | Labels, about/apps, access proposals/approvals. | No whole-drive count or whole-drive principals endpoint in Drive v3; counts/principals remain composed intents. |
-| Calendar | Strong event list/get/create/update/delete, calendar list, free/busy, availability, poll trigger coverage, and watch/channel lifecycle metadata. | Calendar CRUD, calendarList item CRUD, ACLs, event instances/move/quickAdd/import, colors/settings. | Event polling and provider push channel metadata now both exist. |
+| Calendar | Strong event list/get/create/update/delete/instances/move, calendar and CalendarList lifecycle, ACL lifecycle, free/busy, availability, poll trigger coverage, and watch/channel lifecycle metadata. | Event quickAdd/import, colors, and settings reads. | Event polling and provider push channel metadata now both exist. |
 | Contacts | Strong contact/group read and basic contact/group mutation coverage. | Batch contact operations, directory people, other contacts, group get/delete/member modify, contact photos, sync-token polling trigger. | People API exposes sync tokens for incremental connections but no generic watch endpoint. |
 
 ## Sheets
@@ -153,7 +153,12 @@ events, freebusy, and settings.
 ### Covered
 
 - `calendarList.list`
+- `calendarList.get/insert/patch/update/delete`
+- `calendars.get/insert/patch/update/delete/clear`
+- `acl.list/get/insert/patch/update/delete`
 - `events.list/get/insert/update/delete`
+- `events.instances`
+- `events.move`
 - `freebusy.query`
 - Derived availability search over free/busy.
 - Polling trigger over event sync tokens.
@@ -166,11 +171,6 @@ events, freebusy, and settings.
 
 | Provider Operation | Candidate Action/Trigger | Priority | Rationale |
 | --- | --- | --- | --- |
-| `calendars.get/insert/patch/update/delete/clear` | Calendar CRUD actions | High | Hosts cannot currently create or manage calendars directly. |
-| `calendarList.get/insert/patch/update/delete` | Calendar-list item actions | Medium | Needed for user-specific calendar visibility and settings. |
-| `acl.list/get/insert/patch/update/delete` | Calendar ACL actions | Medium | Important for sharing workflows; external-write/destructive risk. |
-| `events.instances` | `google.calendar.event.instances` | Medium | Important for recurring event inspection. |
-| `events.move` | `google.calendar.event.move` | Medium | Common scheduler operation when moving events between calendars. |
 | `events.quickAdd` | `google.calendar.event.quick_add` | Low | Convenience endpoint, but less predictable for AI-driven hosts. |
 | `events.import` | `google.calendar.event.import` | Low | Migration/admin workflow. |
 | `colors.get`, `settings.list/get` | Metadata/settings actions | Low | Useful for UI polish and diagnostics. |

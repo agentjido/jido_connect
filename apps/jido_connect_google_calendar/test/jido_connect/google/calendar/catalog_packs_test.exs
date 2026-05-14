@@ -56,12 +56,19 @@ defmodule Jido.Connect.Google.Calendar.CatalogPacksTest do
 
     ids = Enum.map(results, & &1.tool.id)
 
+    assert "google.calendar.calendar.get" in ids
     assert "google.calendar.calendar.list" in ids
+    assert "google.calendar.calendar_list.get" in ids
     assert "google.calendar.event.get" in ids
+    assert "google.calendar.event.instances" in ids
     assert "google.calendar.availability.find" in ids
+    assert "google.calendar.acl.list" in ids
+    assert "google.calendar.acl.get" in ids
     assert "google.calendar.event.changed" in ids
     assert "google.calendar.event.changed.push" in ids
     refute "google.calendar.event.create" in ids
+    refute "google.calendar.calendar.delete" in ids
+    refute "google.calendar.acl.create" in ids
     refute "google.calendar.event.watch" in ids
 
     assert {:ok, descriptor} =
@@ -99,6 +106,34 @@ defmodule Jido.Connect.Google.Calendar.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.calendar.event.delete"
+
+    assert {:ok, descriptor} =
+             Catalog.describe_tool("google.calendar.event.move",
+               modules: [Calendar],
+               packs: Calendar.catalog_packs(),
+               pack: :google_calendar_scheduler
+             )
+
+    assert descriptor.tool.id == "google.calendar.event.move"
+  end
+
+  test "manager pack allows calendar, calendar-list, and ACL management tools" do
+    results =
+      Catalog.search_tools("calendar",
+        modules: [Calendar],
+        packs: Calendar.catalog_packs(),
+        pack: :google_calendar_manager
+      )
+
+    ids = Enum.map(results, & &1.tool.id)
+
+    assert "google.calendar.calendar.create" in ids
+    assert "google.calendar.calendar.clear" in ids
+    assert "google.calendar.calendar_list.delete" in ids
+    assert "google.calendar.acl.create" in ids
+    assert "google.calendar.acl.delete" in ids
+    assert "google.calendar.event.move" in ids
+    assert Calendar.manager_pack().metadata.risk == :destructive
   end
 
   test "watch pack exposes channel lifecycle actions" do

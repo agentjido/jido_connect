@@ -1,7 +1,16 @@
 defmodule Jido.Connect.Google.Calendar.NormalizerTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Google.Calendar.{Attendee, Calendar, Channel, Event, FreeBusy, Normalizer}
+  alias Jido.Connect.Google.Calendar.{
+    AclRule,
+    Attendee,
+    Calendar,
+    Channel,
+    Event,
+    FreeBusy,
+    Normalizer
+  }
+
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
 
   test "normalizes calendar-list entries" do
@@ -11,20 +20,57 @@ defmodule Jido.Connect.Google.Calendar.NormalizerTest do
                "summary" => "Primary Calendar",
                "timeZone" => "America/Chicago",
                "accessRole" => "owner",
+               "etag" => "\"calendar-etag\"",
+               "kind" => "calendar#calendarListEntry",
                "backgroundColor" => "#2952a3",
                "foregroundColor" => "#ffffff",
                "primary" => true,
                "selected" => true,
+               "conferenceProperties" => %{
+                 "allowedConferenceSolutionTypes" => ["hangoutsMeet"]
+               },
                "defaultReminders" => [%{"method" => "popup", "minutes" => 10}]
              })
 
     assert calendar.calendar_id == "primary"
+    assert calendar.etag == "\"calendar-etag\""
+    assert calendar.kind == "calendar#calendarListEntry"
     assert calendar.summary == "Primary Calendar"
     assert calendar.time_zone == "America/Chicago"
     assert calendar.access_role == "owner"
     assert calendar.primary?
     assert calendar.selected?
+
+    assert calendar.conference_properties == %{
+             "allowedConferenceSolutionTypes" => ["hangoutsMeet"]
+           }
+
     assert calendar.default_reminders == [%{"method" => "popup", "minutes" => 10}]
+  end
+
+  test "normalizes ACL rules" do
+    assert {:ok, %AclRule{} = acl_rule} =
+             Normalizer.acl_rule(
+               %{
+                 "id" => "user:guest@example.com",
+                 "etag" => "\"acl-etag\"",
+                 "kind" => "calendar#aclRule",
+                 "role" => "reader",
+                 "scope" => %{
+                   "type" => "user",
+                   "value" => "guest@example.com"
+                 }
+               },
+               calendar_id: "primary"
+             )
+
+    assert acl_rule.acl_rule_id == "user:guest@example.com"
+    assert acl_rule.calendar_id == "primary"
+    assert acl_rule.role == "reader"
+    assert acl_rule.scope_type == "user"
+    assert acl_rule.scope_value == "guest@example.com"
+    assert acl_rule.etag == "\"acl-etag\""
+    assert acl_rule.kind == "calendar#aclRule"
   end
 
   test "normalizes attendees" do
@@ -209,6 +255,7 @@ defmodule Jido.Connect.Google.Calendar.NormalizerTest do
       hidden?: false,
       primary?: false,
       deleted?: false,
+      conference_properties: %{},
       default_reminders: [],
       notification_settings: %{},
       metadata: %{}
@@ -245,6 +292,10 @@ defmodule Jido.Connect.Google.Calendar.NormalizerTest do
     )
 
     assert {:error, _error} = Channel.new(%{})
+
+    ConnectorContracts.assert_struct_defaults(AclRule, %{acl_rule_id: "default"}, metadata: %{})
+
+    assert {:error, _error} = AclRule.new(%{})
 
     ConnectorContracts.assert_struct_defaults(
       FreeBusy,

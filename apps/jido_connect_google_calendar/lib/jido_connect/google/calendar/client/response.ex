@@ -30,6 +30,40 @@ defmodule Jido.Connect.Google.Calendar.Client.Response do
 
   def handle_calendar_list_response(response), do: Transport.handle_error_response(response)
 
+  def handle_calendar_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.calendar/1, "Google Calendar response was invalid")
+  end
+
+  def handle_calendar_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Calendar response was invalid", body)
+  end
+
+  def handle_calendar_response(response), do: Transport.handle_error_response(response)
+
+  def handle_calendar_delete_response({:ok, %{status: status}}, params) when status in 200..299 do
+    {:ok, %{calendar_id: Data.get(params, :calendar_id), deleted?: true}}
+  end
+
+  def handle_calendar_delete_response(response, _params),
+    do: Transport.handle_error_response(response)
+
+  def handle_calendar_clear_response({:ok, %{status: status}}, params) when status in 200..299 do
+    {:ok, %{calendar_id: Data.get(params, :calendar_id), cleared?: true}}
+  end
+
+  def handle_calendar_clear_response(response, _params),
+    do: Transport.handle_error_response(response)
+
+  def handle_calendar_list_delete_response({:ok, %{status: status}}, params)
+      when status in 200..299 do
+    {:ok, %{calendar_id: Data.get(params, :calendar_id), removed?: true}}
+  end
+
+  def handle_calendar_list_delete_response(response, _params),
+    do: Transport.handle_error_response(response)
+
   def handle_event_list_response({:ok, %{status: status, body: body}}, params)
       when status in 200..299 and is_map(body) do
     normalizer = &Normalizer.event(&1, calendar_id: Data.get(params, :calendar_id))
@@ -109,6 +143,61 @@ defmodule Jido.Connect.Google.Calendar.Client.Response do
 
   def handle_channel_stop_response(response, _params),
     do: Transport.handle_error_response(response)
+
+  def handle_acl_list_response({:ok, %{status: status, body: body}}, params)
+      when status in 200..299 and is_map(body) do
+    normalizer = &Normalizer.acl_rule(&1, calendar_id: Data.get(params, :calendar_id))
+
+    with {:ok, acl_rules} <-
+           normalize_items(
+             body,
+             "items",
+             normalizer,
+             "Google Calendar ACL list response was invalid"
+           ) do
+      {:ok,
+       %{
+         acl_rules: acl_rules,
+         next_page_token: Data.get(body, "nextPageToken"),
+         next_sync_token: Data.get(body, "nextSyncToken")
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_acl_list_response({:ok, %{status: status, body: body}}, _params)
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Calendar ACL list response was invalid", body)
+  end
+
+  def handle_acl_list_response(response, _params), do: Transport.handle_error_response(response)
+
+  def handle_acl_rule_response({:ok, %{status: status, body: body}}, params)
+      when status in 200..299 and is_map(body) do
+    normalize_one(
+      body,
+      &Normalizer.acl_rule(&1, calendar_id: Data.get(params, :calendar_id)),
+      "Google Calendar ACL rule response was invalid"
+    )
+  end
+
+  def handle_acl_rule_response({:ok, %{status: status, body: body}}, _params)
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Calendar ACL rule response was invalid", body)
+  end
+
+  def handle_acl_rule_response(response, _params), do: Transport.handle_error_response(response)
+
+  def handle_acl_delete_response({:ok, %{status: status}}, params) when status in 200..299 do
+    {:ok,
+     %{
+       calendar_id: Data.get(params, :calendar_id),
+       acl_rule_id: Data.get(params, :acl_rule_id),
+       deleted?: true
+     }}
+  end
+
+  def handle_acl_delete_response(response, _params), do: Transport.handle_error_response(response)
 
   def handle_free_busy_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do

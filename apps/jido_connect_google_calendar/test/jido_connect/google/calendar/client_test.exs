@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Calendar.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Google.Calendar.{Calendar, Channel, Client, Event}
+  alias Jido.Connect.Google.Calendar.{AclRule, Calendar, Channel, Client, Event}
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -258,6 +258,322 @@ defmodule Jido.Connect.Google.Calendar.ClientTest do
     assert {:ok, %{calendar_id: "primary", event_id: "event123", deleted?: true}} =
              Client.delete_event(
                %{calendar_id: "primary", event_id: "event123", send_updates: "all"},
+               "token"
+             )
+  end
+
+  test "calls calendar resource endpoints" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+      case {conn.method, conn.request_path} do
+        {"GET", "/v3/calendars/primary"} ->
+          assert conn.query_params["fields"] == "id,summary"
+
+          Req.Test.json(conn, %{
+            "id" => "primary",
+            "summary" => "Primary Calendar",
+            "conferenceProperties" => %{
+              "allowedConferenceSolutionTypes" => ["hangoutsMeet"]
+            }
+          })
+
+        {"POST", "/v3/calendars"} ->
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+          assert Jason.decode!(body) == %{
+                   "summary" => "Team",
+                   "timeZone" => "America/Chicago"
+                 }
+
+          Req.Test.json(conn, %{"id" => "team", "summary" => "Team"})
+
+        {"PATCH", "/v3/calendars/team"} ->
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+          assert Jason.decode!(body) == %{"summary" => "Team Updated"}
+
+          Req.Test.json(conn, %{"id" => "team", "summary" => "Team Updated"})
+
+        {"PUT", "/v3/calendars/team"} ->
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+          assert Jason.decode!(body) == %{"summary" => "Team Replaced"}
+
+          Req.Test.json(conn, %{"id" => "team", "summary" => "Team Replaced"})
+
+        {"DELETE", "/v3/calendars/team"} ->
+          Plug.Conn.resp(conn, 204, "")
+
+        {"POST", "/v3/calendars/primary/clear"} ->
+          Plug.Conn.resp(conn, 204, "")
+      end
+    end)
+
+    assert {:ok, %Calendar{calendar_id: "primary", summary: "Primary Calendar"} = calendar} =
+             Client.get_calendar(%{calendar_id: "primary", fields: "id,summary"}, "token")
+
+    assert calendar.conference_properties == %{
+             "allowedConferenceSolutionTypes" => ["hangoutsMeet"]
+           }
+
+    assert {:ok, %Calendar{calendar_id: "team", summary: "Team"}} =
+             Client.create_calendar(
+               %{summary: "Team", time_zone: "America/Chicago"},
+               "token"
+             )
+
+    assert {:ok, %Calendar{summary: "Team Updated"}} =
+             Client.patch_calendar(%{calendar_id: "team", summary: "Team Updated"}, "token")
+
+    assert {:ok, %Calendar{summary: "Team Replaced"}} =
+             Client.update_calendar(%{calendar_id: "team", summary: "Team Replaced"}, "token")
+
+    assert {:ok, %{calendar_id: "team", deleted?: true}} =
+             Client.delete_calendar(%{calendar_id: "team"}, "token")
+
+    assert {:ok, %{calendar_id: "primary", cleared?: true}} =
+             Client.clear_calendar(%{calendar_id: "primary"}, "token")
+  end
+
+  test "calls calendarList item endpoints" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      case {conn.method, conn.request_path} do
+        {"GET", "/v3/users/me/calendarList/primary"} ->
+          assert conn.query_params["fields"] == "id,summary"
+          Req.Test.json(conn, %{"id" => "primary", "summary" => "Primary"})
+
+        {"POST", "/v3/users/me/calendarList"} ->
+          assert conn.query_params["colorRgbFormat"] == "true"
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+          assert Jason.decode!(body) == %{
+                   "id" => "team",
+                   "summaryOverride" => "Team Calendar",
+                   "backgroundColor" => "#1a73e8"
+                 }
+
+          Req.Test.json(conn, %{
+            "id" => "team",
+            "summary" => "Team",
+            "summaryOverride" => "Team Calendar"
+          })
+
+        {"PATCH", "/v3/users/me/calendarList/team"} ->
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+          assert Jason.decode!(body) == %{"id" => "team", "hidden" => true}
+
+          Req.Test.json(conn, %{"id" => "team", "summary" => "Team", "hidden" => true})
+
+        {"PUT", "/v3/users/me/calendarList/team"} ->
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+          assert Jason.decode!(body) == %{"id" => "team", "selected" => false}
+
+          Req.Test.json(conn, %{"id" => "team", "summary" => "Team", "selected" => false})
+
+        {"DELETE", "/v3/users/me/calendarList/team"} ->
+          Plug.Conn.resp(conn, 204, "")
+      end
+    end)
+
+    assert {:ok, %Calendar{calendar_id: "primary"}} =
+             Client.get_calendar_list_entry(
+               %{calendar_id: "primary", fields: "id,summary"},
+               "token"
+             )
+
+    assert {:ok, %Calendar{summary_override: "Team Calendar"}} =
+             Client.create_calendar_list_entry(
+               %{
+                 calendar_id: "team",
+                 summary_override: "Team Calendar",
+                 background_color: "#1a73e8",
+                 color_rgb_format: true
+               },
+               "token"
+             )
+
+    assert {:ok, %Calendar{hidden?: true}} =
+             Client.patch_calendar_list_entry(%{calendar_id: "team", hidden: true}, "token")
+
+    assert {:ok, %Calendar{selected?: false}} =
+             Client.update_calendar_list_entry(%{calendar_id: "team", selected: false}, "token")
+
+    assert {:ok, %{calendar_id: "team", removed?: true}} =
+             Client.delete_calendar_list_entry(%{calendar_id: "team"}, "token")
+  end
+
+  test "calls ACL endpoints" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      case {conn.method, conn.request_path} do
+        {"GET", "/v3/calendars/primary/acl"} ->
+          assert conn.query_params["maxResults"] == "20"
+          assert conn.query_params["showDeleted"] == "true"
+          assert conn.query_params["fields"] =~ "items(id,etag"
+
+          Req.Test.json(conn, %{
+            "items" => [
+              %{
+                "id" => "rule123",
+                "role" => "reader",
+                "scope" => %{"type" => "user", "value" => "guest@example.com"}
+              }
+            ],
+            "nextSyncToken" => "acl-sync"
+          })
+
+        {"GET", "/v3/calendars/primary/acl/rule123"} ->
+          assert conn.query_params["fields"] == "id,role,scope"
+
+          Req.Test.json(conn, %{
+            "id" => "rule123",
+            "role" => "reader",
+            "scope" => %{"type" => "user", "value" => "guest@example.com"}
+          })
+
+        {"POST", "/v3/calendars/primary/acl"} ->
+          assert conn.query_params["sendNotifications"] == "true"
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+          assert Jason.decode!(body) == %{
+                   "role" => "reader",
+                   "scope" => %{"type" => "user", "value" => "guest@example.com"}
+                 }
+
+          Req.Test.json(conn, %{
+            "id" => "rule123",
+            "role" => "reader",
+            "scope" => %{"type" => "user", "value" => "guest@example.com"}
+          })
+
+        {"PATCH", "/v3/calendars/primary/acl/rule123"} ->
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+          assert Jason.decode!(body) == %{"role" => "writer", "scope" => %{}}
+
+          Req.Test.json(conn, %{
+            "id" => "rule123",
+            "role" => "writer",
+            "scope" => %{"type" => "user", "value" => "guest@example.com"}
+          })
+
+        {"PUT", "/v3/calendars/primary/acl/rule123"} ->
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+          assert Jason.decode!(body) == %{
+                   "role" => "reader",
+                   "scope" => %{"type" => "user", "value" => "guest@example.com"}
+                 }
+
+          Req.Test.json(conn, %{
+            "id" => "rule123",
+            "role" => "reader",
+            "scope" => %{"type" => "user", "value" => "guest@example.com"}
+          })
+
+        {"DELETE", "/v3/calendars/primary/acl/rule123"} ->
+          Plug.Conn.resp(conn, 204, "")
+      end
+    end)
+
+    assert {:ok, %{acl_rules: [%AclRule{acl_rule_id: "rule123"}], next_sync_token: "acl-sync"}} =
+             Client.list_acl(
+               %{calendar_id: "primary", page_size: 20, show_deleted: true},
+               "token"
+             )
+
+    assert {:ok, %AclRule{role: "reader"}} =
+             Client.get_acl(
+               %{calendar_id: "primary", acl_rule_id: "rule123", fields: "id,role,scope"},
+               "token"
+             )
+
+    assert {:ok, %AclRule{scope_value: "guest@example.com"}} =
+             Client.create_acl(
+               %{
+                 calendar_id: "primary",
+                 role: "reader",
+                 scope_type: "user",
+                 scope_value: "guest@example.com",
+                 send_notifications: true
+               },
+               "token"
+             )
+
+    assert {:ok, %AclRule{role: "writer"}} =
+             Client.patch_acl(
+               %{calendar_id: "primary", acl_rule_id: "rule123", role: "writer"},
+               "token"
+             )
+
+    assert {:ok, %AclRule{role: "reader"}} =
+             Client.update_acl(
+               %{
+                 calendar_id: "primary",
+                 acl_rule_id: "rule123",
+                 role: "reader",
+                 scope_type: "user",
+                 scope_value: "guest@example.com"
+               },
+               "token"
+             )
+
+    assert {:ok, %{calendar_id: "primary", acl_rule_id: "rule123", deleted?: true}} =
+             Client.delete_acl(%{calendar_id: "primary", acl_rule_id: "rule123"}, "token")
+  end
+
+  test "calls event utility endpoints" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      case {conn.method, conn.request_path} do
+        {"GET", "/v3/calendars/primary/events/series123/instances"} ->
+          assert conn.query_params["maxResults"] == "5"
+          assert conn.query_params["showDeleted"] == "false"
+          assert conn.query_params["originalStart"] == "2026-05-06T09:00:00-05:00"
+
+          Req.Test.json(conn, %{
+            "items" => [
+              %{
+                "id" => "instance123",
+                "status" => "confirmed",
+                "summary" => "Standup",
+                "start" => %{"dateTime" => "2026-05-06T09:00:00-05:00"},
+                "end" => %{"dateTime" => "2026-05-06T09:30:00-05:00"}
+              }
+            ],
+            "nextPageToken" => "instances-next"
+          })
+
+        {"POST", "/v3/calendars/primary/events/event123/move"} ->
+          assert conn.query_params["destination"] == "team"
+          assert conn.query_params["sendUpdates"] == "all"
+
+          Req.Test.json(conn, %{
+            "id" => "event123",
+            "status" => "confirmed",
+            "summary" => "Moved",
+            "start" => %{"dateTime" => "2026-05-06T09:00:00-05:00"},
+            "end" => %{"dateTime" => "2026-05-06T10:00:00-05:00"}
+          })
+      end
+    end)
+
+    assert {:ok, %{events: [%Event{event_id: "instance123"}], next_page_token: "instances-next"}} =
+             Client.list_event_instances(
+               %{
+                 calendar_id: "primary",
+                 event_id: "series123",
+                 page_size: 5,
+                 show_deleted: false,
+                 original_start: "2026-05-06T09:00:00-05:00"
+               },
+               "token"
+             )
+
+    assert {:ok, %Event{event_id: "event123", calendar_id: "team"}} =
+             Client.move_event(
+               %{
+                 calendar_id: "primary",
+                 event_id: "event123",
+                 destination_calendar_id: "team",
+                 send_updates: "all"
+               },
                "token"
              )
   end
