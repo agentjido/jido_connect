@@ -7,6 +7,8 @@
     "jido_con-jxj.2",
     "jido_con-nqr.1"
   ],
+  "closed_at": "2026-05-14T22:12:43Z",
+  "close_reason": "completed",
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G09-S07\nEpic: G09 Google Analytics Connector\nSource: MILESTONE_2.md\nDepends on: G09-S06\n\nAcceptance:\nReader and reporter packs are searchable/describable/callable through catalog plugin.",
   "id": "jido_con-b9n.7",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-b9n",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G09-S07] Add Analytics catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-14T22:08:12Z"
+  "updated_at": "2026-05-14T22:12:43Z"
 }
