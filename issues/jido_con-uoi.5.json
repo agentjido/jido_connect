@@ -9,11 +9,14 @@
   "created": "2026-05-14T14:35:51Z",
   "description": "Implement Forms watch create/renew/delete actions and response-submitted trigger normalization if API support is sufficient.",
   "id": "jido_con-uoi.5",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-uoi",
   "priority": 1,
   "status": "open",
   "title": "[G16-S05] Implement Forms watch lifecycle and triggers",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:55Z"
+  "updated_at": "2026-05-14T14:36:03Z"
 }
