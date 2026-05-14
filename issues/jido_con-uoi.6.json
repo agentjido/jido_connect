@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:35:51Z",
+  "description": "Add readonly/editor/responder catalog packs, README usage, scope matrix tests, generated module checks, and live-test guidance.",
+  "id": "jido_con-uoi.6",
+  "labels": [],
+  "parent": "jido_con-uoi",
+  "priority": 1,
+  "status": "open",
+  "title": "[G16-S06] Add Forms catalog packs and docs",
+  "type": "task",
+  "updated_at": "2026-05-14T14:35:51Z"
+}
