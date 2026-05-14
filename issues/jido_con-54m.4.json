@@ -9,11 +9,14 @@
   "created": "2026-05-14T14:35:52Z",
   "description": "Implement google.tasks.task.list/get/create/update/delete/clear/move actions with scopes, pagination, normalized output, and tests.",
   "id": "jido_con-54m.4",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-54m",
   "priority": 1,
   "status": "open",
   "title": "[G17-S04] Implement task actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:56Z"
+  "updated_at": "2026-05-14T14:36:05Z"
 }
