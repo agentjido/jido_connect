@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-b9n.4"
   ],
+  "closed_at": "2026-05-14T20:58:43Z",
+  "close_reason": "completed",
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G09-S03\nEpic: G09 Google Analytics Connector\nSource: MILESTONE_2.md\nDepends on: G09-S02\n\nAcceptance:\nMetadata action exposes available dimensions/metrics for a property.",
   "id": "jido_con-b9n.3",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-b9n",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G09-S03] Implement metadata action",
   "type": "task",
-  "updated_at": "2026-05-14T20:48:22Z"
+  "updated_at": "2026-05-14T20:58:43Z"
 }
