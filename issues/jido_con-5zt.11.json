@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-5zt.12"
   ],
+  "closed_at": "2026-05-14T18:55:57Z",
+  "close_reason": "Added Contacts group membership actions and people sync trigger in PR #22",
   "created": "2026-05-14T14:58:13Z",
   "description": "Add contact group get/batchGet/delete, contactGroups.members.modify, and a host-owned polling trigger over People connections sync tokens.",
   "id": "jido_con-5zt.11",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S11] Add Contacts group membership and sync trigger",
   "type": "task",
-  "updated_at": "2026-05-14T18:39:42Z"
+  "updated_at": "2026-05-14T18:55:57Z"
 }
