@@ -9,11 +9,14 @@
   "created": "2026-05-14T14:35:50Z",
   "description": "Add normalized form, question/item, response, watch, and batch update result structs with representative fixtures.",
   "id": "jido_con-uoi.2",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-uoi",
   "priority": 1,
   "status": "open",
   "title": "[G16-S02] Add Forms normalized structs and schemas",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:55Z"
+  "updated_at": "2026-05-14T14:36:03Z"
 }
