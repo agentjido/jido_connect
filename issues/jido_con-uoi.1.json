@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:35:50Z",
+  "description": "Add the umbrella app, mix config, package README, provider module, catalog-pack shell, AGENTS guidance, and baseline compile/test wiring for Google Forms.",
+  "id": "jido_con-uoi.1",
+  "labels": [],
+  "parent": "jido_con-uoi",
+  "priority": 1,
+  "status": "open",
+  "title": "[G16-S01] Scaffold jido_connect_google_forms",
+  "type": "task",
+  "updated_at": "2026-05-14T14:35:50Z"
+}
