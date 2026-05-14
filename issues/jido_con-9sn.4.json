@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-9sn.5"
   ],
+  "closed_at": "2026-05-14T19:59:59Z",
+  "close_reason": "completed",
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G08-S04\nEpic: G08 Google Meet Connector\nSource: MILESTONE_2.md\nDepends on: G08-S03\n\nAcceptance:\nConference record list/get actions return normalized records.",
   "id": "jido_con-9sn.4",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-9sn",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G08-S04] Implement conference record actions",
   "type": "task",
-  "updated_at": "2026-05-14T19:51:42Z"
+  "updated_at": "2026-05-14T19:59:59Z"
 }
