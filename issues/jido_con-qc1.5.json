@@ -7,11 +7,14 @@
   "created": "2026-05-14T14:35:50Z",
   "description": "Add readonly/editor catalog packs, README usage, scope matrix tests, privacy classification, generated module checks, and Drive-trigger/export guidance.",
   "id": "jido_con-qc1.5",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-qc1",
   "priority": 1,
   "status": "open",
   "title": "[G15-S05] Add Slides catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:54Z"
+  "updated_at": "2026-05-14T14:36:02Z"
 }
