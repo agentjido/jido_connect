@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-5zt.1"
+  ],
   "blocks": [],
   "created": "2026-05-14T14:58:12Z",
   "description": "Add Sheets data-filter read/write actions and developer metadata get/search actions. Keep data-filter schemas in jido_connect_google_sheets rather than core.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G18-S02] Add Sheets data-filter and developer metadata actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:58:14Z"
+  "updated_at": "2026-05-14T14:58:17Z"
 }
