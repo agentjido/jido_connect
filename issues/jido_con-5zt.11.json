@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5zt.10"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5zt.12"
+  ],
   "created": "2026-05-14T14:58:13Z",
   "description": "Add contact group get/batchGet/delete, contactGroups.members.modify, and a host-owned polling trigger over People connections sync tokens.",
   "id": "jido_con-5zt.11",
