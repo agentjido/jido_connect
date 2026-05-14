@@ -5,7 +5,8 @@
     "jido_con-9sn",
     "jido_con-b9n",
     "jido_con-fle",
-    "jido_con-nqr"
+    "jido_con-nqr",
+    "jido_con-qc1"
   ],
   "created": "2026-05-14T14:35:47Z",
   "description": "Audit the current Google package family before expanding further. Capture supported actions/triggers, missing provider-supported operations, scope requirements, catalog packs, risk classification, privacy boundaries, pagination/checkpoint behavior, fixture coverage, and live-test readiness for Sheets, Gmail, Drive, Calendar, and Contacts.",

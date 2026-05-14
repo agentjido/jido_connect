@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-nmq"
+  ],
   "blocks": [],
   "created": "2026-05-14T14:35:49Z",
   "description": "Implement jido_connect_google_slides as a provider-specific Google Slides connector package using the shared Google foundation. Cover presentation reads, creates, batch updates, thumbnails/pages, catalog packs, docs, and Drive-backed trigger/export strategy where appropriate.",
@@ -10,5 +12,5 @@
   "status": "open",
   "title": "[G15] Google Slides Connector",
   "type": "epic",
-  "updated_at": "2026-05-14T14:35:49Z"
+  "updated_at": "2026-05-14T14:35:57Z"
 }
