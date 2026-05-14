@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-qc1.2"
+  ],
   "created": "2026-05-14T14:35:49Z",
   "description": "Add the umbrella app, mix config, package README, provider module, catalog-pack shell, AGENTS guidance, and baseline compile/test wiring for Google Slides.",
   "id": "jido_con-qc1.1",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G15-S01] Scaffold jido_connect_google_slides",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:49Z"
+  "updated_at": "2026-05-14T14:35:54Z"
 }
