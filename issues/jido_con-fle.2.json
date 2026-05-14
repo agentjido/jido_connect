@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-fle.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-fle.3"
+  ],
   "created": "2026-05-14T14:35:48Z",
   "description": "Add normalized document, tab/body/content, revision-safe request/result structs and fixture coverage for representative Google Docs payloads.",
   "id": "jido_con-fle.2",

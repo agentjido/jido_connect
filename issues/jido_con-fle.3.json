@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-fle.2"
+  ],
   "blocks": [],
   "created": "2026-05-14T14:35:48Z",
   "description": "Implement google.docs.document.get and google.docs.document.create with narrow scopes, normalized output, tests, and catalog metadata.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G14-S03] Implement document read and create actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:48Z"
+  "updated_at": "2026-05-14T14:35:53Z"
 }
