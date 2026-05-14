@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-b9n.6"
   ],
+  "closed_at": "2026-05-14T22:03:35Z",
+  "close_reason": "completed",
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G09-S05\nEpic: G09 Google Analytics Connector\nSource: MILESTONE_2.md\nDepends on: G09-S04\n\nAcceptance:\nRealtime action has separate schemas and scope checks.",
   "id": "jido_con-b9n.5",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-b9n",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G09-S05] Implement realtime report action",
   "type": "task",
-  "updated_at": "2026-05-14T21:58:19Z"
+  "updated_at": "2026-05-14T22:03:35Z"
 }
