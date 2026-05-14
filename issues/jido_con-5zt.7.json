@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5zt.6"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5zt.8"
+  ],
   "created": "2026-05-14T14:58:13Z",
   "description": "Add Drive comments and replies CRUD actions plus shared-drive list/get/create/update/delete/hide/unhide actions where appropriate for Workspace hosts.",
   "id": "jido_con-5zt.7",
