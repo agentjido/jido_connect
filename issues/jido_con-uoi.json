@@ -9,10 +9,13 @@
   "created": "2026-05-14T14:35:50Z",
   "description": "Implement jido_connect_google_forms as a provider-specific Google Forms connector package using the shared Google foundation. Cover form reads, creates, batch updates, response reads, watch lifecycle/triggers, catalog packs, and docs.",
   "id": "jido_con-uoi",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G16] Google Forms Connector",
   "type": "epic",
-  "updated_at": "2026-05-14T14:35:58Z"
+  "updated_at": "2026-05-14T14:36:02Z"
 }
