@@ -5,11 +5,15 @@
   "created": "2026-05-14T14:58:12Z",
   "description": "Add Gmail watch/stop lifecycle actions, explicit history.list action, webhook trigger metadata, and message attachment get support.",
   "id": "jido_con-5zt.3",
-  "labels": [],
+  "labels": [
+    "expansion",
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-5zt",
   "priority": 1,
   "status": "open",
   "title": "[G18-S03] Add Gmail watch history and attachment actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:58:12Z"
+  "updated_at": "2026-05-14T14:58:14Z"
 }
