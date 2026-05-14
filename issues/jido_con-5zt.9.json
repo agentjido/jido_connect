@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:58:13Z",
+  "description": "Add Calendar calendars CRUD, calendarList item CRUD, ACL lifecycle, event instances, and event move actions with appropriate scopes and catalog placement.",
+  "id": "jido_con-5zt.9",
+  "labels": [],
+  "parent": "jido_con-5zt",
+  "priority": 1,
+  "status": "open",
+  "title": "[G18-S09] Add Calendar calendar ACL and event utility actions",
+  "type": "task",
+  "updated_at": "2026-05-14T14:58:13Z"
+}
