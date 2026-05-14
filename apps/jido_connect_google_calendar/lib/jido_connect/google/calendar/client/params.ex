@@ -95,6 +95,14 @@ defmodule Jido.Connect.Google.Calendar.Client.Params do
     |> Data.compact()
   end
 
+  @doc "Builds query params for `events.watch`."
+  def watch_events_params(params) do
+    %{
+      eventTypes: Data.get(params, :event_types)
+    }
+    |> Data.compact()
+  end
+
   @doc "Builds query params for `events.get`."
   def get_event_params(params) do
     %{
@@ -134,6 +142,31 @@ defmodule Jido.Connect.Google.Calendar.Client.Params do
       groupExpansionMax: Data.get(params, :group_expansion_max),
       calendarExpansionMax: Data.get(params, :calendar_expansion_max),
       items: free_busy_items(Data.get(params, :calendar_ids, []))
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a channel JSON body for Calendar watch requests."
+  def watch_channel_body(params) do
+    ttl =
+      Data.get(params, :ttl_seconds) ||
+        ttl_from_expiration_ms(Data.get(params, :expiration_ms))
+
+    %{
+      id: Data.get(params, :channel_id),
+      type: Data.get(params, :channel_type, "web_hook"),
+      address: Data.get(params, :address),
+      token: Data.get(params, :token),
+      params: channel_params(Data.get(params, :delivery_params), ttl)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a channel JSON body for `channels.stop`."
+  def stop_channel_body(params) do
+    %{
+      id: Data.get(params, :channel_id),
+      resourceId: Data.get(params, :resource_id)
     }
     |> Data.compact()
   end
@@ -235,4 +268,19 @@ defmodule Jido.Connect.Google.Calendar.Client.Params do
   end
 
   defp free_busy_items(_calendar_ids), do: []
+
+  defp channel_params(params, nil), do: params
+
+  defp channel_params(params, ttl) when is_map(params) do
+    Map.put(params, :ttl, to_string(ttl))
+  end
+
+  defp channel_params(_params, ttl), do: %{ttl: to_string(ttl)}
+
+  defp ttl_from_expiration_ms(expiration_ms) when is_integer(expiration_ms) do
+    now_ms = System.system_time(:millisecond)
+    max(div(expiration_ms - now_ms, 1000), 0)
+  end
+
+  defp ttl_from_expiration_ms(_expiration_ms), do: nil
 end

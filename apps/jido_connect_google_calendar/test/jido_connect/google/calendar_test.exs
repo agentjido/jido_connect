@@ -13,14 +13,21 @@ defmodule Jido.Connect.Google.CalendarTest do
     Jido.Connect.Google.Calendar.Actions.UpdateEvent,
     Jido.Connect.Google.Calendar.Actions.DeleteEvent,
     Jido.Connect.Google.Calendar.Actions.QueryFreeBusy,
-    Jido.Connect.Google.Calendar.Actions.FindAvailability
+    Jido.Connect.Google.Calendar.Actions.FindAvailability,
+    Jido.Connect.Google.Calendar.Actions.WatchEvents,
+    Jido.Connect.Google.Calendar.Actions.WatchCalendarList,
+    Jido.Connect.Google.Calendar.Actions.WatchAcl,
+    Jido.Connect.Google.Calendar.Actions.WatchSettings,
+    Jido.Connect.Google.Calendar.Actions.StopChannel
   ]
 
   @calendar_dsl_fragments [
     Jido.Connect.Google.Calendar.Actions.Read,
     Jido.Connect.Google.Calendar.Actions.Write,
     Jido.Connect.Google.Calendar.Actions.FreeBusy,
-    Jido.Connect.Google.Calendar.Triggers.Events
+    Jido.Connect.Google.Calendar.Actions.Watch,
+    Jido.Connect.Google.Calendar.Triggers.Events,
+    Jido.Connect.Google.Calendar.Triggers.Push
   ]
 
   defmodule FakeCalendarClient do
@@ -324,6 +331,81 @@ defmodule Jido.Connect.Google.CalendarTest do
       {:ok, %{calendar_id: "primary", event_id: "event123", deleted?: true}}
     end
 
+    def watch_events(
+          %{
+            calendar_id: "primary",
+            channel_id: "event-channel",
+            address: "https://example.com/calendar/events",
+            channel_type: "web_hook"
+          },
+          "token"
+        ) do
+      {:ok,
+       Calendar.Channel.new!(%{
+         channel_id: "event-channel",
+         resource_id: "events-resource",
+         resource_uri: "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+         token: "tenant=1",
+         expiration: "1779000000000"
+       })}
+    end
+
+    def watch_calendar_list(
+          %{
+            channel_id: "calendar-list-channel",
+            address: "https://example.com/calendar/list",
+            channel_type: "web_hook"
+          },
+          "token"
+        ) do
+      {:ok,
+       Calendar.Channel.new!(%{
+         channel_id: "calendar-list-channel",
+         resource_id: "calendar-list-resource",
+         resource_uri: "https://www.googleapis.com/calendar/v3/users/me/calendarList"
+       })}
+    end
+
+    def watch_acl(
+          %{
+            calendar_id: "primary",
+            channel_id: "acl-channel",
+            address: "https://example.com/calendar/acl",
+            channel_type: "web_hook"
+          },
+          "token"
+        ) do
+      {:ok,
+       Calendar.Channel.new!(%{
+         channel_id: "acl-channel",
+         resource_id: "acl-resource",
+         resource_uri: "https://www.googleapis.com/calendar/v3/calendars/primary/acl"
+       })}
+    end
+
+    def watch_settings(
+          %{
+            channel_id: "settings-channel",
+            address: "https://example.com/calendar/settings",
+            channel_type: "web_hook"
+          },
+          "token"
+        ) do
+      {:ok,
+       Calendar.Channel.new!(%{
+         channel_id: "settings-channel",
+         resource_id: "settings-resource",
+         resource_uri: "https://www.googleapis.com/calendar/v3/users/me/settings"
+       })}
+    end
+
+    def stop_channel(
+          %{channel_id: "event-channel", resource_id: "events-resource"},
+          "token"
+        ) do
+      {:ok, %{channel_id: "event-channel", resource_id: "events-resource", stopped?: true}}
+    end
+
     def query_free_busy(
           %{
             calendar_ids: ["primary"],
@@ -409,7 +491,12 @@ defmodule Jido.Connect.Google.CalendarTest do
              "google.calendar.event.update",
              "google.calendar.event.delete",
              "google.calendar.freebusy.query",
-             "google.calendar.availability.find"
+             "google.calendar.availability.find",
+             "google.calendar.event.watch",
+             "google.calendar.calendar_list.watch",
+             "google.calendar.acl.watch",
+             "google.calendar.settings.watch",
+             "google.calendar.channel.stop"
            ]
 
     assert [%{id: :user, kind: :oauth2, refresh?: true, pkce?: true} = profile] =
@@ -417,8 +504,15 @@ defmodule Jido.Connect.Google.CalendarTest do
 
     assert "openid" in profile.default_scopes
 
+    assert "https://www.googleapis.com/auth/calendar" in profile.optional_scopes
+    assert "https://www.googleapis.com/auth/calendar.readonly" in profile.optional_scopes
+    assert "https://www.googleapis.com/auth/calendar.calendarlist" in profile.optional_scopes
+
     assert "https://www.googleapis.com/auth/calendar.calendarlist.readonly" in profile.optional_scopes
 
+    assert "https://www.googleapis.com/auth/calendar.acls.readonly" in profile.optional_scopes
+    assert "https://www.googleapis.com/auth/calendar.acls" in profile.optional_scopes
+    assert "https://www.googleapis.com/auth/calendar.settings.readonly" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/calendar.freebusy" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/calendar.events.freebusy" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/calendar.events.readonly" in profile.optional_scopes
@@ -440,6 +534,15 @@ defmodule Jido.Connect.Google.CalendarTest do
               scope_resolver: Jido.Connect.Google.Calendar.ScopeResolver
             }} =
              Connect.trigger(spec, "google.calendar.event.changed")
+
+    assert {:ok,
+            %{
+              id: "google.calendar.event.changed.push",
+              kind: :webhook,
+              dedupe: %{key: [:channel_id, :resource_id, :message_number]},
+              verification: %{kind: :google_calendar_channel}
+            }} =
+             Connect.trigger(spec, "google.calendar.event.changed.push")
   end
 
   test "compiles generated Jido modules for actions, sensors, and plugin" do
@@ -452,6 +555,30 @@ defmodule Jido.Connect.Google.CalendarTest do
           name: "google_calendar_event_changed",
           trigger_id: "google.calendar.event.changed",
           signal_type: "google.calendar.event.changed"
+        },
+        %{
+          module: Jido.Connect.Google.Calendar.Sensors.EventChangedPush,
+          name: "google_calendar_event_changed_push",
+          trigger_id: "google.calendar.event.changed.push",
+          signal_type: "google.calendar.event.changed.push"
+        },
+        %{
+          module: Jido.Connect.Google.Calendar.Sensors.CalendarListChangedPush,
+          name: "google_calendar_calendar_list_changed_push",
+          trigger_id: "google.calendar.calendar_list.changed.push",
+          signal_type: "google.calendar.calendar_list.changed.push"
+        },
+        %{
+          module: Jido.Connect.Google.Calendar.Sensors.AclChangedPush,
+          name: "google_calendar_acl_changed_push",
+          trigger_id: "google.calendar.acl.changed.push",
+          signal_type: "google.calendar.acl.changed.push"
+        },
+        %{
+          module: Jido.Connect.Google.Calendar.Sensors.SettingChangedPush,
+          name: "google_calendar_setting_changed_push",
+          trigger_id: "google.calendar.setting.changed.push",
+          signal_type: "google.calendar.setting.changed.push"
         }
       ],
       plugin_module: Jido.Connect.Google.Calendar.Plugin,
@@ -460,7 +587,8 @@ defmodule Jido.Connect.Google.CalendarTest do
 
     ConnectorContracts.assert_catalog_pack_delegates(Calendar,
       reader_pack: :google_calendar_reader,
-      scheduler_pack: :google_calendar_scheduler
+      scheduler_pack: :google_calendar_scheduler,
+      watch_pack: :google_calendar_watch
     )
   end
 
@@ -498,6 +626,30 @@ defmodule Jido.Connect.Google.CalendarTest do
              %{},
              %{scopes: ["https://www.googleapis.com/auth/calendar"]}
            ) == ["https://www.googleapis.com/auth/calendar"]
+
+    assert resolver.required_scopes(
+             %{id: "google.calendar.event.watch"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/calendar.events.freebusy"]}
+           ) == ["https://www.googleapis.com/auth/calendar.events.freebusy"]
+
+    assert resolver.required_scopes(
+             %{id: "google.calendar.acl.watch"},
+             %{},
+             %{scopes: []}
+           ) == ["https://www.googleapis.com/auth/calendar.acls.readonly"]
+
+    assert resolver.required_scopes(
+             %{id: "google.calendar.settings.watch"},
+             %{},
+             %{scopes: []}
+           ) == ["https://www.googleapis.com/auth/calendar.settings.readonly"]
+
+    assert resolver.required_scopes(
+             %{id: "google.calendar.channel.stop"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/calendar.settings.readonly"]}
+           ) == ["https://www.googleapis.com/auth/calendar.settings.readonly"]
 
     assert resolver.required_scopes(%{}, %{}, %{}) == [
              "https://www.googleapis.com/auth/calendar.events.readonly"
@@ -721,6 +873,106 @@ defmodule Jido.Connect.Google.CalendarTest do
                Calendar.integration(),
                "google.calendar.event.delete",
                %{calendar_id: "primary", event_id: "event123", send_updates: "all"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes Calendar watch lifecycle actions through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: event_read_scopes())
+
+    assert {:ok,
+            %{
+              channel: %{
+                channel_id: "event-channel",
+                resource_id: "events-resource",
+                resource_uri: "https://www.googleapis.com/calendar/v3/calendars/primary/events"
+              }
+            }} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.event.watch",
+               %{
+                 calendar_id: "primary",
+                 channel_id: " event-channel ",
+                 address: " https://example.com/calendar/events ",
+                 token: "tenant=1"
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{channel_id: "event-channel", stopped?: true}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.channel.stop",
+               %{channel_id: "event-channel", resource_id: "events-resource"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes CalendarList, ACL, and settings watch actions" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{channel: %{channel_id: "calendar-list-channel"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.calendar_list.watch",
+               %{
+                 channel_id: "calendar-list-channel",
+                 address: "https://example.com/calendar/list"
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    {context, lease} = context_and_lease(scopes: acl_scopes())
+
+    assert {:ok, %{channel: %{channel_id: "acl-channel"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.acl.watch",
+               %{
+                 calendar_id: "primary",
+                 channel_id: "acl-channel",
+                 address: "https://example.com/calendar/acl"
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    {context, lease} = context_and_lease(scopes: settings_scopes())
+
+    assert {:ok, %{channel: %{channel_id: "settings-channel"}}} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.settings.watch",
+               %{
+                 channel_id: "settings-channel",
+                 address: "https://example.com/calendar/settings"
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "Calendar watch actions validate channel fields" do
+    {context, lease} = context_and_lease(scopes: event_read_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_calendar_channel,
+              details: %{field: :address}
+            }} =
+             Connect.invoke(
+               Calendar.integration(),
+               "google.calendar.event.watch",
+               %{
+                 calendar_id: "primary",
+                 channel_id: "event-channel",
+                 address: "http://example.com/calendar/events"
+               },
                context: context,
                credential_lease: lease
              )
@@ -1155,6 +1407,24 @@ defmodule Jido.Connect.Google.CalendarTest do
       "email",
       "profile",
       "https://www.googleapis.com/auth/calendar.freebusy"
+    ]
+  end
+
+  defp acl_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/calendar.acls.readonly"
+    ]
+  end
+
+  defp settings_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/calendar.settings.readonly"
     ]
   end
 

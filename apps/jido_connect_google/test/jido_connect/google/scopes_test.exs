@@ -20,6 +20,16 @@ defmodule Jido.Connect.Google.ScopesTest do
     assert "https://mail.google.com/" in Scopes.product(:gmail)
     assert "https://www.googleapis.com/auth/drive" in Scopes.product(:drive)
     assert "https://www.googleapis.com/auth/drive.file" in Scopes.product(:drive)
+    assert "https://www.googleapis.com/auth/calendar" in Scopes.product(:calendar)
+    assert "https://www.googleapis.com/auth/calendar.readonly" in Scopes.product(:calendar)
+    assert "https://www.googleapis.com/auth/calendar.calendarlist" in Scopes.product(:calendar)
+    assert "https://www.googleapis.com/auth/calendar.acls.readonly" in Scopes.product(:calendar)
+    assert "https://www.googleapis.com/auth/calendar.acls" in Scopes.product(:calendar)
+
+    assert "https://www.googleapis.com/auth/calendar.settings.readonly" in Scopes.product(
+             :calendar
+           )
+
     assert "https://www.googleapis.com/auth/calendar.events" in Scopes.product(:calendar)
     assert "https://www.googleapis.com/auth/contacts.readonly" in Scopes.product(:contacts)
     assert "https://www.googleapis.com/auth/analytics.readonly" in Scopes.product(:analytics)

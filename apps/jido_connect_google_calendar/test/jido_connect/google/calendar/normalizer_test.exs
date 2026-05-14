@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Calendar.NormalizerTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Google.Calendar.{Attendee, Calendar, Event, FreeBusy, Normalizer}
+  alias Jido.Connect.Google.Calendar.{Attendee, Calendar, Channel, Event, FreeBusy, Normalizer}
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
 
   test "normalizes calendar-list entries" do
@@ -147,6 +147,27 @@ defmodule Jido.Connect.Google.Calendar.NormalizerTest do
            ]
   end
 
+  test "normalizes notification channels" do
+    assert {:ok, %Channel{} = channel} =
+             Normalizer.channel(%{
+               "kind" => "api#channel",
+               "id" => "event-channel",
+               "resourceId" => "events-resource",
+               "resourceUri" => "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+               "token" => "tenant=1",
+               "expiration" => 1_779_000_000_000
+             })
+
+    assert channel.channel_id == "event-channel"
+    assert channel.resource_id == "events-resource"
+
+    assert channel.resource_uri ==
+             "https://www.googleapis.com/calendar/v3/calendars/primary/events"
+
+    assert channel.token == "tenant=1"
+    assert channel.expiration == "1779000000000"
+  end
+
   test "normalizes freebusy per-calendar and per-group errors" do
     assert {:ok, %FreeBusy{} = free_busy} =
              Normalizer.free_busy(%{
@@ -217,6 +238,13 @@ defmodule Jido.Connect.Google.Calendar.NormalizerTest do
     )
 
     assert {:error, _error} = Event.new(%{})
+
+    ConnectorContracts.assert_struct_defaults(Channel, %{channel_id: "event-channel"},
+      params: %{},
+      metadata: %{}
+    )
+
+    assert {:error, _error} = Channel.new(%{})
 
     ConnectorContracts.assert_struct_defaults(
       FreeBusy,

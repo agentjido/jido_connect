@@ -86,6 +86,30 @@ defmodule Jido.Connect.Google.Calendar.Client.Response do
   def handle_event_delete_response(response, _params),
     do: Transport.handle_error_response(response)
 
+  def handle_channel_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.channel/1, "Google Calendar channel response was invalid")
+  end
+
+  def handle_channel_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Calendar channel response was invalid", body)
+  end
+
+  def handle_channel_response(response), do: Transport.handle_error_response(response)
+
+  def handle_channel_stop_response({:ok, %{status: status}}, params) when status in 200..299 do
+    {:ok,
+     %{
+       channel_id: Data.get(params, :channel_id),
+       resource_id: Data.get(params, :resource_id),
+       stopped?: true
+     }}
+  end
+
+  def handle_channel_stop_response(response, _params),
+    do: Transport.handle_error_response(response)
+
   def handle_free_busy_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
     normalize_one(body, &Normalizer.free_busy/1, "Google Calendar freebusy response was invalid")

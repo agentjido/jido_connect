@@ -14,6 +14,11 @@ defmodule Jido.Connect.Google.Calendar.PrivacyAuditTest do
         action("google.calendar.event.create", :personal_data, :write, :required_for_ai),
         action("google.calendar.event.update", :personal_data, :write, :required_for_ai),
         action("google.calendar.event.delete", :personal_data, :destructive, :always),
+        action("google.calendar.event.watch", :personal_data, :write, :required_for_ai),
+        action("google.calendar.calendar_list.watch", :personal_data, :write, :required_for_ai),
+        action("google.calendar.acl.watch", :personal_data, :write, :required_for_ai),
+        action("google.calendar.settings.watch", :personal_data, :write, :required_for_ai),
+        action("google.calendar.channel.stop", :personal_data, :write, :required_for_ai),
         action("google.calendar.freebusy.query", :personal_data, :read, :none,
           text_includes: ["freebusy"]
         ),
@@ -24,6 +29,18 @@ defmodule Jido.Connect.Google.Calendar.PrivacyAuditTest do
       [
         trigger("google.calendar.event.changed", :personal_data,
           text_includes: ["event", "changed"]
+        ),
+        trigger("google.calendar.event.changed.push", :personal_data,
+          text_includes: ["event", "push"]
+        ),
+        trigger("google.calendar.calendar_list.changed.push", :personal_data,
+          text_includes: ["CalendarList", "push"]
+        ),
+        trigger("google.calendar.acl.changed.push", :personal_data,
+          text_includes: ["ACL", "push"]
+        ),
+        trigger("google.calendar.setting.changed.push", :personal_data,
+          text_includes: ["settings", "push"]
         )
       ]
     )

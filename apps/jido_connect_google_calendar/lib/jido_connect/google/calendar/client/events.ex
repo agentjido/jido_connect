@@ -14,6 +14,18 @@ defmodule Jido.Connect.Google.Calendar.Client.Events do
     |> Response.handle_event_list_response(params)
   end
 
+  def watch_events(%{calendar_id: calendar_id} = params, access_token)
+      when is_binary(calendar_id) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.post(
+      url: "/v3/calendars/#{encode_id(calendar_id)}/events/watch",
+      params: Params.watch_events_params(params),
+      json: Params.watch_channel_body(params)
+    )
+    |> Response.handle_channel_response()
+  end
+
   def get_event(%{calendar_id: calendar_id, event_id: event_id} = params, access_token)
       when is_binary(calendar_id) and is_binary(event_id) and is_binary(access_token) do
     access_token

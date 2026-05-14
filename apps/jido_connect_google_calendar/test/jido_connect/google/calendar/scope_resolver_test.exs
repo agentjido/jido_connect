@@ -6,7 +6,11 @@ defmodule Jido.Connect.Google.Calendar.ScopeResolverTest do
 
   @calendar_scope "https://www.googleapis.com/auth/calendar"
   @calendar_readonly_scope "https://www.googleapis.com/auth/calendar.readonly"
+  @calendar_list_write_scope "https://www.googleapis.com/auth/calendar.calendarlist"
   @calendar_list_scope "https://www.googleapis.com/auth/calendar.calendarlist.readonly"
+  @acl_scope "https://www.googleapis.com/auth/calendar.acls"
+  @acl_readonly_scope "https://www.googleapis.com/auth/calendar.acls.readonly"
+  @settings_readonly_scope "https://www.googleapis.com/auth/calendar.settings.readonly"
   @freebusy_scope "https://www.googleapis.com/auth/calendar.freebusy"
   @events_freebusy_scope "https://www.googleapis.com/auth/calendar.events.freebusy"
   @events_readonly_scope "https://www.googleapis.com/auth/calendar.events.readonly"
@@ -31,6 +35,12 @@ defmodule Jido.Connect.Google.Calendar.ScopeResolverTest do
         operation: "google.calendar.calendar.list",
         granted: [@calendar_readonly_scope],
         expected: @calendar_readonly_scope
+      },
+      %{
+        label: "calendar list watch accepts narrow write grant",
+        operation: "google.calendar.calendar_list.watch",
+        granted: [@calendar_list_write_scope],
+        expected: @calendar_list_write_scope
       },
       %{
         label: "broad calendar grant can satisfy event reads",
@@ -61,6 +71,36 @@ defmodule Jido.Connect.Google.Calendar.ScopeResolverTest do
         operation: "google.calendar.event.update",
         granted: [@events_readonly_scope],
         expected: @events_scope
+      },
+      %{
+        label: "event watch accepts events freebusy scope from Google watch docs",
+        operation: "google.calendar.event.watch",
+        granted: [@events_freebusy_scope],
+        expected: @events_freebusy_scope
+      },
+      %{
+        label: "acl watch uses narrow ACL readonly scope",
+        operation: "google.calendar.acl.watch",
+        granted: [],
+        expected: @acl_readonly_scope
+      },
+      %{
+        label: "acl watch accepts ACL write scope",
+        operation: "google.calendar.acl.changed.push",
+        granted: [@acl_scope],
+        expected: @acl_scope
+      },
+      %{
+        label: "settings watch uses settings readonly scope",
+        operation: "google.calendar.settings.watch",
+        granted: [],
+        expected: @settings_readonly_scope
+      },
+      %{
+        label: "channel stop accepts any Calendar scope that owns the channel",
+        operation: "google.calendar.channel.stop",
+        granted: [@settings_readonly_scope],
+        expected: @settings_readonly_scope
       },
       %{
         label: "broad calendar grant can satisfy mutations",

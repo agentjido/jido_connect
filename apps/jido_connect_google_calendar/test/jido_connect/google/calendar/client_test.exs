@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Calendar.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Google.Calendar.{Calendar, Client, Event}
+  alias Jido.Connect.Google.Calendar.{Calendar, Channel, Client, Event}
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -258,6 +258,171 @@ defmodule Jido.Connect.Google.Calendar.ClientTest do
     assert {:ok, %{calendar_id: "primary", event_id: "event123", deleted?: true}} =
              Client.delete_event(
                %{calendar_id: "primary", event_id: "event123", send_updates: "all"},
+               "token"
+             )
+  end
+
+  test "watches events" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v3/calendars/primary/events/watch"
+      assert conn.query_params["eventTypes"] == "default"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "id" => "event-channel",
+               "type" => "web_hook",
+               "address" => "https://example.com/calendar/events",
+               "token" => "tenant=1",
+               "params" => %{"ttl" => "3600"}
+             }
+
+      Req.Test.json(conn, %{
+        "kind" => "api#channel",
+        "id" => "event-channel",
+        "resourceId" => "events-resource",
+        "resourceUri" => "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "token" => "tenant=1",
+        "expiration" => 1_779_000_000_000
+      })
+    end)
+
+    assert {:ok, %Channel{} = channel} =
+             Client.watch_events(
+               %{
+                 calendar_id: "primary",
+                 channel_id: "event-channel",
+                 address: "https://example.com/calendar/events",
+                 token: "tenant=1",
+                 ttl_seconds: 3600,
+                 event_types: "default"
+               },
+               "token"
+             )
+
+    assert channel.channel_id == "event-channel"
+    assert channel.resource_id == "events-resource"
+    assert channel.expiration == "1779000000000"
+  end
+
+  test "watches calendar list" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v3/users/me/calendarList/watch"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "id" => "calendar-list-channel",
+               "type" => "web_hook",
+               "address" => "https://example.com/calendar/list"
+             }
+
+      Req.Test.json(conn, %{
+        "kind" => "api#channel",
+        "id" => "calendar-list-channel",
+        "resourceId" => "calendar-list-resource",
+        "resourceUri" => "https://www.googleapis.com/calendar/v3/users/me/calendarList"
+      })
+    end)
+
+    assert {:ok, %Channel{channel_id: "calendar-list-channel"}} =
+             Client.watch_calendar_list(
+               %{
+                 channel_id: "calendar-list-channel",
+                 address: "https://example.com/calendar/list"
+               },
+               "token"
+             )
+  end
+
+  test "watches ACL changes" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v3/calendars/primary/acl/watch"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "id" => "acl-channel",
+               "type" => "web_hook",
+               "address" => "https://example.com/calendar/acl"
+             }
+
+      Req.Test.json(conn, %{
+        "kind" => "api#channel",
+        "id" => "acl-channel",
+        "resourceId" => "acl-resource",
+        "resourceUri" => "https://www.googleapis.com/calendar/v3/calendars/primary/acl"
+      })
+    end)
+
+    assert {:ok, %Channel{channel_id: "acl-channel"}} =
+             Client.watch_acl(
+               %{
+                 calendar_id: "primary",
+                 channel_id: "acl-channel",
+                 address: "https://example.com/calendar/acl"
+               },
+               "token"
+             )
+  end
+
+  test "watches settings" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v3/users/me/settings/watch"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "id" => "settings-channel",
+               "type" => "web_hook",
+               "address" => "https://example.com/calendar/settings"
+             }
+
+      Req.Test.json(conn, %{
+        "kind" => "api#channel",
+        "id" => "settings-channel",
+        "resourceId" => "settings-resource",
+        "resourceUri" => "https://www.googleapis.com/calendar/v3/users/me/settings"
+      })
+    end)
+
+    assert {:ok, %Channel{channel_id: "settings-channel"}} =
+             Client.watch_settings(
+               %{
+                 channel_id: "settings-channel",
+                 address: "https://example.com/calendar/settings"
+               },
+               "token"
+             )
+  end
+
+  test "stops channels" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v3/channels/stop"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "id" => "event-channel",
+               "resourceId" => "events-resource"
+             }
+
+      Plug.Conn.resp(conn, 204, "")
+    end)
+
+    assert {:ok,
+            %{
+              channel_id: "event-channel",
+              resource_id: "events-resource",
+              stopped?: true
+            }} =
+             Client.stop_channel(
+               %{channel_id: "event-channel", resource_id: "events-resource"},
                "token"
              )
   end

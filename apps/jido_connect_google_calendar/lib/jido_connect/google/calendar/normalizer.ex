@@ -2,7 +2,7 @@ defmodule Jido.Connect.Google.Calendar.Normalizer do
   @moduledoc "Normalizes Google Calendar API payloads into stable package structs."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Google.Calendar.{Attendee, Calendar, Event, FreeBusy}
+  alias Jido.Connect.Google.Calendar.{Attendee, Calendar, Channel, Event, FreeBusy}
 
   @doc "Normalizes a Google Calendar calendar-list entry payload."
   @spec calendar(map()) :: {:ok, Calendar.t()} | {:error, term()}
@@ -102,6 +102,26 @@ defmodule Jido.Connect.Google.Calendar.Normalizer do
 
   def event(_payload, _opts), do: {:error, :invalid_event_payload}
 
+  @doc "Normalizes a Google Calendar notification channel payload."
+  @spec channel(map()) :: {:ok, Channel.t()} | {:error, term()}
+  def channel(payload) when is_map(payload) do
+    %{
+      channel_id: Data.get(payload, "id"),
+      resource_id: Data.get(payload, "resourceId"),
+      resource_uri: Data.get(payload, "resourceUri"),
+      token: Data.get(payload, "token"),
+      expiration: normalize_string(Data.get(payload, "expiration")),
+      type: Data.get(payload, "type"),
+      address: Data.get(payload, "address"),
+      kind: Data.get(payload, "kind"),
+      params: Data.get(payload, "params", %{})
+    }
+    |> Data.compact()
+    |> Channel.new()
+  end
+
+  def channel(_payload), do: {:error, :invalid_channel_payload}
+
   @doc "Normalizes a Google Calendar free/busy response payload."
   @spec free_busy(map()) :: {:ok, FreeBusy.t()} | {:error, term()}
   def free_busy(payload) when is_map(payload) do
@@ -143,6 +163,10 @@ defmodule Jido.Connect.Google.Calendar.Normalizer do
   end
 
   defp time_value(_payload), do: nil
+
+  defp normalize_string(value) when is_integer(value), do: Integer.to_string(value)
+  defp normalize_string(value) when is_binary(value), do: value
+  defp normalize_string(value), do: value
 
   defp all_day?(payload) when is_map(payload), do: is_binary(Data.get(payload, "date"))
   defp all_day?(_payload), do: false

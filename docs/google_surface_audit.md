@@ -33,13 +33,14 @@ live-test readiness, and Beadwork sequencing.
 | `jido_connect_google_sheets` | `google_sheets` | 9 | 0 | 2 | `user` |
 | `jido_connect_gmail` | `gmail` | 11 | 1 | 3 | `user` |
 | `jido_connect_google_drive` | `google_drive` | 38 | 2 | 3 | `user`, `service_account`, `domain_delegated_service_account` |
-| `jido_connect_google_calendar` | `google_calendar` | 8 | 1 | 2 | `user` |
+| `jido_connect_google_calendar` | `google_calendar` | 13 | 5 | 3 | `user` |
 | `jido_connect_google_contacts` | `google_contacts` | 9 | 0 | 2 | `user` |
 
 ## Cross-Package Notes
 
-- Poll triggers currently exist for Gmail, Drive, and Calendar only. Gmail and
-  Drive also expose webhook trigger metadata for provider push deliveries.
+- Poll triggers currently exist for Gmail, Drive, and Calendar only. Gmail,
+  Drive, and Calendar also expose webhook trigger metadata for provider push
+  deliveries.
 - Drive is the only package that declares service-account and delegated
   service-account auth profiles.
 - Mutating write actions consistently require AI confirmation, destructive
@@ -64,7 +65,7 @@ action families. Do not move Google filter/query semantics into
 | Sheets | Spreadsheet create, value batch operations, data-filter operations, developer metadata, and sheet copy. |
 | Gmail | Watch/stop lifecycle, explicit history action, attachments, draft lifecycle, batch message triage, label lifecycle, and destructive message/thread operations outside default packs. |
 | Drive | File labels, about/apps/generateIds metadata utilities, access proposal/approval workflows, and further channel renewal helpers as host patterns emerge. |
-| Calendar | Watch/channel lifecycle, calendar CRUD, calendar-list item CRUD, ACL lifecycle, event instances, and event move. |
+| Calendar | Calendar CRUD, calendar-list item CRUD, ACL lifecycle, event instances, event move, quickAdd/import, colors, and settings reads. |
 | Contacts | Batch contact operations, directory people, other contacts, group lifecycle, group membership, and sync-token polling trigger. |
 
 Explicit non-goals from the audit:
@@ -88,7 +89,7 @@ for a wholesale pass.
 | Sheets | `spreadsheets.readonly`, `spreadsheets` | Existing reads/writes are ready for live smoke tests against a disposable spreadsheet. |
 | Gmail | `gmail.metadata`, `gmail.labels`, `gmail.modify`, `gmail.compose`, `gmail.send`, `https://mail.google.com/` | Sending and destructive mailbox actions need isolated test accounts and explicit confirmation. Permanent message/thread deletes require the full Gmail mailbox scope. |
 | Drive | `drive.metadata.readonly`, `drive.readonly`, `drive.file`, `drive` | Current user OAuth flow is ready for metadata/content/file/comment/shared-drive checks; service-account and delegated flows need separate live coverage. |
-| Calendar | `calendar.calendarlist.readonly`, `calendar.events.readonly`, `calendar.events`, `calendar.events.freebusy` | Use a disposable calendar for event mutation and delete checks. |
+| Calendar | `calendar.calendarlist.readonly`, `calendar.events.readonly`, `calendar.events`, `calendar.events.freebusy`, `calendar.acls.readonly`, `calendar.settings.readonly` | Use a disposable calendar for event mutation/delete checks and HTTPS webhook endpoints for channel lifecycle smoke tests. |
 | Contacts | `profile`, `contacts.readonly`, `contacts` | Use a test contact/group namespace to avoid mutating real address book data. |
 
 ## Implementation Sequence
@@ -278,19 +279,29 @@ Auth profiles: `user`
 | `google.calendar.event.delete` | destructive | `personal_data` | `calendar.events` | `calendar_id`, `event_id` | `result` |
 | `google.calendar.freebusy.query` | read | `personal_data` | `calendar.events.freebusy` | `calendar_ids`, `time_min`, `time_max` | `free_busy` |
 | `google.calendar.availability.find` | read | `personal_data` | `calendar.events.freebusy` | `calendar_ids`, `time_min`, `time_max` | `windows`, `free_busy` |
+| `google.calendar.event.watch` | write | `personal_data` | `calendar.events.readonly` | `calendar_id`, `channel_id`, `address` | `channel` |
+| `google.calendar.calendar_list.watch` | write | `personal_data` | `calendar.calendarlist.readonly` | `channel_id`, `address` | `channel` |
+| `google.calendar.acl.watch` | write | `personal_data` | `calendar.acls.readonly` | `calendar_id`, `channel_id`, `address` | `channel` |
+| `google.calendar.settings.watch` | write | `personal_data` | `calendar.settings.readonly` | `channel_id`, `address` | `channel` |
+| `google.calendar.channel.stop` | write | `personal_data` | calendar channel scope | `channel_id`, `resource_id` | `result` |
 
 ### Trigger
 
 | ID | Kind | Checkpoint | Dedupe | Scope | Signal |
 | --- | --- | --- | --- | --- | --- |
 | `google.calendar.event.changed` | poll | `sync_token` | `event_id`, `updated` | `calendar.events.readonly` | `event_id`, calendar ID, status, change type, summary, start, end, updated, event |
+| `google.calendar.event.changed.push` | webhook | none | `channel_id`, `resource_id`, `message_number` | `calendar.events.readonly` | channel id, resource id, resource URI, state, resource type, optional calendar id, delivery metadata |
+| `google.calendar.calendar_list.changed.push` | webhook | none | `channel_id`, `resource_id`, `message_number` | `calendar.calendarlist.readonly` | channel id, resource id, resource URI, state, resource type, delivery metadata |
+| `google.calendar.acl.changed.push` | webhook | none | `channel_id`, `resource_id`, `message_number` | `calendar.acls.readonly` | channel id, resource id, resource URI, state, resource type, optional calendar id, delivery metadata |
+| `google.calendar.setting.changed.push` | webhook | none | `channel_id`, `resource_id`, `message_number` | `calendar.settings.readonly` | channel id, resource id, resource URI, state, resource type, delivery metadata |
 
 ### Catalog Packs
 
 | Pack | Surface |
 | --- | --- |
-| `google_calendar_reader` | Calendar/event reads, free/busy, availability search, and event-changed polling. |
+| `google_calendar_reader` | Calendar/event reads, free/busy, availability search, event-changed polling, and webhook trigger metadata. |
 | `google_calendar_scheduler` | Reader pack plus event create, update, and delete. |
+| `google_calendar_watch` | Reader pack plus Calendar event, CalendarList, ACL, settings watch creation and channel stop lifecycle actions. |
 
 ## Contacts
 
