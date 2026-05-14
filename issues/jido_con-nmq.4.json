@@ -9,11 +9,14 @@
   "created": "2026-05-14T14:35:47Z",
   "description": "Write docs/google_surface_audit.md with the current surface matrix, gap recommendations, live-test readiness, and implementation sequencing.",
   "id": "jido_con-nmq.4",
-  "labels": [],
+  "labels": [
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-nmq",
   "priority": 1,
   "status": "open",
   "title": "[G13-S04] Write Google surface audit document",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:53Z"
+  "updated_at": "2026-05-14T14:36:00Z"
 }
