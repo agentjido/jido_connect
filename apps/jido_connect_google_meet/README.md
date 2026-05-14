@@ -11,8 +11,8 @@ added.
 
 This scaffold declares the provider package, user OAuth profile, Meet scope
 resolver, generated Jido plugin shell, and normalized Zoi-backed structs.
-Conference record, recording/transcript, trigger, and catalog-pack work is
-intentionally split into later Beadwork tasks.
+Recording/transcript, trigger, and catalog-pack work is intentionally split into
+later Beadwork tasks.
 
 ## Normalized Structs
 
@@ -37,6 +37,8 @@ scopes:
 
 - `google.meet.space.create`
 - `google.meet.space.get`
+- `google.meet.conference_record.list`
+- `google.meet.conference_record.get`
 
 No Meet triggers are exposed yet. The generated plugin and provider metadata
 are present so later tasks can add action families without changing package

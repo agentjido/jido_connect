@@ -10,11 +10,14 @@ defmodule Jido.Connect.Google.MeetTest do
 
   @meet_action_modules [
     Jido.Connect.Google.Meet.Actions.CreateSpace,
-    Jido.Connect.Google.Meet.Actions.GetSpace
+    Jido.Connect.Google.Meet.Actions.GetSpace,
+    Jido.Connect.Google.Meet.Actions.ListConferenceRecords,
+    Jido.Connect.Google.Meet.Actions.GetConferenceRecord
   ]
 
   @meet_dsl_fragments [
-    Jido.Connect.Google.Meet.Actions.Spaces
+    Jido.Connect.Google.Meet.Actions.Spaces,
+    Jido.Connect.Google.Meet.Actions.ConferenceRecords
   ]
 
   defmodule FakeMeetClient do
@@ -42,6 +45,29 @@ defmodule Jido.Connect.Google.MeetTest do
          meeting_code: "abc-mnop-xyz"
        })}
     end
+
+    def list_conference_records(%{page_size: 25, filter: "space.name = \"spaces/abc\""}, "token") do
+      {:ok,
+       %{
+         conference_records: [
+           Meet.ConferenceRecord.new!(%{
+             conference_record_name: "conferenceRecords/abc",
+             space: "spaces/abc",
+             start_time: "2026-05-14T18:00:00Z"
+           })
+         ],
+         next_page_token: "next"
+       }}
+    end
+
+    def get_conference_record(%{conference_record_name: "conferenceRecords/abc"}, "token") do
+      {:ok,
+       Meet.ConferenceRecord.new!(%{
+         conference_record_name: "conferenceRecords/abc",
+         space: "spaces/abc",
+         start_time: "2026-05-14T18:00:00Z"
+       })}
+    end
   end
 
   test "declares Google Meet provider metadata" do
@@ -56,7 +82,9 @@ defmodule Jido.Connect.Google.MeetTest do
 
     assert Enum.map(spec.actions, & &1.id) == [
              "google.meet.space.create",
-             "google.meet.space.get"
+             "google.meet.space.get",
+             "google.meet.conference_record.list",
+             "google.meet.conference_record.get"
            ]
 
     assert spec.triggers == []
@@ -120,6 +148,47 @@ defmodule Jido.Connect.Google.MeetTest do
                Meet.integration(),
                "google.meet.space.get",
                %{space_name: "spaces/abc-mnop-xyz"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes list conference records through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: [@meet_readonly_scope])
+
+    assert {:ok,
+            %{
+              conference_records: [
+                %{
+                  conference_record_name: "conferenceRecords/abc",
+                  space: "spaces/abc"
+                }
+              ],
+              next_page_token: "next"
+            }} =
+             Connect.invoke(
+               Meet.integration(),
+               "google.meet.conference_record.list",
+               %{filter: "space.name = \"spaces/abc\""},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes get conference record through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: [@meet_readonly_scope])
+
+    assert {:ok,
+            %{
+              conference_record: %{
+                conference_record_name: "conferenceRecords/abc",
+                space: "spaces/abc"
+              }
+            }} =
+             Connect.invoke(
+               Meet.integration(),
+               "google.meet.conference_record.get",
+               %{conference_record_name: "conferenceRecords/abc"},
                context: context,
                credential_lease: lease
              )
