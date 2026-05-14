@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-nmq.1"
+  ],
   "blocks": [],
   "created": "2026-05-14T14:35:47Z",
   "description": "Compare current package surfaces against Google API capability areas and identify high-value missing actions/triggers. Keep provider-specific query/filter behavior in connector packages rather than core.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G13-S02] Compare current packages against provider APIs",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:47Z"
+  "updated_at": "2026-05-14T14:35:52Z"
 }
