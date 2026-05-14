@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-b9n.5"
   ],
+  "closed_at": "2026-05-14T21:57:16Z",
+  "close_reason": "completed",
   "created": "2026-05-04T19:20:05Z",
   "description": "Planning ID: G09-S04\nEpic: G09 Google Analytics Connector\nSource: MILESTONE_2.md\nDepends on: G09-S03\n\nAcceptance:\nReport actions validate date ranges, dimensions, metrics, filters, and limits.",
   "id": "jido_con-b9n.4",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-b9n",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G09-S04] Implement run report and batch report actions",
   "type": "task",
-  "updated_at": "2026-05-14T20:59:30Z"
+  "updated_at": "2026-05-14T21:57:16Z"
 }
