@@ -3,7 +3,10 @@ defmodule Jido.Connect.Google.Meet do
   Google Meet integration authored with the `Jido.Connect` Spark DSL.
   """
 
-  use Jido.Connect
+  use Jido.Connect,
+    fragments: [
+      Jido.Connect.Google.Meet.Actions.Spaces
+    ]
 
   integration do
     id(:google_meet)

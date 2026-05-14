@@ -6,6 +6,7 @@ defmodule Jido.Connect.Google.Meet.ScopeResolverTest do
 
   @created_scope "https://www.googleapis.com/auth/meetings.space.created"
   @readonly_scope "https://www.googleapis.com/auth/meetings.space.readonly"
+  @settings_scope "https://www.googleapis.com/auth/meetings.space.settings"
 
   test "resolves Meet scopes for scaffolded operation shapes" do
     assert {:module, ScopeResolver} = Code.ensure_loaded(ScopeResolver)
@@ -23,5 +24,17 @@ defmodule Jido.Connect.Google.Meet.ScopeResolverTest do
              %{},
              %{scopes: [@readonly_scope]}
            ) == [@readonly_scope]
+
+    assert ScopeResolver.required_scopes(
+             %{action_id: "google.meet.space.get"},
+             %{},
+             %{scopes: [@created_scope]}
+           ) == [@created_scope]
+
+    assert ScopeResolver.required_scopes(
+             %{action_id: "google.meet.space.get"},
+             %{},
+             %{scopes: [@settings_scope]}
+           ) == [@settings_scope]
   end
 end
