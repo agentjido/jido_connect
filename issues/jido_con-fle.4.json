@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-fle.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-fle.5"
+  ],
   "created": "2026-05-14T14:35:48Z",
   "description": "Implement provider-specific document batchUpdate actions with safe schema boundaries for text/style/table/image operations where practical.",
   "id": "jido_con-fle.4",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G14-S04] Implement document batch update actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:53Z"
+  "updated_at": "2026-05-14T14:35:54Z"
 }
