@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:35:47Z",
+  "description": "Generate and document the current action/trigger matrix for Sheets, Gmail, Drive, Calendar, and Contacts from the compiled Jido.Connect specs. Include scopes, effects, risk, auth profiles, handlers, catalog packs, and trigger checkpoint details.",
+  "id": "jido_con-nmq.1",
+  "labels": [],
+  "parent": "jido_con-nmq",
+  "priority": 1,
+  "status": "open",
+  "title": "[G13-S01] Capture current Google action and trigger matrix",
+  "type": "task",
+  "updated_at": "2026-05-14T14:35:47Z"
+}
