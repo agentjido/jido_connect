@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-5zt.6"
   ],
@@ -16,8 +16,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G18-S07] Add Drive comments replies and shared-drive actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:58:18Z"
+  "updated_at": "2026-05-14T17:00:09Z"
 }
