@@ -5,14 +5,18 @@ defmodule Jido.Connect.Google.Sheets.CatalogPacks do
 
   @readonly_tools [
     "google.sheets.spreadsheet.get",
-    "google.sheets.values.get"
+    "google.sheets.values.get",
+    "google.sheets.values.batch_get"
   ]
 
   @writer_tools @readonly_tools ++
                   [
+                    "google.sheets.spreadsheet.create",
                     "google.sheets.values.update",
                     "google.sheets.values.append",
                     "google.sheets.values.clear",
+                    "google.sheets.values.batch_update",
+                    "google.sheets.values.batch_clear",
                     "google.sheets.sheet.add",
                     "google.sheets.sheet.delete",
                     "google.sheets.sheet.rename"

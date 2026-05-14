@@ -34,6 +34,24 @@ defmodule Jido.Connect.Google.Sheets.ScopeResolverTest do
         expected: @write_scope
       },
       %{
+        label: "values batch get can use read-only scope",
+        operation: "google.sheets.values.batch_get",
+        granted: [@read_scope],
+        expected: @read_scope
+      },
+      %{
+        label: "values batch mutation requires full Sheets scope",
+        operation: "google.sheets.values.batch_update",
+        granted: [@read_scope],
+        expected: @write_scope
+      },
+      %{
+        label: "spreadsheet create requires full Sheets scope",
+        operation: "google.sheets.spreadsheet.create",
+        granted: [],
+        expected: @write_scope
+      },
+      %{
         label: "sheet management mutation requires full Sheets scope",
         operation: "google.sheets.sheet.delete",
         granted: [],

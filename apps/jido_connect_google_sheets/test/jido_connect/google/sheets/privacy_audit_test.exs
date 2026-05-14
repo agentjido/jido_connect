@@ -12,6 +12,9 @@ defmodule Jido.Connect.Google.Sheets.PrivacyAuditTest do
       action("google.sheets.values.get", :workspace_content, :read, :none,
         text_includes: ["sheet values", "range"]
       ),
+      action("google.sheets.values.batch_get", :workspace_content, :read, :none,
+        text_includes: ["values", "ranges"]
+      ),
       action("google.sheets.values.update", :workspace_content, :write, :required_for_ai,
         text_includes: ["sheet values"]
       ),
@@ -21,6 +24,17 @@ defmodule Jido.Connect.Google.Sheets.PrivacyAuditTest do
       action("google.sheets.values.clear", :workspace_content, :destructive, :always,
         text_includes: ["sheet values"]
       ),
+      action(
+        "google.sheets.values.batch_update",
+        :workspace_content,
+        :write,
+        :required_for_ai,
+        text_includes: ["values", "ranges"]
+      ),
+      action("google.sheets.values.batch_clear", :workspace_content, :destructive, :always,
+        text_includes: ["values", "ranges"]
+      ),
+      action("google.sheets.spreadsheet.create", :workspace_metadata, :write, :required_for_ai),
       action("google.sheets.sheet.add", :workspace_metadata, :write, :required_for_ai),
       action("google.sheets.sheet.delete", :workspace_metadata, :destructive, :always),
       action("google.sheets.sheet.rename", :workspace_metadata, :write, :required_for_ai),

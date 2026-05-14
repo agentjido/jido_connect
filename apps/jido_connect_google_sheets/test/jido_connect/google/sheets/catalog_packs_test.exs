@@ -38,7 +38,9 @@ defmodule Jido.Connect.Google.Sheets.CatalogPacksTest do
 
     assert "google.sheets.spreadsheet.get" in ids
     assert "google.sheets.values.get" in ids
+    assert "google.sheets.values.batch_get" in ids
     refute "google.sheets.values.update" in ids
+    refute "google.sheets.spreadsheet.create" in ids
 
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.sheets.values.get",
@@ -66,6 +68,15 @@ defmodule Jido.Connect.Google.Sheets.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.sheets.values.update"
+
+    assert {:ok, descriptor} =
+             Catalog.describe_tool("google.sheets.values.batch_update",
+               modules: [Sheets],
+               packs: Sheets.catalog_packs(),
+               pack: :google_sheets_writer
+             )
+
+    assert descriptor.tool.id == "google.sheets.values.batch_update"
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("google.sheets.batch_update",

@@ -49,10 +49,14 @@ Write actions require `https://www.googleapis.com/auth/spreadsheets`.
 Implemented actions:
 
 - `google.sheets.spreadsheet.get`
+- `google.sheets.spreadsheet.create`
 - `google.sheets.values.get`
+- `google.sheets.values.batch_get`
 - `google.sheets.values.update`
 - `google.sheets.values.append`
 - `google.sheets.values.clear`
+- `google.sheets.values.batch_update`
+- `google.sheets.values.batch_clear`
 - `google.sheets.sheet.add`
 - `google.sheets.sheet.delete`
 - `google.sheets.sheet.rename`
@@ -113,9 +117,11 @@ result.update.updated_cells
 
 `Sheets.catalog_packs/0` returns two storage-free catalog packs:
 
-- `:google_sheets_readonly` exposes `spreadsheet.get` and `values.get`.
-- `:google_sheets_writer` exposes read tools, value writes, and sheet
-  add/delete/rename. It intentionally excludes raw `google.sheets.batch_update`.
+- `:google_sheets_readonly` exposes spreadsheet metadata reads and single or
+  batch value reads.
+- `:google_sheets_writer` exposes read tools, spreadsheet creation, value
+  writes, value batch writes/clears, and sheet add/delete/rename. It
+  intentionally excludes raw `google.sheets.batch_update`.
 
 Use the raw batch update action outside the writer pack when a host explicitly
 wants to expose the full Google Sheets batchUpdate escape hatch.

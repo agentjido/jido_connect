@@ -8,9 +8,13 @@ defmodule Jido.Connect.Google.SheetsTest do
   @sheets_action_modules [
     Jido.Connect.Google.Sheets.Actions.GetSpreadsheet,
     Jido.Connect.Google.Sheets.Actions.GetValues,
+    Jido.Connect.Google.Sheets.Actions.BatchGetValues,
     Jido.Connect.Google.Sheets.Actions.UpdateValues,
     Jido.Connect.Google.Sheets.Actions.AppendValues,
     Jido.Connect.Google.Sheets.Actions.ClearValues,
+    Jido.Connect.Google.Sheets.Actions.BatchUpdateValues,
+    Jido.Connect.Google.Sheets.Actions.BatchClearValues,
+    Jido.Connect.Google.Sheets.Actions.CreateSpreadsheet,
     Jido.Connect.Google.Sheets.Actions.AddSheet,
     Jido.Connect.Google.Sheets.Actions.DeleteSheet,
     Jido.Connect.Google.Sheets.Actions.RenameSheet,
@@ -20,6 +24,7 @@ defmodule Jido.Connect.Google.SheetsTest do
   @sheets_dsl_fragments [
     Jido.Connect.Google.Sheets.Actions.Read,
     Jido.Connect.Google.Sheets.Actions.Write,
+    Jido.Connect.Google.Sheets.Actions.ManageSpreadsheets,
     Jido.Connect.Google.Sheets.Actions.ManageSheets
   ]
 
@@ -46,6 +51,28 @@ defmodule Jido.Connect.Google.SheetsTest do
        Sheets.ValueRange.new!(%{
          range: "Sheet1!A1:B2",
          values: [["Name", "Count"], ["A", 1]]
+       })}
+    end
+
+    def batch_get_values(%{spreadsheet_id: "sheet123", ranges: ["Sheet1!A1:B2"]}, "token") do
+      {:ok,
+       %{
+         spreadsheet_id: "sheet123",
+         value_ranges: [
+           Sheets.ValueRange.new!(%{
+             range: "Sheet1!A1:B2",
+             values: [["Name", "Count"]]
+           })
+         ]
+       }}
+    end
+
+    def create_spreadsheet(%{title: "Budget"}, "token") do
+      {:ok,
+       Sheets.Spreadsheet.new!(%{
+         spreadsheet_id: "sheet123",
+         title: "Budget",
+         sheets: [%{sheet_id: 0, title: "Sheet1"}]
        })}
     end
 
@@ -98,6 +125,38 @@ defmodule Jido.Connect.Google.SheetsTest do
          spreadsheet_id: "sheet123",
          cleared_range: "Sheet1!A1:B2"
        })}
+    end
+
+    def batch_update_values(
+          %{
+            spreadsheet_id: "sheet123",
+            value_input_option: "RAW",
+            include_values_in_response: false,
+            data: [
+              %{
+                range: "Sheet1!A1:B2",
+                values: [["Name", "Count"]],
+                major_dimension: "ROWS"
+              }
+            ]
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         spreadsheet_id: "sheet123",
+         total_updated_cells: 2,
+         responses: [
+           Sheets.UpdateResult.new!(%{
+             updated_range: "Sheet1!A1:B2",
+             updated_cells: 2
+           })
+         ]
+       }}
+    end
+
+    def batch_clear_values(%{spreadsheet_id: "sheet123", ranges: ["Sheet1!A1:B2"]}, "token") do
+      {:ok, %{spreadsheet_id: "sheet123", cleared_ranges: ["Sheet1!A1:B2"]}}
     end
 
     def add_sheet(%{spreadsheet_id: "sheet123", title: "Forecast"}, "token") do
@@ -158,9 +217,13 @@ defmodule Jido.Connect.Google.SheetsTest do
     assert Enum.map(spec.actions, & &1.id) == [
              "google.sheets.spreadsheet.get",
              "google.sheets.values.get",
+             "google.sheets.values.batch_get",
              "google.sheets.values.update",
              "google.sheets.values.append",
              "google.sheets.values.clear",
+             "google.sheets.values.batch_update",
+             "google.sheets.values.batch_clear",
+             "google.sheets.spreadsheet.create",
              "google.sheets.sheet.add",
              "google.sheets.sheet.delete",
              "google.sheets.sheet.rename",
@@ -195,6 +258,12 @@ defmodule Jido.Connect.Google.SheetsTest do
 
     assert resolver.required_scopes(
              %{id: "google.sheets.values.update"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"]}
+           ) == ["https://www.googleapis.com/auth/spreadsheets"]
+
+    assert resolver.required_scopes(
+             %{id: "google.sheets.values.batch_update"},
              %{},
              %{scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"]}
            ) == ["https://www.googleapis.com/auth/spreadsheets"]
@@ -249,6 +318,23 @@ defmodule Jido.Connect.Google.SheetsTest do
              )
   end
 
+  test "invokes batch get values through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              spreadsheet_id: "sheet123",
+              value_ranges: [%{range: "Sheet1!A1:B2", values: [["Name", "Count"]]}]
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_get",
+               %{spreadsheet_id: "sheet123", ranges: ["Sheet1!A1:B2"]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
   test "read actions accept full Sheets write scope" do
     {context, lease} =
       context_and_lease(
@@ -290,6 +376,19 @@ defmodule Jido.Connect.Google.SheetsTest do
              )
   end
 
+  test "invokes create spreadsheet through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{spreadsheet: %{spreadsheet_id: "sheet123", title: "Budget"}}} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.spreadsheet.create",
+               %{title: "Budget"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
   test "invokes append values through injected client and lease" do
     {context, lease} = context_and_lease(scopes: write_scopes())
 
@@ -311,6 +410,42 @@ defmodule Jido.Connect.Google.SheetsTest do
                Sheets.integration(),
                "google.sheets.values.clear",
                %{spreadsheet_id: "sheet123", range: "Sheet1!A1:B2"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes batch update values through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok,
+            %{
+              batch_update: %{
+                spreadsheet_id: "sheet123",
+                total_updated_cells: 2,
+                responses: [%{updated_range: "Sheet1!A1:B2"}]
+              }
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_update",
+               %{
+                 spreadsheet_id: "sheet123",
+                 data: [%{range: "Sheet1!A1:B2", values: [["Name", "Count"]]}]
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes batch clear values through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{batch_clear: %{cleared_ranges: ["Sheet1!A1:B2"]}}} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_clear",
+               %{spreadsheet_id: "sheet123", ranges: ["Sheet1!A1:B2"]},
                context: context,
                credential_lease: lease
              )
@@ -383,6 +518,74 @@ defmodule Jido.Connect.Google.SheetsTest do
                Sheets.integration(),
                "google.sheets.batch_update",
                %{spreadsheet_id: "sheet123", requests: [%{repeatCell: %{}, deleteSheet: %{}}]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch value update validates range data before client execution" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_batch_update_values_entry,
+              details: %{index: 0}
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_update",
+               %{spreadsheet_id: "sheet123", data: [%{range: "", values: [["Name"]]}]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch get validates ranges before client execution" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_batch_get_values_ranges,
+              details: %{expected: "non-empty list"}
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_get",
+               %{spreadsheet_id: "sheet123", ranges: []},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch clear validates ranges before client execution" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_batch_clear_values_ranges,
+              details: %{expected: "non-empty A1 range strings"}
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_clear",
+               %{spreadsheet_id: "sheet123", ranges: [""]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch value update validates non-empty data before client execution" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_batch_update_values_data,
+              details: %{expected: "non-empty list"}
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_update",
+               %{spreadsheet_id: "sheet123", data: []},
                context: context,
                credential_lease: lease
              )

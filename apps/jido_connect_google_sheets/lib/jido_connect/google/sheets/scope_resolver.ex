@@ -10,9 +10,12 @@ defmodule Jido.Connect.Google.Sheets.ScopeResolver do
   @read_scope "https://www.googleapis.com/auth/spreadsheets.readonly"
   @write_scope "https://www.googleapis.com/auth/spreadsheets"
   @write_actions [
+    "google.sheets.spreadsheet.create",
     "google.sheets.values.update",
     "google.sheets.values.append",
     "google.sheets.values.clear",
+    "google.sheets.values.batch_update",
+    "google.sheets.values.batch_clear",
     "google.sheets.sheet.add",
     "google.sheets.sheet.delete",
     "google.sheets.sheet.rename",

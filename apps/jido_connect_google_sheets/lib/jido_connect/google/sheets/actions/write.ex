@@ -94,5 +94,59 @@ defmodule Jido.Connect.Google.Sheets.Actions.Write do
         field :update, :map
       end
     end
+
+    action :batch_update_values do
+      id "google.sheets.values.batch_update"
+      resource :spreadsheet_values
+      verb :update
+      data_classification :workspace_content
+      label "Batch update sheet values"
+      description "Overwrite values in multiple Google Sheets A1 ranges."
+      handler Jido.Connect.Google.Sheets.Handlers.Actions.BatchUpdateValues
+      effect :write, confirmation: :required_for_ai
+
+      access do
+        auth :user
+        scopes [@write_scope], resolver: @scope_resolver
+      end
+
+      input do
+        field :spreadsheet_id, :string, required?: true, example: "1abc..."
+        field :data, {:array, :map}, required?: true
+        field :value_input_option, :string, enum: ["RAW", "USER_ENTERED"], default: "RAW"
+        field :include_values_in_response, :boolean, default: false
+        field :response_value_render_option, :string
+        field :response_date_time_render_option, :string
+      end
+
+      output do
+        field :batch_update, :map
+      end
+    end
+
+    action :batch_clear_values do
+      id "google.sheets.values.batch_clear"
+      resource :spreadsheet_values
+      verb :clear
+      data_classification :workspace_content
+      label "Batch clear sheet values"
+      description "Clear values from multiple Google Sheets A1 ranges."
+      handler Jido.Connect.Google.Sheets.Handlers.Actions.BatchClearValues
+      effect :destructive, confirmation: :always
+
+      access do
+        auth :user
+        scopes [@write_scope], resolver: @scope_resolver
+      end
+
+      input do
+        field :spreadsheet_id, :string, required?: true, example: "1abc..."
+        field :ranges, {:array, :string}, required?: true, example: ["Sheet1!A1:B2"]
+      end
+
+      output do
+        field :batch_clear, :map
+      end
+    end
   end
 end

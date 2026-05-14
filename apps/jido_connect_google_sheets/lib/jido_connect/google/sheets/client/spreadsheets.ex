@@ -14,6 +14,14 @@ defmodule Jido.Connect.Google.Sheets.Client.Spreadsheets do
     |> Response.handle_spreadsheet_response()
   end
 
+  def create_spreadsheet(%{title: title} = params, access_token)
+      when is_binary(title) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.post(url: "/v4/spreadsheets", json: create_spreadsheet_body(params))
+    |> Response.handle_spreadsheet_response()
+  end
+
   def add_sheet(%{spreadsheet_id: spreadsheet_id, title: title} = params, access_token)
       when is_binary(spreadsheet_id) and is_binary(title) and is_binary(access_token) do
     access_token
@@ -78,6 +86,41 @@ defmodule Jido.Connect.Google.Sheets.Client.Spreadsheets do
       |> compact()
 
     %{addSheet: %{properties: properties}}
+  end
+
+  defp create_spreadsheet_body(params) do
+    %{
+      properties:
+        %{
+          title: Map.get(params, :title),
+          locale: Map.get(params, :locale),
+          timeZone: Map.get(params, :time_zone)
+        }
+        |> compact(),
+      sheets: create_sheets(params)
+    }
+    |> compact()
+  end
+
+  defp create_sheets(params) do
+    params
+    |> sheet_properties()
+    |> case do
+      nil -> nil
+      properties -> [%{properties: properties}]
+    end
+  end
+
+  defp sheet_properties(params) do
+    %{
+      title: Map.get(params, :sheet_title),
+      gridProperties: grid_properties(params)
+    }
+    |> compact()
+    |> case do
+      empty when empty == %{} -> nil
+      properties -> properties
+    end
   end
 
   defp grid_properties(params) do

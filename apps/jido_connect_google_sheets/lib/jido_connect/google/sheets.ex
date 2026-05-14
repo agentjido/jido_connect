@@ -10,6 +10,7 @@ defmodule Jido.Connect.Google.Sheets do
     fragments: [
       Jido.Connect.Google.Sheets.Actions.Read,
       Jido.Connect.Google.Sheets.Actions.Write,
+      Jido.Connect.Google.Sheets.Actions.ManageSpreadsheets,
       Jido.Connect.Google.Sheets.Actions.ManageSheets
     ]
 

@@ -14,6 +14,14 @@ defmodule Jido.Connect.Google.Sheets.Client.Params do
     |> maybe_put(:dateTimeRenderOption, Map.get(params, :date_time_render_option))
   end
 
+  def values_batch_get_params(params) when is_map(params) do
+    []
+    |> put_repeated(:ranges, Map.get(params, :ranges, []))
+    |> maybe_put(:majorDimension, Map.get(params, :major_dimension))
+    |> maybe_put(:valueRenderOption, Map.get(params, :value_render_option))
+    |> maybe_put(:dateTimeRenderOption, Map.get(params, :date_time_render_option))
+  end
+
   def values_update_params(params) when is_map(params) do
     []
     |> maybe_put(:valueInputOption, Map.get(params, :value_input_option, "RAW"))
