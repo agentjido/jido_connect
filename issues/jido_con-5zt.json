@@ -21,9 +21,15 @@
     "google",
     "milestone-2"
   ],
+  "comments": [
+    {
+      "text": "Sequencing note: this epic is intentionally ahead of the new product package epics so current Sheets, Gmail, Drive, Calendar, and Contacts gaps are hardened before expanding the Google family further.",
+      "timestamp": "2026-05-14T15:03:46Z"
+    }
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G18] Current Google Package Expansion",
   "type": "epic",
-  "updated_at": "2026-05-14T15:03:45Z"
+  "updated_at": "2026-05-14T15:03:46Z"
 }
