@@ -50,6 +50,29 @@ defmodule Jido.Connect.Google.Sheets.Client.Response do
 
   def handle_value_ranges_response(response), do: Transport.handle_error_response(response)
 
+  def handle_matched_value_ranges_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, value_ranges} <- normalize_matched_value_ranges(Data.get(body, "valueRanges", [])) do
+      {:ok,
+       %{
+         spreadsheet_id: Data.get(body, "spreadsheetId"),
+         value_ranges: value_ranges
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_matched_value_ranges_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response(
+      "Google Sheets batch get values by data filter response was invalid",
+      body
+    )
+  end
+
+  def handle_matched_value_ranges_response(response),
+    do: Transport.handle_error_response(response)
+
   def handle_update_result_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
     Normalizer.update_result(body)
@@ -88,6 +111,34 @@ defmodule Jido.Connect.Google.Sheets.Client.Response do
 
   def handle_batch_update_values_response(response), do: Transport.handle_error_response(response)
 
+  def handle_batch_update_values_by_data_filter_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, responses} <-
+           normalize_data_filter_update_responses(Data.get(body, "responses", [])) do
+      {:ok,
+       %{
+         spreadsheet_id: Data.get(body, "spreadsheetId"),
+         total_updated_rows: Data.get(body, "totalUpdatedRows", 0),
+         total_updated_columns: Data.get(body, "totalUpdatedColumns", 0),
+         total_updated_cells: Data.get(body, "totalUpdatedCells", 0),
+         total_updated_sheets: Data.get(body, "totalUpdatedSheets", 0),
+         responses: responses
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_batch_update_values_by_data_filter_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response(
+      "Google Sheets batch update values by data filter response was invalid",
+      body
+    )
+  end
+
+  def handle_batch_update_values_by_data_filter_response(response),
+    do: Transport.handle_error_response(response)
+
   def handle_batch_clear_values_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
     {:ok,
@@ -107,6 +158,40 @@ defmodule Jido.Connect.Google.Sheets.Client.Response do
   end
 
   def handle_batch_clear_values_response(response), do: Transport.handle_error_response(response)
+
+  def handle_developer_metadata_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    Normalizer.developer_metadata(body)
+  end
+
+  def handle_developer_metadata_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response(
+      "Google Sheets developer metadata response was invalid",
+      body
+    )
+  end
+
+  def handle_developer_metadata_response(response), do: Transport.handle_error_response(response)
+
+  def handle_developer_metadata_search_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, matched} <-
+           normalize_matched_developer_metadata(Data.get(body, "matchedDeveloperMetadata", [])) do
+      {:ok, %{matched_developer_metadata: matched}}
+    end
+  end
+
+  def handle_developer_metadata_search_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response(
+      "Google Sheets developer metadata search response was invalid",
+      body
+    )
+  end
+
+  def handle_developer_metadata_search_response(response),
+    do: Transport.handle_error_response(response)
 
   def handle_add_sheet_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
@@ -205,6 +290,108 @@ defmodule Jido.Connect.Google.Sheets.Client.Response do
     Transport.invalid_success_response(
       "Google Sheets batch update values response was invalid",
       responses
+    )
+  end
+
+  defp normalize_matched_value_ranges(value_ranges) when is_list(value_ranges) do
+    normalize_many(value_ranges, &normalize_matched_value_range/1)
+  end
+
+  defp normalize_matched_value_ranges(value_ranges) do
+    Transport.invalid_success_response(
+      "Google Sheets batch get values by data filter response was invalid",
+      value_ranges
+    )
+  end
+
+  defp normalize_matched_value_range(%{} = payload) do
+    with {:ok, value_range} <- Normalizer.value_range(Data.get(payload, "valueRange", %{})) do
+      {:ok,
+       %{
+         value_range: value_range,
+         data_filters: Data.get(payload, "dataFilters", [])
+       }
+       |> Data.compact()}
+    end
+  end
+
+  defp normalize_matched_value_range(payload) do
+    Transport.invalid_success_response(
+      "Google Sheets matched value range response was invalid",
+      payload
+    )
+  end
+
+  defp normalize_data_filter_update_responses(responses) when is_list(responses) do
+    normalize_many(responses, &normalize_data_filter_update_response/1)
+  end
+
+  defp normalize_data_filter_update_responses(responses) do
+    Transport.invalid_success_response(
+      "Google Sheets batch update values by data filter response was invalid",
+      responses
+    )
+  end
+
+  defp normalize_data_filter_update_response(%{} = payload) do
+    with {:ok, updated_data} <- maybe_value_range(Data.get(payload, "updatedData")) do
+      {:ok,
+       %{
+         updated_range: Data.get(payload, "updatedRange"),
+         updated_rows: Data.get(payload, "updatedRows", 0),
+         updated_columns: Data.get(payload, "updatedColumns", 0),
+         updated_cells: Data.get(payload, "updatedCells", 0),
+         data_filter: Data.get(payload, "dataFilter"),
+         updated_data: updated_data
+       }
+       |> Data.compact()}
+    end
+  end
+
+  defp normalize_data_filter_update_response(payload) do
+    Transport.invalid_success_response(
+      "Google Sheets data filter update response was invalid",
+      payload
+    )
+  end
+
+  defp maybe_value_range(nil), do: {:ok, nil}
+  defp maybe_value_range(%{} = payload), do: Normalizer.value_range(payload)
+
+  defp maybe_value_range(payload) do
+    Transport.invalid_success_response(
+      "Google Sheets updated data response was invalid",
+      payload
+    )
+  end
+
+  defp normalize_matched_developer_metadata(matches) when is_list(matches) do
+    normalize_many(matches, &normalize_matched_developer_metadata_entry/1)
+  end
+
+  defp normalize_matched_developer_metadata(matches) do
+    Transport.invalid_success_response(
+      "Google Sheets developer metadata search response was invalid",
+      matches
+    )
+  end
+
+  defp normalize_matched_developer_metadata_entry(%{} = payload) do
+    with {:ok, developer_metadata} <-
+           Normalizer.developer_metadata(Data.get(payload, "developerMetadata", %{})) do
+      {:ok,
+       %{
+         developer_metadata: developer_metadata,
+         data_filters: Data.get(payload, "dataFilters", [])
+       }
+       |> Data.compact()}
+    end
+  end
+
+  defp normalize_matched_developer_metadata_entry(payload) do
+    Transport.invalid_success_response(
+      "Google Sheets matched developer metadata response was invalid",
+      payload
     )
   end
 

@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Sheets.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Google.Sheets.{Client, Spreadsheet, ValueRange}
+  alias Jido.Connect.Google.Sheets.{Client, DeveloperMetadata, Spreadsheet, ValueRange}
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -138,6 +138,81 @@ defmodule Jido.Connect.Google.Sheets.ClientTest do
              result.value_ranges
   end
 
+  test "gets spreadsheet by data filter" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v4/spreadsheets/sheet123:getByDataFilter"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "dataFilters" => [%{"a1Range" => "Sheet1!A1:B2"}],
+               "includeGridData" => false,
+               "excludeTablesInBandedRanges" => false
+             }
+
+      Req.Test.json(conn, spreadsheet_payload())
+    end)
+
+    assert {:ok, %Spreadsheet{} = spreadsheet} =
+             Client.get_spreadsheet_by_data_filter(
+               %{
+                 spreadsheet_id: "sheet123",
+                 data_filters: [%{a1Range: "Sheet1!A1:B2"}],
+                 include_grid_data: false,
+                 exclude_tables_in_banded_ranges: false
+               },
+               "token"
+             )
+
+    assert spreadsheet.spreadsheet_id == "sheet123"
+  end
+
+  test "batch gets values by data filter" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v4/spreadsheets/sheet123/values:batchGetByDataFilter"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "dataFilters" => [%{"a1Range" => "Sheet1!A1:B2"}],
+               "majorDimension" => "ROWS",
+               "valueRenderOption" => "FORMATTED_VALUE"
+             }
+
+      Req.Test.json(conn, %{
+        "spreadsheetId" => "sheet123",
+        "valueRanges" => [
+          %{
+            "valueRange" => %{
+              "range" => "Sheet1!A1:B2",
+              "majorDimension" => "ROWS",
+              "values" => [["A"]]
+            },
+            "dataFilters" => [%{"a1Range" => "Sheet1!A1:B2"}]
+          }
+        ]
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.batch_get_values_by_data_filter(
+               %{
+                 spreadsheet_id: "sheet123",
+                 data_filters: [%{a1Range: "Sheet1!A1:B2"}],
+                 major_dimension: "ROWS",
+                 value_render_option: "FORMATTED_VALUE"
+               },
+               "token"
+             )
+
+    assert result.spreadsheet_id == "sheet123"
+
+    assert [%{value_range: %ValueRange{range: "Sheet1!A1:B2"}, data_filters: [_filter]}] =
+             result.value_ranges
+  end
+
   test "rejects malformed batch get response" do
     Req.Test.stub(__MODULE__, fn conn ->
       Req.Test.json(conn, %{"spreadsheetId" => "sheet123", "valueRanges" => "bad"})
@@ -146,6 +221,30 @@ defmodule Jido.Connect.Google.Sheets.ClientTest do
     assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
              Client.batch_get_values(
                %{spreadsheet_id: "sheet123", ranges: ["Sheet1!A1:B2"]},
+               "token"
+             )
+  end
+
+  test "rejects malformed batch get by data filter response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, %{"spreadsheetId" => "sheet123", "valueRanges" => "bad"})
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.batch_get_values_by_data_filter(
+               %{spreadsheet_id: "sheet123", data_filters: [%{a1Range: "Sheet1!A1:B2"}]},
+               "token"
+             )
+  end
+
+  test "rejects malformed matched value range entries" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, %{"spreadsheetId" => "sheet123", "valueRanges" => ["bad"]})
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.batch_get_values_by_data_filter(
+               %{spreadsheet_id: "sheet123", data_filters: [%{a1Range: "Sheet1!A1:B2"}]},
                "token"
              )
   end
@@ -236,6 +335,61 @@ defmodule Jido.Connect.Google.Sheets.ClientTest do
     assert Enum.map(result.responses, & &1.updated_range) == ["Sheet1!A1:B2", "Sheet2!A1:A1"]
   end
 
+  test "batch updates values by data filter" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v4/spreadsheets/sheet123/values:batchUpdateByDataFilter"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "valueInputOption" => "USER_ENTERED",
+               "data" => [
+                 %{
+                   "dataFilter" => %{"a1Range" => "Sheet1!A1:B2"},
+                   "majorDimension" => "ROWS",
+                   "values" => [["Name", "Count"]]
+                 }
+               ],
+               "includeValuesInResponse" => true
+             }
+
+      Req.Test.json(conn, %{
+        "spreadsheetId" => "sheet123",
+        "totalUpdatedCells" => 2,
+        "responses" => [
+          %{
+            "dataFilter" => %{"a1Range" => "Sheet1!A1:B2"},
+            "updatedRange" => "Sheet1!A1:B2",
+            "updatedRows" => 1,
+            "updatedColumns" => 2,
+            "updatedCells" => 2,
+            "updatedData" => %{"range" => "Sheet1!A1:B2", "values" => [["Name", "Count"]]}
+          }
+        ]
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.batch_update_values_by_data_filter(
+               %{
+                 spreadsheet_id: "sheet123",
+                 value_input_option: "USER_ENTERED",
+                 include_values_in_response: true,
+                 data: [
+                   %{
+                     data_filter: %{a1_range: "Sheet1!A1:B2"},
+                     values: [["Name", "Count"]]
+                   }
+                 ]
+               },
+               "token"
+             )
+
+    assert result.total_updated_cells == 2
+    assert [%{updated_range: "Sheet1!A1:B2", updated_data: %ValueRange{}}] = result.responses
+  end
+
   test "rejects malformed batch update values response" do
     Req.Test.stub(__MODULE__, fn conn ->
       Req.Test.json(conn, %{"spreadsheetId" => "sheet123", "responses" => "bad"})
@@ -246,6 +400,39 @@ defmodule Jido.Connect.Google.Sheets.ClientTest do
                %{
                  spreadsheet_id: "sheet123",
                  data: [%{range: "Sheet1!A1:B2", values: [["Name"]]}]
+               },
+               "token"
+             )
+  end
+
+  test "rejects malformed batch update by data filter response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, %{"spreadsheetId" => "sheet123", "responses" => "bad"})
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.batch_update_values_by_data_filter(
+               %{
+                 spreadsheet_id: "sheet123",
+                 data: [%{data_filter: %{a1Range: "Sheet1!A1:B2"}, values: [["Name"]]}]
+               },
+               "token"
+             )
+  end
+
+  test "rejects malformed updated data in batch update by data filter response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, %{
+        "spreadsheetId" => "sheet123",
+        "responses" => [%{"updatedData" => "bad"}]
+      })
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.batch_update_values_by_data_filter(
+               %{
+                 spreadsheet_id: "sheet123",
+                 data: [%{data_filter: %{a1Range: "Sheet1!A1:B2"}, values: [["Name"]]}]
                },
                "token"
              )
@@ -331,6 +518,35 @@ defmodule Jido.Connect.Google.Sheets.ClientTest do
     assert result.cleared_ranges == ["Sheet1!A1:B2", "Sheet2!A1:A1"]
   end
 
+  test "batch clears values by data filter" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v4/spreadsheets/sheet123/values:batchClearByDataFilter"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "dataFilters" => [%{"developerMetadataLookup" => %{"metadataKey" => "sync_id"}}]
+             }
+
+      Req.Test.json(conn, %{
+        "spreadsheetId" => "sheet123",
+        "clearedRanges" => ["Sheet1!A1:B2"]
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.batch_clear_values_by_data_filter(
+               %{
+                 spreadsheet_id: "sheet123",
+                 data_filters: [%{developer_metadata_lookup: %{metadata_key: "sync_id"}}]
+               },
+               "token"
+             )
+
+    assert result.cleared_ranges == ["Sheet1!A1:B2"]
+  end
+
   test "rejects malformed batch clear response" do
     Req.Test.stub(__MODULE__, fn conn ->
       Req.Test.json(conn, ["bad"])
@@ -339,6 +555,115 @@ defmodule Jido.Connect.Google.Sheets.ClientTest do
     assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
              Client.batch_clear_values(
                %{spreadsheet_id: "sheet123", ranges: ["Sheet1!A1:B2"]},
+               "token"
+             )
+  end
+
+  test "gets developer metadata" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v4/spreadsheets/sheet123/developerMetadata/123"
+
+      Req.Test.json(conn, developer_metadata_payload())
+    end)
+
+    assert {:ok, %DeveloperMetadata{} = metadata} =
+             Client.get_developer_metadata(
+               %{spreadsheet_id: "sheet123", metadata_id: 123},
+               "token"
+             )
+
+    assert metadata.metadata_id == 123
+    assert metadata.metadata_key == "sync_id"
+  end
+
+  test "rejects malformed developer metadata response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, ["bad"])
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.get_developer_metadata(
+               %{spreadsheet_id: "sheet123", metadata_id: 123},
+               "token"
+             )
+  end
+
+  test "searches developer metadata" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v4/spreadsheets/sheet123/developerMetadata:search"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "dataFilters" => [%{"developerMetadataLookup" => %{"metadataKey" => "sync_id"}}]
+             }
+
+      Req.Test.json(conn, %{
+        "matchedDeveloperMetadata" => [
+          %{
+            "developerMetadata" => developer_metadata_payload(),
+            "dataFilters" => [%{"developerMetadataLookup" => %{"metadataKey" => "sync_id"}}]
+          }
+        ]
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.search_developer_metadata(
+               %{
+                 spreadsheet_id: "sheet123",
+                 data_filters: [%{developerMetadataLookup: %{metadataKey: "sync_id"}}]
+               },
+               "token"
+             )
+
+    assert [%{developer_metadata: %DeveloperMetadata{metadata_id: 123}}] =
+             result.matched_developer_metadata
+  end
+
+  test "rejects malformed developer metadata search response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, %{"matchedDeveloperMetadata" => "bad"})
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.search_developer_metadata(
+               %{
+                 spreadsheet_id: "sheet123",
+                 data_filters: [%{developerMetadataLookup: %{metadataKey: "sync_id"}}]
+               },
+               "token"
+             )
+  end
+
+  test "rejects malformed matched developer metadata entries" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, %{"matchedDeveloperMetadata" => ["bad"]})
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.search_developer_metadata(
+               %{
+                 spreadsheet_id: "sheet123",
+                 data_filters: [%{developerMetadataLookup: %{metadataKey: "sync_id"}}]
+               },
+               "token"
+             )
+  end
+
+  test "rejects malformed developer metadata search body" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, ["bad"])
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.search_developer_metadata(
+               %{
+                 spreadsheet_id: "sheet123",
+                 data_filters: [%{developerMetadataLookup: %{metadataKey: "sync_id"}}]
+               },
                "token"
              )
   end
@@ -521,6 +846,16 @@ defmodule Jido.Connect.Google.Sheets.ClientTest do
       "updatedRows" => 2,
       "updatedColumns" => 2,
       "updatedCells" => 4
+    }
+  end
+
+  defp developer_metadata_payload do
+    %{
+      "metadataId" => 123,
+      "metadataKey" => "sync_id",
+      "metadataValue" => "abc",
+      "visibility" => "DOCUMENT",
+      "location" => %{"locationType" => "SPREADSHEET"}
     }
   end
 end

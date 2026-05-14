@@ -46,6 +46,18 @@ defmodule Jido.Connect.Google.Sheets.ScopeResolverTest do
         expected: @write_scope
       },
       %{
+        label: "data-filter read requires full Sheets scope per Google endpoint",
+        operation: "google.sheets.values.batch_get_by_data_filter",
+        granted: [@read_scope],
+        expected: @write_scope
+      },
+      %{
+        label: "developer metadata search requires full Sheets scope",
+        operation: "google.sheets.developer_metadata.search",
+        granted: [@read_scope],
+        expected: @write_scope
+      },
+      %{
         label: "spreadsheet create requires full Sheets scope",
         operation: "google.sheets.spreadsheet.create",
         granted: [],

@@ -11,13 +11,17 @@ defmodule Jido.Connect.Google.Sheets do
       Jido.Connect.Google.Sheets.Actions.Read,
       Jido.Connect.Google.Sheets.Actions.Write,
       Jido.Connect.Google.Sheets.Actions.ManageSpreadsheets,
-      Jido.Connect.Google.Sheets.Actions.ManageSheets
+      Jido.Connect.Google.Sheets.Actions.ManageSheets,
+      Jido.Connect.Google.Sheets.Actions.DataFilters,
+      Jido.Connect.Google.Sheets.Actions.DeveloperMetadata
     ]
 
   integration do
     id :google_sheets
     name "Google Sheets"
-    description "Google Sheets spreadsheet, values, sheet, and batch update tools."
+
+    description "Google Sheets spreadsheet, values, data filter, developer metadata, sheet, and batch update tools."
+
     category :productivity
     docs ["https://developers.google.com/workspace/sheets/api"]
   end

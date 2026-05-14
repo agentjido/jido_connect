@@ -18,14 +18,22 @@ defmodule Jido.Connect.Google.SheetsTest do
     Jido.Connect.Google.Sheets.Actions.AddSheet,
     Jido.Connect.Google.Sheets.Actions.DeleteSheet,
     Jido.Connect.Google.Sheets.Actions.RenameSheet,
-    Jido.Connect.Google.Sheets.Actions.BatchUpdate
+    Jido.Connect.Google.Sheets.Actions.BatchUpdate,
+    Jido.Connect.Google.Sheets.Actions.GetSpreadsheetByDataFilter,
+    Jido.Connect.Google.Sheets.Actions.BatchGetValuesByDataFilter,
+    Jido.Connect.Google.Sheets.Actions.BatchUpdateValuesByDataFilter,
+    Jido.Connect.Google.Sheets.Actions.BatchClearValuesByDataFilter,
+    Jido.Connect.Google.Sheets.Actions.GetDeveloperMetadata,
+    Jido.Connect.Google.Sheets.Actions.SearchDeveloperMetadata
   ]
 
   @sheets_dsl_fragments [
     Jido.Connect.Google.Sheets.Actions.Read,
     Jido.Connect.Google.Sheets.Actions.Write,
     Jido.Connect.Google.Sheets.Actions.ManageSpreadsheets,
-    Jido.Connect.Google.Sheets.Actions.ManageSheets
+    Jido.Connect.Google.Sheets.Actions.ManageSheets,
+    Jido.Connect.Google.Sheets.Actions.DataFilters,
+    Jido.Connect.Google.Sheets.Actions.DeveloperMetadata
   ]
 
   defmodule FakeSheetsClient do
@@ -63,6 +71,43 @@ defmodule Jido.Connect.Google.SheetsTest do
              range: "Sheet1!A1:B2",
              values: [["Name", "Count"]]
            })
+         ]
+       }}
+    end
+
+    def get_spreadsheet_by_data_filter(
+          %{
+            spreadsheet_id: "sheet123",
+            data_filters: [%{a1Range: "Sheet1!A1:B2"}],
+            include_grid_data: false,
+            exclude_tables_in_banded_ranges: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Sheets.Spreadsheet.new!(%{
+         spreadsheet_id: "sheet123",
+         title: "Budget",
+         sheets: [%{sheet_id: 0, title: "Sheet1"}]
+       })}
+    end
+
+    def batch_get_values_by_data_filter(
+          %{spreadsheet_id: "sheet123", data_filters: [%{a1Range: "Sheet1!A1:B2"}]},
+          "token"
+        ) do
+      {:ok,
+       %{
+         spreadsheet_id: "sheet123",
+         value_ranges: [
+           %{
+             value_range:
+               Sheets.ValueRange.new!(%{
+                 range: "Sheet1!A1:B2",
+                 values: [["Name", "Count"]]
+               }),
+             data_filters: [%{a1Range: "Sheet1!A1:B2"}]
+           }
          ]
        }}
     end
@@ -155,7 +200,42 @@ defmodule Jido.Connect.Google.SheetsTest do
        }}
     end
 
+    def batch_update_values_by_data_filter(
+          %{
+            spreadsheet_id: "sheet123",
+            value_input_option: "RAW",
+            include_values_in_response: false,
+            data: [
+              %{
+                data_filter: %{a1Range: "Sheet1!A1:B2"},
+                values: [["Name", "Count"]]
+              }
+            ]
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         spreadsheet_id: "sheet123",
+         total_updated_cells: 2,
+         responses: [
+           %{
+             updated_range: "Sheet1!A1:B2",
+             updated_cells: 2,
+             data_filter: %{a1Range: "Sheet1!A1:B2"}
+           }
+         ]
+       }}
+    end
+
     def batch_clear_values(%{spreadsheet_id: "sheet123", ranges: ["Sheet1!A1:B2"]}, "token") do
+      {:ok, %{spreadsheet_id: "sheet123", cleared_ranges: ["Sheet1!A1:B2"]}}
+    end
+
+    def batch_clear_values_by_data_filter(
+          %{spreadsheet_id: "sheet123", data_filters: [%{a1Range: "Sheet1!A1:B2"}]},
+          "token"
+        ) do
       {:ok, %{spreadsheet_id: "sheet123", cleared_ranges: ["Sheet1!A1:B2"]}}
     end
 
@@ -192,6 +272,40 @@ defmodule Jido.Connect.Google.SheetsTest do
         ) do
       {:ok, %{spreadsheet_id: "sheet123", replies: [%{}]}}
     end
+
+    def get_developer_metadata(%{spreadsheet_id: "sheet123", metadata_id: 123}, "token") do
+      {:ok,
+       Sheets.DeveloperMetadata.new!(%{
+         metadata_id: 123,
+         metadata_key: "sync_id",
+         metadata_value: "abc",
+         visibility: "DOCUMENT"
+       })}
+    end
+
+    def search_developer_metadata(
+          %{
+            spreadsheet_id: "sheet123",
+            data_filters: [%{developerMetadataLookup: %{metadataKey: "sync_id"}}]
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         matched_developer_metadata: [
+           %{
+             developer_metadata:
+               Sheets.DeveloperMetadata.new!(%{
+                 metadata_id: 123,
+                 metadata_key: "sync_id",
+                 metadata_value: "abc",
+                 visibility: "DOCUMENT"
+               }),
+             data_filters: [%{developerMetadataLookup: %{metadataKey: "sync_id"}}]
+           }
+         ]
+       }}
+    end
   end
 
   test "declares Google Sheets provider metadata" do
@@ -227,7 +341,13 @@ defmodule Jido.Connect.Google.SheetsTest do
              "google.sheets.sheet.add",
              "google.sheets.sheet.delete",
              "google.sheets.sheet.rename",
-             "google.sheets.batch_update"
+             "google.sheets.batch_update",
+             "google.sheets.spreadsheet.get_by_data_filter",
+             "google.sheets.values.batch_get_by_data_filter",
+             "google.sheets.values.batch_update_by_data_filter",
+             "google.sheets.values.batch_clear_by_data_filter",
+             "google.sheets.developer_metadata.get",
+             "google.sheets.developer_metadata.search"
            ]
   end
 
@@ -264,6 +384,12 @@ defmodule Jido.Connect.Google.SheetsTest do
 
     assert resolver.required_scopes(
              %{id: "google.sheets.values.batch_update"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"]}
+           ) == ["https://www.googleapis.com/auth/spreadsheets"]
+
+    assert resolver.required_scopes(
+             %{id: "google.sheets.values.batch_get_by_data_filter"},
              %{},
              %{scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"]}
            ) == ["https://www.googleapis.com/auth/spreadsheets"]
@@ -330,6 +456,41 @@ defmodule Jido.Connect.Google.SheetsTest do
                Sheets.integration(),
                "google.sheets.values.batch_get",
                %{spreadsheet_id: "sheet123", ranges: ["Sheet1!A1:B2"]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes get spreadsheet by data filter through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{spreadsheet: %{spreadsheet_id: "sheet123", title: "Budget"}}} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.spreadsheet.get_by_data_filter",
+               %{spreadsheet_id: "sheet123", data_filters: [%{a1Range: "Sheet1!A1:B2"}]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes batch get by data filter through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok,
+            %{
+              spreadsheet_id: "sheet123",
+              value_ranges: [
+                %{
+                  value_range: %{range: "Sheet1!A1:B2", values: [["Name", "Count"]]},
+                  data_filters: [%{a1Range: "Sheet1!A1:B2"}]
+                }
+              ]
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_get_by_data_filter",
+               %{spreadsheet_id: "sheet123", data_filters: [%{a1Range: "Sheet1!A1:B2"}]},
                context: context,
                credential_lease: lease
              )
@@ -446,6 +607,72 @@ defmodule Jido.Connect.Google.SheetsTest do
                Sheets.integration(),
                "google.sheets.values.batch_clear",
                %{spreadsheet_id: "sheet123", ranges: ["Sheet1!A1:B2"]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes batch update values by data filter through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok,
+            %{
+              batch_update: %{
+                spreadsheet_id: "sheet123",
+                total_updated_cells: 2,
+                responses: [%{updated_range: "Sheet1!A1:B2"}]
+              }
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_update_by_data_filter",
+               %{
+                 spreadsheet_id: "sheet123",
+                 data: [%{data_filter: %{a1Range: "Sheet1!A1:B2"}, values: [["Name", "Count"]]}]
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes batch clear values by data filter through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{batch_clear: %{cleared_ranges: ["Sheet1!A1:B2"]}}} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_clear_by_data_filter",
+               %{spreadsheet_id: "sheet123", data_filters: [%{a1Range: "Sheet1!A1:B2"}]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes developer metadata actions through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{developer_metadata: %{metadata_id: 123, metadata_key: "sync_id"}}} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.developer_metadata.get",
+               %{spreadsheet_id: "sheet123", metadata_id: 123},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok,
+            %{
+              matched_developer_metadata: [
+                %{developer_metadata: %{metadata_id: 123, metadata_key: "sync_id"}}
+              ]
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.developer_metadata.search",
+               %{
+                 spreadsheet_id: "sheet123",
+                 data_filters: [%{developerMetadataLookup: %{metadataKey: "sync_id"}}]
+               },
                context: context,
                credential_lease: lease
              )
@@ -574,6 +801,70 @@ defmodule Jido.Connect.Google.SheetsTest do
              )
   end
 
+  test "data-filter actions validate provider data filters before client execution" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_data_filters,
+              details: %{expected: "non-empty list with exactly one DataFilter selector per map"}
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_get_by_data_filter",
+               %{
+                 spreadsheet_id: "sheet123",
+                 data_filters: [%{a1Range: "Sheet1!A1:B2", gridRange: %{sheetId: 0}}]
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :invalid_data_filters}} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.spreadsheet.get_by_data_filter",
+               %{spreadsheet_id: "sheet123", data_filters: []},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :invalid_data_filters}} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_clear_by_data_filter",
+               %{spreadsheet_id: "sheet123", data_filters: [%{}]},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :invalid_data_filters}} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.developer_metadata.search",
+               %{spreadsheet_id: "sheet123", data_filters: [%{gridRange: %{}}]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch update by data filter validates data entries before client execution" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_batch_update_by_data_filter_entry,
+              details: %{index: 0}
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_update_by_data_filter",
+               %{spreadsheet_id: "sheet123", data: [%{data_filter: %{a1Range: ""}, values: []}]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
   test "batch value update validates non-empty data before client execution" do
     {context, lease} = context_and_lease(scopes: write_scopes())
 
@@ -620,6 +911,23 @@ defmodule Jido.Connect.Google.SheetsTest do
                Sheets.integration(),
                "google.sheets.values.update",
                %{spreadsheet_id: "sheet123", range: "Sheet1!A1:B2", values: [["Name", "Count"]]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "data-filter reads require full Sheets scope" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: ["https://www.googleapis.com/auth/spreadsheets"]
+            }} =
+             Connect.invoke(
+               Sheets.integration(),
+               "google.sheets.values.batch_get_by_data_filter",
+               %{spreadsheet_id: "sheet123", data_filters: [%{a1Range: "Sheet1!A1:B2"}]},
                context: context,
                credential_lease: lease
              )

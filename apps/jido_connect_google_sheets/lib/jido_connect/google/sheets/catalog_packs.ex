@@ -9,14 +9,24 @@ defmodule Jido.Connect.Google.Sheets.CatalogPacks do
     "google.sheets.values.batch_get"
   ]
 
+  @full_scope_read_tools [
+    "google.sheets.spreadsheet.get_by_data_filter",
+    "google.sheets.values.batch_get_by_data_filter",
+    "google.sheets.developer_metadata.get",
+    "google.sheets.developer_metadata.search"
+  ]
+
   @writer_tools @readonly_tools ++
+                  @full_scope_read_tools ++
                   [
                     "google.sheets.spreadsheet.create",
                     "google.sheets.values.update",
                     "google.sheets.values.append",
                     "google.sheets.values.clear",
                     "google.sheets.values.batch_update",
+                    "google.sheets.values.batch_update_by_data_filter",
                     "google.sheets.values.batch_clear",
+                    "google.sheets.values.batch_clear_by_data_filter",
                     "google.sheets.sheet.add",
                     "google.sheets.sheet.delete",
                     "google.sheets.sheet.rename"

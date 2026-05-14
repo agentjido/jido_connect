@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Sheets.Client.Values do
   @moduledoc "Google Sheets values API boundary."
 
-  alias Jido.Connect.Google.Sheets.Client.{Params, Response, Transport}
+  alias Jido.Connect.Google.Sheets.{DataFilter, Client.Params, Client.Response, Client.Transport}
 
   def get_values(%{spreadsheet_id: spreadsheet_id, range: range} = params, access_token)
       when is_binary(spreadsheet_id) and is_binary(range) and is_binary(access_token) do
@@ -24,6 +24,20 @@ defmodule Jido.Connect.Google.Sheets.Client.Values do
       params: Params.values_batch_get_params(params)
     )
     |> Response.handle_value_ranges_response()
+  end
+
+  def batch_get_values_by_data_filter(
+        %{spreadsheet_id: spreadsheet_id, data_filters: data_filters} = params,
+        access_token
+      )
+      when is_binary(spreadsheet_id) and is_list(data_filters) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.post(
+      url: "/v4/spreadsheets/#{encode_path_segment(spreadsheet_id)}/values:batchGetByDataFilter",
+      json: batch_get_by_data_filter_body(params)
+    )
+    |> Response.handle_matched_value_ranges_response()
   end
 
   def update_values(%{spreadsheet_id: spreadsheet_id, range: range} = params, access_token)
@@ -69,6 +83,21 @@ defmodule Jido.Connect.Google.Sheets.Client.Values do
     |> Response.handle_batch_update_values_response()
   end
 
+  def batch_update_values_by_data_filter(
+        %{spreadsheet_id: spreadsheet_id, data: data} = params,
+        access_token
+      )
+      when is_binary(spreadsheet_id) and is_list(data) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.post(
+      url:
+        "/v4/spreadsheets/#{encode_path_segment(spreadsheet_id)}/values:batchUpdateByDataFilter",
+      json: batch_update_by_data_filter_body(params)
+    )
+    |> Response.handle_batch_update_values_by_data_filter_response()
+  end
+
   def batch_clear_values(%{spreadsheet_id: spreadsheet_id, ranges: ranges}, access_token)
       when is_binary(spreadsheet_id) and is_list(ranges) and is_binary(access_token) do
     access_token
@@ -76,6 +105,21 @@ defmodule Jido.Connect.Google.Sheets.Client.Values do
     |> Req.post(
       url: "/v4/spreadsheets/#{encode_path_segment(spreadsheet_id)}/values:batchClear",
       json: %{ranges: ranges}
+    )
+    |> Response.handle_batch_clear_values_response()
+  end
+
+  def batch_clear_values_by_data_filter(
+        %{spreadsheet_id: spreadsheet_id, data_filters: data_filters},
+        access_token
+      )
+      when is_binary(spreadsheet_id) and is_list(data_filters) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.post(
+      url:
+        "/v4/spreadsheets/#{encode_path_segment(spreadsheet_id)}/values:batchClearByDataFilter",
+      json: %{dataFilters: DataFilter.to_google_filters(data_filters)}
     )
     |> Response.handle_batch_clear_values_response()
   end
@@ -96,6 +140,27 @@ defmodule Jido.Connect.Google.Sheets.Client.Values do
     %{
       valueInputOption: Map.get(params, :value_input_option, "RAW"),
       data: Enum.map(Map.get(params, :data, []), &value_range_data/1),
+      includeValuesInResponse: Map.get(params, :include_values_in_response),
+      responseValueRenderOption: Map.get(params, :response_value_render_option),
+      responseDateTimeRenderOption: Map.get(params, :response_date_time_render_option)
+    }
+    |> compact()
+  end
+
+  defp batch_get_by_data_filter_body(params) do
+    %{
+      dataFilters: DataFilter.to_google_filters(Map.get(params, :data_filters, [])),
+      majorDimension: Map.get(params, :major_dimension),
+      valueRenderOption: Map.get(params, :value_render_option),
+      dateTimeRenderOption: Map.get(params, :date_time_render_option)
+    }
+    |> compact()
+  end
+
+  defp batch_update_by_data_filter_body(params) do
+    %{
+      valueInputOption: Map.get(params, :value_input_option, "RAW"),
+      data: Enum.map(Map.get(params, :data, []), &DataFilter.to_google_value_range/1),
       includeValuesInResponse: Map.get(params, :include_values_in_response),
       responseValueRenderOption: Map.get(params, :response_value_render_option),
       responseDateTimeRenderOption: Map.get(params, :response_date_time_render_option)

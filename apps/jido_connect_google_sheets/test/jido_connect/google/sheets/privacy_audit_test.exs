@@ -15,6 +15,20 @@ defmodule Jido.Connect.Google.Sheets.PrivacyAuditTest do
       action("google.sheets.values.batch_get", :workspace_content, :read, :none,
         text_includes: ["values", "ranges"]
       ),
+      action(
+        "google.sheets.spreadsheet.get_by_data_filter",
+        :workspace_content,
+        :read,
+        :none,
+        text_includes: ["spreadsheet", "data filters"]
+      ),
+      action(
+        "google.sheets.values.batch_get_by_data_filter",
+        :workspace_content,
+        :read,
+        :none,
+        text_includes: ["values", "data filters"]
+      ),
       action("google.sheets.values.update", :workspace_content, :write, :required_for_ai,
         text_includes: ["sheet values"]
       ),
@@ -31,10 +45,30 @@ defmodule Jido.Connect.Google.Sheets.PrivacyAuditTest do
         :required_for_ai,
         text_includes: ["values", "ranges"]
       ),
+      action(
+        "google.sheets.values.batch_update_by_data_filter",
+        :workspace_content,
+        :write,
+        :required_for_ai,
+        text_includes: ["values", "data filters"]
+      ),
       action("google.sheets.values.batch_clear", :workspace_content, :destructive, :always,
         text_includes: ["values", "ranges"]
       ),
+      action(
+        "google.sheets.values.batch_clear_by_data_filter",
+        :workspace_content,
+        :destructive,
+        :always,
+        text_includes: ["values", "data filters"]
+      ),
       action("google.sheets.spreadsheet.create", :workspace_metadata, :write, :required_for_ai),
+      action("google.sheets.developer_metadata.get", :workspace_metadata, :read, :none,
+        text_includes: ["developer metadata"]
+      ),
+      action("google.sheets.developer_metadata.search", :workspace_metadata, :read, :none,
+        text_includes: ["developer metadata", "data filters"]
+      ),
       action("google.sheets.sheet.add", :workspace_metadata, :write, :required_for_ai),
       action("google.sheets.sheet.delete", :workspace_metadata, :destructive, :always),
       action("google.sheets.sheet.rename", :workspace_metadata, :write, :required_for_ai),

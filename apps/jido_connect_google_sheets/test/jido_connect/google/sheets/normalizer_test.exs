@@ -2,6 +2,7 @@ defmodule Jido.Connect.Google.Sheets.NormalizerTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect.Google.Sheets.{
+    DeveloperMetadata,
     Normalizer,
     Range,
     Sheet,
@@ -96,6 +97,21 @@ defmodule Jido.Connect.Google.Sheets.NormalizerTest do
     assert result.updated_cells == 0
   end
 
+  test "normalizes developer metadata" do
+    assert {:ok, %DeveloperMetadata{} = metadata} =
+             Normalizer.developer_metadata(%{
+               "metadataId" => 123,
+               "metadataKey" => "sync_id",
+               "metadataValue" => "abc",
+               "visibility" => "DOCUMENT",
+               "location" => %{"locationType" => "SPREADSHEET"}
+             })
+
+    assert metadata.metadata_id == 123
+    assert metadata.metadata_key == "sync_id"
+    assert metadata.location == %{"locationType" => "SPREADSHEET"}
+  end
+
   test "struct constructors expose schema defaults" do
     ConnectorContracts.assert_struct_defaults(Sheet, %{sheet_id: 0, title: "Sheet1"},
       hidden?: false,
@@ -123,6 +139,13 @@ defmodule Jido.Connect.Google.Sheets.NormalizerTest do
       updated_rows: 0,
       updated_columns: 0,
       updated_cells: 0,
+      metadata: %{}
+    )
+
+    ConnectorContracts.assert_struct_defaults(
+      DeveloperMetadata,
+      %{metadata_id: 123, metadata_key: "sync_id", visibility: "DOCUMENT"},
+      location: %{},
       metadata: %{}
     )
 

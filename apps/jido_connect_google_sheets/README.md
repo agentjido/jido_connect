@@ -41,8 +41,10 @@ scopes:
 - `https://www.googleapis.com/auth/spreadsheets.readonly`
 - `https://www.googleapis.com/auth/spreadsheets`
 
-Read actions accept either the read-only Sheets scope or the full Sheets scope.
-Write actions require `https://www.googleapis.com/auth/spreadsheets`.
+Basic read actions accept either the read-only Sheets scope or the full Sheets
+scope. Google Sheets data-filter and developer metadata endpoints require
+`https://www.googleapis.com/auth/spreadsheets`, even when the action is
+read-only. Write actions also require `https://www.googleapis.com/auth/spreadsheets`.
 
 ## Tool Surface
 
@@ -50,13 +52,19 @@ Implemented actions:
 
 - `google.sheets.spreadsheet.get`
 - `google.sheets.spreadsheet.create`
+- `google.sheets.spreadsheet.get_by_data_filter`
 - `google.sheets.values.get`
 - `google.sheets.values.batch_get`
+- `google.sheets.values.batch_get_by_data_filter`
 - `google.sheets.values.update`
 - `google.sheets.values.append`
 - `google.sheets.values.clear`
 - `google.sheets.values.batch_update`
+- `google.sheets.values.batch_update_by_data_filter`
 - `google.sheets.values.batch_clear`
+- `google.sheets.values.batch_clear_by_data_filter`
+- `google.sheets.developer_metadata.get`
+- `google.sheets.developer_metadata.search`
 - `google.sheets.sheet.add`
 - `google.sheets.sheet.delete`
 - `google.sheets.sheet.rename`
@@ -118,10 +126,16 @@ result.update.updated_cells
 `Sheets.catalog_packs/0` returns two storage-free catalog packs:
 
 - `:google_sheets_readonly` exposes spreadsheet metadata reads and single or
-  batch value reads.
+  batch value reads that work with `spreadsheets.readonly`.
 - `:google_sheets_writer` exposes read tools, spreadsheet creation, value
-  writes, value batch writes/clears, and sheet add/delete/rename. It
-  intentionally excludes raw `google.sheets.batch_update`.
+  writes, value batch writes/clears, provider-specific data-filter tools,
+  developer metadata tools, and sheet add/delete/rename. It intentionally
+  excludes raw `google.sheets.batch_update`.
+
+Data-filter inputs use Google Sheets DataFilter shape inside this provider
+package, for example `%{a1Range: "Sheet1!A1:B2"}` or
+`%{developerMetadataLookup: %{metadataKey: "sync_id"}}`. Snake-case aliases such
+as `%{a1_range: "Sheet1!A1:B2"}` are normalized to Google's JSON field names.
 
 Use the raw batch update action outside the writer pack when a host explicitly
 wants to expose the full Google Sheets batchUpdate escape hatch.

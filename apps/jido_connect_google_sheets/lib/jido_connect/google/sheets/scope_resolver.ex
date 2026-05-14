@@ -9,13 +9,19 @@ defmodule Jido.Connect.Google.Sheets.ScopeResolver do
 
   @read_scope "https://www.googleapis.com/auth/spreadsheets.readonly"
   @write_scope "https://www.googleapis.com/auth/spreadsheets"
-  @write_actions [
+  @full_access_actions [
     "google.sheets.spreadsheet.create",
+    "google.sheets.spreadsheet.get_by_data_filter",
+    "google.sheets.values.batch_get_by_data_filter",
     "google.sheets.values.update",
     "google.sheets.values.append",
     "google.sheets.values.clear",
     "google.sheets.values.batch_update",
+    "google.sheets.values.batch_update_by_data_filter",
     "google.sheets.values.batch_clear",
+    "google.sheets.values.batch_clear_by_data_filter",
+    "google.sheets.developer_metadata.get",
+    "google.sheets.developer_metadata.search",
     "google.sheets.sheet.add",
     "google.sheets.sheet.delete",
     "google.sheets.sheet.rename",
@@ -28,8 +34,9 @@ defmodule Jido.Connect.Google.Sheets.ScopeResolver do
     |> required_for_operation(connection)
   end
 
-  defp required_for_operation(operation_id, _connection) when operation_id in @write_actions,
-    do: [@write_scope]
+  defp required_for_operation(operation_id, _connection)
+       when operation_id in @full_access_actions,
+       do: [@write_scope]
 
   defp required_for_operation(_operation_id, %{scopes: scopes}) when is_list(scopes) do
     if @write_scope in scopes, do: [@write_scope], else: [@read_scope]

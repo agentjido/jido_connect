@@ -2,7 +2,14 @@ defmodule Jido.Connect.Google.Sheets.Normalizer do
   @moduledoc "Normalizes Google Sheets API payloads into stable package structs."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Google.Sheets.{Sheet, Spreadsheet, UpdateResult, ValueRange}
+
+  alias Jido.Connect.Google.Sheets.{
+    DeveloperMetadata,
+    Sheet,
+    Spreadsheet,
+    UpdateResult,
+    ValueRange
+  }
 
   @doc "Normalizes a Google spreadsheet payload."
   @spec spreadsheet(map()) :: {:ok, Spreadsheet.t()} | {:error, term()}
@@ -69,6 +76,20 @@ defmodule Jido.Connect.Google.Sheets.Normalizer do
     }
     |> Data.compact()
     |> UpdateResult.new()
+  end
+
+  @doc "Normalizes a Google developer metadata payload."
+  @spec developer_metadata(map()) :: {:ok, DeveloperMetadata.t()} | {:error, term()}
+  def developer_metadata(payload) when is_map(payload) do
+    %{
+      metadata_id: Data.get(payload, "metadataId"),
+      metadata_key: Data.get(payload, "metadataKey"),
+      metadata_value: Data.get(payload, "metadataValue"),
+      location: Data.get(payload, "location", %{}),
+      visibility: Data.get(payload, "visibility")
+    }
+    |> Data.compact()
+    |> DeveloperMetadata.new()
   end
 
   defp sheet!(payload) do

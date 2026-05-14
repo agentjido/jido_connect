@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Sheets.Client.Spreadsheets do
   @moduledoc "Google Sheets spreadsheet API boundary."
 
-  alias Jido.Connect.Google.Sheets.Client.{Params, Response, Transport}
+  alias Jido.Connect.Google.Sheets.{DataFilter, Client.Params, Client.Response, Client.Transport}
 
   def get_spreadsheet(%{spreadsheet_id: spreadsheet_id} = params, access_token)
       when is_binary(spreadsheet_id) and is_binary(access_token) do
@@ -19,6 +19,20 @@ defmodule Jido.Connect.Google.Sheets.Client.Spreadsheets do
     access_token
     |> Transport.request()
     |> Req.post(url: "/v4/spreadsheets", json: create_spreadsheet_body(params))
+    |> Response.handle_spreadsheet_response()
+  end
+
+  def get_spreadsheet_by_data_filter(
+        %{spreadsheet_id: spreadsheet_id, data_filters: data_filters} = params,
+        access_token
+      )
+      when is_binary(spreadsheet_id) and is_list(data_filters) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.post(
+      url: batch_get_by_data_filter_url(spreadsheet_id),
+      json: get_by_data_filter_body(params)
+    )
     |> Response.handle_spreadsheet_response()
   end
 
@@ -102,6 +116,15 @@ defmodule Jido.Connect.Google.Sheets.Client.Spreadsheets do
     |> compact()
   end
 
+  defp get_by_data_filter_body(params) do
+    %{
+      dataFilters: DataFilter.to_google_filters(Map.get(params, :data_filters, [])),
+      includeGridData: Map.get(params, :include_grid_data),
+      excludeTablesInBandedRanges: Map.get(params, :exclude_tables_in_banded_ranges)
+    }
+    |> compact()
+  end
+
   defp create_sheets(params) do
     params
     |> sheet_properties()
@@ -137,6 +160,10 @@ defmodule Jido.Connect.Google.Sheets.Client.Spreadsheets do
 
   defp batch_update_url(spreadsheet_id) do
     "/v4/spreadsheets/#{URI.encode(spreadsheet_id, &URI.char_unreserved?/1)}:batchUpdate"
+  end
+
+  defp batch_get_by_data_filter_url(spreadsheet_id) do
+    "/v4/spreadsheets/#{URI.encode(spreadsheet_id, &URI.char_unreserved?/1)}:getByDataFilter"
   end
 
   defp batch_update_body(params) do
