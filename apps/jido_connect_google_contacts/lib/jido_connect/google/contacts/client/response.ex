@@ -283,6 +283,60 @@ defmodule Jido.Connect.Google.Contacts.Client.Response do
 
   def handle_contact_group_response(response), do: Transport.handle_error_response(response)
 
+  def handle_contact_group_batch_get_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, responses} <- normalize_contact_group_response_items(body) do
+      {:ok, %{groups: Enum.map(responses, & &1.group), responses: responses}}
+    end
+  end
+
+  def handle_contact_group_batch_get_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    invalid_contact_group_batch_get_response(body)
+  end
+
+  def handle_contact_group_batch_get_response(response),
+    do: Transport.handle_error_response(response)
+
+  def handle_contact_group_delete_response({:ok, %{status: status}}, params)
+      when status in 200..299 do
+    {:ok,
+     %{
+       resource_name: Data.get(params, :resource_name),
+       delete_contacts?: Data.get(params, :delete_contacts, false),
+       deleted?: true
+     }}
+  end
+
+  def handle_contact_group_delete_response(response, _params),
+    do: Transport.handle_error_response(response)
+
+  def handle_contact_group_members_modify_response({:ok, %{status: status, body: body}}, params)
+      when status in 200..299 and is_map(body) do
+    {:ok,
+     %{
+       resource_name: Data.get(params, :resource_name),
+       resource_names_to_add: Data.get(params, :resource_names_to_add, []),
+       resource_names_to_remove: Data.get(params, :resource_names_to_remove, []),
+       not_found_resource_names: Data.get(body, "notFoundResourceNames", []),
+       cannot_remove_last_contact_group_resource_names:
+         Data.get(body, "canNotRemoveLastContactGroupResourceNames", [])
+     }}
+  end
+
+  def handle_contact_group_members_modify_response({:ok, %{status: status}}, params)
+      when status in 200..299 do
+    {:ok,
+     %{
+       resource_name: Data.get(params, :resource_name),
+       resource_names_to_add: Data.get(params, :resource_names_to_add, []),
+       resource_names_to_remove: Data.get(params, :resource_names_to_remove, [])
+     }}
+  end
+
+  def handle_contact_group_members_modify_response(response, _params),
+    do: Transport.handle_error_response(response)
+
   defp normalize_one(body, normalizer, message) do
     case normalizer.(body) do
       {:ok, item} -> {:ok, item}
@@ -330,6 +384,49 @@ defmodule Jido.Connect.Google.Contacts.Client.Response do
   defp invalid_batch_update_response(body) do
     Transport.invalid_success_response(
       "Google Contacts person batch update response was invalid",
+      body
+    )
+  end
+
+  defp normalize_contact_group_response_items(body) do
+    case Data.get(body, "responses", []) do
+      items when is_list(items) ->
+        items
+        |> Enum.reduce_while({:ok, []}, fn payload, {:ok, acc} ->
+          case normalize_contact_group_response(payload) do
+            {:ok, response} -> {:cont, {:ok, [response | acc]}}
+            {:error, _error} -> {:halt, invalid_contact_group_batch_get_response(body)}
+          end
+        end)
+        |> case do
+          {:ok, responses} -> {:ok, Enum.reverse(responses)}
+          {:error, error} -> {:error, error}
+        end
+
+      _invalid ->
+        invalid_contact_group_batch_get_response(body)
+    end
+  end
+
+  defp normalize_contact_group_response(payload) when is_map(payload) do
+    with group when is_map(group) <- Data.get(payload, "contactGroup"),
+         {:ok, normalized} <- Normalizer.group(group) do
+      {:ok,
+       %{
+         requested_resource_name: Data.get(payload, "requestedResourceName"),
+         group: normalized,
+         status: Data.get(payload, "status")
+       }}
+    else
+      _invalid -> {:error, :invalid_contact_group_response}
+    end
+  end
+
+  defp normalize_contact_group_response(_payload), do: {:error, :invalid_contact_group_response}
+
+  defp invalid_contact_group_batch_get_response(body) do
+    Transport.invalid_success_response(
+      "Google Contacts contact group batch get response was invalid",
       body
     )
   end

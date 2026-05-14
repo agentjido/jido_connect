@@ -34,7 +34,7 @@ live-test readiness, and Beadwork sequencing.
 | `jido_connect_gmail` | `gmail` | 11 | 1 | 3 | `user` |
 | `jido_connect_google_drive` | `google_drive` | 38 | 2 | 3 | `user`, `service_account`, `domain_delegated_service_account` |
 | `jido_connect_google_calendar` | `google_calendar` | 32 | 5 | 4 | `user` |
-| `jido_connect_google_contacts` | `google_contacts` | 18 | 0 | 2 | `user` |
+| `jido_connect_google_contacts` | `google_contacts` | 22 | 1 | 2 | `user` |
 
 ## Cross-Package Notes
 
@@ -66,7 +66,7 @@ action families. Do not move Google filter/query semantics into
 | Gmail | Watch/stop lifecycle, explicit history action, attachments, draft lifecycle, batch message triage, label lifecycle, and destructive message/thread operations outside default packs. |
 | Drive | File labels, about/apps/generateIds metadata utilities, access proposal/approval workflows, and further channel renewal helpers as host patterns emerge. |
 | Calendar | Event quickAdd/import, colors, and settings reads. |
-| Contacts | Group lifecycle, group membership, contact photos, and sync-token polling trigger. |
+| Contacts | Contact photo actions. |
 
 Explicit non-goals from the audit:
 
@@ -348,6 +348,10 @@ Auth profiles: `user`
 | `google.contacts.other.list` | read | `personal_data` | `contacts.other.readonly` | none | `people`, `next_page_token`, `next_sync_token`, `total_size` |
 | `google.contacts.other.search` | read | `personal_data` | `contacts.other.readonly` | `query` | `people` |
 | `google.contacts.other.copy` | write | `personal_data` | `contacts.other.readonly`, `contacts` | `resource_name` | `person` |
+| `google.contacts.group.get` | read | `personal_data` | `contacts.readonly` | `resource_name` | `group` |
+| `google.contacts.group.batch_get` | read | `personal_data` | `contacts.readonly` | `resource_names` | `groups`, `responses` |
+| `google.contacts.group.delete` | destructive | `personal_data` | `contacts` | `resource_name` | `result` |
+| `google.contacts.group.member.modify` | write | `personal_data` | `contacts` | `resource_name` | `result` |
 | `google.contacts.person.create` | write | `personal_data` | `contacts` | none | `person` |
 | `google.contacts.person.update` | write | `personal_data` | `contacts` | `resource_name`, `etag` | `person` |
 | `google.contacts.person.delete` | destructive | `personal_data` | `contacts` | `resource_name` | `result` |
@@ -358,12 +362,14 @@ Auth profiles: `user`
 
 | Pack | Surface |
 | --- | --- |
-| `google_contacts_readonly` | Person list/get/search, batch get, directory list/search, other-contact list/search, and contact-group list. |
-| `google_contacts_manager` | Read-only pack plus batch create/update/delete, other-contact copy, person create/update/delete, and group create/update. |
+| `google_contacts_readonly` | Person list/get/search, batch get, directory list/search, other-contact list/search, and contact-group list/get/batch-get. |
+| `google_contacts_manager` | Read-only pack plus batch create/update/delete, other-contact copy, person create/update/delete, and group create/update/delete/member modify. |
 
 ### Triggers
 
-No trigger specs are currently exposed.
+| ID | Kind | Checkpoint | Dedupe | Scope | Signal |
+| --- | --- | --- | --- | --- | --- |
+| `google.contacts.person.changed` | poll | `sync_token` | `resource_name`, `etag` | `contacts.readonly` | `resource_name`, `person_id`, `etag`, `deleted`, `display_name`, `person` |
 
 ## Existing-Package Expansion Epic
 

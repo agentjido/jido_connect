@@ -263,6 +263,27 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
     |> query_params()
   end
 
+  @doc "Builds query params for `contactGroups.get`."
+  def get_contact_group_params(params) do
+    %{
+      maxMembers: Data.get(params, :max_members),
+      groupFields: Data.get(params, :group_fields, default_group_fields()),
+      fields: Data.get(params, :fields, contact_group_response_fields())
+    }
+    |> query_params()
+  end
+
+  @doc "Builds query params for `contactGroups.batchGet`."
+  def batch_get_contact_groups_params(params) do
+    %{
+      resourceNames: Data.get(params, :resource_names, []),
+      maxMembers: Data.get(params, :max_members),
+      groupFields: Data.get(params, :group_fields, default_group_fields()),
+      fields: Data.get(params, :fields, contact_group_batch_response_fields())
+    }
+    |> query_params()
+  end
+
   @doc "Builds query params for `contactGroups.create`."
   def create_contact_group_params(params) do
     %{
@@ -278,6 +299,23 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
       fields: Data.get(params, :fields, contact_group_response_fields())
     }
     |> query_params()
+  end
+
+  @doc "Builds query params for `contactGroups.delete`."
+  def delete_contact_group_params(params) do
+    %{
+      deleteContacts: Data.get(params, :delete_contacts, false)
+    }
+    |> query_params()
+  end
+
+  @doc "Builds a Google People API contact group membership mutation body."
+  def modify_contact_group_members_body(params) do
+    %{
+      resourceNamesToAdd: Data.get(params, :resource_names_to_add, []),
+      resourceNamesToRemove: Data.get(params, :resource_names_to_remove, [])
+    }
+    |> Data.compact()
   end
 
   @doc "Builds a Google People API contact group mutation body."
@@ -340,8 +378,12 @@ defmodule Jido.Connect.Google.Contacts.Client.Params do
     "nextPageToken,nextSyncToken,contactGroups(#{contact_group_response_fields()})"
   end
 
+  defp contact_group_batch_response_fields do
+    "responses(requestedResourceName,status,contactGroup(#{contact_group_response_fields()}))"
+  end
+
   defp contact_group_response_fields do
-    "resourceName,etag,metadata,groupType,memberCount,name,formattedName"
+    "resourceName,etag,metadata,groupType,memberCount,memberResourceNames,clientData,name,formattedName"
   end
 
   defp batch_contacts_to_create(contacts) when is_list(contacts) do

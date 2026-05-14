@@ -38,6 +38,39 @@ defmodule Jido.Connect.Google.Contacts.Handlers.Actions.Helpers do
     end
   end
 
+  def validate_any_resource_names(input, fields, reason) do
+    results =
+      Enum.map(fields, fn field ->
+        values = Data.get(input, field, [])
+
+        cond do
+          values == [] ->
+            {:ok, []}
+
+          is_list(values) ->
+            case validate_string_list(values, field, reason) do
+              :ok -> {:ok, values}
+              {:error, error} -> {:error, error}
+            end
+
+          true ->
+            validation_error(field, reason)
+        end
+      end)
+
+    cond do
+      Enum.any?(results, &match?({:error, _error}, &1)) ->
+        {:error, error} = Enum.find(results, &match?({:error, _error}, &1))
+        {:error, error}
+
+      results |> Enum.flat_map(fn {:ok, values} -> values end) |> Enum.empty?() ->
+        validation_error(:resource_names, reason)
+
+      true ->
+        :ok
+    end
+  end
+
   def validate_contacts(input, reason, opts \\ []) do
     case Data.get(input, :contacts) do
       contacts when is_list(contacts) and contacts != [] ->

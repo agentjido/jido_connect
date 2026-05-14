@@ -63,6 +63,12 @@ defmodule Jido.Connect.Google.Contacts.ScopeResolverTest do
         operation: "google.contacts.group.member.modify",
         granted: [@contacts_readonly_scope],
         expected: @contacts_scope
+      },
+      %{
+        label: "group batch get uses Contacts readonly scope",
+        operation: "google.contacts.group.batch_get",
+        granted: [],
+        expected: @contacts_readonly_scope
       }
     ])
 

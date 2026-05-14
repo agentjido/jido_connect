@@ -10,6 +10,8 @@ defmodule Jido.Connect.Google.Contacts.Group do
               formatted_name: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               group_type: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               member_count: Zoi.integer() |> Zoi.nullish() |> Zoi.optional(),
+              member_resource_names: Zoi.list(Zoi.string()) |> Zoi.default([]),
+              client_data: Zoi.list(Zoi.map()) |> Zoi.default([]),
               etag: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               metadata: Zoi.map() |> Zoi.default(%{})
             },

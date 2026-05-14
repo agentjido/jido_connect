@@ -42,11 +42,15 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacksTest do
     assert "google.contacts.directory.search" in ids
     assert "google.contacts.other.list" in ids
     assert "google.contacts.other.search" in ids
+    assert "google.contacts.group.get" in ids
+    assert "google.contacts.group.batch_get" in ids
     refute "google.contacts.person.create" in ids
     refute "google.contacts.person.batch_create" in ids
     refute "google.contacts.person.delete" in ids
     refute "google.contacts.other.copy" in ids
     refute "google.contacts.group.create" in ids
+    refute "google.contacts.group.delete" in ids
+    refute "google.contacts.group.member.modify" in ids
 
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.contacts.other.search",
@@ -92,6 +96,15 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.contacts.other.copy"
+
+    assert {:ok, descriptor} =
+             Catalog.describe_tool("google.contacts.group.member.modify",
+               modules: [Contacts],
+               packs: Contacts.catalog_packs(),
+               pack: :google_contacts_manager
+             )
+
+    assert descriptor.tool.id == "google.contacts.group.member.modify"
   end
 
   test "pack restrictions apply to call_tool" do

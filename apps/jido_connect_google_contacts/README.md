@@ -10,7 +10,8 @@ handlers, schemas, normalized structs, and tests in this package.
 
 This package declares the Contacts provider, OAuth profile, Contacts scope
 resolver, normalized person/contact group structs, People API read, batch,
-directory, other-contact, and mutation actions, and curated catalog packs.
+directory, other-contact, group lifecycle/member, mutation actions, poll
+trigger metadata, and curated catalog packs.
 
 ## Actions
 
@@ -26,6 +27,10 @@ directory, other-contact, and mutation actions, and curated catalog packs.
 - `google.contacts.other.list`
 - `google.contacts.other.search`
 - `google.contacts.other.copy`
+- `google.contacts.group.get`
+- `google.contacts.group.batch_get`
+- `google.contacts.group.delete`
+- `google.contacts.group.member.modify`
 - `google.contacts.person.create`
 - `google.contacts.person.update`
 - `google.contacts.person.delete`
@@ -36,11 +41,17 @@ directory, other-contact, and mutation actions, and curated catalog packs.
 ## Catalog Packs
 
 - `:google_contacts_readonly` includes person reads, person search, batch get,
-  directory reads, other-contact reads, and contact group reads without
-  mutation tools.
+  directory reads, other-contact reads, and contact group list/get/batch-get
+  without mutation tools.
 - `:google_contacts_manager` includes the full Contacts surface: read tools,
   batch contact create/update/delete, other-contact copy, contact
-  create/update/delete, and contact group create/update.
+  create/update/delete, and contact group create/update/delete/member modify.
+
+## Triggers
+
+- `google.contacts.person.changed` polls `people.connections.list` with sync
+  tokens and emits normalized changed contact signals. The initial poll captures
+  the sync checkpoint without replaying historical contacts.
 
 ```elixir
 Jido.Connect.Catalog.search_tools("contacts",

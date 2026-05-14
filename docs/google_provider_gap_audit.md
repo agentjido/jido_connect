@@ -35,7 +35,7 @@ Official references used for this comparison:
 | Gmail | Strong metadata, message/thread reads, send, draft create/send, label triage, and poll trigger coverage. | Watch/stop lifecycle, history action, attachments, draft management, batch modify/delete, label get/update/delete, message/thread trash/delete. | Settings and CSE surfaces are large and sensitive; keep them out of default packs. |
 | Drive | Strong file metadata/content, basic file writes, permission lifecycle, revision lifecycle, comments/replies, shared-drive lifecycle, service-account profiles, poll trigger coverage, and watch/channel lifecycle metadata. | Labels, about/apps, access proposals/approvals. | No whole-drive count or whole-drive principals endpoint in Drive v3; counts/principals remain composed intents. |
 | Calendar | Strong event list/get/create/update/delete/instances/move, calendar and CalendarList lifecycle, ACL lifecycle, free/busy, availability, poll trigger coverage, and watch/channel lifecycle metadata. | Event quickAdd/import, colors, and settings reads. | Event polling and provider push channel metadata now both exist. |
-| Contacts | Strong personal contact, batch contact, directory, other-contact, and contact-group read/mutation coverage. | Group get/delete/member modify, contact photos, sync-token polling trigger. | People API exposes sync tokens for incremental connections but no generic watch endpoint. |
+| Contacts | Strong personal contact, batch contact, directory, other-contact, contact-group read/mutation, group membership, and sync-token poll trigger coverage. | Contact photo actions. | People API exposes sync tokens for incremental connections but no generic watch endpoint. |
 
 ## Sheets
 
@@ -200,17 +200,19 @@ Official People API resources include `people`, `people.connections`,
 - `people.updateContact`
 - `people.deleteContact`
 - `contactGroups.list`
+- `contactGroups.get`
+- `contactGroups.batchGet`
 - `contactGroups.create`
 - `contactGroups.update`
+- `contactGroups.delete`
+- `contactGroups.members.modify`
+- `people.connections.list` sync-token polling trigger
 
 ### Missing Provider Operations
 
 | Provider Operation | Candidate Action/Trigger | Priority | Rationale |
 | --- | --- | --- | --- |
-| `contactGroups.get/batchGet/delete` | Group lifecycle actions | Medium | Completes group management beyond list/create/update. |
-| `contactGroups.members.modify` | Group membership action | Medium | Required for contact group assignment. |
 | `people.updateContactPhoto/deleteContactPhoto` | Contact photo actions | Low | Useful but content-heavy and likely not default pack material. |
-| `people.connections.list` sync token trigger | Contact changed poll trigger | Medium | Existing list response supports incremental sync; expose as host-owned polling trigger. |
 
 ## Catalog Guidance
 

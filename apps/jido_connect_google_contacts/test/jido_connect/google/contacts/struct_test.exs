@@ -51,6 +51,8 @@ defmodule Jido.Connect.Google.Contacts.StructTest do
       ConnectorContracts.assert_struct_defaults(
         Group,
         %{resource_name: "contactGroups/friends"},
+        member_resource_names: [],
+        client_data: [],
         metadata: %{}
       )
 

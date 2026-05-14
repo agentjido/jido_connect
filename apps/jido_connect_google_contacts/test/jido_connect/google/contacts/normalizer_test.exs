@@ -91,11 +91,15 @@ defmodule Jido.Connect.Google.Contacts.NormalizerTest do
                "formattedName" => "Friends",
                "groupType" => "USER_CONTACT_GROUP",
                "memberCount" => 2,
+               "memberResourceNames" => ["people/c123", "people/c456"],
+               "clientData" => [%{"key" => "source", "value" => "jido"}],
                "metadata" => %{"deleted" => false}
              })
 
     assert group.group_id == "friends"
     assert group.member_count == 2
+    assert group.member_resource_names == ["people/c123", "people/c456"]
+    assert group.client_data == [%{"key" => "source", "value" => "jido"}]
   end
 
   test "rejects non-map contact detail payloads" do

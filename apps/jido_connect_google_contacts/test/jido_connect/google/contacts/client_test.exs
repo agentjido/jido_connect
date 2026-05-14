@@ -453,6 +453,59 @@ defmodule Jido.Connect.Google.Contacts.ClientTest do
     assert group.name == "Friends"
   end
 
+  test "gets contact groups" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/contactGroups/friends"
+      assert conn.query_params["maxMembers"] == "10"
+      assert conn.query_params["groupFields"] =~ "memberCount"
+      assert conn.query_params["fields"] =~ "memberResourceNames"
+
+      Req.Test.json(conn, group_payload())
+    end)
+
+    assert {:ok, %Contacts.Group{} = group} =
+             Client.get_contact_group(
+               %{resource_name: "contactGroups/friends", max_members: 10},
+               "token"
+             )
+
+    assert group.group_id == "friends"
+    assert group.member_resource_names == ["people/c123", "people/c456"]
+  end
+
+  test "batch gets contact groups" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/contactGroups:batchGet"
+      assert conn.query_string =~ "resourceNames=contactGroups%2Ffriends"
+      assert conn.query_string =~ "resourceNames=contactGroups%2Fcoworkers"
+      assert conn.query_params["fields"] =~ "responses"
+
+      Req.Test.json(conn, %{
+        "responses" => [
+          %{
+            "requestedResourceName" => "contactGroups/friends",
+            "contactGroup" => group_payload(),
+            "status" => %{"code" => 0}
+          }
+        ]
+      })
+    end)
+
+    assert {:ok,
+            %{
+              groups: [%Contacts.Group{} = group],
+              responses: [%{requested_resource_name: "contactGroups/friends"}]
+            }} =
+             Client.batch_get_contact_groups(
+               %{resource_names: ["contactGroups/friends", "contactGroups/coworkers"]},
+               "token"
+             )
+
+    assert group.resource_name == "contactGroups/friends"
+  end
+
   test "creates contact groups" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "POST"
@@ -497,6 +550,56 @@ defmodule Jido.Connect.Google.Contacts.ClientTest do
              )
 
     assert group.name == "Close Friends"
+  end
+
+  test "deletes contact groups" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "DELETE"
+      assert conn.request_path == "/v1/contactGroups/friends"
+      assert conn.query_params["deleteContacts"] == "false"
+
+      Plug.Conn.resp(conn, 200, "")
+    end)
+
+    assert {:ok,
+            %{resource_name: "contactGroups/friends", delete_contacts?: false, deleted?: true}} =
+             Client.delete_contact_group(%{resource_name: "contactGroups/friends"}, "token")
+  end
+
+  test "modifies contact group members" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/contactGroups/friends/members:modify"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "resourceNamesToAdd" => ["people/c123"],
+               "resourceNamesToRemove" => ["people/c456"]
+             }
+
+      Req.Test.json(conn, %{
+        "notFoundResourceNames" => [],
+        "canNotRemoveLastContactGroupResourceNames" => ["people/c456"]
+      })
+    end)
+
+    assert {:ok,
+            %{
+              resource_name: "contactGroups/friends",
+              resource_names_to_add: ["people/c123"],
+              resource_names_to_remove: ["people/c456"],
+              not_found_resource_names: [],
+              cannot_remove_last_contact_group_resource_names: ["people/c456"]
+            }} =
+             Client.modify_contact_group_members(
+               %{
+                 resource_name: "contactGroups/friends",
+                 resource_names_to_add: ["people/c123"],
+                 resource_names_to_remove: ["people/c456"]
+               },
+               "token"
+             )
   end
 
   test "returns provider errors for malformed people list items" do
@@ -581,6 +684,8 @@ defmodule Jido.Connect.Google.Contacts.ClientTest do
       "formattedName" => "Friends",
       "groupType" => "USER_CONTACT_GROUP",
       "memberCount" => 2,
+      "memberResourceNames" => ["people/c123", "people/c456"],
+      "clientData" => [%{"key" => "source", "value" => "jido"}],
       "metadata" => %{"deleted" => false}
     }
   end

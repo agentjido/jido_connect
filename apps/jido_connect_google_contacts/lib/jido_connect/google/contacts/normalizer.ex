@@ -92,6 +92,8 @@ defmodule Jido.Connect.Google.Contacts.Normalizer do
       formatted_name: Data.get(payload, "formattedName"),
       group_type: Data.get(payload, "groupType"),
       member_count: Data.get(payload, "memberCount"),
+      member_resource_names: Data.get(payload, "memberResourceNames", []),
+      client_data: Data.get(payload, "clientData", []),
       etag: Data.get(payload, "etag"),
       metadata: Data.get(payload, "metadata", %{})
     }

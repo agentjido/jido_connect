@@ -12,7 +12,9 @@ defmodule Jido.Connect.Google.Contacts do
       Jido.Connect.Google.Contacts.Actions.Batch,
       Jido.Connect.Google.Contacts.Actions.Directory,
       Jido.Connect.Google.Contacts.Actions.OtherContacts,
-      Jido.Connect.Google.Contacts.Actions.Write
+      Jido.Connect.Google.Contacts.Actions.Groups,
+      Jido.Connect.Google.Contacts.Actions.Write,
+      Jido.Connect.Google.Contacts.Triggers.People
     ]
 
   integration do

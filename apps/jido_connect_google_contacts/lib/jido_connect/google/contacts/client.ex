@@ -19,6 +19,10 @@ defmodule Jido.Connect.Google.Contacts.Client do
   defdelegate search_other_contacts(params, access_token), to: OtherContacts
   defdelegate copy_other_contact(params, access_token), to: OtherContacts
   defdelegate list_contact_groups(params, access_token), to: ContactGroups
+  defdelegate get_contact_group(params, access_token), to: ContactGroups
+  defdelegate batch_get_contact_groups(params, access_token), to: ContactGroups
   defdelegate create_contact_group(params, access_token), to: ContactGroups
   defdelegate update_contact_group(params, access_token), to: ContactGroups
+  defdelegate delete_contact_group(params, access_token), to: ContactGroups
+  defdelegate modify_contact_group_members(params, access_token), to: ContactGroups
 end

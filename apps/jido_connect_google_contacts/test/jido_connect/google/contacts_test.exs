@@ -19,6 +19,10 @@ defmodule Jido.Connect.Google.ContactsTest do
     Jido.Connect.Google.Contacts.Actions.ListOtherContacts,
     Jido.Connect.Google.Contacts.Actions.SearchOtherContacts,
     Jido.Connect.Google.Contacts.Actions.CopyOtherContact,
+    Jido.Connect.Google.Contacts.Actions.GetContactGroup,
+    Jido.Connect.Google.Contacts.Actions.BatchGetContactGroups,
+    Jido.Connect.Google.Contacts.Actions.DeleteContactGroup,
+    Jido.Connect.Google.Contacts.Actions.ModifyContactGroupMembers,
     Jido.Connect.Google.Contacts.Actions.CreateContact,
     Jido.Connect.Google.Contacts.Actions.UpdateContact,
     Jido.Connect.Google.Contacts.Actions.DeleteContact,
@@ -31,7 +35,18 @@ defmodule Jido.Connect.Google.ContactsTest do
     Jido.Connect.Google.Contacts.Actions.Batch,
     Jido.Connect.Google.Contacts.Actions.Directory,
     Jido.Connect.Google.Contacts.Actions.OtherContacts,
-    Jido.Connect.Google.Contacts.Actions.Write
+    Jido.Connect.Google.Contacts.Actions.Groups,
+    Jido.Connect.Google.Contacts.Actions.Write,
+    Jido.Connect.Google.Contacts.Triggers.People
+  ]
+
+  @contacts_sensor_specs [
+    %{
+      module: Jido.Connect.Google.Contacts.Sensors.PersonChanged,
+      name: "google_contacts_person_changed",
+      trigger_id: "google.contacts.person.changed",
+      signal_type: "google.contacts.person.changed"
+    }
   ]
 
   defmodule FakeContactsClient do
@@ -51,6 +66,24 @@ defmodule Jido.Connect.Google.ContactsTest do
          next_page_token: "contacts-next",
          total_items: 1
        }}
+    end
+
+    def list_people(%{sync_token: "contacts-sync-1", request_sync_token: true}, "token") do
+      {:ok,
+       %{
+         people: [
+           Contacts.Person.new!(%{
+             resource_name: "people/c123",
+             etag: "etag123",
+             display_name: "Ada Lovelace"
+           })
+         ],
+         next_sync_token: "contacts-sync-2"
+       }}
+    end
+
+    def list_people(%{resource_name: "people/me", request_sync_token: true}, "token") do
+      {:ok, %{people: [], next_sync_token: "contacts-sync-1"}}
     end
 
     def get_person(%{resource_name: "people/me"}, "token") do
@@ -246,6 +279,35 @@ defmodule Jido.Connect.Google.ContactsTest do
        }}
     end
 
+    def get_contact_group(%{resource_name: "contactGroups/friends"}, "token") do
+      {:ok,
+       Contacts.Group.new!(%{
+         resource_name: "contactGroups/friends",
+         name: "Friends",
+         member_count: 2,
+         member_resource_names: ["people/c123", "people/c456"]
+       })}
+    end
+
+    def batch_get_contact_groups(
+          %{resource_names: ["contactGroups/friends", "contactGroups/coworkers"]},
+          "token"
+        ) do
+      {:ok,
+       %{
+         groups: [
+           Contacts.Group.new!(%{
+             resource_name: "contactGroups/friends",
+             name: "Friends"
+           }),
+           Contacts.Group.new!(%{
+             resource_name: "contactGroups/coworkers",
+             name: "Coworkers"
+           })
+         ]
+       }}
+    end
+
     def create_contact_group(%{name: "Leads"}, "token") do
       {:ok,
        Contacts.Group.new!(%{
@@ -263,6 +325,27 @@ defmodule Jido.Connect.Google.ContactsTest do
          resource_name: "contactGroups/leads",
          name: "Prospects"
        })}
+    end
+
+    def delete_contact_group(%{resource_name: "contactGroups/leads"}, "token") do
+      {:ok, %{resource_name: "contactGroups/leads", delete_contacts?: false, deleted?: true}}
+    end
+
+    def modify_contact_group_members(
+          %{
+            resource_name: "contactGroups/leads",
+            resource_names_to_add: ["people/c123"],
+            resource_names_to_remove: []
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         resource_name: "contactGroups/leads",
+         resource_names_to_add: ["people/c123"],
+         resource_names_to_remove: [],
+         not_found_resource_names: []
+       }}
     end
   end
 
@@ -295,6 +378,10 @@ defmodule Jido.Connect.Google.ContactsTest do
              "google.contacts.other.list",
              "google.contacts.other.search",
              "google.contacts.other.copy",
+             "google.contacts.group.get",
+             "google.contacts.group.batch_get",
+             "google.contacts.group.delete",
+             "google.contacts.group.member.modify",
              "google.contacts.person.create",
              "google.contacts.person.update",
              "google.contacts.person.delete",
@@ -302,7 +389,7 @@ defmodule Jido.Connect.Google.ContactsTest do
              "google.contacts.group.update"
            ]
 
-    assert [] = spec.triggers
+    assert Enum.map(spec.triggers, & &1.id) == ["google.contacts.person.changed"]
 
     assert [%{id: :user, kind: :oauth2, refresh?: true, pkce?: true} = profile] =
              spec.auth_profiles
@@ -320,6 +407,7 @@ defmodule Jido.Connect.Google.ContactsTest do
     ConnectorContracts.assert_generated_surface(Contacts,
       otp_app: :jido_connect_google_contacts,
       action_modules: @contacts_action_modules,
+      sensor_specs: @contacts_sensor_specs,
       plugin_module: Jido.Connect.Google.Contacts.Plugin,
       plugin_name: "google_contacts"
     )
@@ -496,6 +584,27 @@ defmodule Jido.Connect.Google.ContactsTest do
                credential_lease: lease
              )
 
+    assert {:ok,
+            %{group: %{resource_name: "contactGroups/friends", member_resource_names: members}}} =
+             Connect.invoke(
+               Contacts,
+               "google.contacts.group.get",
+               %{resource_name: "contactGroups/friends"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert members == ["people/c123", "people/c456"]
+
+    assert {:ok, %{groups: [%{name: "Friends"}, %{name: "Coworkers"}]}} =
+             Connect.invoke(
+               Contacts,
+               "google.contacts.group.batch_get",
+               %{resource_names: ["contactGroups/friends", "contactGroups/coworkers"]},
+               context: context,
+               credential_lease: lease
+             )
+
     assert {:ok, %{group: %{resource_name: "contactGroups/leads", name: "Leads"}}} =
              Connect.invoke(Contacts, "google.contacts.group.create", %{name: "Leads"},
                context: context,
@@ -509,6 +618,69 @@ defmodule Jido.Connect.Google.ContactsTest do
                %{resource_name: "contactGroups/leads", name: "Prospects"},
                context: context,
                credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{resource_name: "contactGroups/leads", deleted?: true}}} =
+             Connect.invoke(
+               Contacts,
+               "google.contacts.group.delete",
+               %{resource_name: "contactGroups/leads"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok,
+            %{result: %{resource_names_to_add: ["people/c123"], not_found_resource_names: []}}} =
+             Connect.invoke(
+               Contacts,
+               "google.contacts.group.member.modify",
+               %{
+                 resource_name: "contactGroups/leads",
+                 resource_names_to_add: ["people/c123"],
+                 resource_names_to_remove: []
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "contact change poll initializes checkpoint without replaying contacts" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{signals: [], checkpoint: "contacts-sync-1"}} =
+             Connect.poll(
+               Contacts.integration(),
+               "google.contacts.person.changed",
+               %{},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "contact change poll emits normalized people and advances checkpoint" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              signals: [
+                %{
+                  resource_name: "people/c123",
+                  person_id: "c123",
+                  etag: "etag123",
+                  deleted: false,
+                  display_name: "Ada Lovelace",
+                  person: %{resource_name: "people/c123"}
+                }
+              ],
+              checkpoint: "contacts-sync-2"
+            }} =
+             Connect.poll(
+               Contacts.integration(),
+               "google.contacts.person.changed",
+               %{},
+               context: context,
+               credential_lease: lease,
+               checkpoint: "contacts-sync-1"
              )
   end
 
