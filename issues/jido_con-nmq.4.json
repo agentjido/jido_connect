@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-nmq.5"
   ],
+  "closed_at": "2026-05-14T15:03:10Z",
+  "close_reason": "Finalized Google surface audit roll-up in PR #11",
   "created": "2026-05-14T14:35:47Z",
   "description": "Write docs/google_surface_audit.md with the current surface matrix, gap recommendations, live-test readiness, and implementation sequencing.",
   "id": "jido_con-nmq.4",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-nmq",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G13-S04] Write Google surface audit document",
   "type": "task",
-  "updated_at": "2026-05-14T14:59:03Z"
+  "updated_at": "2026-05-14T15:03:10Z"
 }
