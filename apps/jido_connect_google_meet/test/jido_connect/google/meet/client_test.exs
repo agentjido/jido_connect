@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Meet.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Google.Meet.{Client, ConferenceRecord, Space}
+  alias Jido.Connect.Google.Meet.{Client, ConferenceRecord, Recording, Space, Transcript}
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -130,6 +130,134 @@ defmodule Jido.Connect.Google.Meet.ClientTest do
     assert record.start_time == "2026-05-14T18:00:00Z"
   end
 
+  test "lists Meet recording metadata" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v2/conferenceRecords/abc/recordings"
+      assert conn.query_params["pageSize"] == "10"
+      assert conn.query_params["pageToken"] == "older"
+
+      assert conn.query_params["fields"] ==
+               "recordings(name,state,driveDestination),nextPageToken"
+
+      Req.Test.json(conn, %{
+        "recordings" => [
+          %{
+            "name" => "conferenceRecords/abc/recordings/def",
+            "state" => "FILE_GENERATED",
+            "driveDestination" => %{
+              "file" => "drive-file-1",
+              "exportUri" => "https://drive.google.com/file/d/drive-file-1/view"
+            }
+          }
+        ],
+        "nextPageToken" => "next"
+      })
+    end)
+
+    assert {:ok, %{recordings: [%Recording{} = recording], next_page_token: "next"}} =
+             Client.list_recordings(
+               %{
+                 conference_record_name: "conferenceRecords/abc",
+                 page_size: 10,
+                 page_token: "older",
+                 fields: "recordings(name,state,driveDestination),nextPageToken"
+               },
+               "token"
+             )
+
+    assert recording.recording_name == "conferenceRecords/abc/recordings/def"
+    assert recording.drive_file_id == "drive-file-1"
+  end
+
+  test "gets Meet recording metadata" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v2/conferenceRecords/abc/recordings/def"
+      assert conn.query_params["fields"] == "name,state,driveDestination"
+
+      Req.Test.json(conn, %{
+        "name" => "conferenceRecords/abc/recordings/def",
+        "state" => "FILE_GENERATED",
+        "driveDestination" => %{"file" => "drive-file-1"}
+      })
+    end)
+
+    assert {:ok, %Recording{} = recording} =
+             Client.get_recording(
+               %{
+                 recording_name: "conferenceRecords/abc/recordings/def",
+                 fields: "name,state,driveDestination"
+               },
+               "token"
+             )
+
+    assert recording.state == "FILE_GENERATED"
+  end
+
+  test "lists Meet transcript metadata" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v2/conferenceRecords/abc/transcripts"
+      assert conn.query_params["pageSize"] == "10"
+
+      assert conn.query_params["fields"] ==
+               "transcripts(name,state,docsDestination),nextPageToken"
+
+      Req.Test.json(conn, %{
+        "transcripts" => [
+          %{
+            "name" => "conferenceRecords/abc/transcripts/ghi",
+            "state" => "FILE_GENERATED",
+            "docsDestination" => %{
+              "document" => "doc-1",
+              "exportUri" => "https://docs.google.com/document/d/doc-1/view"
+            }
+          }
+        ],
+        "nextPageToken" => "next"
+      })
+    end)
+
+    assert {:ok, %{transcripts: [%Transcript{} = transcript], next_page_token: "next"}} =
+             Client.list_transcripts(
+               %{
+                 conference_record_name: "conferenceRecords/abc",
+                 page_size: 10,
+                 fields: "transcripts(name,state,docsDestination),nextPageToken"
+               },
+               "token"
+             )
+
+    assert transcript.transcript_name == "conferenceRecords/abc/transcripts/ghi"
+    assert transcript.document_id == "doc-1"
+  end
+
+  test "gets Meet transcript metadata" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v2/conferenceRecords/abc/transcripts/ghi"
+      assert conn.query_params["fields"] == "name,state,docsDestination"
+
+      Req.Test.json(conn, %{
+        "name" => "conferenceRecords/abc/transcripts/ghi",
+        "state" => "FILE_GENERATED",
+        "docsDestination" => %{"document" => "doc-1"}
+      })
+    end)
+
+    assert {:ok, %Transcript{} = transcript} =
+             Client.get_transcript(
+               %{
+                 transcript_name: "conferenceRecords/abc/transcripts/ghi",
+                 fields: "name,state,docsDestination"
+               },
+               "token"
+             )
+
+    assert transcript.state == "FILE_GENERATED"
+  end
+
   test "returns provider errors for malformed space responses" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
@@ -158,5 +286,43 @@ defmodule Jido.Connect.Google.Meet.ClientTest do
               provider: :google,
               reason: :invalid_response
             }} = Client.list_conference_records(%{}, "token")
+  end
+
+  test "returns provider errors for malformed recording responses" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v2/conferenceRecords/abc/recordings/def"
+
+      Req.Test.json(conn, %{"state" => "FILE_GENERATED"})
+    end)
+
+    assert {:error,
+            %Jido.Connect.Error.ProviderError{
+              provider: :google,
+              reason: :invalid_response
+            }} =
+             Client.get_recording(
+               %{recording_name: "conferenceRecords/abc/recordings/def"},
+               "token"
+             )
+  end
+
+  test "returns provider errors for malformed transcript responses" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v2/conferenceRecords/abc/transcripts/ghi"
+
+      Req.Test.json(conn, %{"state" => "FILE_GENERATED"})
+    end)
+
+    assert {:error,
+            %Jido.Connect.Error.ProviderError{
+              provider: :google,
+              reason: :invalid_response
+            }} =
+             Client.get_transcript(
+               %{transcript_name: "conferenceRecords/abc/transcripts/ghi"},
+               "token"
+             )
   end
 end

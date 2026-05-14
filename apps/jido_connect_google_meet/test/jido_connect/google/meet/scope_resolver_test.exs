@@ -48,5 +48,17 @@ defmodule Jido.Connect.Google.Meet.ScopeResolverTest do
              %{},
              %{scopes: [@created_scope]}
            ) == [@created_scope]
+
+    assert ScopeResolver.required_scopes(
+             %{action_id: "google.meet.recording.list"},
+             %{},
+             %{scopes: [@readonly_scope]}
+           ) == [@readonly_scope]
+
+    assert ScopeResolver.required_scopes(
+             %{action_id: "google.meet.transcript.get"},
+             %{},
+             %{scopes: [@created_scope]}
+           ) == [@created_scope]
   end
 end

@@ -12,12 +12,18 @@ defmodule Jido.Connect.Google.MeetTest do
     Jido.Connect.Google.Meet.Actions.CreateSpace,
     Jido.Connect.Google.Meet.Actions.GetSpace,
     Jido.Connect.Google.Meet.Actions.ListConferenceRecords,
-    Jido.Connect.Google.Meet.Actions.GetConferenceRecord
+    Jido.Connect.Google.Meet.Actions.GetConferenceRecord,
+    Jido.Connect.Google.Meet.Actions.ListRecordings,
+    Jido.Connect.Google.Meet.Actions.GetRecording,
+    Jido.Connect.Google.Meet.Actions.ListTranscripts,
+    Jido.Connect.Google.Meet.Actions.GetTranscript
   ]
 
   @meet_dsl_fragments [
     Jido.Connect.Google.Meet.Actions.Spaces,
-    Jido.Connect.Google.Meet.Actions.ConferenceRecords
+    Jido.Connect.Google.Meet.Actions.ConferenceRecords,
+    Jido.Connect.Google.Meet.Actions.Recordings,
+    Jido.Connect.Google.Meet.Actions.Transcripts
   ]
 
   defmodule FakeMeetClient do
@@ -68,6 +74,60 @@ defmodule Jido.Connect.Google.MeetTest do
          start_time: "2026-05-14T18:00:00Z"
        })}
     end
+
+    def list_recordings(
+          %{conference_record_name: "conferenceRecords/abc", page_size: 10},
+          "token"
+        ) do
+      {:ok,
+       %{
+         recordings: [
+           Meet.Recording.new!(%{
+             recording_name: "conferenceRecords/abc/recordings/def",
+             state: "FILE_GENERATED",
+             drive_file_id: "drive-file-1",
+             export_uri: "https://drive.google.com/file/d/drive-file-1/view"
+           })
+         ],
+         next_page_token: "recordings-next"
+       }}
+    end
+
+    def get_recording(%{recording_name: "conferenceRecords/abc/recordings/def"}, "token") do
+      {:ok,
+       Meet.Recording.new!(%{
+         recording_name: "conferenceRecords/abc/recordings/def",
+         state: "FILE_GENERATED",
+         drive_file_id: "drive-file-1"
+       })}
+    end
+
+    def list_transcripts(
+          %{conference_record_name: "conferenceRecords/abc", page_size: 10},
+          "token"
+        ) do
+      {:ok,
+       %{
+         transcripts: [
+           Meet.Transcript.new!(%{
+             transcript_name: "conferenceRecords/abc/transcripts/ghi",
+             state: "FILE_GENERATED",
+             document_id: "doc-1",
+             export_uri: "https://docs.google.com/document/d/doc-1/view"
+           })
+         ],
+         next_page_token: "transcripts-next"
+       }}
+    end
+
+    def get_transcript(%{transcript_name: "conferenceRecords/abc/transcripts/ghi"}, "token") do
+      {:ok,
+       Meet.Transcript.new!(%{
+         transcript_name: "conferenceRecords/abc/transcripts/ghi",
+         state: "FILE_GENERATED",
+         document_id: "doc-1"
+       })}
+    end
   end
 
   test "declares Google Meet provider metadata" do
@@ -84,7 +144,11 @@ defmodule Jido.Connect.Google.MeetTest do
              "google.meet.space.create",
              "google.meet.space.get",
              "google.meet.conference_record.list",
-             "google.meet.conference_record.get"
+             "google.meet.conference_record.get",
+             "google.meet.recording.list",
+             "google.meet.recording.get",
+             "google.meet.transcript.list",
+             "google.meet.transcript.get"
            ]
 
     assert spec.triggers == []
@@ -189,6 +253,88 @@ defmodule Jido.Connect.Google.MeetTest do
                Meet.integration(),
                "google.meet.conference_record.get",
                %{conference_record_name: "conferenceRecords/abc"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes list recordings through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: [@meet_readonly_scope])
+
+    assert {:ok,
+            %{
+              recordings: [
+                %{
+                  recording_name: "conferenceRecords/abc/recordings/def",
+                  drive_file_id: "drive-file-1"
+                }
+              ],
+              next_page_token: "recordings-next"
+            }} =
+             Connect.invoke(
+               Meet.integration(),
+               "google.meet.recording.list",
+               %{conference_record_name: "conferenceRecords/abc"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes get recording through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: [@meet_readonly_scope])
+
+    assert {:ok,
+            %{
+              recording: %{
+                recording_name: "conferenceRecords/abc/recordings/def",
+                state: "FILE_GENERATED"
+              }
+            }} =
+             Connect.invoke(
+               Meet.integration(),
+               "google.meet.recording.get",
+               %{recording_name: "conferenceRecords/abc/recordings/def"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes list transcripts through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: [@meet_readonly_scope])
+
+    assert {:ok,
+            %{
+              transcripts: [
+                %{
+                  transcript_name: "conferenceRecords/abc/transcripts/ghi",
+                  document_id: "doc-1"
+                }
+              ],
+              next_page_token: "transcripts-next"
+            }} =
+             Connect.invoke(
+               Meet.integration(),
+               "google.meet.transcript.list",
+               %{conference_record_name: "conferenceRecords/abc"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes get transcript through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: [@meet_readonly_scope])
+
+    assert {:ok,
+            %{
+              transcript: %{
+                transcript_name: "conferenceRecords/abc/transcripts/ghi",
+                state: "FILE_GENERATED"
+              }
+            }} =
+             Connect.invoke(
+               Meet.integration(),
+               "google.meet.transcript.get",
+               %{transcript_name: "conferenceRecords/abc/transcripts/ghi"},
                context: context,
                credential_lease: lease
              )

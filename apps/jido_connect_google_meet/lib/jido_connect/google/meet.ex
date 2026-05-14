@@ -6,7 +6,9 @@ defmodule Jido.Connect.Google.Meet do
   use Jido.Connect,
     fragments: [
       Jido.Connect.Google.Meet.Actions.Spaces,
-      Jido.Connect.Google.Meet.Actions.ConferenceRecords
+      Jido.Connect.Google.Meet.Actions.ConferenceRecords,
+      Jido.Connect.Google.Meet.Actions.Recordings,
+      Jido.Connect.Google.Meet.Actions.Transcripts
     ]
 
   integration do

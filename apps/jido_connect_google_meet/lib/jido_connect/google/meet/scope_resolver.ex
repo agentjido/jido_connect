@@ -20,6 +20,12 @@ defmodule Jido.Connect.Google.Meet.ScopeResolver do
     "google.meet.conference_record.list",
     "google.meet.conference_record.get"
   ]
+  @artifact_read_actions [
+    "google.meet.recording.list",
+    "google.meet.recording.get",
+    "google.meet.transcript.list",
+    "google.meet.transcript.get"
+  ]
 
   def required_scopes(operation, _input, connection) do
     operation
@@ -50,6 +56,15 @@ defmodule Jido.Connect.Google.Meet.ScopeResolver do
 
   defp required_for_operation(operation_id, _connection)
        when operation_id in @conference_record_read_actions,
+       do: [@readonly_scope]
+
+  defp required_for_operation(operation_id, %{scopes: scopes})
+       when operation_id in @artifact_read_actions and is_list(scopes) do
+    if @created_scope in scopes, do: [@created_scope], else: [@readonly_scope]
+  end
+
+  defp required_for_operation(operation_id, _connection)
+       when operation_id in @artifact_read_actions,
        do: [@readonly_scope]
 
   defp required_for_operation(_operation_id, _connection), do: [@readonly_scope]

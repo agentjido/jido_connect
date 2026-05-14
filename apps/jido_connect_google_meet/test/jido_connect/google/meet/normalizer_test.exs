@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Meet.NormalizerTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Google.Meet.{ConferenceRecord, Normalizer, Space}
+  alias Jido.Connect.Google.Meet.{ConferenceRecord, Normalizer, Recording, Space, Transcript}
 
   test "normalizes Meet space payloads" do
     assert {:ok,
@@ -49,5 +49,59 @@ defmodule Jido.Connect.Google.Meet.NormalizerTest do
   test "rejects malformed Meet conference record payloads" do
     assert {:error, _error} = Normalizer.conference_record(%{"space" => "spaces/abc"})
     assert {:error, :invalid_conference_record_payload} = Normalizer.conference_record(nil)
+  end
+
+  test "normalizes Meet recording metadata payloads" do
+    assert {:ok,
+            %Recording{
+              recording_name: "conferenceRecords/abc/recordings/def",
+              state: "FILE_GENERATED",
+              drive_destination: %{
+                "file" => "drive-file-1",
+                "exportUri" => "https://drive.google.com/file/d/drive-file-1/view"
+              },
+              drive_file_id: "drive-file-1",
+              export_uri: "https://drive.google.com/file/d/drive-file-1/view"
+            }} =
+             Normalizer.recording(%{
+               "name" => "conferenceRecords/abc/recordings/def",
+               "state" => "FILE_GENERATED",
+               "driveDestination" => %{
+                 "file" => "drive-file-1",
+                 "exportUri" => "https://drive.google.com/file/d/drive-file-1/view"
+               }
+             })
+  end
+
+  test "rejects malformed Meet recording payloads" do
+    assert {:error, _error} = Normalizer.recording(%{"state" => "FILE_GENERATED"})
+    assert {:error, :invalid_recording_payload} = Normalizer.recording(nil)
+  end
+
+  test "normalizes Meet transcript metadata payloads" do
+    assert {:ok,
+            %Transcript{
+              transcript_name: "conferenceRecords/abc/transcripts/ghi",
+              state: "FILE_GENERATED",
+              docs_destination: %{
+                "document" => "doc-1",
+                "exportUri" => "https://docs.google.com/document/d/doc-1/view"
+              },
+              document_id: "doc-1",
+              export_uri: "https://docs.google.com/document/d/doc-1/view"
+            }} =
+             Normalizer.transcript(%{
+               "name" => "conferenceRecords/abc/transcripts/ghi",
+               "state" => "FILE_GENERATED",
+               "docsDestination" => %{
+                 "document" => "doc-1",
+                 "exportUri" => "https://docs.google.com/document/d/doc-1/view"
+               }
+             })
+  end
+
+  test "rejects malformed Meet transcript payloads" do
+    assert {:error, _error} = Normalizer.transcript(%{"state" => "FILE_GENERATED"})
+    assert {:error, :invalid_transcript_payload} = Normalizer.transcript(nil)
   end
 end

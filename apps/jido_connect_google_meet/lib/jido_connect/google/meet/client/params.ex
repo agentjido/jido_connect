@@ -22,6 +22,16 @@ defmodule Jido.Connect.Google.Meet.Client.Params do
     |> Data.compact()
   end
 
+  @doc "Builds query params for Meet artifact list requests."
+  def artifact_list_params(params) do
+    %{
+      pageSize: Data.get(params, :page_size),
+      pageToken: Data.get(params, :page_token),
+      fields: Data.get(params, :fields)
+    }
+    |> Data.compact()
+  end
+
   @doc "Builds a Google Meet Space request body."
   def space_body(params) do
     %{
