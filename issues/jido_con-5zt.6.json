@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:58:12Z",
+  "description": "Add Drive revisions list/get/update/delete and permissions get/update/delete action families with service-account profile coverage and risk metadata.",
+  "id": "jido_con-5zt.6",
+  "labels": [],
+  "parent": "jido_con-5zt",
+  "priority": 1,
+  "status": "open",
+  "title": "[G18-S06] Add Drive revision and permission lifecycle actions",
+  "type": "task",
+  "updated_at": "2026-05-14T14:58:12Z"
+}
