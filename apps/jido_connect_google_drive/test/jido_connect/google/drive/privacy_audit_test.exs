@@ -55,6 +55,57 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
         action("google.drive.revision.delete", :workspace_metadata, :destructive, :always,
           text_includes: ["revision", "Permanently"]
         ),
+        action("google.drive.comments.list", :workspace_content, :read, :none,
+          text_includes: ["comments"]
+        ),
+        action("google.drive.comment.get", :workspace_content, :read, :none,
+          text_includes: ["comment"]
+        ),
+        action("google.drive.comment.create", :workspace_content, :external_write, :always,
+          text_includes: ["comment"]
+        ),
+        action("google.drive.comment.update", :workspace_content, :write, :required_for_ai,
+          text_includes: ["comment"]
+        ),
+        action("google.drive.comment.delete", :workspace_content, :destructive, :always,
+          text_includes: ["comment"]
+        ),
+        action("google.drive.replies.list", :workspace_content, :read, :none,
+          text_includes: ["replies"]
+        ),
+        action("google.drive.reply.get", :workspace_content, :read, :none,
+          text_includes: ["reply"]
+        ),
+        action("google.drive.reply.create", :workspace_content, :external_write, :always,
+          text_includes: ["reply"]
+        ),
+        action("google.drive.reply.update", :workspace_content, :write, :required_for_ai,
+          text_includes: ["reply"]
+        ),
+        action("google.drive.reply.delete", :workspace_content, :destructive, :always,
+          text_includes: ["reply"]
+        ),
+        action("google.drive.shared_drives.list", :workspace_metadata, :read, :none,
+          text_includes: ["shared drives"]
+        ),
+        action("google.drive.shared_drive.get", :workspace_metadata, :read, :none,
+          text_includes: ["shared-drive"]
+        ),
+        action("google.drive.shared_drive.create", :workspace_metadata, :write, :required_for_ai,
+          text_includes: ["shared drive"]
+        ),
+        action("google.drive.shared_drive.update", :workspace_metadata, :write, :required_for_ai,
+          text_includes: ["shared-drive"]
+        ),
+        action("google.drive.shared_drive.delete", :workspace_metadata, :destructive, :always,
+          text_includes: ["shared drive"]
+        ),
+        action("google.drive.shared_drive.hide", :workspace_metadata, :write, :required_for_ai,
+          text_includes: ["shared drive"]
+        ),
+        action("google.drive.shared_drive.unhide", :workspace_metadata, :write, :required_for_ai,
+          text_includes: ["shared drive"]
+        ),
         action("google.drive.changes.watch", :workspace_metadata, :write, :required_for_ai,
           text_includes: ["push", "notification"]
         ),

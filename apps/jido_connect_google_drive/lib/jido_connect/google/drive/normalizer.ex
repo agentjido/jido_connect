@@ -2,7 +2,18 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
   @moduledoc "Normalizes Google Drive API payloads into stable package structs."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Google.Drive.{Change, Channel, File, Folder, Permission, Revision}
+
+  alias Jido.Connect.Google.Drive.{
+    Change,
+    Channel,
+    Comment,
+    File,
+    Folder,
+    Permission,
+    Reply,
+    Revision,
+    SharedDrive
+  }
 
   @folder_mime_type "application/vnd.google-apps.folder"
 
@@ -144,6 +155,74 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
 
   def revision(_payload), do: {:error, :invalid_revision_payload}
 
+  @doc "Normalizes a Google Drive comment payload."
+  @spec comment(map()) :: {:ok, Comment.t()} | {:error, term()}
+  def comment(payload) when is_map(payload) do
+    with {:ok, replies} <- normalize_embedded_replies(Data.get(payload, "replies")) do
+      %{
+        comment_id: Data.get(payload, "id"),
+        kind: Data.get(payload, "kind"),
+        created_time: Data.get(payload, "createdTime"),
+        modified_time: Data.get(payload, "modifiedTime"),
+        resolved?: Data.get(payload, "resolved", false),
+        anchor: Data.get(payload, "anchor"),
+        author: Data.get(payload, "author"),
+        deleted?: Data.get(payload, "deleted", false),
+        html_content: Data.get(payload, "htmlContent"),
+        content: Data.get(payload, "content"),
+        quoted_file_content: Data.get(payload, "quotedFileContent"),
+        replies: replies
+      }
+      |> Data.compact()
+      |> Comment.new()
+    end
+  end
+
+  def comment(_payload), do: {:error, :invalid_comment_payload}
+
+  @doc "Normalizes a Google Drive comment reply payload."
+  @spec reply(map()) :: {:ok, Reply.t()} | {:error, term()}
+  def reply(payload) when is_map(payload) do
+    %{
+      reply_id: Data.get(payload, "id"),
+      kind: Data.get(payload, "kind"),
+      created_time: Data.get(payload, "createdTime"),
+      modified_time: Data.get(payload, "modifiedTime"),
+      action: Data.get(payload, "action"),
+      author: Data.get(payload, "author"),
+      deleted?: Data.get(payload, "deleted", false),
+      html_content: Data.get(payload, "htmlContent"),
+      content: Data.get(payload, "content")
+    }
+    |> Data.compact()
+    |> Reply.new()
+  end
+
+  def reply(_payload), do: {:error, :invalid_reply_payload}
+
+  @doc "Normalizes a Google Drive shared-drive payload."
+  @spec shared_drive(map()) :: {:ok, SharedDrive.t()} | {:error, term()}
+  def shared_drive(payload) when is_map(payload) do
+    %{
+      shared_drive_id: Data.get(payload, "id"),
+      name: Data.get(payload, "name"),
+      kind: Data.get(payload, "kind"),
+      color_rgb: Data.get(payload, "colorRgb"),
+      theme_id: Data.get(payload, "themeId"),
+      background_image_link: Data.get(payload, "backgroundImageLink"),
+      background_image_file: Data.get(payload, "backgroundImageFile"),
+      created_time: Data.get(payload, "createdTime"),
+      hidden?: Data.get(payload, "hidden", false),
+      capabilities: Data.get(payload, "capabilities", %{}),
+      restrictions: Data.get(payload, "restrictions", %{}),
+      org_unit_id: Data.get(payload, "orgUnitId")
+    }
+    |> Data.compact()
+    |> SharedDrive.new()
+  end
+
+  def shared_drive(_payload), do: {:error, :invalid_shared_drive_payload}
+
   @doc "Returns true when a Drive payload is a folder."
   @spec folder?(map()) :: boolean()
   def folder?(payload) when is_map(payload),
@@ -188,4 +267,23 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
   end
 
   defp normalize_embedded_permissions(_permissions), do: {:error, :invalid_permission_payload}
+
+  defp normalize_embedded_replies(nil), do: {:ok, []}
+  defp normalize_embedded_replies([]), do: {:ok, []}
+
+  defp normalize_embedded_replies(replies) when is_list(replies) do
+    replies
+    |> Enum.reduce_while({:ok, []}, fn payload, {:ok, acc} ->
+      case reply(payload) do
+        {:ok, reply} -> {:cont, {:ok, [Map.from_struct(reply) | acc]}}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:ok, replies} -> {:ok, Enum.reverse(replies)}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp normalize_embedded_replies(_replies), do: {:error, :invalid_reply_payload}
 end

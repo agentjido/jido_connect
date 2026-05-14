@@ -40,10 +40,19 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
     assert "google.drive.permission.get" in ids
     assert "google.drive.revisions.list" in ids
     assert "google.drive.revision.get" in ids
+    assert "google.drive.comments.list" in ids
+    assert "google.drive.comment.get" in ids
+    assert "google.drive.replies.list" in ids
+    assert "google.drive.reply.get" in ids
+    assert "google.drive.shared_drives.list" in ids
+    assert "google.drive.shared_drive.get" in ids
     refute "google.drive.changes.watch" in ids
     refute "google.drive.file.create" in ids
     refute "google.drive.permission.update" in ids
     refute "google.drive.revision.delete" in ids
+    refute "google.drive.comment.create" in ids
+    refute "google.drive.reply.create" in ids
+    refute "google.drive.shared_drive.create" in ids
 
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.drive.file.get",
@@ -95,6 +104,27 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("google.drive.revision.delete",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_file_writer
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.drive.comment.create",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_file_writer
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.drive.reply.create",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_file_writer
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.drive.shared_drive.delete",
                modules: [Drive],
                packs: Drive.catalog_packs(),
                pack: :google_drive_file_writer

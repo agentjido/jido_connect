@@ -24,6 +24,23 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.GetRevision,
     Jido.Connect.Google.Drive.Actions.UpdateRevision,
     Jido.Connect.Google.Drive.Actions.DeleteRevision,
+    Jido.Connect.Google.Drive.Actions.ListComments,
+    Jido.Connect.Google.Drive.Actions.GetComment,
+    Jido.Connect.Google.Drive.Actions.CreateComment,
+    Jido.Connect.Google.Drive.Actions.UpdateComment,
+    Jido.Connect.Google.Drive.Actions.DeleteComment,
+    Jido.Connect.Google.Drive.Actions.ListReplies,
+    Jido.Connect.Google.Drive.Actions.GetReply,
+    Jido.Connect.Google.Drive.Actions.CreateReply,
+    Jido.Connect.Google.Drive.Actions.UpdateReply,
+    Jido.Connect.Google.Drive.Actions.DeleteReply,
+    Jido.Connect.Google.Drive.Actions.ListSharedDrives,
+    Jido.Connect.Google.Drive.Actions.GetSharedDrive,
+    Jido.Connect.Google.Drive.Actions.CreateSharedDrive,
+    Jido.Connect.Google.Drive.Actions.UpdateSharedDrive,
+    Jido.Connect.Google.Drive.Actions.DeleteSharedDrive,
+    Jido.Connect.Google.Drive.Actions.HideSharedDrive,
+    Jido.Connect.Google.Drive.Actions.UnhideSharedDrive,
     Jido.Connect.Google.Drive.Actions.WatchChanges,
     Jido.Connect.Google.Drive.Actions.WatchFile,
     Jido.Connect.Google.Drive.Actions.StopChannel
@@ -35,6 +52,9 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.FileContent,
     Jido.Connect.Google.Drive.Actions.Permissions,
     Jido.Connect.Google.Drive.Actions.Revisions,
+    Jido.Connect.Google.Drive.Actions.Comments,
+    Jido.Connect.Google.Drive.Actions.Replies,
+    Jido.Connect.Google.Drive.Actions.SharedDrives,
     Jido.Connect.Google.Drive.Actions.Watch,
     Jido.Connect.Google.Drive.Triggers.Changes
   ]
@@ -308,6 +328,196 @@ defmodule Jido.Connect.Google.DriveTest do
       {:ok, %{file_id: "file123", revision_id: "rev1", deleted?: true}}
     end
 
+    def list_comments(
+          %{file_id: "file123", include_deleted: false, page_size: 100},
+          "token"
+        ) do
+      {:ok,
+       %{
+         comments: [
+           Drive.Comment.new!(%{
+             comment_id: "comment123",
+             content: "Looks good",
+             resolved?: false
+           })
+         ],
+         next_page_token: "next-comment"
+       }}
+    end
+
+    def get_comment(
+          %{file_id: "file123", comment_id: "comment123", include_deleted: false},
+          "token"
+        ) do
+      {:ok,
+       Drive.Comment.new!(%{
+         comment_id: "comment123",
+         content: "Looks good",
+         resolved?: false
+       })}
+    end
+
+    def create_comment(%{file_id: "file123", content: "Looks good"}, "token") do
+      {:ok,
+       Drive.Comment.new!(%{
+         comment_id: "comment456",
+         content: "Looks good",
+         resolved?: false
+       })}
+    end
+
+    def update_comment(
+          %{file_id: "file123", comment_id: "comment123", content: "Updated"},
+          "token"
+        ) do
+      {:ok,
+       Drive.Comment.new!(%{
+         comment_id: "comment123",
+         content: "Updated",
+         resolved?: false
+       })}
+    end
+
+    def delete_comment(%{file_id: "file123", comment_id: "comment123"}, "token") do
+      {:ok, %{file_id: "file123", comment_id: "comment123", deleted?: true}}
+    end
+
+    def list_replies(
+          %{file_id: "file123", comment_id: "comment123", include_deleted: false, page_size: 100},
+          "token"
+        ) do
+      {:ok,
+       %{
+         replies: [
+           Drive.Reply.new!(%{
+             reply_id: "reply123",
+             content: "Agreed"
+           })
+         ],
+         next_page_token: "next-reply"
+       }}
+    end
+
+    def get_reply(
+          %{
+            file_id: "file123",
+            comment_id: "comment123",
+            reply_id: "reply123",
+            include_deleted: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.Reply.new!(%{
+         reply_id: "reply123",
+         content: "Agreed"
+       })}
+    end
+
+    def create_reply(%{file_id: "file123", comment_id: "comment123", content: "Agreed"}, "token") do
+      {:ok,
+       Drive.Reply.new!(%{
+         reply_id: "reply456",
+         content: "Agreed"
+       })}
+    end
+
+    def update_reply(
+          %{
+            file_id: "file123",
+            comment_id: "comment123",
+            reply_id: "reply123",
+            content: "Updated"
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.Reply.new!(%{
+         reply_id: "reply123",
+         content: "Updated"
+       })}
+    end
+
+    def delete_reply(
+          %{file_id: "file123", comment_id: "comment123", reply_id: "reply123"},
+          "token"
+        ) do
+      {:ok, %{file_id: "file123", comment_id: "comment123", reply_id: "reply123", deleted?: true}}
+    end
+
+    def list_shared_drives(%{page_size: 100, use_domain_admin_access: false}, "token") do
+      {:ok,
+       %{
+         shared_drives: [
+           Drive.SharedDrive.new!(%{
+             shared_drive_id: "drive123",
+             name: "Team Drive"
+           })
+         ],
+         next_page_token: "next-drive"
+       }}
+    end
+
+    def get_shared_drive(%{shared_drive_id: "drive123", use_domain_admin_access: false}, "token") do
+      {:ok,
+       Drive.SharedDrive.new!(%{
+         shared_drive_id: "drive123",
+         name: "Team Drive"
+       })}
+    end
+
+    def create_shared_drive(%{request_id: "request-123", name: "Team Drive"}, "token") do
+      {:ok,
+       Drive.SharedDrive.new!(%{
+         shared_drive_id: "drive123",
+         name: "Team Drive"
+       })}
+    end
+
+    def update_shared_drive(
+          %{
+            shared_drive_id: "drive123",
+            name: "Team Drive Renamed",
+            use_domain_admin_access: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.SharedDrive.new!(%{
+         shared_drive_id: "drive123",
+         name: "Team Drive Renamed"
+       })}
+    end
+
+    def delete_shared_drive(
+          %{
+            shared_drive_id: "drive123",
+            use_domain_admin_access: false,
+            allow_item_deletion: false
+          },
+          "token"
+        ) do
+      {:ok, %{shared_drive_id: "drive123", deleted?: true}}
+    end
+
+    def hide_shared_drive(%{shared_drive_id: "drive123"}, "token") do
+      {:ok,
+       Drive.SharedDrive.new!(%{
+         shared_drive_id: "drive123",
+         name: "Team Drive",
+         hidden?: true
+       })}
+    end
+
+    def unhide_shared_drive(%{shared_drive_id: "drive123"}, "token") do
+      {:ok,
+       Drive.SharedDrive.new!(%{
+         shared_drive_id: "drive123",
+         name: "Team Drive",
+         hidden?: false
+       })}
+    end
+
     def watch_changes(
           %{
             page_token: "start-token",
@@ -560,6 +770,7 @@ defmodule Jido.Connect.Google.DriveTest do
 
     assert "openid" in profile.default_scopes
     assert "https://www.googleapis.com/auth/drive.metadata.readonly" in profile.optional_scopes
+    assert "https://www.googleapis.com/auth/drive" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/drive.file" in profile.optional_scopes
     assert "https://www.googleapis.com/auth/drive.readonly" in profile.optional_scopes
 
@@ -599,6 +810,23 @@ defmodule Jido.Connect.Google.DriveTest do
              "google.drive.revision.get",
              "google.drive.revision.update",
              "google.drive.revision.delete",
+             "google.drive.comments.list",
+             "google.drive.comment.get",
+             "google.drive.comment.create",
+             "google.drive.comment.update",
+             "google.drive.comment.delete",
+             "google.drive.replies.list",
+             "google.drive.reply.get",
+             "google.drive.reply.create",
+             "google.drive.reply.update",
+             "google.drive.reply.delete",
+             "google.drive.shared_drives.list",
+             "google.drive.shared_drive.get",
+             "google.drive.shared_drive.create",
+             "google.drive.shared_drive.update",
+             "google.drive.shared_drive.delete",
+             "google.drive.shared_drive.hide",
+             "google.drive.shared_drive.unhide",
              "google.drive.changes.watch",
              "google.drive.file.watch",
              "google.drive.channel.stop"
@@ -642,6 +870,19 @@ defmodule Jido.Connect.Google.DriveTest do
     get_revision = Enum.find(spec.actions, &(&1.id == "google.drive.revision.get"))
     update_revision = Enum.find(spec.actions, &(&1.id == "google.drive.revision.update"))
     delete_revision = Enum.find(spec.actions, &(&1.id == "google.drive.revision.delete"))
+    list_comments = Enum.find(spec.actions, &(&1.id == "google.drive.comments.list"))
+    create_comment = Enum.find(spec.actions, &(&1.id == "google.drive.comment.create"))
+    update_comment = Enum.find(spec.actions, &(&1.id == "google.drive.comment.update"))
+    delete_comment = Enum.find(spec.actions, &(&1.id == "google.drive.comment.delete"))
+    list_replies = Enum.find(spec.actions, &(&1.id == "google.drive.replies.list"))
+    create_reply = Enum.find(spec.actions, &(&1.id == "google.drive.reply.create"))
+    update_reply = Enum.find(spec.actions, &(&1.id == "google.drive.reply.update"))
+    delete_reply = Enum.find(spec.actions, &(&1.id == "google.drive.reply.delete"))
+    list_shared_drives = Enum.find(spec.actions, &(&1.id == "google.drive.shared_drives.list"))
+    create_shared_drive = Enum.find(spec.actions, &(&1.id == "google.drive.shared_drive.create"))
+    update_shared_drive = Enum.find(spec.actions, &(&1.id == "google.drive.shared_drive.update"))
+    delete_shared_drive = Enum.find(spec.actions, &(&1.id == "google.drive.shared_drive.delete"))
+    hide_shared_drive = Enum.find(spec.actions, &(&1.id == "google.drive.shared_drive.hide"))
     assert create_permission.risk == :external_write
     assert create_permission.confirmation == :always
     assert get_permission.risk == :read
@@ -655,6 +896,29 @@ defmodule Jido.Connect.Google.DriveTest do
     assert update_revision.confirmation == :required_for_ai
     assert delete_revision.risk == :destructive
     assert delete_revision.confirmation == :always
+    assert list_comments.risk == :read
+    assert create_comment.risk == :external_write
+    assert create_comment.confirmation == :always
+    assert update_comment.risk == :write
+    assert update_comment.confirmation == :required_for_ai
+    assert delete_comment.risk == :destructive
+    assert delete_comment.confirmation == :always
+    assert list_replies.risk == :read
+    assert create_reply.risk == :external_write
+    assert create_reply.confirmation == :always
+    assert update_reply.risk == :write
+    assert update_reply.confirmation == :required_for_ai
+    assert delete_reply.risk == :destructive
+    assert delete_reply.confirmation == :always
+    assert list_shared_drives.risk == :read
+    assert create_shared_drive.risk == :write
+    assert create_shared_drive.confirmation == :required_for_ai
+    assert update_shared_drive.risk == :write
+    assert update_shared_drive.confirmation == :required_for_ai
+    assert delete_shared_drive.risk == :destructive
+    assert delete_shared_drive.confirmation == :always
+    assert hide_shared_drive.risk == :write
+    assert hide_shared_drive.confirmation == :required_for_ai
 
     watch_changes = Enum.find(spec.actions, &(&1.id == "google.drive.changes.watch"))
     watch_file = Enum.find(spec.actions, &(&1.id == "google.drive.file.watch"))
@@ -671,6 +935,12 @@ defmodule Jido.Connect.Google.DriveTest do
     get_permission_fields = Enum.find(get_permission.input, &(&1.name == :fields))
     list_revisions_fields = Enum.find(list_revisions.input, &(&1.name == :fields))
     get_revision_fields = Enum.find(get_revision.input, &(&1.name == :fields))
+    list_comments_fields = Enum.find(list_comments.input, &(&1.name == :fields))
+    create_comment_fields = Enum.find(create_comment.input, &(&1.name == :fields))
+    list_replies_fields = Enum.find(list_replies.input, &(&1.name == :fields))
+    create_reply_fields = Enum.find(create_reply.input, &(&1.name == :fields))
+    list_shared_drives_fields = Enum.find(list_shared_drives.input, &(&1.name == :fields))
+    create_shared_drive_fields = Enum.find(create_shared_drive.input, &(&1.name == :fields))
 
     assert create_permission_fields.metadata.presets.default ==
              Jido.Connect.Google.Drive.Fields.permission_metadata()
@@ -683,6 +953,24 @@ defmodule Jido.Connect.Google.DriveTest do
 
     assert get_revision_fields.metadata.presets.default ==
              Jido.Connect.Google.Drive.Fields.revision_metadata()
+
+    assert list_comments_fields.metadata.presets.default ==
+             Jido.Connect.Google.Drive.Fields.comment_list()
+
+    assert create_comment_fields.metadata.presets.default ==
+             Jido.Connect.Google.Drive.Fields.comment_metadata()
+
+    assert list_replies_fields.metadata.presets.default ==
+             Jido.Connect.Google.Drive.Fields.reply_list()
+
+    assert create_reply_fields.metadata.presets.default ==
+             Jido.Connect.Google.Drive.Fields.reply_metadata()
+
+    assert list_shared_drives_fields.metadata.presets.default ==
+             Jido.Connect.Google.Drive.Fields.shared_drive_list()
+
+    assert create_shared_drive_fields.metadata.presets.default ==
+             Jido.Connect.Google.Drive.Fields.shared_drive_metadata()
 
     for operation <- spec.actions ++ spec.triggers do
       assert operation.auth_profile == :user
@@ -783,6 +1071,18 @@ defmodule Jido.Connect.Google.DriveTest do
              %{},
              %{scopes: []}
            ) == ["https://www.googleapis.com/auth/drive.readonly"]
+
+    assert resolver.required_scopes(
+             %{id: "google.drive.comments.list"},
+             %{},
+             %{scopes: []}
+           ) == ["https://www.googleapis.com/auth/drive.readonly"]
+
+    assert resolver.required_scopes(
+             %{id: "google.drive.shared_drive.create"},
+             %{},
+             %{scopes: []}
+           ) == ["https://www.googleapis.com/auth/drive"]
 
     assert resolver.required_scopes(
              %{id: "google.drive.changes.watch"},
@@ -1227,6 +1527,208 @@ defmodule Jido.Connect.Google.DriveTest do
              )
   end
 
+  test "invokes comment read actions through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: read_content_scopes())
+
+    assert {:ok,
+            %{
+              comments: [%{comment_id: "comment123", content: "Looks good"}],
+              next_page_token: "next-comment"
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.comments.list",
+               %{file_id: "file123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{comment: %{comment_id: "comment123", content: "Looks good"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.comment.get",
+               %{file_id: "file123", comment_id: "comment123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes comment mutations through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{comment: %{comment_id: "comment456", content: "Looks good"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.comment.create",
+               %{file_id: "file123", content: " Looks good "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{comment: %{comment_id: "comment123", content: "Updated"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.comment.update",
+               %{file_id: "file123", comment_id: "comment123", content: " Updated "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{file_id: "file123", comment_id: "comment123", deleted?: true}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.comment.delete",
+               %{file_id: "file123", comment_id: "comment123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes reply read actions through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: read_content_scopes())
+
+    assert {:ok,
+            %{
+              replies: [%{reply_id: "reply123", content: "Agreed"}],
+              next_page_token: "next-reply"
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.replies.list",
+               %{file_id: "file123", comment_id: "comment123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{reply: %{reply_id: "reply123", content: "Agreed"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.reply.get",
+               %{file_id: "file123", comment_id: "comment123", reply_id: "reply123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes reply mutations through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{reply: %{reply_id: "reply456", content: "Agreed"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.reply.create",
+               %{file_id: "file123", comment_id: "comment123", content: " Agreed "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{reply: %{reply_id: "reply123", content: "Updated"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.reply.update",
+               %{
+                 file_id: "file123",
+                 comment_id: "comment123",
+                 reply_id: "reply123",
+                 content: " Updated "
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok,
+            %{
+              result: %{
+                file_id: "file123",
+                comment_id: "comment123",
+                reply_id: "reply123",
+                deleted?: true
+              }
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.reply.delete",
+               %{file_id: "file123", comment_id: "comment123", reply_id: "reply123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes shared-drive read actions through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: read_content_scopes())
+
+    assert {:ok,
+            %{
+              shared_drives: [%{shared_drive_id: "drive123", name: "Team Drive"}],
+              next_page_token: "next-drive"
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.shared_drives.list",
+               %{},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{shared_drive: %{shared_drive_id: "drive123", name: "Team Drive"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.shared_drive.get",
+               %{shared_drive_id: "drive123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes shared-drive admin mutations through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: full_drive_scopes())
+
+    assert {:ok, %{shared_drive: %{shared_drive_id: "drive123", name: "Team Drive"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.shared_drive.create",
+               %{request_id: " request-123 ", name: " Team Drive "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{shared_drive: %{shared_drive_id: "drive123", name: "Team Drive Renamed"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.shared_drive.update",
+               %{shared_drive_id: "drive123", name: " Team Drive Renamed "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{shared_drive: %{shared_drive_id: "drive123", hidden?: true}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.shared_drive.hide",
+               %{shared_drive_id: "drive123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{shared_drive: %{shared_drive_id: "drive123", hidden?: false}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.shared_drive.unhide",
+               %{shared_drive_id: "drive123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{result: %{shared_drive_id: "drive123", deleted?: true}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.shared_drive.delete",
+               %{shared_drive_id: "drive123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
   test "invokes changes watch through injected client and lease" do
     {context, lease} = context_and_lease()
 
@@ -1418,6 +1920,114 @@ defmodule Jido.Connect.Google.DriveTest do
              )
   end
 
+  test "comment mutations validate content inputs" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_comment,
+              details: %{field: :content}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.comment.create",
+               %{file_id: "file123", content: "  "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_comment,
+              details: %{field: :content}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.comment.update",
+               %{file_id: "file123", comment_id: "comment123", content: "  "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "reply mutations validate payload inputs" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_reply,
+              details: %{field: :reply_create}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.reply.create",
+               %{file_id: "file123", comment_id: "comment123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_reply,
+              details: %{field: :content}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.reply.update",
+               %{
+                 file_id: "file123",
+                 comment_id: "comment123",
+                 reply_id: "reply123",
+                 content: "  "
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "shared-drive mutations validate admin inputs" do
+    {context, lease} = context_and_lease(scopes: full_drive_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_shared_drive,
+              details: %{field: :name}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.shared_drive.create",
+               %{request_id: "request-123", name: "  "},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_shared_drive,
+              details: %{field: :shared_drive_update}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.shared_drive.update",
+               %{shared_drive_id: "drive123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_shared_drive,
+              details: %{field: :allow_item_deletion}
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.shared_drive.delete",
+               %{shared_drive_id: "drive123", allow_item_deletion: true},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
   test "file change poll initializes checkpoint without replaying history" do
     {context, lease} = context_and_lease()
 
@@ -1544,6 +2154,24 @@ defmodule Jido.Connect.Google.DriveTest do
       "email",
       "profile",
       "https://www.googleapis.com/auth/drive.file"
+    ]
+  end
+
+  defp read_content_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/drive.readonly"
+    ]
+  end
+
+  defp full_drive_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/drive"
     ]
   end
 

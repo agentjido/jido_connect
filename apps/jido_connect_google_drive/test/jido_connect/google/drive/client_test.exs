@@ -5,10 +5,13 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     Change,
     Channel,
     Client,
+    Comment,
     Fields,
     File,
     Folder,
     Permission,
+    Reply,
+    SharedDrive,
     Revision
   }
 
@@ -645,6 +648,356 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
 
     assert {:ok, %{file_id: "file123", revision_id: "rev1", deleted?: true}} =
              Client.delete_revision(%{file_id: "file123", revision_id: "rev1"}, "token")
+  end
+
+  test "lists file comments" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/file123/comments"
+      assert conn.query_params["includeDeleted"] == "false"
+      assert conn.query_params["pageSize"] == "25"
+      assert conn.query_params["fields"] == Fields.comment_list()
+
+      Req.Test.json(conn, %{
+        "comments" => [
+          %{"id" => "comment123", "content" => "Looks good", "resolved" => false}
+        ],
+        "nextPageToken" => "next-comment"
+      })
+    end)
+
+    assert {:ok, %{comments: [%Comment{} = comment], next_page_token: "next-comment"}} =
+             Client.list_comments(
+               %{file_id: "file123", include_deleted: false, page_size: 25},
+               "token"
+             )
+
+    assert comment.comment_id == "comment123"
+    assert comment.content == "Looks good"
+  end
+
+  test "gets file comments" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/file123/comments/comment123"
+      assert conn.query_params["includeDeleted"] == "false"
+      assert conn.query_params["fields"] == Fields.comment_metadata()
+
+      Req.Test.json(conn, %{"id" => "comment123", "content" => "Looks good"})
+    end)
+
+    assert {:ok, %Comment{} = comment} =
+             Client.get_comment(
+               %{file_id: "file123", comment_id: "comment123", include_deleted: false},
+               "token"
+             )
+
+    assert comment.comment_id == "comment123"
+  end
+
+  test "creates file comments" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v3/files/file123/comments"
+      assert conn.query_params["fields"] == Fields.comment_metadata()
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "content" => "Looks good",
+               "anchor" => "{\"r\":\"head\"}"
+             }
+
+      Req.Test.json(conn, %{"id" => "comment456", "content" => "Looks good"})
+    end)
+
+    assert {:ok, %Comment{} = comment} =
+             Client.create_comment(
+               %{file_id: "file123", content: "Looks good", anchor: "{\"r\":\"head\"}"},
+               "token"
+             )
+
+    assert comment.comment_id == "comment456"
+  end
+
+  test "updates file comments" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "PATCH"
+      assert conn.request_path == "/v3/files/file123/comments/comment123"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{"content" => "Updated"}
+
+      Req.Test.json(conn, %{"id" => "comment123", "content" => "Updated"})
+    end)
+
+    assert {:ok, %Comment{} = comment} =
+             Client.update_comment(
+               %{file_id: "file123", comment_id: "comment123", content: "Updated"},
+               "token"
+             )
+
+    assert comment.content == "Updated"
+  end
+
+  test "deletes file comments" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "DELETE"
+      assert conn.request_path == "/v3/files/file123/comments/comment123"
+
+      Plug.Conn.resp(conn, 204, "")
+    end)
+
+    assert {:ok, %{file_id: "file123", comment_id: "comment123", deleted?: true}} =
+             Client.delete_comment(%{file_id: "file123", comment_id: "comment123"}, "token")
+  end
+
+  test "lists comment replies" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/file123/comments/comment123/replies"
+      assert conn.query_params["includeDeleted"] == "false"
+      assert conn.query_params["pageSize"] == "25"
+      assert conn.query_params["fields"] == Fields.reply_list()
+
+      Req.Test.json(conn, %{
+        "replies" => [
+          %{"id" => "reply123", "content" => "Agreed"}
+        ],
+        "nextPageToken" => "next-reply"
+      })
+    end)
+
+    assert {:ok, %{replies: [%Reply{} = reply], next_page_token: "next-reply"}} =
+             Client.list_replies(
+               %{
+                 file_id: "file123",
+                 comment_id: "comment123",
+                 include_deleted: false,
+                 page_size: 25
+               },
+               "token"
+             )
+
+    assert reply.reply_id == "reply123"
+  end
+
+  test "gets comment replies" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/file123/comments/comment123/replies/reply123"
+      assert conn.query_params["includeDeleted"] == "false"
+      assert conn.query_params["fields"] == Fields.reply_metadata()
+
+      Req.Test.json(conn, %{"id" => "reply123", "content" => "Agreed"})
+    end)
+
+    assert {:ok, %Reply{} = reply} =
+             Client.get_reply(
+               %{
+                 file_id: "file123",
+                 comment_id: "comment123",
+                 reply_id: "reply123",
+                 include_deleted: false
+               },
+               "token"
+             )
+
+    assert reply.reply_id == "reply123"
+  end
+
+  test "creates comment replies" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v3/files/file123/comments/comment123/replies"
+      assert conn.query_params["fields"] == Fields.reply_metadata()
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{"content" => "Agreed"}
+
+      Req.Test.json(conn, %{"id" => "reply456", "content" => "Agreed"})
+    end)
+
+    assert {:ok, %Reply{} = reply} =
+             Client.create_reply(
+               %{file_id: "file123", comment_id: "comment123", content: "Agreed"},
+               "token"
+             )
+
+    assert reply.reply_id == "reply456"
+  end
+
+  test "updates comment replies" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "PATCH"
+      assert conn.request_path == "/v3/files/file123/comments/comment123/replies/reply123"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{"content" => "Updated"}
+
+      Req.Test.json(conn, %{"id" => "reply123", "content" => "Updated"})
+    end)
+
+    assert {:ok, %Reply{} = reply} =
+             Client.update_reply(
+               %{
+                 file_id: "file123",
+                 comment_id: "comment123",
+                 reply_id: "reply123",
+                 content: "Updated"
+               },
+               "token"
+             )
+
+    assert reply.content == "Updated"
+  end
+
+  test "deletes comment replies" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "DELETE"
+      assert conn.request_path == "/v3/files/file123/comments/comment123/replies/reply123"
+
+      Plug.Conn.resp(conn, 204, "")
+    end)
+
+    assert {:ok,
+            %{file_id: "file123", comment_id: "comment123", reply_id: "reply123", deleted?: true}} =
+             Client.delete_reply(
+               %{file_id: "file123", comment_id: "comment123", reply_id: "reply123"},
+               "token"
+             )
+  end
+
+  test "lists shared drives" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/drives"
+      assert conn.query_params["pageSize"] == "25"
+      assert conn.query_params["q"] == "name contains 'Team'"
+      assert conn.query_params["useDomainAdminAccess"] == "false"
+      assert conn.query_params["fields"] == Fields.shared_drive_list()
+
+      Req.Test.json(conn, %{
+        "drives" => [%{"id" => "drive123", "name" => "Team Drive"}],
+        "nextPageToken" => "next-drive"
+      })
+    end)
+
+    assert {:ok, %{shared_drives: [%SharedDrive{} = shared_drive], next_page_token: "next-drive"}} =
+             Client.list_shared_drives(
+               %{page_size: 25, query: "name contains 'Team'", use_domain_admin_access: false},
+               "token"
+             )
+
+    assert shared_drive.shared_drive_id == "drive123"
+  end
+
+  test "gets shared drives" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/drives/drive123"
+      assert conn.query_params["useDomainAdminAccess"] == "false"
+      assert conn.query_params["fields"] == Fields.shared_drive_metadata()
+
+      Req.Test.json(conn, %{"id" => "drive123", "name" => "Team Drive"})
+    end)
+
+    assert {:ok, %SharedDrive{} = shared_drive} =
+             Client.get_shared_drive(
+               %{shared_drive_id: "drive123", use_domain_admin_access: false},
+               "token"
+             )
+
+    assert shared_drive.name == "Team Drive"
+  end
+
+  test "creates shared drives" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v3/drives"
+      assert conn.query_params["requestId"] == "request-123"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{"name" => "Team Drive"}
+
+      Req.Test.json(conn, %{"id" => "drive123", "name" => "Team Drive"})
+    end)
+
+    assert {:ok, %SharedDrive{} = shared_drive} =
+             Client.create_shared_drive(
+               %{request_id: "request-123", name: "Team Drive"},
+               "token"
+             )
+
+    assert shared_drive.shared_drive_id == "drive123"
+  end
+
+  test "updates shared drives" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "PATCH"
+      assert conn.request_path == "/v3/drives/drive123"
+      assert conn.query_params["useDomainAdminAccess"] == "false"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{"name" => "Team Drive Renamed"}
+
+      Req.Test.json(conn, %{"id" => "drive123", "name" => "Team Drive Renamed"})
+    end)
+
+    assert {:ok, %SharedDrive{} = shared_drive} =
+             Client.update_shared_drive(
+               %{
+                 shared_drive_id: "drive123",
+                 name: "Team Drive Renamed",
+                 use_domain_admin_access: false
+               },
+               "token"
+             )
+
+    assert shared_drive.name == "Team Drive Renamed"
+  end
+
+  test "deletes shared drives" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "DELETE"
+      assert conn.request_path == "/v3/drives/drive123"
+      assert conn.query_params["useDomainAdminAccess"] == "false"
+      assert conn.query_params["allowItemDeletion"] == "false"
+
+      Plug.Conn.resp(conn, 204, "")
+    end)
+
+    assert {:ok, %{shared_drive_id: "drive123", deleted?: true}} =
+             Client.delete_shared_drive(
+               %{
+                 shared_drive_id: "drive123",
+                 use_domain_admin_access: false,
+                 allow_item_deletion: false
+               },
+               "token"
+             )
+  end
+
+  test "hides and unhides shared drives" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path in ["/v3/drives/drive123/hide", "/v3/drives/drive123/unhide"]
+      assert conn.query_params["fields"] == Fields.shared_drive_metadata()
+
+      hidden? = conn.request_path == "/v3/drives/drive123/hide"
+      Req.Test.json(conn, %{"id" => "drive123", "name" => "Team Drive", "hidden" => hidden?})
+    end)
+
+    assert {:ok, %SharedDrive{hidden?: true}} =
+             Client.hide_shared_drive(%{shared_drive_id: "drive123"}, "token")
+
+    assert {:ok, %SharedDrive{hidden?: false}} =
+             Client.unhide_shared_drive(%{shared_drive_id: "drive123"}, "token")
   end
 
   test "gets a change start page token" do

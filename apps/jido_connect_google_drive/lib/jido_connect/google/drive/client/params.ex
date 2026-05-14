@@ -23,6 +23,15 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   @doc "Default revision metadata fields used by revision actions."
   defdelegate default_revision_fields, to: Fields, as: :revision_metadata
 
+  @doc "Default comment metadata fields used by comment actions."
+  defdelegate default_comment_fields, to: Fields, as: :comment_metadata
+
+  @doc "Default reply metadata fields used by reply actions."
+  defdelegate default_reply_fields, to: Fields, as: :reply_metadata
+
+  @doc "Default shared-drive metadata fields used by shared-drive actions."
+  defdelegate default_shared_drive_fields, to: Fields, as: :shared_drive_metadata
+
   @doc "Default change metadata fields used by Drive change pollers."
   def default_change_fields, do: Enum.join(@default_change_fields, ",")
 
@@ -230,6 +239,149 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     |> Data.compact()
   end
 
+  @doc "Builds query params for `comments.list`."
+  def list_comments_params(params) do
+    %{
+      fields: Data.get(params, :fields, comment_list_fields()),
+      includeDeleted: Data.get(params, :include_deleted),
+      pageSize: Data.get(params, :page_size, 100),
+      pageToken: Data.get(params, :page_token),
+      startModifiedTime: Data.get(params, :start_modified_time)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `comments.get`."
+  def get_comment_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_comment_fields()),
+      includeDeleted: Data.get(params, :include_deleted)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for comment create/update responses."
+  def comment_mutation_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_comment_fields())
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a JSON body for comment create/update requests."
+  def comment_body(params) do
+    %{
+      content: Data.get(params, :content),
+      anchor: Data.get(params, :anchor),
+      quotedFileContent: Data.get(params, :quoted_file_content)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `replies.list`."
+  def list_replies_params(params) do
+    %{
+      fields: Data.get(params, :fields, reply_list_fields()),
+      includeDeleted: Data.get(params, :include_deleted),
+      pageSize: Data.get(params, :page_size, 100),
+      pageToken: Data.get(params, :page_token)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `replies.get`."
+  def get_reply_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_reply_fields()),
+      includeDeleted: Data.get(params, :include_deleted)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for reply create/update responses."
+  def reply_mutation_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_reply_fields())
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a JSON body for reply create/update requests."
+  def reply_body(params) do
+    %{
+      content: Data.get(params, :content),
+      action: Data.get(params, :action)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `drives.list`."
+  def list_shared_drives_params(params) do
+    %{
+      fields: Data.get(params, :fields, shared_drive_list_fields()),
+      pageSize: Data.get(params, :page_size, 100),
+      pageToken: Data.get(params, :page_token),
+      q: Data.get(params, :query),
+      useDomainAdminAccess: Data.get(params, :use_domain_admin_access)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `drives.get`."
+  def get_shared_drive_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_shared_drive_fields()),
+      useDomainAdminAccess: Data.get(params, :use_domain_admin_access)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `drives.create`."
+  def create_shared_drive_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_shared_drive_fields()),
+      requestId: Data.get(params, :request_id)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `drives.update`."
+  def update_shared_drive_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_shared_drive_fields()),
+      useDomainAdminAccess: Data.get(params, :use_domain_admin_access)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `drives.delete`."
+  def delete_shared_drive_params(params) do
+    %{
+      useDomainAdminAccess: Data.get(params, :use_domain_admin_access),
+      allowItemDeletion: Data.get(params, :allow_item_deletion)
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds query params for `drives.hide` and `drives.unhide`."
+  def shared_drive_visibility_params(params) do
+    %{
+      fields: Data.get(params, :fields, default_shared_drive_fields())
+    }
+    |> Data.compact()
+  end
+
+  @doc "Builds a JSON body for shared-drive create/update requests."
+  def shared_drive_body(params) do
+    %{
+      name: Data.get(params, :name),
+      colorRgb: Data.get(params, :color_rgb),
+      themeId: Data.get(params, :theme_id),
+      restrictions: Data.get(params, :restrictions)
+    }
+    |> Data.compact()
+  end
+
   @doc "Builds query params for `changes.getStartPageToken`."
   def start_page_token_params(params) do
     %{
@@ -312,6 +464,12 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   defp permission_list_fields, do: Fields.permission_list()
 
   defp revision_list_fields, do: Fields.revision_list()
+
+  defp comment_list_fields, do: Fields.comment_list()
+
+  defp reply_list_fields, do: Fields.reply_list()
+
+  defp shared_drive_list_fields, do: Fields.shared_drive_list()
 
   defp change_list_fields,
     do: "nextPageToken,newStartPageToken,changes(#{default_change_fields()})"

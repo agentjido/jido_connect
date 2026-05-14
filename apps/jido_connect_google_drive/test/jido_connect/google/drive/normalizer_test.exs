@@ -4,10 +4,13 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
   alias Jido.Connect.Google.Drive.{
     Change,
     Channel,
+    Comment,
     File,
     Folder,
     Normalizer,
     Permission,
+    Reply,
+    SharedDrive,
     Revision
   }
 
@@ -96,6 +99,72 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
     refute revision.published?
     assert revision.size == 4096
     assert revision.export_links == %{"application/pdf" => "https://example.com/export"}
+  end
+
+  test "normalizes comment payloads with embedded replies" do
+    assert {:ok, %Comment{} = comment} =
+             Normalizer.comment(%{
+               "id" => "comment123",
+               "kind" => "drive#comment",
+               "createdTime" => "2026-05-05T12:00:00Z",
+               "modifiedTime" => "2026-05-05T12:05:00Z",
+               "resolved" => true,
+               "author" => %{"displayName" => "Author"},
+               "htmlContent" => "<p>Looks good</p>",
+               "content" => "Looks good",
+               "quotedFileContent" => %{"mimeType" => "text/plain", "value" => "Quote"},
+               "replies" => [
+                 %{
+                   "id" => "reply123",
+                   "action" => "resolve",
+                   "content" => "Done"
+                 }
+               ]
+             })
+
+    assert comment.comment_id == "comment123"
+    assert comment.resolved?
+    assert comment.content == "Looks good"
+    assert [%{reply_id: "reply123", action: "resolve"}] = comment.replies
+  end
+
+  test "normalizes reply payloads" do
+    assert {:ok, %Reply{} = reply} =
+             Normalizer.reply(%{
+               "id" => "reply123",
+               "kind" => "drive#reply",
+               "createdTime" => "2026-05-05T12:00:00Z",
+               "modifiedTime" => "2026-05-05T12:05:00Z",
+               "action" => "reopen",
+               "author" => %{"displayName" => "Author"},
+               "htmlContent" => "<p>Reopened</p>",
+               "content" => "Reopened"
+             })
+
+    assert reply.reply_id == "reply123"
+    assert reply.action == "reopen"
+    assert reply.content == "Reopened"
+  end
+
+  test "normalizes shared-drive payloads" do
+    assert {:ok, %SharedDrive{} = shared_drive} =
+             Normalizer.shared_drive(%{
+               "id" => "drive123",
+               "name" => "Team Drive",
+               "kind" => "drive#drive",
+               "colorRgb" => "#0B57D0",
+               "backgroundImageLink" => "https://example.com/background.png",
+               "createdTime" => "2026-05-05T12:00:00Z",
+               "hidden" => true,
+               "capabilities" => %{"canDeleteDrive" => false},
+               "restrictions" => %{"driveMembersOnly" => true},
+               "orgUnitId" => "ou123"
+             })
+
+    assert shared_drive.shared_drive_id == "drive123"
+    assert shared_drive.name == "Team Drive"
+    assert shared_drive.hidden?
+    assert shared_drive.capabilities == %{"canDeleteDrive" => false}
   end
 
   test "normalizes change payloads with embedded files" do
@@ -197,5 +266,32 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
     )
 
     assert {:error, _error} = Revision.new(%{})
+
+    ConnectorContracts.assert_struct_defaults(Comment, %{comment_id: "comment123"},
+      resolved?: false,
+      deleted?: false,
+      replies: [],
+      metadata: %{}
+    )
+
+    assert {:error, _error} = Comment.new(%{})
+
+    ConnectorContracts.assert_struct_defaults(Reply, %{reply_id: "reply123"},
+      deleted?: false,
+      metadata: %{}
+    )
+
+    assert {:error, _error} = Reply.new(%{})
+
+    ConnectorContracts.assert_struct_defaults(
+      SharedDrive,
+      %{shared_drive_id: "drive123", name: "Team Drive"},
+      hidden?: false,
+      capabilities: %{},
+      restrictions: %{},
+      metadata: %{}
+    )
+
+    assert {:error, _error} = SharedDrive.new(%{shared_drive_id: "drive123"})
   end
 end

@@ -21,6 +21,7 @@ defmodule Jido.Connect.Google.Scopes do
       "https://mail.google.com/"
     ],
     drive: [
+      "https://www.googleapis.com/auth/drive",
       "https://www.googleapis.com/auth/drive.metadata.readonly",
       "https://www.googleapis.com/auth/drive.file",
       "https://www.googleapis.com/auth/drive.readonly"

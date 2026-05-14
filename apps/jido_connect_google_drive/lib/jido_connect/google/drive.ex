@@ -10,6 +10,9 @@ defmodule Jido.Connect.Google.Drive do
       Jido.Connect.Google.Drive.Actions.FileContent,
       Jido.Connect.Google.Drive.Actions.Permissions,
       Jido.Connect.Google.Drive.Actions.Revisions,
+      Jido.Connect.Google.Drive.Actions.Comments,
+      Jido.Connect.Google.Drive.Actions.Replies,
+      Jido.Connect.Google.Drive.Actions.SharedDrives,
       Jido.Connect.Google.Drive.Actions.Watch,
       Jido.Connect.Google.Drive.Triggers.Changes
     ]

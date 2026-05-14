@@ -12,6 +12,12 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
     "google.drive.permission.get",
     "google.drive.revisions.list",
     "google.drive.revision.get",
+    "google.drive.comments.list",
+    "google.drive.comment.get",
+    "google.drive.replies.list",
+    "google.drive.reply.get",
+    "google.drive.shared_drives.list",
+    "google.drive.shared_drive.get",
     "google.drive.file.changed",
     "google.drive.file.changed.push"
   ]
@@ -40,7 +46,7 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
       id: :google_drive_readonly,
       label: "Google Drive read-only",
       description:
-        "Read Drive metadata, file content, permissions, and change events without mutation tools.",
+        "Read Drive metadata, file content, comments, permissions, shared drives, and change events without mutation tools.",
       filters: %{provider: :google_drive},
       allowed_tools: @readonly_tools,
       metadata: %{package: :jido_connect_google_drive, risk: :read}
@@ -53,7 +59,7 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
       id: :google_drive_file_writer,
       label: "Google Drive file writer",
       description:
-        "Read and mutate Drive file metadata. Excludes deletes and permission sharing.",
+        "Read and mutate Drive file metadata. Excludes deletes, collaboration changes, and shared-drive administration.",
       filters: %{provider: :google_drive},
       allowed_tools: @file_writer_tools,
       metadata: %{
@@ -64,7 +70,18 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
           "google.drive.permission.update",
           "google.drive.permission.delete",
           "google.drive.revision.update",
-          "google.drive.revision.delete"
+          "google.drive.revision.delete",
+          "google.drive.comment.create",
+          "google.drive.comment.update",
+          "google.drive.comment.delete",
+          "google.drive.reply.create",
+          "google.drive.reply.update",
+          "google.drive.reply.delete",
+          "google.drive.shared_drive.create",
+          "google.drive.shared_drive.update",
+          "google.drive.shared_drive.delete",
+          "google.drive.shared_drive.hide",
+          "google.drive.shared_drive.unhide"
         ]
       }
     })

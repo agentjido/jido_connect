@@ -26,6 +26,23 @@ schemas, normalized structs, and tests in this package.
 - `google.drive.revision.get`
 - `google.drive.revision.update`
 - `google.drive.revision.delete`
+- `google.drive.comments.list`
+- `google.drive.comment.get`
+- `google.drive.comment.create`
+- `google.drive.comment.update`
+- `google.drive.comment.delete`
+- `google.drive.replies.list`
+- `google.drive.reply.get`
+- `google.drive.reply.create`
+- `google.drive.reply.update`
+- `google.drive.reply.delete`
+- `google.drive.shared_drives.list`
+- `google.drive.shared_drive.get`
+- `google.drive.shared_drive.create`
+- `google.drive.shared_drive.update`
+- `google.drive.shared_drive.delete`
+- `google.drive.shared_drive.hide`
+- `google.drive.shared_drive.unhide`
 - `google.drive.changes.watch`
 - `google.drive.file.watch`
 - `google.drive.channel.stop`
@@ -78,6 +95,9 @@ Fields.file_with_permissions()
 Fields.file_list_with_permissions()
 Fields.permission_list()
 Fields.revision_list()
+Fields.comment_list()
+Fields.reply_list()
+Fields.shared_drive_list()
 ```
 
 For example, pass `Fields.file_list_with_permissions()` to
@@ -97,12 +117,15 @@ fields.metadata.presets.with_permissions
 ## Catalog Packs
 
 - `:google_drive_readonly` includes metadata reads, content reads, permission
-  reads, revision reads, file-change polling, and file-change webhook metadata.
+  reads, revision reads, comment/reply reads, shared-drive reads, file-change
+  polling, and file-change webhook metadata.
 - `:google_drive_file_writer` adds common file metadata writes and folder
   creation. It intentionally excludes destructive delete, permission sharing,
-  permission lifecycle mutations, and revision lifecycle mutations.
+  permission lifecycle mutations, revision lifecycle mutations, comment/reply
+  mutations, and shared-drive administration.
 - `:google_drive_watch` adds Drive push channel lifecycle actions for file and
-  change notifications. It excludes file deletion and permission sharing.
+  change notifications. It excludes file deletion, permission sharing,
+  comment/reply mutation, and shared-drive administration.
 
 ```elixir
 Jido.Connect.Catalog.search_tools("drive",
@@ -118,6 +141,10 @@ The connector prefers narrow Drive scopes:
 
 - `drive.metadata.readonly` for metadata reads, permission listing, and change
   polling or push channel lifecycle.
-- `drive.readonly` for file content export/download.
+- `drive.readonly` for file content export/download, comment/reply reads, and
+  shared-drive reads.
 - `drive.file` for app-managed file writes, deletes, permission lifecycle
-  mutations, and revision lifecycle mutations.
+  mutations, revision lifecycle mutations, and app-managed comment/reply
+  mutations.
+- `drive` for shared-drive administration such as create/update/delete,
+  hide, and unhide.

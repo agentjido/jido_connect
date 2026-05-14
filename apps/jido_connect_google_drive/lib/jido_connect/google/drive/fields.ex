@@ -57,6 +57,48 @@ defmodule Jido.Connect.Google.Drive.Fields do
     "exportLinks"
   ]
 
+  @reply_metadata [
+    "id",
+    "kind",
+    "createdTime",
+    "modifiedTime",
+    "action",
+    "author",
+    "deleted",
+    "htmlContent",
+    "content"
+  ]
+
+  @comment_metadata [
+    "id",
+    "kind",
+    "createdTime",
+    "modifiedTime",
+    "resolved",
+    "anchor",
+    "author",
+    "deleted",
+    "htmlContent",
+    "content",
+    "quotedFileContent",
+    "replies(#{Enum.join(@reply_metadata, ",")})"
+  ]
+
+  @shared_drive_metadata [
+    "id",
+    "name",
+    "kind",
+    "colorRgb",
+    "themeId",
+    "backgroundImageLink",
+    "backgroundImageFile",
+    "createdTime",
+    "hidden",
+    "capabilities",
+    "restrictions",
+    "orgUnitId"
+  ]
+
   @permission_views ["published"]
 
   @doc "Google Drive permission views accepted by `includePermissionsForView`."
@@ -70,6 +112,15 @@ defmodule Jido.Connect.Google.Drive.Fields do
 
   @doc "Default Drive revision metadata fields."
   def revision_metadata, do: join(@revision_metadata)
+
+  @doc "Default Drive comment metadata fields."
+  def comment_metadata, do: join(@comment_metadata)
+
+  @doc "Default Drive reply metadata fields."
+  def reply_metadata, do: join(@reply_metadata)
+
+  @doc "Default Drive shared-drive metadata fields."
+  def shared_drive_metadata, do: join(@shared_drive_metadata)
 
   @doc "Drive file metadata with embedded permission metadata."
   def file_with_permissions do
@@ -87,6 +138,15 @@ defmodule Jido.Connect.Google.Drive.Fields do
 
   @doc "Default `revisions.list` field expression."
   def revision_list, do: "nextPageToken,revisions(#{revision_metadata()})"
+
+  @doc "Default `comments.list` field expression."
+  def comment_list, do: "nextPageToken,comments(#{comment_metadata()})"
+
+  @doc "Default `replies.list` field expression."
+  def reply_list, do: "nextPageToken,replies(#{reply_metadata()})"
+
+  @doc "Default `drives.list` field expression."
+  def shared_drive_list, do: "nextPageToken,drives(#{shared_drive_metadata()})"
 
   @doc "Field presets for single-file metadata actions."
   def file_presets do
@@ -131,6 +191,52 @@ defmodule Jido.Connect.Google.Drive.Fields do
     %{
       default: revision_list(),
       revision_metadata: revision_metadata()
+    }
+  end
+
+  @doc "Field presets for single-comment actions."
+  def comment_presets do
+    %{
+      default: comment_metadata(),
+      reply_metadata: reply_metadata()
+    }
+  end
+
+  @doc "Field presets for `comments.list`."
+  def comment_list_presets do
+    %{
+      default: comment_list(),
+      comment_metadata: comment_metadata()
+    }
+  end
+
+  @doc "Field presets for single-reply actions."
+  def reply_presets do
+    %{
+      default: reply_metadata()
+    }
+  end
+
+  @doc "Field presets for `replies.list`."
+  def reply_list_presets do
+    %{
+      default: reply_list(),
+      reply_metadata: reply_metadata()
+    }
+  end
+
+  @doc "Field presets for single shared-drive actions."
+  def shared_drive_presets do
+    %{
+      default: shared_drive_metadata()
+    }
+  end
+
+  @doc "Field presets for `drives.list`."
+  def shared_drive_list_presets do
+    %{
+      default: shared_drive_list(),
+      shared_drive_metadata: shared_drive_metadata()
     }
   end
 

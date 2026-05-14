@@ -164,6 +164,161 @@ defmodule Jido.Connect.Google.Drive.Client.Response do
   def handle_revision_delete_response(response, _params),
     do: Transport.handle_error_response(response)
 
+  def handle_comment_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, comments} <-
+           normalize_items(
+             body,
+             "comments",
+             &Normalizer.comment/1,
+             "Google Drive comment list response was invalid"
+           ) do
+      {:ok,
+       %{
+         comments: comments,
+         next_page_token: Data.get(body, "nextPageToken")
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_comment_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Drive comment list response was invalid", body)
+  end
+
+  def handle_comment_list_response(response), do: Transport.handle_error_response(response)
+
+  def handle_comment_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.comment/1, "Google Drive comment response was invalid")
+  end
+
+  def handle_comment_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Drive comment response was invalid", body)
+  end
+
+  def handle_comment_response(response), do: Transport.handle_error_response(response)
+
+  def handle_comment_delete_response({:ok, %{status: status}}, params) when status in 200..299 do
+    {:ok,
+     %{
+       file_id: Data.get(params, :file_id),
+       comment_id: Data.get(params, :comment_id),
+       deleted?: true
+     }}
+  end
+
+  def handle_comment_delete_response(response, _params),
+    do: Transport.handle_error_response(response)
+
+  def handle_reply_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, replies} <-
+           normalize_items(
+             body,
+             "replies",
+             &Normalizer.reply/1,
+             "Google Drive reply list response was invalid"
+           ) do
+      {:ok,
+       %{
+         replies: replies,
+         next_page_token: Data.get(body, "nextPageToken")
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_reply_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Drive reply list response was invalid", body)
+  end
+
+  def handle_reply_list_response(response), do: Transport.handle_error_response(response)
+
+  def handle_reply_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.reply/1, "Google Drive reply response was invalid")
+  end
+
+  def handle_reply_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Drive reply response was invalid", body)
+  end
+
+  def handle_reply_response(response), do: Transport.handle_error_response(response)
+
+  def handle_reply_delete_response({:ok, %{status: status}}, params) when status in 200..299 do
+    {:ok,
+     %{
+       file_id: Data.get(params, :file_id),
+       comment_id: Data.get(params, :comment_id),
+       reply_id: Data.get(params, :reply_id),
+       deleted?: true
+     }}
+  end
+
+  def handle_reply_delete_response(response, _params),
+    do: Transport.handle_error_response(response)
+
+  def handle_shared_drive_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, shared_drives} <-
+           normalize_items(
+             body,
+             "drives",
+             &Normalizer.shared_drive/1,
+             "Google Drive shared-drive list response was invalid"
+           ) do
+      {:ok,
+       %{
+         shared_drives: shared_drives,
+         next_page_token: Data.get(body, "nextPageToken")
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_shared_drive_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response(
+      "Google Drive shared-drive list response was invalid",
+      body
+    )
+  end
+
+  def handle_shared_drive_list_response(response), do: Transport.handle_error_response(response)
+
+  def handle_shared_drive_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(
+      body,
+      &Normalizer.shared_drive/1,
+      "Google Drive shared-drive response was invalid"
+    )
+  end
+
+  def handle_shared_drive_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Drive shared-drive response was invalid", body)
+  end
+
+  def handle_shared_drive_response(response), do: Transport.handle_error_response(response)
+
+  def handle_shared_drive_delete_response({:ok, %{status: status}}, params)
+      when status in 200..299 do
+    {:ok,
+     %{
+       shared_drive_id: Data.get(params, :shared_drive_id),
+       deleted?: true
+     }}
+  end
+
+  def handle_shared_drive_delete_response(response, _params),
+    do: Transport.handle_error_response(response)
+
   def handle_start_page_token_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
     case Data.get(body, "startPageToken") do

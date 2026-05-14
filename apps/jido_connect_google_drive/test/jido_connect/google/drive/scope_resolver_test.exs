@@ -5,6 +5,7 @@ defmodule Jido.Connect.Google.Drive.ScopeResolverTest do
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
 
   @metadata_scope "https://www.googleapis.com/auth/drive.metadata.readonly"
+  @drive_scope "https://www.googleapis.com/auth/drive"
   @file_scope "https://www.googleapis.com/auth/drive.file"
   @readonly_scope "https://www.googleapis.com/auth/drive.readonly"
 
@@ -65,6 +66,12 @@ defmodule Jido.Connect.Google.Drive.ScopeResolverTest do
         expected: @file_scope
       },
       %{
+        label: "file mutation accepts full drive grant",
+        operation: "google.drive.file.update",
+        granted: [@drive_scope],
+        expected: @drive_scope
+      },
+      %{
         label: "permission mutation requires drive.file scope",
         operation: "google.drive.permission.update",
         granted: [],
@@ -75,6 +82,36 @@ defmodule Jido.Connect.Google.Drive.ScopeResolverTest do
         operation: "google.drive.revision.delete",
         granted: [],
         expected: @file_scope
+      },
+      %{
+        label: "comment read defaults to file content readonly scope",
+        operation: "google.drive.comments.list",
+        granted: [],
+        expected: @readonly_scope
+      },
+      %{
+        label: "reply read accepts drive.file for app-owned files",
+        operation: "google.drive.reply.get",
+        granted: [@file_scope],
+        expected: @file_scope
+      },
+      %{
+        label: "shared drive reads require broad readonly by default",
+        operation: "google.drive.shared_drives.list",
+        granted: [],
+        expected: @readonly_scope
+      },
+      %{
+        label: "shared drive reads accept full drive grant",
+        operation: "google.drive.shared_drive.get",
+        granted: [@drive_scope],
+        expected: @drive_scope
+      },
+      %{
+        label: "shared drive administration requires full drive scope",
+        operation: "google.drive.shared_drive.delete",
+        granted: [@readonly_scope],
+        expected: @drive_scope
       },
       %{
         label: "changes watch defaults to metadata read scope",
