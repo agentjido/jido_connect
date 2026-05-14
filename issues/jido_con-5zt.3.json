@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5zt.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5zt.4"
+  ],
   "created": "2026-05-14T14:58:12Z",
   "description": "Add Gmail watch/stop lifecycle actions, explicit history.list action, webhook trigger metadata, and message attachment get support.",
   "id": "jido_con-5zt.3",
