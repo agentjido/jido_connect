@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-14T14:35:48Z",
+  "description": "Add the umbrella app, mix config, package README, provider module, catalog-pack shell, AGENTS guidance, and baseline compile/test wiring for Google Docs.",
+  "id": "jido_con-fle.1",
+  "labels": [],
+  "parent": "jido_con-fle",
+  "priority": 1,
+  "status": "open",
+  "title": "[G14-S01] Scaffold jido_connect_google_docs",
+  "type": "task",
+  "updated_at": "2026-05-14T14:35:48Z"
+}
