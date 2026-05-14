@@ -1,6 +1,7 @@
 {
   "assignee": "",
   "blocked_by": [
+    "jido_con-5zt",
     "jido_con-b9n",
     "jido_con-nmq"
   ],
@@ -18,5 +19,5 @@
   "status": "open",
   "title": "[G10] Google Search Console Connector",
   "type": "epic",
-  "updated_at": "2026-05-14T14:35:57Z"
+  "updated_at": "2026-05-14T15:03:44Z"
 }
