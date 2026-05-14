@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-nmq.1"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-nmq",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G13-S02] Compare current packages against provider APIs",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:59Z"
+  "updated_at": "2026-05-14T14:51:59Z"
 }
