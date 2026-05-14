@@ -363,6 +363,8 @@ defmodule Jido.Connect.Google.SheetsTest do
       readonly_pack: :google_sheets_readonly,
       writer_pack: :google_sheets_writer
     )
+
+    ConnectorContracts.assert_plugin_tool_availability(Sheets)
   end
 
   test "loads Sheets Spark DSL fragments" do

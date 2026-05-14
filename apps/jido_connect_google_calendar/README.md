@@ -76,6 +76,21 @@ Jido.Connect.Catalog.search_tools("calendar",
 )
 ```
 
+## Tool Availability
+
+Generated plugin availability covers every Calendar action and trigger,
+including poll and webhook metadata. Hosts can pass a durable connection plus
+optional allow lists to see `:available`, `:missing_scopes`,
+`:connection_required`, or `:disabled_by_policy` per tool:
+
+```elixir
+Jido.Connect.Google.Calendar.Plugin.tool_availability(%{
+  connection: connection,
+  allowed_actions: ["google.calendar.event.list"],
+  allowed_triggers: ["google.calendar.event.changed"]
+})
+```
+
 ## Scopes
 
 The connector prefers narrow Calendar scopes:

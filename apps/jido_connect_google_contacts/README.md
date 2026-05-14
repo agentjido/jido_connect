@@ -61,6 +61,20 @@ Jido.Connect.Catalog.search_tools("contacts",
 )
 ```
 
+## Tool Availability
+
+Generated plugin availability covers every Contacts action and trigger. Hosts
+can pass a durable connection plus optional allow lists to see `:available`,
+`:missing_scopes`, `:connection_required`, or `:disabled_by_policy` per tool:
+
+```elixir
+Jido.Connect.Google.Contacts.Plugin.tool_availability(%{
+  connection: connection,
+  allowed_actions: ["google.contacts.person.list"],
+  allowed_triggers: ["google.contacts.person.changed"]
+})
+```
+
 ## Scopes
 
 The connector starts with the narrow Contacts scopes from the shared Google

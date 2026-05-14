@@ -2,8 +2,8 @@
 
 This document compares the current Google connector packages against the
 official Google REST API surfaces as of May 14, 2026. It builds on
-`docs/google_surface_audit.md` and should feed `jido_con-nmq.3`, where the
-high-value gaps become concrete Beadwork tickets.
+`docs/google_surface_audit.md` and records the post-expansion state after the
+high-value gaps were converted into Beadwork tickets and implemented.
 
 The goal is connector-specific expansion, not a provider-neutral query DSL in
 `jido_connect`. Filtering, field masks, search syntax, data filters, and
@@ -31,8 +31,8 @@ Official references used for this comparison:
 
 | Package | Current Shape | High-Value Gaps | Notes |
 | --- | --- | --- | --- |
-| Sheets | Strong single-range read/write and structural batch update coverage. | Spreadsheet create, value batch operations, data-filter operations, developer metadata, sheet copy. | No native Sheets watch surface in the REST reference; Drive file-change triggers can cover spreadsheet file changes. |
-| Gmail | Strong metadata, message/thread reads, send, draft create/send, label triage, and poll trigger coverage. | Watch/stop lifecycle, history action, attachments, draft management, batch modify/delete, label get/update/delete, message/thread trash/delete. | Settings and CSE surfaces are large and sensitive; keep them out of default packs. |
+| Sheets | Strong spreadsheet create/read, values read/write/batch, data-filter, developer metadata, and structural batch update coverage. | Sheet copy. | No native Sheets watch surface in the REST reference; Drive file-change triggers can cover spreadsheet file changes. |
+| Gmail | Strong metadata, message/thread reads, send, draft lifecycle, label lifecycle, attachments, history, batch triage/delete, watch/stop lifecycle, poll trigger, and webhook trigger metadata coverage. | Settings and specialized import/insert workflows. | Settings and CSE surfaces are large and sensitive; keep them out of default packs. |
 | Drive | Strong file metadata/content, basic file writes, permission lifecycle, revision lifecycle, comments/replies, shared-drive lifecycle, service-account profiles, poll trigger coverage, and watch/channel lifecycle metadata. | Labels, about/apps, access proposals/approvals. | No whole-drive count or whole-drive principals endpoint in Drive v3; counts/principals remain composed intents. |
 | Calendar | Strong event list/get/create/update/delete/instances/move, calendar and CalendarList lifecycle, ACL lifecycle, free/busy, availability, poll trigger coverage, and watch/channel lifecycle metadata. | Event quickAdd/import, colors, and settings reads. | Event polling and provider push channel metadata now both exist. |
 | Contacts | Strong personal contact, batch contact, directory, other-contact, contact-group read/mutation, group membership, and sync-token poll trigger coverage. | Contact photo actions. | People API exposes sync tokens for incremental connections but no generic watch endpoint. |
@@ -46,25 +46,27 @@ Official REST resources include `spreadsheets`, `spreadsheets.values`,
 
 ### Covered
 
+- `spreadsheets.create`
 - `spreadsheets.get`
+- `spreadsheets.getByDataFilter`
 - `spreadsheets.batchUpdate`
 - `spreadsheets.values.get`
+- `spreadsheets.values.batchGet`
+- `spreadsheets.values.batchGetByDataFilter`
 - `spreadsheets.values.update`
 - `spreadsheets.values.append`
 - `spreadsheets.values.clear`
+- `spreadsheets.values.batchUpdate`
+- `spreadsheets.values.batchUpdateByDataFilter`
+- `spreadsheets.values.batchClear`
+- `spreadsheets.values.batchClearByDataFilter`
+- `spreadsheets.developerMetadata.get/search`
 - Sheet add/delete/rename through structural batch update wrappers.
 
 ### Missing Provider Operations
 
 | Provider Operation | Candidate Action | Priority | Rationale |
 | --- | --- | --- | --- |
-| `spreadsheets.create` | `google.sheets.spreadsheet.create` | High | Hosts need to create spreadsheets without dropping to raw Drive file creation plus manual Sheets setup. |
-| `spreadsheets.values.batchGet` | `google.sheets.values.batch_get` | High | Common read path for dashboards and sync jobs; safer than repeated single-range calls. |
-| `spreadsheets.values.batchUpdate` | `google.sheets.values.batch_update` | High | Common multi-range write path with narrower semantics than broad structural `batch_update`. |
-| `spreadsheets.values.batchClear` | `google.sheets.values.batch_clear` | Medium | Completes the value batch family; destructive and should require confirmation. |
-| `spreadsheets.getByDataFilter` | `google.sheets.spreadsheet.get_by_data_filter` | Medium | Provider-specific filtered read surface; belongs in Sheets, not core. |
-| `spreadsheets.values.*ByDataFilter` | Data-filter value actions | Medium | Useful once provider-specific filter schemas are stable. |
-| `spreadsheets.developerMetadata.get/search` | Developer metadata actions | Medium | Important for host-owned tagging and sync correlation. |
 | `spreadsheets.sheets.copyTo` | `google.sheets.sheet.copy_to` | Low | Useful but less central than value batch and create operations. |
 
 ### Trigger Notes
@@ -84,24 +86,20 @@ settings resources.
 ### Covered
 
 - `users.getProfile`
-- `users.messages.list/get/send/modify`
-- `users.threads.list/get`
-- `users.drafts.create/send`
-- `users.labels.list/create`
+- `users.watch` / `users.stop`
+- `users.history.list`
+- `users.messages.list/get/send/modify/batchModify/trash/untrash/delete/batchDelete`
+- `users.messages.attachments.get`
+- `users.threads.list/get/modify/trash/untrash/delete`
+- `users.drafts.list/get/create/update/send/delete`
+- `users.labels.list/get/create/update/delete`
 - Polling trigger over message history.
+- Webhook trigger metadata for Gmail Pub/Sub push notifications.
 
 ### Missing Provider Operations
 
 | Provider Operation | Candidate Action/Trigger | Priority | Rationale |
 | --- | --- | --- | --- |
-| `users.watch` / `users.stop` | Gmail watch lifecycle actions and webhook trigger metadata | High | Needed for provider push instead of polling-only message change detection. |
-| `users.history.list` | `google.gmail.history.list` | High | Makes checkpoint debugging and host-owned replay more explicit. |
-| `users.messages.attachments.get` | `google.gmail.attachment.get` | High | Common read path once message metadata reveals attachments. |
-| `users.drafts.list/get/update/delete` | Draft management actions | High | Current package can create/send drafts but cannot review or edit them. |
-| `users.messages.batchModify` | `google.gmail.messages.batch_modify` | Medium | Efficient triage for multiple messages; same provider concern as label application. |
-| `users.messages.trash/untrash/delete/batchDelete` | Message removal actions | Medium | Useful but destructive; keep out of default packs. |
-| `users.threads.modify/trash/untrash/delete` | Thread mutation actions | Medium | Complements current thread reads. |
-| `users.labels.get/patch/update/delete` | Label management actions | Medium | Completes label lifecycle beyond list/create. |
 | `users.settings.*` | Settings action family | Low | Large, sensitive surface. Split into a later explicit Gmail settings epic if needed. |
 | `users.messages.import/insert` | Import/insert actions | Low | Specialized migration/admin workflows; avoid default catalog packs. |
 
@@ -225,9 +223,12 @@ Official People API resources include `people`, `people.connections`,
   from default packs unless a new pack explicitly names that risk.
 - Webhook/watch lifecycle actions should be discoverable via action/trigger
   metadata so host apps can expose provider availability without hardcoded maps.
+- Generated plugin `tool_availability/1` is the current availability surface
+  for host apps. It reports action and trigger ids with connection, scope, and
+  allow-list states without requiring credential leases or provider API calls.
 
 ## Next Beadwork Step
 
-`jido_con-nmq.3` should convert the high-priority and selected medium-priority
-rows into package-specific tasks. Avoid creating tickets for every provider
-method; create tickets around coherent action families with a clear host value.
+`jido_con-5zt.12` closes the current-package expansion by refreshing catalog
+packs, package docs, and action availability tests before the new Google product
+package epics begin.

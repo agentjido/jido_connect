@@ -644,6 +644,8 @@ defmodule Jido.Connect.GmailTest do
       send_pack: :google_gmail_send,
       destructive_pack: :google_gmail_destructive
     )
+
+    ConnectorContracts.assert_plugin_tool_availability(Gmail)
   end
 
   test "loads Gmail Spark DSL fragments" do

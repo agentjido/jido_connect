@@ -93,6 +93,19 @@ descriptor.tool.id
 #=> "google.sheets.values.get"
 ```
 
+## Tool Availability
+
+Generated plugin availability covers every Sheets action. Hosts can pass a
+durable connection plus optional allow lists to see `:available`,
+`:missing_scopes`, `:connection_required`, or `:disabled_by_policy` per tool:
+
+```elixir
+Jido.Connect.Google.Sheets.Plugin.tool_availability(%{
+  connection: connection,
+  allowed_actions: ["google.sheets.values.get"]
+})
+```
+
 ## Calling A Tool
 
 Hosts own connection lookup, credential leasing, persistence, and policy. Pass

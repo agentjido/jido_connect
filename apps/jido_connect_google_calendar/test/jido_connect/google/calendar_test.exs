@@ -873,6 +873,8 @@ defmodule Jido.Connect.Google.CalendarTest do
       watch_pack: :google_calendar_watch,
       manager_pack: :google_calendar_manager
     )
+
+    ConnectorContracts.assert_plugin_tool_availability(Calendar)
   end
 
   test "loads Calendar Spark DSL fragments" do

@@ -88,6 +88,21 @@ Jido.Connect.Catalog.search_tools("gmail",
 )
 ```
 
+## Tool Availability
+
+Generated plugin availability covers every Gmail action and trigger, including
+mailbox polling and webhook metadata. Hosts can pass a durable connection plus
+optional allow lists to see `:available`, `:missing_scopes`,
+`:connection_required`, or `:disabled_by_policy` per tool:
+
+```elixir
+Jido.Connect.Gmail.Plugin.tool_availability(%{
+  connection: connection,
+  allowed_actions: ["google.gmail.messages.list"],
+  allowed_triggers: ["google.gmail.message.received"]
+})
+```
+
 ## Scopes
 
 The connector prefers narrow Gmail scopes:

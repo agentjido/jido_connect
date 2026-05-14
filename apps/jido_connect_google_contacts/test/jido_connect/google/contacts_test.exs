@@ -416,6 +416,8 @@ defmodule Jido.Connect.Google.ContactsTest do
       readonly_pack: :google_contacts_readonly,
       manager_pack: :google_contacts_manager
     )
+
+    ConnectorContracts.assert_plugin_tool_availability(Contacts)
   end
 
   test "loads Contacts Spark DSL fragments" do

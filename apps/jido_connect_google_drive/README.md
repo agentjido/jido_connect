@@ -135,6 +135,21 @@ Jido.Connect.Catalog.search_tools("drive",
 )
 ```
 
+## Tool Availability
+
+Generated plugin availability covers every Drive action and trigger, including
+poll and webhook metadata. Hosts can pass a durable connection plus optional
+allow lists to see `:available`, `:missing_scopes`, `:connection_required`, or
+`:disabled_by_policy` per tool:
+
+```elixir
+Jido.Connect.Google.Drive.Plugin.tool_availability(%{
+  connection: connection,
+  allowed_actions: ["google.drive.files.list"],
+  allowed_triggers: ["google.drive.file.changed"]
+})
+```
+
 ## Scopes
 
 The connector prefers narrow Drive scopes:

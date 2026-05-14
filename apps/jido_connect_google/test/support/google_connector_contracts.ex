@@ -71,6 +71,23 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
            } = plugin_module.plugin_spec()
   end
 
+  @doc "Asserts generated plugin tool availability for all provider actions and triggers."
+  def assert_plugin_tool_availability(provider) do
+    spec = provider.integration()
+    plugin_module = provider.jido_plugin_module()
+    tool_ids = Enum.map(spec.actions ++ spec.triggers, & &1.id)
+
+    assert_availability_ids(plugin_module.tool_availability(), tool_ids)
+
+    for availability <- plugin_module.tool_availability() do
+      assert availability.state == :connection_required
+    end
+
+    assert_action_allow_list_availability(plugin_module, spec)
+    assert_trigger_allow_list_availability(plugin_module, spec)
+    assert_connected_availability(plugin_module, spec)
+  end
+
   @doc "Asserts product pack delegate functions and catalog ordering."
   def assert_catalog_pack_delegates(provider, expected_delegates) do
     expected_ids =
@@ -287,6 +304,97 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
 
   defp assert_known_confirmation(confirmation) do
     assert Taxonomy.known_confirmation?(confirmation)
+  end
+
+  defp assert_action_allow_list_availability(_plugin_module, %{actions: []}), do: :ok
+
+  defp assert_action_allow_list_availability(plugin_module, spec) do
+    [allowed_action | denied_actions] = spec.actions
+
+    availability =
+      plugin_module.tool_availability(%{allowed_actions: [allowed_action.id]})
+      |> Map.new(&{&1.tool, &1})
+
+    assert availability[allowed_action.id].state == :connection_required
+
+    for action <- denied_actions do
+      assert availability[action.id].state == :disabled_by_policy
+    end
+
+    for trigger <- spec.triggers do
+      assert availability[trigger.id].state == :connection_required
+    end
+  end
+
+  defp assert_trigger_allow_list_availability(_plugin_module, %{triggers: []}), do: :ok
+
+  defp assert_trigger_allow_list_availability(plugin_module, spec) do
+    [allowed_trigger | denied_triggers] = spec.triggers
+
+    availability =
+      plugin_module.tool_availability(%{allowed_triggers: [allowed_trigger.id]})
+      |> Map.new(&{&1.tool, &1})
+
+    assert availability[allowed_trigger.id].state == :connection_required
+
+    for trigger <- denied_triggers do
+      assert availability[trigger.id].state == :disabled_by_policy
+    end
+
+    for action <- spec.actions do
+      assert availability[action.id].state == :connection_required
+    end
+  end
+
+  defp assert_connected_availability(plugin_module, spec) do
+    connection =
+      Jido.Connect.Connection.new!(%{
+        id: "#{spec.id}_conn",
+        provider: spec.id,
+        profile: :user,
+        tenant_id: "tenant_1",
+        owner_type: :app_user,
+        owner_id: "user_1",
+        status: :connected,
+        scopes: all_user_scopes(spec)
+      })
+
+    available = plugin_module.tool_availability(%{connection: connection})
+    assert_availability_ids(available, Enum.map(spec.actions ++ spec.triggers, & &1.id))
+
+    for availability <- available do
+      assert availability.state == :available
+      assert availability.connection_id == connection.id
+      assert availability.missing_scopes == []
+    end
+
+    missing_scope_connection = %{connection | scopes: []}
+
+    missing_scope_availability =
+      plugin_module.tool_availability(%{connection: missing_scope_connection})
+
+    assert Enum.any?(missing_scope_availability, &(&1.state == :missing_scopes))
+    refute Enum.any?(missing_scope_availability, &(&1.state == :connection_required))
+  end
+
+  defp assert_availability_ids(availability, expected_ids) do
+    assert MapSet.new(Enum.map(availability, & &1.tool)) == MapSet.new(expected_ids)
+  end
+
+  defp all_user_scopes(spec) do
+    profile =
+      Enum.find(spec.auth_profiles, &(&1.id == :user)) ||
+        List.first(spec.auth_profiles)
+
+    operation_scopes =
+      spec.actions
+      |> Enum.concat(spec.triggers)
+      |> Enum.flat_map(& &1.scopes)
+
+    profile.default_scopes
+    |> Enum.concat(profile.optional_scopes)
+    |> Enum.concat(operation_scopes)
+    |> Enum.uniq()
   end
 
   defp row_ids(rows), do: rows |> Enum.map(&Map.fetch!(&1, :id)) |> MapSet.new()

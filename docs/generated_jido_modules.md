@@ -16,3 +16,21 @@ Generated actions and poll sensors expect the host to pass either a resolved
 `Jido.Connect.ConnectionSelector` plus a `connection_resolver` callback. In both
 cases raw credentials stay out of agent context; execution still requires a
 short-lived `Jido.Connect.CredentialLease`.
+
+Generated plugin modules also expose `tool_availability/1` for host UIs and
+agent planners that need to show which connector tools can be used before a
+credential lease exists:
+
+```elixir
+Jido.Connect.Google.Drive.Plugin.tool_availability(%{
+  connection: connection,
+  allowed_actions: ["google.drive.files.list"],
+  allowed_triggers: ["google.drive.file.changed"]
+})
+```
+
+The result includes one entry per generated action and trigger with a stable
+tool id, state, connection id when known, missing scopes when applicable, and
+policy/configuration metadata. Availability states are `:available`,
+`:connection_required`, `:missing_scopes`, `:disabled_by_policy`, and
+`:configuration_error`.

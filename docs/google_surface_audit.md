@@ -30,17 +30,17 @@ live-test readiness, and Beadwork sequencing.
 
 | Package | Provider ID | Actions | Triggers | Catalog Packs | Auth Profiles |
 | --- | --- | ---: | ---: | ---: | --- |
-| `jido_connect_google_sheets` | `google_sheets` | 9 | 0 | 2 | `user` |
-| `jido_connect_gmail` | `gmail` | 11 | 1 | 3 | `user` |
+| `jido_connect_google_sheets` | `google_sheets` | 19 | 0 | 2 | `user` |
+| `jido_connect_gmail` | `gmail` | 31 | 2 | 4 | `user` |
 | `jido_connect_google_drive` | `google_drive` | 38 | 2 | 3 | `user`, `service_account`, `domain_delegated_service_account` |
 | `jido_connect_google_calendar` | `google_calendar` | 32 | 5 | 4 | `user` |
 | `jido_connect_google_contacts` | `google_contacts` | 22 | 1 | 2 | `user` |
 
 ## Cross-Package Notes
 
-- Poll triggers currently exist for Gmail, Drive, and Calendar only. Gmail,
-  Drive, and Calendar also expose webhook trigger metadata for provider push
-  deliveries.
+- Poll triggers currently exist for Gmail, Drive, Calendar, and Contacts.
+  Gmail, Drive, and Calendar also expose webhook trigger metadata for provider
+  push deliveries.
 - Drive is the only package that declares service-account and delegated
   service-account auth profiles.
 - Mutating write actions consistently require AI confirmation, destructive
@@ -51,19 +51,23 @@ live-test readiness, and Beadwork sequencing.
   updates, permission sharing, and outbound sends are intentionally excluded
   from default writer or reader packs unless the pack explicitly represents that
   risk.
+- Generated plugin availability is the supported host-facing action/trigger
+  availability surface. Each current Google package exposes `tool_availability/1`
+  from its generated plugin and reports `:available`, `:missing_scopes`,
+  `:connection_required`, `:disabled_by_policy`, or `:configuration_error`
+  without requiring a credential lease.
 - This inventory is credential-free. Live API coverage remains a separate
   release-readiness step.
 
-## Gap Recommendations
+## Remaining Gap Recommendations
 
-The highest-value follow-up work should be implemented as provider-specific
-action families. Do not move Google filter/query semantics into
-`jido_connect` core.
+Remaining follow-up work should be implemented as provider-specific action
+families. Do not move Google filter/query semantics into `jido_connect` core.
 
 | Package | Recommended Expansion |
 | --- | --- |
-| Sheets | Spreadsheet create, value batch operations, data-filter operations, developer metadata, and sheet copy. |
-| Gmail | Watch/stop lifecycle, explicit history action, attachments, draft lifecycle, batch message triage, label lifecycle, and destructive message/thread operations outside default packs. |
+| Sheets | Sheet copy. |
+| Gmail | Settings reads and specialized import/insert workflows outside default packs. |
 | Drive | File labels, about/apps/generateIds metadata utilities, access proposal/approval workflows, and further channel renewal helpers as host patterns emerge. |
 | Calendar | Event quickAdd/import, colors, and settings reads. |
 | Contacts | Contact photo actions. |
@@ -116,20 +120,30 @@ Auth profiles: `user`
 | --- | --- | --- | --- | --- | --- |
 | `google.sheets.spreadsheet.get` | read | `workspace_metadata` | `spreadsheets.readonly` | `spreadsheet_id` | `spreadsheet` |
 | `google.sheets.values.get` | read | `workspace_content` | `spreadsheets.readonly` | `spreadsheet_id`, `range` | `value_range` |
+| `google.sheets.values.batch_get` | read | `workspace_content` | `spreadsheets.readonly` | `spreadsheet_id`, `ranges` | `spreadsheet_id`, `value_ranges` |
 | `google.sheets.values.update` | write | `workspace_content` | `spreadsheets` | `spreadsheet_id`, `range`, `values` | `update` |
 | `google.sheets.values.append` | write | `workspace_content` | `spreadsheets` | `spreadsheet_id`, `range`, `values` | `update` |
 | `google.sheets.values.clear` | destructive | `workspace_content` | `spreadsheets` | `spreadsheet_id`, `range` | `update` |
+| `google.sheets.values.batch_update` | write | `workspace_content` | `spreadsheets` | `spreadsheet_id`, `data` | `batch_update` |
+| `google.sheets.values.batch_clear` | destructive | `workspace_content` | `spreadsheets` | `spreadsheet_id`, `ranges` | `batch_clear` |
+| `google.sheets.spreadsheet.create` | write | `workspace_metadata` | `spreadsheets` | `title` | `spreadsheet` |
 | `google.sheets.sheet.add` | write | `workspace_metadata` | `spreadsheets` | `spreadsheet_id`, `title` | `sheet` |
 | `google.sheets.sheet.delete` | destructive | `workspace_metadata` | `spreadsheets` | `spreadsheet_id`, `sheet_id` | `result` |
 | `google.sheets.sheet.rename` | write | `workspace_metadata` | `spreadsheets` | `spreadsheet_id`, `sheet_id`, `title` | `sheet` |
 | `google.sheets.batch_update` | destructive | `workspace_content` | `spreadsheets` | `spreadsheet_id`, `requests` | `batch_update` |
+| `google.sheets.spreadsheet.get_by_data_filter` | read | `workspace_content` | `spreadsheets` | `spreadsheet_id`, `data_filters` | `spreadsheet` |
+| `google.sheets.values.batch_get_by_data_filter` | read | `workspace_content` | `spreadsheets` | `spreadsheet_id`, `data_filters` | `spreadsheet_id`, `value_ranges` |
+| `google.sheets.values.batch_update_by_data_filter` | write | `workspace_content` | `spreadsheets` | `spreadsheet_id`, `data` | `batch_update` |
+| `google.sheets.values.batch_clear_by_data_filter` | destructive | `workspace_content` | `spreadsheets` | `spreadsheet_id`, `data_filters` | `batch_clear` |
+| `google.sheets.developer_metadata.get` | read | `workspace_metadata` | `spreadsheets` | `spreadsheet_id`, `metadata_id` | `developer_metadata` |
+| `google.sheets.developer_metadata.search` | read | `workspace_metadata` | `spreadsheets` | `spreadsheet_id`, `data_filters` | `matched_developer_metadata` |
 
 ### Catalog Packs
 
 | Pack | Surface |
 | --- | --- |
 | `google_sheets_readonly` | Spreadsheet metadata and value reads. |
-| `google_sheets_writer` | Read-only actions plus value update, append, clear, sheet add, sheet delete, and sheet rename. |
+| `google_sheets_writer` | Read-only actions plus spreadsheet creation, value update/append/clear/batch operations, data-filter tools, developer metadata reads, sheet add/delete/rename. Raw structural batch update remains outside the pack. |
 
 ### Triggers
 
@@ -176,12 +190,15 @@ Auth profiles: `user`
 | `google.gmail.thread.trash` | destructive | `message_content` | `gmail.modify` | `thread_id` | `thread` |
 | `google.gmail.thread.untrash` | write | `message_content` | `gmail.modify` | `thread_id` | `thread` |
 | `google.gmail.thread.delete` | destructive | `message_content` | `https://mail.google.com/` | `thread_id` | `result` |
+| `google.gmail.watch.start` | write | `personal_data` | `gmail.metadata` | `topic_name` | `watch` |
+| `google.gmail.watch.stop` | write | `personal_data` | `gmail.metadata` | none | `result` |
 
-### Trigger
+### Triggers
 
 | ID | Kind | Checkpoint | Dedupe | Scope | Signal |
 | --- | --- | --- | --- | --- | --- |
 | `google.gmail.message.received` | poll | `history_id` | `message_id` | `gmail.metadata` | `message_id`, `thread_id`, `history_id`, labels, snippet, headers, message |
+| `google.gmail.mailbox.changed` | webhook | none | `history_id` | `gmail.metadata` | `email_address`, `history_id`, Pub/Sub delivery metadata |
 
 ### Catalog Packs
 

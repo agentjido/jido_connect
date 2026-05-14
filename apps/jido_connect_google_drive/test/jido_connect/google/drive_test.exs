@@ -1041,6 +1041,8 @@ defmodule Jido.Connect.Google.DriveTest do
       file_writer_pack: :google_drive_file_writer,
       watch_pack: :google_drive_watch
     )
+
+    ConnectorContracts.assert_plugin_tool_availability(Drive)
   end
 
   test "loads Drive Spark DSL fragments" do
