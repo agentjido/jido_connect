@@ -5,11 +5,15 @@
   "created": "2026-05-14T14:58:13Z",
   "description": "Add Drive comments and replies CRUD actions plus shared-drive list/get/create/update/delete/hide/unhide actions where appropriate for Workspace hosts.",
   "id": "jido_con-5zt.7",
-  "labels": [],
+  "labels": [
+    "expansion",
+    "google",
+    "milestone-2"
+  ],
   "parent": "jido_con-5zt",
   "priority": 1,
   "status": "open",
   "title": "[G18-S07] Add Drive comments replies and shared-drive actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:58:13Z"
+  "updated_at": "2026-05-14T14:58:15Z"
 }
