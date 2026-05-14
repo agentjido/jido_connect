@@ -9,28 +9,31 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
   @doc "Normalizes a Google Drive file payload."
   @spec file(map()) :: {:ok, File.t()} | {:error, term()}
   def file(payload) when is_map(payload) do
-    %{
-      file_id: Data.get(payload, "id"),
-      name: Data.get(payload, "name"),
-      mime_type: Data.get(payload, "mimeType"),
-      description: Data.get(payload, "description"),
-      web_view_link: Data.get(payload, "webViewLink"),
-      web_content_link: Data.get(payload, "webContentLink"),
-      icon_link: Data.get(payload, "iconLink"),
-      thumbnail_link: Data.get(payload, "thumbnailLink"),
-      size: normalize_integer(Data.get(payload, "size")),
-      md5_checksum: Data.get(payload, "md5Checksum"),
-      created_time: Data.get(payload, "createdTime"),
-      modified_time: Data.get(payload, "modifiedTime"),
-      parents: Data.get(payload, "parents", []),
-      owners: Data.get(payload, "owners", []),
-      shared?: Data.get(payload, "shared", false),
-      trashed?: Data.get(payload, "trashed", false),
-      starred?: Data.get(payload, "starred", false),
-      drive_id: Data.get(payload, "driveId")
-    }
-    |> Data.compact()
-    |> File.new()
+    with {:ok, permissions} <- normalize_embedded_permissions(Data.get(payload, "permissions")) do
+      %{
+        file_id: Data.get(payload, "id"),
+        name: Data.get(payload, "name"),
+        mime_type: Data.get(payload, "mimeType"),
+        description: Data.get(payload, "description"),
+        web_view_link: Data.get(payload, "webViewLink"),
+        web_content_link: Data.get(payload, "webContentLink"),
+        icon_link: Data.get(payload, "iconLink"),
+        thumbnail_link: Data.get(payload, "thumbnailLink"),
+        size: normalize_integer(Data.get(payload, "size")),
+        md5_checksum: Data.get(payload, "md5Checksum"),
+        created_time: Data.get(payload, "createdTime"),
+        modified_time: Data.get(payload, "modifiedTime"),
+        parents: Data.get(payload, "parents", []),
+        owners: Data.get(payload, "owners", []),
+        shared?: Data.get(payload, "shared", false),
+        trashed?: Data.get(payload, "trashed", false),
+        starred?: Data.get(payload, "starred", false),
+        drive_id: Data.get(payload, "driveId"),
+        permissions: permissions
+      }
+      |> Data.compact()
+      |> File.new()
+    end
   end
 
   def file(_payload), do: {:error, :invalid_file_payload}
@@ -120,4 +123,23 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
   defp normalize_string(nil), do: nil
   defp normalize_string(value) when is_binary(value), do: value
   defp normalize_string(value), do: to_string(value)
+
+  defp normalize_embedded_permissions(nil), do: {:ok, []}
+  defp normalize_embedded_permissions([]), do: {:ok, []}
+
+  defp normalize_embedded_permissions(permissions) when is_list(permissions) do
+    permissions
+    |> Enum.reduce_while({:ok, []}, fn payload, {:ok, acc} ->
+      case permission(payload) do
+        {:ok, permission} -> {:cont, {:ok, [Map.from_struct(permission) | acc]}}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:ok, permissions} -> {:ok, Enum.reverse(permissions)}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp normalize_embedded_permissions(_permissions), do: {:error, :invalid_permission_payload}
 end

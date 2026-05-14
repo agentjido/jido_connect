@@ -22,6 +22,7 @@ defmodule Jido.Connect.Google.Drive.File do
               trashed?: Zoi.boolean() |> Zoi.default(false),
               starred?: Zoi.boolean() |> Zoi.default(false),
               drive_id: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              permissions: Zoi.list(Zoi.map()) |> Zoi.default([]),
               metadata: Zoi.map() |> Zoi.default(%{})
             },
             coerce: true

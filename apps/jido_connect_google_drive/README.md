@@ -41,6 +41,38 @@ Connect action/trigger catalog. Service-account token minting lives in
 `jido_connect_google`; Drive stays responsible for Drive-specific scopes and
 endpoint behavior.
 
+## Permission-Aware Field Projections
+
+Google Drive `fields` expressions are provider-specific. `jido_connect` core
+exposes action and catalog metadata so hosts can detect whether an action
+supports `fields`, but it does not translate a universal embed-permissions
+request across providers.
+
+Use Drive-specific field presets when a host wants embedded permission metadata:
+
+```elixir
+alias Jido.Connect.Google.Drive.Fields
+
+Fields.file_metadata()
+Fields.file_with_permissions()
+Fields.file_list_with_permissions()
+Fields.permission_list()
+```
+
+For example, pass `Fields.file_list_with_permissions()` to
+`google.drive.files.list` when you want Drive to return file metadata with
+embedded permissions in one request. Use `google.drive.permissions.list` when you
+prefer an explicit per-file permission request.
+
+Hosts can discover support through action input metadata:
+
+```elixir
+{:ok, action} = Jido.Connect.action(Jido.Connect.Google.Drive, "google.drive.files.list")
+fields = Enum.find(action.input, &(&1.name == :fields))
+
+fields.metadata.presets.with_permissions
+```
+
 ## Catalog Packs
 
 - `:google_drive_readonly` includes metadata reads, content reads, permission

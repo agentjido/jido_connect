@@ -431,6 +431,32 @@ defmodule Jido.Connect.Google.DriveTest do
              "google.drive.permission.create"
            ]
 
+    list_files = Enum.find(spec.actions, &(&1.id == "google.drive.files.list"))
+    get_file = Enum.find(spec.actions, &(&1.id == "google.drive.file.get"))
+    list_permissions = Enum.find(spec.actions, &(&1.id == "google.drive.permissions.list"))
+
+    list_files_fields = Enum.find(list_files.input, &(&1.name == :fields))
+    get_file_fields = Enum.find(get_file.input, &(&1.name == :fields))
+    permission_fields = Enum.find(list_permissions.input, &(&1.name == :fields))
+
+    list_files_permission_view =
+      Enum.find(list_files.input, &(&1.name == :include_permissions_for_view))
+
+    get_file_permission_view =
+      Enum.find(get_file.input, &(&1.name == :include_permissions_for_view))
+
+    assert list_files_fields.metadata.presets.with_permissions ==
+             Jido.Connect.Google.Drive.Fields.file_list_with_permissions()
+
+    assert get_file_fields.metadata.presets.with_permissions ==
+             Jido.Connect.Google.Drive.Fields.file_with_permissions()
+
+    assert permission_fields.metadata.presets.default ==
+             Jido.Connect.Google.Drive.Fields.permission_list()
+
+    assert list_files_permission_view.enum == ["published"]
+    assert get_file_permission_view.enum == ["published"]
+
     delete_action = Enum.find(spec.actions, &(&1.id == "google.drive.file.delete"))
     assert delete_action.risk == :destructive
     assert delete_action.confirmation == :always
@@ -438,6 +464,11 @@ defmodule Jido.Connect.Google.DriveTest do
     create_permission = Enum.find(spec.actions, &(&1.id == "google.drive.permission.create"))
     assert create_permission.risk == :external_write
     assert create_permission.confirmation == :always
+
+    create_permission_fields = Enum.find(create_permission.input, &(&1.name == :fields))
+
+    assert create_permission_fields.metadata.presets.default ==
+             Jido.Connect.Google.Drive.Fields.permission_metadata()
 
     for operation <- spec.actions ++ spec.triggers do
       assert operation.auth_profile == :user

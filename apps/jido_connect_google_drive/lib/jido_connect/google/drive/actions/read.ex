@@ -3,6 +3,8 @@ defmodule Jido.Connect.Google.Drive.Actions.Read do
 
   use Spark.Dsl.Fragment, of: Jido.Connect
 
+  alias Jido.Connect.Google.Drive.Fields
+
   @metadata_scope "https://www.googleapis.com/auth/drive.metadata.readonly"
   @scope_resolver Jido.Connect.Google.Drive.ScopeResolver
   @auth_profiles [:user, :service_account, :domain_delegated_service_account]
@@ -27,11 +29,22 @@ defmodule Jido.Connect.Google.Drive.Actions.Read do
         field(:query, :string)
         field(:page_size, :integer, default: 25)
         field(:page_token, :string)
-        field(:fields, :string)
+
+        field(:fields, :string,
+          description: "Google Drive files.list fields expression.",
+          metadata: %{presets: Fields.file_list_presets()}
+        )
+
         field(:order_by, :string)
         field(:spaces, :string, default: "drive")
         field(:corpora, :string)
         field(:drive_id, :string)
+
+        field(:include_permissions_for_view, :string,
+          enum: Fields.permission_views(),
+          example: "published"
+        )
+
         field(:include_items_from_all_drives, :boolean, default: false)
         field(:supports_all_drives, :boolean, default: false)
       end
@@ -59,7 +72,17 @@ defmodule Jido.Connect.Google.Drive.Actions.Read do
 
       input do
         field(:file_id, :string, required?: true, example: "1abc...")
-        field(:fields, :string)
+
+        field(:fields, :string,
+          description: "Google Drive files.get fields expression.",
+          metadata: %{presets: Fields.file_presets()}
+        )
+
+        field(:include_permissions_for_view, :string,
+          enum: Fields.permission_views(),
+          example: "published"
+        )
+
         field(:supports_all_drives, :boolean, default: false)
       end
 

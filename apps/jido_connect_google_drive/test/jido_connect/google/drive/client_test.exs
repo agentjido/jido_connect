@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Drive.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Google.Drive.{Change, Client, File, Folder, Permission}
+  alias Jido.Connect.Google.Drive.{Change, Client, Fields, File, Folder, Permission}
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -52,6 +52,51 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     assert file.name == "Budget.pdf"
   end
 
+  test "passes permission-aware file fields and normalizes embedded permissions" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files"
+      assert conn.query_params["fields"] == Fields.file_list_with_permissions()
+      assert conn.query_params["includePermissionsForView"] == "published"
+
+      Req.Test.json(conn, %{
+        "files" => [
+          %{
+            "id" => "file123",
+            "name" => "Budget.pdf",
+            "mimeType" => "application/pdf",
+            "permissions" => [
+              %{
+                "id" => "perm123",
+                "type" => "user",
+                "role" => "reader",
+                "emailAddress" => "reader@example.com"
+              }
+            ]
+          }
+        ]
+      })
+    end)
+
+    assert {:ok, %{files: [%File{} = file]}} =
+             Client.list_files(
+               %{
+                 fields: Fields.file_list_with_permissions(),
+                 include_permissions_for_view: "published"
+               },
+               "token"
+             )
+
+    assert [
+             %{
+               permission_id: "perm123",
+               type: "user",
+               role: "reader",
+               email_address: "reader@example.com"
+             }
+           ] = file.permissions
+  end
+
   test "returns provider errors for malformed Drive list items" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
@@ -89,6 +134,40 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
 
     assert file.file_id == "file123"
     assert file.name == "Budget.pdf"
+  end
+
+  test "passes custom get file fields unchanged" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/file123"
+      assert conn.query_params["fields"] == Fields.file_with_permissions()
+      assert conn.query_params["includePermissionsForView"] == "published"
+
+      Req.Test.json(conn, %{
+        "id" => "file123",
+        "name" => "Budget.pdf",
+        "permissions" => [
+          %{
+            "id" => "perm123",
+            "type" => "anyone",
+            "role" => "reader",
+            "allowFileDiscovery" => false
+          }
+        ]
+      })
+    end)
+
+    assert {:ok, %File{} = file} =
+             Client.get_file(
+               %{
+                 file_id: "file123",
+                 fields: Fields.file_with_permissions(),
+                 include_permissions_for_view: "published"
+               },
+               "token"
+             )
+
+    assert [%{permission_id: "perm123", type: "anyone", role: "reader"}] = file.permissions
   end
 
   test "returns provider errors for malformed Drive single-object responses" do
@@ -296,7 +375,7 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
       assert conn.query_params["pageSize"] == "50"
       assert conn.query_params["supportsAllDrives"] == "true"
       assert conn.query_params["useDomainAdminAccess"] == "false"
-      assert conn.query_params["fields"] =~ "permissions(id,type,role"
+      assert conn.query_params["fields"] == Fields.permission_list()
 
       Req.Test.json(conn, %{
         "permissions" => [

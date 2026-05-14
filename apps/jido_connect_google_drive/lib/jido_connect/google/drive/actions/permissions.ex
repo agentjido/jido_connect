@@ -3,6 +3,8 @@ defmodule Jido.Connect.Google.Drive.Actions.Permissions do
 
   use Spark.Dsl.Fragment, of: Jido.Connect
 
+  alias Jido.Connect.Google.Drive.Fields
+
   @metadata_scope "https://www.googleapis.com/auth/drive.metadata.readonly"
   @file_scope "https://www.googleapis.com/auth/drive.file"
   @permission_types ["user", "group", "domain", "anyone"]
@@ -30,7 +32,12 @@ defmodule Jido.Connect.Google.Drive.Actions.Permissions do
         field(:file_id, :string, required?: true, example: "1abc...")
         field(:page_size, :integer, default: 100)
         field(:page_token, :string)
-        field(:fields, :string)
+
+        field(:fields, :string,
+          description: "Google Drive permissions.list fields expression.",
+          metadata: %{presets: Fields.permission_list_presets()}
+        )
+
         field(:supports_all_drives, :boolean, default: false)
         field(:use_domain_admin_access, :boolean, default: false)
       end
@@ -67,7 +74,12 @@ defmodule Jido.Connect.Google.Drive.Actions.Permissions do
         field(:send_notification_email, :boolean)
         field(:email_message, :string)
         field(:transfer_ownership, :boolean, default: false)
-        field(:fields, :string)
+
+        field(:fields, :string,
+          description: "Google Drive permissions.create fields expression.",
+          metadata: %{presets: Fields.permission_presets()}
+        )
+
         field(:supports_all_drives, :boolean, default: false)
         field(:use_domain_admin_access, :boolean, default: false)
       end

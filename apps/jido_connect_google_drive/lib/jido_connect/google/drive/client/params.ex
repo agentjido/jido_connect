@@ -2,38 +2,8 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   @moduledoc "Google Drive request parameter helpers."
 
   alias Jido.Connect.Data
+  alias Jido.Connect.Google.Drive.Fields
 
-  @default_file_fields [
-    "id",
-    "name",
-    "mimeType",
-    "description",
-    "webViewLink",
-    "webContentLink",
-    "iconLink",
-    "thumbnailLink",
-    "size",
-    "md5Checksum",
-    "createdTime",
-    "modifiedTime",
-    "parents",
-    "owners",
-    "shared",
-    "trashed",
-    "starred",
-    "driveId"
-  ]
-  @default_permission_fields [
-    "id",
-    "type",
-    "role",
-    "emailAddress",
-    "domain",
-    "displayName",
-    "allowFileDiscovery",
-    "deleted",
-    "expirationTime"
-  ]
   @default_change_fields [
     "changeId",
     "fileId",
@@ -41,14 +11,14 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     "time",
     "driveId",
     "changeType",
-    "file(#{Enum.join(@default_file_fields, ",")})"
+    "file(#{Fields.file_metadata()})"
   ]
 
   @doc "Default file metadata fields used by read actions."
-  def default_file_fields, do: Enum.join(@default_file_fields, ",")
+  defdelegate default_file_fields, to: Fields, as: :file_metadata
 
   @doc "Default permission metadata fields used by permission actions."
-  def default_permission_fields, do: Enum.join(@default_permission_fields, ",")
+  defdelegate default_permission_fields, to: Fields, as: :permission_metadata
 
   @doc "Default change metadata fields used by Drive change pollers."
   def default_change_fields, do: Enum.join(@default_change_fields, ",")
@@ -64,6 +34,7 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
       spaces: Data.get(params, :spaces, "drive"),
       corpora: Data.get(params, :corpora),
       driveId: Data.get(params, :drive_id),
+      includePermissionsForView: Data.get(params, :include_permissions_for_view),
       includeItemsFromAllDrives: Data.get(params, :include_items_from_all_drives),
       supportsAllDrives: Data.get(params, :supports_all_drives)
     }
@@ -74,6 +45,7 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   def get_file_params(params) do
     %{
       fields: Data.get(params, :fields, default_file_fields()),
+      includePermissionsForView: Data.get(params, :include_permissions_for_view),
       supportsAllDrives: Data.get(params, :supports_all_drives)
     }
     |> Data.compact()
@@ -201,10 +173,9 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     |> Data.compact()
   end
 
-  defp list_fields, do: "nextPageToken,files(#{default_file_fields()})"
+  defp list_fields, do: Fields.file_list()
 
-  defp permission_list_fields,
-    do: "nextPageToken,permissions(#{default_permission_fields()})"
+  defp permission_list_fields, do: Fields.permission_list()
 
   defp change_list_fields,
     do: "nextPageToken,newStartPageToken,changes(#{default_change_fields()})"
