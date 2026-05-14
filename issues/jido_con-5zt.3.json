@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-5zt.4"
   ],
+  "closed_at": "2026-05-14T15:58:02Z",
+  "close_reason": "Added Gmail watch history and attachment actions in PR #14",
   "created": "2026-05-14T14:58:12Z",
   "description": "Add Gmail watch/stop lifecycle actions, explicit history.list action, webhook trigger metadata, and message attachment get support.",
   "id": "jido_con-5zt.3",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-5zt",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S03] Add Gmail watch history and attachment actions",
   "type": "task",
-  "updated_at": "2026-05-14T15:37:47Z"
+  "updated_at": "2026-05-14T15:58:02Z"
 }
