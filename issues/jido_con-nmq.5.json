@@ -7,6 +7,8 @@
     "jido_con-5zt",
     "jido_con-5zt.1"
   ],
+  "closed_at": "2026-05-14T15:04:02Z",
+  "close_reason": "Reconciled G18 before new Google package epics and kept G11 as final hardening/demo gate",
   "created": "2026-05-14T14:35:48Z",
   "description": "Update Beadwork dependencies and comments so the cross-Google hardening/demo epic waits on the completed audit and newly accepted Google package epics.",
   "id": "jido_con-nmq.5",
@@ -22,8 +24,8 @@
     }
   ],
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G13-S05] Reconcile cross-Google hardening dependencies",
   "type": "task",
-  "updated_at": "2026-05-14T15:03:45Z"
+  "updated_at": "2026-05-14T15:04:02Z"
 }
