@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-uoi.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-uoi.4"
+  ],
   "created": "2026-05-14T14:35:50Z",
   "description": "Implement google.forms.form.get, create, and batchUpdate actions with provider-specific request schemas and tests.",
   "id": "jido_con-uoi.3",

@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-uoi.3"
+  ],
   "blocks": [],
   "created": "2026-05-14T14:35:50Z",
   "description": "Implement google.forms.responses.list and get actions with pagination, normalized output, privacy classification, and tests.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G16-S04] Implement form response actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:35:50Z"
+  "updated_at": "2026-05-14T14:35:55Z"
 }
