@@ -25,6 +25,10 @@ defmodule Jido.Connect.Google.Meet do
     tags([:google, :workspace, :meetings, :collaboration])
   end
 
+  defdelegate catalog_packs, to: Jido.Connect.Google.Meet.CatalogPacks, as: :all
+  defdelegate reader_pack, to: Jido.Connect.Google.Meet.CatalogPacks, as: :reader
+  defdelegate scheduler_pack, to: Jido.Connect.Google.Meet.CatalogPacks, as: :scheduler
+
   auth do
     oauth2 :user do
       default?(true)

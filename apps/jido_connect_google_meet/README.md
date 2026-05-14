@@ -11,7 +11,7 @@ added.
 
 This scaffold declares the provider package, user OAuth profile, Meet scope
 resolver, generated Jido plugin shell, and normalized Zoi-backed structs.
-Trigger and catalog-pack work is intentionally split into later Beadwork tasks.
+Trigger work is intentionally split into later Beadwork tasks.
 
 ## Normalized Structs
 
@@ -55,6 +55,16 @@ recording media, Google Docs transcript content, or transcript entry text.
 Meet trigger subscriptions should be backed by Google Workspace Events and
 host-owned durable state. The design spike for that work lives in
 `../../docs/google_meet_workspace_events_spike.md`.
+
+## Catalog Packs
+
+- `:google_meet_reader` exposes metadata-first read actions for spaces,
+  conference records, recordings, and transcripts.
+- `:google_meet_scheduler` adds meeting-space creation to the reader surface.
+
+Both packs are action-first and mark Workspace Events triggers as later work.
+They do not expose trigger ids until subscription lifecycle and host-owned
+durable state are implemented.
 
 ## Tool Availability
 
