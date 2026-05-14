@@ -8,7 +8,11 @@ defmodule Jido.Connect.Google.Analytics.Handlers.Actions.ResourceHelpers do
   def fetch_client(_credentials), do: {:ok, Client}
 
   def public_map(struct) when is_struct(struct), do: struct |> Map.from_struct() |> public_map()
-  def public_map(map) when is_map(map), do: map
+  def public_map(list) when is_list(list), do: Enum.map(list, &public_map/1)
+
+  def public_map(map) when is_map(map),
+    do: Map.new(map, fn {key, value} -> {key, public_map(value)} end)
+
   def public_map(value), do: value
 
   def metadata_input(input) do
@@ -24,7 +28,7 @@ defmodule Jido.Connect.Google.Analytics.Handlers.Actions.ResourceHelpers do
     end
   end
 
-  defp normalize_property(value) when is_binary(value) do
+  def normalize_property(value) when is_binary(value) do
     case String.trim(value) do
       "" -> invalid_property()
       "properties/" <> _rest = property -> {:ok, property}
@@ -32,7 +36,7 @@ defmodule Jido.Connect.Google.Analytics.Handlers.Actions.ResourceHelpers do
     end
   end
 
-  defp normalize_property(_value), do: invalid_property()
+  def normalize_property(_value), do: invalid_property()
 
   defp invalid_property do
     {:error,

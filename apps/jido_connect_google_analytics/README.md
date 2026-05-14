@@ -11,9 +11,9 @@ surfaces are added.
 
 This scaffold declares the provider package, user OAuth profile, Analytics
 scope resolver, generated Jido plugin shell, shared Google transport boundary,
-and normalized Zoi-backed structs. Metadata, report, property discovery,
-catalog pack, and trigger work is intentionally split into later Beadwork
-tasks.
+normalized Zoi-backed structs, metadata lookup, and core report actions.
+Property discovery, catalog pack, and trigger work is intentionally split into
+later Beadwork tasks.
 
 ## Normalized Structs
 
@@ -46,16 +46,31 @@ configurable through application environment for tests.
 ## Tool Surface
 
 - `google.analytics.metadata.get`
+- `google.analytics.report.run`
+- `google.analytics.report.batch_run`
 
 No Analytics triggers are exposed yet. The generated plugin and provider
-metadata are present so later tasks can add reporting, realtime, and
-property-discovery action families without changing package wiring.
+metadata are present so later tasks can add realtime and property-discovery
+action families without changing package wiring.
 
 ## Query Shape
 
 Analytics report dimensions, metrics, filters, orderings, and limits are
 provider-specific GA4 contracts. Keep those mappings in this package rather
 than adding a generic query DSL to `jido_connect` core.
+
+Report actions accept provider-native GA4 request concepts:
+
+- `date_ranges`: non-empty list of maps with `start_date`/`end_date` or
+  `startDate`/`endDate`.
+- `metrics`: non-empty list of metric names or provider metric maps, up to
+  Google Analytics' 10 metric limit.
+- `dimensions`: optional list of dimension names or provider dimension maps,
+  up to Google Analytics' 9 dimension limit.
+- `dimension_filter`, `metric_filter`, `order_bys`, `comparisons`, and
+  `cohort_spec`: GA4-shaped maps/lists. Snake-case keys are converted to
+  Google lower camelCase keys at the connector boundary.
+- `limit`: positive integer up to 250,000 rows. `offset`: non-negative integer.
 
 ## Tool Availability
 
