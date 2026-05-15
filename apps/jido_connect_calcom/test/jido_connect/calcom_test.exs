@@ -9,12 +9,16 @@ defmodule Jido.Connect.CalcomTest do
     Jido.Connect.Calcom.Actions.ListBookings,
     Jido.Connect.Calcom.Actions.GetBooking,
     Jido.Connect.Calcom.Actions.CancelBooking,
-    Jido.Connect.Calcom.Actions.RescheduleBooking
+    Jido.Connect.Calcom.Actions.RescheduleBooking,
+    Jido.Connect.Calcom.Actions.CreateWebhook,
+    Jido.Connect.Calcom.Actions.ListWebhooks,
+    Jido.Connect.Calcom.Actions.DeleteWebhook
   ]
 
   @calcom_dsl_fragments [
     Jido.Connect.Calcom.Actions.EventTypes,
-    Jido.Connect.Calcom.Actions.Bookings
+    Jido.Connect.Calcom.Actions.Bookings,
+    Jido.Connect.Calcom.Actions.Webhooks
   ]
 
   @test_scopes [
@@ -81,6 +85,38 @@ defmodule Jido.Connect.CalcomTest do
          start: "2026-06-01T11:00:00Z"
        })}
     end
+
+    def create_webhook(params, "token") do
+      {:ok,
+       Calcom.Webhook.new!(%{
+         id: 1,
+         subscriber_url: params.subscriber_url,
+         active: params.active,
+         triggers: params.triggers
+       })}
+    end
+
+    def list_webhooks(_params, "token") do
+      {:ok,
+       [
+         Calcom.Webhook.new!(%{
+           id: 1,
+           subscriber_url: "https://example.com/hook",
+           active: true,
+           triggers: ["BOOKING_CREATED"]
+         })
+       ]}
+    end
+
+    def delete_webhook(%{webhook_id: 1}, "token") do
+      {:ok,
+       Calcom.Webhook.new!(%{
+         id: 1,
+         subscriber_url: "https://example.com/hook",
+         active: false,
+         triggers: []
+       })}
+    end
   end
 
   test "declares Cal.com provider metadata" do
@@ -98,7 +134,10 @@ defmodule Jido.Connect.CalcomTest do
              "calcom.bookings.list",
              "calcom.bookings.get",
              "calcom.bookings.cancel",
-             "calcom.bookings.reschedule"
+             "calcom.bookings.reschedule",
+             "calcom.webhooks.create",
+             "calcom.webhooks.list",
+             "calcom.webhooks.delete"
            ]
 
     assert spec.triggers == []
@@ -169,7 +208,8 @@ defmodule Jido.Connect.CalcomTest do
   test "exposes curated catalog pack delegates" do
     assert %{id: :calcom_reader} = Calcom.reader_pack()
     assert %{id: :calcom_booking} = Calcom.booking_pack()
-    assert Enum.map(Calcom.catalog_packs(), & &1.id) == [:calcom_reader, :calcom_booking]
+    assert %{id: :calcom_webhook} = Calcom.webhook_pack()
+    assert Enum.map(Calcom.catalog_packs(), & &1.id) == [:calcom_reader, :calcom_booking, :calcom_webhook]
   end
 
   test "invokes list event types through injected client and lease" do
@@ -232,6 +272,45 @@ defmodule Jido.Connect.CalcomTest do
                Calcom.integration(),
                "calcom.bookings.reschedule",
                %{booking_uid: "booking-1", start: "2026-06-01T11:00:00Z"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes create webhook through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{webhook: %{id: 1, subscriber_url: "https://example.com/hook", active: true}}} =
+             Connect.invoke(
+               Calcom.integration(),
+               "calcom.webhooks.create",
+               %{subscriber_url: "https://example.com/hook", triggers: ["BOOKING_CREATED"], active: true},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes list webhooks through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{webhooks: [%{id: 1, subscriber_url: "https://example.com/hook"}]}} =
+             Connect.invoke(
+               Calcom.integration(),
+               "calcom.webhooks.list",
+               %{},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes delete webhook through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{webhook: %{id: 1}}} =
+             Connect.invoke(
+               Calcom.integration(),
+               "calcom.webhooks.delete",
+               %{webhook_id: 1},
                context: context,
                credential_lease: lease
              )
