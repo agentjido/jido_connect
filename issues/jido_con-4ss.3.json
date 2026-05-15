@@ -7,6 +7,7 @@
   "id": "jido_con-4ss.3",
   "labels": [
     "airtable",
+    "connector",
     "database"
   ],
   "parent": "jido_con-4ss",
