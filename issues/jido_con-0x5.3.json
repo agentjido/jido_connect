@@ -6,7 +6,8 @@
   "description": "Implement issue search/list/get, project/team metadata, comments list, pagination, tests, and normalized outputs.",
   "id": "jido_con-0x5.3",
   "labels": [
-    "linear"
+    "linear",
+    "work-management"
   ],
   "parent": "jido_con-0x5",
   "priority": 2,
