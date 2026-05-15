@@ -12,7 +12,8 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
     google_drive: "../../../fixtures/google_drive",
     google_forms: "../../../fixtures/google_forms",
     google_sheets: "../../../fixtures/google_sheets",
-    google_slides: "../../../fixtures/google_slides"
+    google_slides: "../../../fixtures/google_slides",
+    google_tasks: "../../../fixtures/google_tasks"
   }
 
   @doc "Asserts the generated Jido action, sensor, manifest, and plugin surface."
