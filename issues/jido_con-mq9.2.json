@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-mq9.1"
+  ],
   "blocks": [],
   "created": "2026-05-15T21:50:00Z",
   "description": "Implement provider-specific webhook create/list/delete or equivalent lifecycle actions using Cal.com API versioning, normalized outputs, tests, scope/policy metadata, and catalog availability.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[W4-CAL-S02] Add Cal.com webhook lifecycle actions",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:01Z"
+  "updated_at": "2026-05-15T21:50:03Z"
 }

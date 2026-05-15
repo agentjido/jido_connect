@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-mq9.2"
+  ],
   "created": "2026-05-15T21:49:59Z",
   "description": "Make apps/jido_connect_calcom pass package and umbrella compile/test. Fix Req.Test/Plug dependency assumptions, warnings, and any stale generated coverage artifacts without changing public behavior.",
   "id": "jido_con-mq9.1",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[W4-CAL-S01] Repair Cal.com tests and package dependencies",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:01Z"
+  "updated_at": "2026-05-15T21:50:03Z"
 }
