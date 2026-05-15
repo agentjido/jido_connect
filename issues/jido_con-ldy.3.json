@@ -6,6 +6,7 @@
   "description": "Implement contact/company/deal get, search, and list-style actions with pagination, property selection, archived handling, tests, and least-privilege metadata.",
   "id": "jido_con-ldy.3",
   "labels": [
+    "connector",
     "crm",
     "hubspot"
   ],
