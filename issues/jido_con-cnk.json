@@ -6,6 +6,7 @@
   "description": "Build jido_connect_webhook for generic inbound triggers with verification, replay protection, normalized delivery metadata, catalog/trigger discovery, and docs.",
   "id": "jido_con-cnk",
   "labels": [
+    "connector",
     "generic",
     "webhook"
   ],
