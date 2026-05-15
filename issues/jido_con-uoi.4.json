@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-uoi.5"
   ],
+  "closed_at": "2026-05-15T17:06:13Z",
+  "close_reason": "Implemented in 43e91cf by pi-connector-factory",
   "created": "2026-05-14T14:35:50Z",
   "description": "Implement google.forms.responses.list and get actions with pagination, normalized output, privacy classification, and tests.",
   "id": "jido_con-uoi.4",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-uoi",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G16-S04] Implement form response actions",
   "type": "task",
-  "updated_at": "2026-05-15T16:55:12Z"
+  "updated_at": "2026-05-15T17:06:13Z"
 }
