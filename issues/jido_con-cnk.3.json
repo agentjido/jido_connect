@@ -6,6 +6,7 @@
   "description": "Add trigger metadata and normalization for inbound webhook deliveries, including headers/body/query metadata, dedupe hooks, and fixture tests.",
   "id": "jido_con-cnk.3",
   "labels": [
+    "generic",
     "webhook"
   ],
   "parent": "jido_con-cnk",
