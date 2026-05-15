@@ -6,7 +6,8 @@
   "description": "Add umbrella app, provider module, OAuth/PAT auth profiles, transport boundary, README/AGENTS, and generated plugin tests.",
   "id": "jido_con-pfy.1",
   "labels": [
-    "calendly"
+    "calendly",
+    "scheduling"
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
