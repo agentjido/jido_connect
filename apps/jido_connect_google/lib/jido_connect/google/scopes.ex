@@ -61,6 +61,10 @@ defmodule Jido.Connect.Google.Scopes do
     docs: [
       "https://www.googleapis.com/auth/documents.readonly",
       "https://www.googleapis.com/auth/documents"
+    ],
+    slides: [
+      "https://www.googleapis.com/auth/presentations.readonly",
+      "https://www.googleapis.com/auth/presentations"
     ]
   }
 
