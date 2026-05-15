@@ -6,7 +6,8 @@
   "description": "Add Linear webhook verification/normalization, trigger metadata for issue lifecycle/comment events, catalog packs, availability tests, and README/live-test guidance.",
   "id": "jido_con-0x5.5",
   "labels": [
-    "linear"
+    "linear",
+    "work-management"
   ],
   "parent": "jido_con-0x5",
   "priority": 2,
