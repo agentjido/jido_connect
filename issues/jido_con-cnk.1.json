@@ -6,6 +6,7 @@
   "description": "Add package shell, provider module, auth/verification profile structs, generated plugin/sensor tests, and README skeleton.",
   "id": "jido_con-cnk.1",
   "labels": [
+    "generic",
     "webhook"
   ],
   "parent": "jido_con-cnk",
