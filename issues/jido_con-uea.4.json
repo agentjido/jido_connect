@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-uea.3"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:51Z",
   "description": "Implement create/update records for Lead/Contact/Task and generic sObject with risk metadata, validation boundaries, and tests.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W4-SF-S04] Implement Salesforce record write actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:56Z"
+  "updated_at": "2026-05-15T22:01:58Z"
 }

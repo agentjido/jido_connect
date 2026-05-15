@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-uea.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-uea.4"
+  ],
   "created": "2026-05-15T22:01:51Z",
   "description": "Implement SOQL query, get record, describe object, list recent records where appropriate, pagination/nextRecordsUrl handling, tests, and normalized output.",
   "id": "jido_con-uea.3",
