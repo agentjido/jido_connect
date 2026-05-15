@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-15T22:01:30Z",
+  "description": "Add umbrella app, provider module, project/personal API key auth profiles, host override transport boundary, README/AGENTS, and generated plugin tests.",
+  "id": "jido_con-z95.1",
+  "labels": [],
+  "parent": "jido_con-z95",
+  "priority": 2,
+  "status": "open",
+  "title": "[W6-PH-S01] Scaffold jido_connect_posthog",
+  "type": "task",
+  "updated_at": "2026-05-15T22:01:30Z"
+}
