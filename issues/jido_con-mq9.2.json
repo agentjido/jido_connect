@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-mq9.3"
   ],
+  "closed_at": "2026-05-15T23:13:09Z",
+  "close_reason": "Implemented in 79e0550 by pi-connector-factory",
   "created": "2026-05-15T21:50:00Z",
   "description": "Implement provider-specific webhook create/list/delete or equivalent lifecycle actions using Cal.com API versioning, normalized outputs, tests, scope/policy metadata, and catalog availability.",
   "id": "jido_con-mq9.2",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-mq9",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-CAL-S02] Add Cal.com webhook lifecycle actions",
   "type": "task",
-  "updated_at": "2026-05-15T23:06:53Z"
+  "updated_at": "2026-05-15T23:13:09Z"
 }
