@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-nqr.4"
   ],
+  "closed_at": "2026-05-15T22:16:07Z",
+  "close_reason": "Implemented in ba5ecb4 by pi-connector-factory",
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G10-S03\nEpic: G10 Google Search Console Connector\nSource: MILESTONE_2.md\nDepends on: G10-S02\n\nAcceptance:\nSite actions validate URL/property inputs and scopes.",
   "id": "jido_con-nqr.3",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-nqr",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G10-S03] Implement site list/add actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:03:52Z"
+  "updated_at": "2026-05-15T22:16:07Z"
 }
