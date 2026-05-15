@@ -6,7 +6,8 @@
   "description": "Add invitee created/canceled webhook trigger normalization, catalog packs, availability tests, README usage, and live-test guidance.",
   "id": "jido_con-pfy.5",
   "labels": [
-    "calendly"
+    "calendly",
+    "scheduling"
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
