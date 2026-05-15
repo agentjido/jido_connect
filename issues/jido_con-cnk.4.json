@@ -8,6 +8,7 @@
   "labels": [
     "connector",
     "generic",
+    "wave-4",
     "webhook"
   ],
   "parent": "jido_con-cnk",
