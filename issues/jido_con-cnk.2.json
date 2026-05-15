@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-cnk.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-cnk.3"
+  ],
   "created": "2026-05-15T21:50:28Z",
   "description": "Support shared-secret HMAC, static bearer/token, timestamp tolerance, replay id extraction, unsigned dev mode, and redacted error details with tests.",
   "id": "jido_con-cnk.2",
