@@ -5,11 +5,13 @@
   "created": "2026-05-15T22:01:22Z",
   "description": "Add Linear webhook verification/normalization, trigger metadata for issue lifecycle/comment events, catalog packs, availability tests, and README/live-test guidance.",
   "id": "jido_con-0x5.5",
-  "labels": [],
+  "labels": [
+    "linear"
+  ],
   "parent": "jido_con-0x5",
   "priority": 2,
   "status": "open",
   "title": "[W5-LIN-S05] Add Linear webhook trigger and catalog docs",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:22Z"
+  "updated_at": "2026-05-15T22:01:26Z"
 }
