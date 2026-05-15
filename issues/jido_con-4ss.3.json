@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-4ss.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-4ss.4"
+  ],
   "created": "2026-05-15T21:50:14Z",
   "description": "Implement list bases, list tables/schema, list records, get record, filtering/sorting params as provider-specific contracts, pagination tests, and normalized output.",
   "id": "jido_con-4ss.3",
