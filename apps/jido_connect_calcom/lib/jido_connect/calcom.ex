@@ -88,4 +88,5 @@ defmodule Jido.Connect.Calcom do
   defdelegate reader_pack, to: Jido.Connect.Calcom.CatalogPacks, as: :reader
   defdelegate booking_pack, to: Jido.Connect.Calcom.CatalogPacks, as: :booking
   defdelegate webhook_pack, to: Jido.Connect.Calcom.CatalogPacks, as: :webhook
+  defdelegate full_pack, to: Jido.Connect.Calcom.CatalogPacks, as: :full
 end
