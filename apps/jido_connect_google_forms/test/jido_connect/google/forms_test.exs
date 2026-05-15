@@ -176,6 +176,7 @@ defmodule Jido.Connect.Google.FormsTest do
 
     ConnectorContracts.assert_catalog_pack_delegates(Forms,
       readonly_pack: :google_forms_readonly,
+      responder_pack: :google_forms_responder,
       editor_pack: :google_forms_editor
     )
 

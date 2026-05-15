@@ -62,5 +62,6 @@ defmodule Jido.Connect.Google.Forms do
 
   defdelegate catalog_packs, to: Jido.Connect.Google.Forms.CatalogPacks, as: :all
   defdelegate readonly_pack, to: Jido.Connect.Google.Forms.CatalogPacks, as: :readonly
+  defdelegate responder_pack, to: Jido.Connect.Google.Forms.CatalogPacks, as: :responder
   defdelegate editor_pack, to: Jido.Connect.Google.Forms.CatalogPacks, as: :editor
 end
