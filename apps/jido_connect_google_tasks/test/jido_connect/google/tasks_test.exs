@@ -4,6 +4,7 @@ defmodule Jido.Connect.Google.TasksTest do
   alias Jido.Connect
   alias Jido.Connect.Google.Tasks
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
+  alias Jido.Connect.TriggerSpec
 
   @readonly_scope "https://www.googleapis.com/auth/tasks.readonly"
   @write_scope "https://www.googleapis.com/auth/tasks"
@@ -35,6 +36,13 @@ defmodule Jido.Connect.Google.TasksTest do
   @task_dsl_fragments [
     Jido.Connect.Google.Tasks.Actions.Tasks
   ]
+
+  @trigger_dsl_fragments [
+    Jido.Connect.Google.Tasks.Triggers.Tasks
+  ]
+
+  @trigger_id "google.tasks.task.changed"
+  @trigger_sensor Jido.Connect.Google.Tasks.Sensors.TaskChanged
 
   defmodule FakeTasksClient do
     # --- Task list fake methods ---
@@ -245,7 +253,16 @@ defmodule Jido.Connect.Google.TasksTest do
              "google.tasks.task.move"
            ]
 
-    assert spec.triggers == []
+    assert [%TriggerSpec{} = trigger] = spec.triggers
+    assert trigger.id == @trigger_id
+    assert trigger.kind == :poll
+    assert trigger.checkpoint == :updated_min
+    assert trigger.handler == Jido.Connect.Google.Tasks.Handlers.Triggers.TaskChangedPoller
+    assert trigger.resource == :task
+    assert trigger.verb == :watch
+    assert trigger.data_classification == :workspace_metadata
+    assert trigger.interval_ms == 300_000
+    assert trigger.dedupe == %{key: [:task_id, :updated]}
 
     assert [%{id: :user, kind: :oauth2, refresh?: true, pkce?: true} = profile] =
              spec.auth_profiles
@@ -261,13 +278,23 @@ defmodule Jido.Connect.Google.TasksTest do
     ConnectorContracts.assert_generated_surface(Tasks,
       otp_app: :jido_connect_google_tasks,
       action_modules: @all_action_modules,
+      sensor_specs: [
+        %{
+          module: @trigger_sensor,
+          name: "google_tasks_task_changed",
+          trigger_id: @trigger_id,
+          signal_type: @trigger_id
+        }
+      ],
       plugin_module: Jido.Connect.Google.Tasks.Plugin,
       plugin_name: "google_tasks"
     )
   end
 
   test "loads Tasks Spark DSL fragments" do
-    ConnectorContracts.assert_spark_fragments(@task_list_dsl_fragments ++ @task_dsl_fragments)
+    ConnectorContracts.assert_spark_fragments(
+      @task_list_dsl_fragments ++ @task_dsl_fragments ++ @trigger_dsl_fragments
+    )
   end
 
   # --- Task list invocation tests ---
