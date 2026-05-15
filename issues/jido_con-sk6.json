@@ -6,6 +6,7 @@
   "description": "Build jido_connect_http as a generic long-tail API connector with safe request construction, auth profiles, response shaping, policy gates, catalog packs, and docs.",
   "id": "jido_con-sk6",
   "labels": [
+    "generic",
     "http"
   ],
   "priority": 2,
