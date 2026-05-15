@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-4ss.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-4ss.5"
+  ],
   "created": "2026-05-15T21:50:14Z",
   "description": "Implement create/update/delete records and batch variants with risk metadata, typed field payload handling, and tests.",
   "id": "jido_con-4ss.4",

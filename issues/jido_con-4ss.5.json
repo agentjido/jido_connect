@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-4ss.4"
+  ],
   "blocks": [],
   "created": "2026-05-15T21:50:14Z",
   "description": "Add reader/editor catalog packs, availability tests, README usage, live-test guidance, and a changed-record polling/webhook design note.",
