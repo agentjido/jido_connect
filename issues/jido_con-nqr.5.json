@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-nqr.6"
   ],
+  "closed_at": "2026-05-15T22:32:11Z",
+  "close_reason": "Implemented in 0a3cbd7 by pi-connector-factory",
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G10-S05\nEpic: G10 Google Search Console Connector\nSource: MILESTONE_2.md\nDepends on: G10-S04\n\nAcceptance:\nSitemap actions normalize sitemap metadata and submission result.",
   "id": "jido_con-nqr.5",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-nqr",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G10-S05] Implement sitemap list/submit actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:23:22Z"
+  "updated_at": "2026-05-15T22:32:11Z"
 }
