@@ -7,6 +7,7 @@
   "id": "jido_con-z95",
   "labels": [
     "analytics",
+    "connector",
     "posthog"
   ],
   "priority": 2,
