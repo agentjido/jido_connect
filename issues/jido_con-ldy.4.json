@@ -6,6 +6,7 @@
   "description": "Implement create/update contact and deal plus note association actions with explicit confirmation/risk metadata, tests, and normalized outputs.",
   "id": "jido_con-ldy.4",
   "labels": [
+    "connector",
     "crm",
     "hubspot"
   ],
