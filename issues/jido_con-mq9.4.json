@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-mq9.3"
   ],
@@ -14,8 +14,8 @@
   ],
   "parent": "jido_con-mq9",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[W4-CAL-S04] Refresh Cal.com catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:03Z"
+  "updated_at": "2026-05-15T23:24:07Z"
 }
