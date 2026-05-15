@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-mq9.2"
   ],
@@ -16,8 +16,8 @@
   ],
   "parent": "jido_con-mq9",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[W4-CAL-S03] Add Cal.com booking webhook trigger",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:03Z"
+  "updated_at": "2026-05-15T23:13:09Z"
 }
