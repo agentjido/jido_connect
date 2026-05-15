@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-uoi.5"
   ],
@@ -13,8 +13,8 @@
   ],
   "parent": "jido_con-uoi",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G16-S06] Add Forms catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-14T14:36:04Z"
+  "updated_at": "2026-05-15T19:46:29Z"
 }
