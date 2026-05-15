@@ -7,6 +7,7 @@
   "id": "jido_con-z95.1",
   "labels": [
     "analytics",
+    "connector",
     "posthog"
   ],
   "parent": "jido_con-z95",
