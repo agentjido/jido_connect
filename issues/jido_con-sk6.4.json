@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-15T21:50:21Z",
+  "description": "Add safe-read/write catalog packs, availability tests, examples, and guidance for using Generic HTTP without replacing provider-specific connectors.",
+  "id": "jido_con-sk6.4",
+  "labels": [],
+  "parent": "jido_con-sk6",
+  "priority": 2,
+  "status": "open",
+  "title": "[W4-HTTP-S04] Add HTTP catalog packs and docs",
+  "type": "task",
+  "updated_at": "2026-05-15T21:50:21Z"
+}
