@@ -6,7 +6,8 @@
   "description": "Implement JQL search, get issue, list projects, and metadata actions with pagination, field selection, normalized output, tests, and privacy classification.",
   "id": "jido_con-ul0.3",
   "labels": [
-    "jira"
+    "jira",
+    "work-management"
   ],
   "parent": "jido_con-ul0",
   "priority": 2,
