@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ul0.3"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:12Z",
   "description": "Implement create/update issue, transition issue, assign issue, and add comment actions with explicit confirmation/risk metadata and tests.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W5-JIRA-S04] Implement Jira issue write actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:17Z"
+  "updated_at": "2026-05-15T22:01:18Z"
 }

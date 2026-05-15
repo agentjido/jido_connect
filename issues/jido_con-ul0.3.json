@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-ul0.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ul0.4"
+  ],
   "created": "2026-05-15T22:01:12Z",
   "description": "Implement JQL search, get issue, list projects, and metadata actions with pagination, field selection, normalized output, tests, and privacy classification.",
   "id": "jido_con-ul0.3",
