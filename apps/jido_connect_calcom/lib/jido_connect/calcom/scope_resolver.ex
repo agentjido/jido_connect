@@ -15,7 +15,11 @@ defmodule Jido.Connect.Calcom.ScopeResolver do
     "calcom.bookings.reschedule" => ["BOOKING_WRITE"],
     "calcom.webhooks.list" => ["WEBHOOK_READ"],
     "calcom.webhooks.create" => ["WEBHOOK_WRITE"],
-    "calcom.webhooks.delete" => ["WEBHOOK_WRITE"]
+    "calcom.webhooks.delete" => ["WEBHOOK_WRITE"],
+    "calcom.booking.created" => ["BOOKING_READ"],
+    "calcom.booking.updated" => ["BOOKING_READ"],
+    "calcom.booking.canceled" => ["BOOKING_READ"],
+    "calcom.booking.rescheduled" => ["BOOKING_READ"]
   }
 
   def required_scopes(operation, _input, _connection) do

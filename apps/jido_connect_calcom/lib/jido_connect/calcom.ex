@@ -10,7 +10,8 @@ defmodule Jido.Connect.Calcom do
     fragments: [
       Jido.Connect.Calcom.Actions.EventTypes,
       Jido.Connect.Calcom.Actions.Bookings,
-      Jido.Connect.Calcom.Actions.Webhooks
+      Jido.Connect.Calcom.Actions.Webhooks,
+      Jido.Connect.Calcom.Triggers.Bookings
     ]
 
   integration do

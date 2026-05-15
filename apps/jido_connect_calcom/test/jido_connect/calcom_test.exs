@@ -18,7 +18,8 @@ defmodule Jido.Connect.CalcomTest do
   @calcom_dsl_fragments [
     Jido.Connect.Calcom.Actions.EventTypes,
     Jido.Connect.Calcom.Actions.Bookings,
-    Jido.Connect.Calcom.Actions.Webhooks
+    Jido.Connect.Calcom.Actions.Webhooks,
+    Jido.Connect.Calcom.Triggers.Bookings
   ]
 
   @test_scopes [
@@ -140,7 +141,12 @@ defmodule Jido.Connect.CalcomTest do
              "calcom.webhooks.delete"
            ]
 
-    assert spec.triggers == []
+    assert Enum.map(spec.triggers, & &1.id) == [
+             "calcom.booking.created",
+             "calcom.booking.updated",
+             "calcom.booking.canceled",
+             "calcom.booking.rescheduled"
+           ]
 
     assert [
              %{id: :api_key, kind: :api_key} = api_key_profile,
@@ -159,7 +165,14 @@ defmodule Jido.Connect.CalcomTest do
   test "compiles generated Jido plugin surface" do
     assert Application.get_env(:jido_connect_calcom, :jido_connect_providers) == [Calcom]
     assert Calcom.jido_action_modules() == @calcom_action_modules
-    assert Calcom.jido_sensor_modules() == []
+
+    assert Calcom.jido_sensor_modules() == [
+             Jido.Connect.Calcom.Sensors.BookingCreated,
+             Jido.Connect.Calcom.Sensors.BookingUpdated,
+             Jido.Connect.Calcom.Sensors.BookingCanceled,
+             Jido.Connect.Calcom.Sensors.BookingRescheduled
+           ]
+
     assert Calcom.jido_plugin_module() == Jido.Connect.Calcom.Plugin
 
     assert %Jido.Connect.Catalog.Manifest{
@@ -167,7 +180,12 @@ defmodule Jido.Connect.CalcomTest do
              package: :jido_connect_calcom,
              generated_modules: %{
                actions: @calcom_action_modules,
-               sensors: [],
+               sensors: [
+                 Jido.Connect.Calcom.Sensors.BookingCreated,
+                 Jido.Connect.Calcom.Sensors.BookingUpdated,
+                 Jido.Connect.Calcom.Sensors.BookingCanceled,
+                 Jido.Connect.Calcom.Sensors.BookingRescheduled
+               ],
                plugin: Jido.Connect.Calcom.Plugin
              }
            } = Calcom.jido_connect_manifest()
@@ -209,7 +227,12 @@ defmodule Jido.Connect.CalcomTest do
     assert %{id: :calcom_reader} = Calcom.reader_pack()
     assert %{id: :calcom_booking} = Calcom.booking_pack()
     assert %{id: :calcom_webhook} = Calcom.webhook_pack()
-    assert Enum.map(Calcom.catalog_packs(), & &1.id) == [:calcom_reader, :calcom_booking, :calcom_webhook]
+
+    assert Enum.map(Calcom.catalog_packs(), & &1.id) == [
+             :calcom_reader,
+             :calcom_booking,
+             :calcom_webhook
+           ]
   end
 
   test "invokes list event types through injected client and lease" do
@@ -284,7 +307,11 @@ defmodule Jido.Connect.CalcomTest do
              Connect.invoke(
                Calcom.integration(),
                "calcom.webhooks.create",
-               %{subscriber_url: "https://example.com/hook", triggers: ["BOOKING_CREATED"], active: true},
+               %{
+                 subscriber_url: "https://example.com/hook",
+                 triggers: ["BOOKING_CREATED"],
+                 active: true
+               },
                context: context,
                credential_lease: lease
              )

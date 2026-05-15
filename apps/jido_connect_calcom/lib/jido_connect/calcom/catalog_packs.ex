@@ -16,11 +16,11 @@ defmodule Jido.Connect.Calcom.CatalogPacks do
                    ]
 
   @webhook_tools @reader_tools ++
-                    [
-                      "calcom.webhooks.create",
-                      "calcom.webhooks.list",
-                      "calcom.webhooks.delete"
-                    ]
+                   [
+                     "calcom.webhooks.create",
+                     "calcom.webhooks.list",
+                     "calcom.webhooks.delete"
+                   ]
 
   @doc "Returns all built-in Cal.com catalog packs."
   def all, do: [reader(), booking(), webhook()]
