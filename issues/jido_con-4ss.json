@@ -6,7 +6,8 @@
   "description": "Build jido_connect_airtable for base/table/record workflows. Cover OAuth/PAT auth, metadata discovery, record CRUD/batch operations, changed-record polling guidance, catalog packs, and docs.",
   "id": "jido_con-4ss",
   "labels": [
-    "airtable"
+    "airtable",
+    "database"
   ],
   "priority": 2,
   "status": "open",
