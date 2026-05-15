@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-mq9.2"
   ],
+  "closed_at": "2026-05-15T23:06:52Z",
+  "close_reason": "Implemented in 3e98246 by pi-connector-factory",
   "created": "2026-05-15T21:49:59Z",
   "description": "Make apps/jido_connect_calcom pass package and umbrella compile/test. Fix Req.Test/Plug dependency assumptions, warnings, and any stale generated coverage artifacts without changing public behavior.",
   "id": "jido_con-mq9.1",
@@ -14,8 +16,8 @@
   ],
   "parent": "jido_con-mq9",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-CAL-S01] Repair Cal.com tests and package dependencies",
   "type": "task",
-  "updated_at": "2026-05-15T22:42:53Z"
+  "updated_at": "2026-05-15T23:06:52Z"
 }
