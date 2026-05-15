@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-54m.3"
   ],
+  "closed_at": "2026-05-15T20:07:48Z",
+  "close_reason": "Implemented in abe55e2 by pi-connector-factory",
   "created": "2026-05-14T14:35:51Z",
   "description": "Add normalized task list, task, link, and mutation result structs with representative fixtures.",
   "id": "jido_con-54m.2",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-54m",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G17-S02] Add Tasks normalized structs and schemas",
   "type": "task",
-  "updated_at": "2026-05-15T20:02:36Z"
+  "updated_at": "2026-05-15T20:07:48Z"
 }
