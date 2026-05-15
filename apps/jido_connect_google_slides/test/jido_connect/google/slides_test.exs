@@ -38,7 +38,9 @@ defmodule Jido.Connect.Google.SlidesTest do
       otp_app: :jido_connect_google_slides,
       action_modules: [
         Jido.Connect.Google.Slides.Actions.GetPresentation,
-        Jido.Connect.Google.Slides.Actions.CreatePresentation
+        Jido.Connect.Google.Slides.Actions.CreatePresentation,
+        Jido.Connect.Google.Slides.Actions.BatchUpdate,
+        Jido.Connect.Google.Slides.Actions.GetPageThumbnail
       ],
       plugin_module: Jido.Connect.Google.Slides.Plugin,
       plugin_name: "google_slides"

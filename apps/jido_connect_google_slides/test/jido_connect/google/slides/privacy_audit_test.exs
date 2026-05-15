@@ -11,6 +11,16 @@ defmodule Jido.Connect.Google.Slides.PrivacyAuditTest do
       ),
       action("google.slides.presentation.create", :workspace_metadata, :write, :required_for_ai,
         text_includes: ["presentation"]
+      ),
+      action(
+        "google.slides.presentation.batch_update",
+        :workspace_content,
+        :write,
+        :required_for_ai,
+        text_includes: ["presentation"]
+      ),
+      action("google.slides.presentation.page.get_thumbnail", :workspace_content, :read, :none,
+        text_includes: ["thumbnail"]
       )
     ])
   end
