@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-15T22:01:50Z",
+  "description": "Add umbrella app, provider module, OAuth connected-app auth profile, instance URL handling, REST transport boundary, README/AGENTS, and generated plugin tests.",
+  "id": "jido_con-uea.1",
+  "labels": [],
+  "parent": "jido_con-uea",
+  "priority": 2,
+  "status": "open",
+  "title": "[W4-SF-S01] Scaffold jido_connect_salesforce",
+  "type": "task",
+  "updated_at": "2026-05-15T22:01:50Z"
+}
