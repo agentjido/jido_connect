@@ -6,6 +6,7 @@
   "description": "Implement create/update records for Lead/Contact/Task and generic sObject with risk metadata, validation boundaries, and tests.",
   "id": "jido_con-uea.4",
   "labels": [
+    "crm",
     "salesforce"
   ],
   "parent": "jido_con-uea",
