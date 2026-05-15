@@ -8,6 +8,7 @@
   "labels": [
     "connector",
     "jira",
+    "wave-5",
     "work-management"
   ],
   "parent": "jido_con-ul0",
@@ -15,5 +16,5 @@
   "status": "open",
   "title": "[W5-JIRA-S01] Scaffold jido_connect_jira",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:13Z"
+  "updated_at": "2026-05-15T22:01:14Z"
 }
