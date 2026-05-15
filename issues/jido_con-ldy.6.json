@@ -6,6 +6,7 @@
   "description": "Add reader/sales-editor catalog packs, plugin availability tests, scope matrix, privacy classification, and live-test guidance.",
   "id": "jido_con-ldy.6",
   "labels": [
+    "crm",
     "hubspot"
   ],
   "parent": "jido_con-ldy",
