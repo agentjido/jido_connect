@@ -48,6 +48,10 @@ Run a Ralph-style loop, one Beadwork task at a time:
 bun run loop -- --limit 5
 ```
 
+The loop runs the same clean one-commit contract as `step`, then re-reads
+Beadwork before selecting the next task. It stops when there are no ready child
+tasks left or when one step fails.
+
 Preview the exact Pi prompt for the next task:
 
 ```sh
