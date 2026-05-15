@@ -5,6 +5,7 @@
     "jido_con-sk6.2"
   ],
   "created": "2026-05-15T21:50:21Z",
+  "defer_until": "2027-01-01",
   "description": "Add package shell, provider module, auth profiles for none/api-key/bearer/basic/custom headers, transport boundary, generated plugin tests, and docs skeleton.",
   "id": "jido_con-sk6.1",
   "labels": [
@@ -15,8 +16,8 @@
   ],
   "parent": "jido_con-sk6",
   "priority": 2,
-  "status": "open",
+  "status": "deferred",
   "title": "[W4-HTTP-S01] Scaffold jido_connect_http",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:25Z"
+  "updated_at": "2026-05-15T22:00:35Z"
 }
