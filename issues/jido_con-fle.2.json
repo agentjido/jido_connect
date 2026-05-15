@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-fle.1"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-fle",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G14-S02] Add Docs normalized structs and schemas",
   "type": "task",
-  "updated_at": "2026-05-14T14:36:00Z"
+  "updated_at": "2026-05-15T14:32:08Z"
 }
