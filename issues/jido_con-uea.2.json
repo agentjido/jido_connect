@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-15T22:01:50Z",
+  "description": "Add sObject record, lead, contact, account, opportunity, task, describe metadata, query result, and pagination structs with representative Salesforce fixture coverage.",
+  "id": "jido_con-uea.2",
+  "labels": [],
+  "parent": "jido_con-uea",
+  "priority": 2,
+  "status": "open",
+  "title": "[W4-SF-S02] Add Salesforce normalized structs and fixtures",
+  "type": "task",
+  "updated_at": "2026-05-15T22:01:50Z"
+}
