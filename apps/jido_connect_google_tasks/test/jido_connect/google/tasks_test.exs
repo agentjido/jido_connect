@@ -272,6 +272,12 @@ defmodule Jido.Connect.Google.TasksTest do
     assert "profile" in profile.default_scopes
     assert @readonly_scope in profile.optional_scopes
     assert @write_scope in profile.optional_scopes
+
+    ConnectorContracts.assert_google_naming_and_catalog_conventions(Tasks,
+      id_prefix: "google.tasks.",
+      pack_id_prefix: "google_tasks_",
+      module_namespace: Jido.Connect.Google.Tasks
+    )
   end
 
   test "compiles generated Jido plugin surface" do
@@ -289,6 +295,13 @@ defmodule Jido.Connect.Google.TasksTest do
       plugin_module: Jido.Connect.Google.Tasks.Plugin,
       plugin_name: "google_tasks"
     )
+
+    ConnectorContracts.assert_catalog_pack_delegates(Tasks,
+      readonly_pack: :google_tasks_readonly,
+      editor_pack: :google_tasks_editor
+    )
+
+    ConnectorContracts.assert_plugin_tool_availability(Tasks)
   end
 
   test "loads Tasks Spark DSL fragments" do
