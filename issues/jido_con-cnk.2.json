@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-cnk.1"
+  ],
   "blocks": [],
   "created": "2026-05-15T21:50:28Z",
   "description": "Support shared-secret HMAC, static bearer/token, timestamp tolerance, replay id extraction, unsigned dev mode, and redacted error details with tests.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W4-WEB-S02] Implement webhook verification primitives",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:30Z"
+  "updated_at": "2026-05-15T21:50:32Z"
 }
