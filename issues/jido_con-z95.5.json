@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-z95.4"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:31Z",
   "description": "Add analytics-reader/event-writer catalog packs, scope/policy matrix, availability tests, README usage, and live-test guidance.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W6-PH-S05] Add PostHog catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:36Z"
+  "updated_at": "2026-05-15T22:01:38Z"
 }

@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-z95.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-z95.5"
+  ],
   "created": "2026-05-15T22:01:30Z",
   "description": "Implement HogQL/query action, list/get insights, date-range inputs, result normalization, pagination, tests, and error handling.",
   "id": "jido_con-z95.4",
