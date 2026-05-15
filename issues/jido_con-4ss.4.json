@@ -6,7 +6,8 @@
   "description": "Implement create/update/delete records and batch variants with risk metadata, typed field payload handling, and tests.",
   "id": "jido_con-4ss.4",
   "labels": [
-    "airtable"
+    "airtable",
+    "database"
   ],
   "parent": "jido_con-4ss",
   "priority": 2,
