@@ -7,6 +7,7 @@
   "id": "jido_con-pfy.4",
   "labels": [
     "calendly",
+    "connector",
     "scheduling"
   ],
   "parent": "jido_con-pfy",
@@ -14,5 +15,5 @@
   "status": "open",
   "title": "[W4-CALENDLY-S04] Implement Calendly cancellation and webhook lifecycle",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:45Z"
+  "updated_at": "2026-05-15T22:01:46Z"
 }
