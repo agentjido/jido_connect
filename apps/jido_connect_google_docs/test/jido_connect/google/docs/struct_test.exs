@@ -2,6 +2,7 @@ defmodule Jido.Connect.Google.Docs.StructTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect.Google.Docs.{
+    BatchUpdateRequest,
     Document,
     DocumentRequest,
     DocumentResult,
@@ -97,5 +98,94 @@ defmodule Jido.Connect.Google.Docs.StructTest do
     result = DocumentResult.new!(%{})
     assert result.document_id == nil
     assert result.metadata == %{}
+  end
+
+  test "batch update request struct validates with Zoi" do
+    request =
+      ConnectorContracts.assert_struct_defaults(
+        BatchUpdateRequest,
+        %{document_id: "doc_abc123", requests: [%{insert_text: %{}}]},
+        metadata: %{}
+      )
+
+    assert request.document_id == "doc_abc123"
+    assert length(request.requests) == 1
+  end
+
+  test "batch update request struct accepts optional write_control" do
+    request =
+      BatchUpdateRequest.new!(%{
+        document_id: "doc_abc123",
+        requests: [%{insert_text: %{}}],
+        write_control: %{required_revision_id: "rev001"}
+      })
+
+    assert request.write_control == %{required_revision_id: "rev001"}
+  end
+
+  test "batch update request struct rejects missing document_id" do
+    assert {:error, _error} = BatchUpdateRequest.new(%{requests: [%{insert_text: %{}}]})
+  end
+
+  test "batch update request struct rejects missing requests" do
+    assert {:error, _error} = BatchUpdateRequest.new(%{document_id: "doc_abc123"})
+  end
+
+  test "batch update request validate_requests accepts valid operations" do
+    requests = [
+      %{insert_text: %{text: "Hello", location: %{index: 1}}},
+      %{update_text_style: %{range: %{start_index: 1, end_index: 6}}},
+      %{insert_table: %{rows: 3, columns: 2, location: %{index: 10}}},
+      %{insert_inline_image: %{uri: "https://example.com/img.png", location: %{index: 20}}}
+    ]
+
+    assert :ok = BatchUpdateRequest.validate_requests(requests)
+  end
+
+  test "batch update request validate_requests rejects empty list" do
+    assert {:error, :empty_requests} = BatchUpdateRequest.validate_requests([])
+  end
+
+  test "batch update request validate_requests rejects too many requests" do
+    requests = Enum.map(1..101, fn i -> %{insert_text: %{text: "#{i}"}} end)
+
+    assert {:error, {:too_many_requests, 101, 100}} =
+             BatchUpdateRequest.validate_requests(requests)
+  end
+
+  test "batch update request validate_requests rejects multi-key maps" do
+    assert {:error, {:invalid_request, 0, "must contain exactly one operation"}} =
+             BatchUpdateRequest.validate_requests([%{insert_text: %{}, update_text_style: %{}}])
+  end
+
+  test "batch update request validate_requests rejects unsupported operations" do
+    assert {:error, {:unsupported_operation, 0, :dangerous_op}} =
+             BatchUpdateRequest.validate_requests([%{dangerous_op: %{}}])
+  end
+
+  test "batch update request validate_requests rejects non-list" do
+    assert {:error, :not_a_list} = BatchUpdateRequest.validate_requests("not a list")
+  end
+
+  test "batch update request validate_requests rejects non-map entries" do
+    assert {:error, {:invalid_request, 0, "must be a map"}} =
+             BatchUpdateRequest.validate_requests(["not a map"])
+  end
+
+  test "batch update request supported_operations includes expected operations" do
+    ops = BatchUpdateRequest.supported_operations()
+
+    assert MapSet.member?(ops, "insert_text")
+    assert MapSet.member?(ops, "update_text_style")
+    assert MapSet.member?(ops, "insert_table")
+    assert MapSet.member?(ops, "insert_inline_image")
+    assert MapSet.member?(ops, "delete_content_range")
+    assert MapSet.member?(ops, "replace_all_text")
+    assert MapSet.member?(ops, "update_paragraph_style")
+    assert MapSet.member?(ops, "update_table_cell_style")
+  end
+
+  test "batch update request max_requests returns limit" do
+    assert BatchUpdateRequest.max_requests() == 100
   end
 end

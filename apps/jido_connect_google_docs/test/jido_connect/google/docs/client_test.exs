@@ -124,6 +124,92 @@ defmodule Jido.Connect.Google.Docs.ClientTest do
              Client.get_document(%{document_id: "nonexistent"}, "token")
   end
 
+  test "batch updates document" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/documents/doc_abc123:batchUpdate"
+      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      decoded = Jason.decode!(body)
+      assert decoded["requests"] == [%{"insertText" => %{"text" => "Hello"}}]
+      assert decoded["writeControl"] == %{"requiredRevisionId" => "rev001"}
+
+      Req.Test.json(conn, %{
+        "documentId" => "doc_abc123",
+        "replies" => [%{"insertText" => %{}}]
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.batch_update(
+               %{
+                 document_id: "doc_abc123",
+                 requests: [%{insertText: %{text: "Hello"}}],
+                 write_control: %{requiredRevisionId: "rev001"}
+               },
+               "token"
+             )
+
+    assert result.document_id == "doc_abc123"
+    assert length(result.replies) == 1
+  end
+
+  test "batch updates document without write control" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/documents/doc_abc123:batchUpdate"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      decoded = Jason.decode!(body)
+      assert decoded["requests"] == [%{"insertText" => %{"text" => "Hello"}}]
+      refute Map.has_key?(decoded, "writeControl")
+
+      Req.Test.json(conn, %{
+        "documentId" => "doc_abc123",
+        "replies" => []
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.batch_update(
+               %{
+                 document_id: "doc_abc123",
+                 requests: [%{insertText: %{text: "Hello"}}]
+               },
+               "token"
+             )
+
+    assert result.document_id == "doc_abc123"
+    assert result.replies == []
+  end
+
+  test "handles batch update API error response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Plug.Conn.send_resp(conn, 400, Jason.encode!(%{"error" => %{"message" => "bad request"}}))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 400}} =
+             Client.batch_update(
+               %{document_id: "doc_abc123", requests: [%{insertText: %{}}]},
+               "token"
+             )
+  end
+
+  test "handles batch update malformed response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, ["bad"])
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.batch_update(
+               %{document_id: "doc_abc123", requests: [%{insertText: %{}}]},
+               "token"
+             )
+  end
+
   defp document_payload do
     %{
       "documentId" => "doc_abc123",

@@ -11,6 +11,9 @@ defmodule Jido.Connect.Google.Docs.PrivacyAuditTest do
       ),
       action("google.docs.document.create", :workspace_metadata, :write, :required_for_ai,
         text_includes: ["document"]
+      ),
+      action("google.docs.document.batch_update", :workspace_content, :destructive, :always,
+        text_includes: ["document"]
       )
     ])
   end

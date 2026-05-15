@@ -7,7 +7,8 @@ defmodule Jido.Connect.Google.DocsTest do
 
   @docs_action_modules [
     Jido.Connect.Google.Docs.Actions.GetDocument,
-    Jido.Connect.Google.Docs.Actions.CreateDocument
+    Jido.Connect.Google.Docs.Actions.CreateDocument,
+    Jido.Connect.Google.Docs.Actions.BatchUpdateDocument
   ]
 
   @docs_dsl_fragments [
@@ -35,6 +36,17 @@ defmodule Jido.Connect.Google.DocsTest do
          revision_id: "rev001"
        })}
     end
+
+    def batch_update(
+          %{document_id: "doc_abc123", requests: [%{insert_text: _}]},
+          "token"
+        ) do
+      {:ok,
+       %{
+         document_id: "doc_abc123",
+         replies: [%{insert_text: %{}}]
+       }}
+    end
   end
 
   test "declares Google Docs provider metadata" do
@@ -49,7 +61,8 @@ defmodule Jido.Connect.Google.DocsTest do
 
     assert Enum.map(spec.actions, & &1.id) == [
              "google.docs.document.get",
-             "google.docs.document.create"
+             "google.docs.document.create",
+             "google.docs.document.batch_update"
            ]
 
     assert [%{id: :user, kind: :oauth2, refresh?: true, pkce?: true} = profile] =
@@ -144,6 +157,84 @@ defmodule Jido.Connect.Google.DocsTest do
                Docs.integration(),
                "google.docs.document.create",
                %{title: "New Project Plan"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch update requires full Docs scope" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: [@write_scope]
+            }} =
+             Connect.invoke(
+               Docs.integration(),
+               "google.docs.document.batch_update",
+               %{document_id: "doc_abc123", requests: [%{insert_text: %{text: "hello"}}]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes batch update document through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{replies: [%{insert_text: %{}}]}} =
+             Connect.invoke(
+               Docs.integration(),
+               "google.docs.document.batch_update",
+               %{
+                 document_id: "doc_abc123",
+                 requests: [%{insert_text: %{text: "Hello", location: %{index: 1}}}]
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch update rejects empty requests" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error, %Connect.Error.ValidationError{reason: :invalid_batch_update_requests}} =
+             Connect.invoke(
+               Docs.integration(),
+               "google.docs.document.batch_update",
+               %{document_id: "doc_abc123", requests: []},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch update rejects requests with multiple operations per map" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error, %Connect.Error.ValidationError{reason: :invalid_batch_update_request}} =
+             Connect.invoke(
+               Docs.integration(),
+               "google.docs.document.batch_update",
+               %{
+                 document_id: "doc_abc123",
+                 requests: [%{insert_text: %{}, update_text_style: %{}}]
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch update rejects unsupported operations" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error, %Connect.Error.ValidationError{reason: :unsupported_batch_update_operation}} =
+             Connect.invoke(
+               Docs.integration(),
+               "google.docs.document.batch_update",
+               %{
+                 document_id: "doc_abc123",
+                 requests: [%{dangerous_operation: %{}}]
+               },
                context: context,
                credential_lease: lease
              )

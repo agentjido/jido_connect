@@ -65,10 +65,50 @@ defmodule Jido.Connect.Google.Docs.Normalizer do
     |> DocumentResult.new()
   end
 
+  @doc "Normalizes a Google Docs batch update result payload."
+  @spec batch_update_result(map()) :: {:ok, map()} | {:error, term()}
+  def batch_update_result(payload) when is_map(payload) do
+    document =
+      case Data.get(payload, "document") do
+        nil -> nil
+        doc_payload -> document(doc_payload)
+      end
+
+    replies =
+      payload
+      |> Data.get("replies", [])
+      |> Enum.map(&public_map/1)
+
+    result = %{
+      document_id: Data.get(payload, "documentId"),
+      replies: replies,
+      write_control: Data.get(payload, "writeControl")
+    }
+
+    result =
+      case document do
+        {:ok, doc} -> Map.put(result, :document, public_map(doc))
+        _ -> result
+      end
+
+    {:ok, Data.compact(result)}
+  end
+
   defp tab!(payload) do
     case tab(payload) do
       {:ok, tab} -> tab
       {:error, error} -> raise error
     end
   end
+
+  defp public_map(struct) when is_struct(struct),
+    do: struct |> Map.from_struct() |> public_map()
+
+  defp public_map(map) when is_map(map) do
+    map
+    |> Map.new(fn {key, value} -> {key, public_map(value)} end)
+  end
+
+  defp public_map(list) when is_list(list), do: Enum.map(list, &public_map/1)
+  defp public_map(value), do: value
 end
