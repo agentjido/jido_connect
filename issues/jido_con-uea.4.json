@@ -8,12 +8,13 @@
   "labels": [
     "connector",
     "crm",
-    "salesforce"
+    "salesforce",
+    "wave-4"
   ],
   "parent": "jido_con-uea",
   "priority": 2,
   "status": "open",
   "title": "[W4-SF-S04] Implement Salesforce record write actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:55Z"
+  "updated_at": "2026-05-15T22:01:56Z"
 }
