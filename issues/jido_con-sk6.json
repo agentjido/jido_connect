@@ -8,11 +8,12 @@
   "labels": [
     "connector",
     "generic",
-    "http"
+    "http",
+    "wave-4"
   ],
   "priority": 2,
   "status": "open",
   "title": "[W4] Generic HTTP Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T21:50:20Z"
+  "updated_at": "2026-05-15T21:50:21Z"
 }
