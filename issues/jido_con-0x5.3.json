@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-0x5.2"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:21Z",
   "description": "Implement issue search/list/get, project/team metadata, comments list, pagination, tests, and normalized outputs.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W5-LIN-S03] Implement Linear read/search actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:25Z"
+  "updated_at": "2026-05-15T22:01:27Z"
 }

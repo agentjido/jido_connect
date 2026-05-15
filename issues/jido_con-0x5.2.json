@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-0x5.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-0x5.3"
+  ],
   "created": "2026-05-15T22:01:21Z",
   "description": "Add issue, project, team, user, state, label, comment, and pagination structs with representative Linear GraphQL fixture coverage.",
   "id": "jido_con-0x5.2",
