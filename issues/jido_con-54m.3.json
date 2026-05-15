@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-54m.4"
   ],
+  "closed_at": "2026-05-15T20:24:58Z",
+  "close_reason": "Implemented in 5940236 by pi-connector-factory",
   "created": "2026-05-14T14:35:52Z",
   "description": "Implement google.tasks.tasklist.list/get/create/update/delete actions with scopes, pagination, normalized output, and tests.",
   "id": "jido_con-54m.3",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-54m",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G17-S03] Implement task list actions",
   "type": "task",
-  "updated_at": "2026-05-15T20:07:48Z"
+  "updated_at": "2026-05-15T20:24:58Z"
 }
