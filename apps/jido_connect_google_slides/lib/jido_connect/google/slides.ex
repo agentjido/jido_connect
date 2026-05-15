@@ -7,7 +7,9 @@ defmodule Jido.Connect.Google.Slides do
   """
 
   use Jido.Connect,
-    fragments: []
+    fragments: [
+      Jido.Connect.Google.Slides.Actions.Presentations
+    ]
 
   integration do
     id(:google_slides)

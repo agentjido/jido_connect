@@ -47,4 +47,35 @@ defmodule Jido.Connect.Google.Slides.ScopeResolverTest do
       }
     ])
   end
+
+  test "returns write scope for create operations" do
+    assert ScopeResolver.required_scopes(
+             %{id: "google.slides.presentation.create"},
+             %{},
+             %{scopes: [@write_scope]}
+           ) == [@write_scope]
+  end
+
+  test "declares Slides write scope matrix" do
+    ConnectorContracts.assert_scope_matrix(ScopeResolver, [
+      %{
+        label: "create presentation requires write scope",
+        operation: "google.slides.presentation.create",
+        granted: [],
+        expected: @write_scope
+      },
+      %{
+        label: "create presentation does not downgrade with readonly grant",
+        operation: "google.slides.presentation.create",
+        granted: [@readonly_scope],
+        expected: @write_scope
+      },
+      %{
+        label: "create presentation accepts write scope",
+        operation: "google.slides.presentation.create",
+        granted: [@write_scope],
+        expected: @write_scope
+      }
+    ])
+  end
 end

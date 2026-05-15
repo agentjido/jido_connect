@@ -36,7 +36,10 @@ defmodule Jido.Connect.Google.SlidesTest do
   test "compiles generated Jido plugin surface" do
     ConnectorContracts.assert_generated_surface(Slides,
       otp_app: :jido_connect_google_slides,
-      action_modules: [],
+      action_modules: [
+        Jido.Connect.Google.Slides.Actions.GetPresentation,
+        Jido.Connect.Google.Slides.Actions.CreatePresentation
+      ],
       plugin_module: Jido.Connect.Google.Slides.Plugin,
       plugin_name: "google_slides"
     )
@@ -46,12 +49,12 @@ defmodule Jido.Connect.Google.SlidesTest do
       editor_pack: :google_slides_editor
     )
 
-    # Plugin tool availability will be tested once Slides actions are added.
-    # The scaffold has no actions yet, so assert_plugin_tool_availability
-    # is deferred to the first action-implementation task.
+    ConnectorContracts.assert_plugin_tool_availability(Slides)
   end
 
   test "loads Slides Spark DSL fragments" do
-    ConnectorContracts.assert_spark_fragments([])
+    ConnectorContracts.assert_spark_fragments([
+      Jido.Connect.Google.Slides.Actions.Presentations
+    ])
   end
 end
