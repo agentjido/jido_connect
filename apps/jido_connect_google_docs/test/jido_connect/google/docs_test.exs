@@ -73,6 +73,12 @@ defmodule Jido.Connect.Google.DocsTest do
     assert "profile" in profile.default_scopes
     assert @readonly_scope in profile.optional_scopes
     assert @write_scope in profile.optional_scopes
+
+    ConnectorContracts.assert_google_naming_and_catalog_conventions(Docs,
+      id_prefix: "google.docs.",
+      pack_id_prefix: "google_docs_",
+      module_namespace: Jido.Connect.Google.Docs
+    )
   end
 
   test "compiles generated Jido plugin surface" do
@@ -82,6 +88,13 @@ defmodule Jido.Connect.Google.DocsTest do
       plugin_module: Jido.Connect.Google.Docs.Plugin,
       plugin_name: "google_docs"
     )
+
+    ConnectorContracts.assert_catalog_pack_delegates(Docs,
+      readonly_pack: :google_docs_readonly,
+      editor_pack: :google_docs_editor
+    )
+
+    ConnectorContracts.assert_plugin_tool_availability(Docs)
   end
 
   test "loads Docs Spark DSL fragments" do

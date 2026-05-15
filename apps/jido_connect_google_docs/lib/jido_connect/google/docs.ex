@@ -54,4 +54,8 @@ defmodule Jido.Connect.Google.Docs do
       revoke?(true)
     end
   end
+
+  defdelegate catalog_packs, to: Jido.Connect.Google.Docs.CatalogPacks, as: :all
+  defdelegate readonly_pack, to: Jido.Connect.Google.Docs.CatalogPacks, as: :readonly
+  defdelegate editor_pack, to: Jido.Connect.Google.Docs.CatalogPacks, as: :editor
 end
