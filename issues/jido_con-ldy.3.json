@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-15T21:50:05Z",
+  "description": "Implement contact/company/deal get, search, and list-style actions with pagination, property selection, archived handling, tests, and least-privilege metadata.",
+  "id": "jido_con-ldy.3",
+  "labels": [],
+  "parent": "jido_con-ldy",
+  "priority": 2,
+  "status": "open",
+  "title": "[W4-HUB-S03] Implement HubSpot CRM read/search actions",
+  "type": "task",
+  "updated_at": "2026-05-15T21:50:05Z"
+}
