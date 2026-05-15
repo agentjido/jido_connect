@@ -8,6 +8,7 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
   @google_fixture_roots %{
     gmail: "../../fixtures/gmail",
     google_calendar: "../../../fixtures/google_calendar",
+    google_docs: "../../../fixtures/google_docs",
     google_drive: "../../../fixtures/google_drive",
     google_sheets: "../../../fixtures/google_sheets"
   }
