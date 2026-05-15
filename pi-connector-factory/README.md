@@ -33,6 +33,8 @@ bun run step
 
 This streams Pi session events while the task runs. Raw JSONL session logs are
 also written under `runs/<timestamp>-<issue>-step/sessions/`.
+The default Pi timeout is 30 minutes; override it with `PI_TIMEOUT_MS` in
+`.env` when a task needs more room.
 
 Run one specific task:
 

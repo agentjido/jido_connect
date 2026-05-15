@@ -12,6 +12,7 @@ Rules:
 - Use existing Spark DSL, Zoi struct, provider client, action handler, trigger, catalog, and test patterns.
 - Prefer small capability-oriented modules over catch-all client modules.
 - Run focused tests for the changed package. Run broader checks when touching shared code.
+- Do not run `mix deps.get` unless the issue explicitly requires dependency work. This workspace may have local deps already available while Hex/network fetches are slow.
 - Make exactly one Git commit on the current branch.
 - Include the Beadwork issue id in the commit message.
 - Do not push.
@@ -21,9 +22,9 @@ Useful commands:
 
 ```sh
 bw show {{issue_id}}
-mix compile --warnings-as-errors
+mix compile --warnings-as-errors --no-deps-check
 mix format --check-formatted
-mix test
+mix test --no-deps-check
 git status --short
 git diff --check
 git commit -am "{{issue_id}}: implement task"
