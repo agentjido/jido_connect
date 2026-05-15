@@ -6,6 +6,7 @@
   "description": "Implement create/update issue, add comment, assign/change status/label actions with confirmation metadata and tests.",
   "id": "jido_con-0x5.4",
   "labels": [
+    "connector",
     "linear",
     "work-management"
   ],
@@ -14,5 +15,5 @@
   "status": "open",
   "title": "[W5-LIN-S04] Implement Linear mutation actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:25Z"
+  "updated_at": "2026-05-15T22:01:26Z"
 }
