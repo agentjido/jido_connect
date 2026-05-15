@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-fle.5"
   ],
+  "closed_at": "2026-05-15T15:35:18Z",
+  "close_reason": "Implemented in 588dbb6 by pi-connector-factory",
   "created": "2026-05-14T14:35:48Z",
   "description": "Implement provider-specific document batchUpdate actions with safe schema boundaries for text/style/table/image operations where practical.",
   "id": "jido_con-fle.4",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-fle",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G14-S04] Implement document batch update actions",
   "type": "task",
-  "updated_at": "2026-05-15T15:23:39Z"
+  "updated_at": "2026-05-15T15:35:18Z"
 }
