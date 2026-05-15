@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-15T22:01:41Z",
+  "description": "Implement list/get event types, list scheduled events, list/get invitees, pagination, date filters, tests, and normalized outputs.",
+  "id": "jido_con-pfy.3",
+  "labels": [],
+  "parent": "jido_con-pfy",
+  "priority": 2,
+  "status": "open",
+  "title": "[W4-CALENDLY-S03] Implement Calendly event read actions",
+  "type": "task",
+  "updated_at": "2026-05-15T22:01:41Z"
+}
