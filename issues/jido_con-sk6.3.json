@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-sk6.2"
+  ],
   "blocks": [],
   "created": "2026-05-15T21:50:21Z",
   "description": "Normalize status, headers, body summary/json/text, errors, rate limits, and add SSRF/host allowlist policy hooks for hosts.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W4-HTTP-S03] Add HTTP response normalization and policy gates",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:24Z"
+  "updated_at": "2026-05-15T21:50:26Z"
 }
