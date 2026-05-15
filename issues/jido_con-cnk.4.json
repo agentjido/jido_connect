@@ -6,6 +6,7 @@
   "description": "Add catalog/availability coverage, route mounting guidance, replay/dedupe contract docs, and local demo/live-test guidance.",
   "id": "jido_con-cnk.4",
   "labels": [
+    "generic",
     "webhook"
   ],
   "parent": "jido_con-cnk",
