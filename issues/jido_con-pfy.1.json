@@ -5,11 +5,13 @@
   "created": "2026-05-15T22:01:40Z",
   "description": "Add umbrella app, provider module, OAuth/PAT auth profiles, transport boundary, README/AGENTS, and generated plugin tests.",
   "id": "jido_con-pfy.1",
-  "labels": [],
+  "labels": [
+    "calendly"
+  ],
   "parent": "jido_con-pfy",
   "priority": 2,
   "status": "open",
   "title": "[W4-CALENDLY-S01] Scaffold jido_connect_calendly",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:40Z"
+  "updated_at": "2026-05-15T22:01:42Z"
 }
