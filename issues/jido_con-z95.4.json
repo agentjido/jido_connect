@@ -7,6 +7,7 @@
   "id": "jido_con-z95.4",
   "labels": [
     "analytics",
+    "connector",
     "posthog"
   ],
   "parent": "jido_con-z95",
@@ -14,5 +15,5 @@
   "status": "open",
   "title": "[W6-PH-S04] Implement PostHog query and insight actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:34Z"
+  "updated_at": "2026-05-15T22:01:35Z"
 }
