@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-fle.3"
   ],
+  "closed_at": "2026-05-15T14:43:30Z",
+  "close_reason": "Implemented in 19beeb3 by pi-connector-factory",
   "created": "2026-05-14T14:35:48Z",
   "description": "Add normalized document, tab/body/content, revision-safe request/result structs and fixture coverage for representative Google Docs payloads.",
   "id": "jido_con-fle.2",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-fle",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G14-S02] Add Docs normalized structs and schemas",
   "type": "task",
-  "updated_at": "2026-05-15T14:32:08Z"
+  "updated_at": "2026-05-15T14:43:30Z"
 }
