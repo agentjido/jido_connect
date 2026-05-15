@@ -8,7 +8,8 @@
   "labels": [
     "connector",
     "crm",
-    "salesforce"
+    "salesforce",
+    "wave-4"
   ],
   "parent": "jido_con-uea",
   "priority": 2,
