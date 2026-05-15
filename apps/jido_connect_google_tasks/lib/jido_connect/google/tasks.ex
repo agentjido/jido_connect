@@ -8,7 +8,8 @@ defmodule Jido.Connect.Google.Tasks do
 
   use Jido.Connect,
     fragments: [
-      Jido.Connect.Google.Tasks.Actions.TaskLists
+      Jido.Connect.Google.Tasks.Actions.TaskLists,
+      Jido.Connect.Google.Tasks.Actions.Tasks
     ]
 
   integration do

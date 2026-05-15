@@ -16,11 +16,29 @@ defmodule Jido.Connect.Google.TasksTest do
     Jido.Connect.Google.Tasks.Actions.DeleteTaskList
   ]
 
+  @task_action_modules [
+    Jido.Connect.Google.Tasks.Actions.ListTasks,
+    Jido.Connect.Google.Tasks.Actions.GetTask,
+    Jido.Connect.Google.Tasks.Actions.CreateTask,
+    Jido.Connect.Google.Tasks.Actions.UpdateTask,
+    Jido.Connect.Google.Tasks.Actions.DeleteTask,
+    Jido.Connect.Google.Tasks.Actions.ClearTasks,
+    Jido.Connect.Google.Tasks.Actions.MoveTask
+  ]
+
+  @all_action_modules @task_list_action_modules ++ @task_action_modules
+
   @task_list_dsl_fragments [
     Jido.Connect.Google.Tasks.Actions.TaskLists
   ]
 
+  @task_dsl_fragments [
+    Jido.Connect.Google.Tasks.Actions.Tasks
+  ]
+
   defmodule FakeTasksClient do
+    # --- Task list fake methods ---
+
     def list_task_lists(%{page_size: 20}, "token") do
       {:ok,
        %{
@@ -92,7 +110,106 @@ defmodule Jido.Connect.Google.TasksTest do
     def delete_task_list(%{task_list_id: "list_2"}, "token") do
       {:ok, %{task_list_id: "list_2", deleted?: true}}
     end
+
+    # --- Task fake methods ---
+
+    def list_tasks(%{task_list_id: "list_1", page_size: 20}, "token") do
+      {:ok,
+       %{
+         tasks: [
+           Tasks.Task.new!(%{
+             task_id: "task_1",
+             task_list_id: "list_1",
+             title: "Buy groceries",
+             status: "needsAction"
+           }),
+           Tasks.Task.new!(%{
+             task_id: "task_2",
+             task_list_id: "list_1",
+             title: "Write report",
+             status: "completed"
+           })
+         ]
+       }}
+    end
+
+    def list_tasks(%{task_list_id: "list_1", page_size: 1} = params, "token")
+        when not is_map_key(params, :page_token) do
+      {:ok,
+       %{
+         tasks: [
+           Tasks.Task.new!(%{task_id: "task_1", title: "Buy groceries"})
+         ],
+         next_page_token: "task_page_2"
+       }}
+    end
+
+    def list_tasks(%{task_list_id: "list_1", page_size: 1, page_token: "task_page_2"}, "token") do
+      {:ok,
+       %{
+         tasks: [
+           Tasks.Task.new!(%{task_id: "task_2", title: "Write report"})
+         ]
+       }}
+    end
+
+    def get_task(%{task_list_id: "list_1", task_id: "task_1"}, "token") do
+      {:ok,
+       Tasks.Task.new!(%{
+         task_id: "task_1",
+         task_list_id: "list_1",
+         title: "Buy groceries",
+         notes: "Milk, eggs, bread",
+         status: "needsAction",
+         due: "2026-05-20T00:00:00.000Z",
+         self_link: "https://www.googleapis.com/tasks/v1/lists/list_1/tasks/task_1"
+       })}
+    end
+
+    def create_task(%{task_list_id: "list_1", title: "New task"}, "token") do
+      {:ok,
+       Tasks.Task.new!(%{
+         task_id: "task_new",
+         task_list_id: "list_1",
+         title: "New task",
+         status: "needsAction",
+         updated: "2026-05-15T14:00:00.000Z"
+       })}
+    end
+
+    def update_task(%{task_list_id: "list_1", task_id: "task_1"}, "token") do
+      {:ok,
+       Tasks.Task.new!(%{
+         task_id: "task_1",
+         task_list_id: "list_1",
+         title: "Updated groceries",
+         status: "completed",
+         updated: "2026-05-15T15:00:00.000Z"
+       })}
+    end
+
+    def delete_task(%{task_list_id: "list_1", task_id: "task_2"}, "token") do
+      {:ok, %{task_id: "task_2", task_list_id: "list_1", deleted?: true}}
+    end
+
+    def clear_tasks(%{task_list_id: "list_1"}, "token") do
+      {:ok, %{task_list_id: "list_1", cleared?: true}}
+    end
+
+    def move_task(%{task_list_id: "list_1", task_id: "task_1"}, "token") do
+      {:ok,
+       Tasks.Task.new!(%{
+         task_id: "task_1",
+         task_list_id: "list_1",
+         title: "Buy groceries",
+         status: "needsAction",
+         parent: "task_3",
+         position: "00000000000000000001"
+       })}
+    end
   end
+
+  # --- Provider metadata tests ---
 
   test "declares Google Tasks provider metadata" do
     spec = Tasks.integration()
@@ -113,15 +230,19 @@ defmodule Jido.Connect.Google.TasksTest do
       assert action.risk
     end
 
-    # Catalog packs are validated separately in catalog_packs_test.exs.
-    # Pack allowed_tools include task IDs that will be registered in a later issue.
-
     assert Enum.map(spec.actions, & &1.id) == [
              "google.tasks.tasklist.list",
              "google.tasks.tasklist.get",
              "google.tasks.tasklist.create",
              "google.tasks.tasklist.update",
-             "google.tasks.tasklist.delete"
+             "google.tasks.tasklist.delete",
+             "google.tasks.task.list",
+             "google.tasks.task.get",
+             "google.tasks.task.create",
+             "google.tasks.task.update",
+             "google.tasks.task.delete",
+             "google.tasks.task.clear",
+             "google.tasks.task.move"
            ]
 
     assert spec.triggers == []
@@ -139,15 +260,17 @@ defmodule Jido.Connect.Google.TasksTest do
   test "compiles generated Jido plugin surface" do
     ConnectorContracts.assert_generated_surface(Tasks,
       otp_app: :jido_connect_google_tasks,
-      action_modules: @task_list_action_modules,
+      action_modules: @all_action_modules,
       plugin_module: Jido.Connect.Google.Tasks.Plugin,
       plugin_name: "google_tasks"
     )
   end
 
   test "loads Tasks Spark DSL fragments" do
-    ConnectorContracts.assert_spark_fragments(@task_list_dsl_fragments)
+    ConnectorContracts.assert_spark_fragments(@task_list_dsl_fragments ++ @task_dsl_fragments)
   end
+
+  # --- Task list invocation tests ---
 
   test "invokes list task lists through injected client and lease" do
     {context, lease} = context_and_lease()
@@ -249,6 +372,138 @@ defmodule Jido.Connect.Google.TasksTest do
              )
   end
 
+  # --- Task invocation tests ---
+
+  test "invokes list tasks through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              tasks: [
+                %{task_id: "task_1", title: "Buy groceries"},
+                %{task_id: "task_2", title: "Write report"}
+              ]
+            }} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.list",
+               %{task_list_id: " list_1 "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes list tasks with pagination" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{tasks: [%{task_id: "task_1"}], next_page_token: "task_page_2"}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.list",
+               %{task_list_id: "list_1", page_size: 1},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{tasks: [%{task_id: "task_2"}]}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.list",
+               %{task_list_id: "list_1", page_size: 1, page_token: "task_page_2"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes get task through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              task: %{
+                task_id: "task_1",
+                title: "Buy groceries",
+                notes: "Milk, eggs, bread",
+                status: "needsAction",
+                due: "2026-05-20T00:00:00.000Z"
+              }
+            }} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.get",
+               %{task_list_id: " list_1 ", task_id: " task_1 "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes create task through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{task: %{task_id: "task_new", title: "New task"}}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.create",
+               %{task_list_id: " list_1 ", title: " New task "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes update task through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{task: %{task_id: "task_1", title: "Updated groceries"}}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.update",
+               %{task_list_id: " list_1 ", task_id: " task_1 "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes delete task through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{result: %{task_id: "task_2", task_list_id: "list_1", deleted?: true}}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.delete",
+               %{task_list_id: " list_1 ", task_id: " task_2 "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes clear tasks through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{result: %{task_list_id: "list_1", cleared?: true}}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.clear",
+               %{task_list_id: " list_1 "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes move task through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{task: %{task_id: "task_1", parent: "task_3"}}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.move",
+               %{task_list_id: " list_1 ", task_id: " task_1 "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  # --- Scope enforcement tests ---
+
   test "write actions require Tasks write scope" do
     {context, lease} = context_and_lease()
 
@@ -265,6 +520,25 @@ defmodule Jido.Connect.Google.TasksTest do
                credential_lease: lease
              )
   end
+
+  test "task write actions require Tasks write scope" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: [@write_scope]
+            }} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.create",
+               %{task_list_id: "list_1", title: "New task"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  # --- Task list validation tests ---
 
   test "get task list validates required task_list_id" do
     {context, lease} = context_and_lease()
@@ -338,6 +612,200 @@ defmodule Jido.Connect.Google.TasksTest do
                credential_lease: lease
              )
   end
+
+  # --- Task validation tests ---
+
+  test "list tasks validates required task_list_id" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_task_request,
+              details: %{field: :task_list_id}
+            }} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.list",
+               %{task_list_id: " "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "get task validates required task_list_id and task_id" do
+    {context, lease} = context_and_lease()
+
+    assert {:error, %Connect.Error.ValidationError{reason: :input}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.get",
+               %{task_id: "task_1"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :input}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.get",
+               %{task_list_id: "list_1"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "get task validates non-blank task_list_id" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_task_request,
+              details: %{field: :task_list_id}
+            }} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.get",
+               %{task_list_id: " ", task_id: "task_1"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "get task validates non-blank task_id" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_task_request,
+              details: %{field: :task_id}
+            }} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.get",
+               %{task_list_id: "list_1", task_id: " "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "create task validates required task_list_id and title" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error, %Connect.Error.ValidationError{reason: :input}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.create",
+               %{title: "New task"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_task_request,
+              details: %{field: :title}
+            }} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.create",
+               %{task_list_id: "list_1", title: " "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "update task validates required task_list_id and task_id" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error, %Connect.Error.ValidationError{reason: :input}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.update",
+               %{task_id: "task_1"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :input}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.update",
+               %{task_list_id: "list_1"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "delete task validates required task_list_id and task_id" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error, %Connect.Error.ValidationError{reason: :input}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.delete",
+               %{task_id: "task_1"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_task_request,
+              details: %{field: :task_id}
+            }} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.delete",
+               %{task_list_id: "list_1", task_id: " "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "clear tasks validates required task_list_id" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_task_request,
+              details: %{field: :task_list_id}
+            }} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.clear",
+               %{task_list_id: " "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "move task validates required task_list_id and task_id" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error, %Connect.Error.ValidationError{reason: :input}} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.move",
+               %{task_id: "task_1"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_task_request,
+              details: %{field: :task_id}
+            }} =
+             Connect.invoke(
+               Tasks.integration(),
+               "google.tasks.task.move",
+               %{task_list_id: "list_1", task_id: " "},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  # --- Helpers ---
 
   defp context_and_lease(opts \\ []) do
     scopes = Keyword.get(opts, :scopes, read_scopes())
