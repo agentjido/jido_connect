@@ -6,6 +6,7 @@ defmodule Jido.Connect.Google.Forms.ScopeResolverTest do
 
   @readonly_scope "https://www.googleapis.com/auth/forms.body.readonly"
   @write_scope "https://www.googleapis.com/auth/forms.body"
+  @responses_readonly_scope "https://www.googleapis.com/auth/forms.responses.readonly"
 
   test "returns readonly scope by default" do
     assert {:module, ScopeResolver} = Code.ensure_loaded(ScopeResolver)
@@ -82,6 +83,24 @@ defmodule Jido.Connect.Google.Forms.ScopeResolverTest do
         operation: "google.forms.form.batch_update",
         granted: [@write_scope],
         expected: @write_scope
+      },
+      %{
+        label: "list responses requires responses readonly scope",
+        operation: "google.forms.responses.list",
+        granted: [],
+        expected: @responses_readonly_scope
+      },
+      %{
+        label: "get response requires responses readonly scope",
+        operation: "google.forms.responses.get",
+        granted: [],
+        expected: @responses_readonly_scope
+      },
+      %{
+        label: "list responses does not accept body readonly scope",
+        operation: "google.forms.responses.list",
+        granted: [@readonly_scope],
+        expected: @responses_readonly_scope
       },
       %{
         label: "unknown operation defaults to readonly scope",

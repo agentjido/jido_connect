@@ -12,6 +12,12 @@ defmodule Jido.Connect.Google.Forms.PrivacyAuditTest do
       ),
       action("google.forms.form.batch_update", :workspace_content, :destructive, :always,
         text_includes: ["form"]
+      ),
+      action("google.forms.responses.list", :personal_data, :read, :none,
+        text_includes: ["response"]
+      ),
+      action("google.forms.responses.get", :personal_data, :read, :none,
+        text_includes: ["response"]
       )
     ])
   end

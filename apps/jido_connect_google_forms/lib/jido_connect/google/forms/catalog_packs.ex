@@ -4,7 +4,9 @@ defmodule Jido.Connect.Google.Forms.CatalogPacks do
   alias Jido.Connect.Catalog.Pack
 
   @readonly_tools [
-    "google.forms.form.get"
+    "google.forms.form.get",
+    "google.forms.responses.list",
+    "google.forms.responses.get"
   ]
 
   @editor_tools @readonly_tools ++

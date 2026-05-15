@@ -171,6 +171,30 @@ defmodule Jido.Connect.Google.Forms.FixtureTest do
     assert result.replies == []
   end
 
+  test "normalizes Google Forms response list fixture" do
+    payload = fixture!("response_list.json")
+
+    assert {:ok, responses} =
+             payload
+             |> Map.get("responses")
+             |> Enum.map(&Normalizer.response/1)
+             |> Enum.reduce_while({:ok, []}, fn
+               {:ok, r}, {:ok, acc} -> {:cont, {:ok, [r | acc]}}
+               {:error, e}, _ -> {:halt, {:error, e}}
+             end)
+             |> then(fn
+               {:ok, items} -> {:ok, Enum.reverse(items)}
+               {:error, e} -> {:error, e}
+             end)
+
+    assert length(responses) == 2
+    [resp1, resp2] = responses
+    assert resp1.response_id == "ACYDBNhW5dYSnRJ8xVBM3yMFvYgzbA5v4VpZGhKB6YxHWDiNeCgtMNvJ8w"
+    assert resp1.respondent_email == "user@example.com"
+    assert resp2.response_id == "ACYDBNhAnotherResponseId"
+    assert resp2.respondent_email == "other@example.com"
+  end
+
   defp fixture!(name) do
     ConnectorContracts.google_fixture!(:google_forms, name, __DIR__)
   end
