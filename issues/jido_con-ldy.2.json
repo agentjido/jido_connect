@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-ldy.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ldy.3"
+  ],
   "created": "2026-05-15T21:50:05Z",
   "description": "Add normalized contact, company, deal, note/engagement, owner, pipeline, and pagination structs plus representative CRM v3 fixture coverage.",
   "id": "jido_con-ldy.2",
