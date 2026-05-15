@@ -205,7 +205,7 @@ function startIssue(issue: Issue) {
 }
 
 function readyIssues() {
-  return parseJson<Issue[]>(run("bw", ["ready", "--json"], { cwd: repoRoot, capture: true }).stdout);
+  return issueList(run("bw", ["ready", "--json"], { cwd: repoRoot, capture: true }).stdout);
 }
 
 function queueIssues() {
@@ -232,9 +232,12 @@ function queueIssues() {
 }
 
 function childIssues(parentId: string) {
-  return parseJson<Issue[]>(
-    run("bw", ["list", "--parent", parentId, "--json"], { cwd: repoRoot, capture: true }).stdout
-  );
+  return issueList(run("bw", ["list", "--parent", parentId, "--json"], { cwd: repoRoot, capture: true }).stdout);
+}
+
+function issueList(value: string) {
+  const issues = parseJson<Issue[] | null>(value);
+  return Array.isArray(issues) ? issues : [];
 }
 
 function isReadyLeaf(issue: Issue, blockerStatus: Map<string, string>) {
