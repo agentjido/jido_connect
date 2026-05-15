@@ -6,6 +6,7 @@
   "description": "Implement issue search/list/get, project/team metadata, comments list, pagination, tests, and normalized outputs.",
   "id": "jido_con-0x5.3",
   "labels": [
+    "connector",
     "linear",
     "work-management"
   ],
@@ -14,5 +15,5 @@
   "status": "open",
   "title": "[W5-LIN-S03] Implement Linear read/search actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:24Z"
+  "updated_at": "2026-05-15T22:01:25Z"
 }
