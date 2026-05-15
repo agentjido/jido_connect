@@ -2,7 +2,7 @@ defmodule Jido.Connect.Google.SearchConsole.Normalizer do
   @moduledoc "Normalizes Google Search Console API payloads into stable package structs."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Google.SearchConsole.{Row, SearchReport, Sitemap, Site}
+  alias Jido.Connect.Google.SearchConsole.{Row, SearchReport, Sitemap, Site, URLInspection}
 
   @doc "Normalizes a Search Console site entry payload."
   @spec site(map()) :: {:ok, Site.t()} | {:error, term()}
@@ -84,4 +84,31 @@ defmodule Jido.Connect.Google.SearchConsole.Normalizer do
 
   defp count_list(items) when is_list(items), do: length(items)
   defp count_list(_), do: 0
+
+  @doc "Normalizes a Search Console URL inspection response payload."
+  @spec url_inspection(map()) :: {:ok, URLInspection.t()} | {:error, term()}
+  def url_inspection(payload) when is_map(payload) do
+    result = Data.get(payload, "inspectionResult", %{})
+
+    rich_results =
+      case Data.get(result, "richResultsResult", %{}) |> Data.get("detectedItems", []) do
+        items when is_list(items) -> items
+        _ -> []
+      end
+
+    attrs =
+      %{
+        inspection_result_link: Data.get(result, "inspectionResultLink"),
+        index_status: Data.get(result, "indexStatusResult", %{}),
+        amp_result: Data.get(result, "ampResult", %{}),
+        mobile_usability_result: Data.get(result, "mobileUsabilityResult", %{}),
+        rich_results: rich_results,
+        metadata: %{}
+      }
+      |> Data.compact()
+
+    URLInspection.new(attrs)
+  end
+
+  def url_inspection(_payload), do: {:error, :invalid_url_inspection_payload}
 end

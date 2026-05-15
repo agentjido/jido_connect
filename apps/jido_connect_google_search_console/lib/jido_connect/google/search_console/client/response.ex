@@ -103,6 +103,30 @@ defmodule Jido.Connect.Google.SearchConsole.Client.Response do
   def handle_sitemap_submit_response(response, _sitemap_path),
     do: Transport.handle_error_response(response)
 
+  def handle_url_inspection_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case Normalizer.url_inspection(body) do
+      {:ok, inspection} ->
+        {:ok, inspection}
+
+      {:error, _error} ->
+        Transport.invalid_success_response(
+          "Google Search Console URL inspection response was invalid",
+          body
+        )
+    end
+  end
+
+  def handle_url_inspection_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response(
+      "Google Search Console URL inspection response was invalid",
+      body
+    )
+  end
+
+  def handle_url_inspection_response(response), do: Transport.handle_error_response(response)
+
   defp normalize_one(body, normalizer, message) do
     case normalizer.(body) do
       {:ok, item} -> {:ok, item}

@@ -10,7 +10,8 @@ defmodule Jido.Connect.Google.SearchConsole do
     fragments: [
       Jido.Connect.Google.SearchConsole.Actions.Sites,
       Jido.Connect.Google.SearchConsole.Actions.SearchAnalytics,
-      Jido.Connect.Google.SearchConsole.Actions.Sitemaps
+      Jido.Connect.Google.SearchConsole.Actions.Sitemaps,
+      Jido.Connect.Google.SearchConsole.Actions.URLInspection
     ]
 
   integration do
