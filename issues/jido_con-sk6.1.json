@@ -6,6 +6,7 @@
   "description": "Add package shell, provider module, auth profiles for none/api-key/bearer/basic/custom headers, transport boundary, generated plugin tests, and docs skeleton.",
   "id": "jido_con-sk6.1",
   "labels": [
+    "connector",
     "generic",
     "http"
   ],
