@@ -5,11 +5,13 @@
   "created": "2026-05-15T22:01:21Z",
   "description": "Add umbrella app, provider module, OAuth/API key auth profiles, GraphQL transport boundary, README/AGENTS, and generated plugin tests.",
   "id": "jido_con-0x5.1",
-  "labels": [],
+  "labels": [
+    "linear"
+  ],
   "parent": "jido_con-0x5",
   "priority": 2,
   "status": "open",
   "title": "[W5-LIN-S01] Scaffold jido_connect_linear",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:21Z"
+  "updated_at": "2026-05-15T22:01:22Z"
 }
