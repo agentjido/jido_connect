@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-15T22:01:12Z",
+  "description": "Implement JQL search, get issue, list projects, and metadata actions with pagination, field selection, normalized output, tests, and privacy classification.",
+  "id": "jido_con-ul0.3",
+  "labels": [],
+  "parent": "jido_con-ul0",
+  "priority": 2,
+  "status": "open",
+  "title": "[W5-JIRA-S03] Implement Jira issue read/search actions",
+  "type": "task",
+  "updated_at": "2026-05-15T22:01:12Z"
+}
