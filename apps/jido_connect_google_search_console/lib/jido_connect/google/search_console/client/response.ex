@@ -44,6 +44,30 @@ defmodule Jido.Connect.Google.SearchConsole.Client.Response do
 
   def handle_site_response(response), do: Transport.handle_error_response(response)
 
+  def handle_search_analytics_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case Normalizer.search_report(body) do
+      {:ok, report} ->
+        {:ok, report}
+
+      {:error, _error} ->
+        Transport.invalid_success_response(
+          "Google Search Console search analytics response was invalid",
+          body
+        )
+    end
+  end
+
+  def handle_search_analytics_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response(
+      "Google Search Console search analytics response was invalid",
+      body
+    )
+  end
+
+  def handle_search_analytics_response(response), do: Transport.handle_error_response(response)
+
   defp normalize_one(body, normalizer, message) do
     case normalizer.(body) do
       {:ok, item} -> {:ok, item}

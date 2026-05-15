@@ -10,11 +10,13 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
 
   @action_modules [
     Jido.Connect.Google.SearchConsole.Actions.ListSites,
-    Jido.Connect.Google.SearchConsole.Actions.AddSite
+    Jido.Connect.Google.SearchConsole.Actions.AddSite,
+    Jido.Connect.Google.SearchConsole.Actions.QuerySearchAnalytics
   ]
 
   @dsl_fragments [
-    Jido.Connect.Google.SearchConsole.Actions.Sites
+    Jido.Connect.Google.SearchConsole.Actions.Sites,
+    Jido.Connect.Google.SearchConsole.Actions.SearchAnalytics
   ]
 
   defmodule FakeSearchConsoleClient do
@@ -41,6 +43,17 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
          permission_level: "siteOwner"
        })}
     end
+
+    def query_search_analytics(%{site_url: "https://example.com/"}, "token") do
+      {:ok,
+       SearchConsole.SearchReport.new!(%{
+         site_url: "https://example.com/",
+         rows: [
+           %{keys: ["seo tips"], clicks: 10, impressions: 200, ctr: 0.05, position: 2.1}
+         ],
+         response_aggregation_type: "auto"
+       })}
+    end
   end
 
   test "declares Google Search Console provider metadata" do
@@ -55,7 +68,8 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
 
     assert Enum.map(spec.actions, & &1.id) == [
              "google.search_console.site.list",
-             "google.search_console.site.add"
+             "google.search_console.site.add",
+             "google.search_console.search_analytics.query"
            ]
 
     assert spec.triggers == []
@@ -118,6 +132,23 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
                SearchConsole.integration(),
                "google.search_console.site.add",
                %{site_url: "https://new-site.com/"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes query search analytics through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: [@readonly_scope])
+
+    assert {:ok, %{report: %{site_url: "https://example.com/", rows: [_ | _]}}} =
+             Connect.invoke(
+               SearchConsole.integration(),
+               "google.search_console.search_analytics.query",
+               %{
+                 site_url: "https://example.com/",
+                 start_date: "2026-01-01",
+                 end_date: "2026-01-31"
+               },
                context: context,
                credential_lease: lease
              )
