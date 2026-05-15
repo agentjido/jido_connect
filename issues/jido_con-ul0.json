@@ -6,6 +6,7 @@
   "description": "Build jido_connect_jira for Jira Cloud and Jira Service Management work-management workflows. Cover OAuth/API token auth, issue search/read/write, comments, transitions, project metadata, webhook normalization, catalog packs, and docs.",
   "id": "jido_con-ul0",
   "labels": [
+    "connector",
     "jira",
     "work-management"
   ],
