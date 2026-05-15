@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-z95.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-z95.4"
+  ],
   "created": "2026-05-15T22:01:30Z",
   "description": "Implement capture event, batch capture, evaluate feature flag, and list/get feature flags actions with tests and policy metadata.",
   "id": "jido_con-z95.3",

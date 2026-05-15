@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-z95.3"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:30Z",
   "description": "Implement HogQL/query action, list/get insights, date-range inputs, result normalization, pagination, tests, and error handling.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W6-PH-S04] Implement PostHog query and insight actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:35Z"
+  "updated_at": "2026-05-15T22:01:38Z"
 }
