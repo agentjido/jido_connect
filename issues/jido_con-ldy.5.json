@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ldy.4"
+  ],
   "blocks": [],
   "created": "2026-05-15T21:50:05Z",
   "description": "Add webhook verification/event normalization where feasible or a polling trigger design for contact/deal changes, with dedupe/checkpoint fixtures.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W4-HUB-S05] Spike HubSpot webhook or polling triggers",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:10Z"
+  "updated_at": "2026-05-15T21:50:12Z"
 }

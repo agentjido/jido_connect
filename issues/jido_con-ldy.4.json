@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-ldy.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ldy.5"
+  ],
   "created": "2026-05-15T21:50:05Z",
   "description": "Implement create/update contact and deal plus note association actions with explicit confirmation/risk metadata, tests, and normalized outputs.",
   "id": "jido_con-ldy.4",
@@ -18,5 +20,5 @@
   "status": "open",
   "title": "[W4-HUB-S04] Implement HubSpot CRM write actions",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:11Z"
+  "updated_at": "2026-05-15T21:50:12Z"
 }
