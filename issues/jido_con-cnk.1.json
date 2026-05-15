@@ -6,6 +6,7 @@
   "description": "Add package shell, provider module, auth/verification profile structs, generated plugin/sensor tests, and README skeleton.",
   "id": "jido_con-cnk.1",
   "labels": [
+    "connector",
     "generic",
     "webhook"
   ],
@@ -14,5 +15,5 @@
   "status": "open",
   "title": "[W4-WEB-S01] Scaffold jido_connect_webhook",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:28Z"
+  "updated_at": "2026-05-15T21:50:29Z"
 }
