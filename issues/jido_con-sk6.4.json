@@ -6,6 +6,7 @@
   "description": "Add safe-read/write catalog packs, availability tests, examples, and guidance for using Generic HTTP without replacing provider-specific connectors.",
   "id": "jido_con-sk6.4",
   "labels": [
+    "connector",
     "generic",
     "http"
   ],
