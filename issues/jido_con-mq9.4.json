@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-mq9.3"
+  ],
   "blocks": [],
   "created": "2026-05-15T21:50:00Z",
   "description": "Update catalog packs, README usage, scope matrix, data classification, live-test guidance, and package quality gates for Cal.com.",
