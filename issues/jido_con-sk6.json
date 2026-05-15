@@ -12,6 +12,12 @@
     "http",
     "wave-4"
   ],
+  "comments": [
+    {
+      "text": "Deferred: core HTTP transport helpers already exist; a generic arbitrary HTTP connector needs a separate policy/SSRF/security decision before implementation.",
+      "timestamp": "2026-05-15T22:00:35Z"
+    }
+  ],
   "priority": 2,
   "status": "deferred",
   "title": "[W4] Generic HTTP Connector",
