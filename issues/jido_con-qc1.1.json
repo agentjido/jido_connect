@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-qc1.2"
   ],
+  "closed_at": "2026-05-15T15:51:44Z",
+  "close_reason": "Implemented in 5c33e39 by pi-connector-factory",
   "created": "2026-05-14T14:35:49Z",
   "description": "Add the umbrella app, mix config, package README, provider module, catalog-pack shell, AGENTS guidance, and baseline compile/test wiring for Google Slides.",
   "id": "jido_con-qc1.1",
@@ -13,8 +15,8 @@
   ],
   "parent": "jido_con-qc1",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G15-S01] Scaffold jido_connect_google_slides",
   "type": "task",
-  "updated_at": "2026-05-15T15:44:39Z"
+  "updated_at": "2026-05-15T15:51:44Z"
 }
