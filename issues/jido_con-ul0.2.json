@@ -6,7 +6,8 @@
   "description": "Add issue, project, user, comment, status, transition, field schema, and pagination structs with representative Jira REST fixtures.",
   "id": "jido_con-ul0.2",
   "labels": [
-    "jira"
+    "jira",
+    "work-management"
   ],
   "parent": "jido_con-ul0",
   "priority": 2,
