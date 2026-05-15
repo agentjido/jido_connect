@@ -8,12 +8,13 @@
   "labels": [
     "airtable",
     "connector",
-    "database"
+    "database",
+    "wave-4"
   ],
   "parent": "jido_con-4ss",
   "priority": 2,
   "status": "open",
   "title": "[W4-AIR-S04] Implement Airtable record write actions",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:17Z"
+  "updated_at": "2026-05-15T21:50:18Z"
 }
