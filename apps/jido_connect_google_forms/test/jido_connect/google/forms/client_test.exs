@@ -231,4 +231,133 @@ defmodule Jido.Connect.Google.Forms.ClientTest do
       "revisionId" => "rev001"
     }
   end
+
+  test "lists responses" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/forms/1ABCdefGHI/responses"
+      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+      Req.Test.json(conn, %{
+        "responses" => [
+          %{
+            "responseId" => "ACYDBNhW_resp1",
+            "formId" => "1ABCdefGHI",
+            "createTime" => "2026-05-14T10:00:00.000Z"
+          },
+          %{
+            "responseId" => "ACYDBNhW_resp2",
+            "formId" => "1ABCdefGHI",
+            "createTime" => "2026-05-14T11:00:00.000Z"
+          }
+        ],
+        "nextPageToken" => "next_page_abc"
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.list_responses(%{form_id: "1ABCdefGHI"}, "token")
+
+    assert length(result.responses) == 2
+    assert result.next_page_token == "next_page_abc"
+    assert Enum.at(result.responses, 0).response_id == "ACYDBNhW_resp1"
+    assert Enum.at(result.responses, 1).response_id == "ACYDBNhW_resp2"
+  end
+
+  test "lists responses with pagination params" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/forms/1ABCdefGHI/responses"
+      assert conn.query_params["pageSize"] == "10"
+      assert conn.query_params["pageToken"] == "page_tok"
+      assert conn.query_params["filter"] == "timestamp >= '2026-01-01'"
+
+      Req.Test.json(conn, %{
+        "responses" => []
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.list_responses(
+               %{
+                 form_id: "1ABCdefGHI",
+                 page_size: 10,
+                 page_token: "page_tok",
+                 filter: "timestamp >= '2026-01-01'"
+               },
+               "token"
+             )
+
+    assert result.responses == []
+    refute Map.has_key?(result, :next_page_token)
+  end
+
+  test "gets response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/forms/1ABCdefGHI/responses/ACYDBNhW_resp1"
+      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+      Req.Test.json(conn, %{
+        "responseId" => "ACYDBNhW_resp1",
+        "formId" => "1ABCdefGHI",
+        "respondentEmail" => "user@example.com",
+        "createTime" => "2026-05-14T10:00:00.000Z",
+        "lastSubmittedTime" => "2026-05-14T10:02:30.000Z",
+        "answers" => %{}
+      })
+    end)
+
+    assert {:ok, response} =
+             Client.get_response(
+               %{form_id: "1ABCdefGHI", response_id: "ACYDBNhW_resp1"},
+               "token"
+             )
+
+    assert response.response_id == "ACYDBNhW_resp1"
+    assert response.form_id == "1ABCdefGHI"
+    assert response.respondent_email == "user@example.com"
+  end
+
+  test "handles list responses API error response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Plug.Conn.send_resp(conn, 403, Jason.encode!(%{"error" => %{"message" => "forbidden"}}))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 403}} =
+             Client.list_responses(%{form_id: "1ABCdefGHI"}, "token")
+  end
+
+  test "handles list responses malformed response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, ["bad"])
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{}} =
+             Client.list_responses(%{form_id: "1ABCdefGHI"}, "token")
+  end
+
+  test "handles get response API error response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Plug.Conn.send_resp(conn, 404, Jason.encode!(%{"error" => %{"message" => "not found"}}))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 404}} =
+             Client.get_response(
+               %{form_id: "1ABCdefGHI", response_id: "nonexistent"},
+               "token"
+             )
+  end
+
+  test "handles get response malformed response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, ["bad"])
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{}} =
+             Client.get_response(
+               %{form_id: "1ABCdefGHI", response_id: "ACYDBNhW_resp1"},
+               "token"
+             )
+  end
 end

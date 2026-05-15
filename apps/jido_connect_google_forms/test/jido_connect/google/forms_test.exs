@@ -7,15 +7,19 @@ defmodule Jido.Connect.Google.FormsTest do
 
   @readonly_scope "https://www.googleapis.com/auth/forms.body.readonly"
   @write_scope "https://www.googleapis.com/auth/forms.body"
+  @responses_readonly_scope "https://www.googleapis.com/auth/forms.responses.readonly"
 
   @forms_action_modules [
     Jido.Connect.Google.Forms.Actions.GetForm,
     Jido.Connect.Google.Forms.Actions.CreateForm,
-    Jido.Connect.Google.Forms.Actions.BatchUpdateForm
+    Jido.Connect.Google.Forms.Actions.BatchUpdateForm,
+    Jido.Connect.Google.Forms.Actions.ListResponses,
+    Jido.Connect.Google.Forms.Actions.GetResponse
   ]
 
   @forms_dsl_fragments [
-    Jido.Connect.Google.Forms.Actions.Forms
+    Jido.Connect.Google.Forms.Actions.Forms,
+    Jido.Connect.Google.Forms.Actions.Responses
   ]
 
   defmodule FakeFormsClient do
@@ -49,6 +53,36 @@ defmodule Jido.Connect.Google.FormsTest do
          replies: [%{"updateFormTitle" => %{}}, %{"createItem" => %{"itemId" => "new_1"}}]
        }}
     end
+
+    def list_responses(%{form_id: "1ABCdefGHI"}, "token") do
+      {:ok,
+       %{
+         responses: [
+           Forms.Response.new!(%{
+             response_id: "ACYDBNhW_resp1",
+             form_id: "1ABCdefGHI",
+             create_time: "2026-05-14T10:00:00.000Z"
+           }),
+           Forms.Response.new!(%{
+             response_id: "ACYDBNhW_resp2",
+             form_id: "1ABCdefGHI",
+             create_time: "2026-05-14T11:00:00.000Z"
+           })
+         ],
+         next_page_token: "next_page_abc"
+       }}
+    end
+
+    def get_response(%{form_id: "1ABCdefGHI", response_id: "ACYDBNhW_resp1"}, "token") do
+      {:ok,
+       Forms.Response.new!(%{
+         response_id: "ACYDBNhW_resp1",
+         form_id: "1ABCdefGHI",
+         respondent_email: "user@example.com",
+         create_time: "2026-05-14T10:00:00.000Z",
+         last_submitted_time: "2026-05-14T10:02:30.000Z"
+       })}
+    end
   end
 
   test "declares Google Forms provider metadata" do
@@ -64,7 +98,9 @@ defmodule Jido.Connect.Google.FormsTest do
     assert Enum.map(spec.actions, & &1.id) == [
              "google.forms.form.get",
              "google.forms.form.create",
-             "google.forms.form.batch_update"
+             "google.forms.form.batch_update",
+             "google.forms.responses.list",
+             "google.forms.responses.get"
            ]
 
     assert [%{id: :user, kind: :oauth2, refresh?: true, pkce?: true} = profile] =
@@ -255,6 +291,86 @@ defmodule Jido.Connect.Google.FormsTest do
                context: context,
                credential_lease: lease
              )
+  end
+
+  test "invokes list responses through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: responses_scopes())
+
+    assert {:ok, %{responses: responses, next_page_token: "next_page_abc"}} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.responses.list",
+               %{form_id: "1ABCdefGHI"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert length(responses) == 2
+
+    resp_ids = Enum.map(responses, & &1[:response_id])
+    assert "ACYDBNhW_resp1" in resp_ids
+    assert "ACYDBNhW_resp2" in resp_ids
+    assert Enum.all?(responses, &(&1[:form_id] == "1ABCdefGHI"))
+  end
+
+  test "invokes get response through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: responses_scopes())
+
+    assert {:ok, %{response: response}} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.responses.get",
+               %{form_id: "1ABCdefGHI", response_id: "ACYDBNhW_resp1"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert response.response_id == "ACYDBNhW_resp1"
+    assert response.form_id == "1ABCdefGHI"
+    assert response.respondent_email == "user@example.com"
+  end
+
+  test "list responses requires responses readonly scope" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: [@responses_readonly_scope]
+            }} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.responses.list",
+               %{form_id: "1ABCdefGHI"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "get response requires responses readonly scope" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: [@responses_readonly_scope]
+            }} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.responses.get",
+               %{form_id: "1ABCdefGHI", response_id: "ACYDBNhW_resp1"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  defp responses_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      @responses_readonly_scope
+    ]
   end
 
   defp write_scopes do

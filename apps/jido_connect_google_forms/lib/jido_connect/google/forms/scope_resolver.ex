@@ -10,11 +10,17 @@ defmodule Jido.Connect.Google.Forms.ScopeResolver do
 
   @readonly_scope "https://www.googleapis.com/auth/forms.body.readonly"
   @write_scope "https://www.googleapis.com/auth/forms.body"
+  @responses_readonly_scope "https://www.googleapis.com/auth/forms.responses.readonly"
 
   @write_operations MapSet.new([
                       "google.forms.form.create",
                       "google.forms.form.batch_update"
                     ])
+
+  @response_operations MapSet.new([
+                         "google.forms.responses.list",
+                         "google.forms.responses.get"
+                       ])
 
   def required_scopes(operation, _input, _connection) do
     operation
@@ -23,10 +29,15 @@ defmodule Jido.Connect.Google.Forms.ScopeResolver do
   end
 
   defp required_for_operation(operation_id) do
-    if MapSet.member?(@write_operations, operation_id) do
-      [@write_scope]
-    else
-      [@readonly_scope]
+    cond do
+      MapSet.member?(@write_operations, operation_id) ->
+        [@write_scope]
+
+      MapSet.member?(@response_operations, operation_id) ->
+        [@responses_readonly_scope]
+
+      true ->
+        [@readonly_scope]
     end
   end
 

@@ -23,6 +23,18 @@ defmodule Jido.Connect.Google.Forms.CatalogPacksTest do
          revision_id: "rev001"
        })}
     end
+
+    def list_responses(%{form_id: "1ABCdefGHI"}, "token") do
+      {:ok,
+       %{
+         responses: [
+           Forms.Response.new!(%{
+             response_id: "ACYDBNhW_resp1",
+             form_id: "1ABCdefGHI"
+           })
+         ]
+       }}
+    end
   end
 
   test "readonly pack restricts search and describe to read tools" do
@@ -36,6 +48,8 @@ defmodule Jido.Connect.Google.Forms.CatalogPacksTest do
     ids = Enum.map(results, & &1.tool.id)
 
     assert "google.forms.form.get" in ids
+    assert "google.forms.responses.list" in ids
+    assert "google.forms.responses.get" in ids
     refute "google.forms.form.create" in ids
     refute "google.forms.form.batch_update" in ids
 
@@ -47,6 +61,15 @@ defmodule Jido.Connect.Google.Forms.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.forms.form.get"
+
+    assert {:ok, responses_descriptor} =
+             Catalog.describe_tool("google.forms.responses.list",
+               modules: [Forms],
+               packs: Forms.catalog_packs(),
+               pack: :google_forms_readonly
+             )
+
+    assert responses_descriptor.tool.id == "google.forms.responses.list"
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("google.forms.form.create",
@@ -76,6 +99,8 @@ defmodule Jido.Connect.Google.Forms.CatalogPacksTest do
     assert "google.forms.form.get" in ids
     assert "google.forms.form.create" in ids
     assert "google.forms.form.batch_update" in ids
+    assert "google.forms.responses.list" in ids
+    assert "google.forms.responses.get" in ids
 
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.forms.form.create",
@@ -127,6 +152,19 @@ defmodule Jido.Connect.Google.Forms.CatalogPacksTest do
                context: context,
                credential_lease: lease
              )
+
+    assert {:ok, %{responses: responses}} =
+             Catalog.call_tool(
+               "google.forms.responses.list",
+               %{form_id: "1ABCdefGHI"},
+               modules: [Forms],
+               packs: Forms.catalog_packs(),
+               pack: :google_forms_readonly,
+               context: context,
+               credential_lease: lease
+             )
+
+    assert length(responses) == 1
   end
 
   defp context_and_lease(opts \\ []) do
@@ -135,7 +173,8 @@ defmodule Jido.Connect.Google.Forms.CatalogPacksTest do
         "openid",
         "email",
         "profile",
-        "https://www.googleapis.com/auth/forms.body.readonly"
+        "https://www.googleapis.com/auth/forms.body.readonly",
+        "https://www.googleapis.com/auth/forms.responses.readonly"
       ])
 
     connection =
