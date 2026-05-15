@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-0x5.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-0x5.5"
+  ],
   "created": "2026-05-15T22:01:21Z",
   "description": "Implement create/update issue, add comment, assign/change status/label actions with confirmation metadata and tests.",
   "id": "jido_con-0x5.4",

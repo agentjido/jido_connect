@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-0x5.4"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:22Z",
   "description": "Add Linear webhook verification/normalization, trigger metadata for issue lifecycle/comment events, catalog packs, availability tests, and README/live-test guidance.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W5-LIN-S05] Add Linear webhook trigger and catalog docs",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:27Z"
+  "updated_at": "2026-05-15T22:01:28Z"
 }
