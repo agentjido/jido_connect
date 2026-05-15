@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [
     "jido_con-54m.2"
@@ -13,8 +13,8 @@
   ],
   "parent": "jido_con-54m",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G17-S01] Scaffold jido_connect_google_tasks",
   "type": "task",
-  "updated_at": "2026-05-14T14:36:04Z"
+  "updated_at": "2026-05-15T19:54:03Z"
 }
