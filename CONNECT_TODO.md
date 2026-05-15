@@ -42,6 +42,7 @@ helps prove reusable core abstractions.
 - `shipped`: package exists in `apps/` and the tracked roadmap scope is complete.
 - `in_progress`: package exists or work has started, but the roadmap scope is not
   complete yet.
+- `queued`: Beadwork epics/tasks exist and are ready after current blockers.
 - `ready`: Beadwork or the roadmap says this should be built soon, but no package
   exists yet.
 - `planned`: important, but after the first connector families are stable.
@@ -58,20 +59,20 @@ helps prove reusable core abstractions.
 | 5 | `jido_connect_google_calendar` | Google Calendar | shipped | OAuth2 user | calendars, calendar lists, events, ACLs, freebusy, availability, watch lifecycle | event changed poll, Calendar watch channels | Natural pair with Gmail and scheduling workflows. |
 | 6 | `jido_connect_google_contacts` | Google Contacts | shipped | OAuth2 user | people, other contacts, directory, contact groups, batch writes | n/a | Completes core personal workspace context after Gmail/Calendar. |
 | 7 | `jido_connect_google_analytics` | Google Analytics | shipped | OAuth2 user | GA4 reports, batch reports, realtime reports, metadata, property summaries | n/a | Product and marketing analytics connector is implemented. |
-| 8 | `jido_connect_google_meet` | Google Meet | in_progress | OAuth2 user | meeting spaces, conference records, recordings, transcripts | Workspace Events spike only | Package exists and child tasks are closed; Beadwork epic still needs final cleanup/closure. |
+| 8 | `jido_connect_google_meet` | Google Meet | shipped | OAuth2 user | meeting spaces, conference records, recordings, transcripts | Workspace Events spike only | Package exists and tracked Beadwork scope is complete. |
 | 9 | `jido_connect_google_search_console` | Google Search Console | in_progress | OAuth2 user | scaffold landed; site, analytics, sitemap, URL inspection actions remain | n/a | SEO/search reporting package exists but Beadwork tasks remain open. |
-| 10 | `jido_connect_calcom` | Cal.com | in_progress | API key, OAuth2 user, webhook signing later | list event types, list bookings, get booking, cancel/reschedule booking | booking webhook lifecycle later | Recovered from the old Pi factory worktree; package compiles and has offline tests, but webhook support still needs tasks. |
-| 11 | `jido_connect_google_docs` | Google Docs | ready | OAuth2 user | get/create documents, batch update | Drive-backed change strategy later | Ready Beadwork epic; next Google document-content package. |
-| 12 | `jido_connect_google_slides` | Google Slides | ready | OAuth2 user | get/create presentations, batch update, pages, thumbnails | Drive-backed change strategy later | Ready Beadwork epic; complements Docs for workspace authoring. |
-| 13 | `jido_connect_google_forms` | Google Forms | ready | OAuth2 user | list/get/create forms, batch update, response reads | Forms watches/triggers where supported | Ready Beadwork epic; high-value lead/support intake connector. |
-| 14 | `jido_connect_google_tasks` | Google Tasks | ready | OAuth2 user | task lists, task CRUD, move/clear tasks | task polling where viable | Ready Beadwork epic; lightweight personal task automation. |
-| 15 | `jido_connect_hubspot` | HubSpot | ready | OAuth2 app, private app token | search contacts, create/update contact, create note, create deal | new contact poll, deal stage change poll | High-value sales automation; good CRM reference model. |
-| 16 | `jido_connect_airtable` | Airtable | ready | OAuth2, personal access token | list records, get record, create/update record, delete record | changed records poll | Flexible database-like app; useful for many agent workflows. |
+| 10 | `jido_connect_calcom` | Cal.com | queued | API key, OAuth2 user, webhook signing later | list event types, list bookings, get booking, cancel/reschedule booking | booking webhook lifecycle later | Recovered package exists; Beadwork hardening/webhook queue now starts with fixing package tests. |
+| 11 | `jido_connect_google_docs` | Google Docs | shipped | OAuth2 user | get/create documents, batch update | Drive-backed change strategy later | Implemented and live read smoke tested. |
+| 12 | `jido_connect_google_slides` | Google Slides | shipped | OAuth2 user | get/create presentations, batch update, pages, thumbnails | Drive-backed change strategy later | Implemented and live read smoke tested. |
+| 13 | `jido_connect_google_forms` | Google Forms | shipped | OAuth2 user | list/get/create forms, batch update, response reads | Forms watches/triggers where supported | Implemented and live read smoke tested. |
+| 14 | `jido_connect_google_tasks` | Google Tasks | shipped | OAuth2 user | task lists, task CRUD, move/clear tasks | task polling where viable | Implemented and live read smoke tested. |
+| 15 | `jido_connect_hubspot` | HubSpot | queued | OAuth2 app, private app token | search contacts, create/update contact, create note, create deal | new contact poll, deal stage change poll | Wave 4 Beadwork epic and leaf tasks are queued. |
+| 16 | `jido_connect_airtable` | Airtable | queued | OAuth2, personal access token | list records, get record, create/update record, delete record | changed records poll | Wave 4 Beadwork epic and leaf tasks are queued. |
 | 17 | `jido_connect_jira` | Jira / Jira Service Management | ready | OAuth2, API token | search issues, create issue, update issue, add comment | issue created/updated webhook | Work-management anchor and future `jido_chat` issue workflow target. |
 | 18 | `jido_connect_linear` | Linear | ready | OAuth2, API key | search issues, create issue, update issue, add comment | issue created/updated webhook | Modern product/dev workflow and clean `jido_chat` handoff target. |
 | 19 | `jido_connect_posthog` | PostHog | ready | project API key, personal API key, self-hosted host override | capture event, batch events, evaluate feature flag, query HogQL, list insights | annotation or alert webhook later | Product-engineering connector for launch metrics, flags, and usage analysis. |
-| 20 | `jido_connect_http` | Generic HTTP | ready | API key, bearer token, basic auth, custom headers | request, get JSON, post JSON, transform response | n/a | Covers long-tail APIs while custom connectors catch up. |
-| 21 | `jido_connect_webhook` | Generic Webhook | ready | shared secret/HMAC, static token, unsigned dev mode | normalize inbound payload, verify signature | inbound webhook | Long-tail trigger coverage and shared webhook host/demo harness. |
+| 20 | `jido_connect_http` | Generic HTTP | queued | API key, bearer token, basic auth, custom headers | request, get JSON, post JSON, transform response | n/a | Wave 4 Beadwork epic and leaf tasks are queued. |
+| 21 | `jido_connect_webhook` | Generic Webhook | queued | shared secret/HMAC, static token, unsigned dev mode | normalize inbound payload, verify signature | inbound webhook | Wave 4 Beadwork epic and leaf tasks are queued. |
 | 22 | `jido_connect_mcp` | MCP bridge | shipped | host-provided endpoint credentials, OAuth/bearer passthrough | list tools, call tool | resource/prompt discovery later | Protocol bridge for MCP servers; pairs with HTTP/Webhook as the generic bridge family. |
 | 23 | `jido_connect_slack` | Slack | shipped | OAuth2 bot/user | channels, messages, users, reactions, files, search, pins, scheduled messages | Events API webhooks | Existing collaboration reference connector. |
 | 24 | `jido_connect_github` | GitHub | shipped | OAuth2 user, GitHub App installation | repositories, issues, PRs, Actions, files, releases, search, installations | polls and webhooks | Existing dev-work connector and GitHub App auth reference. |
@@ -134,8 +135,8 @@ workflows.
 - Google Meet
 - Google Search Console
 
-Contacts and Analytics are implemented. Meet exists and needs Beadwork cleanup.
-Search Console is the active unfinished Google package.
+Contacts, Analytics, and Meet are implemented. Search Console is the active
+unfinished Google package and has remaining Beadwork tasks queued.
 
 ### Wave 3: Ready Google Workspace Tail
 
@@ -144,20 +145,24 @@ Search Console is the active unfinished Google package.
 - Google Forms
 - Google Tasks
 
-These ready Beadwork epics should be split into leaf tasks before Pi works
-through them.
+This wave is implemented. Docs, Slides, Forms, and Tasks have all tracked
+Beadwork child tasks closed and passed live read-oriented smoke tests using the
+project-owned Google OAuth client.
 
 ### Wave 4: Scheduling, Sales, And Data
 
-- Cal.com
+- Cal.com hardening and webhooks
 - HubSpot
 - Airtable
-- Calendly
-- Salesforce
+- Generic HTTP
+- Generic Webhook
+- Calendly and Salesforce after the first Wave 4 packages stabilize
 
 This wave proves scheduling APIs, CRM object models, search/list/create/update
-patterns, webhook/poll parity, and richer schema metadata. Cal.com now has a
-partial recovered package; finish webhooks and hardening before Calendly.
+patterns, webhook/poll parity, generic long-tail API access, and richer schema
+metadata. Beadwork now has queued epics and leaf tasks for Cal.com hardening,
+HubSpot, Airtable, Generic HTTP, and Generic Webhook. Cal.com should go first
+because its recovered package currently exposes test/dependency hardening work.
 
 ### Wave 5: Work Management And Chat Handoffs
 
@@ -214,8 +219,8 @@ analytics, and bridge packages have established repeatable patterns.
 
 ## Core Work Remaining While Scaling
 
-- Keep Beadwork aligned with package state; close stale completed epics and split
-  ready epics into leaf tasks before handing them to Pi.
+- Keep Beadwork aligned with package state; close stale completed epics and keep
+  ready epics split into leaf tasks before handing them to Pi.
 - Standard pagination and cursor helpers across non-Google providers.
 - Standard rate-limit and retry metadata in provider errors.
 - Dynamic scope requirements at action and input level for every new provider.
