@@ -6,6 +6,7 @@
   "description": "Add webhook verification/event normalization where feasible or a polling trigger design for contact/deal changes, with dedupe/checkpoint fixtures.",
   "id": "jido_con-ldy.5",
   "labels": [
+    "crm",
     "hubspot"
   ],
   "parent": "jido_con-ldy",
