@@ -6,6 +6,7 @@
   "description": "Add webhook verification/normalization for issue created/updated/comment events, catalog packs, availability tests, README usage, and live-test guidance.",
   "id": "jido_con-ul0.5",
   "labels": [
+    "connector",
     "jira",
     "work-management"
   ],
