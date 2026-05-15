@@ -7,7 +7,8 @@
   "id": "jido_con-mq9.2",
   "labels": [
     "calcom",
-    "connector"
+    "connector",
+    "wave-4"
   ],
   "parent": "jido_con-mq9",
   "priority": 2,
