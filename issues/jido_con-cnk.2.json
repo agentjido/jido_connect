@@ -6,6 +6,7 @@
   "description": "Support shared-secret HMAC, static bearer/token, timestamp tolerance, replay id extraction, unsigned dev mode, and redacted error details with tests.",
   "id": "jido_con-cnk.2",
   "labels": [
+    "generic",
     "webhook"
   ],
   "parent": "jido_con-cnk",
