@@ -7,6 +7,7 @@
     "jido_con-sk6.3"
   ],
   "created": "2026-05-15T21:50:21Z",
+  "defer_until": "2027-01-01",
   "description": "Implement request/get_json/post_json actions with method allowlist, URL/header/body schemas, timeout/retry controls, redaction, and tests.",
   "id": "jido_con-sk6.2",
   "labels": [
@@ -17,8 +18,8 @@
   ],
   "parent": "jido_con-sk6",
   "priority": 2,
-  "status": "open",
+  "status": "deferred",
   "title": "[W4-HTTP-S02] Implement safe HTTP request actions",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:26Z"
+  "updated_at": "2026-05-15T22:00:36Z"
 }
