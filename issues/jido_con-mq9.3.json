@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-mq9.4"
   ],
+  "closed_at": "2026-05-15T23:24:06Z",
+  "close_reason": "Implemented in b770348 by pi-connector-factory",
   "created": "2026-05-15T21:50:00Z",
   "description": "Add webhook verification/normalization primitives and generated trigger metadata for booking created/updated/canceled/rescheduled events, with replay-safe fixture tests.",
   "id": "jido_con-mq9.3",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-mq9",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-CAL-S03] Add Cal.com booking webhook trigger",
   "type": "task",
-  "updated_at": "2026-05-15T23:13:09Z"
+  "updated_at": "2026-05-15T23:24:06Z"
 }
