@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-cnk.3"
+  ],
   "blocks": [],
   "created": "2026-05-15T21:50:28Z",
   "description": "Add catalog/availability coverage, route mounting guidance, replay/dedupe contract docs, and local demo/live-test guidance.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W4-WEB-S04] Add webhook catalog packs and host docs",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:32Z"
+  "updated_at": "2026-05-15T21:50:33Z"
 }
