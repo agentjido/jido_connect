@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-qc1.3"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-qc1",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G15-S04] Implement Slides batch update and thumbnail actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:36:02Z"
+  "updated_at": "2026-05-15T16:06:33Z"
 }
