@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-0x5.1"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:21Z",
   "description": "Add issue, project, team, user, state, label, comment, and pagination structs with representative Linear GraphQL fixture coverage.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W5-LIN-S02] Add Linear normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:24Z"
+  "updated_at": "2026-05-15T22:01:27Z"
 }
