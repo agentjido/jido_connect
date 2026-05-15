@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-15T21:50:14Z",
+  "description": "Add reader/editor catalog packs, availability tests, README usage, live-test guidance, and a changed-record polling/webhook design note.",
+  "id": "jido_con-4ss.5",
+  "labels": [],
+  "parent": "jido_con-4ss",
+  "priority": 2,
+  "status": "open",
+  "title": "[W4-AIR-S05] Add Airtable catalog packs, docs, and trigger plan",
+  "type": "task",
+  "updated_at": "2026-05-15T21:50:14Z"
+}
