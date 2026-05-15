@@ -6,7 +6,8 @@
   "description": "Add umbrella app, provider module, OAuth/API key auth profiles, GraphQL transport boundary, README/AGENTS, and generated plugin tests.",
   "id": "jido_con-0x5.1",
   "labels": [
-    "linear"
+    "linear",
+    "work-management"
   ],
   "parent": "jido_con-0x5",
   "priority": 2,
