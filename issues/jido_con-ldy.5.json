@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-ldy.4"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ldy.6"
+  ],
   "created": "2026-05-15T21:50:05Z",
   "description": "Add webhook verification/event normalization where feasible or a polling trigger design for contact/deal changes, with dedupe/checkpoint fixtures.",
   "id": "jido_con-ldy.5",
