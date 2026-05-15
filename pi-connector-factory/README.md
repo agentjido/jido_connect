@@ -55,6 +55,8 @@ Each `step`:
 
 - Requires a clean Git worktree before Pi starts.
 - Selects one ready Beadwork task, excluding epics by default.
+- If `bw ready` returns only epics, selects the first ready child task whose
+  blockers are closed.
 - Starts the task with `bw start`.
 - Runs Pi with Z.ai `glm-5.1`.
 - Requires Pi to make exactly one commit on the current branch.

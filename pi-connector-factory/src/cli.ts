@@ -89,7 +89,7 @@ function doctor() {
     console.log(`${ok ? "ok " : "NO "} ${name}`);
   }
 
-  const ready = readyIssues();
+  const ready = queueIssues();
   const nextTask = ready.find((issue) => issue.type !== "epic");
 
   console.log("");
@@ -180,7 +180,7 @@ function selectIssue(args: Args, nullable: true): Issue | undefined;
 function selectIssue(args: Args, nullable = false) {
   const issueId = stringOption(args.options.issue);
   const allowEpic = args.options["allow-epic"] === true;
-  const issue = issueId ? showIssue(issueId) : readyIssues().find((item) => allowEpic || item.type !== "epic");
+  const issue = issueId ? showIssue(issueId) : queueIssues().find((item) => allowEpic || item.type !== "epic");
 
   if (!issue) {
     if (nullable) return undefined;
@@ -206,6 +206,51 @@ function startIssue(issue: Issue) {
 
 function readyIssues() {
   return parseJson<Issue[]>(run("bw", ["ready", "--json"], { cwd: repoRoot, capture: true }).stdout);
+}
+
+function queueIssues() {
+  const rawReady = readyIssues();
+  const queue = new Map<string, Issue>();
+  const blockerStatus = new Map<string, string>();
+
+  for (const issue of rawReady) {
+    if (issue.type !== "epic") {
+      queue.set(issue.id, issue);
+      continue;
+    }
+
+    for (const child of childIssues(issue.id)) {
+      if (isReadyLeaf(child, blockerStatus)) {
+        queue.set(child.id, child);
+      }
+    }
+
+    queue.set(issue.id, issue);
+  }
+
+  return [...queue.values()];
+}
+
+function childIssues(parentId: string) {
+  return parseJson<Issue[]>(
+    run("bw", ["list", "--parent", parentId, "--json"], { cwd: repoRoot, capture: true }).stdout
+  );
+}
+
+function isReadyLeaf(issue: Issue, blockerStatus: Map<string, string>) {
+  if (issue.type === "epic") return false;
+  if (!["open", "in_progress"].includes(issue.status)) return false;
+
+  return (issue.blocked_by || []).every((blockerId) => {
+    let status = blockerStatus.get(blockerId);
+
+    if (!status) {
+      status = showIssue(blockerId).status;
+      blockerStatus.set(blockerId, status);
+    }
+
+    return status === "closed";
+  });
 }
 
 function showIssue(id: string) {
