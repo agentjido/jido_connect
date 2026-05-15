@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-4ss.2"
+  ],
   "created": "2026-05-15T21:50:13Z",
   "description": "Add umbrella app, provider module, OAuth/PAT auth profiles, transport boundary, package docs, and generated plugin surface tests.",
   "id": "jido_con-4ss.1",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W4-AIR-S01] Scaffold jido_connect_airtable",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:15Z"
+  "updated_at": "2026-05-15T21:50:19Z"
 }
