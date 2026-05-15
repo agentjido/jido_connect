@@ -26,6 +26,7 @@ defmodule Jido.Connect.Calcom.ClientTest do
     assert Transport.api_version(:event_types) == "2024-06-14"
     assert Transport.api_version(:bookings_list) == "2026-05-01"
     assert Transport.api_version(:bookings_detail) == "2026-02-25"
+    assert Transport.api_version(:webhooks) == "2024-06-14"
     assert request.options.base_url == "https://cal.test"
     assert request.headers["authorization"] == ["Bearer cal_test_key"]
     assert request.headers["accept"] == ["application/json"]
@@ -232,6 +233,15 @@ defmodule Jido.Connect.Calcom.ClientTest do
     assert {:error, %Error.ProviderError{reason: :invalid_response}} =
              Response.handle_reschedule_booking_response({:ok, %{status: 200, body: []}})
 
+    assert {:error, %Error.ProviderError{reason: :invalid_response}} =
+             Response.handle_create_webhook_response({:ok, %{status: 200, body: []}})
+
+    assert {:error, %Error.ProviderError{reason: :invalid_response}} =
+             Response.handle_list_webhooks_response({:ok, %{status: 200, body: []}})
+
+    assert {:error, %Error.ProviderError{reason: :invalid_response}} =
+             Response.handle_delete_webhook_response({:ok, %{status: 200, body: []}})
+
     assert {:error,
             %Error.ProviderError{
               provider: :calcom,
@@ -254,6 +264,99 @@ defmodule Jido.Connect.Calcom.ClientTest do
     assert {:error, %Error.ProviderError{provider: :calcom}} =
              Response.handle_reschedule_booking_response(
                {:error, %RuntimeError{message: "timeout"}}
+             )
+
+    assert {:error, %Error.ProviderError{provider: :calcom}} =
+             Response.handle_create_webhook_response({:error, %RuntimeError{message: "timeout"}})
+
+    assert {:error, %Error.ProviderError{provider: :calcom}} =
+             Response.handle_list_webhooks_response({:error, %RuntimeError{message: "timeout"}})
+
+    assert {:error, %Error.ProviderError{provider: :calcom}} =
+             Response.handle_delete_webhook_response({:error, %RuntimeError{message: "timeout"}})
+  end
+
+  test "create webhook sends expected body and normalizes webhook" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v2/webhooks"
+      assert ["2024-06-14"] = Plug.Conn.get_req_header(conn, "cal-api-version")
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "subscriberUrl" => "https://example.com/hook",
+               "triggers" => ["BOOKING_CREATED"],
+               "active" => true
+             }
+
+      Req.Test.json(conn, %{
+        data: %{
+          id: 1,
+          subscriberUrl: "https://example.com/hook",
+          active: true,
+          triggers: ["BOOKING_CREATED"]
+        }
+      })
+    end)
+
+    assert {:ok, %Calcom.Webhook{id: 1, subscriber_url: "https://example.com/hook", active: true}} =
+             Client.create_webhook(
+               %{
+                 subscriber_url: "https://example.com/hook",
+                 triggers: ["BOOKING_CREATED"],
+                 active: true
+               },
+               "token"
+             )
+  end
+
+  test "list webhooks sends expected request and normalizes results" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v2/webhooks"
+      assert ["2024-06-14"] = Plug.Conn.get_req_header(conn, "cal-api-version")
+
+      assert %{"eventTypeId" => "10"} = URI.decode_query(conn.query_string)
+
+      Req.Test.json(conn, %{
+        data: [
+          %{id: 1, subscriberUrl: "https://example.com/hook", triggers: ["BOOKING_CREATED"]}
+        ]
+      })
+    end)
+
+    assert {:ok, [%Calcom.Webhook{id: 1, subscriber_url: "https://example.com/hook"}]} =
+             Client.list_webhooks(%{event_type_id: 10}, "token")
+  end
+
+  test "delete webhook sends expected request and normalizes response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "DELETE"
+      assert conn.request_path == "/v2/webhooks/42"
+      assert ["2024-06-14"] = Plug.Conn.get_req_header(conn, "cal-api-version")
+
+      Req.Test.json(conn, %{data: %{id: 42}})
+    end)
+
+    assert {:ok, %Calcom.Webhook{id: 42}} =
+             Client.delete_webhook(%{webhook_id: 42}, "token")
+  end
+
+  test "webhook response helpers normalize successful payloads" do
+    assert {:ok, %Calcom.Webhook{id: 1}} =
+             Response.handle_create_webhook_response(
+               {:ok, %{status: 200, body: %{"data" => %{"id" => 1}}}}
+             )
+
+    assert {:ok, [%Calcom.Webhook{id: 1}]} =
+             Response.handle_list_webhooks_response(
+               {:ok, %{status: 200, body: %{"data" => [%{"id" => 1}]}}}
+             )
+
+    assert {:ok, %Calcom.Webhook{id: 1}} =
+             Response.handle_delete_webhook_response(
+               {:ok, %{status: 200, body: %{"data" => %{"id" => 1}}}}
              )
   end
 end

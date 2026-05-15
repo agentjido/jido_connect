@@ -8,7 +8,8 @@ defmodule Jido.Connect.Calcom.Client.Transport do
   @api_versions %{
     event_types: "2024-06-14",
     bookings_list: "2026-05-01",
-    bookings_detail: "2026-02-25"
+    bookings_detail: "2026-02-25",
+    webhooks: "2024-06-14"
   }
 
   @doc "Builds a Cal.com API bearer request."

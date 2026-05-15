@@ -9,7 +9,8 @@ defmodule Jido.Connect.Calcom do
   use Jido.Connect,
     fragments: [
       Jido.Connect.Calcom.Actions.EventTypes,
-      Jido.Connect.Calcom.Actions.Bookings
+      Jido.Connect.Calcom.Actions.Bookings,
+      Jido.Connect.Calcom.Actions.Webhooks
     ]
 
   integration do
@@ -85,4 +86,5 @@ defmodule Jido.Connect.Calcom do
   defdelegate catalog_packs, to: Jido.Connect.Calcom.CatalogPacks, as: :all
   defdelegate reader_pack, to: Jido.Connect.Calcom.CatalogPacks, as: :reader
   defdelegate booking_pack, to: Jido.Connect.Calcom.CatalogPacks, as: :booking
+  defdelegate webhook_pack, to: Jido.Connect.Calcom.CatalogPacks, as: :webhook
 end

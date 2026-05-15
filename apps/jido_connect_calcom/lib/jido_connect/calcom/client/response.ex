@@ -77,6 +77,50 @@ defmodule Jido.Connect.Calcom.Client.Response do
 
   def handle_reschedule_booking_response(response), do: Transport.handle_error_response(response)
 
+  def handle_create_webhook_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(
+      body,
+      fn b -> Normalizer.webhook(Data.get(b, "data", b)) end,
+      "Cal.com create webhook response was invalid"
+    )
+  end
+
+  def handle_create_webhook_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Cal.com create webhook response was invalid", body)
+  end
+
+  def handle_create_webhook_response(response), do: Transport.handle_error_response(response)
+
+  def handle_list_webhooks_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.webhooks/1, "Cal.com webhooks response was invalid")
+  end
+
+  def handle_list_webhooks_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Cal.com webhooks response was invalid", body)
+  end
+
+  def handle_list_webhooks_response(response), do: Transport.handle_error_response(response)
+
+  def handle_delete_webhook_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(
+      body,
+      fn b -> Normalizer.webhook(Data.get(b, "data", b)) end,
+      "Cal.com delete webhook response was invalid"
+    )
+  end
+
+  def handle_delete_webhook_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Cal.com delete webhook response was invalid", body)
+  end
+
+  def handle_delete_webhook_response(response), do: Transport.handle_error_response(response)
+
   defp normalize_one(body, normalizer, message) do
     case normalizer.(body) do
       {:ok, item} -> {:ok, item}

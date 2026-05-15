@@ -15,8 +15,15 @@ defmodule Jido.Connect.Calcom.CatalogPacks do
                      "calcom.bookings.reschedule"
                    ]
 
+  @webhook_tools @reader_tools ++
+                    [
+                      "calcom.webhooks.create",
+                      "calcom.webhooks.list",
+                      "calcom.webhooks.delete"
+                    ]
+
   @doc "Returns all built-in Cal.com catalog packs."
-  def all, do: [reader(), booking()]
+  def all, do: [reader(), booking(), webhook()]
 
   @doc "Read-only Cal.com discovery pack for event types and bookings."
   def reader do
@@ -39,6 +46,19 @@ defmodule Jido.Connect.Calcom.CatalogPacks do
         "Read Cal.com event types and bookings, plus cancel and reschedule booking actions.",
       filters: %{provider: :calcom},
       allowed_tools: @booking_tools,
+      metadata: %{package: :jido_connect_calcom, risk: :write}
+    })
+  end
+
+  @doc "Cal.com webhook pack for webhook endpoint lifecycle management."
+  def webhook do
+    Pack.new!(%{
+      id: :calcom_webhook,
+      label: "Cal.com webhook",
+      description:
+        "Read Cal.com event types and bookings, plus manage webhook endpoint lifecycle.",
+      filters: %{provider: :calcom},
+      allowed_tools: @webhook_tools,
       metadata: %{package: :jido_connect_calcom, risk: :write}
     })
   end
