@@ -6,7 +6,8 @@
   "description": "Add user, organization, event type, scheduled event, invitee, cancellation, webhook subscription, and pagination structs with representative fixtures.",
   "id": "jido_con-pfy.2",
   "labels": [
-    "calendly"
+    "calendly",
+    "scheduling"
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
