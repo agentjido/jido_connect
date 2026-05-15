@@ -6,6 +6,7 @@
   "description": "Add normalized contact, company, deal, note/engagement, owner, pipeline, and pagination structs plus representative CRM v3 fixture coverage.",
   "id": "jido_con-ldy.2",
   "labels": [
+    "crm",
     "hubspot"
   ],
   "parent": "jido_con-ldy",
