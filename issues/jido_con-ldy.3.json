@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-ldy.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ldy.4"
+  ],
   "created": "2026-05-15T21:50:05Z",
   "description": "Implement contact/company/deal get, search, and list-style actions with pagination, property selection, archived handling, tests, and least-privilege metadata.",
   "id": "jido_con-ldy.3",
