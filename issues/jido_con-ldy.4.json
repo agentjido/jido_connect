@@ -6,6 +6,7 @@
   "description": "Implement create/update contact and deal plus note association actions with explicit confirmation/risk metadata, tests, and normalized outputs.",
   "id": "jido_con-ldy.4",
   "labels": [
+    "crm",
     "hubspot"
   ],
   "parent": "jido_con-ldy",
@@ -13,5 +14,5 @@
   "status": "open",
   "title": "[W4-HUB-S04] Implement HubSpot CRM write actions",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:08Z"
+  "updated_at": "2026-05-15T21:50:09Z"
 }
