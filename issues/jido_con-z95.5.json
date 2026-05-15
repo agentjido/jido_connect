@@ -8,7 +8,8 @@
   "labels": [
     "analytics",
     "connector",
-    "posthog"
+    "posthog",
+    "wave-6"
   ],
   "parent": "jido_con-z95",
   "priority": 2,
