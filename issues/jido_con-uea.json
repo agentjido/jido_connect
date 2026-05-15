@@ -8,11 +8,12 @@
   "labels": [
     "connector",
     "crm",
-    "salesforce"
+    "salesforce",
+    "wave-4"
   ],
   "priority": 2,
   "status": "open",
   "title": "[W4] Salesforce Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T22:01:49Z"
+  "updated_at": "2026-05-15T22:01:50Z"
 }
