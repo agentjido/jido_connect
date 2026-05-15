@@ -8,6 +8,7 @@
   "labels": [
     "connector",
     "jira",
+    "wave-5",
     "work-management"
   ],
   "parent": "jido_con-ul0",
@@ -15,5 +16,5 @@
   "status": "open",
   "title": "[W5-JIRA-S05] Add Jira webhook trigger and catalog docs",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:17Z"
+  "updated_at": "2026-05-15T22:01:18Z"
 }
