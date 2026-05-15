@@ -5,11 +5,13 @@
   "created": "2026-05-15T22:01:40Z",
   "description": "Add user, organization, event type, scheduled event, invitee, cancellation, webhook subscription, and pagination structs with representative fixtures.",
   "id": "jido_con-pfy.2",
-  "labels": [],
+  "labels": [
+    "calendly"
+  ],
   "parent": "jido_con-pfy",
   "priority": 2,
   "status": "open",
   "title": "[W4-CALENDLY-S02] Add Calendly normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:40Z"
+  "updated_at": "2026-05-15T22:01:43Z"
 }
