@@ -7,6 +7,7 @@
   "id": "jido_con-pfy.3",
   "labels": [
     "calendly",
+    "connector",
     "scheduling"
   ],
   "parent": "jido_con-pfy",
@@ -14,5 +15,5 @@
   "status": "open",
   "title": "[W4-CALENDLY-S03] Implement Calendly event read actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:44Z"
+  "updated_at": "2026-05-15T22:01:45Z"
 }
