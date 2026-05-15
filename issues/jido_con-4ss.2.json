@@ -5,11 +5,13 @@
   "created": "2026-05-15T21:50:13Z",
   "description": "Add base, table, field, view, record, attachment, comment, and pagination structs with representative Airtable fixture coverage.",
   "id": "jido_con-4ss.2",
-  "labels": [],
+  "labels": [
+    "airtable"
+  ],
   "parent": "jido_con-4ss",
   "priority": 2,
   "status": "open",
   "title": "[W4-AIR-S02] Add Airtable normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:13Z"
+  "updated_at": "2026-05-15T21:50:15Z"
 }
