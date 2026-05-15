@@ -6,6 +6,7 @@
   "description": "Add sObject record, lead, contact, account, opportunity, task, describe metadata, query result, and pagination structs with representative Salesforce fixture coverage.",
   "id": "jido_con-uea.2",
   "labels": [
+    "connector",
     "crm",
     "salesforce"
   ],
