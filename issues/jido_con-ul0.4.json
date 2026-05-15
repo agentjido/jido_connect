@@ -6,6 +6,7 @@
   "description": "Implement create/update issue, transition issue, assign issue, and add comment actions with explicit confirmation/risk metadata and tests.",
   "id": "jido_con-ul0.4",
   "labels": [
+    "connector",
     "jira",
     "work-management"
   ],
