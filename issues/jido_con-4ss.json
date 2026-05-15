@@ -7,11 +7,12 @@
   "id": "jido_con-4ss",
   "labels": [
     "airtable",
+    "connector",
     "database"
   ],
   "priority": 2,
   "status": "open",
   "title": "[W4] Airtable Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T21:50:12Z"
+  "updated_at": "2026-05-15T21:50:13Z"
 }
