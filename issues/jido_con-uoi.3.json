@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-uoi.2"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-uoi",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G16-S03] Implement form read/create/update actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:36:03Z"
+  "updated_at": "2026-05-15T16:42:39Z"
 }
