@@ -1,0 +1,68 @@
+{
+  "documentId": "doc_tabs456",
+  "title": "Multi-Tab Report",
+  "revisionId": "rev002",
+  "suggestionsViewMode": "PREVIEW_SUGGESTIONS_ACCEPTED",
+  "tabs": [
+    {
+      "tabProperties": {
+        "id": "tab_summary",
+        "title": "Summary",
+        "index": 0
+      },
+      "body": {
+        "content": [
+          {
+            "startIndex": 1,
+            "endIndex": 15,
+            "paragraph": {
+              "elements": [
+                {
+                  "startIndex": 1,
+                  "endIndex": 15,
+                  "textRun": {
+                    "content": "Executive summary\n",
+                    "textStyle": {}
+                  }
+                }
+              ],
+              "paragraphStyle": {
+                "namedStyleType": "HEADING_1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "tabProperties": {
+        "id": "tab_details",
+        "title": "Details",
+        "index": 1
+      },
+      "body": {
+        "content": [
+          {
+            "startIndex": 1,
+            "endIndex": 8,
+            "paragraph": {
+              "elements": [
+                {
+                  "startIndex": 1,
+                  "endIndex": 8,
+                  "textRun": {
+                    "content": "Details\n",
+                    "textStyle": {}
+                  }
+                }
+              ],
+              "paragraphStyle": {
+                "namedStyleType": "NORMAL_TEXT"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
