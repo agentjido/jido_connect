@@ -11,7 +11,8 @@ defmodule Jido.Connect.Google.Slides.ScopeResolver do
   @write_scope "https://www.googleapis.com/auth/presentations"
 
   @write_operations MapSet.new([
-                      "google.slides.presentation.create"
+                      "google.slides.presentation.create",
+                      "google.slides.presentation.batch_update"
                     ])
 
   def required_scopes(operation, _input, _connection) do

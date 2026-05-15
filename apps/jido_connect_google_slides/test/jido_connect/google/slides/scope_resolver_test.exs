@@ -56,6 +56,14 @@ defmodule Jido.Connect.Google.Slides.ScopeResolverTest do
            ) == [@write_scope]
   end
 
+  test "returns write scope for batchUpdate operations" do
+    assert ScopeResolver.required_scopes(
+             %{id: "google.slides.presentation.batch_update"},
+             %{},
+             %{scopes: [@write_scope]}
+           ) == [@write_scope]
+  end
+
   test "declares Slides write scope matrix" do
     ConnectorContracts.assert_scope_matrix(ScopeResolver, [
       %{
@@ -77,5 +85,36 @@ defmodule Jido.Connect.Google.Slides.ScopeResolverTest do
         expected: @write_scope
       }
     ])
+  end
+
+  test "declares Slides batchUpdate scope matrix" do
+    ConnectorContracts.assert_scope_matrix(ScopeResolver, [
+      %{
+        label: "batchUpdate requires write scope",
+        operation: "google.slides.presentation.batch_update",
+        granted: [],
+        expected: @write_scope
+      },
+      %{
+        label: "batchUpdate does not downgrade with readonly grant",
+        operation: "google.slides.presentation.batch_update",
+        granted: [@readonly_scope],
+        expected: @write_scope
+      },
+      %{
+        label: "batchUpdate accepts write scope",
+        operation: "google.slides.presentation.batch_update",
+        granted: [@write_scope],
+        expected: @write_scope
+      }
+    ])
+  end
+
+  test "returns readonly scope for thumbnail operations" do
+    assert ScopeResolver.required_scopes(
+             %{id: "google.slides.presentation.page.get_thumbnail"},
+             %{},
+             %{scopes: [@readonly_scope]}
+           ) == [@readonly_scope]
   end
 end

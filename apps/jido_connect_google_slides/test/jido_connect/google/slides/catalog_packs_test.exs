@@ -4,7 +4,7 @@ defmodule Jido.Connect.Google.Slides.CatalogPacksTest do
   alias Jido.Connect
   alias Jido.Connect.Catalog
   alias Jido.Connect.Google.Slides
-  alias Jido.Connect.Google.Slides.Presentation
+  alias Jido.Connect.Google.Slides.{BatchUpdateResult, Presentation, Thumbnail}
 
   defmodule FakeSlidesClient do
     def get_presentation(%{presentation_id: "pres_abc123"}, "token") do
@@ -22,6 +22,30 @@ defmodule Jido.Connect.Google.Slides.CatalogPacksTest do
          presentation_id: "pres_new001",
          title: "New Deck",
          revision_id: "rev001"
+       })}
+    end
+
+    def batch_update(
+          %{presentation_id: "pres_abc123", requests: [%{"createSlide" => _}]},
+          "token"
+        ) do
+      {:ok,
+       BatchUpdateResult.new!(%{
+         presentation_id: "pres_abc123",
+         replies: [%{"createSlide" => %{"objectId" => "new_slide_1"}}]
+       })}
+    end
+
+    def get_page_thumbnail(
+          %{presentation_id: "pres_abc123", page_object_id: "slide_title"},
+          "token"
+        ) do
+      {:ok,
+       Thumbnail.new!(%{
+         width: 800,
+         height: 450,
+         content_url: "https://lh3.googleusercontent.com/d/slide_thumb_abc",
+         mime_type: "image/png"
        })}
     end
   end
@@ -60,7 +84,9 @@ defmodule Jido.Connect.Google.Slides.CatalogPacksTest do
     ids = Enum.map(results, & &1.tool.id)
 
     assert "google.slides.presentation.get" in ids
+    assert "google.slides.presentation.page.get_thumbnail" in ids
     refute "google.slides.presentation.create" in ids
+    refute "google.slides.presentation.batch_update" in ids
 
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.slides.presentation.get",
@@ -70,6 +96,15 @@ defmodule Jido.Connect.Google.Slides.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.slides.presentation.get"
+
+    assert {:ok, descriptor} =
+             Catalog.describe_tool("google.slides.presentation.page.get_thumbnail",
+               modules: [Slides],
+               packs: Slides.catalog_packs(),
+               pack: :google_slides_readonly
+             )
+
+    assert descriptor.tool.id == "google.slides.presentation.page.get_thumbnail"
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("google.slides.presentation.create",
@@ -91,6 +126,8 @@ defmodule Jido.Connect.Google.Slides.CatalogPacksTest do
 
     assert "google.slides.presentation.get" in ids
     assert "google.slides.presentation.create" in ids
+    assert "google.slides.presentation.batch_update" in ids
+    assert "google.slides.presentation.page.get_thumbnail" in ids
 
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.slides.presentation.create",
