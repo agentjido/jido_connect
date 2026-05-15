@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-uea.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-uea.5"
+  ],
   "created": "2026-05-15T22:01:51Z",
   "description": "Implement create/update records for Lead/Contact/Task and generic sObject with risk metadata, validation boundaries, and tests.",
   "id": "jido_con-uea.4",

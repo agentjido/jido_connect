@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-uea.4"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:51Z",
   "description": "Add CRM reader/editor catalog packs, availability tests, README usage, live-test guidance, and a CDC/poll/webhook design note for future triggers.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W4-SF-S05] Add Salesforce catalog packs and sync trigger plan",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:57Z"
+  "updated_at": "2026-05-15T22:01:58Z"
 }
