@@ -5,7 +5,9 @@
   "created": "2026-05-15T21:49:59Z",
   "description": "Finish the recovered Cal.com package before adding Calendly. Scope: repair test/dependency issues, harden auth/client behavior, add webhook lifecycle/trigger support, and refresh catalog/docs/live-test guidance.",
   "id": "jido_con-mq9",
-  "labels": [],
+  "labels": [
+    "calcom"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[W4] Cal.com Hardening And Webhooks",
