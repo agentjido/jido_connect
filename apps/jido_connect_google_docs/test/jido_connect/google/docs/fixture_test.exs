@@ -53,10 +53,39 @@ defmodule Jido.Connect.Google.Docs.FixtureTest do
   test "normalizes Google Docs batch update result fixture" do
     payload = fixture!("batch_update_result.json")
 
-    assert {:ok, result} = Normalizer.document_result(payload)
+    assert {:ok, result} = Normalizer.batch_update_result(payload)
     assert result.document_id == "doc_batch101"
-    assert result.title == "Batch Updated Doc"
-    assert result.revision_id == "rev005"
+    assert result.replies == []
+  end
+
+  test "normalizes batch update result with replies" do
+    payload = %{
+      "documentId" => "doc_reply_001",
+      "replies" => [
+        %{"insertText" => %{}},
+        %{"updateTextStyle" => %{}}
+      ]
+    }
+
+    assert {:ok, result} = Normalizer.batch_update_result(payload)
+    assert result.document_id == "doc_reply_001"
+    assert length(result.replies) == 2
+  end
+
+  test "normalizes batch update result with inline document" do
+    payload = %{
+      "documentId" => "doc_inline_001",
+      "document" => %{
+        "documentId" => "doc_inline_001",
+        "title" => "Updated Doc"
+      },
+      "replies" => [%{"insertText" => %{}}]
+    }
+
+    assert {:ok, result} = Normalizer.batch_update_result(payload)
+    assert result.document_id == "doc_inline_001"
+    assert %{document_id: "doc_inline_001", title: "Updated Doc"} = result.document
+    assert length(result.replies) == 1
   end
 
   test "normalizes tab directly" do

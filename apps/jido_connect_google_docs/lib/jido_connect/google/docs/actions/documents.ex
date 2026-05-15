@@ -69,5 +69,44 @@ defmodule Jido.Connect.Google.Docs.Actions.Documents do
         field(:document, :map)
       end
     end
+
+    action :batch_update_document do
+      id("google.docs.document.batch_update")
+      resource(:document)
+      verb(:update)
+      data_classification(:workspace_content)
+      label("Batch update document")
+
+      description(
+        "Run a validated Google Docs batchUpdate request for text, style, table, and image operations."
+      )
+
+      handler(Jido.Connect.Google.Docs.Handlers.Actions.BatchUpdateDocument)
+      effect(:destructive, confirmation: :always)
+
+      access do
+        auth(:user)
+        scopes([@write_scope], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:document_id, :string, required?: true, example: "1abc...")
+
+        field(:requests, {:array, :map},
+          required?: true,
+          description:
+            "List of batch update operations. Each map must contain exactly one operation key."
+        )
+
+        field(:write_control, :map,
+          description: "Optional write control for concurrency control."
+        )
+      end
+
+      output do
+        field(:document, :map)
+        field(:replies, {:array, :map})
+      end
+    end
   end
 end

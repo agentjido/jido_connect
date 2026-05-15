@@ -7,4 +7,5 @@ defmodule Jido.Connect.Google.Docs.Client do
 
   defdelegate get_document(params, access_token), to: __MODULE__.Documents
   defdelegate create_document(params, access_token), to: __MODULE__.Documents
+  defdelegate batch_update(params, access_token), to: __MODULE__.Documents
 end
