@@ -11,4 +11,8 @@ defmodule Jido.Connect.Google.Forms.Client do
 
   defdelegate list_responses(params, access_token), to: __MODULE__.Responses
   defdelegate get_response(params, access_token), to: __MODULE__.Responses
+
+  defdelegate create_watch(params, access_token), to: __MODULE__.Watches
+  defdelegate renew_watch(params, access_token), to: __MODULE__.Watches
+  defdelegate delete_watch(params, access_token), to: __MODULE__.Watches
 end

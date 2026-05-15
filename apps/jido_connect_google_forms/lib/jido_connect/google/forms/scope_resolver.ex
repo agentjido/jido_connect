@@ -12,6 +12,12 @@ defmodule Jido.Connect.Google.Forms.ScopeResolver do
   @write_scope "https://www.googleapis.com/auth/forms.body"
   @responses_readonly_scope "https://www.googleapis.com/auth/forms.responses.readonly"
 
+  @watch_operations MapSet.new([
+                      "google.forms.watch.create",
+                      "google.forms.watch.renew",
+                      "google.forms.watch.delete"
+                    ])
+
   @write_operations MapSet.new([
                       "google.forms.form.create",
                       "google.forms.form.batch_update"
@@ -34,6 +40,9 @@ defmodule Jido.Connect.Google.Forms.ScopeResolver do
         [@write_scope]
 
       MapSet.member?(@response_operations, operation_id) ->
+        [@responses_readonly_scope]
+
+      MapSet.member?(@watch_operations, operation_id) ->
         [@responses_readonly_scope]
 
       true ->

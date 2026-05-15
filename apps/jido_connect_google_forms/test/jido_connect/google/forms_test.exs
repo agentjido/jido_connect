@@ -14,12 +14,17 @@ defmodule Jido.Connect.Google.FormsTest do
     Jido.Connect.Google.Forms.Actions.CreateForm,
     Jido.Connect.Google.Forms.Actions.BatchUpdateForm,
     Jido.Connect.Google.Forms.Actions.ListResponses,
-    Jido.Connect.Google.Forms.Actions.GetResponse
+    Jido.Connect.Google.Forms.Actions.GetResponse,
+    Jido.Connect.Google.Forms.Actions.CreateWatch,
+    Jido.Connect.Google.Forms.Actions.RenewWatch,
+    Jido.Connect.Google.Forms.Actions.DeleteWatch
   ]
 
   @forms_dsl_fragments [
     Jido.Connect.Google.Forms.Actions.Forms,
-    Jido.Connect.Google.Forms.Actions.Responses
+    Jido.Connect.Google.Forms.Actions.Responses,
+    Jido.Connect.Google.Forms.Actions.Watches,
+    Jido.Connect.Google.Forms.Triggers.ResponseSubmitted
   ]
 
   defmodule FakeFormsClient do
@@ -83,6 +88,37 @@ defmodule Jido.Connect.Google.FormsTest do
          last_submitted_time: "2026-05-14T10:02:30.000Z"
        })}
     end
+
+    def create_watch(
+          %{form_id: "1ABCdefGHI", event_type: "SCHEMA_RESPONSES"},
+          "token"
+        ) do
+      {:ok,
+       Forms.Watch.new!(%{
+         watch_id: "watch_abc123",
+         target_id: "1ABCdefGHI",
+         state: "ACTIVE",
+         event_type: "RESPONSE",
+         create_time: "2026-05-14T12:00:00.000Z",
+         expire_time: "2026-05-21T12:00:00.000Z"
+       })}
+    end
+
+    def renew_watch(%{form_id: "1ABCdefGHI", watch_id: "watch_abc123"}, "token") do
+      {:ok,
+       Forms.Watch.new!(%{
+         watch_id: "watch_abc123",
+         target_id: "1ABCdefGHI",
+         state: "ACTIVE",
+         event_type: "RESPONSE",
+         create_time: "2026-05-14T12:00:00.000Z",
+         expire_time: "2026-05-28T12:00:00.000Z"
+       })}
+    end
+
+    def delete_watch(%{form_id: "1ABCdefGHI", watch_id: "watch_abc123"}, "token") do
+      {:ok, %{deleted?: true}}
+    end
   end
 
   test "declares Google Forms provider metadata" do
@@ -100,7 +136,10 @@ defmodule Jido.Connect.Google.FormsTest do
              "google.forms.form.create",
              "google.forms.form.batch_update",
              "google.forms.responses.list",
-             "google.forms.responses.get"
+             "google.forms.responses.get",
+             "google.forms.watch.create",
+             "google.forms.watch.renew",
+             "google.forms.watch.delete"
            ]
 
     assert [%{id: :user, kind: :oauth2, refresh?: true, pkce?: true} = profile] =
@@ -123,6 +162,14 @@ defmodule Jido.Connect.Google.FormsTest do
     ConnectorContracts.assert_generated_surface(Forms,
       otp_app: :jido_connect_google_forms,
       action_modules: @forms_action_modules,
+      sensor_specs: [
+        %{
+          module: Jido.Connect.Google.Forms.Sensors.ResponseSubmitted,
+          name: "google_forms_response_submitted",
+          trigger_id: "google.forms.response.submitted",
+          signal_type: "google.forms.response.submitted"
+        }
+      ],
       plugin_module: Jido.Connect.Google.Forms.Plugin,
       plugin_name: "google_forms"
     )
@@ -359,6 +406,107 @@ defmodule Jido.Connect.Google.FormsTest do
                Forms.integration(),
                "google.forms.responses.get",
                %{form_id: "1ABCdefGHI", response_id: "ACYDBNhW_resp1"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes create watch through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: responses_scopes())
+
+    assert {:ok, %{watch: watch}} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.watch.create",
+               %{form_id: "1ABCdefGHI", event_type: "SCHEMA_RESPONSES"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert watch.watch_id == "watch_abc123"
+    assert watch.target_id == "1ABCdefGHI"
+    assert watch.state == "ACTIVE"
+    assert watch.event_type == "RESPONSE"
+  end
+
+  test "invokes renew watch through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: responses_scopes())
+
+    assert {:ok, %{watch: watch}} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.watch.renew",
+               %{form_id: "1ABCdefGHI", watch_id: "watch_abc123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert watch.watch_id == "watch_abc123"
+    assert watch.state == "ACTIVE"
+    assert watch.expire_time == "2026-05-28T12:00:00.000Z"
+  end
+
+  test "invokes delete watch through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: responses_scopes())
+
+    assert {:ok, %{result: result}} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.watch.delete",
+               %{form_id: "1ABCdefGHI", watch_id: "watch_abc123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert result.deleted? == true
+  end
+
+  test "create watch requires responses readonly scope" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: [@responses_readonly_scope]
+            }} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.watch.create",
+               %{form_id: "1ABCdefGHI", event_type: "SCHEMA_RESPONSES"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "renew watch requires responses readonly scope" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: [@responses_readonly_scope]
+            }} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.watch.renew",
+               %{form_id: "1ABCdefGHI", watch_id: "watch_abc123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "delete watch requires responses readonly scope" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: [@responses_readonly_scope]
+            }} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.watch.delete",
+               %{form_id: "1ABCdefGHI", watch_id: "watch_abc123"},
                context: context,
                credential_lease: lease
              )

@@ -12,7 +12,10 @@ defmodule Jido.Connect.Google.Forms.CatalogPacks do
   @editor_tools @readonly_tools ++
                   [
                     "google.forms.form.create",
-                    "google.forms.form.batch_update"
+                    "google.forms.form.batch_update",
+                    "google.forms.watch.create",
+                    "google.forms.watch.renew",
+                    "google.forms.watch.delete"
                   ]
 
   @doc "Returns all built-in Google Forms catalog packs."
