@@ -32,6 +32,8 @@ defmodule Jido.Connect.Google.SearchConsole do
     tags([:google, :workspace, :search, :seo, :marketing])
   end
 
+  defdelegate catalog_packs, to: Jido.Connect.Google.SearchConsole.CatalogPacks, as: :all
+
   auth do
     oauth2 :user do
       default?(true)
