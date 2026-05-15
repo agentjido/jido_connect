@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [
     "jido_con-mq9.2"
@@ -14,8 +14,8 @@
   ],
   "parent": "jido_con-mq9",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[W4-CAL-S01] Repair Cal.com tests and package dependencies",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:03Z"
+  "updated_at": "2026-05-15T22:42:53Z"
 }
