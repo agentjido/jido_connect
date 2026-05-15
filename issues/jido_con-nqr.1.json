@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-nqr.2"
   ],
+  "closed_at": "2026-05-15T21:48:52Z",
+  "close_reason": "Search Console scaffold exists and package compile/test pass",
   "created": "2026-05-04T19:20:06Z",
   "description": "Planning ID: G10-S01\nEpic: G10 Google Search Console Connector\nSource: MILESTONE_2.md\nDepends on: G09-S07\n\nAcceptance:\nPackage compiles and can share report/date-range patterns with Analytics.",
   "id": "jido_con-nqr.1",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-nqr",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G10-S01] Scaffold jido_connect_google_search_console",
   "type": "task",
-  "updated_at": "2026-05-14T22:13:14Z"
+  "updated_at": "2026-05-15T21:48:52Z"
 }
