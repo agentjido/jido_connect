@@ -1,0 +1,30 @@
+{
+  "responseId": "ACYDBNhW5dYSnRJ8xVBM3yMFvYgzbA5v4VpZGhKB6YxHWDiNeCgtMNvJ8w",
+  "formId": "1ABCdefGHIjklMNO_pqrSTU_vwx_YZ",
+  "respondentEmail": "user@example.com",
+  "createTime": "2026-05-14T10:00:00.000Z",
+  "lastSubmittedTime": "2026-05-14T10:02:30.000Z",
+  "answers": {
+    "question_001": {
+      "textAnswers": {
+        "answers": [
+          { "value": "Very Satisfied" }
+        ]
+      }
+    },
+    "question_002": {
+      "textAnswers": {
+        "answers": [
+          { "value": "Faster shipping options would be great." }
+        ]
+      }
+    },
+    "question_003": {
+      "textAnswers": {
+        "answers": [
+          { "value": "9" }
+        ]
+      }
+    }
+  }
+}
