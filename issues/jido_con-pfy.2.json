@@ -8,12 +8,13 @@
   "labels": [
     "calendly",
     "connector",
-    "scheduling"
+    "scheduling",
+    "wave-4"
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
   "status": "open",
   "title": "[W4-CALENDLY-S02] Add Calendly normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:43Z"
+  "updated_at": "2026-05-15T22:01:44Z"
 }
