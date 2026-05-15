@@ -4,6 +4,8 @@
     "jido_con-qc1.4"
   ],
   "blocks": [],
+  "closed_at": "2026-05-15T16:21:59Z",
+  "close_reason": "Implemented in 7738fb6 by pi-connector-factory",
   "created": "2026-05-14T14:35:50Z",
   "description": "Add readonly/editor catalog packs, README usage, scope matrix tests, privacy classification, generated module checks, and Drive-trigger/export guidance.",
   "id": "jido_con-qc1.5",
@@ -13,8 +15,8 @@
   ],
   "parent": "jido_con-qc1",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G15-S05] Add Slides catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-15T16:14:46Z"
+  "updated_at": "2026-05-15T16:21:59Z"
 }
