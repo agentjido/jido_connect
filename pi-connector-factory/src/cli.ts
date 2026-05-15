@@ -297,7 +297,7 @@ async function runPi(promptText: string, runDir: string): Promise<RunResult> {
   const stdoutChunks: Buffer[] = [];
   const stderrChunks: Buffer[] = [];
   const streamer = startSessionStreamer(sessionDir);
-  const timeoutMs = Number(process.env.PI_TIMEOUT_MS || "900000");
+  const timeoutMs = Number(process.env.PI_TIMEOUT_MS || "1800000");
 
   return await new Promise<RunResult>((resolvePromise, reject) => {
     let timedOut = false;
