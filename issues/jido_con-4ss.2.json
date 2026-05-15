@@ -6,7 +6,8 @@
   "description": "Add base, table, field, view, record, attachment, comment, and pagination structs with representative Airtable fixture coverage.",
   "id": "jido_con-4ss.2",
   "labels": [
-    "airtable"
+    "airtable",
+    "database"
   ],
   "parent": "jido_con-4ss",
   "priority": 2,
