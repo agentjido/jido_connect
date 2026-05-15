@@ -1,5 +1,21 @@
 defmodule Jido.Connect.Calcom.CatalogPacks do
-  @moduledoc "Curated catalog packs for common Cal.com tool surfaces."
+  @moduledoc """
+  Curated catalog packs for common Cal.com tool surfaces.
+
+  Packs are storage-free catalog filters that hosts pass to the catalog
+  boundary to scope tool discovery and invocation.
+
+  ## Packs
+
+  | Pack | Risk | Tools |
+  |------|------|-------|
+  | `:calcom_reader` | read | event type and booking queries |
+  | `:calcom_booking` | write | reader + booking cancel / reschedule |
+  | `:calcom_webhook` | write | reader + webhook CRUD |
+  | `:calcom_full` | write | all Cal.com action tools |
+
+  Triggers are subscribed to independently and are not listed in packs.
+  """
 
   alias Jido.Connect.Catalog.Pack
 
@@ -22,8 +38,15 @@ defmodule Jido.Connect.Calcom.CatalogPacks do
                      "calcom.webhooks.delete"
                    ]
 
+  @full_tools @booking_tools ++
+                [
+                  "calcom.webhooks.create",
+                  "calcom.webhooks.list",
+                  "calcom.webhooks.delete"
+                ]
+
   @doc "Returns all built-in Cal.com catalog packs."
-  def all, do: [reader(), booking(), webhook()]
+  def all, do: [reader(), booking(), webhook(), full()]
 
   @doc "Read-only Cal.com discovery pack for event types and bookings."
   def reader do
@@ -59,6 +82,18 @@ defmodule Jido.Connect.Calcom.CatalogPacks do
         "Read Cal.com event types and bookings, plus manage webhook endpoint lifecycle.",
       filters: %{provider: :calcom},
       allowed_tools: @webhook_tools,
+      metadata: %{package: :jido_connect_calcom, risk: :write}
+    })
+  end
+
+  @doc "Cal.com full pack with all action tools."
+  def full do
+    Pack.new!(%{
+      id: :calcom_full,
+      label: "Cal.com full",
+      description: "All Cal.com action tools: event types, bookings, and webhooks.",
+      filters: %{provider: :calcom},
+      allowed_tools: @full_tools,
       metadata: %{package: :jido_connect_calcom, risk: :write}
     })
   end

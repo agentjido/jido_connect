@@ -227,11 +227,13 @@ defmodule Jido.Connect.CalcomTest do
     assert %{id: :calcom_reader} = Calcom.reader_pack()
     assert %{id: :calcom_booking} = Calcom.booking_pack()
     assert %{id: :calcom_webhook} = Calcom.webhook_pack()
+    assert %{id: :calcom_full} = Calcom.full_pack()
 
     assert Enum.map(Calcom.catalog_packs(), & &1.id) == [
              :calcom_reader,
              :calcom_booking,
-             :calcom_webhook
+             :calcom_webhook,
+             :calcom_full
            ]
   end
 
