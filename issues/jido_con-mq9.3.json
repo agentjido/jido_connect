@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-15T21:50:00Z",
+  "description": "Add webhook verification/normalization primitives and generated trigger metadata for booking created/updated/canceled/rescheduled events, with replay-safe fixture tests.",
+  "id": "jido_con-mq9.3",
+  "labels": [],
+  "parent": "jido_con-mq9",
+  "priority": 2,
+  "status": "open",
+  "title": "[W4-CAL-S03] Add Cal.com booking webhook trigger",
+  "type": "task",
+  "updated_at": "2026-05-15T21:50:00Z"
+}
