@@ -6,6 +6,7 @@
   "description": "Add umbrella app, mix config, provider module, auth profiles for OAuth and private app token, transport boundary, README/AGENTS, and baseline generated plugin tests.",
   "id": "jido_con-ldy.1",
   "labels": [
+    "connector",
     "crm",
     "hubspot"
   ],
