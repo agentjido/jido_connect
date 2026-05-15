@@ -6,7 +6,8 @@
   "description": "Add umbrella app, provider module, OAuth/API token auth profiles, Atlassian cloud transport boundary, README/AGENTS, and generated plugin tests.",
   "id": "jido_con-ul0.1",
   "labels": [
-    "jira"
+    "jira",
+    "work-management"
   ],
   "parent": "jido_con-ul0",
   "priority": 2,
