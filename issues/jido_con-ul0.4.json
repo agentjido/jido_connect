@@ -5,11 +5,13 @@
   "created": "2026-05-15T22:01:12Z",
   "description": "Implement create/update issue, transition issue, assign issue, and add comment actions with explicit confirmation/risk metadata and tests.",
   "id": "jido_con-ul0.4",
-  "labels": [],
+  "labels": [
+    "jira"
+  ],
   "parent": "jido_con-ul0",
   "priority": 2,
   "status": "open",
   "title": "[W5-JIRA-S04] Implement Jira issue write actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:12Z"
+  "updated_at": "2026-05-15T22:01:16Z"
 }
