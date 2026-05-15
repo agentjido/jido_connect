@@ -8,12 +8,13 @@
   "labels": [
     "analytics",
     "connector",
-    "posthog"
+    "posthog",
+    "wave-6"
   ],
   "parent": "jido_con-z95",
   "priority": 2,
   "status": "open",
   "title": "[W6-PH-S01] Scaffold jido_connect_posthog",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:31Z"
+  "updated_at": "2026-05-15T22:01:32Z"
 }
