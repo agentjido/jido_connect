@@ -5,11 +5,13 @@
   "created": "2026-05-15T21:50:28Z",
   "description": "Add trigger metadata and normalization for inbound webhook deliveries, including headers/body/query metadata, dedupe hooks, and fixture tests.",
   "id": "jido_con-cnk.3",
-  "labels": [],
+  "labels": [
+    "webhook"
+  ],
   "parent": "jido_con-cnk",
   "priority": 2,
   "status": "open",
   "title": "[W4-WEB-S03] Add generic inbound webhook trigger",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:28Z"
+  "updated_at": "2026-05-15T21:50:30Z"
 }
