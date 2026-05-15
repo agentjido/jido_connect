@@ -6,6 +6,7 @@
   "description": "Add event, person, feature flag, flag evaluation, insight, query result, and pagination structs with representative PostHog fixture coverage.",
   "id": "jido_con-z95.2",
   "labels": [
+    "analytics",
     "posthog"
   ],
   "parent": "jido_con-z95",
