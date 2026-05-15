@@ -8,12 +8,13 @@
   "labels": [
     "calendly",
     "connector",
-    "scheduling"
+    "scheduling",
+    "wave-4"
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
   "status": "open",
   "title": "[W4-CALENDLY-S01] Scaffold jido_connect_calendly",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:42Z"
+  "updated_at": "2026-05-15T22:01:43Z"
 }
