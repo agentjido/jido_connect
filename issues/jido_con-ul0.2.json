@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ul0.1"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:12Z",
   "description": "Add issue, project, user, comment, status, transition, field schema, and pagination structs with representative Jira REST fixtures.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W5-JIRA-S02] Add Jira normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:15Z"
+  "updated_at": "2026-05-15T22:01:18Z"
 }
