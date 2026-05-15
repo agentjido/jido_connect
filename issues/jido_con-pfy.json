@@ -8,11 +8,12 @@
   "labels": [
     "calendly",
     "connector",
-    "scheduling"
+    "scheduling",
+    "wave-4"
   ],
   "priority": 2,
   "status": "open",
   "title": "[W4] Calendly Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T22:01:39Z"
+  "updated_at": "2026-05-15T22:01:40Z"
 }
