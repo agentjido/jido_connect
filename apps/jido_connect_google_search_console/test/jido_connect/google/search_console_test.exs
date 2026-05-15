@@ -11,12 +11,15 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
   @action_modules [
     Jido.Connect.Google.SearchConsole.Actions.ListSites,
     Jido.Connect.Google.SearchConsole.Actions.AddSite,
-    Jido.Connect.Google.SearchConsole.Actions.QuerySearchAnalytics
+    Jido.Connect.Google.SearchConsole.Actions.QuerySearchAnalytics,
+    Jido.Connect.Google.SearchConsole.Actions.ListSitemaps,
+    Jido.Connect.Google.SearchConsole.Actions.SubmitSitemap
   ]
 
   @dsl_fragments [
     Jido.Connect.Google.SearchConsole.Actions.Sites,
-    Jido.Connect.Google.SearchConsole.Actions.SearchAnalytics
+    Jido.Connect.Google.SearchConsole.Actions.SearchAnalytics,
+    Jido.Connect.Google.SearchConsole.Actions.Sitemaps
   ]
 
   defmodule FakeSearchConsoleClient do
@@ -54,6 +57,29 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
          response_aggregation_type: "auto"
        })}
     end
+
+    def list_sitemaps(%{site_url: "https://example.com/"}, "token") do
+      {:ok,
+       %{
+         sitemaps: [
+           SearchConsole.Sitemap.new!(%{
+             path: "https://example.com/sitemap.xml",
+             last_submitted: "2026-01-15T10:30:00Z",
+             is_pending: false,
+             error_count: 0,
+             warnings_count: 1,
+             type: "SITEMAP"
+           })
+         ]
+       }}
+    end
+
+    def submit_sitemap(
+          %{site_url: "https://example.com/", sitemap_path: "https://example.com/sitemap.xml"},
+          "token"
+        ) do
+      {:ok, %{path: "https://example.com/sitemap.xml", submitted: true}}
+    end
   end
 
   test "declares Google Search Console provider metadata" do
@@ -69,7 +95,9 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
     assert Enum.map(spec.actions, & &1.id) == [
              "google.search_console.site.list",
              "google.search_console.site.add",
-             "google.search_console.search_analytics.query"
+             "google.search_console.search_analytics.query",
+             "google.search_console.sitemap.list",
+             "google.search_console.sitemap.submit"
            ]
 
     assert spec.triggers == []
@@ -148,6 +176,35 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
                  site_url: "https://example.com/",
                  start_date: "2026-01-01",
                  end_date: "2026-01-31"
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes list sitemaps through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: [@readonly_scope])
+
+    assert {:ok, %{sitemaps: [%{path: "https://example.com/sitemap.xml"}]}} =
+             Connect.invoke(
+               SearchConsole.integration(),
+               "google.search_console.sitemap.list",
+               %{site_url: "https://example.com/"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes submit sitemap through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: [@write_scope])
+
+    assert {:ok, %{path: "https://example.com/sitemap.xml", submitted: true}} =
+             Connect.invoke(
+               SearchConsole.integration(),
+               "google.search_console.sitemap.submit",
+               %{
+                 site_url: "https://example.com/",
+                 sitemap_path: "https://example.com/sitemap.xml"
                },
                context: context,
                credential_lease: lease

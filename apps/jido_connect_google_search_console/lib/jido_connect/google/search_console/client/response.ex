@@ -68,6 +68,41 @@ defmodule Jido.Connect.Google.SearchConsole.Client.Response do
 
   def handle_search_analytics_response(response), do: Transport.handle_error_response(response)
 
+  def handle_sitemap_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, sitemaps} <-
+           normalize_items(
+             body,
+             "sitemap",
+             &Normalizer.sitemap/1,
+             "Google Search Console sitemap list response was invalid"
+           ) do
+      {:ok,
+       %{
+         sitemaps: sitemaps
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_sitemap_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response(
+      "Google Search Console sitemap list response was invalid",
+      body
+    )
+  end
+
+  def handle_sitemap_list_response(response), do: Transport.handle_error_response(response)
+
+  def handle_sitemap_submit_response({:ok, %{status: status, body: _body}}, sitemap_path)
+      when status in 200..299 do
+    {:ok, %{path: sitemap_path, submitted: true}}
+  end
+
+  def handle_sitemap_submit_response(response, _sitemap_path),
+    do: Transport.handle_error_response(response)
+
   defp normalize_one(body, normalizer, message) do
     case normalizer.(body) do
       {:ok, item} -> {:ok, item}

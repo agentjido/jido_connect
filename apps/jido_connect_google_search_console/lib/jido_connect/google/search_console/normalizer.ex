@@ -2,7 +2,7 @@ defmodule Jido.Connect.Google.SearchConsole.Normalizer do
   @moduledoc "Normalizes Google Search Console API payloads into stable package structs."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Google.SearchConsole.{Row, SearchReport, Site}
+  alias Jido.Connect.Google.SearchConsole.{Row, SearchReport, Sitemap, Site}
 
   @doc "Normalizes a Search Console site entry payload."
   @spec site(map()) :: {:ok, Site.t()} | {:error, term()}
@@ -59,4 +59,29 @@ defmodule Jido.Connect.Google.SearchConsole.Normalizer do
   end
 
   defp row(_payload), do: {:error, :invalid_row_payload}
+
+  @doc "Normalizes a Search Console sitemap entry payload."
+  @spec sitemap(map()) :: {:ok, Sitemap.t()} | {:error, term()}
+  def sitemap(payload) when is_map(payload) do
+    attrs =
+      %{
+        path: Data.get(payload, "path"),
+        last_submitted: Data.get(payload, "lastSubmitted"),
+        is_pending: Data.get(payload, "isPending", false),
+        last_downloaded: Data.get(payload, "lastDownloaded"),
+        error_count: count_list(Data.get(payload, "errors", [])),
+        warnings_count: count_list(Data.get(payload, "warnings", [])),
+        type: Data.get(payload, "type"),
+        contents: Data.get(payload, "contents", []),
+        metadata: %{}
+      }
+      |> Data.compact()
+
+    Sitemap.new(attrs)
+  end
+
+  def sitemap(_payload), do: {:error, :invalid_sitemap_payload}
+
+  defp count_list(items) when is_list(items), do: length(items)
+  defp count_list(_), do: 0
 end
