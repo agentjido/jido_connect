@@ -6,6 +6,7 @@
   "description": "Normalize status, headers, body summary/json/text, errors, rate limits, and add SSRF/host allowlist policy hooks for hosts.",
   "id": "jido_con-sk6.3",
   "labels": [
+    "generic",
     "http"
   ],
   "parent": "jido_con-sk6",
