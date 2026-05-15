@@ -8,7 +8,8 @@
   "labels": [
     "calendly",
     "connector",
-    "scheduling"
+    "scheduling",
+    "wave-4"
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
