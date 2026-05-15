@@ -5,11 +5,13 @@
   "created": "2026-05-15T21:50:05Z",
   "description": "Add umbrella app, mix config, provider module, auth profiles for OAuth and private app token, transport boundary, README/AGENTS, and baseline generated plugin tests.",
   "id": "jido_con-ldy.1",
-  "labels": [],
+  "labels": [
+    "hubspot"
+  ],
   "parent": "jido_con-ldy",
   "priority": 2,
   "status": "open",
   "title": "[W4-HUB-S01] Scaffold jido_connect_hubspot",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:05Z"
+  "updated_at": "2026-05-15T21:50:06Z"
 }
