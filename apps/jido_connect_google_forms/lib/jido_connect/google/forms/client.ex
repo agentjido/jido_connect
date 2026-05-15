@@ -1,0 +1,11 @@
+defmodule Jido.Connect.Google.Forms.Client do
+  @moduledoc """
+  Google Forms API client facade.
+
+  Endpoint-specific client modules are added by capability tasks.
+  """
+
+  defdelegate get_form(params, access_token), to: __MODULE__.Forms
+  defdelegate create_form(params, access_token), to: __MODULE__.Forms
+  defdelegate batch_update(params, access_token), to: __MODULE__.Forms
+end

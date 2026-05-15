@@ -1,6 +1,7 @@
 defmodule Jido.Connect.Google.FormsTest do
   use ExUnit.Case, async: true
 
+  alias Jido.Connect
   alias Jido.Connect.Google.Forms
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
 
@@ -8,12 +9,47 @@ defmodule Jido.Connect.Google.FormsTest do
   @write_scope "https://www.googleapis.com/auth/forms.body"
 
   @forms_action_modules [
-    Jido.Connect.Google.Forms.Actions.GetForm
+    Jido.Connect.Google.Forms.Actions.GetForm,
+    Jido.Connect.Google.Forms.Actions.CreateForm,
+    Jido.Connect.Google.Forms.Actions.BatchUpdateForm
   ]
 
   @forms_dsl_fragments [
     Jido.Connect.Google.Forms.Actions.Forms
   ]
+
+  defmodule FakeFormsClient do
+    def get_form(%{form_id: "1ABCdefGHI"}, "token") do
+      {:ok,
+       Forms.Form.new!(%{
+         form_id: "1ABCdefGHI",
+         title: "Customer Survey",
+         description: "Tell us what you think.",
+         revision_id: "rev001"
+       })}
+    end
+
+    def create_form(%{title: "New Survey"}, "token") do
+      {:ok,
+       Forms.Form.new!(%{
+         form_id: "1NEW_form_id",
+         title: "New Survey",
+         description: nil,
+         revision_id: "rev001"
+       })}
+    end
+
+    def batch_update(
+          %{form_id: "1ABCdefGHI", requests: [%{update_form_title: _}]},
+          "token"
+        ) do
+      {:ok,
+       %{
+         form_id: "1ABCdefGHI",
+         replies: [%{"updateFormTitle" => %{}}, %{"createItem" => %{"itemId" => "new_1"}}]
+       }}
+    end
+  end
 
   test "declares Google Forms provider metadata" do
     spec = Forms.integration()
@@ -26,7 +62,9 @@ defmodule Jido.Connect.Google.FormsTest do
     assert spec.tags == [:google, :workspace, :forms, :surveys, :productivity]
 
     assert Enum.map(spec.actions, & &1.id) == [
-             "google.forms.form.get"
+             "google.forms.form.get",
+             "google.forms.form.create",
+             "google.forms.form.batch_update"
            ]
 
     assert [%{id: :user, kind: :oauth2, refresh?: true, pkce?: true} = profile] =
@@ -63,5 +101,209 @@ defmodule Jido.Connect.Google.FormsTest do
 
   test "loads Forms Spark DSL fragments" do
     ConnectorContracts.assert_spark_fragments(@forms_dsl_fragments)
+  end
+
+  test "invokes get form through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              form: %{
+                form_id: "1ABCdefGHI",
+                title: "Customer Survey",
+                revision_id: "rev001"
+              }
+            }} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.form.get",
+               %{form_id: "1ABCdefGHI"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes create form through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok,
+            %{
+              form: %{
+                form_id: "1NEW_form_id",
+                title: "New Survey",
+                revision_id: "rev001"
+              }
+            }} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.form.create",
+               %{title: "New Survey"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes batch update form through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{replies: replies}} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.form.batch_update",
+               %{
+                 form_id: "1ABCdefGHI",
+                 requests: [%{update_form_title: %{title: "Updated Survey"}}]
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert length(replies) == 2
+  end
+
+  test "fails before handler execution when required Forms scopes are missing" do
+    {context, lease} = context_and_lease(scopes: ["openid", "email", "profile"])
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: [@readonly_scope]
+            }} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.form.get",
+               %{form_id: "1ABCdefGHI"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "write actions require full Forms scope" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: [@write_scope]
+            }} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.form.create",
+               %{title: "New Survey"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch update requires full Forms scope" do
+    {context, lease} = context_and_lease()
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: [@write_scope]
+            }} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.form.batch_update",
+               %{form_id: "1ABCdefGHI", requests: [%{update_form_title: %{title: "x"}}]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch update rejects empty requests" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error, %Connect.Error.ValidationError{reason: :invalid_batch_update_requests}} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.form.batch_update",
+               %{form_id: "1ABCdefGHI", requests: []},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch update rejects requests with multiple operations per map" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error, %Connect.Error.ValidationError{reason: :invalid_batch_update_request}} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.form.batch_update",
+               %{
+                 form_id: "1ABCdefGHI",
+                 requests: [%{update_form_title: %{}, create_item: %{}}]
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "batch update rejects unsupported operations" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error, %Connect.Error.ValidationError{reason: :unsupported_batch_update_operation}} =
+             Connect.invoke(
+               Forms.integration(),
+               "google.forms.form.batch_update",
+               %{
+                 form_id: "1ABCdefGHI",
+                 requests: [%{dangerous_operation: %{}}]
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  defp write_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      @write_scope
+    ]
+  end
+
+  defp context_and_lease(opts \\ []) do
+    scopes =
+      Keyword.get(opts, :scopes, [
+        "openid",
+        "email",
+        "profile",
+        @readonly_scope
+      ])
+
+    connection =
+      Connect.Connection.new!(%{
+        id: "conn_1",
+        provider: :google_forms,
+        profile: :user,
+        tenant_id: "tenant_1",
+        owner_type: :app_user,
+        owner_id: "user_1",
+        status: :connected,
+        scopes: scopes
+      })
+
+    context =
+      Connect.Context.new!(%{
+        tenant_id: "tenant_1",
+        actor: %{id: "user_1", type: :user},
+        connection: connection
+      })
+
+    lease =
+      Connect.CredentialLease.new!(%{
+        connection_id: "conn_1",
+        provider: :google_forms,
+        profile: :user,
+        expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
+        fields: %{access_token: "token", google_forms_client: FakeFormsClient},
+        scopes: scopes
+      })
+
+    {context, lease}
   end
 end
