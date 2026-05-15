@@ -6,6 +6,7 @@
   "description": "Add reader/sales-editor catalog packs, plugin availability tests, scope matrix, privacy classification, and live-test guidance.",
   "id": "jido_con-ldy.6",
   "labels": [
+    "connector",
     "crm",
     "hubspot"
   ],
@@ -14,5 +15,5 @@
   "status": "open",
   "title": "[W4-HUB-S06] Add HubSpot catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:10Z"
+  "updated_at": "2026-05-15T21:50:11Z"
 }
