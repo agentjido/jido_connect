@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-fle.4"
   ],
+  "closed_at": "2026-05-15T15:07:17Z",
+  "close_reason": "Implemented in bf87502 after Pi timeout salvage",
   "created": "2026-05-14T14:35:48Z",
   "description": "Implement google.docs.document.get and google.docs.document.create with narrow scopes, normalized output, tests, and catalog metadata.",
   "id": "jido_con-fle.3",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-fle",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G14-S03] Implement document read and create actions",
   "type": "task",
-  "updated_at": "2026-05-15T14:47:41Z"
+  "updated_at": "2026-05-15T15:07:17Z"
 }
