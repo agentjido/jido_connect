@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-uoi.4"
   ],
+  "closed_at": "2026-05-15T16:55:12Z",
+  "close_reason": "Implemented in 9987ddd by pi-connector-factory",
   "created": "2026-05-14T14:35:50Z",
   "description": "Implement google.forms.form.get, create, and batchUpdate actions with provider-specific request schemas and tests.",
   "id": "jido_con-uoi.3",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-uoi",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G16-S03] Implement form read/create/update actions",
   "type": "task",
-  "updated_at": "2026-05-15T16:42:39Z"
+  "updated_at": "2026-05-15T16:55:12Z"
 }
