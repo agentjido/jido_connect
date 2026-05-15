@@ -6,6 +6,7 @@
   "description": "Build jido_connect_linear for modern product/development issue workflows. Cover OAuth/API key auth, issues/projects/teams/comments, mutations, webhook normalization, catalog packs, and docs.",
   "id": "jido_con-0x5",
   "labels": [
+    "connector",
     "linear",
     "work-management"
   ],
