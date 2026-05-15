@@ -6,6 +6,7 @@
   "description": "Implement SOQL query, get record, describe object, list recent records where appropriate, pagination/nextRecordsUrl handling, tests, and normalized output.",
   "id": "jido_con-uea.3",
   "labels": [
+    "connector",
     "crm",
     "salesforce"
   ],
