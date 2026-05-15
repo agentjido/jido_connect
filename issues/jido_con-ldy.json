@@ -5,7 +5,9 @@
   "created": "2026-05-15T21:50:04Z",
   "description": "Build jido_connect_hubspot as the first CRM connector. Cover OAuth/private app token auth, CRM object search/read/write, notes/deals, webhook or poll foundations, catalog packs, and docs.",
   "id": "jido_con-ldy",
-  "labels": [],
+  "labels": [
+    "hubspot"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[W4] HubSpot Connector",
