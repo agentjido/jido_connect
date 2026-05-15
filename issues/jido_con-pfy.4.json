@@ -5,11 +5,13 @@
   "created": "2026-05-15T22:01:41Z",
   "description": "Implement cancel event/invitee where supported plus webhook create/list/delete actions, risk metadata, tests, and normalized outputs.",
   "id": "jido_con-pfy.4",
-  "labels": [],
+  "labels": [
+    "calendly"
+  ],
   "parent": "jido_con-pfy",
   "priority": 2,
   "status": "open",
   "title": "[W4-CALENDLY-S04] Implement Calendly cancellation and webhook lifecycle",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:41Z"
+  "updated_at": "2026-05-15T22:01:45Z"
 }
