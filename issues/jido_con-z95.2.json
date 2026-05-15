@@ -7,6 +7,7 @@
   "id": "jido_con-z95.2",
   "labels": [
     "analytics",
+    "connector",
     "posthog"
   ],
   "parent": "jido_con-z95",
@@ -14,5 +15,5 @@
   "status": "open",
   "title": "[W6-PH-S02] Add PostHog normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:32Z"
+  "updated_at": "2026-05-15T22:01:33Z"
 }
