@@ -8,12 +8,13 @@
   "labels": [
     "airtable",
     "connector",
-    "database"
+    "database",
+    "wave-4"
   ],
   "parent": "jido_con-4ss",
   "priority": 2,
   "status": "open",
   "title": "[W4-AIR-S05] Add Airtable catalog packs, docs, and trigger plan",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:18Z"
+  "updated_at": "2026-05-15T21:50:19Z"
 }
