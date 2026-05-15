@@ -9,7 +9,9 @@ defmodule Jido.Connect.Google.Forms do
   use Jido.Connect,
     fragments: [
       Jido.Connect.Google.Forms.Actions.Forms,
-      Jido.Connect.Google.Forms.Actions.Responses
+      Jido.Connect.Google.Forms.Actions.Responses,
+      Jido.Connect.Google.Forms.Actions.Watches,
+      Jido.Connect.Google.Forms.Triggers.ResponseSubmitted
     ]
 
   integration do

@@ -107,6 +107,30 @@ defmodule Jido.Connect.Google.Forms.ScopeResolverTest do
         operation: "google.forms.form.unknown_action",
         granted: [],
         expected: @readonly_scope
+      },
+      %{
+        label: "create watch requires responses readonly scope",
+        operation: "google.forms.watch.create",
+        granted: [],
+        expected: @responses_readonly_scope
+      },
+      %{
+        label: "renew watch requires responses readonly scope",
+        operation: "google.forms.watch.renew",
+        granted: [],
+        expected: @responses_readonly_scope
+      },
+      %{
+        label: "delete watch requires responses readonly scope",
+        operation: "google.forms.watch.delete",
+        granted: [],
+        expected: @responses_readonly_scope
+      },
+      %{
+        label: "create watch does not accept body readonly scope",
+        operation: "google.forms.watch.create",
+        granted: [@readonly_scope],
+        expected: @responses_readonly_scope
       }
     ])
   end

@@ -66,6 +66,33 @@ defmodule Jido.Connect.Google.Forms.Client.Response do
 
   def handle_response_get_response(response), do: Transport.handle_error_response(response)
 
+  def handle_watch_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    Normalizer.watch(body)
+  end
+
+  def handle_watch_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Forms watch response was invalid", body)
+  end
+
+  def handle_watch_response(response), do: Transport.handle_error_response(response)
+
+  def handle_watch_delete_response({:ok, %{status: status}})
+      when status in 200..299 do
+    {:ok, %{deleted?: true}}
+  end
+
+  def handle_watch_delete_response({:ok, %{status: _status, body: body}})
+      when is_map(body) do
+    Transport.invalid_success_response(
+      "Google Forms watch delete response was invalid",
+      body
+    )
+  end
+
+  def handle_watch_delete_response(response), do: Transport.handle_error_response(response)
+
   defp normalize_items(body, key, normalizer, message) do
     case Data.get(body, key, []) do
       items when is_list(items) ->
