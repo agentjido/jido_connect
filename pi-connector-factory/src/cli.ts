@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 
 type Issue = {
   id: string;
@@ -45,10 +45,10 @@ async function main() {
       prompt(args);
       break;
     case "step":
-      step(args);
+      await step(args);
       break;
     case "loop":
-      loop(args);
+      await loop(args);
       break;
     case "help":
     case "--help":
@@ -117,7 +117,7 @@ function prompt(args: Args) {
   console.log(`wrote ${relativeToRepo(join(runDir, "prompt.md"))}`);
 }
 
-function step(args: Args) {
+async function step(args: Args) {
   ensureCleanGit("before starting Pi");
 
   const issue = selectIssue(args);
@@ -133,7 +133,7 @@ function step(args: Args) {
   console.log(`issue: ${startedIssue.id} ${startedIssue.title}`);
   console.log(`run:   ${relativeToRepo(runDir)}`);
 
-  const piOutput = runPi(promptText, runDir);
+  const piOutput = await runPi(promptText, runDir);
   writeFileSync(join(runDir, "pi.stdout.log"), piOutput.stdout);
   writeFileSync(join(runDir, "pi.stderr.log"), piOutput.stderr);
 
@@ -158,7 +158,7 @@ function step(args: Args) {
   console.log(`done: ${issue.id} -> ${shortSha}`);
 }
 
-function loop(args: Args) {
+async function loop(args: Args) {
   const limit = Number(args.options.limit || "5");
   if (!Number.isFinite(limit) || limit < 1) fail("--limit must be a positive number");
 
@@ -171,7 +171,7 @@ function loop(args: Args) {
     }
 
     console.log(`\n[${index + 1}/${limit}] ${issue.id} ${issue.title}`);
-    step({ positional: [], options: { ...args.options, issue: issue.id } });
+    await step({ positional: [], options: { ...args.options, issue: issue.id } });
   }
 }
 
@@ -264,7 +264,7 @@ function renderPrompt(issue: Issue) {
   });
 }
 
-function runPi(promptText: string, runDir: string): RunResult {
+async function runPi(promptText: string, runDir: string): Promise<RunResult> {
   if (!process.env.ZAI_API_KEY) {
     fail("ZAI_API_KEY is missing. Put it in pi-connector-factory/.env or the repo root .env.");
   }
@@ -272,48 +272,210 @@ function runPi(promptText: string, runDir: string): RunResult {
   const sessionDir = join(runDir, "sessions");
   mkdirSync(sessionDir, { recursive: true });
 
-  const result = spawnSync(
-    "pi",
-    [
-      "--provider",
-      piProvider(),
-      "--model",
-      piModel(),
-      "--thinking",
-      piThinking(),
-      "--mode",
-      "text",
-      "--session-dir",
-      sessionDir,
-      "--no-extensions",
-      "--no-skills",
-      "--no-prompt-templates",
-      "--tools",
-      "read,bash,edit,write,grep,find,ls",
-      "-p",
-      promptText
-    ],
-    {
+  console.log(`logs:  ${relativeToRepo(sessionDir)}/*.jsonl`);
+
+  const args = [
+    "--provider",
+    piProvider(),
+    "--model",
+    piModel(),
+    "--thinking",
+    piThinking(),
+    "--mode",
+    "text",
+    "--session-dir",
+    sessionDir,
+    "--no-extensions",
+    "--no-skills",
+    "--no-prompt-templates",
+    "--tools",
+    "read,bash,edit,write,grep,find,ls",
+    "-p",
+    promptText
+  ];
+
+  const stdoutChunks: Buffer[] = [];
+  const stderrChunks: Buffer[] = [];
+  const streamer = startSessionStreamer(sessionDir);
+  const timeoutMs = Number(process.env.PI_TIMEOUT_MS || "900000");
+
+  return await new Promise<RunResult>((resolvePromise, reject) => {
+    let timedOut = false;
+    const child = spawn("pi", args, {
       cwd: repoRoot,
       env: process.env,
-      encoding: "utf8",
-      maxBuffer: 512 * 1024 * 1024,
-      timeout: Number(process.env.PI_TIMEOUT_MS || "900000")
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+
+    const timeout =
+      timeoutMs > 0
+        ? setTimeout(() => {
+            timedOut = true;
+            child.kill("SIGTERM");
+          }, timeoutMs)
+        : undefined;
+
+    child.stdout.on("data", (chunk: Buffer) => {
+      stdoutChunks.push(chunk);
+      process.stdout.write(chunk);
+    });
+
+    child.stderr.on("data", (chunk: Buffer) => {
+      stderrChunks.push(chunk);
+      process.stderr.write(chunk);
+    });
+
+    child.on("error", (error) => {
+      if (timeout) clearTimeout(timeout);
+      streamer.stop();
+      reject(error);
+    });
+
+    child.on("close", (status, signal) => {
+      if (timeout) clearTimeout(timeout);
+      streamer.stop();
+
+      const stdout = Buffer.concat(stdoutChunks).toString("utf8");
+      const stderr = Buffer.concat(stderrChunks).toString("utf8");
+
+      if (timedOut) {
+        writeFileSync(join(runDir, "pi.stdout.log"), stdout);
+        writeFileSync(join(runDir, "pi.stderr.log"), stderr);
+        reject(new Error(`pi timed out after ${timeoutMs}ms`));
+        return;
+      }
+
+      if (status !== 0) {
+        writeFileSync(join(runDir, "pi.stdout.log"), stdout);
+        writeFileSync(join(runDir, "pi.stderr.log"), stderr);
+        reject(new Error(`pi exited with status ${status ?? `signal ${signal}`}`));
+        return;
+      }
+
+      resolvePromise({ stdout, stderr });
+    });
+  }).catch((error: Error) => fail(error.message));
+}
+
+type SessionStreamState = {
+  buffer: string;
+  offset: number;
+};
+
+function startSessionStreamer(sessionDir: string) {
+  const states = new Map<string, SessionStreamState>();
+  const pollMs = Number(process.env.PI_LOG_POLL_MS || "1000");
+  const timer = setInterval(flush, pollMs);
+
+  function flush() {
+    for (const path of sessionFiles(sessionDir)) {
+      streamSessionFile(path, states);
     }
-  );
-
-  if (result.error) fail(result.error.message);
-
-  if (result.status !== 0) {
-    writeFileSync(join(runDir, "pi.stdout.log"), result.stdout || "");
-    writeFileSync(join(runDir, "pi.stderr.log"), result.stderr || "");
-    fail(`pi exited with status ${result.status}`);
   }
 
-  return {
-    stdout: result.stdout || "",
-    stderr: result.stderr || ""
-  };
+  function stop() {
+    clearInterval(timer);
+    flush();
+  }
+
+  flush();
+
+  return { stop };
+}
+
+function sessionFiles(sessionDir: string) {
+  if (!existsSync(sessionDir)) return [];
+
+  return readdirSync(sessionDir)
+    .filter((file) => file.endsWith(".jsonl"))
+    .sort()
+    .map((file) => join(sessionDir, file));
+}
+
+function streamSessionFile(path: string, states: Map<string, SessionStreamState>) {
+  const state = states.get(path) || { buffer: "", offset: 0 };
+  const size = statSync(path).size;
+
+  if (size <= state.offset) {
+    states.set(path, state);
+    return;
+  }
+
+  const chunk = readFileSync(path).subarray(state.offset, size).toString("utf8");
+  state.offset = size;
+
+  const lines = `${state.buffer}${chunk}`.split(/\r?\n/);
+  state.buffer = lines.pop() || "";
+  states.set(path, state);
+
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    streamSessionLine(line);
+  }
+}
+
+function streamSessionLine(line: string) {
+  try {
+    const event = JSON.parse(line);
+    streamSessionEvent(event);
+  } catch {
+    console.log(`[pi:log] ${line}`);
+  }
+}
+
+function streamSessionEvent(event: any) {
+  if (event?.type !== "message") return;
+
+  const message = event.message;
+  const content = Array.isArray(message?.content) ? message.content : [];
+
+  if (message?.role === "assistant") {
+    for (const item of content) {
+      if (item?.type === "text") {
+        streamText("pi", item.text);
+      }
+
+      if (item?.type === "toolCall") {
+        console.log(`[pi:${item.name}] ${summarizeToolCall(item.name, item.arguments || {})}`);
+      }
+    }
+  }
+
+  if (message?.role === "toolResult") {
+    const text = content.map((item: any) => item?.text).filter(Boolean).join("\n");
+    if (text && text !== "(no output)") {
+      streamText(`pi:${message.toolName || "result"}`, text, toolResultLimit());
+    }
+  }
+}
+
+function summarizeToolCall(name: string, args: Record<string, unknown>) {
+  if (name === "bash") return String(args.command || "");
+  if (typeof args.path === "string") return args.path;
+
+  return JSON.stringify(args);
+}
+
+function streamText(label: string, text: unknown, limit = assistantTextLimit()) {
+  if (typeof text !== "string" || text.trim().length === 0) return;
+
+  const trimmed = truncate(text.trim(), limit);
+  for (const line of trimmed.split(/\r?\n/)) {
+    console.log(`[${label}] ${line}`);
+  }
+}
+
+function truncate(value: string, limit: number) {
+  if (value.length <= limit) return value;
+  return `${value.slice(0, limit)}\n... truncated ${value.length - limit} chars`;
+}
+
+function assistantTextLimit() {
+  return Number(process.env.PI_LOG_ASSISTANT_CHARS || "2000");
+}
+
+function toolResultLimit() {
+  return Number(process.env.PI_LOG_RESULT_CHARS || "2000");
 }
 
 function ensureCleanGit(reason: string) {

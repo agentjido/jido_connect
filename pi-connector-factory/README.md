@@ -31,6 +31,9 @@ Run exactly one ready Beadwork task:
 bun run step
 ```
 
+This streams Pi session events while the task runs. Raw JSONL session logs are
+also written under `runs/<timestamp>-<issue>-step/sessions/`.
+
 Run one specific task:
 
 ```sh
