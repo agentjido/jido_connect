@@ -9,6 +9,8 @@
   "blocks": [
     "jido_con-jxj"
   ],
+  "closed_at": "2026-05-15T21:48:52Z",
+  "close_reason": "All Meet child tasks are closed; package scaffold/actions/catalog docs are complete for tracked scope",
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G08\nSource: MILESTONE_2.md\nPurpose: add meeting-space and conference-record workflows, then prepare for Workspace Events-backed triggers.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-9sn",
@@ -17,8 +19,8 @@
     "milestone-2"
   ],
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G08] Google Meet Connector",
   "type": "epic",
-  "updated_at": "2026-05-14T19:12:48Z"
+  "updated_at": "2026-05-15T21:48:52Z"
 }
