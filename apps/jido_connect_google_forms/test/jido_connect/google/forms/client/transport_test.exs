@@ -22,6 +22,7 @@ defmodule Jido.Connect.Google.Forms.Client.TransportTest do
   test "builds bearer request" do
     req = Transport.forms_request("token123")
 
-    assert req.headers == [{"accept", "application/json"}, {"authorization", "Bearer token123"}]
+    assert req.headers["authorization"] == ["Bearer token123"]
+    assert req.headers["accept"] == ["application/json"]
   end
 end

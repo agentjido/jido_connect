@@ -29,7 +29,7 @@ defmodule Jido.Connect.Google.Forms.Normalizer do
   @doc "Normalizes a Google Forms form payload."
   @spec form(map()) :: {:ok, Form.t()} | {:error, term()}
   def form(payload) when is_map(payload) do
-    form_info = Data.get(payload, "formInfo", %{}) || %{}
+    form_info = Data.get(payload, "info", Data.get(payload, "formInfo", %{})) || %{}
 
     linked_sheet_id =
       case Data.get(payload, "linkedSheetId") do
