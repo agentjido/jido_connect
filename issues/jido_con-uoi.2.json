@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-uoi.3"
   ],
+  "closed_at": "2026-05-15T16:42:38Z",
+  "close_reason": "Implemented in 8a2b38c by pi-connector-factory",
   "created": "2026-05-14T14:35:50Z",
   "description": "Add normalized form, question/item, response, watch, and batch update result structs with representative fixtures.",
   "id": "jido_con-uoi.2",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-uoi",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G16-S02] Add Forms normalized structs and schemas",
   "type": "task",
-  "updated_at": "2026-05-15T16:33:39Z"
+  "updated_at": "2026-05-15T16:42:38Z"
 }
