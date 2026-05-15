@@ -10,7 +10,9 @@ defmodule Jido.Connect.Google.Slides.ScopeResolver do
   @readonly_scope "https://www.googleapis.com/auth/presentations.readonly"
   @write_scope "https://www.googleapis.com/auth/presentations"
 
-  @write_operations MapSet.new([])
+  @write_operations MapSet.new([
+                      "google.slides.presentation.create"
+                    ])
 
   def required_scopes(operation, _input, _connection) do
     operation

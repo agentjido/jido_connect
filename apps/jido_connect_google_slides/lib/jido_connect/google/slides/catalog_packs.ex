@@ -3,9 +3,11 @@ defmodule Jido.Connect.Google.Slides.CatalogPacks do
 
   alias Jido.Connect.Catalog.Pack
 
-  @readonly_tools []
+  @readonly_tools [
+    "google.slides.presentation.get"
+  ]
 
-  @editor_tools @readonly_tools
+  @editor_tools @readonly_tools ++ ["google.slides.presentation.create"]
 
   @doc "Returns all built-in Google Slides catalog packs."
   def all, do: [readonly(), editor()]
