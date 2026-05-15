@@ -5,11 +5,13 @@
   "created": "2026-05-15T21:50:14Z",
   "description": "Implement create/update/delete records and batch variants with risk metadata, typed field payload handling, and tests.",
   "id": "jido_con-4ss.4",
-  "labels": [],
+  "labels": [
+    "airtable"
+  ],
   "parent": "jido_con-4ss",
   "priority": 2,
   "status": "open",
   "title": "[W4-AIR-S04] Implement Airtable record write actions",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:14Z"
+  "updated_at": "2026-05-15T21:50:17Z"
 }
