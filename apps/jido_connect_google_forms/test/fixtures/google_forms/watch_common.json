@@ -1,0 +1,8 @@
+{
+  "id": "watch_abc123",
+  "targetId": "1ABCdefGHIjklMNO_pqrSTU_vwx_YZ",
+  "state": "ACTIVE",
+  "eventType": "RESPONSE",
+  "createTime": "2026-05-14T12:00:00.000Z",
+  "expireTime": "2026-05-21T12:00:00.000Z"
+}

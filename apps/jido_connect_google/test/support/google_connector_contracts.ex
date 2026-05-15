@@ -10,6 +10,7 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
     google_calendar: "../../../fixtures/google_calendar",
     google_docs: "../../../fixtures/google_docs",
     google_drive: "../../../fixtures/google_drive",
+    google_forms: "../../../fixtures/google_forms",
     google_sheets: "../../../fixtures/google_sheets",
     google_slides: "../../../fixtures/google_slides"
   }
