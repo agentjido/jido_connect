@@ -6,6 +6,7 @@
   "description": "Support shared-secret HMAC, static bearer/token, timestamp tolerance, replay id extraction, unsigned dev mode, and redacted error details with tests.",
   "id": "jido_con-cnk.2",
   "labels": [
+    "connector",
     "generic",
     "webhook"
   ],
@@ -14,5 +15,5 @@
   "status": "open",
   "title": "[W4-WEB-S02] Implement webhook verification primitives",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:29Z"
+  "updated_at": "2026-05-15T21:50:30Z"
 }
