@@ -6,6 +6,7 @@
   "description": "Implement capture event, batch capture, evaluate feature flag, and list/get feature flags actions with tests and policy metadata.",
   "id": "jido_con-z95.3",
   "labels": [
+    "analytics",
     "posthog"
   ],
   "parent": "jido_con-z95",
