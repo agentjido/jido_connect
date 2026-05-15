@@ -2,6 +2,7 @@ defmodule Jido.Connect.Google.Forms.StructTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect.Google.Forms.{
+    BatchUpdateRequest,
     BatchUpdateResult,
     Form,
     QuestionItem,
@@ -180,5 +181,68 @@ defmodule Jido.Connect.Google.Forms.StructTest do
 
     assert length(result.replies) == 1
     assert result.write_control == %{"requiredRevisionId" => "rev002"}
+  end
+
+  describe "BatchUpdateRequest" do
+    test "validates supported operations" do
+      ops = BatchUpdateRequest.supported_operations()
+
+      assert MapSet.member?(ops, "create_item")
+      assert MapSet.member?(ops, "update_item")
+      assert MapSet.member?(ops, "delete_item")
+      assert MapSet.member?(ops, "update_form_info")
+      assert MapSet.member?(ops, "update_settings")
+      assert MapSet.member?(ops, "move_item")
+      assert MapSet.member?(ops, "update_form_title")
+      assert MapSet.member?(ops, "update_form_description")
+    end
+
+    test "validates requests with single supported operation" do
+      requests = [
+        %{update_form_title: %{title: "New Title"}},
+        %{create_item: %{item: %{}}},
+        %{update_item: %{}}
+      ]
+
+      assert :ok = BatchUpdateRequest.validate_requests(requests)
+    end
+
+    test "rejects empty requests" do
+      assert {:error, :empty_requests} = BatchUpdateRequest.validate_requests([])
+    end
+
+    test "rejects non-list requests" do
+      assert {:error, :not_a_list} = BatchUpdateRequest.validate_requests("not a list")
+    end
+
+    test "rejects requests with multiple operation keys" do
+      assert {:error, {:invalid_request, 0, "must contain exactly one operation"}} =
+               BatchUpdateRequest.validate_requests([%{create_item: %{}, update_item: %{}}])
+    end
+
+    test "rejects unsupported operations" do
+      assert {:error, {:unsupported_operation, 0, :dangerous_op}} =
+               BatchUpdateRequest.validate_requests([%{dangerous_op: %{}}])
+    end
+
+    test "rejects non-map entries" do
+      assert {:error, {:invalid_request, 0, "must be a map"}} =
+               BatchUpdateRequest.validate_requests(["not a map"])
+    end
+
+    test "rejects too many requests" do
+      max = BatchUpdateRequest.max_requests()
+      requests = Enum.map(1..(max + 1), fn _ -> %{create_item: %{}} end)
+      count = max + 1
+
+      assert {:error, {:too_many_requests, ^count, ^max}} =
+               BatchUpdateRequest.validate_requests(requests)
+    end
+
+    test "struct validates with Zoi" do
+      req = BatchUpdateRequest.new!(%{form_id: "1ABC", requests: [%{create_item: %{}}]})
+      assert req.form_id == "1ABC"
+      assert length(req.requests) == 1
+    end
   end
 end

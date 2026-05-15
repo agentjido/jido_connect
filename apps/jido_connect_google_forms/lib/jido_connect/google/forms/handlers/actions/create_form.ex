@@ -1,4 +1,4 @@
-defmodule Jido.Connect.Google.Forms.Handlers.Actions.GetForm do
+defmodule Jido.Connect.Google.Forms.Handlers.Actions.CreateForm do
   @moduledoc false
 
   alias Jido.Connect.Google.Forms.Client
@@ -6,7 +6,7 @@ defmodule Jido.Connect.Google.Forms.Handlers.Actions.GetForm do
   def run(input, %{credentials: credentials}) do
     with {:ok, client} <- fetch_client(credentials),
          {:ok, form} <-
-           client.get_form(input, Map.get(credentials, :access_token)) do
+           client.create_form(input, Map.get(credentials, :access_token)) do
       {:ok, %{form: public_map(form)}}
     end
   end
