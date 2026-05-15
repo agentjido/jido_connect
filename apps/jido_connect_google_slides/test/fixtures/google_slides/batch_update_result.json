@@ -1,0 +1,18 @@
+{
+  "presentationId": "pres_batch789",
+  "replies": [
+    {
+      "createShape": {
+        "objectId": "new_shape_001"
+      }
+    },
+    {
+      "insertText": {
+        "objectId": "new_shape_001"
+      }
+    }
+  ],
+  "writeControl": {
+    "requiredRevisionId": "rev003"
+  }
+}
