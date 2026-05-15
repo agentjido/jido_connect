@@ -6,7 +6,8 @@
   "description": "Update catalog packs, README usage, scope matrix, data classification, live-test guidance, and package quality gates for Cal.com.",
   "id": "jido_con-mq9.4",
   "labels": [
-    "calcom"
+    "calcom",
+    "connector"
   ],
   "parent": "jido_con-mq9",
   "priority": 2,
