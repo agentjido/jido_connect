@@ -6,7 +6,8 @@
   "description": "Implement create/update issue, add comment, assign/change status/label actions with confirmation metadata and tests.",
   "id": "jido_con-0x5.4",
   "labels": [
-    "linear"
+    "linear",
+    "work-management"
   ],
   "parent": "jido_con-0x5",
   "priority": 2,
