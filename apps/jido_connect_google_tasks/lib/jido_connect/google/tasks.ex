@@ -6,7 +6,10 @@ defmodule Jido.Connect.Google.Tasks do
   Tasks surface is implemented.
   """
 
-  use Jido.Connect
+  use Jido.Connect,
+    fragments: [
+      Jido.Connect.Google.Tasks.Actions.TaskLists
+    ]
 
   integration do
     id(:google_tasks)
