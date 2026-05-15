@@ -5,11 +5,13 @@
   "created": "2026-05-15T22:01:11Z",
   "description": "Add umbrella app, provider module, OAuth/API token auth profiles, Atlassian cloud transport boundary, README/AGENTS, and generated plugin tests.",
   "id": "jido_con-ul0.1",
-  "labels": [],
+  "labels": [
+    "jira"
+  ],
   "parent": "jido_con-ul0",
   "priority": 2,
   "status": "open",
   "title": "[W5-JIRA-S01] Scaffold jido_connect_jira",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:11Z"
+  "updated_at": "2026-05-15T22:01:13Z"
 }
