@@ -6,7 +6,10 @@ defmodule Jido.Connect.Google.Docs do
   Docs surface is implemented.
   """
 
-  use Jido.Connect
+  use Jido.Connect,
+    fragments: [
+      Jido.Connect.Google.Docs.Actions.Documents
+    ]
 
   integration do
     id(:google_docs)
