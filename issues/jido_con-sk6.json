@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-15T21:50:20Z",
+  "description": "Build jido_connect_http as a generic long-tail API connector with safe request construction, auth profiles, response shaping, policy gates, catalog packs, and docs.",
+  "id": "jido_con-sk6",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "[W4] Generic HTTP Connector",
+  "type": "epic",
+  "updated_at": "2026-05-15T21:50:20Z"
+}
