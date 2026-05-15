@@ -9,7 +9,8 @@ defmodule Jido.Connect.Google.SearchConsole do
   use Jido.Connect,
     fragments: [
       Jido.Connect.Google.SearchConsole.Actions.Sites,
-      Jido.Connect.Google.SearchConsole.Actions.SearchAnalytics
+      Jido.Connect.Google.SearchConsole.Actions.SearchAnalytics,
+      Jido.Connect.Google.SearchConsole.Actions.Sitemaps
     ]
 
   integration do
