@@ -6,11 +6,12 @@
   "description": "Build jido_connect_posthog for product analytics and feature flag workflows. Cover project/personal API auth, events, feature flag evaluation, HogQL/query actions, insights, catalog packs, and docs.",
   "id": "jido_con-z95",
   "labels": [
+    "analytics",
     "posthog"
   ],
   "priority": 2,
   "status": "open",
   "title": "[W6] PostHog Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T22:01:28Z"
+  "updated_at": "2026-05-15T22:01:29Z"
 }
