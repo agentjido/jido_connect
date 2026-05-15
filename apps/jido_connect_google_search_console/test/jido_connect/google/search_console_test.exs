@@ -13,13 +13,15 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
     Jido.Connect.Google.SearchConsole.Actions.AddSite,
     Jido.Connect.Google.SearchConsole.Actions.QuerySearchAnalytics,
     Jido.Connect.Google.SearchConsole.Actions.ListSitemaps,
-    Jido.Connect.Google.SearchConsole.Actions.SubmitSitemap
+    Jido.Connect.Google.SearchConsole.Actions.SubmitSitemap,
+    Jido.Connect.Google.SearchConsole.Actions.InspectUrl
   ]
 
   @dsl_fragments [
     Jido.Connect.Google.SearchConsole.Actions.Sites,
     Jido.Connect.Google.SearchConsole.Actions.SearchAnalytics,
-    Jido.Connect.Google.SearchConsole.Actions.Sitemaps
+    Jido.Connect.Google.SearchConsole.Actions.Sitemaps,
+    Jido.Connect.Google.SearchConsole.Actions.URLInspection
   ]
 
   defmodule FakeSearchConsoleClient do
@@ -80,6 +82,20 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
         ) do
       {:ok, %{path: "https://example.com/sitemap.xml", submitted: true}}
     end
+
+    def inspect_url(
+          %{site_url: "https://example.com/", inspection_url: "https://example.com/page"},
+          "token"
+        ) do
+      {:ok,
+       SearchConsole.URLInspection.new!(%{
+         inspection_result_link:
+           "https://search.google.com/search-console/inspect?id=xyz",
+         index_status: %{"verdict" => "PASS", "coverageState" => "Submitted and indexed"},
+         mobile_usability_result: %{"verdict" => "PASS"},
+         rich_results: []
+       })}
+    end
   end
 
   test "declares Google Search Console provider metadata" do
@@ -97,7 +113,8 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
              "google.search_console.site.add",
              "google.search_console.search_analytics.query",
              "google.search_console.sitemap.list",
-             "google.search_console.sitemap.submit"
+             "google.search_console.sitemap.submit",
+             "google.search_console.url_inspection.inspect"
            ]
 
     assert spec.triggers == []
@@ -209,6 +226,32 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
                context: context,
                credential_lease: lease
              )
+  end
+
+  test "invokes inspect URL through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: [@readonly_scope])
+
+    assert {:ok, %{inspection: inspection}} =
+             Connect.invoke(
+               SearchConsole.integration(),
+               "google.search_console.url_inspection.inspect",
+               %{
+                 site_url: "https://example.com/",
+                 inspection_url: "https://example.com/page"
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert inspection.inspection_result_link ==
+             "https://search.google.com/search-console/inspect?id=xyz"
+
+    assert inspection.index_status == %{
+             "verdict" => "PASS",
+             "coverageState" => "Submitted and indexed"
+           }
+
+    assert inspection.mobile_usability_result == %{"verdict" => "PASS"}
   end
 
   defp context_and_lease(opts) do

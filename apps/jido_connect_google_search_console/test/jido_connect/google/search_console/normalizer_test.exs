@@ -2,7 +2,7 @@ defmodule Jido.Connect.Google.SearchConsole.NormalizerTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect.Google.SearchConsole.Normalizer
-  alias Jido.Connect.Google.SearchConsole.{Row, SearchReport, Sitemap, Site}
+  alias Jido.Connect.Google.SearchConsole.{Row, SearchReport, Sitemap, Site, URLInspection}
 
   test "normalizes a site payload with permission level" do
     payload = %{
@@ -143,6 +143,80 @@ defmodule Jido.Connect.Google.SearchConsole.NormalizerTest do
       assert {:ok, %Sitemap{} = sitemap} = Normalizer.sitemap(payload)
       assert sitemap.error_count == 0
       assert sitemap.warnings_count == 0
+    end
+  end
+
+  describe "url_inspection normalization" do
+    test "normalizes a URL inspection payload with full results" do
+      payload = %{
+        "inspectionResult" => %{
+          "inspectionResultLink" =>
+            "https://search.google.com/search-console/inspect?id=xyz",
+          "indexStatusResult" => %{
+            "verdict" => "PASS",
+            "coverageState" => "Submitted and indexed",
+            "robotsTxtState" => "ALLOWED",
+            "pageFetchState" => "SUCCESSFUL"
+          },
+          "ampResult" => %{"verdict" => "PASS"},
+          "mobileUsabilityResult" => %{"verdict" => "PASS"},
+          "richResultsResult" => %{
+            "detectedItems" => [
+              %{"richResultType" => "Logos"}
+            ]
+          }
+        }
+      }
+
+      assert {:ok, %URLInspection{} = inspection} = Normalizer.url_inspection(payload)
+
+      assert inspection.inspection_result_link ==
+               "https://search.google.com/search-console/inspect?id=xyz"
+
+      assert inspection.index_status == %{
+               "verdict" => "PASS",
+               "coverageState" => "Submitted and indexed",
+               "robotsTxtState" => "ALLOWED",
+               "pageFetchState" => "SUCCESSFUL"
+             }
+
+      assert inspection.amp_result == %{"verdict" => "PASS"}
+      assert inspection.mobile_usability_result == %{"verdict" => "PASS"}
+      assert length(inspection.rich_results) == 1
+    end
+
+    test "normalizes a URL inspection payload with minimal fields" do
+      payload = %{"inspectionResult" => %{}}
+
+      assert {:ok, %URLInspection{} = inspection} = Normalizer.url_inspection(payload)
+      assert inspection.inspection_result_link == nil
+      assert inspection.index_status == %{}
+      assert inspection.rich_results == []
+    end
+
+    test "normalizes a URL inspection with missing inspectionResult" do
+      assert {:ok, %URLInspection{} = inspection} = Normalizer.url_inspection(%{})
+      assert inspection.inspection_result_link == nil
+      assert inspection.index_status == %{}
+      assert inspection.rich_results == []
+    end
+
+    test "returns error for invalid URL inspection payload" do
+      assert {:error, :invalid_url_inspection_payload} =
+               Normalizer.url_inspection("not a map")
+
+      assert {:error, :invalid_url_inspection_payload} = Normalizer.url_inspection(nil)
+    end
+
+    test "handles non-list richResults detectedItems gracefully" do
+      payload = %{
+        "inspectionResult" => %{
+          "richResultsResult" => %{"detectedItems" => "not a list"}
+        }
+      }
+
+      assert {:ok, %URLInspection{} = inspection} = Normalizer.url_inspection(payload)
+      assert inspection.rich_results == []
     end
   end
 end
