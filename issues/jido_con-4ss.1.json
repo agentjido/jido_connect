@@ -5,11 +5,13 @@
   "created": "2026-05-15T21:50:13Z",
   "description": "Add umbrella app, provider module, OAuth/PAT auth profiles, transport boundary, package docs, and generated plugin surface tests.",
   "id": "jido_con-4ss.1",
-  "labels": [],
+  "labels": [
+    "airtable"
+  ],
   "parent": "jido_con-4ss",
   "priority": 2,
   "status": "open",
   "title": "[W4-AIR-S01] Scaffold jido_connect_airtable",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:13Z"
+  "updated_at": "2026-05-15T21:50:14Z"
 }
