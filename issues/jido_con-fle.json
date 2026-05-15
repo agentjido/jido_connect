@@ -7,6 +7,8 @@
   "blocks": [
     "jido_con-jxj"
   ],
+  "closed_at": "2026-05-15T21:48:53Z",
+  "close_reason": "All Docs child tasks are closed; live read smoke test passed",
   "created": "2026-05-14T14:35:48Z",
   "description": "Implement jido_connect_google_docs as a provider-specific Google Docs connector package using the shared Google foundation. Cover document reads, creates, batch updates, normalized structs, catalog packs, docs, and Drive-backed trigger/export strategy where appropriate.",
   "id": "jido_con-fle",
@@ -15,8 +17,8 @@
     "milestone-2"
   ],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G14] Google Docs Connector",
   "type": "epic",
-  "updated_at": "2026-05-14T15:03:45Z"
+  "updated_at": "2026-05-15T21:48:53Z"
 }
