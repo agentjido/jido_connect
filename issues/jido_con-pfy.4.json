@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-pfy.3"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:41Z",
   "description": "Implement cancel event/invitee where supported plus webhook create/list/delete actions, risk metadata, tests, and normalized outputs.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W4-CALENDLY-S04] Implement Calendly cancellation and webhook lifecycle",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:46Z"
+  "updated_at": "2026-05-15T22:01:48Z"
 }
