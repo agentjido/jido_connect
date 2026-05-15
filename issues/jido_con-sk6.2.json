@@ -6,6 +6,7 @@
   "description": "Implement request/get_json/post_json actions with method allowlist, URL/header/body schemas, timeout/retry controls, redaction, and tests.",
   "id": "jido_con-sk6.2",
   "labels": [
+    "connector",
     "generic",
     "http"
   ],
