@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-0x5.3"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:21Z",
   "description": "Implement create/update issue, add comment, assign/change status/label actions with confirmation metadata and tests.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W5-LIN-S04] Implement Linear mutation actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:26Z"
+  "updated_at": "2026-05-15T22:01:28Z"
 }
