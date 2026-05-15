@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-54m.6"
   ],
+  "closed_at": "2026-05-15T20:48:29Z",
+  "close_reason": "Implemented in a0c6db5 by pi-connector-factory",
   "created": "2026-05-14T14:35:52Z",
   "description": "Determine whether Google Tasks metadata supports reliable changed/upcoming-task polling; implement a poll trigger only if checkpoint semantics are sound.",
   "id": "jido_con-54m.5",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-54m",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G17-S05] Spike Tasks polling trigger",
   "type": "task",
-  "updated_at": "2026-05-15T20:34:29Z"
+  "updated_at": "2026-05-15T20:48:29Z"
 }
