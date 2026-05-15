@@ -7,6 +7,7 @@
   "id": "jido_con-pfy.5",
   "labels": [
     "calendly",
+    "connector",
     "scheduling"
   ],
   "parent": "jido_con-pfy",
@@ -14,5 +15,5 @@
   "status": "open",
   "title": "[W4-CALENDLY-S05] Add Calendly triggers, catalog packs, and docs",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:46Z"
+  "updated_at": "2026-05-15T22:01:47Z"
 }
