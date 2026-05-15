@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-54m.2"
   ],
+  "closed_at": "2026-05-15T20:02:36Z",
+  "close_reason": "Implemented in e74501f by pi-connector-factory",
   "created": "2026-05-14T14:35:51Z",
   "description": "Add the umbrella app, mix config, package README, provider module, catalog-pack shell, AGENTS guidance, and baseline compile/test wiring for Google Tasks.",
   "id": "jido_con-54m.1",
@@ -13,8 +15,8 @@
   ],
   "parent": "jido_con-54m",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G17-S01] Scaffold jido_connect_google_tasks",
   "type": "task",
-  "updated_at": "2026-05-15T19:54:03Z"
+  "updated_at": "2026-05-15T20:02:36Z"
 }
