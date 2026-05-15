@@ -71,6 +71,10 @@ defmodule Jido.Connect.Google.Scopes do
       "https://www.googleapis.com/auth/forms.body",
       "https://www.googleapis.com/auth/forms.responses.readonly",
       "https://www.googleapis.com/auth/forms.responses"
+    ],
+    tasks: [
+      "https://www.googleapis.com/auth/tasks.readonly",
+      "https://www.googleapis.com/auth/tasks"
     ]
   }
 
