@@ -6,7 +6,10 @@ defmodule Jido.Connect.Google.SearchConsole do
   Search Console surface is implemented.
   """
 
-  use Jido.Connect
+  use Jido.Connect,
+    fragments: [
+      Jido.Connect.Google.SearchConsole.Actions.Sites
+    ]
 
   integration do
     id(:google_search_console)
