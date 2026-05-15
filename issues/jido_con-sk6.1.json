@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-sk6.2"
+  ],
   "created": "2026-05-15T21:50:21Z",
   "description": "Add package shell, provider module, auth profiles for none/api-key/bearer/basic/custom headers, transport boundary, generated plugin tests, and docs skeleton.",
   "id": "jido_con-sk6.1",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W4-HTTP-S01] Scaffold jido_connect_http",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:22Z"
+  "updated_at": "2026-05-15T21:50:25Z"
 }
