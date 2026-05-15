@@ -6,7 +6,8 @@
   "description": "Add issue, project, team, user, state, label, comment, and pagination structs with representative Linear GraphQL fixture coverage.",
   "id": "jido_con-0x5.2",
   "labels": [
-    "linear"
+    "linear",
+    "work-management"
   ],
   "parent": "jido_con-0x5",
   "priority": 2,
