@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-z95.2"
+  ],
   "blocks": [],
   "created": "2026-05-15T22:01:30Z",
   "description": "Implement capture event, batch capture, evaluate feature flag, and list/get feature flags actions with tests and policy metadata.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[W6-PH-S03] Implement PostHog event and feature flag actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:34Z"
+  "updated_at": "2026-05-15T22:01:38Z"
 }

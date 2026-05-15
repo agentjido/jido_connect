@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-z95.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-z95.3"
+  ],
   "created": "2026-05-15T22:01:30Z",
   "description": "Add event, person, feature flag, flag evaluation, insight, query result, and pagination structs with representative PostHog fixture coverage.",
   "id": "jido_con-z95.2",
@@ -18,5 +20,5 @@
   "status": "open",
   "title": "[W6-PH-S02] Add PostHog normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:37Z"
+  "updated_at": "2026-05-15T22:01:38Z"
 }
