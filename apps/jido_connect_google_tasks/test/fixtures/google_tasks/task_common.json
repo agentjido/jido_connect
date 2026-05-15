@@ -1,0 +1,23 @@
+{
+  "id": "dGFrazEyMzQ1Njc4OQ",
+  "etag": "\"LTE3ODM0NzY3NjY0MA\"",
+  "title": "Buy groceries",
+  "updated": "2026-05-12T09:30:00.000Z",
+  "selfLink": "https://www.googleapis.com/tasks/v1/lists/MDAxNjUwMjY0MzQ1NjM0NzY3Mjo3Njc0MzI2NDpx/tasks/dGFrazEyMzQ1Njc4OQ",
+  "parent": "",
+  "position": "00000000000000000000",
+  "notes": "Milk, eggs, bread, and coffee.",
+  "status": "needsAction",
+  "due": "2026-05-15T00:00:00.000Z",
+  "completed": "",
+  "deleted": false,
+  "hidden": false,
+  "links": [
+    {
+      "type": "text/html",
+      "description": "Shopping list",
+      "link": "https://example.com/shopping-list"
+    }
+  ],
+  "webViewLink": "https://tasks.google.com/task/dGFrazEyMzQ1Njc4OQ"
+}
