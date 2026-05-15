@@ -6,7 +6,8 @@
   "description": "Add reader/editor catalog packs, availability tests, README usage, live-test guidance, and a changed-record polling/webhook design note.",
   "id": "jido_con-4ss.5",
   "labels": [
-    "airtable"
+    "airtable",
+    "database"
   ],
   "parent": "jido_con-4ss",
   "priority": 2,
