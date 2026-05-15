@@ -6,6 +6,7 @@
   "description": "Add analytics-reader/event-writer catalog packs, scope/policy matrix, availability tests, README usage, and live-test guidance.",
   "id": "jido_con-z95.5",
   "labels": [
+    "analytics",
     "posthog"
   ],
   "parent": "jido_con-z95",
@@ -13,5 +14,5 @@
   "status": "open",
   "title": "[W6-PH-S05] Add PostHog catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:35Z"
+  "updated_at": "2026-05-15T22:01:36Z"
 }
