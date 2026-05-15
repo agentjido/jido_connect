@@ -5,11 +5,13 @@
   "created": "2026-05-15T22:01:12Z",
   "description": "Add webhook verification/normalization for issue created/updated/comment events, catalog packs, availability tests, README usage, and live-test guidance.",
   "id": "jido_con-ul0.5",
-  "labels": [],
+  "labels": [
+    "jira"
+  ],
   "parent": "jido_con-ul0",
   "priority": 2,
   "status": "open",
   "title": "[W5-JIRA-S05] Add Jira webhook trigger and catalog docs",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:12Z"
+  "updated_at": "2026-05-15T22:01:17Z"
 }
