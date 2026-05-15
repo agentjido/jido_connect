@@ -5,11 +5,13 @@
   "created": "2026-05-15T21:50:05Z",
   "description": "Add normalized contact, company, deal, note/engagement, owner, pipeline, and pagination structs plus representative CRM v3 fixture coverage.",
   "id": "jido_con-ldy.2",
-  "labels": [],
+  "labels": [
+    "hubspot"
+  ],
   "parent": "jido_con-ldy",
   "priority": 2,
   "status": "open",
   "title": "[W4-HUB-S02] Add HubSpot normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:05Z"
+  "updated_at": "2026-05-15T21:50:07Z"
 }
