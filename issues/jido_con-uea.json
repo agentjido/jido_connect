@@ -5,7 +5,9 @@
   "created": "2026-05-15T22:01:49Z",
   "description": "Build jido_connect_salesforce for enterprise CRM workflows. Cover OAuth connected app auth, SOQL/query, record read/write, leads/tasks, schema metadata, catalog packs, and docs.",
   "id": "jido_con-uea",
-  "labels": [],
+  "labels": [
+    "salesforce"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[W4] Salesforce Connector",
