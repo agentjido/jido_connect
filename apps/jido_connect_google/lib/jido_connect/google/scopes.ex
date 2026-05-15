@@ -65,6 +65,12 @@ defmodule Jido.Connect.Google.Scopes do
     slides: [
       "https://www.googleapis.com/auth/presentations.readonly",
       "https://www.googleapis.com/auth/presentations"
+    ],
+    forms: [
+      "https://www.googleapis.com/auth/forms.body.readonly",
+      "https://www.googleapis.com/auth/forms.body",
+      "https://www.googleapis.com/auth/forms.responses.readonly",
+      "https://www.googleapis.com/auth/forms.responses"
     ]
   }
 
