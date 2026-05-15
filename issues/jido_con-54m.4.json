@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-54m.3"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-54m",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G17-S04] Implement task actions",
   "type": "task",
-  "updated_at": "2026-05-14T14:36:05Z"
+  "updated_at": "2026-05-15T20:24:59Z"
 }
