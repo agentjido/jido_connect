@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-15T21:50:14Z",
+  "description": "Implement list bases, list tables/schema, list records, get record, filtering/sorting params as provider-specific contracts, pagination tests, and normalized output.",
+  "id": "jido_con-4ss.3",
+  "labels": [],
+  "parent": "jido_con-4ss",
+  "priority": 2,
+  "status": "open",
+  "title": "[W4-AIR-S03] Implement Airtable metadata and record read actions",
+  "type": "task",
+  "updated_at": "2026-05-15T21:50:14Z"
+}
