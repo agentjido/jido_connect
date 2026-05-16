@@ -1,0 +1,280 @@
+defmodule Jido.Connect.JiraTest do
+  use ExUnit.Case, async: true
+
+  alias Jido.Connect
+  alias Jido.Connect.Jira
+
+  @jira_actions_fragment Jido.Connect.Jira.Actions.Issues
+
+  @jira_action_modules [
+    Jido.Connect.Jira.Actions.GetIssue,
+    Jido.Connect.Jira.Actions.ListIssues,
+    Jido.Connect.Jira.Actions.CreateIssue
+  ]
+
+  @jira_sensor_modules []
+
+  @jira_dsl_fragments [
+    @jira_actions_fragment
+  ]
+
+  test "declares Jira provider metadata" do
+    spec = Jira.integration()
+
+    assert spec.id == :jira
+    assert spec.package == :jido_connect_jira
+    assert spec.name == "Jira"
+    assert spec.category == :project_management
+    assert spec.status == :experimental
+    assert spec.tags == [:project_management, :issues, :work_management]
+
+    assert Enum.map(spec.actions, & &1.id) == [
+             "jira.issue.get",
+             "jira.issue.search",
+             "jira.issue.create"
+           ]
+
+    assert Enum.map(spec.triggers, & &1.id) == []
+
+    assert [
+             %{id: :api_token, kind: :api_key} = api_token_profile,
+             %{id: :oauth2_user, kind: :oauth2} = oauth_profile
+           ] =
+             spec.auth_profiles
+
+    assert api_token_profile.default? == true
+    assert "read:jira-work" in api_token_profile.default_scopes
+    assert "write:jira-work" in api_token_profile.scopes
+
+    assert oauth_profile.default? == false
+    assert oauth_profile.pkce? == true
+    assert oauth_profile.refresh? == true
+    assert "read:jira-work" in oauth_profile.default_scopes
+    assert "write:jira-work" in oauth_profile.optional_scopes
+  end
+
+  test "declares project_access policy" do
+    spec = Jira.integration()
+    assert [%{id: :project_access, decision: :allow_operation}] = spec.policies
+  end
+
+  test "catalog entry exposes auth and runtime capabilities" do
+    entry = Connect.Catalog.entry(Jira)
+    features = entry.capabilities |> Enum.map(& &1.feature) |> MapSet.new()
+
+    assert entry.package == :jido_connect_jira
+    assert entry.tags == [:project_management, :issues, :work_management]
+    assert [%{id: :project_access}] = entry.policies
+    assert MapSet.subset?(MapSet.new([:api_key, :oauth2]), features)
+    assert MapSet.member?(features, :generated_jido_actions)
+    assert MapSet.member?(features, :webhook_verification)
+  end
+
+  test "action specs resolve with correct metadata" do
+    spec = Jira.integration()
+
+    assert {:ok,
+            %{
+              id: "jira.issue.get",
+              resource: :issue,
+              verb: :get,
+              mutation?: false,
+              auth_profiles: [:api_token, :oauth2_user],
+              scope_resolver: Jido.Connect.Jira.ScopeResolver
+            }} =
+             Connect.action(spec, "jira.issue.get")
+
+    assert {:ok,
+            %{
+              id: "jira.issue.search",
+              resource: :issue,
+              verb: :search,
+              mutation?: false,
+              auth_profiles: [:api_token, :oauth2_user],
+              scope_resolver: Jido.Connect.Jira.ScopeResolver
+            }} =
+             Connect.action(spec, "jira.issue.search")
+
+    assert {:ok,
+            %{
+              id: "jira.issue.create",
+              resource: :issue,
+              verb: :create,
+              mutation?: true,
+              confirmation: :required_for_ai,
+              auth_profiles: [:api_token, :oauth2_user],
+              scope_resolver: Jido.Connect.Jira.ScopeResolver
+            }} =
+             Connect.action(spec, "jira.issue.create")
+  end
+
+  test "compiles generated Jido plugin surface" do
+    assert Application.get_env(:jido_connect_jira, :jido_connect_providers) == [Jira]
+
+    assert Jira.jido_action_modules() == @jira_action_modules
+    assert Jira.jido_sensor_modules() == @jira_sensor_modules
+    assert Jira.jido_plugin_module() == Jido.Connect.Jira.Plugin
+
+    assert %Connect.Catalog.Manifest{
+             id: :jira,
+             package: :jido_connect_jira,
+             generated_modules: %{
+               actions: @jira_action_modules,
+               sensors: @jira_sensor_modules,
+               plugin: Jido.Connect.Jira.Plugin
+             }
+           } = Jira.jido_connect_manifest()
+
+    assert %Jido.Plugin.Spec{
+             name: "jira",
+             module: Jido.Connect.Jira.Plugin,
+             actions: @jira_action_modules
+           } = Jido.Connect.Jira.Plugin.plugin_spec()
+  end
+
+  test "loads Jira Spark DSL fragments" do
+    for fragment <- @jira_dsl_fragments do
+      assert {:module, ^fragment} = Code.ensure_loaded(fragment)
+      assert fragment.extensions() == [Jido.Connect.Dsl.Extension]
+      assert fragment.opts() == [of: Jido.Connect]
+      assert %{extensions: [Jido.Connect.Dsl.Extension]} = fragment.persisted()
+      assert is_map(fragment.spark_dsl_config())
+
+      assert [{_section, Jido.Connect.Dsl.Extension, Jido.Connect.Dsl.Extension}] =
+               fragment.validate_sections()
+    end
+  end
+
+  test "generated action modules load and export run/2" do
+    for module <- @jira_action_modules do
+      assert {:module, ^module} = Code.ensure_loaded(module)
+      assert function_exported?(module, :run, 2)
+    end
+
+    assert {:module, Jido.Connect.Jira.Plugin} = Code.ensure_loaded(Jido.Connect.Jira.Plugin)
+    assert function_exported?(Jido.Connect.Jira.Plugin, :plugin_spec, 1)
+  end
+
+  test "generated action metadata tracks the DSL action" do
+    projection = Jido.Connect.Jira.Actions.GetIssue.jido_connect_projection()
+
+    assert projection.action_id == "jira.issue.get"
+    assert projection.label == "Get issue"
+    assert Enum.map(projection.input, & &1.name) == [:issue_key]
+    assert Enum.map(projection.output, & &1.name) == [:key, :summary, :status, :project]
+    assert projection.risk == :read
+    assert projection.resource == :issue
+    assert projection.verb == :get
+    assert projection.policies == [:project_access]
+    assert projection.auth_profiles == [:api_token, :oauth2_user]
+    assert projection.scope_resolver == Jido.Connect.Jira.ScopeResolver
+
+    assert Jido.Connect.Jira.Actions.GetIssue.name() == "jira_issue_get"
+  end
+
+  describe "plugin tool availability" do
+    test "reports connection_required for all tools with no connection" do
+      spec = Jira.integration()
+      plugin_module = Jira.jido_plugin_module()
+      tool_ids = Enum.map(spec.actions ++ spec.triggers, & &1.id)
+
+      availability =
+        plugin_module.tool_availability()
+        |> Map.new(&{&1.tool, &1})
+
+      assert MapSet.new(Map.keys(availability)) == MapSet.new(tool_ids)
+
+      for {_tool, avail} <- availability do
+        assert avail.state == :connection_required
+      end
+    end
+
+    test "reports available when connected with full scopes" do
+      spec = Jira.integration()
+      plugin_module = Jira.jido_plugin_module()
+
+      connection =
+        Connect.Connection.new!(%{
+          id: "jira_conn",
+          provider: :jira,
+          profile: :api_token,
+          tenant_id: "tenant_1",
+          owner_type: :app_user,
+          owner_id: "user_1",
+          status: :connected,
+          scopes: all_jira_scopes(spec)
+        })
+
+      available =
+        plugin_module.tool_availability(%{connection: connection})
+        |> Map.new(&{&1.tool, &1})
+
+      tool_ids = Enum.map(spec.actions ++ spec.triggers, & &1.id)
+      assert MapSet.new(Map.keys(available)) == MapSet.new(tool_ids)
+
+      for {_tool, avail} <- available do
+        assert avail.state == :available
+        assert avail.connection_id == connection.id
+        assert avail.missing_scopes == []
+      end
+    end
+
+    test "reports missing_scopes when connected without write scopes" do
+      spec = Jira.integration()
+      plugin_module = Jira.jido_plugin_module()
+
+      read_scopes = [
+        "read:jira-work",
+        "read:jira-users",
+        "read:jira-configuration"
+      ]
+
+      connection =
+        Connect.Connection.new!(%{
+          id: "jira_readonly_conn",
+          provider: :jira,
+          profile: :api_token,
+          tenant_id: "tenant_1",
+          owner_type: :app_user,
+          owner_id: "user_1",
+          status: :connected,
+          scopes: read_scopes
+        })
+
+      availability =
+        plugin_module.tool_availability(%{connection: connection})
+        |> Map.new(&{&1.tool, &1})
+
+      # Read actions should be available
+      read_actions = Enum.filter(spec.actions, &(&1.risk == :read))
+
+      for action <- read_actions do
+        assert availability[action.id].state == :available
+      end
+
+      # Write actions should report missing scopes
+      write_actions = Enum.filter(spec.actions, &(&1.risk == :write))
+
+      for action <- write_actions do
+        assert availability[action.id].state == :missing_scopes
+        assert length(availability[action.id].missing_scopes) > 0
+      end
+    end
+  end
+
+  defp all_jira_scopes(spec) do
+    profile =
+      Enum.find(spec.auth_profiles, &(&1.id == :api_token)) ||
+        List.first(spec.auth_profiles)
+
+    operation_scopes =
+      spec.actions
+      |> Enum.concat(spec.triggers)
+      |> Enum.flat_map(& &1.scopes)
+
+    profile.default_scopes
+    |> Enum.concat(profile.scopes)
+    |> Enum.concat(operation_scopes)
+    |> Enum.uniq()
+  end
+end
