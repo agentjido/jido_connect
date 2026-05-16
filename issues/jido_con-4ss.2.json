@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-4ss.3"
   ],
+  "closed_at": "2026-05-16T00:55:14Z",
+  "close_reason": "Implemented in 5c6b722 by pi-connector-factory",
   "created": "2026-05-15T21:50:13Z",
   "description": "Add base, table, field, view, record, attachment, comment, and pagination structs with representative Airtable fixture coverage.",
   "id": "jido_con-4ss.2",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-4ss",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-AIR-S02] Add Airtable normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-16T00:49:42Z"
+  "updated_at": "2026-05-16T00:55:14Z"
 }
