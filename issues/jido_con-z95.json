@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-16T13:58:40Z",
+  "close_reason": "All child tasks closed; verify-connector-wave.sh passes for posthog. Closing per REVIEW-S08.",
   "created": "2026-05-15T22:01:28Z",
   "description": "Build jido_connect_posthog for product analytics and feature flag workflows. Cover project/personal API auth, events, feature flag evaluation, HogQL/query actions, insights, catalog packs, and docs.",
   "id": "jido_con-z95",
@@ -12,8 +14,8 @@
     "wave-6"
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "[W6] PostHog Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T22:01:29Z"
+  "updated_at": "2026-05-16T13:58:40Z"
 }
