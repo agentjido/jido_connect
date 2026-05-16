@@ -9,7 +9,9 @@
     "step": "bun run src/cli.ts step",
     "loop": "bun run src/cli.ts loop",
     "check": "tsc --noEmit",
-    "verify-wave": "bun run src/cli.ts verify-wave"
+    "verify-wave": "bun run src/cli.ts verify-wave",
+    "status": "bun run src/cli.ts status",
+    "recover": "bun run src/cli.ts recover"
   },
   "devDependencies": {
     "@types/bun": "^1.3.3",

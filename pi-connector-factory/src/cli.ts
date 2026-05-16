@@ -58,6 +58,12 @@ async function main() {
     case "verify-wave":
       verifyWave(args);
       break;
+    case "status":
+      statusCommand();
+      break;
+    case "recover":
+      recoverCommand(args);
+      break;
     case "help":
     case "--help":
     case "-h":
@@ -80,6 +86,8 @@ Commands:
   step          Run exactly one ready Beadwork task through Pi
   loop          Run multiple tasks in sequence
   verify-wave   Serial connector-wave verification (compile + package tests)
+  status        Show current factory state (git, beadwork, last run)
+  recover       Guided recovery after a failed or timed-out step
   help          Show this help message
 
 Global options:
@@ -165,6 +173,30 @@ How it differs from 'bun run loop':
   connector tasks, run this to confirm the whole wave is green.
 `);
       break;
+    case "status":
+      console.log(`Usage: bun run src/cli.ts status
+
+Show current factory state: whether the git worktree is clean, whether any
+Beadwork issues are in_progress, and the last run directory.
+
+This command is read-only and has no side effects.
+`);
+      break;
+    case "recover":
+      console.log(`Usage: bun run src/cli.ts recover [--stash] [--reopen]
+
+Show guided recovery after a failed or timed-out step. By default, this only
+prints status and recommended next steps. It does NOT modify git or Beadwork.
+
+Options:
+  --stash    Stash uncommitted changes with a descriptive name (e.g.
+             factory-recover-<issue-id>-<timestamp>)
+  --reopen   Reopen the in_progress Beadwork issue so it can be re-attempted
+
+Recovery preserves your WIP by default. Use --stash only when you want to
+save changes and restore a clean tree.
+`);
+      break;
     default:
       help();
       break;
@@ -230,7 +262,15 @@ async function step(args: Args) {
   console.log(`issue: ${startedIssue.id} ${startedIssue.title}`);
   console.log(`run:   ${relativeToRepo(runDir)}`);
 
-  const piOutput = await runPi(promptText, runDir);
+  let piOutput: RunResult;
+  try {
+    piOutput = await runPi(promptText, runDir);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    reportFailure(issue.id, runDir, message);
+    process.exit(1);
+  }
+
   writeFileSync(join(runDir, "pi.stdout.log"), piOutput.stdout);
   writeFileSync(join(runDir, "pi.stderr.log"), piOutput.stderr);
 
@@ -238,10 +278,16 @@ async function step(args: Args) {
   const commitCount = Number(git(["rev-list", "--count", `${beforeHead}..${afterHead}`]).stdout);
 
   if (afterHead === beforeHead || commitCount !== 1) {
-    fail(`Pi must create exactly one Git commit; found ${commitCount}`);
+    reportFailure(issue.id, runDir, `Pi must create exactly one Git commit; found ${commitCount}`);
+    process.exit(1);
   }
 
-  ensureCleanGit("after Pi commit");
+  try {
+    ensureCleanGit("after Pi commit");
+  } catch {
+    reportFailure(issue.id, runDir, "Git worktree is dirty after Pi commit");
+    process.exit(1);
+  }
 
   const shortSha = git(["rev-parse", "--short", "HEAD"]).stdout.trim();
   const finalIssue = showIssue(issue.id);
@@ -268,7 +314,247 @@ async function loop(args: Args) {
     }
 
     console.log(`\n[${index + 1}/${limit}] ${issue.id} ${issue.title}`);
-    await step({ positional: [], options: { ...args.options, issue: issue.id } });
+
+    try {
+      await step({ positional: [], options: { ...args.options, issue: issue.id } });
+    } catch {
+      // step already reported the failure and exited; this is unreachable
+      // but satisfies the type checker for the loop.
+      process.exit(1);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Failure reporting & recovery
+// ---------------------------------------------------------------------------
+
+type RecoveryInfo = {
+  issueId: string;
+  runDir: string;
+  error: string;
+  gitDirty: boolean;
+  gitStatus: string;
+  beadworkInProgress: boolean;
+  timestamp: string;
+};
+
+function reportFailure(issueId: string, runDir: string, error: string): never {
+  const gitStatus = gitStatusOutput();
+  const gitDirty = gitStatus.length > 0;
+  const beadworkInProgress = beadworkIssueIsInProgress(issueId);
+  const timestamp = new Date().toISOString();
+
+  const info: RecoveryInfo = {
+    issueId,
+    runDir: relativeToRepo(runDir),
+    error,
+    gitDirty,
+    gitStatus,
+    beadworkInProgress,
+    timestamp
+  };
+
+  // Write a recovery marker that `status` and `recover` can read later.
+  writeFileSync(join(runDir, "recovery.json"), JSON.stringify(info, null, 2));
+
+  console.error("");
+  console.error("=== FACTORY STEP FAILED ===");
+  console.error("");
+  console.error(`Issue:         ${issueId}`);
+  console.error(`Run dir:       ${relativeToRepo(runDir)}`);
+  console.error(`Log path:      ${relativeToRepo(join(runDir, "pi.stdout.log"))}`);
+  console.error(`Error:         ${error}`);
+  console.error(`Git dirty:     ${gitDirty}`);
+  if (gitDirty) {
+    console.error(`Dirty files:`);
+    for (const line of gitStatus.split("\n")) {
+      if (line.trim()) console.error(`  ${line}`);
+    }
+  }
+  console.error(`Beadwork:      ${beadworkInProgress ? "in_progress" : "not in_progress"}`);
+  console.error("");
+  console.error("Recovery commands:");
+  console.error("  bun run src/cli.ts status          # check current factory state");
+  console.error("  bun run src/cli.ts recover          # show guided recovery steps");
+  if (gitDirty) {
+    console.error(`  git stash push -m "factory-recover-${issueId}"   # stash WIP manually`);
+  }
+  if (beadworkInProgress) {
+    console.error(`  bw reopen ${issueId}                   # reopen the Beadwork issue`);
+  }
+  console.error("");
+
+  process.exit(1);
+}
+
+function statusCommand() {
+  const gitStatus = gitStatusOutput();
+  const gitDirty = gitStatus.length > 0;
+  const inProgressIssues = beadworkInProgressIssues();
+  const lastRun = findLatestRunDir();
+  const recovery = lastRun ? findRecoveryMarker(lastRun) : undefined;
+
+  console.log("");
+  console.log("=== Factory Status ===");
+  console.log("");
+  console.log(`Repo:           ${repoRoot}`);
+  console.log(`Branch:         ${git(["branch", "--show-current"]).stdout.trim()}`);
+  console.log(`Git clean:      ${!gitDirty}`);
+  if (gitDirty) {
+    console.log(`Dirty files:`);
+    for (const line of gitStatus.split("\n")) {
+      if (line.trim()) console.log(`  ${line}`);
+    }
+  }
+  console.log(`Beadwork active: ${inProgressIssues.length > 0 ? inProgressIssues.map((i) => i.id).join(", ") : "none"}`);
+  for (const issue of inProgressIssues) {
+    console.log(`  ${issue.id}  ${issue.title}`);
+  }
+
+  if (lastRun) {
+    console.log(`Last run:       ${relativeToRepo(lastRun)}`);
+  }
+
+  if (recovery) {
+    console.log("");
+    console.log("=== Last Run Failed ===");
+    console.log(`Issue:     ${recovery.issueId}`);
+    console.log(`Error:     ${recovery.error}`);
+    console.log(`Git dirty: ${recovery.gitDirty}`);
+    console.log(`Beadwork:  ${recovery.beadworkInProgress ? "in_progress" : "not in_progress"}`);
+    console.log(`Failed at: ${recovery.timestamp}`);
+    console.log("");
+    console.log("Run `bun run src/cli.ts recover` for guided recovery.");
+  } else {
+    console.log("\nFactory idle. No failed step detected.");
+  }
+
+  console.log("");
+}
+
+function recoverCommand(args: Args) {
+  const doStash = args.options["stash"] === true;
+  const doReopen = args.options["reopen"] === true;
+  const gitStatus = gitStatusOutput();
+  const gitDirty = gitStatus.length > 0;
+  const inProgressIssues = beadworkInProgressIssues();
+  const lastRun = findLatestRunDir();
+  const recovery = lastRun ? findRecoveryMarker(lastRun) : undefined;
+
+  console.log("");
+  console.log("=== Factory Recovery ===");
+  console.log("");
+
+  // Show current state
+  console.log(`Git clean:      ${!gitDirty}`);
+  console.log(`Beadwork active: ${inProgressIssues.length > 0 ? inProgressIssues.map((i) => i.id).join(", ") : "none"}`);
+
+  if (recovery) {
+    console.log(`Failed issue:   ${recovery.issueId}`);
+    console.log(`Run dir:        ${recovery.runDir}`);
+    console.log(`Error:          ${recovery.error}`);
+    console.log(`Failed at:      ${recovery.timestamp}`);
+  }
+
+  // Act: stash
+  if (doStash && gitDirty) {
+    const issueId = recovery?.issueId || "unknown";
+    const stashName = `factory-recover-${issueId}-${Date.now()}`;
+    git(["stash", "push", "-m", stashName]);
+    console.log(`\nStashed changes as: ${stashName}`);
+  } else if (doStash && !gitDirty) {
+    console.log("\n--stash requested but git is already clean; nothing to stash.");
+  } else if (gitDirty) {
+    const issueId = recovery?.issueId || "unknown";
+    console.log(`\nTo stash WIP manually:`);
+    console.log(`  git stash push -m "factory-recover-${issueId}"`);
+  }
+
+  // Act: reopen
+  if (doReopen && inProgressIssues.length > 0) {
+    for (const issue of inProgressIssues) {
+      run("bw", ["reopen", issue.id], { cwd: repoRoot });
+      console.log(`Reopened Beadwork issue: ${issue.id}`);
+    }
+  } else if (doReopen && inProgressIssues.length === 0) {
+    console.log("\n--reopen requested but no Beadwork issues are in_progress; nothing to reopen.");
+  } else if (inProgressIssues.length > 0) {
+    console.log("\nTo reopen Beadwork issues manually:");
+    for (const issue of inProgressIssues) {
+      console.log(`  bw reopen ${issue.id}`);
+    }
+  }
+
+  // Summary of next steps
+  console.log("");
+  console.log("=== Next Steps ===");
+  if (gitDirty && !doStash) {
+    console.log("1. Decide what to do with uncommitted changes (stash, commit, or drop).");
+  } else if (doStash && gitDirty) {
+    console.log("1. WIP stashed. Review with `git stash list`.");
+  }
+  if (inProgressIssues.length > 0 && !doReopen) {
+    console.log("2. Reopen Beadwork issue(s) so they can be re-attempted.");
+  } else if (doReopen && inProgressIssues.length > 0) {
+    console.log("2. Beadwork issue(s) reopened and ready for re-attempt.");
+  }
+  console.log("3. Run `bun run doctor` to verify environment.");
+  console.log("4. Run `bun run step` to re-attempt or move to the next task.");
+  console.log("");
+}
+
+// ---------------------------------------------------------------------------
+// Recovery helpers
+// ---------------------------------------------------------------------------
+
+function gitStatusOutput(): string {
+  const result = spawnSync("git", ["status", "--short"], {
+    cwd: repoRoot,
+    env: process.env,
+    stdio: "pipe",
+    encoding: "utf8"
+  });
+  return (result.stdout || "").trim();
+}
+
+function beadworkIssueIsInProgress(id: string): boolean {
+  try {
+    const issue = showIssue(id);
+    return issue.status === "in_progress";
+  } catch {
+    return false;
+  }
+}
+
+function beadworkInProgressIssues(): Issue[] {
+  const allIssues = issueList(
+    run("bw", ["list", "--status", "in_progress", "--json"], { cwd: repoRoot, capture: true }).stdout
+  );
+  return allIssues.filter((issue) => issue.status === "in_progress");
+}
+
+function findLatestRunDir(): string | undefined {
+  const runsDir = join(factoryRoot, "runs");
+  if (!existsSync(runsDir)) return undefined;
+
+  const entries = readdirSync(runsDir)
+    .filter((name) => name.endsWith("-step"))
+    .sort();
+
+  if (entries.length === 0) return undefined;
+
+  return join(runsDir, entries[entries.length - 1]);
+}
+
+function findRecoveryMarker(runDir: string): RecoveryInfo | undefined {
+  const markerPath = join(runDir, "recovery.json");
+  if (!existsSync(markerPath)) return undefined;
+
+  try {
+    return parseJson<RecoveryInfo>(readFileSync(markerPath, "utf8"));
+  } catch {
+    return undefined;
   }
 }
 
@@ -575,7 +861,7 @@ async function runPi(promptText: string, runDir: string): Promise<RunResult> {
 
       resolvePromise({ stdout, stderr });
     });
-  }).catch((error: Error) => fail(error.message));
+  });
 }
 
 type SessionStreamState = {

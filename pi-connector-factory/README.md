@@ -32,6 +32,8 @@ bun run src/cli.ts doctor --help
 bun run src/cli.ts prompt --help
 bun run src/cli.ts step --help
 bun run src/cli.ts loop --help
+bun run src/cli.ts status --help
+bun run src/cli.ts recover --help
 ```
 
 Check local wiring:
@@ -72,6 +74,88 @@ Preview the exact Pi prompt for the next task:
 ```sh
 bun run prompt
 ```
+
+## Timeout & Recovery
+
+The factory is designed to run long loops unattended. A Pi timeout is an
+expected event with large connector tasks, not an exceptional disaster.
+
+### What happens on timeout
+
+When a `step` fails (timeout, Pi crash, wrong commit count, dirty tree after
+commit), the factory:
+
+1. Writes a `recovery.json` marker to the run directory.
+2. Prints a structured failure report:
+   - Active issue id
+   - Run directory and log path
+   - Whether the git worktree is dirty
+   - Whether the Beadwork issue is still `in_progress`
+   - Exact recovery commands to run
+3. Exits with code 1 **without** modifying git or Beadwork state.
+
+The factory **never** auto-drops, auto-stashes, or auto-resets uncommitted
+work. Your WIP is preserved exactly as Pi left it.
+
+### Check factory state
+
+```sh
+bun run status
+```
+
+This shows: git clean/dirty, Beadwork issues in_progress, last run directory,
+and whether the last run left a recovery marker.
+
+### Guided recovery
+
+```sh
+bun run recover
+```
+
+By default this only prints the current state and recommended next steps.
+It does **not** modify anything.
+
+```sh
+# Stash WIP with a descriptive name
+bun run recover -- --stash
+
+# Reopen the Beadwork issue so it can be re-attempted
+bun run recover -- --reopen
+
+# Both at once
+bun run recover -- --stash --reopen
+```
+
+### Manual recovery
+
+If you prefer to handle recovery by hand:
+
+```sh
+# 1. Check what happened
+bun run status
+
+# 2. Review uncommitted changes
+git status
+git diff
+
+# 3. Stash or commit WIP as appropriate
+git stash push -m "factory-recover-<issue-id>"
+
+# 4. Reopen the Beadwork issue
+bw reopen <issue-id>
+
+# 5. Verify environment
+bun run doctor
+
+# 6. Re-attempt the step
+bun run step -- --issue <issue-id>
+```
+
+### Key principle
+
+The factory preserves the **clean-tree / one-commit contract**: each step
+starts and ends with a clean worktree and exactly one new commit. Recovery
+from a failure means getting back to that state explicitly, never silently.
 
 ## Contract
 
