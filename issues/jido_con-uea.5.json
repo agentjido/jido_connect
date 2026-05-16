@@ -4,6 +4,8 @@
     "jido_con-uea.4"
   ],
   "blocks": [],
+  "closed_at": "2026-05-16T11:44:53Z",
+  "close_reason": "Implemented in 055a9b5 by pi-connector-factory",
   "created": "2026-05-15T22:01:51Z",
   "description": "Add CRM reader/editor catalog packs, availability tests, README usage, live-test guidance, and a CDC/poll/webhook design note for future triggers.",
   "id": "jido_con-uea.5",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-uea",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-SF-S05] Add Salesforce catalog packs and sync trigger plan",
   "type": "task",
-  "updated_at": "2026-05-16T11:38:04Z"
+  "updated_at": "2026-05-16T11:44:53Z"
 }
