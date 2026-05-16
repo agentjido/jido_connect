@@ -59,6 +59,10 @@ defmodule Jido.Connect.PostHog.Client do
     )
   end
 
+  # ---------------------------------------------------------------------------
+  # Insights
+  # ---------------------------------------------------------------------------
+
   @doc "Lists insights for a project."
   def list_insights(api_key, opts \\ [])
       when is_binary(api_key) and is_list(opts) do
@@ -68,6 +72,8 @@ defmodule Jido.Connect.PostHog.Client do
       []
       |> maybe_put_param(:limit, Keyword.get(opts, :limit))
       |> maybe_put_param(:offset, Keyword.get(opts, :offset))
+      |> maybe_put_param(:date_from, Keyword.get(opts, :date_from))
+      |> maybe_put_param(:date_to, Keyword.get(opts, :date_to))
 
     Req.get(request, url: "/api/projects/:project_id/insights/", params: clean_params(params))
   end
@@ -77,9 +83,34 @@ defmodule Jido.Connect.PostHog.Client do
       when is_binary(insight_id) and is_binary(api_key) do
     request = Transport.request(api_key, Keyword.take(opts, [:base_url, :req_options]))
 
+    params =
+      []
+      |> maybe_put_param(:date_from, Keyword.get(opts, :date_from))
+      |> maybe_put_param(:date_to, Keyword.get(opts, :date_to))
+
     Req.get(request,
       url: "/api/projects/:project_id/insights/#{insight_id}/",
-      params: []
+      params: clean_params(params)
+    )
+  end
+
+  # ---------------------------------------------------------------------------
+  # HogQL query
+  # ---------------------------------------------------------------------------
+
+  @doc "Executes a HogQL query against a PostHog project."
+  def run_query(api_key, query, opts \\ [])
+      when is_binary(api_key) and is_binary(query) do
+    request = Transport.request(api_key, Keyword.take(opts, [:base_url, :req_options]))
+
+    body =
+      %{"query" => %{"kind" => "HogQLQuery", "query" => query}}
+      |> maybe_put_body_param(:date_from, Keyword.get(opts, :date_from))
+      |> maybe_put_body_param(:date_to, Keyword.get(opts, :date_to))
+
+    Req.post(request,
+      url: "/api/projects/:project_id/query/",
+      json: body
     )
   end
 
@@ -186,6 +217,9 @@ defmodule Jido.Connect.PostHog.Client do
 
   defp maybe_put_param(params, _key, nil), do: params
   defp maybe_put_param(params, key, value), do: [{key, value} | params]
+
+  defp maybe_put_body_param(body, _key, nil), do: body
+  defp maybe_put_body_param(body, key, value), do: Map.put(body, key, value)
 
   defp clean_params(params), do: Enum.reverse(params)
 

@@ -17,7 +17,8 @@ defmodule Jido.Connect.PostHog.ScopeResolver do
     "posthog.insight.get" => ["insights:read"],
     "posthog.feature_flag.evaluate" => ["feature_flags:read"],
     "posthog.feature_flag.list" => ["feature_flags:read"],
-    "posthog.feature_flag.get" => ["feature_flags:read"]
+    "posthog.feature_flag.get" => ["feature_flags:read"],
+    "posthog.query.run" => ["insights:read"]
   }
 
   @doc """

@@ -1,4 +1,4 @@
-defmodule Jido.Connect.PostHog.Handlers.Actions.ListInsights do
+defmodule Jido.Connect.PostHog.Handlers.Actions.RunQuery do
   @moduledoc false
 
   alias Jido.Connect.PostHog.Client
@@ -8,8 +8,8 @@ defmodule Jido.Connect.PostHog.Handlers.Actions.ListInsights do
     with {:ok, client} <- fetch_client(credentials),
          token <- Client.credential_token(credentials),
          {:ok, %Req.Response{status: 200, body: body}} <-
-           client.list_insights(token, build_opts(input)) do
-      {:ok, normalize_insights(body)}
+           client.run_query(token, input.query, build_opts(input)) do
+      normalize_result(input.query, body)
     else
       {:ok, %Req.Response{status: status, body: body}} ->
         Jido.Connect.PostHog.Client.Transport.handle_error_response(
@@ -26,8 +26,6 @@ defmodule Jido.Connect.PostHog.Handlers.Actions.ListInsights do
 
   defp build_opts(input) do
     []
-    |> maybe_opt(:limit, Map.get(input, :limit))
-    |> maybe_opt(:offset, Map.get(input, :offset))
     |> maybe_opt(:date_from, Map.get(input, :date_from))
     |> maybe_opt(:date_to, Map.get(input, :date_to))
   end
@@ -35,22 +33,31 @@ defmodule Jido.Connect.PostHog.Handlers.Actions.ListInsights do
   defp maybe_opt(opts, _key, nil), do: opts
   defp maybe_opt(opts, key, value), do: Keyword.put(opts, key, value)
 
-  defp normalize_insights(%{"results" => results} = body) do
-    insights =
-      Enum.map(results, fn item ->
-        case Normalizer.insight(item) do
-          {:ok, insight} -> insight
-          {:error, _} -> item
-        end
-      end)
+  defp normalize_result(query, body) when is_map(body) do
+    payload = Map.put(body, "query", query)
 
-    {:ok, page} = Normalizer.pagination(body)
+    case Normalizer.query_result(payload) do
+      {:ok, result} ->
+        {:ok,
+         %{
+           query: result.query,
+           columns: result.columns,
+           results: result.results,
+           has_more: result.has_more
+         }}
 
-    %{
-      insights: insights,
-      next: page.next
-    }
+      {:error, _reason} ->
+        # Fallback to raw extraction if normalizer rejects the shape
+        {:ok,
+         %{
+           query: query,
+           columns: Map.get(body, "columns", []),
+           results: Map.get(body, "results", []),
+           has_more: Map.get(body, "has_more")
+         }}
+    end
   end
 
-  defp normalize_insights(_body), do: %{insights: [], next: nil}
+  defp normalize_result(query, _body),
+    do: {:ok, %{query: query, columns: [], results: [], has_more: nil}}
 end
