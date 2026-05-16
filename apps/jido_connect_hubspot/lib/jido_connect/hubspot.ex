@@ -29,7 +29,8 @@ defmodule Jido.Connect.HubSpot do
 
   use Jido.Connect,
     fragments: [
-      Jido.Connect.HubSpot.Actions.Read
+      Jido.Connect.HubSpot.Actions.Read,
+      Jido.Connect.HubSpot.Actions.Write
     ]
 
   integration do

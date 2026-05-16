@@ -45,4 +45,31 @@ defmodule Jido.Connect.HubSpot.Client.Contacts do
     )
     |> Response.handle_search_response(&Normalizer.contact/1)
   end
+
+  @doc "Creates a new HubSpot CRM contact."
+  def create_contact(params, access_token) when is_map(params) and is_binary(access_token) do
+    body = Params.contact_write_body(params)
+
+    access_token
+    |> Transport.api_request()
+    |> Req.post(
+      url: @object_path,
+      json: body
+    )
+    |> Response.handle_get_response(&Normalizer.contact/1)
+  end
+
+  @doc "Updates an existing HubSpot CRM contact by ID."
+  def update_contact(%{contact_id: contact_id} = params, access_token)
+      when is_binary(contact_id) and is_binary(access_token) do
+    body = Params.contact_write_body(params)
+
+    access_token
+    |> Transport.api_request()
+    |> Req.patch(
+      url: "#{@object_path}/#{contact_id}",
+      json: body
+    )
+    |> Response.handle_get_response(&Normalizer.contact/1)
+  end
 end

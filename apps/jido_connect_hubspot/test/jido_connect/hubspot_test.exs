@@ -4,6 +4,7 @@ defmodule Jido.Connect.HubSpotTest do
   alias Jido.Connect.HubSpot
 
   @hubspot_read_fragment Jido.Connect.HubSpot.Actions.Read
+  @hubspot_write_fragment Jido.Connect.HubSpot.Actions.Write
 
   @hubspot_action_modules [
     Jido.Connect.HubSpot.Actions.GetContact,
@@ -14,11 +15,17 @@ defmodule Jido.Connect.HubSpotTest do
     Jido.Connect.HubSpot.Actions.SearchCompanies,
     Jido.Connect.HubSpot.Actions.GetDeal,
     Jido.Connect.HubSpot.Actions.ListDeals,
-    Jido.Connect.HubSpot.Actions.SearchDeals
+    Jido.Connect.HubSpot.Actions.SearchDeals,
+    Jido.Connect.HubSpot.Actions.CreateContact,
+    Jido.Connect.HubSpot.Actions.UpdateContact,
+    Jido.Connect.HubSpot.Actions.CreateDeal,
+    Jido.Connect.HubSpot.Actions.UpdateDeal,
+    Jido.Connect.HubSpot.Actions.CreateNote
   ]
 
   @hubspot_dsl_fragments [
-    @hubspot_read_fragment
+    @hubspot_read_fragment,
+    @hubspot_write_fragment
   ]
 
   test "declares HubSpot provider metadata" do
@@ -40,7 +47,12 @@ defmodule Jido.Connect.HubSpotTest do
              "hubspot.companies.company.search",
              "hubspot.deals.deal.get",
              "hubspot.deals.deal.list",
-             "hubspot.deals.deal.search"
+             "hubspot.deals.deal.search",
+             "hubspot.contacts.contact.create",
+             "hubspot.contacts.contact.update",
+             "hubspot.deals.deal.create",
+             "hubspot.deals.deal.update",
+             "hubspot.notes.note.create"
            ]
 
     assert Enum.map(spec.triggers, & &1.id) == []
