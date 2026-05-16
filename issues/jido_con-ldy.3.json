@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-ldy.4"
   ],
+  "closed_at": "2026-05-16T00:03:51Z",
+  "close_reason": "Implemented in 9eaee16 by pi-connector-factory",
   "created": "2026-05-15T21:50:05Z",
   "description": "Implement contact/company/deal get, search, and list-style actions with pagination, property selection, archived handling, tests, and least-privilege metadata.",
   "id": "jido_con-ldy.3",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-ldy",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-HUB-S03] Implement HubSpot CRM read/search actions",
   "type": "task",
-  "updated_at": "2026-05-15T23:44:47Z"
+  "updated_at": "2026-05-16T00:03:51Z"
 }
