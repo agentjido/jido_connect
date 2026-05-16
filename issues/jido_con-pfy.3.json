@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-pfy.4"
   ],
+  "closed_at": "2026-05-16T06:40:40Z",
+  "close_reason": "Implemented in 08cffeb by pi-connector-factory",
   "created": "2026-05-15T22:01:41Z",
   "description": "Implement list/get event types, list scheduled events, list/get invitees, pagination, date filters, tests, and normalized outputs.",
   "id": "jido_con-pfy.3",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-CALENDLY-S03] Implement Calendly event read actions",
   "type": "task",
-  "updated_at": "2026-05-16T06:29:39Z"
+  "updated_at": "2026-05-16T06:40:40Z"
 }
