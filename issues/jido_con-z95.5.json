@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-z95.4"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-z95",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[W6-PH-S05] Add PostHog catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:38Z"
+  "updated_at": "2026-05-16T06:07:28Z"
 }
