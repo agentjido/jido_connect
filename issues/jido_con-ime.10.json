@@ -5,11 +5,16 @@
   "created": "2026-05-16T12:50:11Z",
   "description": "Factory hardening finding from live use: when Pi timed out on `jido_con-uea.4`, the repo was left dirty, the Beadwork task remained `in_progress`, and Pi had also attempted to mutate ignored Mix build cache state while trying to recover tests. Manual cleanup required stashing Salesforce WIP, reopening the task, repairing `_build/test`, and rerunning doctor.\n\nWhy this matters: the connector factory is intended to run long loops unattended. A timeout is expected behavior with large connector tasks, not an exceptional disaster. The wrapper should make timeout recovery boring and explicit, preserving work without corrupting the clean-tree/one-commit contract.\n\nAcceptance:\n- Improve `pi-connector-factory` timeout behavior and/or add a documented recovery command/runbook.\n- On timeout, the output should clearly state: active issue id, run dir, log path, whether git is dirty, whether Beadwork is in_progress, and exact next commands.\n- Prefer adding a `recover` or `status` helper if it fits the existing CLI shape; otherwise update README with the manual recovery steps.\n- Do not auto-drop or auto-reset uncommitted work.\n- If adding automation, preserve WIP in a clearly named stash or leave it untouched and tell the user what to do.\n- Add/update tests for CLI argument/status behavior if the factory has test coverage; otherwise keep changes small and inspectable.",
   "id": "jido_con-ime.10",
-  "labels": [],
+  "labels": [
+    "connector-factory",
+    "hardening",
+    "pi-factory",
+    "review"
+  ],
   "parent": "jido_con-ime",
   "priority": 2,
   "status": "open",
   "title": "[REVIEW-S10] Harden Pi factory timeout recovery path",
   "type": "task",
-  "updated_at": "2026-05-16T12:50:11Z"
+  "updated_at": "2026-05-16T12:50:12Z"
 }
