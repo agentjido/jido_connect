@@ -152,7 +152,7 @@ defmodule Jido.Connect.HubSpot.PrivacyAuditTest do
     end
   end
 
-  defp action(id, classification, risk, confirmation, opts \\ []) do
+  defp action(id, classification, risk, confirmation, opts) do
     %{
       id: id,
       classification: classification,

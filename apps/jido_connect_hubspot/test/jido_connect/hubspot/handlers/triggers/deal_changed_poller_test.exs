@@ -29,6 +29,11 @@ defmodule Jido.Connect.HubSpot.Handlers.Triggers.DealChangedPollerTest do
        }}
     end
 
+    # Empty deal list
+    def list_deals(_params, "empty_token") do
+      {:ok, %{items: []}}
+    end
+
     # --- Changed deals (search with filter_groups) ---
 
     def search_deals(
@@ -56,10 +61,7 @@ defmodule Jido.Connect.HubSpot.Handlers.Triggers.DealChangedPollerTest do
       {:ok, %{items: []}}
     end
 
-    # Empty deal list
-    def list_deals(_params, "empty_token") do
-      {:ok, %{items: []}}
-    end
+
   end
 
   describe "poll/2 with no checkpoint" do

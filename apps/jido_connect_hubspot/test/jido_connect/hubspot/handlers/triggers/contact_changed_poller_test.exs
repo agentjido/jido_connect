@@ -45,6 +45,11 @@ defmodule Jido.Connect.HubSpot.Handlers.Triggers.ContactChangedPollerTest do
        }}
     end
 
+    # Empty contact list
+    def list_contacts(_params, "empty_token") do
+      {:ok, %{items: []}}
+    end
+
     # --- Changed contacts (search with filter_groups) ---
 
     def search_contacts(%{filter_groups: [_], after: "page_2", updated_min: _}, "token") do
@@ -99,10 +104,7 @@ defmodule Jido.Connect.HubSpot.Handlers.Triggers.ContactChangedPollerTest do
       {:ok, %{items: []}}
     end
 
-    # Empty contact list
-    def list_contacts(_params, "empty_token") do
-      {:ok, %{items: []}}
-    end
+
   end
 
   describe "poll/2 with no checkpoint" do
