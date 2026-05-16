@@ -5,6 +5,7 @@ defmodule Jido.Connect.Airtable.Client do
 
   defdelegate list_bases(params, access_token), to: Bases
   defdelegate get_base(params, access_token), to: Bases
+  defdelegate list_tables(params, access_token), to: Bases
   defdelegate list_records(params, access_token), to: Records
   defdelegate get_record(params, access_token), to: Records
   defdelegate create_record(params, access_token), to: Records

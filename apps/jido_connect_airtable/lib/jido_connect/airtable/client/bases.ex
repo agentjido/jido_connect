@@ -20,4 +20,14 @@ defmodule Jido.Connect.Airtable.Client.Bases do
     |> Req.get()
     |> Response.handle_get_base_response()
   end
+
+  @doc "Lists all tables in a specific Airtable base."
+  def list_tables(params, access_token) do
+    base_id = Map.fetch!(params, :base_id)
+
+    Transport.api_request(access_token)
+    |> Req.merge(url: "/v0/meta/bases/#{base_id}/tables", params: Map.take(params, [:offset]))
+    |> Req.get()
+    |> Response.handle_list_tables_response()
+  end
 end

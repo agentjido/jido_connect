@@ -19,7 +19,8 @@ defmodule Jido.Connect.Airtable.CatalogPacks do
 
   @base_read_tools [
     "airtable.bases.list",
-    "airtable.bases.get"
+    "airtable.bases.get",
+    "airtable.tables.list"
   ]
 
   @record_read_tools [

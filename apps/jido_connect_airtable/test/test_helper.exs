@@ -5,6 +5,7 @@ defmodule MockClient do
 
   def list_bases(input, token), do: handle(:list_bases, input, token)
   def get_base(input, token), do: handle(:get_base, input, token)
+  def list_tables(input, token), do: handle(:list_tables, input, token)
   def list_records(input, token), do: handle(:list_records, input, token)
   def get_record(input, token), do: handle(:get_record, input, token)
   def create_record(input, token), do: handle(:create_record, input, token)

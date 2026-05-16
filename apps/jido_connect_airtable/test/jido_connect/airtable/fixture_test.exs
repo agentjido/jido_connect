@@ -20,6 +20,20 @@ defmodule Jido.Connect.Airtable.FixtureTest do
       assert {:ok, pagination} = Normalizer.pagination(payload)
       assert pagination.offset == "itrXXXXXXXXXXXX/recXXXXXXXXXXXX"
     end
+
+    test "normalizes each base in list fixture" do
+      payload = fixture!("base_list.json")
+
+      bases = payload["bases"]
+
+      assert {:ok, base1} = Normalizer.base(Enum.at(bases, 0))
+      assert base1.base_id == "appLkNDIC9N0juRia"
+      assert base1.name == "Project Tracker"
+
+      assert {:ok, base2} = Normalizer.base(Enum.at(bases, 1))
+      assert base2.base_id == "appX9k2mPqR4vWnjz"
+      assert base2.name == "CRM"
+    end
   end
 
   describe "table fixtures" do
@@ -31,6 +45,22 @@ defmodule Jido.Connect.Airtable.FixtureTest do
       assert table.name == "Tasks"
       assert table.description == "Active project tasks."
       assert table.primary_field_id == "fld1VnoyuotSTyxXI"
+    end
+
+    test "normalizes each table in list fixture" do
+      payload = fixture!("table_list.json")
+
+      tables = payload["tables"]
+
+      assert {:ok, table1} = Normalizer.table(Enum.at(tables, 0))
+      assert table1.table_id == "tblK9MZVyNlLQRtJf"
+      assert table1.name == "Tasks"
+      assert table1.description == "Active project tasks."
+
+      assert {:ok, table2} = Normalizer.table(Enum.at(tables, 1))
+      assert table2.table_id == "tblX7jN4pQrK2mWab"
+      assert table2.name == "People"
+      assert table2.description == "Team members."
     end
   end
 
@@ -82,6 +112,13 @@ defmodule Jido.Connect.Airtable.FixtureTest do
 
       assert {:ok, record} = Normalizer.record(Enum.at(records, 1))
       assert record.record_id == "recX7jN4pQrK2mWab"
+    end
+
+    test "normalizes record list fixture with pagination" do
+      payload = fixture!("record_list.json")
+
+      assert {:ok, pagination} = Normalizer.pagination(payload)
+      assert pagination.offset == "itrXXXXXXXXXXXX/recXXXXXXXXXXXX"
     end
   end
 

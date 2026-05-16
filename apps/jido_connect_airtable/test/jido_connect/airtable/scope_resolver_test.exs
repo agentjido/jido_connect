@@ -13,6 +13,11 @@ defmodule Jido.Connect.Airtable.ScopeResolverTest do
       assert ScopeResolver.required_scopes(%{id: "airtable.bases.get"}, %{}, %{}) ==
                ["schema.bases:read"]
     end
+
+    test "returns schema.bases:read for list_tables" do
+      assert ScopeResolver.required_scopes(%{id: "airtable.tables.list"}, %{}, %{}) ==
+               ["schema.bases:read"]
+    end
   end
 
   describe "record read scopes" do
@@ -59,6 +64,7 @@ defmodule Jido.Connect.Airtable.ScopeResolverTest do
       assert_scope_matrix([
         %{operation: "airtable.bases.list", expected: ["schema.bases:read"]},
         %{operation: "airtable.bases.get", expected: ["schema.bases:read"]},
+        %{operation: "airtable.tables.list", expected: ["schema.bases:read"]},
         %{operation: "airtable.records.list", expected: ["data.records:read"]},
         %{operation: "airtable.records.get", expected: ["data.records:read"]},
         %{operation: "airtable.records.create", expected: ["data.records:write"]},

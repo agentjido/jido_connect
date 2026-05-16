@@ -9,6 +9,7 @@ defmodule Jido.Connect.Airtable.ScopeResolver do
   @scope_map %{
     "airtable.bases.list" => ["schema.bases:read"],
     "airtable.bases.get" => ["schema.bases:read"],
+    "airtable.tables.list" => ["schema.bases:read"],
     "airtable.records.list" => ["data.records:read"],
     "airtable.records.get" => ["data.records:read"],
     "airtable.records.create" => ["data.records:write"],
