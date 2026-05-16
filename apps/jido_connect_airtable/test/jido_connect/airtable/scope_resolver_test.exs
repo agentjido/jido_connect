@@ -47,6 +47,21 @@ defmodule Jido.Connect.Airtable.ScopeResolverTest do
       assert ScopeResolver.required_scopes(%{id: "airtable.records.delete"}, %{}, %{}) ==
                ["data.records:write"]
     end
+
+    test "returns data.records:write for batch_create" do
+      assert ScopeResolver.required_scopes(%{id: "airtable.records.batch_create"}, %{}, %{}) ==
+               ["data.records:write"]
+    end
+
+    test "returns data.records:write for batch_update" do
+      assert ScopeResolver.required_scopes(%{id: "airtable.records.batch_update"}, %{}, %{}) ==
+               ["data.records:write"]
+    end
+
+    test "returns data.records:write for batch_delete" do
+      assert ScopeResolver.required_scopes(%{id: "airtable.records.batch_delete"}, %{}, %{}) ==
+               ["data.records:write"]
+    end
   end
 
   test "returns empty scopes for unknown operations" do
@@ -69,7 +84,10 @@ defmodule Jido.Connect.Airtable.ScopeResolverTest do
         %{operation: "airtable.records.get", expected: ["data.records:read"]},
         %{operation: "airtable.records.create", expected: ["data.records:write"]},
         %{operation: "airtable.records.update", expected: ["data.records:write"]},
-        %{operation: "airtable.records.delete", expected: ["data.records:write"]}
+        %{operation: "airtable.records.delete", expected: ["data.records:write"]},
+        %{operation: "airtable.records.batch_create", expected: ["data.records:write"]},
+        %{operation: "airtable.records.batch_update", expected: ["data.records:write"]},
+        %{operation: "airtable.records.batch_delete", expected: ["data.records:write"]}
       ])
     end
   end
