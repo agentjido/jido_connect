@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-16T13:58:47Z",
+  "close_reason": "All child tasks closed; verify-connector-wave.sh passes for calendly. Closing per REVIEW-S08.",
   "created": "2026-05-15T22:01:39Z",
   "description": "Build jido_connect_calendly after Cal.com hardening establishes the scheduling package shape. Cover OAuth/PAT auth, event types, scheduled events, invitees, cancel flows, webhook subscriptions, catalog packs, and docs.",
   "id": "jido_con-pfy",
@@ -12,8 +14,8 @@
     "wave-4"
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "[W4] Calendly Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T22:01:40Z"
+  "updated_at": "2026-05-16T13:58:47Z"
 }
