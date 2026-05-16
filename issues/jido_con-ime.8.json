@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ime.7"
+  ],
   "blocks": [],
   "created": "2026-05-16T12:49:27Z",
   "description": "Bookkeeping/process finding from review: Beadwork still shows parent epics for completed connector waves as open/ready even though their leaf tasks are closed. Examples include Cal.com, HubSpot, Airtable, Generic Webhook, Jira, Linear, PostHog, Calendly, and Salesforce. This makes `bw ready` misleading: it shows epics as ready even when there are no remaining leaf implementation tasks.\n\nWhy this matters: the Pi factory deliberately avoids epics by default, but humans looking at `bw ready` can interpret open parent epics as unfinished implementation work. Closing parent epics should happen only after the review/hardening tasks and verification command pass, not immediately after the last leaf task.\n\nAcceptance:\n- After REVIEW-S01 through REVIEW-S07 are done, audit the Wave 4-6 parent epics and close only those whose child tasks are closed and whose package verification passes.\n- Leave Generic HTTP deferred; do not close it as completed.\n- Confirm `bw ready` no longer implies there are unfinished connector implementation epics from the completed wave.\n- Add comments to any parent epic left open explaining why it remains open.",
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[REVIEW-S08] Finalize completed connector parent epics",
   "type": "task",
-  "updated_at": "2026-05-16T12:49:44Z"
+  "updated_at": "2026-05-16T12:49:47Z"
 }
