@@ -7,13 +7,16 @@
   "id": "jido_con-ime.5",
   "labels": [
     "connector-factory",
+    "flaky-test",
     "hardening",
-    "review"
+    "review",
+    "salesforce",
+    "test-failure"
   ],
   "parent": "jido_con-ime",
   "priority": 1,
   "status": "open",
   "title": "[REVIEW-S05] Make Salesforce client delegate tests deterministic",
   "type": "bug",
-  "updated_at": "2026-05-16T12:49:41Z"
+  "updated_at": "2026-05-16T12:49:43Z"
 }
