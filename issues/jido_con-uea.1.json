@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-uea.2"
   ],
+  "closed_at": "2026-05-16T07:13:09Z",
+  "close_reason": "Implemented in 5e92b3c by pi-connector-factory",
   "created": "2026-05-15T22:01:50Z",
   "description": "Add umbrella app, provider module, OAuth connected-app auth profile, instance URL handling, REST transport boundary, README/AGENTS, and generated plugin tests.",
   "id": "jido_con-uea.1",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-uea",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-SF-S01] Scaffold jido_connect_salesforce",
   "type": "task",
-  "updated_at": "2026-05-16T07:03:22Z"
+  "updated_at": "2026-05-16T07:13:09Z"
 }
