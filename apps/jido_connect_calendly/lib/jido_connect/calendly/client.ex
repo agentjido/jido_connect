@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Calendly.Client do
   @moduledoc "Calendly API client boundary."
 
-  alias Jido.Connect.Calendly.Client.{EventTypes, Invitees, ScheduledEvents}
+  alias Jido.Connect.Calendly.Client.{EventTypes, Invitees, ScheduledEvents, WebhookSubscriptions}
 
   # Event types
   defdelegate list_event_types(params, access_token), to: EventTypes
@@ -14,6 +14,12 @@ defmodule Jido.Connect.Calendly.Client do
   # Invitees
   defdelegate list_invitees(params, access_token), to: Invitees
   defdelegate get_invitee(params, access_token), to: Invitees
+  defdelegate cancel_invitee(params, access_token), to: Invitees
+
+  # Webhook subscriptions
+  defdelegate create_webhook(params, access_token), to: WebhookSubscriptions
+  defdelegate list_webhooks(params, access_token), to: WebhookSubscriptions
+  defdelegate delete_webhook(params, access_token), to: WebhookSubscriptions
 
   @doc """
   Returns the configured or injected client module.

@@ -117,4 +117,40 @@ defmodule Jido.Connect.Calendly.Client.ResponseTest do
                )
     end
   end
+
+  describe "handle_delete_response/2" do
+    test "handles 204 No Content" do
+      assert {:ok, %{deleted: true, entity: "webhook_subscription"}} =
+               Response.handle_delete_response(
+                 {:ok, %{status: 204}},
+                 "webhook_subscription"
+               )
+    end
+
+    test "handles 200 with body" do
+      assert {:ok, %{deleted: true, entity: "webhook_subscription", body: body}} =
+               Response.handle_delete_response(
+                 {:ok, %{status: 200, body: %{"message" => "deleted"}}},
+                 "webhook_subscription"
+               )
+
+      assert body == %{"message" => "deleted"}
+    end
+
+    test "handles 200 without map body" do
+      assert {:ok, %{deleted: true, entity: "webhook_subscription"}} =
+               Response.handle_delete_response(
+                 {:ok, %{status: 200}},
+                 "webhook_subscription"
+               )
+    end
+
+    test "delegates error responses to transport" do
+      assert {:error, %Error.ProviderError{provider: :calendly}} =
+               Response.handle_delete_response(
+                 {:ok, %{status: 404, body: %{"message" => "Not found"}}},
+                 "webhook_subscription"
+               )
+    end
+  end
 end

@@ -3,7 +3,13 @@ defmodule Jido.Connect.Calendly.Normalizer do
   Normalizes raw Calendly API response maps into typed Jido.Connect structs.
   """
 
-  alias Jido.Connect.Calendly.{EventType, Invitee, Pagination, ScheduledEvent}
+  alias Jido.Connect.Calendly.{
+    EventType,
+    Invitee,
+    Pagination,
+    ScheduledEvent,
+    WebhookSubscription
+  }
 
   @doc "Normalizes a single Calendly event type resource map."
   def event_type(%{"resource" => %{"uri" => _} = resource}) do
@@ -60,6 +66,26 @@ defmodule Jido.Connect.Calendly.Normalizer do
   end
 
   def invitee_list(_body), do: {:error, :invalid_invitee_list}
+
+  @doc "Normalizes a single Calendly webhook subscription resource map."
+  def webhook_subscription(%{"resource" => %{"uri" => _} = resource}) do
+    WebhookSubscription.new(map_webhook_subscription(resource))
+  end
+
+  def webhook_subscription(%{"uri" => _} = resource),
+    do: WebhookSubscription.new(map_webhook_subscription(resource))
+
+  def webhook_subscription(_body), do: {:error, :invalid_webhook_subscription}
+
+  @doc "Normalizes a paginated webhook subscriptions list response."
+  def webhook_subscription_list(%{"collection" => collection, "pagination" => pagination}) do
+    with items <- Enum.map(collection, &normalize_webhook_subscription_item/1),
+         {:ok, page} <- map_pagination(pagination) do
+      {:ok, %{items: items, pagination: page}}
+    end
+  end
+
+  def webhook_subscription_list(_body), do: {:error, :invalid_webhook_subscription_list}
 
   # ---------------------------------------------------------------------------
   # Private mappers
@@ -161,4 +187,27 @@ defmodule Jido.Connect.Calendly.Normalizer do
   end
 
   defp normalize_invitee_item(_), do: nil
+
+  defp map_webhook_subscription(resource) do
+    %{
+      uri: resource["uri"],
+      callback_url: resource["callback_url"],
+      scope: resource["scope"],
+      organization_uri: resource["organization"],
+      user_uri: resource["user"],
+      events: resource["events"],
+      state: resource["state"],
+      created_at: resource["created_at"],
+      updated_at: resource["updated_at"]
+    }
+  end
+
+  defp normalize_webhook_subscription_item(%{"uri" => _} = item) do
+    case WebhookSubscription.new(map_webhook_subscription(item)) do
+      {:ok, webhook} -> webhook
+      {:error, _} -> nil
+    end
+  end
+
+  defp normalize_webhook_subscription_item(_), do: nil
 end

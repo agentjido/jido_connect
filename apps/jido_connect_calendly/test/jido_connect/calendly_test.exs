@@ -27,23 +27,27 @@ defmodule Jido.Connect.CalendlyTest do
     assert "webhook" in oauth_profile.scopes
   end
 
-  test "declares six read actions" do
+  test "declares ten actions (six read plus cancellation and webhooks)" do
     spec = Calendly.integration()
 
     action_ids = Enum.map(spec.actions, & &1.id)
 
-    assert length(action_ids) == 6
+    assert length(action_ids) == 10
     assert "calendly.event_types.list" in action_ids
     assert "calendly.event_types.get" in action_ids
     assert "calendly.scheduled_events.list" in action_ids
     assert "calendly.scheduled_events.get" in action_ids
     assert "calendly.invitees.list" in action_ids
     assert "calendly.invitees.get" in action_ids
+    assert "calendly.invitees.cancel" in action_ids
+    assert "calendly.webhooks.create" in action_ids
+    assert "calendly.webhooks.list" in action_ids
+    assert "calendly.webhooks.delete" in action_ids
   end
 
   test "compiles generated Jido plugin surface" do
     assert Application.get_env(:jido_connect_calendly, :jido_connect_providers) == [Calendly]
-    assert length(Calendly.jido_action_modules()) == 6
+    assert length(Calendly.jido_action_modules()) == 10
     assert Calendly.jido_sensor_modules() == []
     assert Calendly.jido_plugin_module() == Jido.Connect.Calendly.Plugin
 
@@ -60,11 +64,13 @@ defmodule Jido.Connect.CalendlyTest do
   end
 
   test "exposes curated catalog pack delegates" do
-    assert [%{id: :calendly_reader}] = Calendly.catalog_packs()
+    assert [%{id: :calendly_reader}, %{id: :calendly_webhook}, %{id: :calendly_full}] =
+             Calendly.catalog_packs()
   end
 
   test "reader pack includes all six read action tools" do
-    [%{allowed_tools: tools}] = Calendly.catalog_packs()
+    [%{id: :calendly_reader, allowed_tools: tools}] =
+      Enum.filter(Calendly.catalog_packs(), &(&1.id == :calendly_reader))
 
     assert "calendly.event_types.list" in tools
     assert "calendly.event_types.get" in tools

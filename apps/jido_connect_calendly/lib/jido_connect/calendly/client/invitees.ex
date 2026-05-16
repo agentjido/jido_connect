@@ -1,5 +1,5 @@
 defmodule Jido.Connect.Calendly.Client.Invitees do
-  @moduledoc "Calendly API v2 boundary for invitee reads."
+  @moduledoc "Calendly API v2 boundary for invitee reads and cancellation."
 
   alias Jido.Connect.Calendly.Client.{Response, Transport}
   alias Jido.Connect.Calendly.Normalizer
@@ -29,6 +29,27 @@ defmodule Jido.Connect.Calendly.Client.Invitees do
     access_token
     |> Transport.api_request()
     |> Req.get(url: "#{@base_path}/#{event_uuid}/invitees/#{invitee_uuid}")
+    |> Response.handle_entity_response(&Normalizer.invitee/1, "invitee")
+  end
+
+  @doc "Cancels a Calendly invitee by event URI and invitee URI with an optional reason."
+  def cancel_invitee(%{event_uri: event_uri, uri: uri} = params, access_token)
+      when is_binary(event_uri) and is_binary(uri) and is_binary(access_token) do
+    event_uuid = extract_uuid(event_uri)
+    invitee_uuid = extract_uuid(uri)
+
+    body =
+      case Map.get(params, :reason) do
+        nil -> %{}
+        reason -> %{reason: reason}
+      end
+
+    access_token
+    |> Transport.api_request()
+    |> Req.post(
+      url: "#{@base_path}/#{event_uuid}/invitees/#{invitee_uuid}/cancellation",
+      json: body
+    )
     |> Response.handle_entity_response(&Normalizer.invitee/1, "invitee")
   end
 
