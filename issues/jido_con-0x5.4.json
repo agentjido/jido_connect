@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-0x5.5"
   ],
+  "closed_at": "2026-05-16T05:19:07Z",
+  "close_reason": "Implemented in c2db0f7 by pi-connector-factory",
   "created": "2026-05-15T22:01:21Z",
   "description": "Implement create/update issue, add comment, assign/change status/label actions with confirmation metadata and tests.",
   "id": "jido_con-0x5.4",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-0x5",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W5-LIN-S04] Implement Linear mutation actions",
   "type": "task",
-  "updated_at": "2026-05-16T05:07:28Z"
+  "updated_at": "2026-05-16T05:19:07Z"
 }
