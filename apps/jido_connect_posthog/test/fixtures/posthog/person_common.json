@@ -1,0 +1,10 @@
+{
+  "id": "person-001",
+  "distinct_ids": ["user-1", "alias-abc123"],
+  "properties": {
+    "name": "Alice Nakamura",
+    "email": "alice@example.com",
+    "plan": "pro"
+  },
+  "created_at": "2026-05-01T00:00:00.000Z"
+}
