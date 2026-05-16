@@ -16,11 +16,15 @@
     {
       "text": "Deferred: core HTTP transport helpers already exist; a generic arbitrary HTTP connector needs a separate policy/SSRF/security decision before implementation.",
       "timestamp": "2026-05-15T22:00:35Z"
+    },
+    {
+      "text": "Generic HTTP intentionally left deferred (2027-01-01). Package implementation was deferred during Wave 4 because the surface area requires more design work. Not re-evaluated during REVIEW-S08. Leave deferred until scope and policy gates are finalized.",
+      "timestamp": "2026-05-16T13:59:09Z"
     }
   ],
   "priority": 2,
   "status": "deferred",
   "title": "[W4] Generic HTTP Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T22:00:35Z"
+  "updated_at": "2026-05-16T13:59:09Z"
 }
