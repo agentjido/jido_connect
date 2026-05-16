@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-z95.2"
   ],
+  "closed_at": "2026-05-16T05:37:52Z",
+  "close_reason": "Implemented in 1f8b977 by pi-connector-factory",
   "created": "2026-05-15T22:01:30Z",
   "description": "Add umbrella app, provider module, project/personal API key auth profiles, host override transport boundary, README/AGENTS, and generated plugin tests.",
   "id": "jido_con-z95.1",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-z95",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W6-PH-S01] Scaffold jido_connect_posthog",
   "type": "task",
-  "updated_at": "2026-05-16T05:27:27Z"
+  "updated_at": "2026-05-16T05:37:52Z"
 }
