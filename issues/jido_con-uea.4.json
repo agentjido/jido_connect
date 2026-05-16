@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-uea.5"
   ],
+  "closed_at": "2026-05-16T11:38:04Z",
+  "close_reason": "Implemented in 7bce14f by pi-connector-factory",
   "created": "2026-05-15T22:01:51Z",
   "description": "Implement create/update records for Lead/Contact/Task and generic sObject with risk metadata, validation boundaries, and tests.",
   "id": "jido_con-uea.4",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-uea",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-SF-S04] Implement Salesforce record write actions",
   "type": "task",
-  "updated_at": "2026-05-16T11:26:56Z"
+  "updated_at": "2026-05-16T11:38:04Z"
 }
