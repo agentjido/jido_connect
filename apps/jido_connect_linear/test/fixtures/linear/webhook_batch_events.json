@@ -1,0 +1,77 @@
+[
+  {
+    "action": "create",
+    "type": "Issue",
+    "webhookId": "wh-42",
+    "createdAt": "2026-05-15T14:22:00.000Z",
+    "data": {
+      "id": "uuid-001",
+      "identifier": "LIN-123",
+      "title": "Implement user authentication flow",
+      "state": {
+        "id": "status-3",
+        "name": "In Progress",
+        "type": "started"
+      },
+      "priority": 3,
+      "priorityLabel": "Medium",
+      "team": {
+        "id": "team-1",
+        "key": "LIN",
+        "name": "Linear Team"
+      },
+      "assignee": {
+        "id": "user-1",
+        "name": "Alice Nakamura"
+      },
+      "creator": {
+        "id": "user-2",
+        "name": "Bob Martinez"
+      },
+      "labels": [
+        {"id": "label-1", "name": "backend"},
+        {"id": "label-2", "name": "auth"}
+      ],
+      "createdAt": "2026-04-10T08:30:00.000Z",
+      "updatedAt": "2026-05-15T14:22:00.000Z"
+    }
+  },
+  {
+    "action": "update",
+    "type": "Issue",
+    "webhookId": "wh-43",
+    "createdAt": "2026-05-15T15:00:00.000Z",
+    "data": {
+      "id": "uuid-001",
+      "identifier": "LIN-123",
+      "title": "Implement user authentication flow",
+      "state": {
+        "id": "status-4",
+        "name": "Done",
+        "type": "completed"
+      },
+      "priority": 2,
+      "priorityLabel": "High",
+      "team": {
+        "id": "team-1",
+        "key": "LIN",
+        "name": "Linear Team"
+      },
+      "assignee": {
+        "id": "user-1",
+        "name": "Alice Nakamura"
+      },
+      "creator": {
+        "id": "user-2",
+        "name": "Bob Martinez"
+      },
+      "labels": [
+        {"id": "label-1", "name": "backend"},
+        {"id": "label-2", "name": "auth"},
+        {"id": "label-3", "name": "security"}
+      ],
+      "createdAt": "2026-04-10T08:30:00.000Z",
+      "updatedAt": "2026-05-15T15:00:00.000Z"
+    }
+  }
+]
