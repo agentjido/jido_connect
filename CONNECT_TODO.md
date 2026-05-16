@@ -68,17 +68,17 @@ helps prove reusable core abstractions.
 | 14 | `jido_connect_google_tasks` | Google Tasks | shipped | OAuth2 user | task lists, task CRUD, move/clear tasks | task polling where viable | Implemented and live read smoke tested. |
 | 15 | `jido_connect_hubspot` | HubSpot | queued | OAuth2 app, private app token | search contacts, create/update contact, create note, create deal | new contact poll, deal stage change poll | Wave 4 Beadwork epic and leaf tasks are queued. |
 | 16 | `jido_connect_airtable` | Airtable | queued | OAuth2, personal access token | list records, get record, create/update record, delete record | changed records poll | Wave 4 Beadwork epic and leaf tasks are queued. |
-| 17 | `jido_connect_jira` | Jira / Jira Service Management | ready | OAuth2, API token | search issues, create issue, update issue, add comment | issue created/updated webhook | Work-management anchor and future `jido_chat` issue workflow target. |
-| 18 | `jido_connect_linear` | Linear | ready | OAuth2, API key | search issues, create issue, update issue, add comment | issue created/updated webhook | Modern product/dev workflow and clean `jido_chat` handoff target. |
-| 19 | `jido_connect_posthog` | PostHog | ready | project API key, personal API key, self-hosted host override | capture event, batch events, evaluate feature flag, query HogQL, list insights | annotation or alert webhook later | Product-engineering connector for launch metrics, flags, and usage analysis. |
-| 20 | `jido_connect_http` | Generic HTTP | queued | API key, bearer token, basic auth, custom headers | request, get JSON, post JSON, transform response | n/a | Wave 4 Beadwork epic and leaf tasks are queued. |
+| 17 | `jido_connect_jira` | Jira / Jira Service Management | queued | OAuth2, API token | search issues, create issue, update issue, add comment | issue created/updated webhook | Wave 5 Beadwork epic and leaf tasks are queued. |
+| 18 | `jido_connect_linear` | Linear | queued | OAuth2, API key | search issues, create issue, update issue, add comment | issue created/updated webhook | Wave 5 Beadwork epic and leaf tasks are queued. |
+| 19 | `jido_connect_posthog` | PostHog | queued | project API key, personal API key, self-hosted host override | capture event, batch events, evaluate feature flag, query HogQL, list insights | annotation or alert webhook later | Wave 6 Beadwork epic and leaf tasks are queued. |
+| 20 | `jido_connect_http` | Generic HTTP | deferred | API key, bearer token, basic auth, custom headers | request, get JSON, post JSON, transform response | n/a | Core HTTP helpers already exist; standalone arbitrary HTTP connector is deferred pending policy/SSRF review. |
 | 21 | `jido_connect_webhook` | Generic Webhook | queued | shared secret/HMAC, static token, unsigned dev mode | normalize inbound payload, verify signature | inbound webhook | Wave 4 Beadwork epic and leaf tasks are queued. |
 | 22 | `jido_connect_mcp` | MCP bridge | shipped | host-provided endpoint credentials, OAuth/bearer passthrough | list tools, call tool | resource/prompt discovery later | Protocol bridge for MCP servers; pairs with HTTP/Webhook as the generic bridge family. |
 | 23 | `jido_connect_slack` | Slack | shipped | OAuth2 bot/user | channels, messages, users, reactions, files, search, pins, scheduled messages | Events API webhooks | Existing collaboration reference connector. |
 | 24 | `jido_connect_github` | GitHub | shipped | OAuth2 user, GitHub App installation | repositories, issues, PRs, Actions, files, releases, search, installations | polls and webhooks | Existing dev-work connector and GitHub App auth reference. |
 | 25 | `jido_connect_mercury` | Mercury banking | planned | API token, read-only/read-write/custom tier metadata | list accounts, balances, transactions, recipients, invoices | transaction/invoice poll later | Finance/ops connector; start read-only and require strict policy for money movement. |
-| 26 | `jido_connect_calendly` | Calendly | planned | OAuth2 user, webhook signing | list events, get event, cancel event | invitee created webhook, invitee canceled webhook | Scheduling breadth after Cal.com establishes the package shape. |
-| 27 | `jido_connect_salesforce` | Salesforce | planned | OAuth2, refresh token, connected app | query SOQL, get record, create/update lead, create task | record changed poll/webhook later | Enterprise CRM anchor; more complex auth and schemas. |
+| 26 | `jido_connect_calendly` | Calendly | queued | OAuth2 user, webhook signing | list events, get event, cancel event | invitee created webhook, invitee canceled webhook | Wave 4 Beadwork epic and leaf tasks are queued after Cal.com hardening. |
+| 27 | `jido_connect_salesforce` | Salesforce | queued | OAuth2, refresh token, connected app | query SOQL, get record, create/update lead, create task | record changed poll/webhook later | Wave 4 Beadwork epic and leaf tasks are queued. |
 | 28 | `jido_connect_microsoft_outlook` | Microsoft Outlook Mail | planned | OAuth2 Microsoft Graph | list messages, get message, send email, create draft | new email poll | Mirrors Gmail for Microsoft tenants. |
 | 29 | `jido_connect_microsoft_calendar` | Microsoft Calendar | planned | OAuth2 Microsoft Graph | list events, create/update event, find availability | event changed poll | Completes Microsoft assistant workflow. |
 | 30 | `jido_connect_microsoft_onedrive` | OneDrive | planned | OAuth2 Microsoft Graph | search files, download file, upload file | new file poll | Complements Outlook and Microsoft 365 file workflows. |
@@ -163,6 +163,12 @@ patterns, webhook/poll parity, generic long-tail API access, and richer schema
 metadata. Beadwork now has queued epics and leaf tasks for Cal.com hardening,
 HubSpot, Airtable, Generic HTTP, and Generic Webhook. Cal.com should go first
 because its recovered package currently exposes test/dependency hardening work.
+The standalone Generic HTTP connector is now deferred because core HTTP
+transport helpers already exist and arbitrary outbound HTTP needs a separate
+policy/SSRF design pass. Generic Webhook remains queued because generic inbound
+trigger handling is lower risk and complements provider-specific webhooks.
+Calendly and Salesforce epics are queued for later Wave 4 scheduling/CRM
+coverage.
 
 ### Wave 5: Work Management And Chat Handoffs
 
@@ -174,6 +180,7 @@ because its recovered package currently exposes test/dependency hardening work.
 This wave proves issue normalization, threaded comments, assignees/statuses,
 webhook dedupe, and `jido_chat` handoff workflows such as "turn this
 conversation into an issue" or "summarize this issue thread."
+Jira and Linear epics are queued with leaf tasks.
 
 ### Wave 6: Product Analytics And Generic Bridge
 
@@ -186,6 +193,8 @@ This wave proves analytics/query actions, feature-flag checks, and the generic
 long-tail bridge family. Keep HTTP, Webhook, and MCP as separate provider
 packages, but make them share auth, credential lease, policy, transport, error,
 and catalog contracts.
+PostHog and Generic Webhook are queued. Generic HTTP is deferred until the
+security policy surface is explicit.
 
 ### Wave 7: Support, Commerce, Payments, And Finance
 
