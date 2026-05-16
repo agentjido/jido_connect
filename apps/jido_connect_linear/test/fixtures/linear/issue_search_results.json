@@ -1,0 +1,65 @@
+{
+  "nodes": [
+    {
+      "id": "uuid-001",
+      "identifier": "LIN-123",
+      "title": "Implement user authentication flow",
+      "state": {
+        "id": "status-3",
+        "name": "In Progress",
+        "type": "started",
+        "color": "#F2C94C"
+      },
+      "priority": 3,
+      "priorityLabel": "Medium",
+      "team": {
+        "id": "team-1",
+        "key": "LIN",
+        "name": "Linear Team"
+      },
+      "assignee": {
+        "id": "user-1",
+        "name": "Alice Nakamura"
+      },
+      "labels": {
+        "nodes": [
+          {"id": "label-1", "name": "backend", "color": "#E5484D"},
+          {"id": "label-2", "name": "auth", "color": "#5B5DEF"}
+        ]
+      },
+      "createdAt": "2026-04-10T08:30:00.000Z",
+      "updatedAt": "2026-05-15T14:22:00.000Z"
+    },
+    {
+      "id": "uuid-002",
+      "identifier": "LIN-124",
+      "title": "Fix login redirect loop",
+      "state": {
+        "id": "status-1",
+        "name": "Backlog",
+        "type": "backlog",
+        "color": "#C8C8C8"
+      },
+      "priority": 1,
+      "priorityLabel": "Urgent",
+      "team": {
+        "id": "team-1",
+        "key": "LIN",
+        "name": "Linear Team"
+      },
+      "assignee": null,
+      "labels": {
+        "nodes": [
+          {"id": "label-3", "name": "bug", "color": "#E5484D"}
+        ]
+      },
+      "createdAt": "2026-05-10T12:00:00.000Z",
+      "updatedAt": "2026-05-15T16:00:00.000Z"
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": false,
+    "endCursor": "cursor-def456"
+  },
+  "totalCount": 2
+}

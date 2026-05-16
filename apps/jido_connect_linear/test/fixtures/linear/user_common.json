@@ -1,0 +1,8 @@
+{
+  "id": "user-1",
+  "name": "Alice Nakamura",
+  "displayName": "Alice Nakamura",
+  "email": "alice@example.com",
+  "avatarUrl": "https://avatars.linear.app/user-1",
+  "active": true
+}
