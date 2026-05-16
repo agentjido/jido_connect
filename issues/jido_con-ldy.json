@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-16T13:58:28Z",
+  "close_reason": "All child tasks closed; verify-connector-wave.sh passes for hubspot. Closing per REVIEW-S08.",
   "created": "2026-05-15T21:50:04Z",
   "description": "Build jido_connect_hubspot as the first CRM connector. Cover OAuth/private app token auth, CRM object search/read/write, notes/deals, webhook or poll foundations, catalog packs, and docs.",
   "id": "jido_con-ldy",
@@ -12,8 +14,8 @@
     "wave-4"
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "[W4] HubSpot Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T21:50:04Z"
+  "updated_at": "2026-05-16T13:58:28Z"
 }
