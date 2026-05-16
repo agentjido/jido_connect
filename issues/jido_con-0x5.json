@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-16T13:58:36Z",
+  "close_reason": "All child tasks closed; verify-connector-wave.sh passes for linear. Closing per REVIEW-S08.",
   "created": "2026-05-15T22:01:19Z",
   "description": "Build jido_connect_linear for modern product/development issue workflows. Cover OAuth/API key auth, issues/projects/teams/comments, mutations, webhook normalization, catalog packs, and docs.",
   "id": "jido_con-0x5",
@@ -12,8 +14,8 @@
     "work-management"
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "[W5] Linear Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T22:01:20Z"
+  "updated_at": "2026-05-16T13:58:36Z"
 }
