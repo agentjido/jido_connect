@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-pfy.2"
   ],
+  "closed_at": "2026-05-16T06:22:19Z",
+  "close_reason": "Implemented in 8a5d2c8 by pi-connector-factory",
   "created": "2026-05-15T22:01:40Z",
   "description": "Add umbrella app, provider module, OAuth/PAT auth profiles, transport boundary, README/AGENTS, and generated plugin tests.",
   "id": "jido_con-pfy.1",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-CALENDLY-S01] Scaffold jido_connect_calendly",
   "type": "task",
-  "updated_at": "2026-05-16T06:13:58Z"
+  "updated_at": "2026-05-16T06:22:19Z"
 }
