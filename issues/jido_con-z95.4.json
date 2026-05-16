@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-z95.5"
   ],
+  "closed_at": "2026-05-16T06:07:27Z",
+  "close_reason": "Implemented in 82733f6 by pi-connector-factory",
   "created": "2026-05-15T22:01:30Z",
   "description": "Implement HogQL/query action, list/get insights, date-range inputs, result normalization, pagination, tests, and error handling.",
   "id": "jido_con-z95.4",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-z95",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W6-PH-S04] Implement PostHog query and insight actions",
   "type": "task",
-  "updated_at": "2026-05-16T05:56:46Z"
+  "updated_at": "2026-05-16T06:07:27Z"
 }
