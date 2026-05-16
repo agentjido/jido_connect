@@ -40,6 +40,7 @@ defmodule Jido.Connect.PostHog do
       Jido.Connect.PostHog.Actions.EventCapture,
       Jido.Connect.PostHog.Actions.Persons,
       Jido.Connect.PostHog.Actions.Insights,
+      Jido.Connect.PostHog.Actions.Query,
       Jido.Connect.PostHog.Actions.FeatureFlags
     ]
 

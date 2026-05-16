@@ -28,6 +28,18 @@ defmodule Jido.Connect.PostHog.Actions.Insights do
         )
 
         field(:offset, :integer, default: 0, description: "Pagination offset.")
+
+        field(:date_from, :string,
+          default: nil,
+          description:
+            "Start date for filtering insights by update time (ISO 8601 or relative like '-30d')."
+        )
+
+        field(:date_to, :string,
+          default: nil,
+          description:
+            "End date for filtering insights by update time (ISO 8601 or relative like '-1d')."
+        )
       end
 
       output do
@@ -53,6 +65,17 @@ defmodule Jido.Connect.PostHog.Actions.Insights do
 
       input do
         field(:insight_id, :string, required?: true, description: "Insight short ID.")
+
+        field(:date_from, :string,
+          default: nil,
+          description:
+            "Start date for insight result date range (ISO 8601 or relative like '-30d')."
+        )
+
+        field(:date_to, :string,
+          default: nil,
+          description: "End date for insight result date range (ISO 8601 or relative like '-1d')."
+        )
 
         field(:fields, {:array, :string},
           default: nil,

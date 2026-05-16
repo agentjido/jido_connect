@@ -37,6 +37,10 @@ defmodule Jido.Connect.PostHog.CatalogPacks do
     "posthog.insight.get"
   ]
 
+  @query_tools [
+    "posthog.query.run"
+  ]
+
   @feature_flag_read_tools [
     "posthog.feature_flag.evaluate",
     "posthog.feature_flag.list",
@@ -44,7 +48,10 @@ defmodule Jido.Connect.PostHog.CatalogPacks do
   ]
 
   @reader_tools @event_read_tools ++
-                  @person_read_tools ++ @insight_read_tools ++ @feature_flag_read_tools
+                  @person_read_tools ++
+                  @insight_read_tools ++
+                  @query_tools ++
+                  @feature_flag_read_tools
 
   @doc "Returns all built-in PostHog catalog packs."
   def all, do: [reader(), writer()]

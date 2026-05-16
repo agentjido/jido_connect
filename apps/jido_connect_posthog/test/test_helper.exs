@@ -106,6 +106,53 @@ defmodule Jido.Connect.PostHog.MockClient do
      }}
   end
 
+  def get_insight("insight-001", "token", _opts) do
+    {:ok,
+     %Req.Response{
+       status: 200,
+       body: %{
+         "id" => "insight-001",
+         "short_id" => "iNbXkq2a",
+         "name" => "Pageviews",
+         "derived_name" => "Pageviews over time",
+         "kind" => "InsightLineChart",
+         "result" => [%{"data" => [1, 2, 3]}],
+         "created_at" => "2026-05-01T00:00:00.000Z",
+         "updated_at" => "2026-05-15T00:00:00.000Z"
+       }
+     }}
+  end
+
+  # HogQL query
+
+  def run_query("token", "SELECT event, count() FROM events GROUP BY event LIMIT 5", _opts) do
+    {:ok,
+     %Req.Response{
+       status: 200,
+       body: %{
+         "columns" => ["event", "count()"],
+         "results" => [
+           %{"event" => "pageview", "count()" => 15420},
+           %{"event" => "signup", "count()" => 832},
+           %{"event" => "purchase", "count()" => 215}
+         ],
+         "has_more" => false
+       }
+     }}
+  end
+
+  def run_query("token", _query, _opts) do
+    {:ok,
+     %Req.Response{
+       status: 200,
+       body: %{
+         "columns" => ["event"],
+         "results" => [],
+         "has_more" => false
+       }
+     }}
+  end
+
   # Event capture
 
   def capture_event("token", "pageview", "user-1", _opts) do

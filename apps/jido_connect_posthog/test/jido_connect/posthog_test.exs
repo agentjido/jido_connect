@@ -10,6 +10,8 @@ defmodule Jido.Connect.PostHogTest do
   @posthog_insights_fragment Jido.Connect.PostHog.Actions.Insights
   @posthog_feature_flags_fragment Jido.Connect.PostHog.Actions.FeatureFlags
 
+  @posthog_query_fragment Jido.Connect.PostHog.Actions.Query
+
   @posthog_action_modules [
     Jido.Connect.PostHog.Actions.ListEvents,
     Jido.Connect.PostHog.Actions.GetEvent,
@@ -19,6 +21,7 @@ defmodule Jido.Connect.PostHogTest do
     Jido.Connect.PostHog.Actions.GetPerson,
     Jido.Connect.PostHog.Actions.ListInsights,
     Jido.Connect.PostHog.Actions.GetInsight,
+    Jido.Connect.PostHog.Actions.RunQuery,
     Jido.Connect.PostHog.Actions.EvaluateFeatureFlag,
     Jido.Connect.PostHog.Actions.ListFeatureFlags,
     Jido.Connect.PostHog.Actions.GetFeatureFlag
@@ -29,6 +32,7 @@ defmodule Jido.Connect.PostHogTest do
     @posthog_event_capture_fragment,
     @posthog_persons_fragment,
     @posthog_insights_fragment,
+    @posthog_query_fragment,
     @posthog_feature_flags_fragment
   ]
 
@@ -51,6 +55,7 @@ defmodule Jido.Connect.PostHogTest do
              "posthog.person.get",
              "posthog.insight.list",
              "posthog.insight.get",
+             "posthog.query.run",
              "posthog.feature_flag.evaluate",
              "posthog.feature_flag.list",
              "posthog.feature_flag.get"

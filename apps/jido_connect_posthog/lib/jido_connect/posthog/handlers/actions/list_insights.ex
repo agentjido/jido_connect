@@ -2,6 +2,7 @@ defmodule Jido.Connect.PostHog.Handlers.Actions.ListInsights do
   @moduledoc false
 
   alias Jido.Connect.PostHog.Client
+  alias Jido.Connect.PostHog.Client.Normalizer
 
   def run(input, %{credentials: credentials}) do
     with {:ok, client} <- fetch_client(credentials),
@@ -27,17 +28,29 @@ defmodule Jido.Connect.PostHog.Handlers.Actions.ListInsights do
     []
     |> maybe_opt(:limit, Map.get(input, :limit))
     |> maybe_opt(:offset, Map.get(input, :offset))
+    |> maybe_opt(:date_from, Map.get(input, :date_from))
+    |> maybe_opt(:date_to, Map.get(input, :date_to))
   end
 
   defp maybe_opt(opts, _key, nil), do: opts
   defp maybe_opt(opts, key, value), do: Keyword.put(opts, key, value)
 
   defp normalize_insights(%{"results" => results} = body) do
+    insights =
+      Enum.map(results, fn item ->
+        case Normalizer.insight(item) do
+          {:ok, insight} -> insight
+          {:error, _} -> item
+        end
+      end)
+
+    {:ok, page} = Normalizer.pagination(body)
+
     %{
-      insights: results,
-      next: Map.get(body, "next")
+      insights: insights,
+      next: page.next
     }
   end
 
-  defp normalize_insights(body), do: body
+  defp normalize_insights(_body), do: %{insights: [], next: nil}
 end
