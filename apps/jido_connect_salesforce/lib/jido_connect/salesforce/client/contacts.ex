@@ -39,6 +39,19 @@ defmodule Jido.Connect.Salesforce.Client.Contacts do
     |> handle_create_response()
   end
 
+  @doc "Updates an existing Salesforce contact."
+  def update_contact(%{contact_id: contact_id} = params, credentials)
+      when is_binary(contact_id) and is_map(credentials) do
+    access_token = credentials[:access_token] || credentials[:api_key]
+    instance_url = credentials[:instance_url] || Transport.default_instance_url()
+    body = Params.contact_write_body(params)
+
+    instance_url
+    |> Transport.api_request(access_token)
+    |> Req.patch(url: "/sobjects/Contact/#{contact_id}", json: body)
+    |> handle_update_response()
+  end
+
   defp handle_create_response({:ok, %{status: status, body: body}})
        when status in 200..299 and is_map(body) do
     case Map.get(body, "id") do
@@ -52,6 +65,13 @@ defmodule Jido.Connect.Salesforce.Client.Contacts do
   end
 
   defp handle_create_response(response), do: Transport.handle_error_response(response)
+
+  defp handle_update_response({:ok, %{status: status}})
+       when status in 200..299 do
+    {:ok, %{success: true}}
+  end
+
+  defp handle_update_response(response), do: Transport.handle_error_response(response)
 
   defp normalize_contact(payload) when is_map(payload) do
     {:ok,

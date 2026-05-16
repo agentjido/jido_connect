@@ -49,7 +49,7 @@ defmodule Jido.Connect.Salesforce.Client.Params do
     query
   end
 
-  @doc "Builds the JSON body for contact create requests."
+  @doc "Builds the JSON body for contact create/update requests."
   def contact_write_body(params) do
     build_properties(params, %{
       first_name: "FirstName",
@@ -59,6 +59,42 @@ defmodule Jido.Connect.Salesforce.Client.Params do
       title: "Title",
       account_id: "AccountId"
     })
+  end
+
+  @doc "Builds the JSON body for lead create/update requests."
+  def lead_write_body(params) do
+    build_properties(params, %{
+      first_name: "FirstName",
+      last_name: "LastName",
+      email: "Email",
+      phone: "Phone",
+      company: "Company",
+      title: "Title",
+      status: "LeadSource",
+      source: "LeadSource",
+      owner_id: "OwnerId"
+    })
+  end
+
+  @doc "Builds the JSON body for task create/update requests."
+  def task_write_body(params) do
+    build_properties(params, %{
+      subject: "Subject",
+      status: "Status",
+      priority: "Priority",
+      description: "Description",
+      who_id: "WhoId",
+      what_id: "WhatId",
+      owner_id: "OwnerId",
+      activity_date: "ActivityDate"
+    })
+  end
+
+  @doc "Builds the JSON body for a generic SObject create/update request."
+  def record_write_body(params) do
+    extra = Data.get(params, :properties, %{}) || %{}
+    fields = Data.get(params, :fields, %{}) || %{}
+    Map.merge(fields, extra)
   end
 
   defp build_properties(params, field_map) do
