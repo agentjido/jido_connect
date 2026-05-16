@@ -1,0 +1,44 @@
+{
+  "totalSize": 2,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "Account",
+        "url": "/services/data/v60.0/sobjects/Account/0015g00000XYZaA1AA"
+      },
+      "Id": "0015g00000XYZaA1AA",
+      "Name": "Acme Corp",
+      "Industry": "Technology",
+      "BillingCity": "Austin",
+      "BillingState": "Texas",
+      "BillingCountry": "United States",
+      "Phone": "+1-555-0300",
+      "Website": "https://acme.example.com",
+      "Type": "Customer - Direct",
+      "NumberOfEmployees": 250,
+      "AnnualRevenue": 50000000,
+      "CreatedDate": "2025-11-01T08:00:00.000Z",
+      "LastModifiedDate": "2026-04-10T16:45:00.000Z"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "url": "/services/data/v60.0/sobjects/Account/0015g00000XYZaB2BB"
+      },
+      "Id": "0015g00000XYZaB2BB",
+      "Name": "Globex Inc",
+      "Industry": "Manufacturing",
+      "BillingCity": "Chicago",
+      "BillingState": "Illinois",
+      "BillingCountry": "United States",
+      "Phone": "+1-555-0301",
+      "Website": "https://globex.example.com",
+      "Type": "Prospect",
+      "NumberOfEmployees": 1000,
+      "AnnualRevenue": 120000000,
+      "CreatedDate": "2026-01-20T12:00:00.000Z",
+      "LastModifiedDate": "2026-05-01T09:00:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "totalSize": 2,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "Task",
+        "url": "/services/data/v60.0/sobjects/Task/00T5g00000JKLmN1AA"
+      },
+      "Id": "00T5g00000JKLmN1AA",
+      "Subject": "Follow up on proposal",
+      "Status": "In Progress",
+      "Priority": "Normal",
+      "Description": "Review the SOW and send updated pricing.",
+      "WhoId": "0035g00000ABCdE1AA",
+      "WhatId": "0065g00000GHIjK1AA",
+      "OwnerId": "0055g00000AAA1A1AA",
+      "ActivityDate": "2026-05-20",
+      "CreatedDate": "2026-05-10T11:30:00.000Z",
+      "LastModifiedDate": "2026-05-10T11:30:00.000Z"
+    },
+    {
+      "attributes": {
+        "type": "Task",
+        "url": "/services/data/v60.0/sobjects/Task/00T5g00000JKLmN2BB"
+      },
+      "Id": "00T5g00000JKLmN2BB",
+      "Subject": "Schedule demo call",
+      "Status": "Not Started",
+      "Priority": "High",
+      "Description": "Coordinate demo with technical team.",
+      "WhoId": "0035g00000ABCdE2BB",
+      "WhatId": "0065g00000GHIjL2BB",
+      "OwnerId": "0055g00000AAA1A1AA",
+      "ActivityDate": "2026-05-18",
+      "CreatedDate": "2026-05-12T08:00:00.000Z",
+      "LastModifiedDate": "2026-05-12T08:00:00.000Z"
+    }
+  ]
+}

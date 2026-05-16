@@ -1,0 +1,17 @@
+{
+  "attributes": {
+    "type": "Task",
+    "url": "/services/data/v60.0/sobjects/Task/00T5g00000JKLmN1AA"
+  },
+  "Id": "00T5g00000JKLmN1AA",
+  "Subject": "Follow up on proposal",
+  "Status": "In Progress",
+  "Priority": "Normal",
+  "Description": "Review the SOW and send updated pricing.",
+  "WhoId": "0035g00000ABCdE1AA",
+  "WhatId": "0065g00000GHIjK1AA",
+  "OwnerId": "0055g00000AAA1A1AA",
+  "ActivityDate": "2026-05-20",
+  "CreatedDate": "2026-05-10T11:30:00.000Z",
+  "LastModifiedDate": "2026-05-10T11:30:00.000Z"
+}

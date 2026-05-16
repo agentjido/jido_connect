@@ -1,0 +1,21 @@
+{
+  "attributes": {
+    "type": "Contact",
+    "url": "/services/data/v60.0/sobjects/Contact/0035g00000ABCdE1AA"
+  },
+  "Id": "0035g00000ABCdE1AA",
+  "FirstName": "Bella",
+  "LastName": "Martinez",
+  "Email": "bella@example.com",
+  "Phone": "+1-555-0101",
+  "Title": "Product Manager",
+  "AccountId": "0015g00000XYZaA1AA",
+  "OwnerId": "0055g00000AAA1A1AA",
+  "MailingAddress": {
+    "city": "Austin",
+    "state": "Texas",
+    "country": "United States"
+  },
+  "CreatedDate": "2026-01-15T10:30:00.000Z",
+  "LastModifiedDate": "2026-05-01T14:22:00.000Z"
+}
