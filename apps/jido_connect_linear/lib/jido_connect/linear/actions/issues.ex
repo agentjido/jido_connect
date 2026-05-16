@@ -144,6 +144,84 @@ defmodule Jido.Connect.Linear.Actions.Issues do
       end
     end
 
+    action :assign_issue do
+      id("linear.issue.assign")
+      resource(:issue)
+      verb(:update)
+      data_classification(:workspace_content)
+      label("Assign issue")
+      description("Assign a Linear issue to a user.")
+      handler(Jido.Connect.Linear.Handlers.Actions.AssignIssue)
+      effect(:write, confirmation: :required_for_ai)
+
+      access do
+        auth([:api_key, :oauth2_user], default: :api_key)
+        policies([:team_access])
+        scopes(["write"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:issue_id, :string, required?: true, example: "LIN-123")
+        field(:assignee_id, :string, required?: true)
+      end
+
+      output do
+        field(:updated, :boolean)
+      end
+    end
+
+    action :set_issue_status do
+      id("linear.issue.set_status")
+      resource(:issue)
+      verb(:update)
+      data_classification(:workspace_content)
+      label("Set issue status")
+      description("Change the workflow status of a Linear issue.")
+      handler(Jido.Connect.Linear.Handlers.Actions.SetIssueStatus)
+      effect(:write, confirmation: :required_for_ai)
+
+      access do
+        auth([:api_key, :oauth2_user], default: :api_key)
+        policies([:team_access])
+        scopes(["write"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:issue_id, :string, required?: true, example: "LIN-123")
+        field(:status, :string, required?: true, description: "Linear workflow state ID or name.")
+      end
+
+      output do
+        field(:updated, :boolean)
+      end
+    end
+
+    action :set_issue_labels do
+      id("linear.issue.set_labels")
+      resource(:issue)
+      verb(:update)
+      data_classification(:workspace_content)
+      label("Set issue labels")
+      description("Replace the labels on a Linear issue.")
+      handler(Jido.Connect.Linear.Handlers.Actions.SetIssueLabels)
+      effect(:write, confirmation: :required_for_ai)
+
+      access do
+        auth([:api_key, :oauth2_user], default: :api_key)
+        policies([:team_access])
+        scopes(["write"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:issue_id, :string, required?: true, example: "LIN-123")
+        field(:labels, {:array, :string}, required?: true, default: [])
+      end
+
+      output do
+        field(:updated, :boolean)
+      end
+    end
+
     action :add_comment do
       id("linear.issue.comment.create")
       resource(:comment)
