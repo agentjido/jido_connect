@@ -25,51 +25,70 @@ defmodule Jido.Connect.InboundWebhook do
   """
 
   use Jido.Connect,
-    fragments: []
+    fragments: [
+      Jido.Connect.InboundWebhook.Triggers.InboundDelivery
+    ]
 
   integration do
-    id :webhook
-    name "Webhook"
-    description "Generic inbound webhook verification, replay protection, and normalized delivery metadata."
-    category :tool_bridge
-    docs []
+    id(:webhook)
+    name("Webhook")
+
+    description(
+      "Generic inbound webhook verification, replay protection, and normalized delivery metadata."
+    )
+
+    category(:tool_bridge)
+    docs([])
   end
 
   catalog do
-    package :jido_connect_webhook
-    status :available
-    tags [:webhook, :verification, :infrastructure]
+    package(:jido_connect_webhook)
+    status(:available)
+    tags([:webhook, :verification, :infrastructure])
 
     capability :hmac_verification do
-      kind :webhook
-      feature :hmac_webhook_verification
-      label "HMAC webhook verification"
-      description "Verify inbound webhook signatures using HMAC-SHA256 with configurable headers and digest prefixes."
+      kind(:webhook)
+      feature(:hmac_webhook_verification)
+      label("HMAC webhook verification")
+
+      description(
+        "Verify inbound webhook signatures using HMAC-SHA256 with configurable headers and digest prefixes."
+      )
+    end
+
+    capability :inbound_delivery do
+      kind(:webhook)
+      feature(:webhook_inbound_delivery)
+      label("Inbound webhook delivery")
+
+      description(
+        "Receive normalized inbound webhook deliveries with header, body, and query metadata, plus replay deduplication."
+      )
     end
   end
 
   auth do
     api_key :signing_secret do
-      default? true
-      owner :tenant
-      subject :webhook
-      label "Webhook signing secret"
+      default?(true)
+      owner(:tenant)
+      subject(:webhook)
+      label("Webhook signing secret")
       setup :api_key_shared_secret
-      credential_fields [:signing_secret]
-      lease_fields [:signing_secret]
+      credential_fields([:signing_secret])
+      lease_fields([:signing_secret])
 
-      scopes []
-      default_scopes []
+      scopes([])
+      default_scopes([])
     end
   end
 
   policies do
     policy :webhook_access do
-      label "Webhook access"
-      description "Host verifies the actor may receive webhook deliveries for this connection."
-      subject {:connection, :owner}
-      owner {:connection, :owner}
-      decision :allow_operation
+      label("Webhook access")
+      description("Host verifies the actor may receive webhook deliveries for this connection.")
+      subject({:connection, :owner})
+      owner({:connection, :owner})
+      decision(:allow_operation)
     end
   end
 end
