@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-16T13:58:19Z",
+  "close_reason": "All child tasks closed; verify-connector-wave.sh passes for airtable. Closing per REVIEW-S08.",
   "created": "2026-05-15T21:50:12Z",
   "description": "Build jido_connect_airtable for base/table/record workflows. Cover OAuth/PAT auth, metadata discovery, record CRUD/batch operations, changed-record polling guidance, catalog packs, and docs.",
   "id": "jido_con-4ss",
@@ -12,8 +14,8 @@
     "wave-4"
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "[W4] Airtable Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T21:50:13Z"
+  "updated_at": "2026-05-16T13:58:19Z"
 }
