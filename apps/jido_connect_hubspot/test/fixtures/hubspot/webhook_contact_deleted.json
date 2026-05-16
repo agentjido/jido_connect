@@ -1,0 +1,10 @@
+{
+  "eventId": "1003",
+  "subscriptionId": "51",
+  "portalId": "123456",
+  "objectId": "501",
+  "eventType": "contact.deletion",
+  "changeSource": "CRM_UI",
+  "occurredAt": 1747382400000,
+  "appId": "99999"
+}

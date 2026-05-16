@@ -1,7 +1,7 @@
 defmodule Jido.Connect.HubSpot.FixtureTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.HubSpot.Normalizer
+  alias Jido.Connect.HubSpot.{Normalizer, Webhook}
 
   describe "contact fixtures" do
     test "normalizes common contact fixture" do
@@ -109,6 +109,55 @@ defmodule Jido.Connect.HubSpot.FixtureTest do
       assert {:ok, page} = Normalizer.pagination(payload)
       assert page.after == "501"
       assert page.total == 142
+    end
+  end
+
+  describe "webhook event fixtures" do
+    test "normalizes contact updated webhook fixture" do
+      payload = fixture!("webhook_contact_updated.json")
+
+      assert {:ok, signal} = Webhook.normalize_event(payload)
+      assert signal.event_id == "1001"
+      assert signal.object_type == "contact"
+      assert signal.change_type == "updated"
+      assert signal.property_name == "lifecyclestage"
+    end
+
+    test "normalizes contact created webhook fixture" do
+      payload = fixture!("webhook_contact_created.json")
+
+      assert {:ok, signal} = Webhook.normalize_event(payload)
+      assert signal.change_type == "created"
+    end
+
+    test "normalizes contact deleted webhook fixture" do
+      payload = fixture!("webhook_contact_deleted.json")
+
+      assert {:ok, signal} = Webhook.normalize_event(payload)
+      assert signal.change_type == "deleted"
+    end
+
+    test "normalizes deal updated webhook fixture" do
+      payload = fixture!("webhook_deal_updated.json")
+
+      assert {:ok, signal} = Webhook.normalize_event(payload)
+      assert signal.object_type == "deal"
+      assert signal.change_type == "updated"
+      assert signal.property_name == "dealstage"
+    end
+
+    test "normalizes deal created webhook fixture" do
+      payload = fixture!("webhook_deal_created.json")
+
+      assert {:ok, signal} = Webhook.normalize_event(payload)
+      assert signal.change_type == "created"
+    end
+
+    test "normalizes batch webhook events fixture" do
+      events = fixture!("webhook_batch_events.json")
+
+      assert {:ok, signals} = Webhook.normalize_events(events)
+      assert length(signals) == 2
     end
   end
 

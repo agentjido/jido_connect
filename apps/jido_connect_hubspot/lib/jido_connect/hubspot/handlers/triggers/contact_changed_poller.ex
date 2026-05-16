@@ -1,0 +1,185 @@
+defmodule Jido.Connect.HubSpot.Handlers.Triggers.ContactChangedPoller do
+  @moduledoc false
+
+  alias Jido.Connect.HubSpot.Checkpoint
+  alias Jido.Connect.HubSpot.Client
+
+  @doc """
+  Polls for changed HubSpot contacts.
+
+  HubSpot CRM does not offer sync tokens. This trigger uses the
+  `lastmodifieddate` property as a timestamp checkpoint:
+
+    * On the first poll (no checkpoint), a full snapshot is taken but
+      no signals are emitted. The latest `updated_at` across all returned
+      contacts becomes the initial checkpoint.
+
+    * On subsequent polls, a search request filters contacts with
+      `lastmodifieddate >= checkpoint`. Each contact produces a signal.
+      The new checkpoint is the latest `updated_at` value from the response.
+
+  Deduplication by `contact_id + updated_at` prevents double-emission when
+  contacts share the same millisecond timestamp across pages.
+  """
+  def poll(config, %{credentials: credentials, checkpoint: checkpoint}) do
+    with {:ok, client} <- fetch_client(credentials) do
+      config = normalize_config(config)
+      access_token = credential_token(credentials)
+
+      if checkpoint in [nil, ""] do
+        initialize_checkpoint(client, config, access_token)
+      else
+        poll_changes(client, config, checkpoint, access_token)
+      end
+    end
+  end
+
+  defp initialize_checkpoint(client, config, access_token) do
+    fetch_contact_pages(client, config, access_token, [], nil, MapSet.new(), emit?: false)
+  end
+
+  defp poll_changes(client, config, checkpoint, access_token) do
+    params =
+      build_search_params(config, checkpoint)
+      |> Map.put(:updated_min, checkpoint)
+
+    fetch_contact_pages(client, params, access_token, [], nil, MapSet.new(), emit?: true)
+  end
+
+  defp build_search_params(config, checkpoint) do
+    %{
+      filter_groups: [
+        %{
+          filters: [
+            %{
+              propertyName: "lastmodifieddate",
+              operator: "GTE",
+              value: checkpoint
+            }
+          ]
+        }
+      ],
+      properties: Map.get(config, :properties),
+      limit: Map.get(config, :limit, 100)
+    }
+  end
+
+  defp fetch_contact_pages(client, params, access_token, signals, latest_updated, seen, opts) do
+    request_fn = if Map.has_key?(params, :filter_groups), do: :search, else: :list
+
+    result =
+      case request_fn do
+        :search -> client.search_contacts(params, access_token)
+        :list -> client.list_contacts(params, access_token)
+      end
+
+    with {:ok, resp} <- result do
+      items = Map.get(resp, :items, [])
+      emit? = Keyword.fetch!(opts, :emit?)
+
+      signals =
+        if emit? do
+          signals ++ Enum.map(items, &normalize_signal/1)
+        else
+          signals
+        end
+
+      latest_updated = latest_updated_from_items(items) || latest_updated
+
+      after_cursor = get_in(resp, [:pagination, :after])
+
+      case after_cursor do
+        nil ->
+          checkpoint = latest_updated || Map.get(params, :updated_min)
+
+          if checkpoint in [nil, ""] do
+            Checkpoint.invalid_response(
+              "HubSpot contact list response contained no contacts with updated timestamps"
+            )
+          else
+            {:ok, %{signals: dedupe_signals(signals), checkpoint: checkpoint}}
+          end
+
+        cursor ->
+          if MapSet.member?(seen, cursor) do
+            Checkpoint.invalid_response("HubSpot contact list response repeated paging cursor", %{
+              after: cursor
+            })
+          else
+            fetch_contact_pages(
+              client,
+              Map.put(params, :after, cursor),
+              access_token,
+              signals,
+              latest_updated,
+              MapSet.put(seen, cursor),
+              opts
+            )
+          end
+      end
+    end
+  end
+
+  defp normalize_config(config) do
+    config
+    |> Map.put_new(:limit, 100)
+    |> Map.put_new(:archived, false)
+  end
+
+  defp normalize_signal(contact) do
+    %{
+      contact_id: Map.get(contact, :contact_id),
+      email: Map.get(contact, :email),
+      first_name: Map.get(contact, :first_name),
+      last_name: Map.get(contact, :last_name),
+      change_type: change_type(contact),
+      updated_at: Map.get(contact, :updated_at),
+      archived?: Map.get(contact, :archived?, false),
+      contact: public_map(contact)
+    }
+    |> Enum.reject(fn {_key, value} -> is_nil(value) end)
+    |> Map.new()
+  end
+
+  defp change_type(%{archived?: true}), do: "archived"
+  defp change_type(_contact), do: "updated"
+
+  defp latest_updated_from_items(items) when is_list(items) do
+    items
+    |> Enum.map(&Map.get(&1, :updated_at))
+    |> Enum.reject(&is_nil/1)
+    |> Enum.sort(:desc)
+    |> List.first()
+  end
+
+  defp dedupe_signals(signals) do
+    {_seen, unique} =
+      Enum.reduce(signals, {MapSet.new(), []}, fn signal, {seen, acc} ->
+        key = {Map.get(signal, :contact_id), Map.get(signal, :updated_at)}
+
+        cond do
+          key == {nil, nil} ->
+            {seen, acc}
+
+          MapSet.member?(seen, key) ->
+            {seen, acc}
+
+          true ->
+            {MapSet.put(seen, key), [signal | acc]}
+        end
+      end)
+
+    Enum.reverse(unique)
+  end
+
+  defp public_map(struct) when is_struct(struct), do: struct |> Map.from_struct() |> public_map()
+  defp public_map(map) when is_map(map), do: map
+  defp public_map(value), do: value
+
+  defp fetch_client(%{hubspot_client: client}) when is_atom(client), do: {:ok, client}
+  defp fetch_client(_credentials), do: {:ok, Client}
+
+  defp credential_token(credentials) do
+    Map.get(credentials, :api_key) || Map.get(credentials, :access_token)
+  end
+end

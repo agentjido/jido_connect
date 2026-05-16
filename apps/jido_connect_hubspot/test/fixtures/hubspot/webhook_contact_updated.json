@@ -1,0 +1,12 @@
+{
+  "eventId": "1001",
+  "subscriptionId": "50",
+  "portalId": "123456",
+  "objectId": "501",
+  "eventType": "contact.propertyChange",
+  "propertyName": "lifecyclestage",
+  "propertyValue": "customer",
+  "changeSource": "CRM_UI",
+  "occurredAt": 1747324800000,
+  "appId": "99999"
+}
