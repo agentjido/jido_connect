@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-cnk.2"
   ],
+  "closed_at": "2026-05-16T03:03:32Z",
+  "close_reason": "Implemented in e967d4e by pi-connector-factory",
   "created": "2026-05-15T21:50:27Z",
   "description": "Add package shell, provider module, auth/verification profile structs, generated plugin/sensor tests, and README skeleton.",
   "id": "jido_con-cnk.1",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-cnk",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-WEB-S01] Scaffold jido_connect_webhook",
   "type": "task",
-  "updated_at": "2026-05-16T02:41:18Z"
+  "updated_at": "2026-05-16T03:03:32Z"
 }
