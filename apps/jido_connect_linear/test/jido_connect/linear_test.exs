@@ -5,6 +5,7 @@ defmodule Jido.Connect.LinearTest do
   alias Jido.Connect.Linear
 
   @linear_actions_fragment Jido.Connect.Linear.Actions.Issues
+  @linear_comments_fragment Jido.Connect.Linear.Actions.Comments
   @linear_teams_fragment Jido.Connect.Linear.Actions.Teams
 
   @linear_action_modules [
@@ -13,7 +14,9 @@ defmodule Jido.Connect.LinearTest do
     Jido.Connect.Linear.Actions.CreateIssue,
     Jido.Connect.Linear.Actions.UpdateIssue,
     Jido.Connect.Linear.Actions.AddComment,
-    Jido.Connect.Linear.Actions.ListTeams
+    Jido.Connect.Linear.Actions.ListComments,
+    Jido.Connect.Linear.Actions.ListTeams,
+    Jido.Connect.Linear.Actions.GetTeam
   ]
 
   @linear_sensor_modules [
@@ -24,6 +27,7 @@ defmodule Jido.Connect.LinearTest do
 
   @linear_dsl_fragments [
     @linear_actions_fragment,
+    @linear_comments_fragment,
     @linear_teams_fragment,
     @linear_triggers_fragment
   ]
@@ -44,7 +48,9 @@ defmodule Jido.Connect.LinearTest do
              "linear.issue.create",
              "linear.issue.update",
              "linear.issue.comment.create",
-             "linear.team.list"
+             "linear.issue.comments.list",
+             "linear.team.list",
+             "linear.team.get"
            ]
 
     assert Enum.map(spec.triggers, & &1.id) == [
@@ -156,6 +162,28 @@ defmodule Jido.Connect.LinearTest do
               scope_resolver: Jido.Connect.Linear.ScopeResolver
             }} =
              Connect.action(spec, "linear.team.list")
+
+    assert {:ok,
+            %{
+              id: "linear.issue.comments.list",
+              resource: :comment,
+              verb: :list,
+              mutation?: false,
+              auth_profiles: [:api_key, :oauth2_user],
+              scope_resolver: Jido.Connect.Linear.ScopeResolver
+            }} =
+             Connect.action(spec, "linear.issue.comments.list")
+
+    assert {:ok,
+            %{
+              id: "linear.team.get",
+              resource: :team,
+              verb: :get,
+              mutation?: false,
+              auth_profiles: [:api_key, :oauth2_user],
+              scope_resolver: Jido.Connect.Linear.ScopeResolver
+            }} =
+             Connect.action(spec, "linear.team.get")
   end
 
   test "compiles generated Jido plugin surface" do

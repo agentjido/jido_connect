@@ -83,6 +83,50 @@ defmodule Jido.Connect.Linear.MockClient do
        created_at: "2026-05-15T14:00:00.000Z"
      }}
   end
+
+  def list_comments("uuid-001", "token", _opts) do
+    {:ok,
+     %{
+       comments: [
+         %{
+           id: "comment-1",
+           body: "Investigated the OAuth2 flow.",
+           author: %{id: "user-1", name: "Alice Nakamura", email: "alice@example.com"},
+           parent_id: "uuid-001",
+           created_at: "2026-05-01T10:30:00.000Z",
+           updated_at: "2026-05-01T10:30:00.000Z"
+         },
+         %{
+           id: "comment-2",
+           body: "Implemented the authorization code flow.",
+           author: %{id: "user-2", name: "Bob Martinez", email: "bob@example.com"},
+           parent_id: "uuid-001",
+           created_at: "2026-05-05T14:00:00.000Z",
+           updated_at: "2026-05-05T14:00:00.000Z"
+         }
+       ],
+       has_next_page: false,
+       end_cursor: nil,
+       total_count: 2
+     }}
+  end
+
+  def get_team("team-1", "token", _opts) do
+    {:ok,
+     %{
+       id: "team-1",
+       key: "LIN",
+       name: "Linear Team",
+       description: "Core Linear product team.",
+       icon: "🚀",
+       color: "#5B5DEF",
+       lead: %{id: "user-1", name: "Alice Nakamura", email: "alice@example.com"}
+     }}
+  end
+
+  def get_team("team-1", "token") do
+    get_team("team-1", "token", [])
+  end
 end
 
 # Ensure Req.Test.Ownership is running so that client tests using

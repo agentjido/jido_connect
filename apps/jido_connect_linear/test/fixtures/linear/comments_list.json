@@ -1,0 +1,35 @@
+{
+  "nodes": [
+    {
+      "id": "comment-1",
+      "body": "Investigated the OAuth2 flow. Ready to start implementation.",
+      "user": {
+        "id": "user-1",
+        "name": "Alice Nakamura",
+        "displayName": "Alice Nakamura",
+        "email": "alice@example.com"
+      },
+      "parentId": "uuid-001",
+      "createdAt": "2026-05-01T10:30:00.000Z",
+      "updatedAt": "2026-05-01T10:30:00.000Z"
+    },
+    {
+      "id": "comment-2",
+      "body": "Implemented the authorization code flow. Will add PKCE next.",
+      "user": {
+        "id": "user-2",
+        "name": "Bob Martinez",
+        "displayName": "Bob Martinez",
+        "email": "bob@example.com"
+      },
+      "parentId": "uuid-001",
+      "createdAt": "2026-05-05T14:00:00.000Z",
+      "updatedAt": "2026-05-05T14:00:00.000Z"
+    }
+  ],
+  "pageInfo": {
+    "hasNextPage": false,
+    "endCursor": "cursor-comment-2"
+  },
+  "totalCount": 2
+}

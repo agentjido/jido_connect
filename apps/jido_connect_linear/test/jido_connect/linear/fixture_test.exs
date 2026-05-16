@@ -211,6 +211,33 @@ defmodule Jido.Connect.Linear.FixtureTest do
     end
   end
 
+  describe "comments list fixture" do
+    test "normalizes comments list fixture" do
+      payload = fixture!("comments_list.json")
+
+      nodes = payload["nodes"]
+      page_info = Map.merge(payload["pageInfo"], %{"totalCount" => payload["totalCount"]})
+
+      assert {:ok, page} = Normalizer.pagination(page_info)
+      assert page.has_next_page == false
+      assert page.end_cursor == "cursor-comment-2"
+      assert page.total_count == 2
+      assert length(nodes) == 2
+
+      assert {:ok, first} = Normalizer.comment(Enum.at(nodes, 0))
+      assert first.id == "comment-1"
+      assert first.body == "Investigated the OAuth2 flow. Ready to start implementation."
+      assert first.author.id == "user-1"
+      assert first.author.name == "Alice Nakamura"
+      assert first.parent_id == "uuid-001"
+      assert first.created_at == "2026-05-01T10:30:00.000Z"
+
+      assert {:ok, second} = Normalizer.comment(Enum.at(nodes, 1))
+      assert second.id == "comment-2"
+      assert second.author.name == "Bob Martinez"
+    end
+  end
+
   defp fixture!(name) do
     Path.join([__DIR__, "..", "..", "..", "test", "fixtures", "linear", name])
     |> Path.expand()

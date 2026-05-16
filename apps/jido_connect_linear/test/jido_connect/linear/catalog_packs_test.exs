@@ -19,9 +19,11 @@ defmodule Jido.Connect.Linear.CatalogPacksTest do
       # Issue reads
       assert "linear.issue.get" in ids
       assert "linear.issue.search" in ids
+      assert "linear.issue.comments.list" in ids
 
       # Team reads
       assert "linear.team.list" in ids
+      assert "linear.team.get" in ids
 
       # Write tools excluded
       refute "linear.issue.create" in ids
@@ -47,6 +49,24 @@ defmodule Jido.Connect.Linear.CatalogPacksTest do
                )
 
       assert descriptor.tool.id == "linear.team.list"
+
+      assert {:ok, descriptor} =
+               Catalog.describe_tool("linear.issue.comments.list",
+                 modules: [Linear],
+                 packs: Linear.catalog_packs(),
+                 pack: :linear_reader
+               )
+
+      assert descriptor.tool.id == "linear.issue.comments.list"
+
+      assert {:ok, descriptor} =
+               Catalog.describe_tool("linear.team.get",
+                 modules: [Linear],
+                 packs: Linear.catalog_packs(),
+                 pack: :linear_reader
+               )
+
+      assert descriptor.tool.id == "linear.team.get"
 
       assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
                Catalog.describe_tool("linear.issue.create",
@@ -78,7 +98,9 @@ defmodule Jido.Connect.Linear.CatalogPacksTest do
       # All read tools
       assert "linear.issue.get" in ids
       assert "linear.issue.search" in ids
+      assert "linear.issue.comments.list" in ids
       assert "linear.team.list" in ids
+      assert "linear.team.get" in ids
 
       # Write tools included
       assert "linear.issue.create" in ids

@@ -93,6 +93,37 @@ defmodule Jido.Connect.Linear.Client do
   }
   """
 
+  @list_comments_query """
+  query ListComments($issueId: String!, $first: Int, $after: String) {
+    comments(filter: { issue: { id: { eq: $issueId } } }, first: $first, after: $after) {
+      nodes {
+        id
+        body
+        user { id name displayName email }
+        parentId
+        createdAt
+        updatedAt
+      }
+      pageInfo { hasNextPage endCursor }
+      totalCount
+    }
+  }
+  """
+
+  @get_team_query """
+  query GetTeam($id: String!) {
+    team(id: $id) {
+      id
+      key
+      name
+      description
+      icon
+      color
+      lead { id name displayName email }
+    }
+  }
+  """
+
   @create_comment_mutation """
   mutation CreateComment($input: CommentCreateInput!) {
     commentCreate(input: $input) {
@@ -170,6 +201,34 @@ defmodule Jido.Connect.Linear.Client do
     |> Transport.request()
     |> Transport.graphql(@list_teams_query, variables)
     |> Response.handle_team_list_response()
+  end
+
+  @doc "Lists comments for a Linear issue with pagination."
+  def list_comments(issue_id, access_token, opts \\ [])
+      when is_binary(issue_id) and is_binary(access_token) do
+    variables = %{
+      issueId: issue_id,
+      first: Keyword.get(opts, :first, 50),
+      after: Keyword.get(opts, :after)
+    }
+
+    variables = if variables.after, do: variables, else: Map.delete(variables, :after)
+
+    access_token
+    |> Transport.request()
+    |> Transport.graphql(@list_comments_query, variables)
+    |> Response.handle_comments_list_response()
+  end
+
+  @doc "Fetches a single Linear team by ID."
+  def get_team(team_id, access_token, _opts \\ [])
+      when is_binary(team_id) and is_binary(access_token) do
+    variables = %{id: team_id}
+
+    access_token
+    |> Transport.request()
+    |> Transport.graphql(@get_team_query, variables)
+    |> Response.handle_team_get_response()
   end
 
   @doc "Adds a comment to a Linear issue."
