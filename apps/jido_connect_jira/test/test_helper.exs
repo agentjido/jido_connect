@@ -3,7 +3,7 @@ ExUnit.start()
 defmodule Jido.Connect.Jira.MockClient do
   @moduledoc false
 
-  def get_issue("PROJ-123", "token") do
+  def get_issue("PROJ-123", "token", _opts) do
     {:ok,
      %{
        key: "PROJ-123",
@@ -21,10 +21,11 @@ defmodule Jido.Connect.Jira.MockClient do
      }}
   end
 
-  def search_issues("project = PROJ ORDER BY updated DESC", "token",
-        max_results: 50,
-        start_at: 0
-      ) do
+  def get_issue("PROJ-123", "token") do
+    get_issue("PROJ-123", "token", [])
+  end
+
+  def search_issues("project = PROJ ORDER BY updated DESC", "token", opts) do
     {:ok,
      %{
        issues: [
@@ -38,8 +39,58 @@ defmodule Jido.Connect.Jira.MockClient do
          }
        ],
        total: 1,
-       start_at: 0,
-       max_results: 50
+       start_at: Keyword.get(opts, :start_at, 0),
+       max_results: Keyword.get(opts, :max_results, 50),
+       is_last: true
+     }}
+  end
+
+  def search_issues(jql, token, opts) do
+    search_issues(jql, token, opts)
+  end
+
+  def list_projects("token", opts) do
+    {:ok,
+     %{
+       projects: [
+         %{key: "PROJ", id: "10000", name: "Project Alpha", project_type: "software"},
+         %{key: "TEAM", id: "10001", name: "Team Operations", project_type: "business"}
+       ],
+       total: 2,
+       start_at: Keyword.get(opts, :start_at, 0),
+       max_results: Keyword.get(opts, :max_results, 50),
+       is_last: true
+     }}
+  end
+
+  def get_project("PROJ", "token") do
+    {:ok,
+     %{
+       key: "PROJ",
+       id: "10000",
+       name: "Project Alpha",
+       project_type: "software",
+       style: "classic",
+       description: "Main software project for the Alpha product line.",
+       lead: %{account_id: "acct-1", display_name: "Alice Nakamura", active: true}
+     }}
+  end
+
+  def list_field_schemas("token", _opts) do
+    {:ok,
+     %{
+       fields: [
+         %{id: "summary", name: "Summary", key: "summary", custom: false, searchable: true},
+         %{id: "assignee", name: "Assignee", key: "assignee", custom: false, searchable: true},
+         %{
+           id: "customfield_10001",
+           name: "Story Points",
+           key: "customfield_10001",
+           custom: true,
+           searchable: true
+         }
+       ],
+       total: 3
      }}
   end
 

@@ -5,17 +5,24 @@ defmodule Jido.Connect.JiraTest do
   alias Jido.Connect.Jira
 
   @jira_actions_fragment Jido.Connect.Jira.Actions.Issues
+  @jira_projects_fragment Jido.Connect.Jira.Actions.Projects
+  @jira_metadata_fragment Jido.Connect.Jira.Actions.Metadata
 
   @jira_action_modules [
     Jido.Connect.Jira.Actions.GetIssue,
     Jido.Connect.Jira.Actions.ListIssues,
-    Jido.Connect.Jira.Actions.CreateIssue
+    Jido.Connect.Jira.Actions.CreateIssue,
+    Jido.Connect.Jira.Actions.ListProjects,
+    Jido.Connect.Jira.Actions.GetProject,
+    Jido.Connect.Jira.Actions.ListFieldSchemas
   ]
 
   @jira_sensor_modules []
 
   @jira_dsl_fragments [
-    @jira_actions_fragment
+    @jira_actions_fragment,
+    @jira_projects_fragment,
+    @jira_metadata_fragment
   ]
 
   test "declares Jira provider metadata" do
@@ -31,7 +38,10 @@ defmodule Jido.Connect.JiraTest do
     assert Enum.map(spec.actions, & &1.id) == [
              "jira.issue.get",
              "jira.issue.search",
-             "jira.issue.create"
+             "jira.issue.create",
+             "jira.project.list",
+             "jira.project.get",
+             "jira.field_schema.list"
            ]
 
     assert Enum.map(spec.triggers, & &1.id) == []
@@ -106,6 +116,39 @@ defmodule Jido.Connect.JiraTest do
               scope_resolver: Jido.Connect.Jira.ScopeResolver
             }} =
              Connect.action(spec, "jira.issue.create")
+
+    assert {:ok,
+            %{
+              id: "jira.project.list",
+              resource: :project,
+              verb: :list,
+              mutation?: false,
+              auth_profiles: [:api_token, :oauth2_user],
+              scope_resolver: Jido.Connect.Jira.ScopeResolver
+            }} =
+             Connect.action(spec, "jira.project.list")
+
+    assert {:ok,
+            %{
+              id: "jira.project.get",
+              resource: :project,
+              verb: :get,
+              mutation?: false,
+              auth_profiles: [:api_token, :oauth2_user],
+              scope_resolver: Jido.Connect.Jira.ScopeResolver
+            }} =
+             Connect.action(spec, "jira.project.get")
+
+    assert {:ok,
+            %{
+              id: "jira.field_schema.list",
+              resource: :field_schema,
+              verb: :list,
+              mutation?: false,
+              auth_profiles: [:api_token, :oauth2_user],
+              scope_resolver: Jido.Connect.Jira.ScopeResolver
+            }} =
+             Connect.action(spec, "jira.field_schema.list")
   end
 
   test "compiles generated Jido plugin surface" do
@@ -160,8 +203,20 @@ defmodule Jido.Connect.JiraTest do
 
     assert projection.action_id == "jira.issue.get"
     assert projection.label == "Get issue"
-    assert Enum.map(projection.input, & &1.name) == [:issue_key]
-    assert Enum.map(projection.output, & &1.name) == [:key, :summary, :status, :project]
+    assert Enum.map(projection.input, & &1.name) == [:issue_key, :fields]
+
+    assert Enum.map(projection.output, & &1.name) == [
+             :key,
+             :summary,
+             :status,
+             :project,
+             :assignee,
+             :priority,
+             :labels,
+             :created_at,
+             :updated_at
+           ]
+
     assert projection.risk == :read
     assert projection.resource == :issue
     assert projection.verb == :get

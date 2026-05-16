@@ -24,6 +24,11 @@ defmodule Jido.Connect.Jira.Actions.Issues do
 
       input do
         field(:issue_key, :string, required?: true, example: "PROJ-123")
+
+        field(:fields, {:array, :string},
+          default: nil,
+          description: "Comma-separated or list of field keys to return. Defaults to all fields."
+        )
       end
 
       output do
@@ -31,6 +36,11 @@ defmodule Jido.Connect.Jira.Actions.Issues do
         field(:summary, :string)
         field(:status, :map)
         field(:project, :map)
+        field(:assignee, :map)
+        field(:priority, :map)
+        field(:labels, {:array, :string})
+        field(:created_at, :string)
+        field(:updated_at, :string)
       end
     end
 
@@ -54,11 +64,19 @@ defmodule Jido.Connect.Jira.Actions.Issues do
         field(:jql, :string, required?: true, example: "project = PROJ ORDER BY updated DESC")
         field(:max_results, :integer, default: 50)
         field(:start_at, :integer, default: 0)
+
+        field(:fields, {:array, :string},
+          default: ["summary", "status", "assignee", "updated"],
+          description: "List of field keys to return in each issue."
+        )
       end
 
       output do
         field(:issues, {:array, :map})
         field(:total, :integer)
+        field(:start_at, :integer)
+        field(:max_results, :integer)
+        field(:is_last, :boolean)
       end
     end
 

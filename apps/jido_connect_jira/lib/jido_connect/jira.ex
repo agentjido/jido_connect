@@ -27,7 +27,9 @@ defmodule Jido.Connect.Jira do
 
   use Jido.Connect,
     fragments: [
-      Jido.Connect.Jira.Actions.Issues
+      Jido.Connect.Jira.Actions.Issues,
+      Jido.Connect.Jira.Actions.Projects,
+      Jido.Connect.Jira.Actions.Metadata
     ]
 
   integration do

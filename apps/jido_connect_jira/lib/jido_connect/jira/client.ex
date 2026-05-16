@@ -29,12 +29,24 @@ defmodule Jido.Connect.Jira.Client do
   @doc "Searches Jira issues using JQL."
   def search_issues(jql, access_token, opts \\ [])
       when is_binary(jql) and is_binary(access_token) do
+    fields = Keyword.get(opts, :fields)
+
     body = %{
       jql: jql,
       startAt: Keyword.get(opts, :start_at, 0),
-      maxResults: Keyword.get(opts, :max_results, 50),
-      fields: Keyword.get(opts, :fields, ["summary", "status", "assignee", "updated"])
+      maxResults: Keyword.get(opts, :max_results, 50)
     }
+
+    body =
+      if fields do
+        Map.put(body, :fields, fields)
+      else
+        Map.put(
+          body,
+          :fields,
+          Keyword.get(opts, :fields, ["summary", "status", "assignee", "updated"])
+        )
+      end
 
     access_token
     |> Transport.request()
@@ -50,6 +62,47 @@ defmodule Jido.Connect.Jira.Client do
     |> Transport.request()
     |> Req.post(url: "/rest/api/3/issue", json: body)
     |> Response.handle_issue_create_response()
+  end
+
+  @doc "Lists Jira projects visible to the authenticated user."
+  def list_projects(access_token, opts \\ [])
+      when is_binary(access_token) and is_list(opts) do
+    params =
+      %{
+        startAt: Keyword.get(opts, :start_at, 0),
+        maxResults: Keyword.get(opts, :max_results, 50)
+      }
+      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Map.new()
+
+    access_token
+    |> Transport.request()
+    |> Req.get(url: "/rest/api/3/project/search", params: params)
+    |> Response.handle_project_list_response()
+  end
+
+  @doc "Fetches a single Jira project by key or ID."
+  def get_project(project_key, access_token, opts \\ [])
+      when is_binary(project_key) and is_binary(access_token) and is_list(opts) do
+    access_token
+    |> Transport.request()
+    |> Req.get(url: "/rest/api/3/project/#{project_key}")
+    |> Response.handle_project_response()
+  end
+
+  @doc "Lists all Jira field schemas (system and custom)."
+  def list_field_schemas(access_token, opts \\ [])
+      when is_binary(access_token) and is_list(opts) do
+    params =
+      case Keyword.get(opts, :expand) do
+        nil -> %{}
+        expand -> %{expand: expand}
+      end
+
+    access_token
+    |> Transport.request()
+    |> Req.get(url: "/rest/api/3/field", params: params)
+    |> Response.handle_field_schema_list_response()
   end
 
   @doc "Returns the configured or injected client module."
