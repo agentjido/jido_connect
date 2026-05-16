@@ -102,4 +102,63 @@ defmodule Jido.Connect.Airtable.Client.Records do
   end
 
   defp maybe_put_filter(params), do: params
+
+  # ---------------------------------------------------------------------------
+  # Batch operations
+  # ---------------------------------------------------------------------------
+
+  @max_batch_size 10
+
+  @doc "Creates up to #{@max_batch_size} records in a single request."
+  def create_records(params, access_token) do
+    base_id = Map.fetch!(params, :base_id)
+    table_id = Map.fetch!(params, :table_id)
+    records = Map.fetch!(params, :records)
+    typecast = Map.get(params, :typecast, false)
+
+    payload = Enum.map(records, fn fields -> %{fields: fields} end)
+
+    Transport.api_request(access_token)
+    |> Req.merge(
+      url: "/v0/#{base_id}/#{table_id}",
+      json: %{records: payload, typecast: typecast}
+    )
+    |> Req.post()
+    |> Response.handle_create_records_response()
+  end
+
+  @doc "Updates up to #{@max_batch_size} records in a single request."
+  def update_records(params, access_token) do
+    base_id = Map.fetch!(params, :base_id)
+    table_id = Map.fetch!(params, :table_id)
+    records = Map.fetch!(params, :records)
+    typecast = Map.get(params, :typecast, false)
+
+    payload =
+      Enum.map(records, fn record ->
+        %{id: Map.fetch!(record, :id), fields: Map.fetch!(record, :fields)}
+      end)
+
+    Transport.api_request(access_token)
+    |> Req.merge(
+      url: "/v0/#{base_id}/#{table_id}",
+      json: %{records: payload, typecast: typecast}
+    )
+    |> Req.patch()
+    |> Response.handle_update_records_response()
+  end
+
+  @doc "Deletes up to #{@max_batch_size} records in a single request."
+  def delete_records(params, access_token) do
+    base_id = Map.fetch!(params, :base_id)
+    table_id = Map.fetch!(params, :table_id)
+    record_ids = Map.fetch!(params, :record_ids)
+
+    query_params = %{"records[]" => record_ids}
+
+    Transport.api_request(access_token)
+    |> Req.merge(url: "/v0/#{base_id}/#{table_id}", params: query_params)
+    |> Req.delete()
+    |> Response.handle_delete_records_response()
+  end
 end

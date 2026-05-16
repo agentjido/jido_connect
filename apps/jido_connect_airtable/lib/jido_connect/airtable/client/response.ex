@@ -162,6 +162,57 @@ defmodule Jido.Connect.Airtable.Client.Response do
 
   def handle_delete_record_response(response), do: Transport.handle_error_response(response)
 
+  @doc "Handles a batch create records response."
+  def handle_create_records_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_items(
+      body,
+      "records",
+      &Normalizer.record/1,
+      "Airtable batch create records response was invalid"
+    )
+  end
+
+  def handle_create_records_response({:ok, %{status: _status, body: body}}) do
+    Transport.invalid_success_response("Airtable batch create records response was invalid", body)
+  end
+
+  def handle_create_records_response(response), do: Transport.handle_error_response(response)
+
+  @doc "Handles a batch update records response."
+  def handle_update_records_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_items(
+      body,
+      "records",
+      &Normalizer.record/1,
+      "Airtable batch update records response was invalid"
+    )
+  end
+
+  def handle_update_records_response({:ok, %{status: _status, body: body}}) do
+    Transport.invalid_success_response("Airtable batch update records response was invalid", body)
+  end
+
+  def handle_update_records_response(response), do: Transport.handle_error_response(response)
+
+  @doc "Handles a batch delete records response."
+  def handle_delete_records_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_items(
+      body,
+      "records",
+      &Normalizer.record/1,
+      "Airtable batch delete records response was invalid"
+    )
+  end
+
+  def handle_delete_records_response({:ok, %{status: _status, body: body}}) do
+    Transport.invalid_success_response("Airtable batch delete records response was invalid", body)
+  end
+
+  def handle_delete_records_response(response), do: Transport.handle_error_response(response)
+
   defp normalize_items(body, key, normalizer, message) do
     case Data.get(body, key, []) do
       items when is_list(items) ->

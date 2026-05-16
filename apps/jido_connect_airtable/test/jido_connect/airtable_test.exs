@@ -12,7 +12,10 @@ defmodule Jido.Connect.AirtableTest do
     Jido.Connect.Airtable.Actions.GetRecord,
     Jido.Connect.Airtable.Actions.CreateRecord,
     Jido.Connect.Airtable.Actions.UpdateRecord,
-    Jido.Connect.Airtable.Actions.DeleteRecord
+    Jido.Connect.Airtable.Actions.DeleteRecord,
+    Jido.Connect.Airtable.Actions.CreateRecords,
+    Jido.Connect.Airtable.Actions.UpdateRecords,
+    Jido.Connect.Airtable.Actions.DeleteRecords
   ]
 
   @airtable_dsl_fragments [
@@ -46,7 +49,10 @@ defmodule Jido.Connect.AirtableTest do
              "airtable.records.get",
              "airtable.records.create",
              "airtable.records.update",
-             "airtable.records.delete"
+             "airtable.records.delete",
+             "airtable.records.batch_create",
+             "airtable.records.batch_update",
+             "airtable.records.batch_delete"
            ]
 
     assert spec.triggers == []
@@ -231,6 +237,60 @@ defmodule Jido.Connect.AirtableTest do
              )
   end
 
+  test "invokes batch create records through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{records: [%{record_id: "rec2"}, %{record_id: "rec3"}]}} =
+             Connect.invoke(
+               Airtable.integration(),
+               "airtable.records.batch_create",
+               %{
+                 base_id: "appTest1",
+                 table_id: "tblTest1",
+                 records: [%{"Name" => "New 1"}, %{"Name" => "New 2"}]
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes batch update records through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{records: [%{record_id: "rec1"}, %{record_id: "rec2"}]}} =
+             Connect.invoke(
+               Airtable.integration(),
+               "airtable.records.batch_update",
+               %{
+                 base_id: "appTest1",
+                 table_id: "tblTest1",
+                 records: [
+                   %{id: "rec1", fields: %{"Name" => "Updated 1"}},
+                   %{id: "rec2", fields: %{"Name" => "Updated 2"}}
+                 ]
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes batch delete records through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{records: [%{record_id: "rec1"}, %{record_id: "rec2"}]}} =
+             Connect.invoke(
+               Airtable.integration(),
+               "airtable.records.batch_delete",
+               %{
+                 base_id: "appTest1",
+                 table_id: "tblTest1",
+                 record_ids: ["rec1", "rec2"]
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
   defp context_and_lease do
     connection =
       Connect.Connection.new!(%{
@@ -309,5 +369,37 @@ defmodule FakeAirtableClient do
 
   def delete_record(%{record_id: "rec1"}, "token") do
     {:ok, Airtable.Record.new!(%{record_id: "rec1"})}
+  end
+
+  def create_records(%{records: [%{"Name" => "New 1"}, %{"Name" => "New 2"}]}, "token") do
+    {:ok,
+     [
+       Airtable.Record.new!(%{record_id: "rec2", fields: %{"Name" => "New 1"}}),
+       Airtable.Record.new!(%{record_id: "rec3", fields: %{"Name" => "New 2"}})
+     ]}
+  end
+
+  def update_records(
+        %{
+          records: [
+            %{id: "rec1", fields: %{"Name" => "Updated 1"}},
+            %{id: "rec2", fields: %{"Name" => "Updated 2"}}
+          ]
+        },
+        "token"
+      ) do
+    {:ok,
+     [
+       Airtable.Record.new!(%{record_id: "rec1", fields: %{"Name" => "Updated 1"}}),
+       Airtable.Record.new!(%{record_id: "rec2", fields: %{"Name" => "Updated 2"}})
+     ]}
+  end
+
+  def delete_records(%{record_ids: ["rec1", "rec2"]}, "token") do
+    {:ok,
+     [
+       Airtable.Record.new!(%{record_id: "rec1"}),
+       Airtable.Record.new!(%{record_id: "rec2"})
+     ]}
   end
 end

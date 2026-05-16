@@ -11,6 +11,9 @@ defmodule Jido.Connect.Airtable.Client do
   defdelegate create_record(params, access_token), to: Records
   defdelegate update_record(params, access_token), to: Records
   defdelegate delete_record(params, access_token), to: Records
+  defdelegate create_records(params, access_token), to: Records
+  defdelegate update_records(params, access_token), to: Records
+  defdelegate delete_records(params, access_token), to: Records
 
   @doc """
   Returns the configured or injected client module.
