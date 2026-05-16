@@ -9,7 +9,7 @@ defmodule Jido.Connect.Calendly.CatalogPacks do
   alias Jido.Connect.Catalog.Pack
 
   @doc "Returns all built-in Calendly catalog packs."
-  def all, do: [reader()]
+  def all, do: [reader(), webhook(), full()]
 
   @doc "Read-only Calendly discovery pack."
   def reader do
@@ -28,6 +28,45 @@ defmodule Jido.Connect.Calendly.CatalogPacks do
         "calendly.invitees.get"
       ],
       metadata: %{package: :jido_connect_calendly, risk: :read}
+    })
+  end
+
+  @doc "Webhook lifecycle pack."
+  def webhook do
+    Pack.new!(%{
+      id: :calendly_webhook,
+      label: "Calendly webhook manager",
+      description: "Manage Calendly webhook subscriptions: create, list, and delete.",
+      filters: %{provider: :calendly},
+      allowed_tools: [
+        "calendly.webhooks.create",
+        "calendly.webhooks.list",
+        "calendly.webhooks.delete"
+      ],
+      metadata: %{package: :jido_connect_calendly, risk: :write}
+    })
+  end
+
+  @doc "Full Calendly surface pack (read, cancellation, and webhooks)."
+  def full do
+    Pack.new!(%{
+      id: :calendly_full,
+      label: "Calendly full",
+      description: "Complete Calendly surface: reads, cancellation, and webhook lifecycle.",
+      filters: %{provider: :calendly},
+      allowed_tools: [
+        "calendly.event_types.list",
+        "calendly.event_types.get",
+        "calendly.scheduled_events.list",
+        "calendly.scheduled_events.get",
+        "calendly.invitees.list",
+        "calendly.invitees.get",
+        "calendly.invitees.cancel",
+        "calendly.webhooks.create",
+        "calendly.webhooks.list",
+        "calendly.webhooks.delete"
+      ],
+      metadata: %{package: :jido_connect_calendly, risk: :full}
     })
   end
 end

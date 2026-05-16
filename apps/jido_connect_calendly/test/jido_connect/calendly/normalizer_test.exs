@@ -1,7 +1,14 @@
 defmodule Jido.Connect.Calendly.NormalizerTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Calendly.{EventType, Invitee, Normalizer, Pagination, ScheduledEvent}
+  alias Jido.Connect.Calendly.{
+    EventType,
+    Invitee,
+    Normalizer,
+    Pagination,
+    ScheduledEvent,
+    WebhookSubscription
+  }
 
   describe "event_type/1" do
     test "normalizes a wrapped resource response" do
@@ -174,6 +181,78 @@ defmodule Jido.Connect.Calendly.NormalizerTest do
 
     test "returns error for invalid body" do
       assert {:error, :invalid_invitee_list} = Normalizer.invitee_list(%{"foo" => "bar"})
+    end
+  end
+
+  describe "webhook_subscription/1" do
+    test "normalizes a wrapped resource response" do
+      body = %{
+        "resource" => %{
+          "uri" => "https://api.calendly.com/webhook_subscriptions/wh1",
+          "callback_url" => "https://example.com/webhook",
+          "scope" => "organization",
+          "organization" => "https://api.calendly.com/organizations/org1",
+          "events" => ["invitee.created", "invitee.canceled"],
+          "state" => "active"
+        }
+      }
+
+      assert {:ok, %WebhookSubscription{} = webhook} = Normalizer.webhook_subscription(body)
+      assert webhook.uri == "https://api.calendly.com/webhook_subscriptions/wh1"
+      assert webhook.callback_url == "https://example.com/webhook"
+      assert webhook.scope == "organization"
+      assert webhook.events == ["invitee.created", "invitee.canceled"]
+      assert webhook.state == "active"
+    end
+
+    test "normalizes a bare resource map" do
+      body = %{"uri" => "https://api.calendly.com/webhook_subscriptions/wh1"}
+
+      assert {:ok, %WebhookSubscription{}} = Normalizer.webhook_subscription(body)
+    end
+
+    test "returns error for invalid body" do
+      assert {:error, :invalid_webhook_subscription} =
+               Normalizer.webhook_subscription(%{"foo" => "bar"})
+    end
+  end
+
+  describe "webhook_subscription_list/1" do
+    test "normalizes a paginated list response" do
+      body = %{
+        "collection" => [
+          %{
+            "uri" => "https://api.calendly.com/webhook_subscriptions/wh1",
+            "callback_url" => "https://example.com/webhook1",
+            "events" => ["invitee.created"],
+            "state" => "active"
+          },
+          %{
+            "uri" => "https://api.calendly.com/webhook_subscriptions/wh2",
+            "callback_url" => "https://example.com/webhook2",
+            "events" => ["invitee.canceled"],
+            "state" => "active"
+          }
+        ],
+        "pagination" => %{
+          "previous" => nil,
+          "next" => "https://api.calendly.com/webhook_subscriptions?page_token=abc",
+          "count" => 2
+        }
+      }
+
+      assert {:ok, %{items: items, pagination: %Pagination{} = page}} =
+               Normalizer.webhook_subscription_list(body)
+
+      assert length(items) == 2
+      assert %WebhookSubscription{} = hd(items)
+      assert page.next_page == "https://api.calendly.com/webhook_subscriptions?page_token=abc"
+      assert page.count == 2
+    end
+
+    test "returns error for invalid body" do
+      assert {:error, :invalid_webhook_subscription_list} =
+               Normalizer.webhook_subscription_list(%{"foo" => "bar"})
     end
   end
 end

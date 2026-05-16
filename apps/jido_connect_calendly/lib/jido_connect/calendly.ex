@@ -8,7 +8,8 @@ defmodule Jido.Connect.Calendly do
 
   use Jido.Connect,
     fragments: [
-      Jido.Connect.Calendly.Actions.Read
+      Jido.Connect.Calendly.Actions.Read,
+      Jido.Connect.Calendly.Actions.CancellationWebhooks
     ]
 
   integration do

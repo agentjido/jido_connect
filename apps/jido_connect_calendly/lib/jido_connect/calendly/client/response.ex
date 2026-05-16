@@ -42,4 +42,22 @@ defmodule Jido.Connect.Calendly.Client.Response do
 
   def handle_entity_response(response, _normalizer, _entity_name),
     do: Transport.handle_error_response(response)
+
+  @doc "Handles a delete response (204 No Content or 200 with body)."
+  def handle_delete_response({:ok, %{status: 204}}, entity_name) do
+    {:ok, %{deleted: true, entity: entity_name}}
+  end
+
+  def handle_delete_response({:ok, %{status: status, body: body}}, entity_name)
+      when status in 200..299 and is_map(body) do
+    {:ok, %{deleted: true, entity: entity_name, body: body}}
+  end
+
+  def handle_delete_response({:ok, %{status: status}}, entity_name)
+      when status in 200..299 do
+    {:ok, %{deleted: true, entity: entity_name}}
+  end
+
+  def handle_delete_response(response, _entity_name),
+    do: Transport.handle_error_response(response)
 end

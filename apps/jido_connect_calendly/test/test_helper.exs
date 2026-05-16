@@ -9,6 +9,10 @@ defmodule MockClient do
   def get_scheduled_event(input, token), do: handle(:get_scheduled_event, input, token)
   def list_invitees(input, token), do: handle(:list_invitees, input, token)
   def get_invitee(input, token), do: handle(:get_invitee, input, token)
+  def cancel_invitee(input, token), do: handle(:cancel_invitee, input, token)
+  def create_webhook(input, token), do: handle(:create_webhook, input, token)
+  def list_webhooks(input, token), do: handle(:list_webhooks, input, token)
+  def delete_webhook(input, token), do: handle(:delete_webhook, input, token)
 
   defp handle(action, _input, _token) do
     case Process.get({__MODULE__, action}) do
