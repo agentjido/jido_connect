@@ -111,6 +111,53 @@ defmodule Jido.Connect.Jira.Client.Response do
 
   def handle_field_schema_list_response(response), do: Transport.handle_error_response(response)
 
+  @doc "Handles a Jira issue update response (204 No Content)."
+  def handle_update_response({:ok, %{status: 204}}) do
+    {:ok, %{updated: true}}
+  end
+
+  def handle_update_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    {:ok, Normalizer.normalize_issue(body)}
+  end
+
+  def handle_update_response(response), do: Transport.handle_error_response(response)
+
+  @doc "Handles a Jira issue transition response (204 No Content)."
+  def handle_transition_response({:ok, %{status: 204}}) do
+    {:ok, %{transitioned: true}}
+  end
+
+  def handle_transition_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    {:ok, body}
+  end
+
+  def handle_transition_response(response), do: Transport.handle_error_response(response)
+
+  @doc "Handles a Jira issue assign response (204 No Content)."
+  def handle_assign_response({:ok, %{status: 204}}) do
+    {:ok, %{assigned: true}}
+  end
+
+  def handle_assign_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    {:ok, Normalizer.normalize_issue(body)}
+  end
+
+  def handle_assign_response(response), do: Transport.handle_error_response(response)
+
+  @doc "Handles a Jira issue comment create response."
+  def handle_comment_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case Normalizer.comment(body) do
+      {:ok, comment} -> {:ok, Map.from_struct(comment) |> Map.drop([:metadata])}
+      {:error, _} -> Transport.invalid_success_response("Jira comment response was invalid", body)
+    end
+  end
+
+  def handle_comment_response(response), do: Transport.handle_error_response(response)
+
   @doc "Handles a generic Jira map response."
   def handle_map_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do

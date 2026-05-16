@@ -116,6 +116,27 @@ defmodule Jido.Connect.Jira.MockClient do
        updated_at: "2026-05-15T14:00:00.000+0000"
      }}
   end
+
+  def update_issue("PROJ-123", _fields, "token") do
+    {:ok, %{updated: true}}
+  end
+
+  def transition_issue("PROJ-123", "21", "token", _opts) do
+    {:ok, %{transitioned: true}}
+  end
+
+  def assign_issue("PROJ-123", "acct-1", "token") do
+    {:ok, %{assigned: true}}
+  end
+
+  def add_comment("PROJ-123", _body_text, "token") do
+    {:ok,
+     %{
+       id: "20010",
+       body: "Test comment body",
+       created_at: "2026-05-15T14:00:00.000+0000"
+     }}
+  end
 end
 
 # Ensure Req.Test.Ownership is running so that client tests using

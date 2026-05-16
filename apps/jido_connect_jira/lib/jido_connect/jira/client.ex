@@ -90,6 +90,64 @@ defmodule Jido.Connect.Jira.Client do
     |> Response.handle_project_response()
   end
 
+  @doc "Updates an existing Jira issue."
+  def update_issue(issue_key, fields, access_token)
+      when is_binary(issue_key) and is_map(fields) and is_binary(access_token) do
+    body = %{fields: fields}
+
+    access_token
+    |> Transport.request()
+    |> Req.put(url: "/rest/api/3/issue/#{issue_key}", json: body)
+    |> Response.handle_update_response()
+  end
+
+  @doc "Transitions a Jira issue to a new status."
+  def transition_issue(issue_key, transition_id, access_token, opts \\ [])
+      when is_binary(issue_key) and is_binary(transition_id) and is_binary(access_token) do
+    body = %{transition: %{id: transition_id}}
+
+    body =
+      case Keyword.get(opts, :fields) do
+        nil -> body
+        fields -> Map.put(body, :fields, fields)
+      end
+
+    access_token
+    |> Transport.request()
+    |> Req.post(url: "/rest/api/3/issue/#{issue_key}/transitions", json: body)
+    |> Response.handle_transition_response()
+  end
+
+  @doc "Assigns a Jira issue to a user by account ID."
+  def assign_issue(issue_key, account_id, access_token)
+      when is_binary(issue_key) and is_binary(account_id) and is_binary(access_token) do
+    body = %{accountId: account_id}
+
+    access_token
+    |> Transport.request()
+    |> Req.put(url: "/rest/api/3/issue/#{issue_key}/assignee", json: body)
+    |> Response.handle_assign_response()
+  end
+
+  @doc "Adds a comment to a Jira issue."
+  def add_comment(issue_key, body_text, access_token)
+      when is_binary(issue_key) and is_binary(body_text) and is_binary(access_token) do
+    body = %{
+      body: %{
+        type: "doc",
+        version: 1,
+        content: [
+          %{type: "paragraph", content: [%{type: "text", text: body_text}]}
+        ]
+      }
+    }
+
+    access_token
+    |> Transport.request()
+    |> Req.post(url: "/rest/api/3/issue/#{issue_key}/comment", json: body)
+    |> Response.handle_comment_response()
+  end
+
   @doc "Lists all Jira field schemas (system and custom)."
   def list_field_schemas(access_token, opts \\ [])
       when is_binary(access_token) and is_list(opts) do
