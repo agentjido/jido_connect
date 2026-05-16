@@ -12,8 +12,6 @@ defmodule Jido.Connect.CalendlyTest do
     assert spec.category == :calendar
     assert spec.status == :experimental
     assert spec.tags == [:calendly, :scheduling, :booking, :webhooks]
-    assert spec.actions == []
-    assert spec.triggers == []
 
     assert [
              %{id: :personal_access_token, kind: :api_key} = pat_profile,
@@ -29,30 +27,50 @@ defmodule Jido.Connect.CalendlyTest do
     assert "webhook" in oauth_profile.scopes
   end
 
+  test "declares six read actions" do
+    spec = Calendly.integration()
+
+    action_ids = Enum.map(spec.actions, & &1.id)
+
+    assert length(action_ids) == 6
+    assert "calendly.event_types.list" in action_ids
+    assert "calendly.event_types.get" in action_ids
+    assert "calendly.scheduled_events.list" in action_ids
+    assert "calendly.scheduled_events.get" in action_ids
+    assert "calendly.invitees.list" in action_ids
+    assert "calendly.invitees.get" in action_ids
+  end
+
   test "compiles generated Jido plugin surface" do
     assert Application.get_env(:jido_connect_calendly, :jido_connect_providers) == [Calendly]
-    assert Calendly.jido_action_modules() == []
+    assert length(Calendly.jido_action_modules()) == 6
     assert Calendly.jido_sensor_modules() == []
     assert Calendly.jido_plugin_module() == Jido.Connect.Calendly.Plugin
 
     assert %Jido.Connect.Catalog.Manifest{
              id: :calendly,
              package: :jido_connect_calendly,
-             generated_modules: %{
-               actions: [],
-               sensors: [],
-               plugin: Jido.Connect.Calendly.Plugin
-             }
+             generated_modules: %{plugin: Jido.Connect.Calendly.Plugin}
            } = Calendly.jido_connect_manifest()
 
     assert %Jido.Plugin.Spec{
              name: "calendly",
-             module: Jido.Connect.Calendly.Plugin,
-             actions: []
+             module: Jido.Connect.Calendly.Plugin
            } = Jido.Connect.Calendly.Plugin.plugin_spec()
   end
 
   test "exposes curated catalog pack delegates" do
     assert [%{id: :calendly_reader}] = Calendly.catalog_packs()
+  end
+
+  test "reader pack includes all six read action tools" do
+    [%{allowed_tools: tools}] = Calendly.catalog_packs()
+
+    assert "calendly.event_types.list" in tools
+    assert "calendly.event_types.get" in tools
+    assert "calendly.scheduled_events.list" in tools
+    assert "calendly.scheduled_events.get" in tools
+    assert "calendly.invitees.list" in tools
+    assert "calendly.invitees.get" in tools
   end
 end
