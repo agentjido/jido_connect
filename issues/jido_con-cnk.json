@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-16T13:58:18Z",
+  "close_reason": "All child tasks closed; verify-connector-wave.sh passes for webhook. Closing per REVIEW-S08.",
   "created": "2026-05-15T21:50:26Z",
   "description": "Build jido_connect_webhook for generic inbound triggers with verification, replay protection, normalized delivery metadata, catalog/trigger discovery, and docs.",
   "id": "jido_con-cnk",
@@ -12,8 +14,8 @@
     "webhook"
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "[W4] Generic Webhook Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T21:50:27Z"
+  "updated_at": "2026-05-16T13:58:18Z"
 }
