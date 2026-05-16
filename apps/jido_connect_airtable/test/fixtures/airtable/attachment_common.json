@@ -1,0 +1,13 @@
+{
+  "id": "attPH6wAnRP5OC3bk",
+  "url": "https://content.airtable.com/attachments/example.pdf",
+  "filename": "wireframe.pdf",
+  "type": "application/pdf",
+  "size": 204800,
+  "width": null,
+  "height": null,
+  "thumbnails": {
+    "small": {"url": "https://content.airtable.com/thumbnails/small.pdf", "width": 36, "height": 36},
+    "large": {"url": "https://content.airtable.com/thumbnails/large.pdf", "width": 128, "height": 128}
+  }
+}
