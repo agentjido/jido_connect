@@ -28,7 +28,9 @@ defmodule Jido.Connect.HubSpot do
   """
 
   use Jido.Connect,
-    fragments: []
+    fragments: [
+      Jido.Connect.HubSpot.Actions.Read
+    ]
 
   integration do
     id(:hubspot)
