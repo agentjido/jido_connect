@@ -5,11 +5,15 @@
   "created": "2026-05-16T12:49:26Z",
   "description": "Release-blocking finding from review: Linear OAuth tests fail with the same `missing plug dependency` failure path as Jira, in `Req.Steps.run_plug/1`. The failing tests are in `apps/jido_connect_linear/test/jido_connect/linear/oauth_test.exs` and cover token exchange, refresh, malformed success responses, provider error responses, and upstream HTTP error normalization.\n\nWhy this matters: Linear and Jira are our issue/work-management connectors and likely to be used by `jido_chat` style handoff workflows. OAuth token handling must be locally testable before live checks. This is also a signal that Pi-generated packages can have correct-looking Mix deps but still fail under the package's actual test command.\n\nAcceptance:\n- Diagnose why Plug is not available to `Req.Test` in the Linear package despite the test-only dependency.\n- Fix the package/test setup so `cd apps/jido_connect_linear \u0026\u0026 mix test test/jido_connect/linear/oauth_test.exs` passes.\n- `cd apps/jido_connect_linear \u0026\u0026 mix test --no-deps-check` passes.\n- Keep tests offline; do not call Linear live APIs.\n- Preserve or improve malformed response and error normalization assertions.\n- If sharing a helper with Jira, keep it narrowly scoped and make both package test commands pass independently.",
   "id": "jido_con-ime.4",
-  "labels": [],
+  "labels": [
+    "connector-factory",
+    "hardening",
+    "review"
+  ],
   "parent": "jido_con-ime",
   "priority": 1,
   "status": "open",
   "title": "[REVIEW-S04] Fix Linear OAuth Req.Test runtime setup",
   "type": "bug",
-  "updated_at": "2026-05-16T12:49:26Z"
+  "updated_at": "2026-05-16T12:49:40Z"
 }
