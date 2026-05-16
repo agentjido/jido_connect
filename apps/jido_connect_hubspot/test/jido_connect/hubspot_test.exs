@@ -126,4 +126,111 @@ defmodule Jido.Connect.HubSpotTest do
                fragment.validate_sections()
     end
   end
+
+  describe "plugin tool availability" do
+    test "reports connection_required for all tools with no connection" do
+      spec = HubSpot.integration()
+      plugin_module = HubSpot.jido_plugin_module()
+      tool_ids = Enum.map(spec.actions ++ spec.triggers, & &1.id)
+
+      availability =
+        plugin_module.tool_availability()
+        |> Map.new(&{&1.tool, &1})
+
+      assert MapSet.new(Map.keys(availability)) == MapSet.new(tool_ids)
+
+      for {_tool, avail} <- availability do
+        assert avail.state == :connection_required
+      end
+    end
+
+    test "reports available when connected with full scopes" do
+      spec = HubSpot.integration()
+      plugin_module = HubSpot.jido_plugin_module()
+
+      connection =
+        Jido.Connect.Connection.new!(%{
+          id: "hubspot_conn",
+          provider: :hubspot,
+          profile: :private_app_token,
+          tenant_id: "tenant_1",
+          owner_type: :app_user,
+          owner_id: "user_1",
+          status: :connected,
+          scopes: all_hubspot_scopes(spec)
+        })
+
+      available =
+        plugin_module.tool_availability(%{connection: connection})
+        |> Map.new(&{&1.tool, &1})
+
+      tool_ids = Enum.map(spec.actions ++ spec.triggers, & &1.id)
+      assert MapSet.new(Map.keys(available)) == MapSet.new(tool_ids)
+
+      for {_tool, avail} <- available do
+        assert avail.state == :available
+        assert avail.connection_id == connection.id
+        assert avail.missing_scopes == []
+      end
+    end
+
+    test "reports missing_scopes when connected without write scopes" do
+      spec = HubSpot.integration()
+      plugin_module = HubSpot.jido_plugin_module()
+
+      read_scopes = [
+        "crm.objects.contacts.read",
+        "crm.objects.companies.read",
+        "crm.objects.deals.read",
+        "crm.objects.tickets.read"
+      ]
+
+      connection =
+        Jido.Connect.Connection.new!(%{
+          id: "hubspot_readonly_conn",
+          provider: :hubspot,
+          profile: :private_app_token,
+          tenant_id: "tenant_1",
+          owner_type: :app_user,
+          owner_id: "user_1",
+          status: :connected,
+          scopes: read_scopes
+        })
+
+      availability =
+        plugin_module.tool_availability(%{connection: connection})
+        |> Map.new(&{&1.tool, &1})
+
+      # Read actions should be available
+      read_actions = Enum.filter(spec.actions, &(&1.risk == :read))
+
+      for action <- read_actions do
+        assert availability[action.id].state == :available
+      end
+
+      # Write actions should report missing scopes
+      write_actions = Enum.filter(spec.actions, &(&1.risk == :write))
+
+      for action <- write_actions do
+        assert availability[action.id].state == :missing_scopes
+        assert length(availability[action.id].missing_scopes) > 0
+      end
+    end
+  end
+
+  defp all_hubspot_scopes(spec) do
+    profile =
+      Enum.find(spec.auth_profiles, &(&1.id == :private_app_token)) ||
+        List.first(spec.auth_profiles)
+
+    operation_scopes =
+      spec.actions
+      |> Enum.concat(spec.triggers)
+      |> Enum.flat_map(& &1.scopes)
+
+    profile.default_scopes
+    |> Enum.concat(profile.scopes)
+    |> Enum.concat(operation_scopes)
+    |> Enum.uniq()
+  end
 end

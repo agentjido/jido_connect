@@ -35,6 +35,8 @@ defmodule Jido.Connect.HubSpot do
       Jido.Connect.HubSpot.Triggers.Deals
     ]
 
+  defdelegate catalog_packs, to: Jido.Connect.HubSpot.CatalogPacks, as: :all
+
   integration do
     id(:hubspot)
     name("HubSpot")
