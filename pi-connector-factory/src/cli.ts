@@ -37,6 +37,11 @@ async function main() {
   const [command = "help", ...rest] = process.argv.slice(2);
   const args = parseArgs(rest);
 
+  if (wantsHelp(args)) {
+    commandHelp(command);
+    return;
+  }
+
   switch (command) {
     case "doctor":
       doctor();
@@ -64,14 +69,75 @@ function help() {
   console.log(`Pi Connector Factory
 
 Usage:
-  bun run doctor
-  bun run prompt [--issue <id>] [--allow-epic]
-  bun run step [--issue <id>] [--allow-epic]
-  bun run loop [--limit <n>] [--allow-epic]
+  bun run src/cli.ts <command> [options]
+
+Commands:
+  doctor   Check local wiring and show the next ready task
+  prompt   Preview the Pi prompt for a task without running Pi
+  step     Run exactly one ready Beadwork task through Pi
+  loop     Run multiple tasks in sequence
+  help     Show this help message
+
+Global options:
+  --help, -h   Show help for a command (no side effects)
 
 Beadwork owns the backlog. This wrapper selects one ready Beadwork task and
 asks Pi + Z.ai to produce exactly one clean Git commit.
 `);
+}
+
+function wantsHelp(args: Args): boolean {
+  return args.options["help"] === true;
+}
+
+function commandHelp(command: string): void {
+  switch (command) {
+    case "doctor":
+      console.log(`Usage: bun run src/cli.ts doctor
+
+Check that all required tools and config are present, then show the next
+ready Beadwork task.
+
+This command is read-only and has no side effects.
+`);
+      break;
+    case "prompt":
+      console.log(`Usage: bun run src/cli.ts prompt [--issue <id>] [--allow-epic]
+
+Render the Pi prompt for the next ready task (or a specific --issue) and
+write it to the runs directory.
+
+Options:
+  --issue <id>     Select a specific Beadwork issue instead of the next ready one
+  --allow-epic     Allow selecting an epic issue
+`);
+      break;
+    case "step":
+      console.log(`Usage: bun run src/cli.ts step [--issue <id>] [--allow-epic]
+
+Run exactly one Beadwork task through Pi. Requires a clean Git worktree.
+Pi must produce exactly one commit; the task is closed automatically.
+
+Options:
+  --issue <id>     Select a specific Beadwork issue instead of the next ready one
+  --allow-epic     Allow selecting an epic issue
+`);
+      break;
+    case "loop":
+      console.log(`Usage: bun run src/cli.ts loop [--limit <n>] [--allow-epic]
+
+Run multiple Beadwork tasks in sequence, one step at a time. Stops when
+there are no ready tasks left or when one step fails.
+
+Options:
+  --limit <n>      Maximum number of tasks to run (default: 5)
+  --allow-epic     Allow selecting epic issues
+`);
+      break;
+    default:
+      help();
+      break;
+  }
 }
 
 function doctor() {

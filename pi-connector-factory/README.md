@@ -19,6 +19,21 @@ npm install -g @earendil-works/pi-coding-agent
 
 ## Commands
 
+Show top-level help:
+
+```sh
+bun run src/cli.ts help
+```
+
+Show command-specific help (no side effects):
+
+```sh
+bun run src/cli.ts doctor --help
+bun run src/cli.ts prompt --help
+bun run src/cli.ts step --help
+bun run src/cli.ts loop --help
+```
+
 Check local wiring:
 
 ```sh
