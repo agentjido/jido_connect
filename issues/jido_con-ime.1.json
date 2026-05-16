@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-16T12:49:25Z",
+  "description": "Release-blocking finding from review: root `mix compile --warnings-as-errors --no-deps-check` fails because `apps/jido_connect_mcp/lib/jido_connect/mcp/endpoint_resolver.ex:9` calls `Jido.MCP.ClientPool.resolve_endpoint_id/1`, but the currently locked `jido_mcp` dependency does not expose that function. With warnings-as-errors, this means root-level compile verification is not usable as a release gate.\n\nWhy this matters: generated connector work can pass package-local tests while the umbrella still fails the stricter compile check. That hides dependency/API drift and makes the factory output look healthier than it is. A connector library intended for Hex release should have a clean root warning-as-error baseline, or we need an explicit documented reason why root compile is not a supported check.\n\nAcceptance:\n- Diagnose whether `Jido.MCP.ClientPool.resolve_endpoint_id/1` was removed/renamed in the locked `jido_mcp` dependency or whether `jido_connect_mcp` has a stale integration assumption.\n- Fix `EndpointResolver.resolve/1` or update/pin the dependency so no undefined-function warning is emitted.\n- Add/adjust focused tests for endpoint resolution behavior, including unknown endpoint errors.\n- `mix compile --warnings-as-errors --no-deps-check` passes from repo root.\n- Do not mask the warning by suppressing compiler warnings unless there is a documented compatibility shim with tests.",
+  "id": "jido_con-ime.1",
+  "labels": [],
+  "parent": "jido_con-ime",
+  "priority": 0,
+  "status": "open",
+  "title": "[REVIEW-S01] Restore root warnings-as-errors compile baseline",
+  "type": "bug",
+  "updated_at": "2026-05-16T12:49:25Z"
+}
