@@ -5,22 +5,31 @@ defmodule Jido.Connect.PostHogTest do
   alias Jido.Connect.PostHog
 
   @posthog_events_fragment Jido.Connect.PostHog.Actions.Events
+  @posthog_event_capture_fragment Jido.Connect.PostHog.Actions.EventCapture
   @posthog_persons_fragment Jido.Connect.PostHog.Actions.Persons
   @posthog_insights_fragment Jido.Connect.PostHog.Actions.Insights
+  @posthog_feature_flags_fragment Jido.Connect.PostHog.Actions.FeatureFlags
 
   @posthog_action_modules [
     Jido.Connect.PostHog.Actions.ListEvents,
     Jido.Connect.PostHog.Actions.GetEvent,
+    Jido.Connect.PostHog.Actions.CaptureEvent,
+    Jido.Connect.PostHog.Actions.BatchCaptureEvents,
     Jido.Connect.PostHog.Actions.ListPersons,
     Jido.Connect.PostHog.Actions.GetPerson,
     Jido.Connect.PostHog.Actions.ListInsights,
-    Jido.Connect.PostHog.Actions.GetInsight
+    Jido.Connect.PostHog.Actions.GetInsight,
+    Jido.Connect.PostHog.Actions.EvaluateFeatureFlag,
+    Jido.Connect.PostHog.Actions.ListFeatureFlags,
+    Jido.Connect.PostHog.Actions.GetFeatureFlag
   ]
 
   @posthog_dsl_fragments [
     @posthog_events_fragment,
+    @posthog_event_capture_fragment,
     @posthog_persons_fragment,
-    @posthog_insights_fragment
+    @posthog_insights_fragment,
+    @posthog_feature_flags_fragment
   ]
 
   test "declares PostHog provider metadata" do
@@ -36,10 +45,15 @@ defmodule Jido.Connect.PostHogTest do
     assert Enum.map(spec.actions, & &1.id) == [
              "posthog.event.list",
              "posthog.event.get",
+             "posthog.event.capture",
+             "posthog.event.batch_capture",
              "posthog.person.list",
              "posthog.person.get",
              "posthog.insight.list",
-             "posthog.insight.get"
+             "posthog.insight.get",
+             "posthog.feature_flag.evaluate",
+             "posthog.feature_flag.list",
+             "posthog.feature_flag.get"
            ]
 
     assert [] = spec.triggers

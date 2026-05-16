@@ -37,8 +37,10 @@ defmodule Jido.Connect.PostHog do
   use Jido.Connect,
     fragments: [
       Jido.Connect.PostHog.Actions.Events,
+      Jido.Connect.PostHog.Actions.EventCapture,
       Jido.Connect.PostHog.Actions.Persons,
-      Jido.Connect.PostHog.Actions.Insights
+      Jido.Connect.PostHog.Actions.Insights,
+      Jido.Connect.PostHog.Actions.FeatureFlags
     ]
 
   defdelegate catalog_packs, to: Jido.Connect.PostHog.CatalogPacks, as: :all

@@ -26,6 +26,15 @@ defmodule Jido.Connect.PostHog.CatalogPacksTest do
       # Insight reads
       assert "posthog.insight.list" in ids
       assert "posthog.insight.get" in ids
+
+      # Feature flag reads
+      assert "posthog.feature_flag.evaluate" in ids
+      assert "posthog.feature_flag.list" in ids
+      assert "posthog.feature_flag.get" in ids
+
+      # Write actions should not be in reader pack
+      refute "posthog.event.capture" in ids
+      refute "posthog.event.batch_capture" in ids
     end
 
     test "describe_tool accepts reader tools" do
@@ -55,6 +64,15 @@ defmodule Jido.Connect.PostHog.CatalogPacksTest do
                )
 
       assert descriptor.tool.id == "posthog.insight.get"
+
+      assert {:ok, descriptor} =
+               Catalog.describe_tool("posthog.feature_flag.list",
+                 modules: [PostHog],
+                 packs: PostHog.catalog_packs(),
+                 pack: :posthog_reader
+               )
+
+      assert descriptor.tool.id == "posthog.feature_flag.list"
     end
   end
 
