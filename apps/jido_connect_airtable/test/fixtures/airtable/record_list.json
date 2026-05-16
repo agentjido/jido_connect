@@ -1,0 +1,21 @@
+{
+  "records": [
+    {
+      "id": "recK9MZVyNlLQRtJf",
+      "fields": {
+        "Name": "Design homepage",
+        "Status": "In progress"
+      },
+      "createdTime": "2026-04-10T08:30:00.000Z"
+    },
+    {
+      "id": "recX7jN4pQrK2mWab",
+      "fields": {
+        "Name": "Build API",
+        "Status": "Todo"
+      },
+      "createdTime": "2026-04-11T10:15:00.000Z"
+    }
+  ],
+  "offset": "itrXXXXXXXXXXXX/recXXXXXXXXXXXX"
+}

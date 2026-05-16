@@ -1,0 +1,18 @@
+{
+  "id": "recK9MZVyNlLQRtJf",
+  "fields": {
+    "Name": "Design homepage",
+    "Status": "In progress",
+    "Priority": "High",
+    "Attachments": [
+      {
+        "id": "attPH6wAnRP5OC3bk",
+        "url": "https://content.airtable.com/attachments/example.pdf",
+        "filename": "wireframe.pdf",
+        "type": "application/pdf",
+        "size": 204800
+      }
+    ]
+  },
+  "createdTime": "2026-04-10T08:30:00.000Z"
+}

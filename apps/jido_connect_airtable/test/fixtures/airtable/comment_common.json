@@ -1,0 +1,17 @@
+{
+  "id": "comK9MZVyNlLQRtJf",
+  "text": "Should we update the deadline for this task?",
+  "author": {
+    "id": "usrL4jN2pQrK8mWab",
+    "email": "alice@example.com",
+    "name": "Alice Johnson"
+  },
+  "createdTime": "2026-04-12T14:30:00.000Z",
+  "mentioned": [
+    {
+      "id": "usrR7kM5nTsL1xZcd",
+      "email": "bob@example.com",
+      "name": "Bob Smith"
+    }
+  ]
+}

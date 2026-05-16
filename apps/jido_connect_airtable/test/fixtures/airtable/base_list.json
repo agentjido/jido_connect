@@ -1,0 +1,15 @@
+{
+  "bases": [
+    {
+      "id": "appLkNDIC9N0juRia",
+      "name": "Project Tracker",
+      "permissionLevel": "create"
+    },
+    {
+      "id": "appX9k2mPqR4vWnjz",
+      "name": "CRM",
+      "permissionLevel": "read"
+    }
+  ],
+  "offset": "itrXXXXXXXXXXXX/recXXXXXXXXXXXX"
+}
