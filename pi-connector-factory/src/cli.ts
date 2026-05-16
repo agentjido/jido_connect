@@ -55,6 +55,9 @@ async function main() {
     case "loop":
       await loop(args);
       break;
+    case "verify-wave":
+      verifyWave(args);
+      break;
     case "help":
     case "--help":
     case "-h":
@@ -72,11 +75,12 @@ Usage:
   bun run src/cli.ts <command> [options]
 
 Commands:
-  doctor   Check local wiring and show the next ready task
-  prompt   Preview the Pi prompt for a task without running Pi
-  step     Run exactly one ready Beadwork task through Pi
-  loop     Run multiple tasks in sequence
-  help     Show this help message
+  doctor        Check local wiring and show the next ready task
+  prompt        Preview the Pi prompt for a task without running Pi
+  step          Run exactly one ready Beadwork task through Pi
+  loop          Run multiple tasks in sequence
+  verify-wave   Serial connector-wave verification (compile + package tests)
+  help          Show this help message
 
 Global options:
   --help, -h   Show help for a command (no side effects)
@@ -132,6 +136,33 @@ there are no ready tasks left or when one step fails.
 Options:
   --limit <n>      Maximum number of tasks to run (default: 5)
   --allow-epic     Allow selecting epic issues
+`);
+      break;
+    case "verify-wave":
+      console.log(`Usage: bun run src/cli.ts verify-wave [--skip-compile] [--package <name> ...]
+
+Serial connector-wave verification. Runs root compile/warnings check, then
+tests each connector package one at a time to avoid Mix build lock contention.
+
+Prints a concise pass/fail summary and exits non-zero if any step fails.
+
+Options:
+  --skip-compile   Skip the root compile --warnings-as-errors check
+  --package <name> Run only the named package(s) (e.g. --package calcom --package jira)
+                    Package names match the app directory suffix (calcom, hubspot, etc.)
+
+When to use:
+  Run after a factory loop finishes to verify the entire connector family
+  is healthy. This is broader than a single-task check; it catches dependency
+  drift, warnings, and package test failures across all connectors.
+
+How it differs from 'bun run loop':
+  'bun run loop' runs Pi implementation tasks one at a time. It only checks
+  that Pi produces a clean commit for each individual task. It does NOT verify
+  that other connector packages still pass their tests.
+
+  'verify-wave' is a post-loop gate: after the factory finishes a batch of
+  connector tasks, run this to confirm the whole wave is green.
 `);
       break;
     default:
@@ -239,6 +270,127 @@ async function loop(args: Args) {
     console.log(`\n[${index + 1}/${limit}] ${issue.id} ${issue.title}`);
     await step({ positional: [], options: { ...args.options, issue: issue.id } });
   }
+}
+
+const CONNECTOR_PACKAGES = [
+  "calcom",
+  "hubspot",
+  "airtable",
+  "webhook",
+  "jira",
+  "linear",
+  "posthog",
+  "calendly",
+  "salesforce",
+] as const;
+
+function verifyWave(args: Args) {
+  const skipCompile = args.options["skip-compile"] === true;
+  const requestedPackages = collectPackages(args);
+  const packages = requestedPackages ?? [...CONNECTOR_PACKAGES];
+
+  const results: { name: string; passed: boolean; detail?: string }[] = [];
+
+  console.log("=== Connector Wave Verification ===\n");
+
+  // Phase 1: Root compile / warnings check
+  if (!skipCompile) {
+    console.log("[1/2] Root compile --warnings-as-errors ...");
+    const compileResult = spawnSync("mix", ["compile", "--warnings-as-errors", "--no-deps-check"], {
+      cwd: repoRoot,
+      env: process.env,
+      stdio: "pipe",
+      encoding: "utf8",
+      maxBuffer: 128 * 1024 * 1024,
+    });
+
+    const passed = compileResult.status === 0;
+    const detail = passed ? undefined : (compileResult.stderr || compileResult.stdout || "").trim().split("\n").slice(-5).join("\n");
+    results.push({ name: "root-compile", passed, detail });
+    mark(passed, "root-compile");
+    if (!passed) {
+      if (detail) console.log(`       ${detail.split("\n").join("\n       ")}`);
+    }
+    console.log("");
+  } else {
+    console.log("[1/2] Root compile -- skipped (--skip-compile)\n");
+  }
+
+  // Phase 2: Serial package tests
+  console.log(`[2/2] Package tests (${packages.length} packages, serial) ...`);
+  for (const pkg of packages) {
+    const appDir = join(repoRoot, "apps", `jido_connect_${pkg}`);
+    if (!existsSync(appDir)) {
+      results.push({ name: pkg, passed: false, detail: `app directory not found: ${appDir}` });
+      mark(false, pkg, "dir missing");
+      continue;
+    }
+
+    const testResult = spawnSync("mix", ["test", "--no-deps-check"], {
+      cwd: appDir,
+      env: process.env,
+      stdio: "pipe",
+      encoding: "utf8",
+      maxBuffer: 128 * 1024 * 1024,
+    });
+
+    const passed = testResult.status === 0;
+    const detail = passed
+      ? undefined
+      : (testResult.stderr || testResult.stdout || "").trim().split("\n").slice(-3).join("\n");
+    results.push({ name: pkg, passed, detail });
+    mark(passed, pkg, passed ? undefined : "FAILED");
+    if (!passed && detail) {
+      console.log(`       ${detail.split("\n").join("\n       ")}`);
+    }
+  }
+
+  // Summary
+  console.log("");
+  console.log("=== Summary ===");
+  const passed = results.filter((r) => r.passed);
+  const failed = results.filter((r) => !r.passed);
+
+  for (const r of passed) console.log(`  PASS  ${r.name}`);
+  for (const r of failed) console.log(`  FAIL  ${r.name}` + (r.detail ? ` — ${r.detail.split("\n")[0]}` : ""));
+
+  console.log("");
+  console.log(`${passed.length} passed, ${failed.length} failed, ${results.length} total`);
+
+  if (failed.length > 0) {
+    process.exit(1);
+  }
+}
+
+function collectPackages(args: Args): string[] | undefined {
+  const list: string[] = [];
+
+  // Handle both --package calcom --package jira and --package calcom jira
+  for (let i = 0; i < args.positional.length; i++) {
+    const arg = args.positional[i];
+    if (arg === "--package") {
+      const next = args.positional[i + 1];
+      if (next && !next.startsWith("--")) {
+        list.push(next);
+        i += 1;
+      }
+      continue;
+    }
+  }
+
+  // Also check options for repeated --package flags
+  const optionPkg = args.options["package"];
+  if (typeof optionPkg === "string") {
+    list.push(optionPkg);
+  }
+
+  return list.length > 0 ? list : undefined;
+}
+
+function mark(passed: boolean, name: string, suffix?: string) {
+  const label = passed ? "ok" : "FAIL";
+  const extra = suffix ? ` (${suffix})` : passed ? "" : "";
+  console.log(`  ${label}  ${name}${extra}`);
 }
 
 function selectIssue(args: Args, nullable?: false): Issue;

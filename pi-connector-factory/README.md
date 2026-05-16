@@ -89,3 +89,50 @@ Each `step`:
 
 If no non-epic Beadwork task is ready, Codex needs to split an epic into child
 tasks first.
+
+## Wave Verification
+
+After a factory loop finishes (or at any checkpoint), verify the health of the
+connector family:
+
+```sh
+bun run verify-wave
+```
+
+This runs **serially** (no parallel Mix build lock contention):
+
+1. Root `mix compile --warnings-as-errors --no-deps-check` — catches API drift
+   and stale dependency assumptions across the umbrella.
+2. Package tests for each connector, one at a time: Cal.com, HubSpot, Airtable,
+   Webhook, Jira, Linear, PostHog, Calendly, Salesforce.
+
+It prints a concise PASS/FAIL summary and exits non-zero if any step fails.
+
+Skip the root compile check:
+
+```sh
+bun run verify-wave -- --skip-compile
+```
+
+Run only specific packages:
+
+```sh
+bun run verify-wave -- --package calcom --package jira
+```
+
+### How this differs from `bun run loop`
+
+`bun run loop` runs Pi implementation tasks one at a time. Each step only
+verifies that Pi produces a clean commit for that single task. It does **not**
+check whether other connector packages still pass their tests.
+
+`bun run verify-wave` is a **post-loop gate**: after the factory finishes a
+batch of connector tasks, run this to confirm the whole connector wave is
+green. It catches dependency drift, compilation warnings, and package test
+failures that a single-task check would miss.
+
+### When to run it
+
+- After a factory loop completes a wave of connector tasks.
+- Before merging or releasing a batch of connectors.
+- As a periodic health check on the connector family.

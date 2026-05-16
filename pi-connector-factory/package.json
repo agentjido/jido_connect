@@ -8,7 +8,8 @@
     "prompt": "bun run src/cli.ts prompt",
     "step": "bun run src/cli.ts step",
     "loop": "bun run src/cli.ts loop",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "verify-wave": "bun run src/cli.ts verify-wave"
   },
   "devDependencies": {
     "@types/bun": "^1.3.3",
