@@ -5,7 +5,8 @@
     "jido_con-ime.2",
     "jido_con-ime.3",
     "jido_con-ime.4",
-    "jido_con-ime.5"
+    "jido_con-ime.5",
+    "jido_con-ime.6"
   ],
   "blocks": [],
   "created": "2026-05-16T12:49:27Z",
@@ -23,5 +24,5 @@
   "status": "open",
   "title": "[REVIEW-S07] Add connector-wave verification command",
   "type": "task",
-  "updated_at": "2026-05-16T12:49:46Z"
+  "updated_at": "2026-05-16T12:49:47Z"
 }
