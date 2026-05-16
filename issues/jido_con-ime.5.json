@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-ime.7"
   ],
+  "closed_at": "2026-05-16T13:38:25Z",
+  "close_reason": "Implemented in 4207764 by pi-connector-factory",
   "created": "2026-05-16T12:49:27Z",
   "description": "Confidence-blocking finding from review: `apps/jido_connect_salesforce/test/jido_connect/salesforce/client_test.exs` uses randomized async tests with `function_exported?/3` checks but only one test explicitly calls `Code.ensure_loaded/1`. Under different seeds, different delegate checks fail even though `mix run` shows `Jido.Connect.Salesforce.Client.__info__(:functions)` includes the expected functions. Observed failures included `query_more/2`, `describe_object/2`, `update_lead/2`, and `update_task/2`.\n\nWhy this matters: this is probably a test-load-order problem rather than a production API omission, but it creates false negatives in the Salesforce package. False negatives are still damaging: they make the factory loop appear unreliable and can hide a real future delegate regression because maintainers stop trusting the test.\n\nAcceptance:\n- Make the Salesforce client delegate tests deterministic under randomized ExUnit seeds.\n- Either ensure the module is loaded before each `function_exported?/3` check, collapse delegate checks into one loaded-module test, or assert via `Client.__info__(:functions)` after explicit load.\n- Confirm the source still exports the expected public API: query, query_more, get/describe/list recent, create/update record, contact, lead, and task delegates.\n- `cd apps/jido_connect_salesforce \u0026\u0026 mix test --no-deps-check` passes repeatedly with at least two explicit seeds, including one previously failing seed if available.\n- Do not remove delegate coverage; make it trustworthy.",
   "id": "jido_con-ime.5",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-ime",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[REVIEW-S05] Make Salesforce client delegate tests deterministic",
   "type": "bug",
-  "updated_at": "2026-05-16T13:36:26Z"
+  "updated_at": "2026-05-16T13:38:25Z"
 }
