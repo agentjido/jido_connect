@@ -73,5 +73,25 @@
       "createdAt": "2026-04-10T08:30:00.000Z",
       "updatedAt": "2026-05-15T15:00:00.000Z"
     }
+  },
+  {
+    "action": "create",
+    "type": "Comment",
+    "webhookId": "wh-44",
+    "createdAt": "2026-05-15T16:00:00.000Z",
+    "data": {
+      "id": "comment-webhook-1",
+      "body": "This looks great, merging to main.",
+      "issue": {
+        "id": "uuid-001",
+        "identifier": "LIN-123"
+      },
+      "user": {
+        "id": "user-1",
+        "name": "Alice Nakamura"
+      },
+      "createdAt": "2026-05-15T16:00:00.000Z",
+      "updatedAt": "2026-05-15T16:00:00.000Z"
+    }
   }
 ]

@@ -71,16 +71,60 @@ defmodule Jido.Connect.Linear.WebhookTest do
     end
   end
 
+  describe "normalize_event/1 — comment events" do
+    test "normalizes comment created event" do
+      payload = fixture!("webhook_comment_created.json")
+
+      assert {:ok, signal} = Webhook.normalize_event(payload)
+      assert signal.event_type == "Comment"
+      assert signal.action == "create"
+      assert signal.comment_id == "comment-webhook-1"
+      assert signal.comment_body == "This looks great, merging to main."
+      assert signal.issue_id == "uuid-001"
+      assert signal.issue_identifier == "LIN-123"
+      assert signal.user_id == "user-1"
+      assert signal.user_name == "Alice Nakamura"
+      assert signal.created_at == "2026-05-15T16:00:00.000Z"
+      assert signal.updated_at == "2026-05-15T16:00:00.000Z"
+      assert signal.webhook_id == "wh-44"
+      assert signal.timestamp == "2026-05-15T16:00:00.000Z"
+    end
+
+    test "normalizes comment updated event" do
+      payload = fixture!("webhook_comment_updated.json")
+
+      assert {:ok, signal} = Webhook.normalize_event(payload)
+      assert signal.event_type == "Comment"
+      assert signal.action == "update"
+      assert signal.comment_id == "comment-webhook-1"
+      assert signal.comment_body == "This looks great, merging to main after QA sign-off."
+      assert signal.issue_id == "uuid-001"
+      assert signal.issue_identifier == "LIN-123"
+      assert signal.user_id == "user-1"
+      assert signal.user_name == "Alice Nakamura"
+      assert signal.updated_at == "2026-05-15T16:30:00.000Z"
+      assert signal.webhook_id == "wh-45"
+      assert signal.timestamp == "2026-05-15T16:30:00.000Z"
+    end
+  end
+
   describe "normalize_event/1 — error cases" do
     test "returns error for unsupported event type" do
-      payload = %{"type" => "Comment", "action" => "create", "data" => %{}}
+      payload = %{"type" => "Reaction", "action" => "create", "data" => %{}}
 
       assert {:error, %{reason: :unsupported_webhook_event}} =
                Webhook.normalize_event(payload)
     end
 
-    test "returns error for unsupported action" do
+    test "returns error for unsupported issue action" do
       payload = %{"type" => "Issue", "action" => "unknown", "data" => %{}}
+
+      assert {:error, %{reason: :unsupported_webhook_action}} =
+               Webhook.normalize_event(payload)
+    end
+
+    test "returns error for unsupported comment action" do
+      payload = %{"type" => "Comment", "action" => "remove", "data" => %{}}
 
       assert {:error, %{reason: :unsupported_webhook_action}} =
                Webhook.normalize_event(payload)
@@ -102,14 +146,15 @@ defmodule Jido.Connect.Linear.WebhookTest do
   end
 
   describe "normalize_events/1" do
-    test "normalizes a batch of events" do
+    test "normalizes a batch of issue and comment events" do
       events = fixture!("webhook_batch_events.json")
 
       assert {:ok, signals} = Webhook.normalize_events(events)
-      assert length(signals) == 2
+      assert length(signals) == 3
 
-      actions = Enum.map(signals, & &1.action) |> Enum.sort()
-      assert actions == ["create", "update"]
+      event_types = Enum.map(signals, & &1.event_type)
+      assert Enum.count(event_types, &(&1 == "Issue")) == 2
+      assert Enum.count(event_types, &(&1 == "Comment")) == 1
     end
 
     test "returns error for invalid event in batch" do
@@ -136,12 +181,22 @@ defmodule Jido.Connect.Linear.WebhookTest do
   end
 
   describe "supported_actions/0" do
-    test "returns list of supported action types" do
+    test "returns list of supported issue action types" do
       actions = Webhook.supported_actions()
 
       assert "create" in actions
       assert "update" in actions
       assert "remove" in actions
+    end
+  end
+
+  describe "supported_comment_actions/0" do
+    test "returns list of supported comment action types" do
+      actions = Webhook.supported_comment_actions()
+
+      assert "create" in actions
+      assert "update" in actions
+      refute "remove" in actions
     end
   end
 
