@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-0x5.1"
   ],
@@ -17,8 +17,8 @@
   ],
   "parent": "jido_con-0x5",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[W5-LIN-S02] Add Linear normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:27Z"
+  "updated_at": "2026-05-16T04:51:27Z"
 }
