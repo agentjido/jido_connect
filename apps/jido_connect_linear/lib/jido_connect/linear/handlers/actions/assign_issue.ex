@@ -1,22 +1,23 @@
-defmodule Jido.Connect.Linear.Handlers.Actions.AddComment do
+defmodule Jido.Connect.Linear.Handlers.Actions.AssignIssue do
   @moduledoc false
 
   alias Jido.Connect.Error
   alias Jido.Connect.Linear.Client
 
-  @doc "Adds a comment to a Linear issue. Returns `{:ok, comment}` with confirmation metadata."
+  @doc "Assigns a Linear issue to a user. Returns `{:ok, result}` with confirmation metadata."
   def run(input, %{credentials: credentials}) do
-    with {:ok, _} <- validate_comment_input(input),
+    with {:ok, _} <- validate_assign_input(input),
+         fields <- %{assignee_id: input.assignee_id},
          {:ok, client} <- fetch_client(credentials),
          token <- Client.credential_token(credentials),
-         {:ok, comment} <- client.add_comment(input.issue_id, input.body, token) do
-      {:ok, add_confirmation(comment, :commented, input)}
+         {:ok, result} <- client.update_issue(input.issue_id, fields, token) do
+      {:ok, add_confirmation(result, :assigned, input)}
     end
   end
 
-  defp validate_comment_input(input) do
+  defp validate_assign_input(input) do
     issue_id = Map.get(input, :issue_id)
-    body = Map.get(input, :body)
+    assignee_id = Map.get(input, :assignee_id)
 
     cond do
       not is_binary(issue_id) or byte_size(issue_id) == 0 ->
@@ -26,11 +27,11 @@ defmodule Jido.Connect.Linear.Handlers.Actions.AddComment do
            subject: :issue_id
          )}
 
-      not is_binary(body) or byte_size(body) == 0 ->
+      not is_binary(assignee_id) or byte_size(assignee_id) == 0 ->
         {:error,
-         Error.validation("Comment body is required",
-           reason: :invalid_comment_body,
-           subject: :body
+         Error.validation("Linear assignee_id is required",
+           reason: :invalid_assignee_id,
+           subject: :assignee_id
          )}
 
       true ->
@@ -41,7 +42,8 @@ defmodule Jido.Connect.Linear.Handlers.Actions.AddComment do
   defp add_confirmation(result, action, input) do
     meta = %{
       action: action,
-      issue_id: Map.get(input, :issue_id)
+      issue_id: Map.get(input, :issue_id),
+      assignee_id: Map.get(input, :assignee_id)
     }
 
     Map.put(result, :_confirmation, meta)

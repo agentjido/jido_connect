@@ -59,7 +59,20 @@ defmodule Jido.Connect.Linear.MockClient do
      }}
   end
 
-  def update_issue("LIN-123", _fields, "token") do
+  def create_issue(%{team_id: "team-1"}, "token") do
+    {:ok,
+     %{
+       id: "uuid-002",
+       identifier: "LIN-124",
+       title: "Created issue"
+     }}
+  end
+
+  def update_issue("LIN-ERR", _fields, "token") do
+    {:error, Jido.Connect.Error.provider("Linear API error", reason: :graphql_error)}
+  end
+
+  def update_issue(_issue_id, _fields, "token") do
     {:ok, %{updated: true}}
   end
 
@@ -75,7 +88,11 @@ defmodule Jido.Connect.Linear.MockClient do
      }}
   end
 
-  def add_comment("LIN-123", _body_text, "token") do
+  def add_comment("LIN-ERR", _body_text, "token") do
+    {:error, Jido.Connect.Error.provider("Linear API error", reason: :graphql_error)}
+  end
+
+  def add_comment(_issue_id, _body_text, "token") do
     {:ok,
      %{
        id: "comment-1",
