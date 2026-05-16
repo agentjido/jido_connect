@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-ul0.5"
   ],
+  "closed_at": "2026-05-16T04:16:32Z",
+  "close_reason": "Implemented in d610f80 by pi-connector-factory",
   "created": "2026-05-15T22:01:12Z",
   "description": "Implement create/update issue, transition issue, assign issue, and add comment actions with explicit confirmation/risk metadata and tests.",
   "id": "jido_con-ul0.4",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-ul0",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W5-JIRA-S04] Implement Jira issue write actions",
   "type": "task",
-  "updated_at": "2026-05-16T04:06:30Z"
+  "updated_at": "2026-05-16T04:16:32Z"
 }
