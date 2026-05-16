@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-pfy.4"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[W4-CALENDLY-S05] Add Calendly triggers, catalog packs, and docs",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:48Z"
+  "updated_at": "2026-05-16T06:52:15Z"
 }
