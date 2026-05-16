@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-ldy.5"
   ],
+  "closed_at": "2026-05-16T00:15:00Z",
+  "close_reason": "Implemented in 638f410 by pi-connector-factory",
   "created": "2026-05-15T21:50:05Z",
   "description": "Implement create/update contact and deal plus note association actions with explicit confirmation/risk metadata, tests, and normalized outputs.",
   "id": "jido_con-ldy.4",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-ldy",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-HUB-S04] Implement HubSpot CRM write actions",
   "type": "task",
-  "updated_at": "2026-05-16T00:03:51Z"
+  "updated_at": "2026-05-16T00:15:00Z"
 }
