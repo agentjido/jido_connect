@@ -48,7 +48,12 @@ defmodule Jido.Connect.CalendlyTest do
   test "compiles generated Jido plugin surface" do
     assert Application.get_env(:jido_connect_calendly, :jido_connect_providers) == [Calendly]
     assert length(Calendly.jido_action_modules()) == 10
-    assert Calendly.jido_sensor_modules() == []
+
+    assert Calendly.jido_sensor_modules() == [
+             Jido.Connect.Calendly.Sensors.InviteeCreated,
+             Jido.Connect.Calendly.Sensors.InviteeCanceled
+           ]
+
     assert Calendly.jido_plugin_module() == Jido.Connect.Calendly.Plugin
 
     assert %Jido.Connect.Catalog.Manifest{
@@ -66,6 +71,16 @@ defmodule Jido.Connect.CalendlyTest do
   test "exposes curated catalog pack delegates" do
     assert [%{id: :calendly_reader}, %{id: :calendly_webhook}, %{id: :calendly_full}] =
              Calendly.catalog_packs()
+  end
+
+  test "declares two webhook triggers for invitee created and canceled" do
+    spec = Calendly.integration()
+
+    trigger_ids = Enum.map(spec.triggers, & &1.id)
+
+    assert length(trigger_ids) == 2
+    assert "calendly.invitee.created" in trigger_ids
+    assert "calendly.invitee.canceled" in trigger_ids
   end
 
   test "reader pack includes all six read action tools" do
