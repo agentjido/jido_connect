@@ -6,14 +6,17 @@
   "description": "Local cleanup finding from review: a stale stash remains from an earlier Salesforce timeout: `stash@{0}: On develop: wip jido_con-uea.4 salesforce write actions timed out`. Salesforce write actions have since landed in commits `7bce14f` and `055a9b5`, but the stash may still contain discarded or divergent work.\n\nWhy this matters: stale WIP stashes are easy to accidentally reapply later, especially while running an automated factory loop. Because this stash predates the final Salesforce commits, it may reintroduce obsolete code or conflict with the landed implementation.\n\nAcceptance:\n- Inspect the Salesforce timeout stash against current `develop`.\n- If it contains no unique valuable work, drop it and record that decision in the task close reason.\n- If it contains useful tests or fixes not present on `develop`, extract them deliberately into a normal commit and then drop the stash.\n- Do not touch unrelated stashes such as older Google Drive webhook demo work unless explicitly asked.",
   "id": "jido_con-ime.9",
   "labels": [
+    "cleanup",
     "connector-factory",
+    "git",
     "hardening",
-    "review"
+    "review",
+    "stash"
   ],
   "parent": "jido_con-ime",
   "priority": 3,
   "status": "open",
   "title": "[REVIEW-S09] Inspect and clear stale Salesforce timeout stash",
   "type": "task",
-  "updated_at": "2026-05-16T12:49:42Z"
+  "updated_at": "2026-05-16T12:49:45Z"
 }
