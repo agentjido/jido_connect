@@ -40,6 +40,31 @@ defmodule Jido.Connect.Airtable.Client.Response do
 
   def handle_get_base_response(response), do: Transport.handle_error_response(response)
 
+  @doc "Handles a list tables response."
+  def handle_list_tables_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, tables} <-
+           normalize_items(
+             body,
+             "tables",
+             &Normalizer.table/1,
+             "Airtable list tables response was invalid"
+           ) do
+      result = %{
+        tables: tables,
+        offset: Data.get(body, "offset")
+      }
+
+      {:ok, Data.compact(result)}
+    end
+  end
+
+  def handle_list_tables_response({:ok, %{status: _status, body: body}}) do
+    Transport.invalid_success_response("Airtable list tables response was invalid", body)
+  end
+
+  def handle_list_tables_response(response), do: Transport.handle_error_response(response)
+
   @doc "Handles a list records response."
   def handle_list_records_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do

@@ -19,6 +19,7 @@ defmodule Jido.Connect.Airtable.CatalogPacksTest do
       # Base reads
       assert "airtable.bases.list" in ids
       assert "airtable.bases.get" in ids
+      assert "airtable.tables.list" in ids
 
       # Record reads
       assert "airtable.records.list" in ids
@@ -39,6 +40,15 @@ defmodule Jido.Connect.Airtable.CatalogPacksTest do
                )
 
       assert descriptor.tool.id == "airtable.bases.list"
+
+      assert {:ok, descriptor} =
+               Catalog.describe_tool("airtable.tables.list",
+                 modules: [Airtable],
+                 packs: Airtable.catalog_packs(),
+                 pack: :airtable_reader
+               )
+
+      assert descriptor.tool.id == "airtable.tables.list"
 
       assert {:ok, descriptor} =
                Catalog.describe_tool("airtable.records.list",
@@ -79,6 +89,7 @@ defmodule Jido.Connect.Airtable.CatalogPacksTest do
       # All read tools
       assert "airtable.bases.list" in ids
       assert "airtable.bases.get" in ids
+      assert "airtable.tables.list" in ids
       assert "airtable.records.list" in ids
       assert "airtable.records.get" in ids
 

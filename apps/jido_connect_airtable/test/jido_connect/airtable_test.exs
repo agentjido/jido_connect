@@ -7,6 +7,7 @@ defmodule Jido.Connect.AirtableTest do
   @airtable_action_modules [
     Jido.Connect.Airtable.Actions.ListBases,
     Jido.Connect.Airtable.Actions.GetBase,
+    Jido.Connect.Airtable.Actions.ListTables,
     Jido.Connect.Airtable.Actions.ListRecords,
     Jido.Connect.Airtable.Actions.GetRecord,
     Jido.Connect.Airtable.Actions.CreateRecord,
@@ -40,6 +41,7 @@ defmodule Jido.Connect.AirtableTest do
     assert Enum.map(spec.actions, & &1.id) == [
              "airtable.bases.list",
              "airtable.bases.get",
+             "airtable.tables.list",
              "airtable.records.list",
              "airtable.records.get",
              "airtable.records.create",
@@ -140,6 +142,19 @@ defmodule Jido.Connect.AirtableTest do
              Connect.invoke(
                Airtable.integration(),
                "airtable.bases.get",
+               %{base_id: "appTest1"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes list tables through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{tables: [%{table_id: "tblTest1", name: "Tasks"}]}} =
+             Connect.invoke(
+               Airtable.integration(),
+               "airtable.tables.list",
                %{base_id: "appTest1"},
                context: context,
                credential_lease: lease
@@ -264,6 +279,13 @@ defmodule FakeAirtableClient do
 
   def get_base(%{base_id: "appTest1"}, "token") do
     {:ok, Airtable.Base.new!(%{base_id: "appTest1", name: "Test Base"})}
+  end
+
+  def list_tables(%{base_id: "appTest1"}, "token") do
+    {:ok,
+     %{
+       tables: [Airtable.Table.new!(%{table_id: "tblTest1", name: "Tasks"})]
+     }}
   end
 
   def list_records(_params, "token") do

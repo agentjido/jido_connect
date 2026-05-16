@@ -53,5 +53,31 @@ defmodule Jido.Connect.Airtable.Actions.Bases do
         field(:base, :map)
       end
     end
+
+    action :list_tables do
+      id("airtable.tables.list")
+      resource(:table)
+      verb(:list)
+      data_classification(:workspace_metadata)
+      label("List tables")
+      description("List all tables in a specific Airtable base.")
+      handler(Jido.Connect.Airtable.Handlers.Actions.ListTables)
+      effect(:read)
+
+      access do
+        auth(:personal_access_token)
+        scopes(["schema.bases:read"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:base_id, :string, required?: true, example: "appXXXXXXXXXXXX")
+        field(:offset, :string)
+      end
+
+      output do
+        field(:tables, {:array, :map})
+        field(:offset, :string)
+      end
+    end
   end
 end
