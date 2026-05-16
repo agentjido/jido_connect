@@ -2,18 +2,24 @@ defmodule Jido.Connect.HubSpot.ScopeResolver do
   @moduledoc """
   Resolves HubSpot OAuth scopes.
 
-  The scaffold keeps HubSpot scope behavior package-local so later action
-  families can choose provider-specific least-privilege scopes without adding
-  generic CRM scope logic to `jido_connect` core.
+  Each action maps to the narrowest set of HubSpot CRM scopes required.
+  The resolver is consulted by the `access` block at runtime.
   """
 
-  @scope_map %{}
+  @scope_map %{
+    "hubspot.contacts.contact.get" => ["crm.objects.contacts.read"],
+    "hubspot.contacts.contact.list" => ["crm.objects.contacts.read"],
+    "hubspot.contacts.contact.search" => ["crm.objects.contacts.read"],
+    "hubspot.companies.company.get" => ["crm.objects.companies.read"],
+    "hubspot.companies.company.list" => ["crm.objects.companies.read"],
+    "hubspot.companies.company.search" => ["crm.objects.companies.read"],
+    "hubspot.deals.deal.get" => ["crm.objects.deals.read"],
+    "hubspot.deals.deal.list" => ["crm.objects.deals.read"],
+    "hubspot.deals.deal.search" => ["crm.objects.deals.read"]
+  }
 
   @doc """
   Returns the least-privilege HubSpot scopes for the given operation.
-
-  The scaffold starts with an empty scope map. Action fragments populate
-  entries as they are added.
   """
   def required_scopes(operation, _input, _connection) do
     operation

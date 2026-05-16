@@ -1,0 +1,22 @@
+{
+  "results": [
+    {
+      "id": "301",
+      "properties": {
+        "dealname": "Acme Enterprise License",
+        "amount": "120000",
+        "dealstage": "contractsent",
+        "pipeline": "default",
+        "closedate": "2026-06-30T23:59:59.000Z",
+        "deal_currency_code": "USD",
+        "hubspot_owner_id": "401",
+        "description": "Annual enterprise license deal",
+        "dealtype": "newbusiness"
+      },
+      "createdAt": "2026-03-01T09:00:00.000Z",
+      "updatedAt": "2026-05-10T11:30:00.000Z",
+      "archived": false
+    }
+  ],
+  "total": 1
+}

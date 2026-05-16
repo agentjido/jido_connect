@@ -3,9 +3,23 @@ defmodule Jido.Connect.HubSpotTest do
 
   alias Jido.Connect.HubSpot
 
-  @hubspot_action_modules []
+  @hubspot_read_fragment Jido.Connect.HubSpot.Actions.Read
 
-  @hubspot_dsl_fragments []
+  @hubspot_action_modules [
+    Jido.Connect.HubSpot.Actions.GetContact,
+    Jido.Connect.HubSpot.Actions.ListContacts,
+    Jido.Connect.HubSpot.Actions.SearchContacts,
+    Jido.Connect.HubSpot.Actions.GetCompany,
+    Jido.Connect.HubSpot.Actions.ListCompanies,
+    Jido.Connect.HubSpot.Actions.SearchCompanies,
+    Jido.Connect.HubSpot.Actions.GetDeal,
+    Jido.Connect.HubSpot.Actions.ListDeals,
+    Jido.Connect.HubSpot.Actions.SearchDeals
+  ]
+
+  @hubspot_dsl_fragments [
+    @hubspot_read_fragment
+  ]
 
   test "declares HubSpot provider metadata" do
     spec = HubSpot.integration()
@@ -17,7 +31,18 @@ defmodule Jido.Connect.HubSpotTest do
     assert spec.status == :experimental
     assert spec.tags == [:hubspot, :crm, :contacts, :deals]
 
-    assert Enum.map(spec.actions, & &1.id) == []
+    assert Enum.map(spec.actions, & &1.id) == [
+             "hubspot.contacts.contact.get",
+             "hubspot.contacts.contact.list",
+             "hubspot.contacts.contact.search",
+             "hubspot.companies.company.get",
+             "hubspot.companies.company.list",
+             "hubspot.companies.company.search",
+             "hubspot.deals.deal.get",
+             "hubspot.deals.deal.list",
+             "hubspot.deals.deal.search"
+           ]
+
     assert Enum.map(spec.triggers, & &1.id) == []
 
     assert [
@@ -48,7 +73,7 @@ defmodule Jido.Connect.HubSpotTest do
              id: :hubspot,
              package: :jido_connect_hubspot,
              generated_modules: %{
-               actions: [],
+               actions: @hubspot_action_modules,
                sensors: [],
                plugin: Jido.Connect.HubSpot.Plugin
              }
@@ -57,7 +82,7 @@ defmodule Jido.Connect.HubSpotTest do
     assert %Jido.Plugin.Spec{
              name: "hubspot",
              module: Jido.Connect.HubSpot.Plugin,
-             actions: []
+             actions: @hubspot_action_modules
            } = Jido.Connect.HubSpot.Plugin.plugin_spec()
   end
 
