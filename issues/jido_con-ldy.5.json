@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-ldy.6"
   ],
+  "closed_at": "2026-05-16T00:30:10Z",
+  "close_reason": "Implemented in 35e8c0d by pi-connector-factory",
   "created": "2026-05-15T21:50:05Z",
   "description": "Add webhook verification/event normalization where feasible or a polling trigger design for contact/deal changes, with dedupe/checkpoint fixtures.",
   "id": "jido_con-ldy.5",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-ldy",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-HUB-S05] Spike HubSpot webhook or polling triggers",
   "type": "task",
-  "updated_at": "2026-05-16T00:15:01Z"
+  "updated_at": "2026-05-16T00:30:10Z"
 }
