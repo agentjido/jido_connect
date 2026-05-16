@@ -1,0 +1,83 @@
+{
+  "startAt": 0,
+  "maxResults": 50,
+  "total": 2,
+  "isLast": true,
+  "issues": [
+    {
+      "key": "PROJ-123",
+      "id": "10001",
+      "self": "https://example.atlassian.net/rest/api/3/issue/10001",
+      "fields": {
+        "summary": "Implement user authentication flow",
+        "status": {
+          "name": "In Progress",
+          "id": "3",
+          "statusCategory": {
+            "id": 4,
+            "key": "indeterminate",
+            "colorName": "yellow",
+            "name": "In Progress"
+          }
+        },
+        "issuetype": {
+          "name": "Task",
+          "id": "10002",
+          "subtask": false
+        },
+        "project": {
+          "key": "PROJ",
+          "name": "Project Alpha",
+          "id": "10000"
+        },
+        "assignee": {
+          "accountId": "5f8a7b9c1d2e3f4a5b6c7d8e",
+          "displayName": "Alice Nakamura",
+          "active": true
+        },
+        "priority": {
+          "name": "Medium",
+          "id": "3"
+        },
+        "labels": ["backend", "auth"],
+        "created": "2026-04-10T08:30:00.000+0000",
+        "updated": "2026-05-15T14:22:00.000+0000"
+      }
+    },
+    {
+      "key": "PROJ-124",
+      "id": "10002",
+      "self": "https://example.atlassian.net/rest/api/3/issue/10002",
+      "fields": {
+        "summary": "Fix login redirect for SSO users",
+        "status": {
+          "name": "To Do",
+          "id": "1",
+          "statusCategory": {
+            "id": 2,
+            "key": "new",
+            "colorName": "blue-gray",
+            "name": "To Do"
+          }
+        },
+        "issuetype": {
+          "name": "Bug",
+          "id": "10003",
+          "subtask": false
+        },
+        "project": {
+          "key": "PROJ",
+          "name": "Project Alpha",
+          "id": "10000"
+        },
+        "priority": {
+          "name": "High",
+          "id": "2"
+        },
+        "labels": ["frontend", "auth"],
+        "created": "2026-05-12T09:00:00.000+0000",
+        "updated": "2026-05-14T16:45:00.000+0000"
+      }
+    }
+  ]
+}

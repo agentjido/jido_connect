@@ -1,0 +1,14 @@
+{
+  "id": "summary",
+  "name": "Summary",
+  "key": "summary",
+  "custom": false,
+  "orderable": true,
+  "navigable": true,
+  "searchable": true,
+  "clauseNames": ["summary"],
+  "schema": {
+    "type": "string",
+    "system": "summary"
+  }
+}

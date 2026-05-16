@@ -1,0 +1,15 @@
+{
+  "accountId": "5f8a7b9c1d2e3f4a5b6c7d8e",
+  "displayName": "Alice Nakamura",
+  "active": true,
+  "emailAddress": "alice@example.com",
+  "avatarUrls": {
+    "48x48": "https://example.atlassian.net/secure/useravatar?avatarId=10100",
+    "24x24": "https://example.atlassian.net/secure/useravatar?size=small&avatarId=10100",
+    "16x16": "https://example.atlassian.net/secure/useravatar?size=xsmall&avatarId=10100",
+    "32x32": "https://example.atlassian.net/secure/useravatar?size=medium&avatarId=10100"
+  },
+  "timeZone": "America/Los_Angeles",
+  "locale": "en_US",
+  "accountType": "atlassian"
+}
