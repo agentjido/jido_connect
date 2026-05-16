@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-pfy.5"
   ],
+  "closed_at": "2026-05-16T06:52:15Z",
+  "close_reason": "Implemented in bd631de by pi-connector-factory",
   "created": "2026-05-15T22:01:41Z",
   "description": "Implement cancel event/invitee where supported plus webhook create/list/delete actions, risk metadata, tests, and normalized outputs.",
   "id": "jido_con-pfy.4",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-CALENDLY-S04] Implement Calendly cancellation and webhook lifecycle",
   "type": "task",
-  "updated_at": "2026-05-16T06:40:41Z"
+  "updated_at": "2026-05-16T06:52:15Z"
 }
