@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-ul0.4"
   ],
+  "closed_at": "2026-05-16T04:06:30Z",
+  "close_reason": "Implemented in 29edd1c by pi-connector-factory",
   "created": "2026-05-15T22:01:12Z",
   "description": "Implement JQL search, get issue, list projects, and metadata actions with pagination, field selection, normalized output, tests, and privacy classification.",
   "id": "jido_con-ul0.3",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-ul0",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W5-JIRA-S03] Implement Jira issue read/search actions",
   "type": "task",
-  "updated_at": "2026-05-16T03:54:51Z"
+  "updated_at": "2026-05-16T04:06:30Z"
 }
