@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-ime.7"
   ],
+  "closed_at": "2026-05-16T13:33:02Z",
+  "close_reason": "Implemented in 39c91f3 by pi-connector-factory",
   "created": "2026-05-16T12:49:26Z",
   "description": "Release-blocking finding from review: Jira OAuth tests fail with `missing plug dependency` in `Req.Steps.run_plug/1`, even though `apps/jido_connect_jira/mix.exs` declares `{:plug, \"~\u003e 1.19\", only: :test}`. The failing tests are in `apps/jido_connect_jira/test/jido_connect/jira/oauth_test.exs` and cover authorization-code exchange, refresh-token exchange, malformed success responses, provider error responses, and upstream HTTP errors.\n\nWhy this matters: OAuth is the highest-risk integration boundary for Jira. These tests are the only local proof that we do not leak secrets, that we normalize token errors correctly, and that we construct the token request consistently. A declared test dependency that is not actually available to `Req.Test` points to fragile package-level Mix/test setup, not just a missing assertion.\n\nAcceptance:\n- Diagnose why Plug is not available to `Req.Test` in the Jira package despite the test-only dependency.\n- Fix the package/test setup so `cd apps/jido_connect_jira \u0026\u0026 mix test test/jido_connect/jira/oauth_test.exs` passes.\n- `cd apps/jido_connect_jira \u0026\u0026 mix test --no-deps-check` passes.\n- Keep the OAuth tests offline; do not call Atlassian live APIs.\n- Preserve or improve assertions for malformed token payloads and HTTP error normalization.\n- If the fix is shared with Linear, factor only a small local/common test helper and avoid broad test-framework churn.",
   "id": "jido_con-ime.3",
@@ -19,8 +21,8 @@
   ],
   "parent": "jido_con-ime",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[REVIEW-S03] Fix Jira OAuth Req.Test runtime setup",
   "type": "bug",
-  "updated_at": "2026-05-16T13:23:57Z"
+  "updated_at": "2026-05-16T13:33:02Z"
 }
