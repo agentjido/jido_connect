@@ -7,7 +7,9 @@ defmodule Jido.Connect.Calendly do
   """
 
   use Jido.Connect,
-    fragments: []
+    fragments: [
+      Jido.Connect.Calendly.Actions.Read
+    ]
 
   integration do
     id(:calendly)

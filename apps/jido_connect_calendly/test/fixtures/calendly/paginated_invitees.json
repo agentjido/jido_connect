@@ -1,0 +1,52 @@
+{
+  "collection": [
+    {
+      "uri": "https://api.calendly.com/scheduled_events/m3n4o5p6/invitees/q7r8s9t0",
+      "email": "bob@example.com",
+      "name": "Bob Guest",
+      "status": "active",
+      "timezone": "America/New_York",
+      "event": "https://api.calendly.com/scheduled_events/m3n4o5p6",
+      "new_invitee": null,
+      "old_invitee": null,
+      "canceled_by": null,
+      "cancellation_reason": null,
+      "reschedule_reason": null,
+      "reschedule_url": "https://calendly.com/rescheds/q7r8s9t0",
+      "cancel_url": "https://calendly.com/cancellations/q7r8s9t0",
+      "questions_and_answers": [
+        {
+          "question": "What would you like to discuss?",
+          "answer": "Project kickoff"
+        }
+      ],
+      "created_at": "2026-05-18T08:15:00.000000Z",
+      "updated_at": "2026-05-18T08:15:00.000000Z",
+      "resource": "invitee"
+    },
+    {
+      "uri": "https://api.calendly.com/scheduled_events/m3n4o5p6/invitees/a1b2c3d4",
+      "email": "carol@example.com",
+      "name": "Carol Guest",
+      "status": "active",
+      "timezone": "America/Los_Angeles",
+      "event": "https://api.calendly.com/scheduled_events/m3n4o5p6",
+      "new_invitee": null,
+      "old_invitee": null,
+      "canceled_by": null,
+      "cancellation_reason": null,
+      "reschedule_reason": null,
+      "reschedule_url": "https://calendly.com/rescheds/a1b2c3d4",
+      "cancel_url": "https://calendly.com/cancellations/a1b2c3d4",
+      "questions_and_answers": [],
+      "created_at": "2026-05-18T09:00:00.000000Z",
+      "updated_at": "2026-05-18T09:00:00.000000Z",
+      "resource": "invitee"
+    }
+  ],
+  "pagination": {
+    "previous": null,
+    "next": "https://api.calendly.com/scheduled_events/m3n4o5p6/invitees?count=2&page_token=next_inv_token",
+    "count": 2
+  }
+}

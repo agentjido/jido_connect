@@ -4,9 +4,6 @@ defmodule Jido.Connect.Calendly.CatalogPacks do
 
   Packs are storage-free catalog filters that hosts pass to the catalog
   boundary to scope tool discovery and invocation.
-
-  The scaffold provides an empty reader pack. Additional packs will be added
-  as action capabilities are implemented.
   """
 
   alias Jido.Connect.Catalog.Pack
@@ -19,9 +16,17 @@ defmodule Jido.Connect.Calendly.CatalogPacks do
     Pack.new!(%{
       id: :calendly_reader,
       label: "Calendly reader",
-      description: "Read Calendly event types and scheduled events without mutation tools.",
+      description:
+        "Read Calendly event types, scheduled events, and invitees without mutation tools.",
       filters: %{provider: :calendly},
-      allowed_tools: [],
+      allowed_tools: [
+        "calendly.event_types.list",
+        "calendly.event_types.get",
+        "calendly.scheduled_events.list",
+        "calendly.scheduled_events.get",
+        "calendly.invitees.list",
+        "calendly.invitees.get"
+      ],
       metadata: %{package: :jido_connect_calendly, risk: :read}
     })
   end
