@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-0x5.2"
   ],
@@ -17,8 +17,8 @@
   ],
   "parent": "jido_con-0x5",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[W5-LIN-S03] Implement Linear read/search actions",
   "type": "task",
-  "updated_at": "2026-05-15T22:01:28Z"
+  "updated_at": "2026-05-16T04:57:27Z"
 }
