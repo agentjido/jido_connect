@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-16T13:58:32Z",
+  "close_reason": "All child tasks closed; verify-connector-wave.sh passes for jira. Closing per REVIEW-S08.",
   "created": "2026-05-15T22:01:10Z",
   "description": "Build jido_connect_jira for Jira Cloud and Jira Service Management work-management workflows. Cover OAuth/API token auth, issue search/read/write, comments, transitions, project metadata, webhook normalization, catalog packs, and docs.",
   "id": "jido_con-ul0",
@@ -12,8 +14,8 @@
     "work-management"
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "[W5] Jira Connector",
   "type": "epic",
-  "updated_at": "2026-05-15T22:01:11Z"
+  "updated_at": "2026-05-16T13:58:32Z"
 }
