@@ -20,8 +20,35 @@ defmodule Jido.Connect.Salesforce.ScopeResolverTest do
     end
   end
 
+  describe "generic SObject scopes" do
+    test "returns api scope for query" do
+      assert ScopeResolver.required_scopes(%{id: "salesforce.crm.query"}, %{}, %{}) ==
+               ["api"]
+    end
+
+    test "returns api scope for get_record" do
+      assert ScopeResolver.required_scopes(%{id: "salesforce.crm.record.get"}, %{}, %{}) ==
+               ["api"]
+    end
+
+    test "returns api scope for describe_object" do
+      assert ScopeResolver.required_scopes(%{id: "salesforce.crm.object.describe"}, %{}, %{}) ==
+               ["api"]
+    end
+
+    test "returns api scope for list_recent" do
+      assert ScopeResolver.required_scopes(%{id: "salesforce.crm.record.list_recent"}, %{}, %{}) ==
+               ["api"]
+    end
+
+    test "returns api scope for query_more" do
+      assert ScopeResolver.required_scopes(%{id: "salesforce.crm.query_more"}, %{}, %{}) ==
+               ["api"]
+    end
+  end
+
   test "returns empty scopes for unknown operations" do
-    assert ScopeResolver.required_scopes(%{id: "salesforce.accounts.account.get"}, %{}, %{}) == []
+    assert ScopeResolver.required_scopes(%{id: "salesforce.unknown.action"}, %{}, %{}) == []
     assert ScopeResolver.required_scopes(%{}, %{}, %{}) == []
   end
 
@@ -35,7 +62,12 @@ defmodule Jido.Connect.Salesforce.ScopeResolverTest do
       assert_scope_matrix([
         %{operation: "salesforce.contacts.contact.get", expected: ["api"]},
         %{operation: "salesforce.contacts.contact.list", expected: ["api"]},
-        %{operation: "salesforce.contacts.contact.create", expected: ["api"]}
+        %{operation: "salesforce.contacts.contact.create", expected: ["api"]},
+        %{operation: "salesforce.crm.query", expected: ["api"]},
+        %{operation: "salesforce.crm.record.get", expected: ["api"]},
+        %{operation: "salesforce.crm.object.describe", expected: ["api"]},
+        %{operation: "salesforce.crm.record.list_recent", expected: ["api"]},
+        %{operation: "salesforce.crm.query_more", expected: ["api"]}
       ])
     end
   end

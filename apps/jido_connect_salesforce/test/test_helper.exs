@@ -3,9 +3,17 @@ ExUnit.start()
 defmodule MockClient do
   @moduledoc false
 
+  # Contact operations
   def get_contact(input, credentials), do: handle(:get_contact, input, credentials)
   def list_contacts(input, credentials), do: handle(:list_contacts, input, credentials)
   def create_contact(input, credentials), do: handle(:create_contact, input, credentials)
+
+  # Generic SObject operations
+  def query(input, credentials), do: handle(:query, input, credentials)
+  def get_record(input, credentials), do: handle(:get_record, input, credentials)
+  def describe_object(input, credentials), do: handle(:describe_object, input, credentials)
+  def list_recent(input, credentials), do: handle(:list_recent, input, credentials)
+  def query_more(input, credentials), do: handle(:query_more, input, credentials)
 
   defp handle(action, _input, _credentials) do
     case Process.get({__MODULE__, action}) do

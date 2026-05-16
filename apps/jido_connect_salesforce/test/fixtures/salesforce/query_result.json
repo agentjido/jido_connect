@@ -1,0 +1,26 @@
+{
+  "totalSize": 2,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "Account",
+        "url": "/services/data/v60.0/sobjects/Account/0015g00000XYZaA1AA"
+      },
+      "Id": "0015g00000XYZaA1AA",
+      "Name": "Acme Corp",
+      "LastModifiedDate": "2026-04-10T16:45:00.000Z",
+      "CreatedDate": "2025-11-01T08:00:00.000Z"
+    },
+    {
+      "attributes": {
+        "type": "Account",
+        "url": "/services/data/v60.0/sobjects/Account/0015g00000XYZaB2BB"
+      },
+      "Id": "0015g00000XYZaB2BB",
+      "Name": "Globex Inc",
+      "LastModifiedDate": "2026-05-01T09:00:00.000Z",
+      "CreatedDate": "2026-01-20T12:00:00.000Z"
+    }
+  ]
+}

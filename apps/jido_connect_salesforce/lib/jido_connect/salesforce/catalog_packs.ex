@@ -9,7 +9,7 @@ defmodule Jido.Connect.Salesforce.CatalogPacks do
 
   | Pack | Risk | Tools |
   |------|------|-------|
-  | `:salesforce_reader` | read | contact queries |
+  | `:salesforce_reader` | read | contact queries + generic SObject reads |
   | `:salesforce_editor` | write | reader + contact mutations |
 
   Triggers are subscribed to independently and are not listed in packs.
@@ -22,7 +22,15 @@ defmodule Jido.Connect.Salesforce.CatalogPacks do
     "salesforce.contacts.contact.list"
   ]
 
-  @reader_tools @contact_read_tools
+  @generic_read_tools [
+    "salesforce.crm.query",
+    "salesforce.crm.record.get",
+    "salesforce.crm.object.describe",
+    "salesforce.crm.record.list_recent",
+    "salesforce.crm.query_more"
+  ]
+
+  @reader_tools @contact_read_tools ++ @generic_read_tools
 
   @contact_write_tools [
     "salesforce.contacts.contact.create"
@@ -33,12 +41,13 @@ defmodule Jido.Connect.Salesforce.CatalogPacks do
   @doc "Returns all built-in Salesforce catalog packs."
   def all, do: [reader(), editor()]
 
-  @doc "Read-only Salesforce CRM pack for contact queries."
+  @doc "Read-only Salesforce CRM pack for contact queries and generic reads."
   def reader do
     Pack.new!(%{
       id: :salesforce_reader,
       label: "Salesforce reader",
-      description: "Read Salesforce CRM contacts without mutation tools.",
+      description:
+        "Read Salesforce CRM contacts and generic SObject records without mutation tools.",
       filters: %{provider: :salesforce},
       allowed_tools: @reader_tools,
       metadata: %{package: :jido_connect_salesforce, risk: :read}
@@ -50,7 +59,8 @@ defmodule Jido.Connect.Salesforce.CatalogPacks do
     Pack.new!(%{
       id: :salesforce_editor,
       label: "Salesforce editor",
-      description: "Read Salesforce CRM contacts and create new contacts.",
+      description:
+        "Read Salesforce CRM contacts and generic SObject records, and create new contacts.",
       filters: %{provider: :salesforce},
       allowed_tools: @editor_tools,
       metadata: %{package: :jido_connect_salesforce, risk: :write}

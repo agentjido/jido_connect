@@ -28,4 +28,25 @@ defmodule Jido.Connect.Salesforce.ClientTest do
     assert Client.instance_url(%{}) ==
              "https://login.salesforce.com"
   end
+
+  test "delegates query to Objects module" do
+    assert {:module, Client} = Code.ensure_loaded(Client)
+    assert function_exported?(Client, :query, 2)
+  end
+
+  test "delegates get_record to Objects module" do
+    assert function_exported?(Client, :get_record, 2)
+  end
+
+  test "delegates describe_object to Objects module" do
+    assert function_exported?(Client, :describe_object, 2)
+  end
+
+  test "delegates list_recent to Objects module" do
+    assert function_exported?(Client, :list_recent, 2)
+  end
+
+  test "delegates query_more to Objects module" do
+    assert function_exported?(Client, :query_more, 2)
+  end
 end
