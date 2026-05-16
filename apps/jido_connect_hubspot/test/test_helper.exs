@@ -6,12 +6,17 @@ defmodule MockClient do
   def get_contact(input, token), do: handle(:get_contact, input, token)
   def list_contacts(input, token), do: handle(:list_contacts, input, token)
   def search_contacts(input, token), do: handle(:search_contacts, input, token)
+  def create_contact(input, token), do: handle(:create_contact, input, token)
+  def update_contact(input, token), do: handle(:update_contact, input, token)
   def get_company(input, token), do: handle(:get_company, input, token)
   def list_companies(input, token), do: handle(:list_companies, input, token)
   def search_companies(input, token), do: handle(:search_companies, input, token)
   def get_deal(input, token), do: handle(:get_deal, input, token)
   def list_deals(input, token), do: handle(:list_deals, input, token)
   def search_deals(input, token), do: handle(:search_deals, input, token)
+  def create_deal(input, token), do: handle(:create_deal, input, token)
+  def update_deal(input, token), do: handle(:update_deal, input, token)
+  def create_note(input, token), do: handle(:create_note, input, token)
 
   defp handle(action, _input, _token) do
     case Process.get({__MODULE__, action}) do

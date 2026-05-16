@@ -103,6 +103,56 @@ defmodule Jido.Connect.HubSpot.Client.Params do
   defp maybe_put_archived(body, true), do: Map.put(body, :archived, true)
   defp maybe_put_archived(body, _), do: body
 
+  @doc "Builds the JSON body for contact create/update requests."
+  def contact_write_body(params) do
+    properties =
+      build_properties(params, %{
+        email: "email",
+        first_name: "firstname",
+        last_name: "lastname",
+        phone: "phone",
+        company: "company",
+        job_title: "jobtitle",
+        website: "website",
+        lifecycle_stage: "lifecyclestage"
+      })
+
+    %{properties: properties}
+  end
+
+  @doc "Builds the JSON body for deal create/update requests."
+  def deal_write_body(params) do
+    properties =
+      build_properties(params, %{
+        deal_name: "dealname",
+        amount: "amount",
+        deal_stage: "dealstage",
+        pipeline: "pipeline",
+        close_date: "closedate",
+        deal_currency: "deal_currency_code",
+        owner_id: "hubspot_owner_id",
+        description: "description",
+        deal_type: "dealtype"
+      })
+
+    %{properties: properties}
+  end
+
+  defp build_properties(params, field_map) do
+    extra = Data.get(params, :properties, %{}) || %{}
+
+    mapped =
+      field_map
+      |> Enum.reduce(%{}, fn {param_key, api_key}, acc ->
+        case Data.get(params, param_key) do
+          nil -> acc
+          value -> Map.put(acc, api_key, to_string(value))
+        end
+      end)
+
+    Map.merge(mapped, extra)
+  end
+
   defp query_params(params) do
     params
     |> Data.compact()

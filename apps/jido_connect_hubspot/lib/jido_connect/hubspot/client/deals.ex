@@ -45,4 +45,31 @@ defmodule Jido.Connect.HubSpot.Client.Deals do
     )
     |> Response.handle_search_response(&Normalizer.deal/1)
   end
+
+  @doc "Creates a new HubSpot CRM deal."
+  def create_deal(params, access_token) when is_map(params) and is_binary(access_token) do
+    body = Params.deal_write_body(params)
+
+    access_token
+    |> Transport.api_request()
+    |> Req.post(
+      url: @object_path,
+      json: body
+    )
+    |> Response.handle_get_response(&Normalizer.deal/1)
+  end
+
+  @doc "Updates an existing HubSpot CRM deal by ID."
+  def update_deal(%{deal_id: deal_id} = params, access_token)
+      when is_binary(deal_id) and is_binary(access_token) do
+    body = Params.deal_write_body(params)
+
+    access_token
+    |> Transport.api_request()
+    |> Req.patch(
+      url: "#{@object_path}/#{deal_id}",
+      json: body
+    )
+    |> Response.handle_get_response(&Normalizer.deal/1)
+  end
 end

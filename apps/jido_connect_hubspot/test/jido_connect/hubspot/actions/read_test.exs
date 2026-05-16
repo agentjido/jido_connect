@@ -32,10 +32,26 @@ defmodule Jido.Connect.HubSpot.Actions.ReadTest do
     assert "hubspot.deals.deal.search" in action_ids
   end
 
+  @read_action_ids [
+    "hubspot.contacts.contact.get",
+    "hubspot.contacts.contact.list",
+    "hubspot.contacts.contact.search",
+    "hubspot.companies.company.get",
+    "hubspot.companies.company.list",
+    "hubspot.companies.company.search",
+    "hubspot.deals.deal.get",
+    "hubspot.deals.deal.list",
+    "hubspot.deals.deal.search"
+  ]
+
+  defp read_actions(spec) do
+    Enum.filter(spec.actions, &(&1.id in @read_action_ids))
+  end
+
   test "all read actions have verb :get or :list or :search" do
     spec = HubSpot.integration()
 
-    for action <- spec.actions do
+    for action <- read_actions(spec) do
       assert action.verb in [:get, :list, :search]
     end
   end
@@ -43,7 +59,7 @@ defmodule Jido.Connect.HubSpot.Actions.ReadTest do
   test "all read actions have scope resolver" do
     spec = HubSpot.integration()
 
-    for action <- spec.actions do
+    for action <- read_actions(spec) do
       assert action.scope_resolver == Jido.Connect.HubSpot.ScopeResolver
     end
   end
@@ -51,7 +67,7 @@ defmodule Jido.Connect.HubSpot.Actions.ReadTest do
   test "all read actions use private_app_token auth profile" do
     spec = HubSpot.integration()
 
-    for action <- spec.actions do
+    for action <- read_actions(spec) do
       assert action.auth_profile == :private_app_token
     end
   end
