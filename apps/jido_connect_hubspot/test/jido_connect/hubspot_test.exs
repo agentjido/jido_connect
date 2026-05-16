@@ -5,6 +5,8 @@ defmodule Jido.Connect.HubSpotTest do
 
   @hubspot_read_fragment Jido.Connect.HubSpot.Actions.Read
   @hubspot_write_fragment Jido.Connect.HubSpot.Actions.Write
+  @hubspot_contacts_triggers_fragment Jido.Connect.HubSpot.Triggers.Contacts
+  @hubspot_deals_triggers_fragment Jido.Connect.HubSpot.Triggers.Deals
 
   @hubspot_action_modules [
     Jido.Connect.HubSpot.Actions.GetContact,
@@ -23,9 +25,18 @@ defmodule Jido.Connect.HubSpotTest do
     Jido.Connect.HubSpot.Actions.CreateNote
   ]
 
+  @hubspot_sensor_modules [
+    Jido.Connect.HubSpot.Sensors.ContactChanged,
+    Jido.Connect.HubSpot.Sensors.ContactChangedPush,
+    Jido.Connect.HubSpot.Sensors.DealChanged,
+    Jido.Connect.HubSpot.Sensors.DealChangedPush
+  ]
+
   @hubspot_dsl_fragments [
     @hubspot_read_fragment,
-    @hubspot_write_fragment
+    @hubspot_write_fragment,
+    @hubspot_contacts_triggers_fragment,
+    @hubspot_deals_triggers_fragment
   ]
 
   test "declares HubSpot provider metadata" do
@@ -55,7 +66,12 @@ defmodule Jido.Connect.HubSpotTest do
              "hubspot.notes.note.create"
            ]
 
-    assert Enum.map(spec.triggers, & &1.id) == []
+    assert Enum.map(spec.triggers, & &1.id) == [
+             "hubspot.contacts.contact.changed",
+             "hubspot.contacts.contact.changed.push",
+             "hubspot.deals.deal.changed",
+             "hubspot.deals.deal.changed.push"
+           ]
 
     assert [
              %{id: :private_app_token, kind: :api_key} = pat_profile,
@@ -78,7 +94,7 @@ defmodule Jido.Connect.HubSpotTest do
     assert Application.get_env(:jido_connect_hubspot, :jido_connect_providers) == [HubSpot]
 
     assert HubSpot.jido_action_modules() == @hubspot_action_modules
-    assert HubSpot.jido_sensor_modules() == []
+    assert HubSpot.jido_sensor_modules() == @hubspot_sensor_modules
     assert HubSpot.jido_plugin_module() == Jido.Connect.HubSpot.Plugin
 
     assert %Jido.Connect.Catalog.Manifest{
@@ -86,7 +102,7 @@ defmodule Jido.Connect.HubSpotTest do
              package: :jido_connect_hubspot,
              generated_modules: %{
                actions: @hubspot_action_modules,
-               sensors: [],
+               sensors: @hubspot_sensor_modules,
                plugin: Jido.Connect.HubSpot.Plugin
              }
            } = HubSpot.jido_connect_manifest()

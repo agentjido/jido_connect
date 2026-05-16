@@ -20,7 +20,11 @@ defmodule Jido.Connect.HubSpot.ScopeResolver do
     "hubspot.deals.deal.search" => ["crm.objects.deals.read"],
     "hubspot.deals.deal.create" => ["crm.objects.deals.write"],
     "hubspot.deals.deal.update" => ["crm.objects.deals.write"],
-    "hubspot.notes.note.create" => ["crm.objects.contacts.write", "crm.objects.deals.write"]
+    "hubspot.notes.note.create" => ["crm.objects.contacts.write", "crm.objects.deals.write"],
+    "hubspot.contacts.contact.changed" => ["crm.objects.contacts.read"],
+    "hubspot.contacts.contact.changed.push" => ["crm.objects.contacts.read"],
+    "hubspot.deals.deal.changed" => ["crm.objects.deals.read"],
+    "hubspot.deals.deal.changed.push" => ["crm.objects.deals.read"]
   }
 
   @doc """
