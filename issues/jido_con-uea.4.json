@@ -1,5 +1,5 @@
 {
-  "assignee": "Mike Hostetler",
+  "assignee": "",
   "blocked_by": [
     "jido_con-uea.3"
   ],
@@ -17,8 +17,8 @@
   ],
   "parent": "jido_con-uea",
   "priority": 2,
-  "status": "in_progress",
+  "status": "open",
   "title": "[W4-SF-S04] Implement Salesforce record write actions",
   "type": "task",
-  "updated_at": "2026-05-16T07:36:50Z"
+  "updated_at": "2026-05-16T11:18:01Z"
 }
