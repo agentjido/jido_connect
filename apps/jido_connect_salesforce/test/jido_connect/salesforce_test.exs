@@ -137,6 +137,36 @@ defmodule Jido.Connect.SalesforceTest do
       end
     end
 
+    test "reports missing_scopes when connected without required scopes" do
+      spec = Salesforce.integration()
+      plugin_module = Salesforce.jido_plugin_module()
+
+      # Salesforce uses a single `api` scope for all actions.
+      # Connecting without it should surface missing_scopes for every tool.
+      connection =
+        Jido.Connect.Connection.new!(%{
+          id: "sf_noscope_conn",
+          provider: :salesforce,
+          profile: :oauth2_connected_app,
+          tenant_id: "tenant_1",
+          owner_type: :app_user,
+          owner_id: "user_1",
+          status: :connected,
+          scopes: []
+        })
+
+      availability =
+        plugin_module.tool_availability(%{connection: connection})
+        |> Map.new(&{&1.tool, &1})
+
+      tool_ids = Enum.map(spec.actions ++ spec.triggers, & &1.id)
+
+      for tool_id <- tool_ids do
+        assert availability[tool_id].state == :missing_scopes
+        assert "api" in availability[tool_id].missing_scopes
+      end
+    end
+
     test "reports available when connected with full scopes" do
       spec = Salesforce.integration()
       plugin_module = Salesforce.jido_plugin_module()
@@ -166,6 +196,43 @@ defmodule Jido.Connect.SalesforceTest do
         assert avail.missing_scopes == []
       end
     end
+  end
+
+  test "catalog packs scope tools by risk level" do
+    packs = Salesforce.catalog_packs()
+    pack_by_id = Map.new(packs, &{&1.id, &1})
+
+    reader = pack_by_id[:salesforce_reader]
+    editor = pack_by_id[:salesforce_editor]
+
+    # Reader pack contains only read-classified tools
+    for tool_id <- reader.allowed_tools do
+      assert tool_id in [
+               "salesforce.contacts.contact.get",
+               "salesforce.contacts.contact.list",
+               "salesforce.crm.query",
+               "salesforce.crm.record.get",
+               "salesforce.crm.object.describe",
+               "salesforce.crm.record.list_recent",
+               "salesforce.crm.query_more"
+             ]
+    end
+
+    # Editor pack contains reader tools plus all write tools
+    assert MapSet.new(editor.allowed_tools) ==
+             MapSet.new(
+               reader.allowed_tools ++
+                 [
+                   "salesforce.contacts.contact.create",
+                   "salesforce.contacts.contact.update",
+                   "salesforce.crm.lead.create",
+                   "salesforce.crm.lead.update",
+                   "salesforce.crm.task.create",
+                   "salesforce.crm.task.update",
+                   "salesforce.crm.record.create",
+                   "salesforce.crm.record.update"
+                 ]
+             )
   end
 
   defp all_salesforce_scopes(spec) do
