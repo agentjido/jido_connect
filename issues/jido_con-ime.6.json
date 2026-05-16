@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [
     "jido_con-ime.7"
@@ -16,8 +16,8 @@
   ],
   "parent": "jido_con-ime",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[REVIEW-S06] Remove HubSpot generated-test warnings",
   "type": "task",
-  "updated_at": "2026-05-16T12:49:47Z"
+  "updated_at": "2026-05-16T13:40:42Z"
 }
