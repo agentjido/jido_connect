@@ -12,6 +12,10 @@ defmodule Jido.Connect.JiraTest do
     Jido.Connect.Jira.Actions.GetIssue,
     Jido.Connect.Jira.Actions.ListIssues,
     Jido.Connect.Jira.Actions.CreateIssue,
+    Jido.Connect.Jira.Actions.UpdateIssue,
+    Jido.Connect.Jira.Actions.TransitionIssue,
+    Jido.Connect.Jira.Actions.AssignIssue,
+    Jido.Connect.Jira.Actions.AddComment,
     Jido.Connect.Jira.Actions.ListProjects,
     Jido.Connect.Jira.Actions.GetProject,
     Jido.Connect.Jira.Actions.ListFieldSchemas
@@ -39,6 +43,10 @@ defmodule Jido.Connect.JiraTest do
              "jira.issue.get",
              "jira.issue.search",
              "jira.issue.create",
+             "jira.issue.update",
+             "jira.issue.transition",
+             "jira.issue.assign",
+             "jira.issue.comment.create",
              "jira.project.list",
              "jira.project.get",
              "jira.field_schema.list"
@@ -116,6 +124,54 @@ defmodule Jido.Connect.JiraTest do
               scope_resolver: Jido.Connect.Jira.ScopeResolver
             }} =
              Connect.action(spec, "jira.issue.create")
+
+    assert {:ok,
+            %{
+              id: "jira.issue.update",
+              resource: :issue,
+              verb: :update,
+              mutation?: true,
+              confirmation: :required_for_ai,
+              auth_profiles: [:api_token, :oauth2_user],
+              scope_resolver: Jido.Connect.Jira.ScopeResolver
+            }} =
+             Connect.action(spec, "jira.issue.update")
+
+    assert {:ok,
+            %{
+              id: "jira.issue.transition",
+              resource: :issue,
+              verb: :update,
+              mutation?: true,
+              confirmation: :required_for_ai,
+              auth_profiles: [:api_token, :oauth2_user],
+              scope_resolver: Jido.Connect.Jira.ScopeResolver
+            }} =
+             Connect.action(spec, "jira.issue.transition")
+
+    assert {:ok,
+            %{
+              id: "jira.issue.assign",
+              resource: :issue,
+              verb: :update,
+              mutation?: true,
+              confirmation: :required_for_ai,
+              auth_profiles: [:api_token, :oauth2_user],
+              scope_resolver: Jido.Connect.Jira.ScopeResolver
+            }} =
+             Connect.action(spec, "jira.issue.assign")
+
+    assert {:ok,
+            %{
+              id: "jira.issue.comment.create",
+              resource: :comment,
+              verb: :create,
+              mutation?: true,
+              confirmation: :required_for_ai,
+              auth_profiles: [:api_token, :oauth2_user],
+              scope_resolver: Jido.Connect.Jira.ScopeResolver
+            }} =
+             Connect.action(spec, "jira.issue.comment.create")
 
     assert {:ok,
             %{
@@ -308,7 +364,7 @@ defmodule Jido.Connect.JiraTest do
       end
 
       # Write actions should report missing scopes
-      write_actions = Enum.filter(spec.actions, &(&1.risk == :write))
+      write_actions = Enum.filter(spec.actions, &(&1.risk in [:write, :external_write]))
 
       for action <- write_actions do
         assert availability[action.id].state == :missing_scopes
