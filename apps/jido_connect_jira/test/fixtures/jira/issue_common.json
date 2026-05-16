@@ -1,0 +1,95 @@
+{
+  "key": "PROJ-123",
+  "id": "10001",
+  "self": "https://example.atlassian.net/rest/api/3/issue/10001",
+  "fields": {
+    "summary": "Implement user authentication flow",
+    "description": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "We need to add OAuth2 support for the login flow."
+            }
+          ]
+        }
+      ]
+    },
+    "status": {
+      "name": "In Progress",
+      "id": "3",
+      "description": "This issue is being actively worked on.",
+      "iconUrl": "https://example.atlassian.net/images/icons/statuses/inprogress.png",
+      "statusCategory": {
+        "id": 4,
+        "key": "indeterminate",
+        "colorName": "yellow",
+        "name": "In Progress"
+      }
+    },
+    "issuetype": {
+      "name": "Task",
+      "id": "10002",
+      "subtask": false,
+      "iconUrl": "https://example.atlassian.net/secure/viewavatar?avatarId=12345"
+    },
+    "project": {
+      "key": "PROJ",
+      "name": "Project Alpha",
+      "id": "10000",
+      "projectTypeKey": "software",
+      "avatarUrls": {
+        "48x48": "https://example.atlassian.net/secure/projectavatar?avatarId=10200",
+        "24x24": "https://example.atlassian.net/secure/projectavatar?size=small&avatarId=10200"
+      }
+    },
+    "assignee": {
+      "accountId": "5f8a7b9c1d2e3f4a5b6c7d8e",
+      "displayName": "Alice Nakamura",
+      "active": true,
+      "emailAddress": "alice@example.com",
+      "avatarUrls": {
+        "48x48": "https://example.atlassian.net/secure/useravatar?avatarId=10100",
+        "24x24": "https://example.atlassian.net/secure/useravatar?size=small&avatarId=10100"
+      },
+      "timeZone": "America/Los_Angeles",
+      "accountType": "atlassian"
+    },
+    "reporter": {
+      "accountId": "6g9h0i1j2k3l4m5n6o7p8q9r",
+      "displayName": "Bob Martinez",
+      "active": true,
+      "emailAddress": "bob@example.com",
+      "timeZone": "America/New_York",
+      "accountType": "atlassian"
+    },
+    "priority": {
+      "name": "Medium",
+      "id": "3",
+      "iconUrl": "https://example.atlassian.net/images/icons/priorities/medium.png"
+    },
+    "labels": ["backend", "auth"],
+    "components": [
+      {"id": "10010", "name": "API"}
+    ],
+    "fixVersions": [
+      {"id": "10020", "name": "v2.0", "released": false}
+    ],
+    "duedate": "2026-06-15",
+    "resolution": null,
+    "timetracking": {
+      "originalEstimate": "8h",
+      "remainingEstimate": "3h",
+      "timeSpent": "5h",
+      "originalEstimateSeconds": 28800,
+      "remainingEstimateSeconds": 10800,
+      "timeSpentSeconds": 18000
+    },
+    "created": "2026-04-10T08:30:00.000+0000",
+    "updated": "2026-05-15T14:22:00.000+0000"
+  }
+}

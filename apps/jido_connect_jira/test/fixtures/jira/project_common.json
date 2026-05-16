@@ -1,0 +1,26 @@
+{
+  "key": "PROJ",
+  "id": "10000",
+  "name": "Project Alpha",
+  "projectTypeKey": "software",
+  "style": "classic",
+  "description": "Main software project for the Alpha product line.",
+  "lead": {
+    "accountId": "5f8a7b9c1d2e3f4a5b6c7d8e",
+    "displayName": "Alice Nakamura",
+    "active": true
+  },
+  "url": "https://example.atlassian.net/browse/PROJ",
+  "self": "https://example.atlassian.net/rest/api/3/project/10000",
+  "projectCategory": {
+    "id": "10050",
+    "name": "Engineering",
+    "description": "All engineering projects"
+  },
+  "avatarUrls": {
+    "48x48": "https://example.atlassian.net/secure/projectavatar?avatarId=10200",
+    "24x24": "https://example.atlassian.net/secure/projectavatar?size=small&avatarId=10200",
+    "16x16": "https://example.atlassian.net/secure/projectavatar?size=xsmall&avatarId=10200",
+    "32x32": "https://example.atlassian.net/secure/projectavatar?size=medium&avatarId=10200"
+  }
+}
