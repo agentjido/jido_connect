@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ime.7"
+  ],
   "created": "2026-05-16T12:49:26Z",
   "description": "Release-blocking finding from review: `cd apps/jido_connect_calcom \u0026\u0026 mix test --no-deps-check` fails with `missing plug dependency`. The Cal.com client tests use `Req.Test` with `Plug.Conn.get_req_header/2` and `Plug.Conn.read_body/1`, but `apps/jido_connect_calcom/mix.exs` depends on `:jason` and `:req` only. Current observed result: 69 tests, 8 failures.\n\nWhy this matters: Cal.com was our recovered/scheduling reference package. Its tests are validating real request construction details such as authorization headers, Cal API version headers, query params, and request bodies. If the test dependency graph is incomplete, Pi/factory can mark the connector done while the package is not independently testable.\n\nAcceptance:\n- Add the minimal test-only dependency/setup needed for `Req.Test` plug-backed tests to run in `jido_connect_calcom`.\n- Prefer `{:plug, \"~\u003e 1.19\", only: :test}` unless a shared test strategy is introduced.\n- Keep Plug out of the production/runtime dependency surface unless required by actual package code.\n- `cd apps/jido_connect_calcom \u0026\u0026 mix test --no-deps-check` passes.\n- `cd apps/jido_connect_calcom \u0026\u0026 mix test test/jido_connect/calcom/client_test.exs` passes.\n- No new warnings from `Plug.Conn` being unavailable.",
   "id": "jido_con-ime.2",
@@ -19,5 +21,5 @@
   "status": "open",
   "title": "[REVIEW-S02] Fix Cal.com Req.Test Plug dependency",
   "type": "bug",
-  "updated_at": "2026-05-16T12:49:43Z"
+  "updated_at": "2026-05-16T12:49:45Z"
 }
