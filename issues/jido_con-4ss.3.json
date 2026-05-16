@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-4ss.4"
   ],
+  "closed_at": "2026-05-16T01:08:31Z",
+  "close_reason": "Implemented in bfb491a by pi-connector-factory",
   "created": "2026-05-15T21:50:14Z",
   "description": "Implement list bases, list tables/schema, list records, get record, filtering/sorting params as provider-specific contracts, pagination tests, and normalized output.",
   "id": "jido_con-4ss.3",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-4ss",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-AIR-S03] Implement Airtable metadata and record read actions",
   "type": "task",
-  "updated_at": "2026-05-16T00:55:15Z"
+  "updated_at": "2026-05-16T01:08:31Z"
 }
