@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [
     "jido_con-ime.7"
@@ -17,8 +17,8 @@
   ],
   "parent": "jido_con-ime",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[REVIEW-S05] Make Salesforce client delegate tests deterministic",
   "type": "bug",
-  "updated_at": "2026-05-16T12:49:46Z"
+  "updated_at": "2026-05-16T13:36:26Z"
 }
