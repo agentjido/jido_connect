@@ -2,6 +2,8 @@ defmodule Jido.Connect.InboundWebhookTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect.InboundWebhook
+  alias Jido.Connect.InboundWebhook.Handlers.Triggers.InboundDeliveryWebhook, as: Handler
+  alias Jido.Connect.TriggerSpec
 
   test "declares webhook provider metadata" do
     spec = InboundWebhook.integration()
@@ -14,7 +16,16 @@ defmodule Jido.Connect.InboundWebhookTest do
     assert spec.tags == [:webhook, :verification, :infrastructure]
 
     assert spec.actions == []
-    assert spec.triggers == []
+
+    assert [%TriggerSpec{} = trigger] = spec.triggers
+    assert trigger.id == "webhook.inbound.delivery"
+    assert trigger.name == :inbound_delivery
+    assert trigger.kind == :webhook
+    assert trigger.handler == Handler
+    assert trigger.resource == :delivery
+    assert trigger.verb == :watch
+    assert trigger.auth_profile == :signing_secret
+    assert trigger.dedupe == %{key: [:delivery_id]}
 
     assert [%{id: :signing_secret, kind: :api_key} = profile] =
              spec.auth_profiles
@@ -33,10 +44,13 @@ defmodule Jido.Connect.InboundWebhookTest do
   test "compiles generated Jido plugin surface" do
     assert Application.get_env(:jido_connect_webhook, :jido_connect_providers) == [
              InboundWebhook
-         ]
+           ]
 
     assert InboundWebhook.jido_action_modules() == []
-    assert InboundWebhook.jido_sensor_modules() == []
+
+    assert [Jido.Connect.InboundWebhook.Sensors.InboundDelivery] =
+             InboundWebhook.jido_sensor_modules()
+
     assert InboundWebhook.jido_plugin_module() == Jido.Connect.InboundWebhook.Plugin
 
     assert %Jido.Connect.Catalog.Manifest{
@@ -44,7 +58,7 @@ defmodule Jido.Connect.InboundWebhookTest do
              package: :jido_connect_webhook,
              generated_modules: %{
                actions: [],
-               sensors: [],
+               sensors: [Jido.Connect.InboundWebhook.Sensors.InboundDelivery],
                plugin: Jido.Connect.InboundWebhook.Plugin
              }
            } = InboundWebhook.jido_connect_manifest()
@@ -56,7 +70,8 @@ defmodule Jido.Connect.InboundWebhookTest do
            } = Jido.Connect.InboundWebhook.Plugin.plugin_spec()
   end
 
-  test "plugin tool availability returns empty list with no actions or triggers" do
-    assert [] = Jido.Connect.InboundWebhook.Plugin.tool_availability()
+  test "plugin tool availability includes the inbound delivery trigger" do
+    assert [%{tool: "webhook.inbound.delivery", state: :connection_required}] =
+             Jido.Connect.InboundWebhook.Plugin.tool_availability()
   end
 end
