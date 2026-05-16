@@ -29,8 +29,11 @@ defmodule Jido.Connect.Jira do
     fragments: [
       Jido.Connect.Jira.Actions.Issues,
       Jido.Connect.Jira.Actions.Projects,
-      Jido.Connect.Jira.Actions.Metadata
+      Jido.Connect.Jira.Actions.Metadata,
+      Jido.Connect.Jira.Triggers.Issues
     ]
+
+  defdelegate catalog_packs, to: Jido.Connect.Jira.CatalogPacks, as: :all
 
   integration do
     id(:jira)

@@ -21,12 +21,18 @@ defmodule Jido.Connect.JiraTest do
     Jido.Connect.Jira.Actions.ListFieldSchemas
   ]
 
-  @jira_sensor_modules []
+  @jira_sensor_modules [
+    Jido.Connect.Jira.Sensors.IssueChanged,
+    Jido.Connect.Jira.Sensors.CommentChanged
+  ]
+
+  @jira_triggers_fragment Jido.Connect.Jira.Triggers.Issues
 
   @jira_dsl_fragments [
     @jira_actions_fragment,
     @jira_projects_fragment,
-    @jira_metadata_fragment
+    @jira_metadata_fragment,
+    @jira_triggers_fragment
   ]
 
   test "declares Jira provider metadata" do
@@ -52,7 +58,10 @@ defmodule Jido.Connect.JiraTest do
              "jira.field_schema.list"
            ]
 
-    assert Enum.map(spec.triggers, & &1.id) == []
+    assert Enum.map(spec.triggers, & &1.id) == [
+             "jira.issue.changed",
+             "jira.comment.changed"
+           ]
 
     assert [
              %{id: :api_token, kind: :api_key} = api_token_profile,
@@ -298,6 +307,10 @@ defmodule Jido.Connect.JiraTest do
       for {_tool, avail} <- availability do
         assert avail.state == :connection_required
       end
+
+      # Verify trigger availability
+      assert availability["jira.issue.changed"].state == :connection_required
+      assert availability["jira.comment.changed"].state == :connection_required
     end
 
     test "reports available when connected with full scopes" do

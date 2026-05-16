@@ -1,0 +1,33 @@
+{
+  "timestamp": 1747326600000,
+  "webhookEvent": "comment_updated",
+  "webhookID": "43",
+  "comment": {
+    "id": "20010",
+    "author": {
+      "accountId": "5f8a7b9c1d2e3f4a5b6c7d8e",
+      "displayName": "Alice Nakamura"
+    },
+    "body": {
+      "type": "doc",
+      "version": 1,
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Updated: investigated the OAuth2 flow. Implementation complete."
+            }
+          ]
+        }
+      ]
+    },
+    "created": "2026-05-01T10:30:00.000+0000",
+    "updated": "2026-05-01T11:00:00.000+0000"
+  },
+  "issue": {
+    "id": "10001",
+    "key": "PROJ-123"
+  }
+}
