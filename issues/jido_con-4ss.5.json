@@ -1,5 +1,5 @@
 {
-  "assignee": "Mike Hostetler",
+  "assignee": "",
   "blocked_by": [
     "jido_con-4ss.4"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-4ss",
   "priority": 2,
-  "status": "in_progress",
+  "status": "open",
   "title": "[W4-AIR-S05] Add Airtable catalog packs, docs, and trigger plan",
   "type": "task",
-  "updated_at": "2026-05-16T02:31:03Z"
+  "updated_at": "2026-05-16T02:31:28Z"
 }
