@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-cnk.3"
   ],
+  "closed_at": "2026-05-16T03:10:07Z",
+  "close_reason": "Implemented in d8bb9ca by pi-connector-factory",
   "created": "2026-05-15T21:50:28Z",
   "description": "Support shared-secret HMAC, static bearer/token, timestamp tolerance, replay id extraction, unsigned dev mode, and redacted error details with tests.",
   "id": "jido_con-cnk.2",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-cnk",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-WEB-S02] Implement webhook verification primitives",
   "type": "task",
-  "updated_at": "2026-05-16T03:03:32Z"
+  "updated_at": "2026-05-16T03:10:07Z"
 }
