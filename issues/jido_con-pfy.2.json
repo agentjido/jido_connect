@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-pfy.3"
   ],
+  "closed_at": "2026-05-16T06:29:38Z",
+  "close_reason": "Implemented in cc1e16f by pi-connector-factory",
   "created": "2026-05-15T22:01:40Z",
   "description": "Add user, organization, event type, scheduled event, invitee, cancellation, webhook subscription, and pagination structs with representative fixtures.",
   "id": "jido_con-pfy.2",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-CALENDLY-S02] Add Calendly normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-16T06:22:19Z"
+  "updated_at": "2026-05-16T06:29:38Z"
 }
