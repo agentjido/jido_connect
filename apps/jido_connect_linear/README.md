@@ -7,7 +7,7 @@ It includes:
 - `Jido.Connect.Linear`, a Spark-authored provider that compiles into Jido tools
 - Linear issue actions (get, search, create, update, add comment)
 - Linear team actions (list teams)
-- Webhook triggers for issue created, updated, and removed events
+- Webhook triggers for issue created, updated, and removed events, and comment created and updated events
 - Webhook verification and normalization in `Jido.Connect.Linear.Webhook`
 - Catalog packs for scoped tool discovery (`:linear_reader`, `:linear_editor`)
 - OAuth2 helpers in `Jido.Connect.Linear.OAuth`
@@ -79,11 +79,12 @@ are needed.
 
 ## Webhook Triggers
 
-The provider declares webhook triggers for real-time issue events:
+The provider declares webhook triggers for real-time issue and comment events:
 
 | Trigger ID | Resource | Events |
 |---|---|---|
 | `linear.issue.changed` | issue | `create`, `update`, `remove` |
+| `linear.comment.changed` | comment | `create`, `update` |
 
 ### Webhook Verification
 
@@ -94,7 +95,7 @@ The provider declares webhook triggers for real-time issue events:
   header. Use `compute_signature/2` to compute the digest and
   `verify_signature/2` for constant-time comparison.
 - **Event normalization**: `normalize_event/1` converts a raw Linear webhook
-  payload into a flat signal map with stable field names.
+  payload (Issue or Comment type) into a flat signal map with stable field names.
 - **Batch normalization**: `normalize_events/1` processes a list of events.
 
 ### Webhook Event Fields
@@ -106,6 +107,15 @@ Issue events produce signals with:
 - `status_name`, `priority_label`
 - `assignee_id`, `assignee_name`, `creator_id`, `creator_name`
 - `labels`
+- `created_at`, `updated_at`
+- `webhook_id`, `timestamp`
+
+Comment events produce signals with:
+
+- `event_type` (`"Comment"`), `action` (`"create"` or `"update"`)
+- `comment_id`, `comment_body`
+- `issue_id`, `issue_identifier`
+- `user_id`, `user_name`
 - `created_at`, `updated_at`
 - `webhook_id`, `timestamp`
 

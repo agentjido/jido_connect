@@ -11,22 +11,36 @@ defmodule Jido.Connect.Linear.Webhook do
   This module does **not** store or expose the signing secret. Verification
   receives a pre-computed HMAC digest from the host layer.
 
-  ## Supported Actions
+  ## Supported Events
+
+  **Issue events** (`type: "Issue"`):
 
   - `create` — a new issue was created
   - `update` — an existing issue was updated
   - `remove` — an issue was removed
+
+  **Comment events** (`type: "Comment"`):
+
+  - `create` — a comment was added to an issue
+  - `update` — a comment was updated
   """
 
   alias Jido.Connect.{Data, Error}
 
-  @supported_actions ~w(create update remove)
+  @supported_issue_actions ~w(create update remove)
+  @supported_comment_actions ~w(create update)
 
   @doc """
-  Returns the list of supported Linear webhook action types.
+  Returns the list of supported Linear webhook issue action types.
   """
   @spec supported_actions() :: [String.t()]
-  def supported_actions, do: @supported_actions
+  def supported_actions, do: @supported_issue_actions
+
+  @doc """
+  Returns the list of supported Linear webhook comment action types.
+  """
+  @spec supported_comment_actions() :: [String.t()]
+  def supported_comment_actions, do: @supported_comment_actions
 
   @doc """
   Verifies the Linear webhook signature.
@@ -75,14 +89,22 @@ defmodule Jido.Connect.Linear.Webhook do
   @doc """
   Normalizes a Linear webhook event payload into a signal map.
 
-  Linear webhook payloads contain an `action` field (`create`, `update`,
-  `remove`) and a `data` object with the issue details.
+  ## Issue events
+
+  Linear webhook issue payloads contain a `type` of `"Issue"`, an `action`
+  field (`create`, `update`, `remove`), and a `data` object with issue details.
+
+  ## Comment events
+
+  Linear webhook comment payloads contain a `type` of `"Comment"`, an
+  `action` field (`create`, `update`), and a `data` object with comment
+  details including the parent issue reference.
 
   Returns `{:ok, signal_map}` on success, or `{:error, _}` on failure.
   """
   @spec normalize_event(map()) :: {:ok, map()} | {:error, Error.ProviderError.t()}
   def normalize_event(%{"action" => action, "data" => data, "type" => "Issue"} = payload)
-      when action in @supported_actions and is_map(data) do
+      when action in @supported_issue_actions and is_map(data) do
     labels =
       case Data.get(data, "labels") do
         labels when is_list(labels) ->
@@ -121,9 +143,31 @@ defmodule Jido.Connect.Linear.Webhook do
     {:ok, signal}
   end
 
+  def normalize_event(%{"action" => action, "data" => data, "type" => "Comment"} = payload)
+      when action in @supported_comment_actions and is_map(data) do
+    signal =
+      %{
+        event_type: "Comment",
+        action: action,
+        comment_id: Data.get(data, "id"),
+        comment_body: Data.get(data, "body"),
+        issue_id: get_in(data, ["issue", "id"]),
+        issue_identifier: get_in(data, ["issue", "identifier"]),
+        user_id: get_in(data, ["user", "id"]),
+        user_name: get_in(data, ["user", "name"]),
+        created_at: Data.get(data, "createdAt"),
+        updated_at: Data.get(data, "updatedAt"),
+        webhook_id: Data.get(payload, "webhookId"),
+        timestamp: Data.get(payload, "createdAt")
+      }
+      |> Data.compact()
+
+    {:ok, signal}
+  end
+
   def normalize_event(%{"action" => action, "type" => type}) do
     cond do
-      type != "Issue" ->
+      type not in ["Issue", "Comment"] ->
         {:error,
          Error.provider("Unsupported Linear webhook event type",
            provider: :linear,
@@ -131,9 +175,17 @@ defmodule Jido.Connect.Linear.Webhook do
            details: %{type: type, action: action}
          )}
 
-      action not in @supported_actions ->
+      type == "Issue" and action not in @supported_issue_actions ->
         {:error,
-         Error.provider("Unsupported Linear webhook action",
+         Error.provider("Unsupported Linear webhook issue action",
+           provider: :linear,
+           reason: :unsupported_webhook_action,
+           details: %{type: type, action: action}
+         )}
+
+      type == "Comment" and action not in @supported_comment_actions ->
+        {:error,
+         Error.provider("Unsupported Linear webhook comment action",
            provider: :linear,
            reason: :unsupported_webhook_action,
            details: %{type: type, action: action}

@@ -23,7 +23,8 @@ defmodule Jido.Connect.LinearTest do
   ]
 
   @linear_sensor_modules [
-    Jido.Connect.Linear.Sensors.IssueChanged
+    Jido.Connect.Linear.Sensors.IssueChanged,
+    Jido.Connect.Linear.Sensors.CommentChanged
   ]
 
   @linear_triggers_fragment Jido.Connect.Linear.Triggers.Issues
@@ -60,7 +61,8 @@ defmodule Jido.Connect.LinearTest do
            ]
 
     assert Enum.map(spec.triggers, & &1.id) == [
-             "linear.issue.changed"
+             "linear.issue.changed",
+             "linear.comment.changed"
            ]
 
     assert [
@@ -290,6 +292,7 @@ defmodule Jido.Connect.LinearTest do
 
       # Verify trigger availability
       assert availability["linear.issue.changed"].state == :connection_required
+      assert availability["linear.comment.changed"].state == :connection_required
     end
 
     test "reports available when connected with full scopes" do

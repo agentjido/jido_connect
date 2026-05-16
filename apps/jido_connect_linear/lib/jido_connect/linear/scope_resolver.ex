@@ -18,7 +18,8 @@ defmodule Jido.Connect.Linear.ScopeResolver do
     "linear.issue.comments.list" => ["read"],
     "linear.team.list" => ["read"],
     "linear.team.get" => ["read"],
-    "linear.issue.changed" => ["read"]
+    "linear.issue.changed" => ["read"],
+    "linear.comment.changed" => ["read"]
   }
 
   @doc """
