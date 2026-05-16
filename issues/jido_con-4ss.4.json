@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-4ss.3"
   ],
@@ -17,8 +17,8 @@
   ],
   "parent": "jido_con-4ss",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[W4-AIR-S04] Implement Airtable record write actions",
   "type": "task",
-  "updated_at": "2026-05-15T21:50:19Z"
+  "updated_at": "2026-05-16T01:08:31Z"
 }
