@@ -8,12 +8,17 @@
   "labels": [
     "connector-factory",
     "hardening",
-    "review"
+    "jira",
+    "oauth",
+    "plug",
+    "req-test",
+    "review",
+    "test-failure"
   ],
   "parent": "jido_con-ime",
   "priority": 1,
   "status": "open",
   "title": "[REVIEW-S03] Fix Jira OAuth Req.Test runtime setup",
   "type": "bug",
-  "updated_at": "2026-05-16T12:49:40Z"
+  "updated_at": "2026-05-16T12:49:43Z"
 }
