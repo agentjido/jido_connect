@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-0x5.2"
   ],
+  "closed_at": "2026-05-16T04:51:26Z",
+  "close_reason": "Implemented in 7d99a76 by pi-connector-factory",
   "created": "2026-05-15T22:01:21Z",
   "description": "Add umbrella app, provider module, OAuth/API key auth profiles, GraphQL transport boundary, README/AGENTS, and generated plugin tests.",
   "id": "jido_con-0x5.1",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-0x5",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W5-LIN-S01] Scaffold jido_connect_linear",
   "type": "task",
-  "updated_at": "2026-05-16T04:32:55Z"
+  "updated_at": "2026-05-16T04:51:26Z"
 }
