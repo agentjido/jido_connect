@@ -3,6 +3,11 @@ defmodule Jido.Connect.Salesforce.ClientTest do
 
   alias Jido.Connect.Salesforce.Client
 
+  setup do
+    {:module, Client} = Code.ensure_loaded(Client)
+    :ok
+  end
+
   test "resolve returns injected client module" do
     assert Client.resolve(%{salesforce_client: MockClient}) == MockClient
   end
@@ -30,7 +35,6 @@ defmodule Jido.Connect.Salesforce.ClientTest do
   end
 
   test "delegates query to Objects module" do
-    assert {:module, Client} = Code.ensure_loaded(Client)
     assert function_exported?(Client, :query, 2)
   end
 
