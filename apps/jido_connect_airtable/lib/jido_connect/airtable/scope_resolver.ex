@@ -14,7 +14,10 @@ defmodule Jido.Connect.Airtable.ScopeResolver do
     "airtable.records.get" => ["data.records:read"],
     "airtable.records.create" => ["data.records:write"],
     "airtable.records.update" => ["data.records:write"],
-    "airtable.records.delete" => ["data.records:write"]
+    "airtable.records.delete" => ["data.records:write"],
+    "airtable.records.batch_create" => ["data.records:write"],
+    "airtable.records.batch_update" => ["data.records:write"],
+    "airtable.records.batch_delete" => ["data.records:write"]
   }
 
   @doc """
