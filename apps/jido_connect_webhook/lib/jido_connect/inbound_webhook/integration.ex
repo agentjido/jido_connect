@@ -82,6 +82,10 @@ defmodule Jido.Connect.InboundWebhook do
     end
   end
 
+  defdelegate catalog_packs, to: Jido.Connect.InboundWebhook.CatalogPacks, as: :all
+  defdelegate verifier_pack, to: Jido.Connect.InboundWebhook.CatalogPacks, as: :verifier
+  defdelegate receiver_pack, to: Jido.Connect.InboundWebhook.CatalogPacks, as: :receiver
+
   policies do
     policy :webhook_access do
       label("Webhook access")
