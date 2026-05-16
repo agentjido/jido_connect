@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-uea.4"
   ],
+  "closed_at": "2026-05-16T07:36:50Z",
+  "close_reason": "Implemented in 0706a32 by pi-connector-factory",
   "created": "2026-05-15T22:01:51Z",
   "description": "Implement SOQL query, get record, describe object, list recent records where appropriate, pagination/nextRecordsUrl handling, tests, and normalized output.",
   "id": "jido_con-uea.3",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-uea",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-SF-S03] Implement Salesforce query/read actions",
   "type": "task",
-  "updated_at": "2026-05-16T07:22:53Z"
+  "updated_at": "2026-05-16T07:36:50Z"
 }
