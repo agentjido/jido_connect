@@ -8,12 +8,14 @@
   "labels": [
     "connector-factory",
     "hardening",
-    "review"
+    "review",
+    "tooling",
+    "verification"
   ],
   "parent": "jido_con-ime",
   "priority": 1,
   "status": "open",
   "title": "[REVIEW-S07] Add connector-wave verification command",
   "type": "task",
-  "updated_at": "2026-05-16T12:49:41Z"
+  "updated_at": "2026-05-16T12:49:44Z"
 }
