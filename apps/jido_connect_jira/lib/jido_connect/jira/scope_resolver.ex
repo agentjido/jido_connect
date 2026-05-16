@@ -16,6 +16,7 @@ defmodule Jido.Connect.Jira.ScopeResolver do
     "jira.issue.comment.create" => ["write:jira-work"],
     "jira.project.list" => ["read:jira-work", "read:jira-configuration"],
     "jira.project.get" => ["read:jira-work", "read:jira-configuration"],
+    "jira.field_schema.list" => ["read:jira-work", "read:jira-configuration"],
     "jira.user.list" => ["read:jira-users"]
   }
 

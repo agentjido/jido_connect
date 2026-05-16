@@ -1,0 +1,45 @@
+[
+  {
+    "id": "summary",
+    "name": "Summary",
+    "key": "summary",
+    "custom": false,
+    "orderable": true,
+    "navigable": true,
+    "searchable": true,
+    "clauseNames": ["summary"],
+    "schema": {
+      "type": "string",
+      "system": "summary"
+    }
+  },
+  {
+    "id": "assignee",
+    "name": "Assignee",
+    "key": "assignee",
+    "custom": false,
+    "orderable": true,
+    "navigable": true,
+    "searchable": true,
+    "clauseNames": ["assignee"],
+    "schema": {
+      "type": "user",
+      "system": "assignee"
+    }
+  },
+  {
+    "id": "customfield_10001",
+    "name": "Story Points",
+    "key": "customfield_10001",
+    "custom": true,
+    "orderable": true,
+    "navigable": true,
+    "searchable": true,
+    "clauseNames": ["cf[10001]", "Story Points"],
+    "schema": {
+      "type": "number",
+      "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+      "customId": 10001
+    }
+  }
+]

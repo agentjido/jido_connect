@@ -212,6 +212,63 @@ defmodule Jido.Connect.Jira.FixtureTest do
     end
   end
 
+  describe "projects list fixtures" do
+    test "normalizes projects list fixture" do
+      payload = fixture!("projects_list.json")
+
+      assert {:ok, page} = Normalizer.pagination(payload)
+      assert page.start_at == 0
+      assert page.max_results == 50
+      assert page.total == 2
+      assert page.is_last == true
+
+      values = payload["values"]
+      assert length(values) == 2
+
+      assert {:ok, first} = Normalizer.project(Enum.at(values, 0))
+      assert first.key == "PROJ"
+      assert first.name == "Project Alpha"
+      assert first.project_type == "software"
+      assert first.style == "classic"
+      assert first.description == "Main software project for the Alpha product line."
+      assert first.lead.account_id == "5f8a7b9c1d2e3f4a5b6c7d8e"
+      assert first.lead.display_name == "Alice Nakamura"
+      assert first.category["name"] == "Engineering"
+
+      assert {:ok, second} = Normalizer.project(Enum.at(values, 1))
+      assert second.key == "TEAM"
+      assert second.name == "Team Operations"
+      assert second.project_type == "business"
+      assert second.style == "next-gen"
+    end
+  end
+
+  describe "field schemas list fixtures" do
+    test "normalizes field schemas list fixture" do
+      payload = fixture!("field_schemas_list.json")
+
+      assert is_list(payload)
+      assert length(payload) == 3
+
+      assert {:ok, first} = Normalizer.field_schema(Enum.at(payload, 0))
+      assert first.id == "summary"
+      assert first.name == "Summary"
+      assert first.custom == false
+      assert first.searchable == true
+      assert first.clause_names == ["summary"]
+
+      assert {:ok, second} = Normalizer.field_schema(Enum.at(payload, 1))
+      assert second.id == "assignee"
+      assert second.name == "Assignee"
+
+      assert {:ok, third} = Normalizer.field_schema(Enum.at(payload, 2))
+      assert third.id == "customfield_10001"
+      assert third.name == "Story Points"
+      assert third.custom == true
+      assert third.clause_names == ["cf[10001]", "Story Points"]
+    end
+  end
+
   defp fixture!(name) do
     Path.join([__DIR__, "..", "..", "..", "test", "fixtures", "jira", name])
     |> Path.expand()

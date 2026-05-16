@@ -1,4 +1,4 @@
-defmodule Jido.Connect.Jira.Handlers.Actions.SearchIssues do
+defmodule Jido.Connect.Jira.Handlers.Actions.ListProjects do
   @moduledoc false
 
   alias Jido.Connect.Jira.Client
@@ -7,10 +7,9 @@ defmodule Jido.Connect.Jira.Handlers.Actions.SearchIssues do
     with {:ok, client} <- fetch_client(credentials),
          token <- Client.credential_token(credentials),
          {:ok, result} <-
-           client.search_issues(input.jql, token,
-             max_results: Map.get(input, :max_results, 50),
+           client.list_projects(token,
              start_at: Map.get(input, :start_at, 0),
-             fields: Map.get(input, :fields)
+             max_results: Map.get(input, :max_results, 50)
            ) do
       {:ok, result}
     end
