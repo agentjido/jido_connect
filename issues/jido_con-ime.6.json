@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-16T12:49:27Z",
+  "description": "Quality finding from review: `cd apps/jido_connect_hubspot \u0026\u0026 mix test --no-deps-check` passes, but emits warnings. Observed warnings: duplicated function clauses in trigger test mock modules (`list_contacts/2` and `list_deals/2` clauses not grouped), and an unused default argument in `privacy_audit_test.exs` (`defp action(..., opts \\\\ [])` where every call supplies opts).\n\nWhy this matters: warnings are not harmless in this repo because the release posture is trending toward warnings-as-errors. Passing tests with warnings leave the package in a state where local package tests pass but stricter CI/release checks fail. The warnings also indicate generated tests were mechanically assembled without following idiomatic Elixir grouping rules.\n\nAcceptance:\n- Group same-name/same-arity mock clauses in HubSpot trigger tests so compiler warnings disappear.\n- Remove the unused default argument from the privacy audit helper or add a legitimate zero-options call if that is clearer.\n- `cd apps/jido_connect_hubspot \u0026\u0026 mix test --no-deps-check` passes with no warnings.\n- Do not change HubSpot runtime behavior unless necessary for the tests.",
+  "id": "jido_con-ime.6",
+  "labels": [],
+  "parent": "jido_con-ime",
+  "priority": 2,
+  "status": "open",
+  "title": "[REVIEW-S06] Remove HubSpot generated-test warnings",
+  "type": "task",
+  "updated_at": "2026-05-16T12:49:27Z"
+}
