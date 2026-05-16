@@ -1,0 +1,14 @@
+{
+  "id": "comment-1",
+  "body": "Investigated the OAuth2 flow. Ready to start implementation.",
+  "user": {
+    "id": "user-1",
+    "name": "Alice Nakamura",
+    "displayName": "Alice Nakamura",
+    "email": "alice@example.com",
+    "active": true
+  },
+  "parentId": "uuid-001",
+  "createdAt": "2026-05-01T10:30:00.000Z",
+  "updatedAt": "2026-05-01T10:30:00.000Z"
+}
