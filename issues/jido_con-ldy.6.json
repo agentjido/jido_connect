@@ -4,6 +4,8 @@
     "jido_con-ldy.5"
   ],
   "blocks": [],
+  "closed_at": "2026-05-16T00:37:33Z",
+  "close_reason": "Implemented in f937e20 by pi-connector-factory",
   "created": "2026-05-15T21:50:06Z",
   "description": "Add reader/sales-editor catalog packs, plugin availability tests, scope matrix, privacy classification, and live-test guidance.",
   "id": "jido_con-ldy.6",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-ldy",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-HUB-S06] Add HubSpot catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-16T00:30:10Z"
+  "updated_at": "2026-05-16T00:37:33Z"
 }
