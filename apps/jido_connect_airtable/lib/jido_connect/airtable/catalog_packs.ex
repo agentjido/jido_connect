@@ -34,7 +34,10 @@ defmodule Jido.Connect.Airtable.CatalogPacks do
   @record_write_tools [
     "airtable.records.create",
     "airtable.records.update",
-    "airtable.records.delete"
+    "airtable.records.delete",
+    "airtable.records.batch_create",
+    "airtable.records.batch_update",
+    "airtable.records.batch_delete"
   ]
 
   @editor_tools @reader_tools ++

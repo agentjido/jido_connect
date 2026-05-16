@@ -11,6 +11,9 @@ defmodule MockClient do
   def create_record(input, token), do: handle(:create_record, input, token)
   def update_record(input, token), do: handle(:update_record, input, token)
   def delete_record(input, token), do: handle(:delete_record, input, token)
+  def create_records(input, token), do: handle(:create_records, input, token)
+  def update_records(input, token), do: handle(:update_records, input, token)
+  def delete_records(input, token), do: handle(:delete_records, input, token)
 
   defp handle(action, _input, _token) do
     case Process.get({__MODULE__, action}) do

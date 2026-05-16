@@ -131,7 +131,7 @@ defmodule Jido.Connect.Airtable.Actions.Records do
       description("Delete a record from an Airtable table.")
       handler(Jido.Connect.Airtable.Handlers.Actions.DeleteRecord)
 
-      effect(:write, confirmation: :required_for_ai)
+      effect(:destructive, confirmation: :required_for_ai)
 
       access do
         auth(:personal_access_token)
@@ -146,6 +146,99 @@ defmodule Jido.Connect.Airtable.Actions.Records do
 
       output do
         field(:record, :map)
+      end
+    end
+
+    action :create_records do
+      id("airtable.records.batch_create")
+      resource(:record)
+      verb(:create)
+      data_classification(:workspace_content)
+      label("Batch create records")
+      description("Create up to 10 records in an Airtable table in a single request.")
+      handler(Jido.Connect.Airtable.Handlers.Actions.CreateRecords)
+
+      effect(:write, confirmation: :required_for_ai)
+
+      access do
+        auth(:personal_access_token)
+        scopes(["data.records:write"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:base_id, :string, required?: true, example: "appXXXXXXXXXXXX")
+        field(:table_id, :string, required?: true, example: "tblXXXXXXXXXXXX")
+
+        field(:records, {:array, :map},
+          required?: true,
+          description: "List of field maps, each keyed by Airtable field name."
+        )
+
+        field(:typecast, :boolean, default: false)
+      end
+
+      output do
+        field(:records, {:array, :map})
+      end
+    end
+
+    action :update_records do
+      id("airtable.records.batch_update")
+      resource(:record)
+      verb(:update)
+      data_classification(:workspace_content)
+      label("Batch update records")
+      description("Update up to 10 records in an Airtable table in a single request.")
+      handler(Jido.Connect.Airtable.Handlers.Actions.UpdateRecords)
+
+      effect(:write, confirmation: :required_for_ai)
+
+      access do
+        auth(:personal_access_token)
+        scopes(["data.records:write"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:base_id, :string, required?: true, example: "appXXXXXXXXXXXX")
+        field(:table_id, :string, required?: true, example: "tblXXXXXXXXXXXX")
+
+        field(:records, {:array, :map},
+          required?: true,
+          description: "List of maps with :id and :fields keys."
+        )
+
+        field(:typecast, :boolean, default: false)
+      end
+
+      output do
+        field(:records, {:array, :map})
+      end
+    end
+
+    action :delete_records do
+      id("airtable.records.batch_delete")
+      resource(:record)
+      verb(:delete)
+      data_classification(:workspace_content)
+      label("Batch delete records")
+      description("Delete up to 10 records from an Airtable table in a single request.")
+      handler(Jido.Connect.Airtable.Handlers.Actions.DeleteRecords)
+
+      effect(:destructive, confirmation: :required_for_ai)
+
+      access do
+        auth(:personal_access_token)
+        scopes(["data.records:write"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:base_id, :string, required?: true, example: "appXXXXXXXXXXXX")
+        field(:table_id, :string, required?: true, example: "tblXXXXXXXXXXXX")
+        field(:record_ids, {:array, :string}, required?: true)
+      end
+
+      output do
+        field(:records, {:array, :map})
       end
     end
   end
