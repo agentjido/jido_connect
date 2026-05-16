@@ -4,6 +4,8 @@
     "jido_con-ul0.4"
   ],
   "blocks": [],
+  "closed_at": "2026-05-16T04:32:54Z",
+  "close_reason": "Implemented in 397a65c by pi-connector-factory",
   "created": "2026-05-15T22:01:12Z",
   "description": "Add webhook verification/normalization for issue created/updated/comment events, catalog packs, availability tests, README usage, and live-test guidance.",
   "id": "jido_con-ul0.5",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-ul0",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W5-JIRA-S05] Add Jira webhook trigger and catalog docs",
   "type": "task",
-  "updated_at": "2026-05-16T04:16:32Z"
+  "updated_at": "2026-05-16T04:32:54Z"
 }
