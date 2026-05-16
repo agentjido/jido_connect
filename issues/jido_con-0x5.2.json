@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-0x5.3"
   ],
+  "closed_at": "2026-05-16T04:57:26Z",
+  "close_reason": "Implemented in 8492681 by pi-connector-factory",
   "created": "2026-05-15T22:01:21Z",
   "description": "Add issue, project, team, user, state, label, comment, and pagination structs with representative Linear GraphQL fixture coverage.",
   "id": "jido_con-0x5.2",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-0x5",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W5-LIN-S02] Add Linear normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-16T04:51:27Z"
+  "updated_at": "2026-05-16T04:57:26Z"
 }
