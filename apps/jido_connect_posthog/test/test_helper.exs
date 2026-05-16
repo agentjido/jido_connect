@@ -105,6 +105,105 @@ defmodule Jido.Connect.PostHog.MockClient do
        }
      }}
   end
+
+  # Event capture
+
+  def capture_event("token", "pageview", "user-1", _opts) do
+    {:ok, %Req.Response{status: 202, body: %{}}}
+  end
+
+  def batch_capture_events("token", events), do: batch_capture_events("token", events, [])
+
+  def batch_capture_events("token", _events, _opts) do
+    {:ok, %Req.Response{status: 202, body: %{}}}
+  end
+
+  # Feature flags
+
+  def decide_feature_flag("new-dashboard", "user-1", "token", _opts) do
+    {:ok,
+     %Req.Response{
+       status: 200,
+       body: %{
+         "featureFlags" => %{"new-dashboard" => true},
+         "featureFlagPayloads" => %{},
+         "reason" => nil
+       }
+     }}
+  end
+
+  def decide_feature_flag("dark-mode", "user-1", "token", _opts) do
+    {:ok,
+     %Req.Response{
+       status: 200,
+       body: %{
+         "featureFlags" => %{"dark-mode" => "variant-a"},
+         "featureFlagPayloads" => %{"dark-mode" => %{"color_scheme" => "dark"}},
+         "reason" => nil
+       }
+     }}
+  end
+
+  def decide_feature_flag("disabled-flag", "user-1", "token", _opts) do
+    {:ok,
+     %Req.Response{
+       status: 200,
+       body: %{
+         "featureFlags" => %{"disabled-flag" => false},
+         "featureFlagPayloads" => %{},
+         "reason" => nil
+       }
+     }}
+  end
+
+  def list_feature_flags("token", _opts) do
+    {:ok,
+     %Req.Response{
+       status: 200,
+       body: %{
+         "results" => [
+           %{
+             "id" => 42,
+             "key" => "new-dashboard",
+             "name" => "New Dashboard",
+             "description" => "Enable the redesigned dashboard experience.",
+             "active" => true,
+             "rollout_percentage" => 50.0,
+             "filters" => %{},
+             "created_at" => "2026-04-20T09:00:00.000Z"
+           },
+           %{
+             "id" => 43,
+             "key" => "dark-mode",
+             "name" => "Dark Mode",
+             "description" => "Enable dark mode UI theme.",
+             "active" => true,
+             "rollout_percentage" => 100.0,
+             "filters" => %{},
+             "created_at" => "2026-04-22T14:30:00.000Z"
+           }
+         ],
+         "next" => nil
+       }
+     }}
+  end
+
+  def get_feature_flag("42", "token") do
+    {:ok,
+     %Req.Response{
+       status: 200,
+       body: %{
+         "id" => 42,
+         "key" => "new-dashboard",
+         "name" => "New Dashboard",
+         "description" => "Enable the redesigned dashboard experience for selected users.",
+         "active" => true,
+         "rollout_percentage" => 50.0,
+         "filters" => %{"groups" => []},
+         "created_at" => "2026-04-20T09:00:00.000Z"
+       }
+     }}
+  end
 end
 
 # Ensure Req.Test.Ownership is running so that client tests using

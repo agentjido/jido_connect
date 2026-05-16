@@ -9,10 +9,15 @@ defmodule Jido.Connect.PostHog.ScopeResolver do
   @scope_map %{
     "posthog.event.list" => ["events:read"],
     "posthog.event.get" => ["events:read"],
+    "posthog.event.capture" => ["events:write"],
+    "posthog.event.batch_capture" => ["events:write"],
     "posthog.person.list" => ["persons:read"],
     "posthog.person.get" => ["persons:read"],
     "posthog.insight.list" => ["insights:read"],
-    "posthog.insight.get" => ["insights:read"]
+    "posthog.insight.get" => ["insights:read"],
+    "posthog.feature_flag.evaluate" => ["feature_flags:read"],
+    "posthog.feature_flag.list" => ["feature_flags:read"],
+    "posthog.feature_flag.get" => ["feature_flags:read"]
   }
 
   @doc """

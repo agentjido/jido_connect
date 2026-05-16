@@ -9,7 +9,8 @@ defmodule Jido.Connect.PostHog.CatalogPacks do
 
   | Pack | Risk | Tools |
   |------|------|-------|
-  | `:posthog_reader` | read | event, person, and insight queries |
+  | `:posthog_reader` | read | event, person, insight, and feature flag queries |
+  | `:posthog_writer` | write | event capture operations |
 
   Triggers are subscribed to independently and are not listed in packs.
   """
@@ -19,6 +20,11 @@ defmodule Jido.Connect.PostHog.CatalogPacks do
   @event_read_tools [
     "posthog.event.list",
     "posthog.event.get"
+  ]
+
+  @event_write_tools [
+    "posthog.event.capture",
+    "posthog.event.batch_capture"
   ]
 
   @person_read_tools [
@@ -31,20 +37,39 @@ defmodule Jido.Connect.PostHog.CatalogPacks do
     "posthog.insight.get"
   ]
 
-  @reader_tools @event_read_tools ++ @person_read_tools ++ @insight_read_tools
+  @feature_flag_read_tools [
+    "posthog.feature_flag.evaluate",
+    "posthog.feature_flag.list",
+    "posthog.feature_flag.get"
+  ]
+
+  @reader_tools @event_read_tools ++
+                  @person_read_tools ++ @insight_read_tools ++ @feature_flag_read_tools
 
   @doc "Returns all built-in PostHog catalog packs."
-  def all, do: [reader()]
+  def all, do: [reader(), writer()]
 
-  @doc "Read-only PostHog pack for event, person, and insight queries."
+  @doc "Read-only PostHog pack for event, person, insight, and feature flag queries."
   def reader do
     Pack.new!(%{
       id: :posthog_reader,
       label: "PostHog reader",
-      description: "Read PostHog events, persons, and insights.",
+      description: "Read PostHog events, persons, insights, and feature flags.",
       filters: %{provider: :posthog},
       allowed_tools: @reader_tools,
       metadata: %{package: :jido_connect_posthog, risk: :read}
+    })
+  end
+
+  @doc "Write pack for PostHog event capture operations."
+  def writer do
+    Pack.new!(%{
+      id: :posthog_writer,
+      label: "PostHog writer",
+      description: "Capture PostHog events.",
+      filters: %{provider: :posthog},
+      allowed_tools: @event_write_tools,
+      metadata: %{package: :jido_connect_posthog, risk: :write}
     })
   end
 end
