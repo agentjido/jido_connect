@@ -1,0 +1,27 @@
+{
+  "collection": [
+    {
+      "uri": "https://api.calendly.com/scheduled_events/m3n4o5p6",
+      "name": "30 Minute Meeting",
+      "status": "active",
+      "start_time": "2026-05-20T10:00:00.000000Z",
+      "end_time": "2026-05-20T10:30:00.000000Z",
+      "event_type": "https://api.calendly.com/event_types/i9j0k1l2",
+      "resource": "scheduled_event"
+    },
+    {
+      "uri": "https://api.calendly.com/scheduled_events/y5z6a7b8",
+      "name": "60 Minute Meeting",
+      "status": "canceled",
+      "start_time": "2026-05-22T14:00:00.000000Z",
+      "end_time": "2026-05-22T15:00:00.000000Z",
+      "event_type": "https://api.calendly.com/event_types/c9d0e1f2",
+      "resource": "scheduled_event"
+    }
+  ],
+  "pagination": {
+    "previous": null,
+    "next": "https://api.calendly.com/scheduled_events?count=2&page_token=next_page_token",
+    "count": 2
+  }
+}
