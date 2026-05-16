@@ -4,6 +4,8 @@
     "jido_con-cnk.3"
   ],
   "blocks": [],
+  "closed_at": "2026-05-16T03:28:16Z",
+  "close_reason": "Implemented in 46e1c75 by pi-connector-factory",
   "created": "2026-05-15T21:50:28Z",
   "description": "Add catalog/availability coverage, route mounting guidance, replay/dedupe contract docs, and local demo/live-test guidance.",
   "id": "jido_con-cnk.4",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-cnk",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-WEB-S04] Add webhook catalog packs and host docs",
   "type": "task",
-  "updated_at": "2026-05-16T03:20:54Z"
+  "updated_at": "2026-05-16T03:28:16Z"
 }
