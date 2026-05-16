@@ -43,6 +43,7 @@ defmodule JidoConnectCalcom.MixProject do
     [
       jido_connect_dep(),
       {:jason, "~> 1.4"},
+      {:plug, "~> 1.19", only: :test},
       {:req, "~> 0.5"}
     ]
   end
