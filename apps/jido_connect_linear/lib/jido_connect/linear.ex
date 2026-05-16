@@ -27,6 +27,7 @@ defmodule Jido.Connect.Linear do
   use Jido.Connect,
     fragments: [
       Jido.Connect.Linear.Actions.Issues,
+      Jido.Connect.Linear.Actions.Comments,
       Jido.Connect.Linear.Actions.Teams,
       Jido.Connect.Linear.Triggers.Issues
     ]

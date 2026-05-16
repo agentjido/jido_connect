@@ -231,4 +231,116 @@ defmodule Jido.Connect.Linear.Client.ResponseTest do
       assert comment.created_at == "2026-05-15T14:00:00.000Z"
     end
   end
+
+  describe "handle_comments_list_response/1" do
+    test "normalizes a successful comments list response" do
+      body = %{
+        "data" => %{
+          "comments" => %{
+            "nodes" => [
+              %{
+                "id" => "comment-1",
+                "body" => "First comment",
+                "user" => %{"id" => "user-1", "name" => "Alice", "email" => "a@example.com"},
+                "parentId" => "uuid-001",
+                "createdAt" => "2026-05-01T10:30:00.000Z",
+                "updatedAt" => "2026-05-01T10:30:00.000Z"
+              },
+              %{
+                "id" => "comment-2",
+                "body" => "Second comment",
+                "user" => %{"id" => "user-2", "name" => "Bob", "email" => "b@example.com"},
+                "parentId" => "uuid-001",
+                "createdAt" => "2026-05-05T14:00:00.000Z",
+                "updatedAt" => "2026-05-05T14:00:00.000Z"
+              }
+            ],
+            "pageInfo" => %{"hasNextPage" => false, "endCursor" => "cursor-c2"},
+            "totalCount" => 2
+          }
+        }
+      }
+
+      assert {:ok, result} =
+               Response.handle_comments_list_response({:ok, %{status: 200, body: body}})
+
+      assert length(result.comments) == 2
+      assert hd(result.comments).body == "First comment"
+      assert hd(result.comments).author.name == "Alice"
+      assert result.has_next_page == false
+      assert result.end_cursor == "cursor-c2"
+      assert result.total_count == 2
+    end
+
+    test "returns error when comments data is missing" do
+      body = %{"data" => %{}}
+
+      assert {:error, _} =
+               Response.handle_comments_list_response({:ok, %{status: 200, body: body}})
+    end
+
+    test "returns error for GraphQL errors" do
+      body = %{"errors" => [%{"message" => "Issue not found"}]}
+
+      assert {:error, _} =
+               Response.handle_comments_list_response({:ok, %{status: 200, body: body}})
+    end
+
+    test "returns error for HTTP error" do
+      assert {:error, _} =
+               Response.handle_comments_list_response(
+                 {:ok, %{status: 500, body: %{"errors" => [%{"message" => "Internal error"}]}}}
+               )
+    end
+  end
+
+  describe "handle_team_get_response/1" do
+    test "normalizes a successful team get response" do
+      body = %{
+        "data" => %{
+          "team" => %{
+            "id" => "team-1",
+            "key" => "LIN",
+            "name" => "Linear Team",
+            "description" => "Core product team.",
+            "icon" => "🚀",
+            "color" => "#5B5DEF",
+            "lead" => %{"id" => "user-1", "name" => "Alice", "email" => "a@example.com"}
+          }
+        }
+      }
+
+      assert {:ok, team} =
+               Response.handle_team_get_response({:ok, %{status: 200, body: body}})
+
+      assert team.id == "team-1"
+      assert team.key == "LIN"
+      assert team.name == "Linear Team"
+      assert team.description == "Core product team."
+      assert team.icon == "🚀"
+      assert team.color == "#5B5DEF"
+      assert team.lead.name == "Alice"
+    end
+
+    test "returns error when team data is missing" do
+      body = %{"data" => %{}}
+
+      assert {:error, _} =
+               Response.handle_team_get_response({:ok, %{status: 200, body: body}})
+    end
+
+    test "returns error for GraphQL errors" do
+      body = %{"errors" => [%{"message" => "Team not found"}]}
+
+      assert {:error, _} =
+               Response.handle_team_get_response({:ok, %{status: 200, body: body}})
+    end
+
+    test "returns error for HTTP error" do
+      assert {:error, _} =
+               Response.handle_team_get_response(
+                 {:ok, %{status: 404, body: %{"errors" => [%{"message" => "Not found"}]}}}
+               )
+    end
+  end
 end

@@ -12,7 +12,9 @@ defmodule Jido.Connect.Linear.ScopeResolver do
     "linear.issue.create" => ["write", "issues:create"],
     "linear.issue.update" => ["write"],
     "linear.issue.comment.create" => ["write", "comments:create"],
+    "linear.issue.comments.list" => ["read"],
     "linear.team.list" => ["read"],
+    "linear.team.get" => ["read"],
     "linear.issue.changed" => ["read"]
   }
 

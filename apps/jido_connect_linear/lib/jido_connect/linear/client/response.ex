@@ -196,6 +196,63 @@ defmodule Jido.Connect.Linear.Client.Response do
 
   def handle_comment_response(response), do: Transport.handle_error_response(response)
 
+  @doc "Handles a Linear comments list response."
+  def handle_comments_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case Data.get(body, "errors") do
+      errors when is_list(errors) and length(errors) > 0 ->
+        Transport.handle_error_response(
+          {:ok, %{status: status, body: body}},
+          message: "Linear GraphQL errors",
+          reason: :graphql_error
+        )
+
+      _ ->
+        case get_in(body, ["data", "comments"]) do
+          result when is_map(result) ->
+            nodes = Data.get(result, "nodes", [])
+            page_info = Data.get(result, "pageInfo", %{})
+
+            {:ok,
+             %{
+               comments: Enum.map(nodes, &normalize_comment/1),
+               has_next_page: Data.get(page_info, "hasNextPage", false),
+               end_cursor: Data.get(page_info, "endCursor"),
+               total_count: Data.get(result, "totalCount")
+             }}
+
+          _ ->
+            Transport.invalid_success_response(
+              "Linear comments list response was invalid",
+              body
+            )
+        end
+    end
+  end
+
+  def handle_comments_list_response(response), do: Transport.handle_error_response(response)
+
+  @doc "Handles a Linear team get response."
+  def handle_team_get_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case Data.get(body, "errors") do
+      errors when is_list(errors) and length(errors) > 0 ->
+        Transport.handle_error_response(
+          {:ok, %{status: status, body: body}},
+          message: "Linear GraphQL errors",
+          reason: :graphql_error
+        )
+
+      _ ->
+        case get_in(body, ["data", "team"]) do
+          team when is_map(team) -> {:ok, normalize_team(team)}
+          _ -> Transport.invalid_success_response("Linear team get response was invalid", body)
+        end
+    end
+  end
+
+  def handle_team_get_response(response), do: Transport.handle_error_response(response)
+
   # ---------------------------------------------------------------------------
   # Private helpers
   # ---------------------------------------------------------------------------
@@ -302,10 +359,25 @@ defmodule Jido.Connect.Linear.Client.Response do
       name: Data.get(payload, "name"),
       description: Data.get(payload, "description"),
       icon: Data.get(payload, "icon"),
-      color: Data.get(payload, "color")
+      color: Data.get(payload, "color"),
+      lead: normalize_user(Data.get(payload, "lead"))
     }
     |> Data.compact()
   end
 
   defp normalize_team(_payload), do: nil
+
+  defp normalize_comment(payload) when is_map(payload) do
+    %{
+      id: Data.get(payload, "id"),
+      body: Data.get(payload, "body"),
+      author: normalize_user(Data.get(payload, "user")),
+      parent_id: Data.get(payload, "parentId"),
+      created_at: Data.get(payload, "createdAt"),
+      updated_at: Data.get(payload, "updatedAt")
+    }
+    |> Data.compact()
+  end
+
+  defp normalize_comment(_payload), do: nil
 end

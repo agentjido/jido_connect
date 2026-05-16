@@ -19,11 +19,13 @@ defmodule Jido.Connect.Linear.CatalogPacks do
 
   @issue_read_tools [
     "linear.issue.get",
-    "linear.issue.search"
+    "linear.issue.search",
+    "linear.issue.comments.list"
   ]
 
   @team_read_tools [
-    "linear.team.list"
+    "linear.team.list",
+    "linear.team.get"
   ]
 
   @reader_tools @issue_read_tools ++ @team_read_tools
