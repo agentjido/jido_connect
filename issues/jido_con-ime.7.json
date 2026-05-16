@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ime.1"
+  ],
   "blocks": [],
   "created": "2026-05-16T12:49:27Z",
   "description": "Process finding from review: after the factory completed the connector backlog, the only way to assess health was manually running package tests one by one. That found failures in Cal.com, Jira, Linear, Salesforce, and a root compile warning. The Pi loop itself only enforces one clean commit per task; it does not yet provide a wave-level verification gate.\n\nWhy this matters: this repo now has many independently shippable connector packages. A task can be locally coherent while the broader connector family has dependency drift, warnings, or package test failures. We need a repeatable command that Mike/Codex/Pi can run after a factory loop finishes, and it should be documented in `pi-connector-factory` or a repo script.\n\nAcceptance:\n- Add a small verification command/script for the connector wave, preferably under `pi-connector-factory` or as a documented repo command.\n- It should run package tests serially for at least: Cal.com, HubSpot, Airtable, Webhook, Jira, Linear, PostHog, Calendly, Salesforce.\n- It should avoid parallel Mix build lock contention.\n- It should print a concise pass/fail summary and return non-zero on any failed package.\n- Document how this differs from `bun run loop` and when to run it.\n- Include root compile/warnings check if and only if REVIEW-S01 has made that check reliable; otherwise document it as a known blocker.",
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[REVIEW-S07] Add connector-wave verification command",
   "type": "task",
-  "updated_at": "2026-05-16T12:49:44Z"
+  "updated_at": "2026-05-16T12:49:45Z"
 }
