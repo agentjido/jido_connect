@@ -1,11 +1,17 @@
 defmodule Jido.Connect.Salesforce.Client do
   @moduledoc "Salesforce REST API client boundary."
 
-  alias Jido.Connect.Salesforce.Client.{Contacts, Transport}
+  alias Jido.Connect.Salesforce.Client.{Contacts, Objects, Transport}
 
   defdelegate get_contact(params, credentials), to: Contacts
   defdelegate list_contacts(params, credentials), to: Contacts
   defdelegate create_contact(params, credentials), to: Contacts
+
+  defdelegate query(params, credentials), to: Objects
+  defdelegate get_record(params, credentials), to: Objects
+  defdelegate describe_object(params, credentials), to: Objects
+  defdelegate list_recent(params, credentials), to: Objects
+  defdelegate query_more(params, credentials), to: Objects
 
   @doc """
   Returns the configured or injected client module.

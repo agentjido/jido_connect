@@ -9,6 +9,11 @@ defmodule Jido.Connect.SalesforceTest do
   @salesforce_action_modules [
     Jido.Connect.Salesforce.Actions.GetContact,
     Jido.Connect.Salesforce.Actions.ListContacts,
+    Jido.Connect.Salesforce.Actions.Query,
+    Jido.Connect.Salesforce.Actions.GetRecord,
+    Jido.Connect.Salesforce.Actions.DescribeObject,
+    Jido.Connect.Salesforce.Actions.ListRecent,
+    Jido.Connect.Salesforce.Actions.QueryMore,
     Jido.Connect.Salesforce.Actions.CreateContact
   ]
 
@@ -32,6 +37,11 @@ defmodule Jido.Connect.SalesforceTest do
     assert Enum.map(spec.actions, & &1.id) == [
              "salesforce.contacts.contact.get",
              "salesforce.contacts.contact.list",
+             "salesforce.crm.query",
+             "salesforce.crm.record.get",
+             "salesforce.crm.object.describe",
+             "salesforce.crm.record.list_recent",
+             "salesforce.crm.query_more",
              "salesforce.contacts.contact.create"
            ]
 

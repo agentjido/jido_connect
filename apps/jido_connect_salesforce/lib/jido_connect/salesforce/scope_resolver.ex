@@ -7,9 +7,16 @@ defmodule Jido.Connect.Salesforce.ScopeResolver do
   """
 
   @scope_map %{
+    # Contact actions
     "salesforce.contacts.contact.get" => ["api"],
     "salesforce.contacts.contact.list" => ["api"],
-    "salesforce.contacts.contact.create" => ["api"]
+    "salesforce.contacts.contact.create" => ["api"],
+    # Generic SObject query/read actions
+    "salesforce.crm.query" => ["api"],
+    "salesforce.crm.record.get" => ["api"],
+    "salesforce.crm.object.describe" => ["api"],
+    "salesforce.crm.record.list_recent" => ["api"],
+    "salesforce.crm.query_more" => ["api"]
   }
 
   @doc """
