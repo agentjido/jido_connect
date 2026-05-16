@@ -1,0 +1,8 @@
+{
+  "canceled_by": "alice@example.com",
+  "reason": "Schedule conflict",
+  "invitee": "https://api.calendly.com/scheduled_events/m3n4o5p6/invitees/q7r8s9t0",
+  "event": "https://api.calendly.com/scheduled_events/m3n4o5p6",
+  "organization": "https://api.calendly.com/organizations/e5f6g7h8",
+  "canceled_at": "2026-05-19T12:00:00.000000Z"
+}
