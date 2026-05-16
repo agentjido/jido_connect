@@ -11,9 +11,18 @@ defmodule Jido.Connect.Salesforce.ScopeResolver do
     "salesforce.contacts.contact.get" => ["api"],
     "salesforce.contacts.contact.list" => ["api"],
     "salesforce.contacts.contact.create" => ["api"],
+    "salesforce.contacts.contact.update" => ["api"],
+    # Lead actions
+    "salesforce.crm.lead.create" => ["api"],
+    "salesforce.crm.lead.update" => ["api"],
+    # Task actions
+    "salesforce.crm.task.create" => ["api"],
+    "salesforce.crm.task.update" => ["api"],
     # Generic SObject query/read actions
     "salesforce.crm.query" => ["api"],
     "salesforce.crm.record.get" => ["api"],
+    "salesforce.crm.record.create" => ["api"],
+    "salesforce.crm.record.update" => ["api"],
     "salesforce.crm.object.describe" => ["api"],
     "salesforce.crm.record.list_recent" => ["api"],
     "salesforce.crm.query_more" => ["api"]

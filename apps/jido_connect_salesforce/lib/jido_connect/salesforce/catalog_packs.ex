@@ -33,10 +33,29 @@ defmodule Jido.Connect.Salesforce.CatalogPacks do
   @reader_tools @contact_read_tools ++ @generic_read_tools
 
   @contact_write_tools [
-    "salesforce.contacts.contact.create"
+    "salesforce.contacts.contact.create",
+    "salesforce.contacts.contact.update"
   ]
 
-  @editor_tools @reader_tools ++ @contact_write_tools
+  @lead_write_tools [
+    "salesforce.crm.lead.create",
+    "salesforce.crm.lead.update"
+  ]
+
+  @task_write_tools [
+    "salesforce.crm.task.create",
+    "salesforce.crm.task.update"
+  ]
+
+  @generic_write_tools [
+    "salesforce.crm.record.create",
+    "salesforce.crm.record.update"
+  ]
+
+  @write_tools @contact_write_tools ++
+                 @lead_write_tools ++ @task_write_tools ++ @generic_write_tools
+
+  @editor_tools @reader_tools ++ @write_tools
 
   @doc "Returns all built-in Salesforce catalog packs."
   def all, do: [reader(), editor()]

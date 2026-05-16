@@ -18,6 +18,35 @@ defmodule Jido.Connect.Salesforce.ScopeResolverTest do
       assert ScopeResolver.required_scopes(%{id: "salesforce.contacts.contact.create"}, %{}, %{}) ==
                ["api"]
     end
+
+    test "returns api scope for update_contact" do
+      assert ScopeResolver.required_scopes(%{id: "salesforce.contacts.contact.update"}, %{}, %{}) ==
+               ["api"]
+    end
+  end
+
+  describe "lead scopes" do
+    test "returns api scope for create_lead" do
+      assert ScopeResolver.required_scopes(%{id: "salesforce.crm.lead.create"}, %{}, %{}) ==
+               ["api"]
+    end
+
+    test "returns api scope for update_lead" do
+      assert ScopeResolver.required_scopes(%{id: "salesforce.crm.lead.update"}, %{}, %{}) ==
+               ["api"]
+    end
+  end
+
+  describe "task scopes" do
+    test "returns api scope for create_task" do
+      assert ScopeResolver.required_scopes(%{id: "salesforce.crm.task.create"}, %{}, %{}) ==
+               ["api"]
+    end
+
+    test "returns api scope for update_task" do
+      assert ScopeResolver.required_scopes(%{id: "salesforce.crm.task.update"}, %{}, %{}) ==
+               ["api"]
+    end
   end
 
   describe "generic SObject scopes" do
@@ -63,8 +92,15 @@ defmodule Jido.Connect.Salesforce.ScopeResolverTest do
         %{operation: "salesforce.contacts.contact.get", expected: ["api"]},
         %{operation: "salesforce.contacts.contact.list", expected: ["api"]},
         %{operation: "salesforce.contacts.contact.create", expected: ["api"]},
+        %{operation: "salesforce.contacts.contact.update", expected: ["api"]},
+        %{operation: "salesforce.crm.lead.create", expected: ["api"]},
+        %{operation: "salesforce.crm.lead.update", expected: ["api"]},
+        %{operation: "salesforce.crm.task.create", expected: ["api"]},
+        %{operation: "salesforce.crm.task.update", expected: ["api"]},
         %{operation: "salesforce.crm.query", expected: ["api"]},
         %{operation: "salesforce.crm.record.get", expected: ["api"]},
+        %{operation: "salesforce.crm.record.create", expected: ["api"]},
+        %{operation: "salesforce.crm.record.update", expected: ["api"]},
         %{operation: "salesforce.crm.object.describe", expected: ["api"]},
         %{operation: "salesforce.crm.record.list_recent", expected: ["api"]},
         %{operation: "salesforce.crm.query_more", expected: ["api"]}

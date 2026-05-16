@@ -14,7 +14,14 @@ defmodule Jido.Connect.SalesforceTest do
     Jido.Connect.Salesforce.Actions.DescribeObject,
     Jido.Connect.Salesforce.Actions.ListRecent,
     Jido.Connect.Salesforce.Actions.QueryMore,
-    Jido.Connect.Salesforce.Actions.CreateContact
+    Jido.Connect.Salesforce.Actions.CreateContact,
+    Jido.Connect.Salesforce.Actions.UpdateContact,
+    Jido.Connect.Salesforce.Actions.CreateLead,
+    Jido.Connect.Salesforce.Actions.UpdateLead,
+    Jido.Connect.Salesforce.Actions.CreateTask,
+    Jido.Connect.Salesforce.Actions.UpdateTask,
+    Jido.Connect.Salesforce.Actions.CreateRecord,
+    Jido.Connect.Salesforce.Actions.UpdateRecord
   ]
 
   @salesforce_sensor_modules []
@@ -42,7 +49,14 @@ defmodule Jido.Connect.SalesforceTest do
              "salesforce.crm.object.describe",
              "salesforce.crm.record.list_recent",
              "salesforce.crm.query_more",
-             "salesforce.contacts.contact.create"
+             "salesforce.contacts.contact.create",
+             "salesforce.contacts.contact.update",
+             "salesforce.crm.lead.create",
+             "salesforce.crm.lead.update",
+             "salesforce.crm.task.create",
+             "salesforce.crm.task.update",
+             "salesforce.crm.record.create",
+             "salesforce.crm.record.update"
            ]
 
     assert Enum.map(spec.triggers, & &1.id) == []

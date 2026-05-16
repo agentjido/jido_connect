@@ -13,6 +13,16 @@ defmodule Jido.Connect.Salesforce.Client.ObjectsTest do
     assert function_exported?(Objects, :get_record, 2)
   end
 
+  test "create_record/2 is exported" do
+    assert {:module, Objects} = Code.ensure_loaded(Objects)
+    assert function_exported?(Objects, :create_record, 2)
+  end
+
+  test "update_record/2 is exported" do
+    assert {:module, Objects} = Code.ensure_loaded(Objects)
+    assert function_exported?(Objects, :update_record, 2)
+  end
+
   test "describe_object/2 is exported" do
     assert {:module, Objects} = Code.ensure_loaded(Objects)
     assert function_exported?(Objects, :describe_object, 2)
