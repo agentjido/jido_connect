@@ -8,12 +8,14 @@
   "labels": [
     "connector-factory",
     "hardening",
-    "review"
+    "hubspot",
+    "review",
+    "warnings"
   ],
   "parent": "jido_con-ime",
   "priority": 2,
   "status": "open",
   "title": "[REVIEW-S06] Remove HubSpot generated-test warnings",
   "type": "task",
-  "updated_at": "2026-05-16T12:49:41Z"
+  "updated_at": "2026-05-16T12:49:44Z"
 }
