@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-z95.4"
   ],
+  "closed_at": "2026-05-16T05:56:46Z",
+  "close_reason": "Implemented in 284c25b by pi-connector-factory",
   "created": "2026-05-15T22:01:30Z",
   "description": "Implement capture event, batch capture, evaluate feature flag, and list/get feature flags actions with tests and policy metadata.",
   "id": "jido_con-z95.3",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-z95",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W6-PH-S03] Implement PostHog event and feature flag actions",
   "type": "task",
-  "updated_at": "2026-05-16T05:44:53Z"
+  "updated_at": "2026-05-16T05:56:46Z"
 }
