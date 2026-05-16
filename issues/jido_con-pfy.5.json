@@ -4,6 +4,8 @@
     "jido_con-pfy.4"
   ],
   "blocks": [],
+  "closed_at": "2026-05-16T07:03:22Z",
+  "close_reason": "Implemented in 828da1e by pi-connector-factory",
   "created": "2026-05-15T22:01:41Z",
   "description": "Add invitee created/canceled webhook trigger normalization, catalog packs, availability tests, README usage, and live-test guidance.",
   "id": "jido_con-pfy.5",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-pfy",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-CALENDLY-S05] Add Calendly triggers, catalog packs, and docs",
   "type": "task",
-  "updated_at": "2026-05-16T06:52:15Z"
+  "updated_at": "2026-05-16T07:03:22Z"
 }
