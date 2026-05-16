@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-cnk.4"
   ],
+  "closed_at": "2026-05-16T03:20:53Z",
+  "close_reason": "Implemented in 3640782 by pi-connector-factory",
   "created": "2026-05-15T21:50:28Z",
   "description": "Add trigger metadata and normalization for inbound webhook deliveries, including headers/body/query metadata, dedupe hooks, and fixture tests.",
   "id": "jido_con-cnk.3",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-cnk",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W4-WEB-S03] Add generic inbound webhook trigger",
   "type": "task",
-  "updated_at": "2026-05-16T03:10:07Z"
+  "updated_at": "2026-05-16T03:20:53Z"
 }
