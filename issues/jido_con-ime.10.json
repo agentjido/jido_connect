@@ -9,7 +9,9 @@
     "connector-factory",
     "hardening",
     "pi-factory",
-    "review"
+    "recovery",
+    "review",
+    "timeout"
   ],
   "parent": "jido_con-ime",
   "priority": 2,
