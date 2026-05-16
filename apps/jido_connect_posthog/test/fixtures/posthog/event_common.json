@@ -1,0 +1,12 @@
+{
+  "id": "event-001",
+  "event": "pageview",
+  "distinct_id": "user-1",
+  "properties": {
+    "path": "/home",
+    "referrer": "https://google.com",
+    "browser": "Chrome",
+    "os": "macOS"
+  },
+  "timestamp": "2026-05-15T10:00:00.000Z"
+}

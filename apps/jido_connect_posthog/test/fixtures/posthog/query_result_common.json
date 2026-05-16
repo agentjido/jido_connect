@@ -1,0 +1,12 @@
+{
+  "query": "SELECT event, count() FROM events WHERE timestamp >= '2026-05-01' GROUP BY event ORDER BY count() DESC LIMIT 5",
+  "columns": ["event", "count()"],
+  "results": [
+    {"event": "pageview", "count()": 15420},
+    {"event": "signup", "count()": 832},
+    {"event": "purchase", "count()": 215},
+    {"event": "logout", "count()": 108},
+    {"event": "feature_used", "count()": 64}
+  ],
+  "has_more": false
+}

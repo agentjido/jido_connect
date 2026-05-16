@@ -1,0 +1,21 @@
+{
+  "results": [
+    {
+      "id": "event-001",
+      "event": "pageview",
+      "distinct_id": "user-1",
+      "properties": {"path": "/home"},
+      "timestamp": "2026-05-15T10:00:00.000Z"
+    },
+    {
+      "id": "event-002",
+      "event": "signup",
+      "distinct_id": "user-2",
+      "properties": {"plan": "pro", "source": "organic"},
+      "timestamp": "2026-05-15T11:30:00.000Z"
+    }
+  ],
+  "next": null,
+  "previous": null,
+  "count": 2
+}

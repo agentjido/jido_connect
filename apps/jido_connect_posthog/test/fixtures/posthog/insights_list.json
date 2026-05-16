@@ -1,0 +1,28 @@
+{
+  "results": [
+    {
+      "id": "insight-001",
+      "short_id": "iNbXkq2a",
+      "name": "Pageviews over time",
+      "derived_name": "Pageviews over time",
+      "kind": "InsightLineChart",
+      "result": [{"data": [120, 145, 130]}],
+      "created_at": "2026-05-01T00:00:00.000Z",
+      "updated_at": "2026-05-15T00:00:00.000Z"
+    },
+    {
+      "id": "insight-002",
+      "short_id": "xKm9pL3b",
+      "name": "Signups funnel",
+      "derived_name": "Signups funnel",
+      "kind": "InsightFunnel",
+      "description": "Conversion funnel from landing page to signup completion.",
+      "result": [{"data": [500, 300, 150, 75]}],
+      "created_at": "2026-05-05T00:00:00.000Z",
+      "updated_at": "2026-05-14T00:00:00.000Z"
+    }
+  ],
+  "next": null,
+  "previous": null,
+  "count": 2
+}
