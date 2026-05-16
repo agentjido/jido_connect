@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ime.8"
+  ],
   "created": "2026-05-16T12:50:11Z",
   "description": "Factory hardening finding from live use: running `bun run src/cli.ts loop --help` did not print help. Because the CLI only handles top-level `help`, it treated `--help` as loop args and started the default five-task loop. We had to kill the accidental Pi process and reopen the task it started.\n\nWhy this matters: a CLI used to orchestrate code-writing agents must be defensive. Help flags should never mutate Beadwork, start Pi, or touch the repo. This is especially important because users naturally try `command --help` before running a long operation.\n\nAcceptance:\n- Make `doctor --help`, `prompt --help`, `step --help`, and `loop --help` print command help without side effects.\n- Ensure `loop --help` does not call `bw start`, create a run dir, or spawn Pi.\n- Update README examples if needed.\n- Manually verify `bun run src/cli.ts loop --help` exits zero and leaves git/Beadwork untouched.\n- Keep backwards-compatible command forms for actual `step` and `loop` execution.",
   "id": "jido_con-ime.11",
@@ -18,5 +20,5 @@
   "status": "open",
   "title": "[REVIEW-S11] Make Pi factory command help side-effect free",
   "type": "bug",
-  "updated_at": "2026-05-16T12:50:13Z"
+  "updated_at": "2026-05-16T12:50:21Z"
 }
