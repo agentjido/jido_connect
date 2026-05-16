@@ -4,6 +4,8 @@
     "jido_con-0x5.4"
   ],
   "blocks": [],
+  "closed_at": "2026-05-16T05:27:27Z",
+  "close_reason": "Implemented in 34c833f by pi-connector-factory",
   "created": "2026-05-15T22:01:22Z",
   "description": "Add Linear webhook verification/normalization, trigger metadata for issue lifecycle/comment events, catalog packs, availability tests, and README/live-test guidance.",
   "id": "jido_con-0x5.5",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-0x5",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W5-LIN-S05] Add Linear webhook trigger and catalog docs",
   "type": "task",
-  "updated_at": "2026-05-16T05:19:08Z"
+  "updated_at": "2026-05-16T05:27:27Z"
 }
