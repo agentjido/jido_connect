@@ -4,6 +4,8 @@
     "jido_con-z95.4"
   ],
   "blocks": [],
+  "closed_at": "2026-05-16T06:13:58Z",
+  "close_reason": "Implemented in 979a9f6 by pi-connector-factory",
   "created": "2026-05-15T22:01:31Z",
   "description": "Add analytics-reader/event-writer catalog packs, scope/policy matrix, availability tests, README usage, and live-test guidance.",
   "id": "jido_con-z95.5",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-z95",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W6-PH-S05] Add PostHog catalog packs and docs",
   "type": "task",
-  "updated_at": "2026-05-16T06:07:28Z"
+  "updated_at": "2026-05-16T06:13:58Z"
 }
