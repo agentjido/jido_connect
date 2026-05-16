@@ -1,6 +1,7 @@
 {
   "assignee": "",
   "blocked_by": [
+    "jido_con-ime.10",
     "jido_con-ime.7",
     "jido_con-ime.9"
   ],
@@ -20,5 +21,5 @@
   "status": "open",
   "title": "[REVIEW-S08] Finalize completed connector parent epics",
   "type": "task",
-  "updated_at": "2026-05-16T12:50:20Z"
+  "updated_at": "2026-05-16T12:50:21Z"
 }
