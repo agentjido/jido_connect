@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-ul0.2"
   ],
+  "closed_at": "2026-05-16T03:42:32Z",
+  "close_reason": "Implemented in 89990ca by pi-connector-factory",
   "created": "2026-05-15T22:01:11Z",
   "description": "Add umbrella app, provider module, OAuth/API token auth profiles, Atlassian cloud transport boundary, README/AGENTS, and generated plugin tests.",
   "id": "jido_con-ul0.1",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-ul0",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[W5-JIRA-S01] Scaffold jido_connect_jira",
   "type": "task",
-  "updated_at": "2026-05-16T03:28:16Z"
+  "updated_at": "2026-05-16T03:42:32Z"
 }
