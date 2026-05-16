@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-16T13:58:04Z",
+  "close_reason": "All child tasks closed; verify-connector-wave.sh passes for calcom. Closing per REVIEW-S08.",
   "created": "2026-05-15T21:49:59Z",
   "description": "Finish the recovered Cal.com package before adding Calendly. Scope: repair test/dependency issues, harden auth/client behavior, add webhook lifecycle/trigger support, and refresh catalog/docs/live-test guidance.",
   "id": "jido_con-mq9",
@@ -11,8 +13,8 @@
     "wave-4"
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "[W4] Cal.com Hardening And Webhooks",
   "type": "epic",
-  "updated_at": "2026-05-15T21:49:59Z"
+  "updated_at": "2026-05-16T13:58:04Z"
 }
