@@ -5,11 +5,15 @@
   "created": "2026-05-19T14:16:08Z",
   "description": "Implement search, list/get channels, videos, playlists, playlist items, and comments/captions reads where supported. Cover quota metadata, page tokens, auth/API key behavior, and provider errors offline.",
   "id": "jido_con-q2q.3",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "google",
+    "youtube"
+  ],
   "parent": "jido_con-q2q",
   "priority": 2,
   "status": "open",
   "title": "[G32-S03] Implement YouTube search and read actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:08Z"
+  "updated_at": "2026-05-19T14:16:09Z"
 }
