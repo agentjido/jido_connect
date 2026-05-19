@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ru0.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:50Z",
   "description": "Build jido_connect_zoom for meeting workflows: OAuth/server-to-server auth metadata, users, meetings, recordings, transcripts, controlled meeting writes, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
@@ -12,5 +14,5 @@
   "status": "open",
   "title": "[G23] Zoom Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:03:51Z"
+  "updated_at": "2026-05-19T14:04:09Z"
 }
