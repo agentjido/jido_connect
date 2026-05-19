@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-q2q.2"
+  ],
   "created": "2026-05-19T14:16:06Z",
   "description": "Create apps/jido_connect_youtube using the Google foundation where appropriate, with API key/OAuth auth metadata, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-q2q.1",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G32-S01] Scaffold YouTube package",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:07Z"
+  "updated_at": "2026-05-19T14:16:11Z"
 }
