@@ -28,7 +28,8 @@ defmodule Jido.Connect.Zendesk do
 
   use Jido.Connect,
     fragments: [
-      Jido.Connect.Zendesk.Actions.Tickets
+      Jido.Connect.Zendesk.Actions.Tickets,
+      Jido.Connect.Zendesk.Triggers.Tickets
     ]
 
   defdelegate catalog_packs, to: Jido.Connect.Zendesk.CatalogPacks, as: :all
@@ -55,6 +56,13 @@ defmodule Jido.Connect.Zendesk do
       feature(:api_access)
       label("API access")
       description("Zendesk REST API access via API token or OAuth2.")
+    end
+
+    capability :webhook_verification do
+      kind(:webhook)
+      feature(:webhook_verification)
+      label("Webhook verification")
+      description("HMAC-SHA256 signature verification and Zendesk webhook normalization.")
     end
   end
 

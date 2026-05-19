@@ -10,6 +10,8 @@ It includes:
 - REST client helpers in `Jido.Connect.Zendesk.Client`
 - Transport boundary in `Jido.Connect.Zendesk.Client.Transport`
 - Response normalization in `Jido.Connect.Zendesk.Client.Normalizer`
+- Webhook verification and normalization in `Jido.Connect.Zendesk.Webhook`
+- Trigger fragments for ticket and comment webhook events
 
 The Spark DSL declaration lives in
 `lib/jido_connect/zendesk.ex`. Provider handlers live under
@@ -17,8 +19,8 @@ The Spark DSL declaration lives in
 
 ## Status
 
-This is an **experimental** scaffold. Ticket actions, trigger fragments,
-normalized structs, and webhook support will be added in subsequent waves.
+This is an **experimental** package with read/write ticket actions and
+webhook trigger support.
 
 ## Installation
 
@@ -58,18 +60,113 @@ Read scopes are included in both default scope sets. The `write` and
 `tickets:write` scopes are optional for the OAuth2 profile and should be
 requested only when mutation actions are needed.
 
+See [`docs/zendesk_scope_matrix.md`](../../docs/zendesk_scope_matrix.md) for the
+full action-to-scope mapping.
+
 ## Actions
 
-Ticket actions will be added in a subsequent wave.
+| Action ID | Effect | Description |
+|---|---|---|
+| `zendesk.ticket.list` | read | List tickets with pagination |
+| `zendesk.ticket.search` | read | Search tickets by query |
+| `zendesk.ticket.get` | read | Get a single ticket by ID |
+| `zendesk.ticket.create` | write | Create a new ticket |
+| `zendesk.ticket.update` | write | Update ticket fields |
+| `zendesk.ticket.comment.list` | read | List comments on a ticket |
+| `zendesk.ticket.comment.add` | write | Add a comment to a ticket |
+| `zendesk.user.list` | read | List users with role filter |
+| `zendesk.organization.list` | read | List organizations |
+
+## Webhook Triggers
+
+The provider declares two webhook triggers for real-time ticket event
+notifications:
+
+| Trigger ID | Events | Signal |
+|---|---|---|
+| `zendesk.ticket.changed` | Ticket Created, Updated, Status Changed | Ticket change signal |
+| `zendesk.ticket.comment.changed` | Comment Created | Comment change signal |
+
+### Webhook Verification
+
+Zendesk webhooks deliver signed JSON payloads. The signature is a
+base64-encoded HMAC-SHA256 of the raw request body using the webhook's
+shared secret.
+
+```elixir
+# Verify a webhook delivery
+alias Jido.Connect.Zendesk.Webhook
+
+# Compute the expected signature from the raw body and your secret
+computed = Webhook.compute_signature(raw_body, shared_secret)
+
+# Compare with the signature from the request header
+case Webhook.verify_signature(computed, signature_header) do
+  :ok ->
+    # Normalize the verified event
+    {:ok, signal} = Webhook.normalize_event(parsed_body)
+
+  {:error, _reason} ->
+    # Reject the delivery
+    :invalid
+end
+```
+
+### Supported Webhook Events
+
+| Event Type | Description |
+|---|---|
+| `Ticket Created` | A new ticket was created |
+| `Ticket Updated` | An existing ticket was updated |
+| `Ticket Status Changed` | A ticket's status changed |
+| `Comment Created` | A comment was added to a ticket |
+
+### Signal Shape — Ticket Events
+
+```elixir
+%{
+  event_type: "Ticket Updated",
+  change_type: "updated",
+  ticket_id: 12345,
+  subject: "Cannot reset password",
+  status: "solved",
+  priority: "normal",
+  tags: ["password", "resolved"],
+  previous: %{status: "open", assignee_id: 9001},
+  webhook_id: "wh-invocation-002",
+  account_id: "example",
+  timestamp: "2026-03-16T09:00:00Z"
+}
+```
+
+### Signal Shape — Comment Events
+
+```elixir
+%{
+  event_type: "Comment Created",
+  change_type: "created",
+  comment_id: 50001,
+  comment_body: "Please check your spam folder.",
+  comment_public: true,
+  comment_author_id: 9001,
+  ticket_id: 12345,
+  ticket_subject: "Cannot reset password",
+  webhook_id: "wh-invocation-003",
+  account_id: "example",
+  timestamp: "2026-03-15T11:00:00Z"
+}
+```
 
 ## Catalog Packs
 
 The provider ships with curated catalog packs for scoped tool discovery:
 
-| Pack | Tools |
-|---|---|
-| `:zendesk_reader` | Read-only Zendesk queries |
-| `:zendesk_editor` | Reader + write tools |
+| Pack | Risk | Tools |
+|---|---|---|
+| `:zendesk_reader` | read | Read-only Zendesk queries |
+| `:zendesk_editor` | write | Reader + write tools |
+
+Triggers are subscribed to independently and are not included in packs.
 
 Use packs to restrict which tools are visible to a given surface:
 
@@ -98,16 +195,30 @@ requests against the configurable Zendesk subdomain base URL.
 ## Live-Test Guidance
 
 The offline test suite exercises provider metadata, auth profiles,
-generated plugin surface, and catalog packs through injected fake clients
-and does **not** call live Zendesk APIs.
+generated plugin surface, triggers, and catalog packs through injected fake
+clients and does **not** call live Zendesk APIs.
 
 ### Environment Variables for Live Testing
 
 ```sh
-export ZENDESK_API_TOKEN="your-api-token-here"
-export ZENDESK_API_BASE_URL="https://your-subdomain.zendesk.com"
+export ZENDESK_SUBDOMAIN="your-subdomain"
+export ZENDESK_EMAIL="your-email@example.com"
+export ZENDESK_API_TOKEN="your-api-token"
+# Optional: for webhook signature smoke tests
+export ZENDESK_WEBHOOK_SECRET="your-webhook-secret"
+# Optional: for get-ticket smoke test
+export ZENDESK_TICKET_ID="12345"
 # Never commit these values to version control.
 ```
+
+### Running Live Smoke Tests
+
+```sh
+ZENDESK_SUBDOMAIN=example ZENDESK_API_TOKEN=xxx \
+  mix test apps/jido_connect_zendesk/test --include live_smoke --no-deps-check
+```
+
+Live smoke tests are read-only — no tickets are created, updated, or deleted.
 
 ### Switching Mock / Live Clients
 
