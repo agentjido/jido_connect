@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:28Z",
   "description": "Implement create/update task, add comment/story, add/remove project or tag where supported, and complete/uncomplete task. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-aje.4",
-  "labels": [
-    "connector-roadmap +work-management +asana"
-  ],
+  "labels": [],
   "parent": "jido_con-aje",
   "priority": 2,
   "status": "open",
   "title": "[G19-S04] Implement Asana task mutation actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:31Z"
+  "updated_at": "2026-05-19T14:04:58Z"
 }
