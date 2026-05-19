@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-fe6.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-fe6.5"
+  ],
   "created": "2026-05-19T14:03:23Z",
   "description": "Implement create/update page, append block children, update block, archive block/page, and create comment where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-fe6.4",
