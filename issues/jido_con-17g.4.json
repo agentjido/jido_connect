@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-17g.5"
   ],
+  "closed_at": "2026-05-19T21:35:47Z",
+  "close_reason": "Implemented in b2ead87 by pi-connector-factory",
   "created": "2026-05-19T14:03:11Z",
   "description": "Implement create ticket, update ticket, add public/private comment, tag/status/assignee updates with explicit metadata for write/destructive scope. Gate live mutation smoke tests and cover offline success/error paths.",
   "id": "jido_con-17g.4",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-17g",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G16-S04] Implement Zendesk ticket write actions",
   "type": "task",
-  "updated_at": "2026-05-19T21:26:36Z"
+  "updated_at": "2026-05-19T21:35:47Z"
 }
