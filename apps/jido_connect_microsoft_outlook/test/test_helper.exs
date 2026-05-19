@@ -1,4 +1,4 @@
-ExUnit.start()
+ExUnit.start(exclude: [:live_smoke])
 
 unless Code.ensure_loaded?(Jido.Connect.Microsoft.TestSupport.ConnectorContracts) do
   Code.require_file(
