@@ -1,0 +1,11 @@
+{
+  "@odata.type": "#microsoft.graph.fileAttachment",
+  "id": "AAMkAGI2TG93AAAqBGHNAAAqBGHLAAA=",
+  "lastModifiedDateTime": "2026-05-19T12:00:00Z",
+  "name": "budget_q2_2026.xlsx",
+  "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "size": 45678,
+  "isInline": false,
+  "contentId": null,
+  "contentLocation": null
+}
