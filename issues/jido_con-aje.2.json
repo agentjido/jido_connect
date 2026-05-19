@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-aje.1"
   ],
@@ -16,8 +16,8 @@
   ],
   "parent": "jido_con-aje",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G19-S02] Add Asana normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:05:39Z"
+  "updated_at": "2026-05-19T23:35:17Z"
 }
