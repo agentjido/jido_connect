@@ -1,0 +1,13 @@
+{
+  "id": "01ABCD1234",
+  "name": "photo.jpg",
+  "size": 204800,
+  "webUrl": "https://contoso-my.sharepoint.com/personal/user_contoso_com/Documents/photo.jpg",
+  "@content.downloadUrl": "https://contoso-my.sharepoint.com/download/01ABCD1234?tempauth=EXPENSIVE_TOKEN_REMOVED",
+  "file": {
+    "mimeType": "image/jpeg",
+    "hashes": {
+      "sha1Hash": "DEF456"
+    }
+  }
+}

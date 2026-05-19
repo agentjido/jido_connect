@@ -1,0 +1,22 @@
+{
+  "id": "b!DRIVE1",
+  "driveType": "personal",
+  "name": "OneDrive",
+  "description": "Personal OneDrive storage",
+  "webUrl": "https://contoso-my.sharepoint.com/personal/user_contoso_com/Documents",
+  "quota": {
+    "total": 1099511627776,
+    "used": 536870912,
+    "remaining": 1098974756864,
+    "state": "normal"
+  },
+  "owner": {
+    "user": {
+      "displayName": "Adele Vance",
+      "email": "adele@contoso.com",
+      "id": "USER1"
+    }
+  },
+  "createdDateTime": "2025-01-15T08:00:00Z",
+  "lastModifiedDateTime": "2026-05-19T10:00:00Z"
+}

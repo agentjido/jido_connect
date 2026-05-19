@@ -1,0 +1,27 @@
+{
+  "@odata.deltaToken": "MzslMjM0OyUyMzE7MjM0NTY3",
+  "value": [
+    {
+      "id": "01ABCD1234",
+      "name": "Quarterly Report.docx",
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "parentReference": {
+        "driveId": "b!DRIVE1",
+        "id": "01FOLDER1"
+      }
+    },
+    {
+      "id": "01NEW5678",
+      "name": "Budget.xlsx",
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      },
+      "parentReference": {
+        "driveId": "b!DRIVE1",
+        "id": "01FOLDER1"
+      }
+    }
+  ]
+}

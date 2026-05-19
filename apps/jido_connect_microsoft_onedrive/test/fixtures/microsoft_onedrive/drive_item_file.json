@@ -1,0 +1,55 @@
+{
+  "id": "01ABCD1234",
+  "name": "Quarterly Report.docx",
+  "size": 1024,
+  "webUrl": "https://contoso-my.sharepoint.com/personal/user_contoso_com/Documents/Quarterly Report.docx",
+  "createdDateTime": "2026-05-19T10:00:00Z",
+  "lastModifiedDateTime": "2026-05-19T12:00:00Z",
+  "file": {
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "hashes": {
+      "sha1Hash": "ABC123"
+    }
+  },
+  "parentReference": {
+    "driveId": "b!DRIVE1",
+    "driveType": "personal",
+    "id": "01FOLDER1",
+    "path": "/drive/root:/Reports"
+  },
+  "createdBy": {
+    "user": {
+      "displayName": "Adele Vance",
+      "email": "adele@contoso.com",
+      "id": "USER1"
+    }
+  },
+  "lastModifiedBy": {
+    "user": {
+      "displayName": "Adele Vance",
+      "email": "adele@contoso.com",
+      "id": "USER1"
+    }
+  },
+  "thumbnails": [
+    {
+      "id": "0",
+      "width": 100,
+      "height": 75,
+      "url": "https://contoso-my.sharepoint.com/thumbnail/01ABCD1234"
+    }
+  ],
+  "permissions": [
+    {
+      "id": "PERM1",
+      "roles": ["read"],
+      "grantedTo": {
+        "user": {
+          "displayName": "Bob Smith",
+          "email": "bob@contoso.com",
+          "id": "USER2"
+        }
+      }
+    }
+  ]
+}

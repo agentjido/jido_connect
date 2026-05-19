@@ -1,0 +1,18 @@
+[
+  {
+    "id": "0",
+    "width": 100,
+    "height": 75,
+    "url": "https://contoso-my.sharepoint.com/thumbnail/small/01ABCD1234",
+    "sourceItemId": "01ABCD1234",
+    "contentType": "image/jpeg"
+  },
+  {
+    "id": "1",
+    "width": 800,
+    "height": 600,
+    "url": "https://contoso-my.sharepoint.com/thumbnail/large/01ABCD1234",
+    "sourceItemId": "01ABCD1234",
+    "contentType": "image/jpeg"
+  }
+]
