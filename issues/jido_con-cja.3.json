@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-cja.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:34Z",
   "description": "Implement list/search projects, get project, list/search issues, get issue, list merge requests, get merge request, list pipelines/jobs, and notes reads. Cover pagination headers, self-hosted base URL override, auth errors, and provider errors offline.",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G20-S03] Implement GitLab read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:34Z"
+  "updated_at": "2026-05-19T14:03:37Z"
 }
