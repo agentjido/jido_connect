@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-e6u.5"
+  ],
   "blocks": [
     "jido_con-q2q.2"
   ],
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G32-S01] Scaffold YouTube package",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:11Z"
+  "updated_at": "2026-05-19T14:17:07Z"
 }
