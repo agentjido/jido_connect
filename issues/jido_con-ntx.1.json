@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-ntx.2"
   ],
+  "closed_at": "2026-05-19T18:08:27Z",
+  "close_reason": "Implemented in d1e756f by pi-connector-factory",
   "created": "2026-05-19T13:52:03Z",
   "description": "Create apps/jido_connect_microsoft_outlook using the Microsoft foundation package. Add integration DSL, auth profile reuse, mix.exs, README/CHANGELOG, generated module tests, and basic action catalog shell. Do not implement full message actions yet.",
   "id": "jido_con-ntx.1",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-ntx",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G13-S01] Scaffold Microsoft Outlook Mail package",
   "type": "task",
-  "updated_at": "2026-05-19T17:51:46Z"
+  "updated_at": "2026-05-19T18:08:27Z"
 }
