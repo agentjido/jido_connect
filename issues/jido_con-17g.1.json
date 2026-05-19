@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-17g.2"
+  ],
   "created": "2026-05-19T14:03:09Z",
   "description": "Create apps/jido_connect_zendesk with integration DSL, auth profile metadata for OAuth/API token, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement ticket actions yet.",
   "id": "jido_con-17g.1",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G16-S01] Scaffold Zendesk package",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:09Z"
+  "updated_at": "2026-05-19T14:03:13Z"
 }
