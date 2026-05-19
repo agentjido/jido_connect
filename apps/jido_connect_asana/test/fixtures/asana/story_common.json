@@ -1,0 +1,27 @@
+{
+  "gid": "334455",
+  "resource_type": "story",
+  "resource_subtype": "comment_added",
+  "text": "Updated the wireframes based on feedback from the design review.",
+  "html_text": "<body>Updated the wireframes based on feedback from the design review.</body>",
+  "is_pinned": false,
+  "sticker_name": null,
+  "num_likes": 2,
+  "liked": false,
+  "created_by": {
+    "gid": "123456",
+    "name": "Alice Nakamura",
+    "resource_type": "user"
+  },
+  "target": {
+    "gid": "998877",
+    "name": "Design new landing page",
+    "resource_type": "task"
+  },
+  "task": {
+    "gid": "998877",
+    "name": "Design new landing page",
+    "resource_type": "task"
+  },
+  "created_at": "2026-05-15T09:30:00.000Z"
+}
