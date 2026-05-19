@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:16Z",
   "description": "Implement list/search contacts, get contact, list/get conversations, admins/teams lookups where useful. Cover provider pagination, query filters, auth errors, rate limits, and error normalization offline.",
   "id": "jido_con-zya.3",
-  "labels": [
-    "connector-roadmap +support +intercom"
-  ],
+  "labels": [],
   "parent": "jido_con-zya",
   "priority": 2,
   "status": "open",
   "title": "[G17-S03] Implement Intercom read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:19Z"
+  "updated_at": "2026-05-19T14:04:53Z"
 }
