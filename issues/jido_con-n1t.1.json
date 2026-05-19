@@ -9,11 +9,15 @@
   "created": "2026-05-19T14:03:57Z",
   "description": "Create apps/jido_connect_typeform with integration DSL, OAuth/token auth metadata, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement form/response actions yet.",
   "id": "jido_con-n1t.1",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "forms",
+    "typeform"
+  ],
   "parent": "jido_con-n1t",
   "priority": 2,
   "status": "open",
   "title": "[G24-S01] Scaffold Typeform package",
   "type": "task",
-  "updated_at": "2026-05-19T14:05:09Z"
+  "updated_at": "2026-05-19T14:05:51Z"
 }
