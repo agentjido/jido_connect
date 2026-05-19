@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-aje.2"
+  ],
   "created": "2026-05-19T14:03:26Z",
   "description": "Create apps/jido_connect_asana with integration DSL, OAuth/PAT auth metadata, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement task actions yet.",
   "id": "jido_con-aje.1",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G19-S01] Scaffold Asana package",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:26Z"
+  "updated_at": "2026-05-19T14:03:30Z"
 }
