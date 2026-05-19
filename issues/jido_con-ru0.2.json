@@ -9,11 +9,15 @@
   "created": "2026-05-19T14:03:45Z",
   "description": "Add structs/schemas and fixtures for customers, invoices, subscriptions, payment intents, charges, balance transactions, events/webhook payloads, and pagination. Include normalization tests and privacy fixture review.",
   "id": "jido_con-ru0.2",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "payments",
+    "stripe"
+  ],
   "parent": "jido_con-ru0",
   "priority": 2,
   "status": "open",
   "title": "[G22-S02] Add Stripe normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:05:05Z"
+  "updated_at": "2026-05-19T14:05:47Z"
 }
