@@ -9,11 +9,16 @@
   "created": "2026-05-19T13:54:11Z",
   "description": "Create apps/jido_connect_microsoft_onedrive using the shared Microsoft Graph foundation. Add integration DSL, auth profile reuse, mix.exs, README/CHANGELOG, generated module tests, and an empty catalog/action shell. Do not implement full drive item actions yet.",
   "id": "jido_con-tyr.1",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "graph",
+    "microsoft",
+    "onedrive"
+  ],
   "parent": "jido_con-tyr",
   "priority": 1,
   "status": "open",
   "title": "[G15-S01] Scaffold Microsoft OneDrive package",
   "type": "task",
-  "updated_at": "2026-05-19T13:55:12Z"
+  "updated_at": "2026-05-19T13:55:29Z"
 }
