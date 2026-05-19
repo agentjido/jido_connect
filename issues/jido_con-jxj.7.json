@@ -15,9 +15,15 @@
     "milestone-2"
   ],
   "parent": "jido_con-jxj",
+  "comments": [
+    {
+      "text": "Release readiness review complete. Fixes applied: (1) plug test dep for jido_connect core, (2) formatting for google_search_console and hubspot. 2566 tests pass across 25 apps. jido_connect_mcp skipped (RISK-1 → jido_con-jxj.9). PostHog seed-dependent flake tracked as RISK-2 → jido_con-jxj.10. Full review in docs/release_readiness/google_connectors.md",
+      "timestamp": "2026-05-19T16:15:26Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "[G11-S07] Run release readiness review",
   "type": "task",
-  "updated_at": "2026-05-19T15:49:15Z"
+  "updated_at": "2026-05-19T16:15:26Z"
 }
