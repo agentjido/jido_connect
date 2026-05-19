@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5nj.2"
+  ],
   "created": "2026-05-19T14:16:28Z",
   "description": "Create apps/jido_connect_zoho_crm with integration DSL, OAuth auth metadata, region/base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-5nj.1",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G35-S01] Scaffold Zoho CRM package",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:29Z"
+  "updated_at": "2026-05-19T14:16:33Z"
 }
