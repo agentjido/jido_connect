@@ -5,11 +5,13 @@
   "created": "2026-05-19T14:03:27Z",
   "description": "Implement list workspaces/projects/tasks, get task, search tasks where supported, list stories/comments, and user lookups. Cover pagination, compact/full object expansion choices, auth errors, and provider errors offline.",
   "id": "jido_con-aje.3",
-  "labels": [],
+  "labels": [
+    "connector-roadmap +work-management +asana"
+  ],
   "parent": "jido_con-aje",
   "priority": 2,
   "status": "open",
   "title": "[G19-S03] Implement Asana read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:27Z"
+  "updated_at": "2026-05-19T14:03:28Z"
 }
