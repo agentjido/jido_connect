@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:16:36Z",
   "description": "Create apps/jido_connect_zoho_desk with integration DSL, OAuth auth metadata, region/base URL handling, org/department config, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-l40.1",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "support",
+    "zoho"
+  ],
   "parent": "jido_con-l40",
   "priority": 2,
   "status": "open",
