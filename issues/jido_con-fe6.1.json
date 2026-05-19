@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-zya.5"
+  ],
   "blocks": [
     "jido_con-fe6.2"
   ],
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G18-S01] Scaffold Notion package",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:24Z"
+  "updated_at": "2026-05-19T14:04:05Z"
 }
