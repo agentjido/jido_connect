@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-jxj.5"
   ],
+  "closed_at": "2026-05-19T15:37:10Z",
+  "close_reason": "Implemented in 46c68c0 by pi-connector-factory",
   "created": "2026-05-04T19:20:07Z",
   "description": "Planning ID: G11-S04\nEpic: G11 Cross-Google Hardening And Demo\nSource: MILESTONE_2.md\nDepends on: G11-S03\n\nAcceptance:\nDemo shows OAuth, connection resolver, catalog search, describe, and call for at least Sheets, Gmail, Drive, and Calendar.",
   "id": "jido_con-jxj.4",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-jxj",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G11-S04] Add Google demo integration",
   "type": "task",
-  "updated_at": "2026-05-19T15:24:22Z"
+  "updated_at": "2026-05-19T15:37:10Z"
 }
