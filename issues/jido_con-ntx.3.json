@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-ntx.4"
   ],
+  "closed_at": "2026-05-19T18:25:52Z",
+  "close_reason": "Implemented in 64d175f by pi-connector-factory",
   "created": "2026-05-19T13:52:13Z",
   "description": "Implement read-only Outlook actions and handlers: list mail folders, get mail folder, list messages, get message, search messages if supported cleanly by Graph query params. Use Microsoft Graph transport, normalized responses, dynamic scopes, offline Req tests, and catalog/action introspection tests.",
   "id": "jido_con-ntx.3",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-ntx",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G13-S03] Implement Outlook read actions",
   "type": "task",
-  "updated_at": "2026-05-19T18:16:21Z"
+  "updated_at": "2026-05-19T18:25:52Z"
 }
