@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:15:55Z",
+  "description": "Implement create/update work item, add comment, update PR metadata where reasonable. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
+  "id": "jido_con-id6.4",
+  "labels": [],
+  "parent": "jido_con-id6",
+  "priority": 2,
+  "status": "open",
+  "title": "[G30-S04] Implement Azure DevOps work item and PR write actions",
+  "type": "task",
+  "updated_at": "2026-05-19T14:15:55Z"
+}
