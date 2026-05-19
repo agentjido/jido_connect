@@ -13,8 +13,16 @@ defmodule Jido.Connect.ZendeskTest do
     assert spec.category == :customer_support
     assert spec.status == :experimental
     assert spec.tags == [:support, :tickets, :customer_service]
-    assert spec.actions == []
+    assert length(spec.actions) == 6
     assert spec.triggers == []
+
+    action_ids = Enum.map(spec.actions, & &1.id)
+    assert "zendesk.ticket.list" in action_ids
+    assert "zendesk.ticket.search" in action_ids
+    assert "zendesk.ticket.get" in action_ids
+    assert "zendesk.ticket.comment.list" in action_ids
+    assert "zendesk.user.list" in action_ids
+    assert "zendesk.organization.list" in action_ids
 
     assert [
              %{id: :api_token, kind: :api_key} = api_token_profile,
@@ -50,28 +58,31 @@ defmodule Jido.Connect.ZendeskTest do
     assert MapSet.member?(features, :api_access)
   end
 
-  test "compiles generated Jido plugin surface with no actions" do
+  test "compiles generated Jido plugin surface with ticket read actions" do
     assert Application.get_env(:jido_connect_zendesk, :jido_connect_providers) == [Zendesk]
 
-    assert Zendesk.jido_action_modules() == []
+    action_modules = Zendesk.jido_action_modules()
+    assert length(action_modules) == 6
     assert Zendesk.jido_sensor_modules() == []
     assert Zendesk.jido_plugin_module() == Jido.Connect.Zendesk.Plugin
 
     assert %Connect.Catalog.Manifest{
              id: :zendesk,
              package: :jido_connect_zendesk,
-             generated_modules: %{
-               actions: [],
-               sensors: [],
-               plugin: Jido.Connect.Zendesk.Plugin
-             }
+             generated_modules: generated
            } = Zendesk.jido_connect_manifest()
+
+    assert length(generated.actions) == 6
+    assert generated.sensors == []
+    assert generated.plugin == Jido.Connect.Zendesk.Plugin
 
     assert %Jido.Plugin.Spec{
              name: "zendesk",
              module: Jido.Connect.Zendesk.Plugin,
-             actions: []
+             actions: actions
            } = Jido.Connect.Zendesk.Plugin.plugin_spec()
+
+    assert length(actions) == 6
   end
 
   describe "plugin tool availability" do
@@ -79,7 +90,12 @@ defmodule Jido.Connect.ZendeskTest do
       plugin_module = Zendesk.jido_plugin_module()
 
       availability = plugin_module.tool_availability()
-      assert availability == []
+      assert length(availability) == 6
+
+      for entry <- availability do
+        assert entry.state == :connection_required
+        assert entry.connection_id == nil
+      end
     end
 
     test "reports available when connected with full scopes" do
@@ -102,8 +118,15 @@ defmodule Jido.Connect.ZendeskTest do
         plugin_module.tool_availability(%{connection: connection})
         |> Map.new(&{&1.tool, &1})
 
-      # No actions or triggers yet, so availability is empty
-      assert map_size(available) == 0
+      # 6 ticket read actions should be available with full scopes
+      assert map_size(available) == 6
+
+      assert Map.has_key?(available, "zendesk.ticket.list")
+      assert Map.has_key?(available, "zendesk.ticket.search")
+      assert Map.has_key?(available, "zendesk.ticket.get")
+      assert Map.has_key?(available, "zendesk.ticket.comment.list")
+      assert Map.has_key?(available, "zendesk.user.list")
+      assert Map.has_key?(available, "zendesk.organization.list")
     end
   end
 

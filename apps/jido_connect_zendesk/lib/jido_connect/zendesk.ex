@@ -27,7 +27,9 @@ defmodule Jido.Connect.Zendesk do
   """
 
   use Jido.Connect,
-    fragments: []
+    fragments: [
+      Jido.Connect.Zendesk.Actions.Tickets
+    ]
 
   defdelegate catalog_packs, to: Jido.Connect.Zendesk.CatalogPacks, as: :all
 

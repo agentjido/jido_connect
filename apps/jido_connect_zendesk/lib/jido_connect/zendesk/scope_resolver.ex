@@ -6,7 +6,14 @@ defmodule Jido.Connect.Zendesk.ScopeResolver do
   The resolver is consulted by the `access` block at runtime.
   """
 
-  @scope_map %{}
+  @scope_map %{
+    "zendesk.ticket.list" => ["read", "tickets:read"],
+    "zendesk.ticket.search" => ["read", "tickets:read"],
+    "zendesk.ticket.get" => ["read", "tickets:read"],
+    "zendesk.ticket.comment.list" => ["read", "tickets:read"],
+    "zendesk.user.list" => ["read", "users:read"],
+    "zendesk.organization.list" => ["read"]
+  }
 
   @doc """
   Returns the least-privilege Zendesk scopes for the given operation.

@@ -20,7 +20,14 @@ defmodule Jido.Connect.Zendesk.CatalogPacks do
 
   alias Jido.Connect.Catalog.Pack
 
-  @reader_tools []
+  @reader_tools [
+    "zendesk.ticket.list",
+    "zendesk.ticket.search",
+    "zendesk.ticket.get",
+    "zendesk.ticket.comment.list",
+    "zendesk.user.list",
+    "zendesk.organization.list"
+  ]
 
   @editor_tools @reader_tools ++ []
 

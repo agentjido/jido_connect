@@ -24,7 +24,12 @@ defmodule Jido.Connect.Zendesk.CatalogPacksTest do
       reader = Enum.find(packs, &(&1.id == :zendesk_reader))
 
       assert reader.metadata.risk == :read
-      assert reader.allowed_tools == []
+      assert "zendesk.ticket.list" in reader.allowed_tools
+      assert "zendesk.ticket.search" in reader.allowed_tools
+      assert "zendesk.ticket.get" in reader.allowed_tools
+      assert "zendesk.ticket.comment.list" in reader.allowed_tools
+      assert "zendesk.user.list" in reader.allowed_tools
+      assert "zendesk.organization.list" in reader.allowed_tools
     end
 
     test "editor pack has write risk" do
@@ -32,7 +37,9 @@ defmodule Jido.Connect.Zendesk.CatalogPacksTest do
       editor = Enum.find(packs, &(&1.id == :zendesk_editor))
 
       assert editor.metadata.risk == :write
-      assert editor.allowed_tools == []
+      # Editor includes all reader tools plus write tools
+      assert "zendesk.ticket.list" in editor.allowed_tools
+      assert "zendesk.ticket.get" in editor.allowed_tools
     end
   end
 end
