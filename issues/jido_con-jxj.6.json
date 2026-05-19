@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-jxj.7"
   ],
+  "closed_at": "2026-05-19T15:49:14Z",
+  "close_reason": "Implemented in 9e3ebe6 by pi-connector-factory",
   "created": "2026-05-04T19:20:07Z",
   "description": "Planning ID: G11-S06\nEpic: G11 Cross-Google Hardening And Demo\nSource: MILESTONE_2.md\nDepends on: G11-S05\n\nAcceptance:\nADR defines what belongs in package contracts versus host-owned configuration/storage.",
   "id": "jido_con-jxj.6",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-jxj",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G11-S06] Write service account/domain delegation ADR",
   "type": "task",
-  "updated_at": "2026-05-19T15:42:13Z"
+  "updated_at": "2026-05-19T15:49:14Z"
 }
