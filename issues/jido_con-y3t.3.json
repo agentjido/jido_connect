@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-y3t.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T13:53:52Z",
   "description": "Implement Microsoft Calendar read actions using Graph: list calendars, get calendar, list events, get event, find meeting times or free/busy/availability where Graph supports it. Keep write actions out of this task. Include Req.Test coverage for paging, timezone, attendee, recurrence, and provider error paths.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G14-S03] Implement Microsoft Calendar read and availability actions",
   "type": "task",
-  "updated_at": "2026-05-19T13:53:52Z"
+  "updated_at": "2026-05-19T13:55:10Z"
 }
