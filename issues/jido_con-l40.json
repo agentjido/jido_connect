@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:35Z",
+  "description": "Build jido_connect_zoho_desk for support workflows: OAuth auth, departments, tickets, contacts, accounts, comments/threads, guarded writes, trigger strategy, catalog packs, docs, and read-only live smoke guidance.",
+  "id": "jido_con-l40",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "[G36] Zoho Desk Connector",
+  "type": "epic",
+  "updated_at": "2026-05-19T14:16:35Z"
+}
