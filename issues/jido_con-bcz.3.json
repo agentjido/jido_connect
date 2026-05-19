@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-bcz.4"
   ],
+  "closed_at": "2026-05-19T17:21:01Z",
+  "close_reason": "Implemented in 127e3e8 by pi-connector-factory",
   "created": "2026-05-19T13:51:52Z",
   "description": "Add shared Graph HTTP transport helpers, bearer request setup, base URL override, provider error normalization, retry/rate-limit metadata where exposed, and pagination helpers for @odata.nextLink. Include focused offline tests and docs for connector packages to reuse this foundation.",
   "id": "jido_con-bcz.3",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-bcz",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G12-S03] Add Microsoft Graph transport and pagination helpers",
   "type": "task",
-  "updated_at": "2026-05-19T17:11:53Z"
+  "updated_at": "2026-05-19T17:21:01Z"
 }
