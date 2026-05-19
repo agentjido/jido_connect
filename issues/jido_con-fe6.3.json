@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-fe6.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:22Z",
   "description": "Implement search, get page, get database, query database, list block children, retrieve block, and list comments where supported. Cover pagination, property value normalization, auth errors, and provider errors offline.",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G18-S03] Implement Notion search and read actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:22Z"
+  "updated_at": "2026-05-19T14:03:24Z"
 }

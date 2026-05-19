@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-fe6.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-fe6.3"
+  ],
   "created": "2026-05-19T14:03:21Z",
   "description": "Add structs/schemas and fixtures for pages, databases, blocks, rich text, users, comments, files, parent refs, pagination, and common property values. Include normalization tests and privacy fixture review.",
   "id": "jido_con-fe6.2",
