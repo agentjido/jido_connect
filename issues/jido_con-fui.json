@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:13Z",
+  "description": "Build jido_connect_mailchimp for marketing workflows: OAuth/API key auth, audiences, members, tags, campaigns, reports, webhooks, catalog packs, docs, and read-only live smoke guidance.",
+  "id": "jido_con-fui",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "[G33] Mailchimp Connector",
+  "type": "epic",
+  "updated_at": "2026-05-19T14:16:13Z"
+}
