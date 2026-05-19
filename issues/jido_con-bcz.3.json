@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T13:51:52Z",
+  "description": "Add shared Graph HTTP transport helpers, bearer request setup, base URL override, provider error normalization, retry/rate-limit metadata where exposed, and pagination helpers for @odata.nextLink. Include focused offline tests and docs for connector packages to reuse this foundation.",
+  "id": "jido_con-bcz.3",
+  "labels": [],
+  "parent": "jido_con-bcz",
+  "priority": 1,
+  "status": "open",
+  "title": "[G12-S03] Add Microsoft Graph transport and pagination helpers",
+  "type": "task",
+  "updated_at": "2026-05-19T13:51:52Z"
+}
