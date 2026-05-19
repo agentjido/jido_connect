@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-y2w.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-y2w.5"
+  ],
   "created": "2026-05-19T14:15:21Z",
   "description": "Add structured response helpers, JSON decode behavior, optional result extraction, cursor/header pagination helpers where generic enough, retry/rate-limit metadata, and provider-neutral error taxonomy tests.",
   "id": "jido_con-y2w.4",
