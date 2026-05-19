@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-e6u.2"
+  ],
   "created": "2026-05-19T14:15:59Z",
   "description": "Create apps/jido_connect_sftp with integration DSL, password/private-key auth metadata, host/port/root path config, host key verification policy doc, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-e6u.1",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[G31-S01] Scaffold SFTP package and security policy",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:00Z"
+  "updated_at": "2026-05-19T14:16:04Z"
 }

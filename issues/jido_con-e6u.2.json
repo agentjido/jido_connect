@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-e6u.1"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:00Z",
   "description": "Add structs/schemas and fixtures for remote files, directories, file metadata, connection config, operation results, and error cases. Include normalization tests without real credentials.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G31-S02] Add SFTP normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:01Z"
+  "updated_at": "2026-05-19T14:16:04Z"
 }
