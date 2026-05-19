@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:15:59Z",
+  "description": "Build jido_connect_sftp for file transfer workflows: password/key auth, host key policy, list/stat/download/upload/move/delete, polling trigger strategy, catalog packs, docs, and local smoke guidance.",
+  "id": "jido_con-e6u",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "[G31] SFTP Connector",
+  "type": "epic",
+  "updated_at": "2026-05-19T14:15:59Z"
+}
