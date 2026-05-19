@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-fui.5"
+  ],
   "blocks": [
     "jido_con-yoe.2"
   ],
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G34-S01] Scaffold ActiveCampaign package",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:25Z"
+  "updated_at": "2026-05-19T14:17:09Z"
 }
