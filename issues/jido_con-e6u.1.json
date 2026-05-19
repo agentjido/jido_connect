@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-id6.5"
+  ],
   "blocks": [
     "jido_con-e6u.2"
   ],
@@ -18,5 +20,5 @@
   "status": "open",
   "title": "[G31-S01] Scaffold SFTP package and security policy",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:04Z"
+  "updated_at": "2026-05-19T14:17:06Z"
 }
