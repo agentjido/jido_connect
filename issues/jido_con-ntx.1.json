@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-bcz.4"
   ],
@@ -17,8 +17,8 @@
   ],
   "parent": "jido_con-ntx",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G13-S01] Scaffold Microsoft Outlook Mail package",
   "type": "task",
-  "updated_at": "2026-05-19T13:55:25Z"
+  "updated_at": "2026-05-19T17:51:46Z"
 }
