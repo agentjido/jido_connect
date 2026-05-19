@@ -16,4 +16,8 @@ defmodule Jido.Connect.Microsoft do
   @doc "Returns auth profiles known to the shared Microsoft foundation."
   @spec auth_profiles() :: [atom()]
   defdelegate auth_profiles, to: Jido.Connect.Microsoft.AuthProfiles, as: :ids
+
+  @doc "Returns supported Microsoft Graph product-area ids."
+  @spec availability() :: [atom()]
+  defdelegate availability, to: Jido.Connect.Microsoft.Availability, as: :ids
 end

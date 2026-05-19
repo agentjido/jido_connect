@@ -7,4 +7,15 @@ defmodule Jido.Connect.MicrosoftTest do
     assert Microsoft.provider() == :microsoft
     assert Microsoft.auth_profiles() == [:user]
   end
+
+  test "exposes product-area availability ids" do
+    areas = Microsoft.availability()
+    assert is_list(areas)
+    assert :mail in areas
+    assert :calendar in areas
+    assert :files in areas
+    assert :contacts in areas
+    assert :tasks in areas
+    assert :teams in areas
+  end
 end

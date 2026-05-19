@@ -137,6 +137,132 @@ Mint a short-lived credential lease from a refreshed access token:
 The lease contains only runtime credential material, such as `:access_token`.
 Refresh tokens stay in host-owned durable storage.
 
+## Product-Area Availability
+
+The shared foundation tracks which Microsoft Graph product areas have
+foundation-level support. Each area describes the shared scopes, foundation
+contracts, and the expected product connector package name.
+
+```elixir
+# List all supported product areas
+Jido.Connect.Microsoft.availability()
+#=> [:mail, :calendar, :files, :contacts, :tasks, :teams]
+
+# Fetch metadata for a specific area
+{:ok, mail} = Jido.Connect.Microsoft.Availability.fetch(:mail)
+mail.label         #=> "Outlook Mail"
+mail.scopes         #=> ["Mail.Read", "Mail.ReadBasic", ...]
+mail.product_package #=> :jido_connect_microsoft_outlook
+
+# Read-only scopes for live smoke testing
+Jido.Connect.Microsoft.Availability.read_only_scopes(:mail)
+#=> ["Mail.Read", "Mail.ReadBasic"]
+
+# Check foundation coverage
+Jido.Connect.Microsoft.Availability.available?(:mail)   #=> true
+Jido.Connect.Microsoft.Availability.available?(:unknown) #=> false
+```
+
+Product-area metadata is intentionally **scope and contract metadata only**.
+It does not carry product-specific tools, actions, or triggers. Those belong
+in product connector packages.
+
+### Complete Availability Catalog
+
+| Area | Label | Read-Only Scopes | Product Package |
+|------|-------|-----------------|----------------|
+| `:mail` | Outlook Mail | `Mail.Read`, `Mail.ReadBasic` | `jido_connect_microsoft_outlook` |
+| `:calendar` | Microsoft Calendar | `Calendars.Read` | `jido_connect_microsoft_calendar` |
+| `:files` | OneDrive / SharePoint Files | `Files.Read`, `Files.Read.All` | `jido_connect_microsoft_onedrive` |
+| `:contacts` | Microsoft Contacts | `Contacts.Read` | `jido_connect_microsoft_contacts` |
+| `:tasks` | Microsoft Tasks (To Do) | `Tasks.Read` | `jido_connect_microsoft_tasks` |
+| `:teams` | Microsoft Teams | `Team.ReadBasic.All`, `Chat.Read` | `jido_connect_microsoft_teams` |
+
+## Live Smoke Testing (Read-Only)
+
+The Microsoft foundation package supports **read-only live smoke testing**
+against the Microsoft Graph API using short-lived access tokens. This section
+documents the expected setup and scope.
+
+### Prerequisites
+
+1. An Microsoft Entra ID (Azure AD) application registration.
+2. OAuth credentials configured in `.env` (see `.env.example`).
+3. A user account with consented scopes.
+
+### Environment Variables
+
+Set these in `.env` for live smoke testing:
+
+```bash
+MICROSOFT_CLIENT_ID=your-app-client-id
+MICROSOFT_CLIENT_SECRET=your-app-client-secret
+MICROSOFT_TENANT_ID=common
+MICROSOFT_REDIRECT_URI=http://localhost:4000/integrations/microsoft/oauth/callback
+MICROSOFT_ACCESS_TOKEN=short-lived-access-token
+MICROSOFT_REFRESH_TOKEN=durable-refresh-token
+MICROSOFT_USER_ID=me
+```
+
+Product fixture IDs for smoke tests:
+
+```bash
+MICROSOFT_OUTLOOK_MESSAGE_ID=    # A read-accessible message ID
+MICROSOFT_CALENDAR_ID=            # A read-accessible calendar ID
+MICROSOFT_EVENT_ID=               # A read-accessible event ID
+MICROSOFT_ONEDRIVE_DRIVE_ID=      # A read-accessible drive ID
+MICROSOFT_ONEDRIVE_ITEM_ID=       # A read-accessible item ID
+```
+
+### Read-Only Scope Recommendations
+
+Live smoke tests should use the narrowest read-only scopes:
+
+```elixir
+# Read-only scopes by product area
+Jido.Connect.Microsoft.Availability.read_only_scopes(:mail)
+#=> ["Mail.Read", "Mail.ReadBasic"]
+
+Jido.Connect.Microsoft.Availability.read_only_scopes(:calendar)
+#=> ["Calendars.Read"]
+
+Jido.Connect.Microsoft.Availability.read_only_scopes(:files)
+#=> ["Files.Read", "Files.Read.All"]
+```
+
+### Foundation-Level Smoke Checks
+
+The shared foundation package does not call product endpoints directly.
+Product connectors own endpoint smoke tests. The foundation package supports
+these offline-verified contracts:
+
+1. **Auth URL construction** — `OAuth.authorize_url/1` builds a valid
+   Microsoft OAuth URL with the configured scopes.
+
+2. **Token exchange** — `OAuth.exchange_code/2` and `OAuth.refresh_token/2`
+   handle token lifecycle (requires live credentials).
+
+3. **Transport request construction** — `Transport.request/1` builds a
+   valid authenticated Graph request with the correct base URL and headers.
+
+4. **Scope normalization** — `Scopes.normalize/1`, `Scopes.encode/2`, and
+   `Scopes.include?/2` validate scope sets without calling the API.
+
+5. **Pagination helpers** — `Pagination.query/2`, `Pagination.values/1`,
+   and `Pagination.next_link/1` handle OData pagination envelopes.
+
+6. **Account normalization** — `Account.from_graph_user/2` normalizes
+   Graph user payloads into a standard shape.
+
+### What the Foundation Does NOT Smoke-Test
+
+- Product endpoint calls (GET /me/messages, GET /me/events, etc.).
+- Write, update, or delete operations on any Microsoft resource.
+- Webhook subscription lifecycle.
+- Delta query / change notification polling.
+
+These operations belong in product connector package smoke tests.
+
 ## Shared Helpers
 
 ### Scopes
