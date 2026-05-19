@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-ntx.2"
   ],
@@ -17,8 +17,8 @@
   ],
   "parent": "jido_con-ntx",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G13-S03] Implement Outlook read actions",
   "type": "task",
-  "updated_at": "2026-05-19T13:55:26Z"
+  "updated_at": "2026-05-19T18:16:21Z"
 }
