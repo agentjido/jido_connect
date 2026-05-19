@@ -53,6 +53,8 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
   end
 
   def google_show(conn, _params) do
+    google_catalog = GoogleRuntime.catalog_entries()
+
     render(conn, :google,
       public_url: Ngrok.public_base_url(),
       google_urls: Ngrok.google_urls(),
@@ -60,7 +62,8 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
       scopes: GoogleRuntime.scopes(),
       connections: Store.list_connections(:google),
       results: Store.recent_results(),
-      default_spreadsheet_id: GoogleRuntime.env_value("GOOGLE_SHEETS_SPREADSHEET_ID") || ""
+      default_spreadsheet_id: GoogleRuntime.env_value("GOOGLE_SHEETS_SPREADSHEET_ID") || "",
+      google_catalog: google_catalog
     )
   end
 
@@ -271,6 +274,77 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
 
     result = GoogleRuntime.run_get_values(connection_id, action_params)
     Store.put_result(:google_sheets_values_get, result_status(result), result)
+    redirect(conn, to: ~p"/integrations/google")
+  end
+
+  def google_gmail_list_messages(conn, params) do
+    connection_id = Map.fetch!(params, "connection_id")
+
+    action_params =
+      %{
+        max_results: params |> Map.get("max_results", "10") |> parse_integer(10),
+        query: Map.get(params, "query")
+      }
+      |> Data.compact()
+
+    result = GoogleRuntime.run_gmail_list_messages(connection_id, action_params)
+    Store.put_result(:google_gmail_messages_list, result_status(result), result)
+    redirect(conn, to: ~p"/integrations/google")
+  end
+
+  def google_gmail_get_profile(conn, params) do
+    connection_id = Map.fetch!(params, "connection_id")
+
+    result = GoogleRuntime.run_gmail_get_profile(connection_id, %{})
+    Store.put_result(:google_gmail_profile_get, result_status(result), result)
+    redirect(conn, to: ~p"/integrations/google")
+  end
+
+  def google_drive_list_files(conn, params) do
+    connection_id = Map.fetch!(params, "connection_id")
+
+    action_params =
+      %{
+        page_size: params |> Map.get("page_size", "10") |> parse_integer(10),
+        query: Map.get(params, "query")
+      }
+      |> Data.compact()
+
+    result = GoogleRuntime.run_drive_list_files(connection_id, action_params)
+    Store.put_result(:google_drive_files_list, result_status(result), result)
+    redirect(conn, to: ~p"/integrations/google")
+  end
+
+  def google_drive_get_about(conn, params) do
+    connection_id = Map.fetch!(params, "connection_id")
+
+    result = GoogleRuntime.run_drive_get_about(connection_id, %{})
+    Store.put_result(:google_drive_about_get, result_status(result), result)
+    redirect(conn, to: ~p"/integrations/google")
+  end
+
+  def google_calendar_list_events(conn, params) do
+    connection_id = Map.fetch!(params, "connection_id")
+
+    action_params =
+      %{
+        calendar_id: Map.get(params, "calendar_id", "primary"),
+        max_results: params |> Map.get("max_results", "10") |> parse_integer(10),
+        time_min: Map.get(params, "time_min"),
+        time_max: Map.get(params, "time_max")
+      }
+      |> Data.compact()
+
+    result = GoogleRuntime.run_calendar_list_events(connection_id, action_params)
+    Store.put_result(:google_calendar_events_list, result_status(result), result)
+    redirect(conn, to: ~p"/integrations/google")
+  end
+
+  def google_calendar_list_calendars(conn, params) do
+    connection_id = Map.fetch!(params, "connection_id")
+
+    result = GoogleRuntime.run_calendar_list_calendars(connection_id, %{})
+    Store.put_result(:google_calendar_calendars_list, result_status(result), result)
     redirect(conn, to: ~p"/integrations/google")
   end
 

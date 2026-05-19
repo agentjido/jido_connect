@@ -46,6 +46,12 @@ defmodule Jido.Connect.DemoWeb.Router do
     post("/integrations/github/actions/list_issues", IntegrationController, :github_list_issues)
     post("/integrations/github/actions/create_issue", IntegrationController, :github_create_issue)
     post("/integrations/google/actions/get_values", IntegrationController, :google_get_values)
+    post("/integrations/google/actions/gmail_list_messages", IntegrationController, :google_gmail_list_messages)
+    post("/integrations/google/actions/gmail_get_profile", IntegrationController, :google_gmail_get_profile)
+    post("/integrations/google/actions/drive_list_files", IntegrationController, :google_drive_list_files)
+    post("/integrations/google/actions/drive_get_about", IntegrationController, :google_drive_get_about)
+    post("/integrations/google/actions/calendar_list_events", IntegrationController, :google_calendar_list_events)
+    post("/integrations/google/actions/calendar_list_calendars", IntegrationController, :google_calendar_list_calendars)
     post("/integrations/slack/actions/list_channels", IntegrationController, :slack_list_channels)
     post("/integrations/slack/actions/post_message", IntegrationController, :slack_post_message)
 

@@ -67,6 +67,9 @@ defmodule Jido.Connect.Demo.MixProject do
       {:jido_connect_github, path: "../../apps/jido_connect_github"},
       {:jido_connect_google, path: "../../apps/jido_connect_google"},
       {:jido_connect_google_sheets, path: "../../apps/jido_connect_google_sheets"},
+      {:jido_connect_gmail, path: "../../apps/jido_connect_gmail"},
+      {:jido_connect_google_drive, path: "../../apps/jido_connect_google_drive"},
+      {:jido_connect_google_calendar, path: "../../apps/jido_connect_google_calendar"},
       {:jido_connect_mcp, path: "../../apps/jido_connect_mcp"},
       {:jido_connect_slack, path: "../../apps/jido_connect_slack"}
     ]

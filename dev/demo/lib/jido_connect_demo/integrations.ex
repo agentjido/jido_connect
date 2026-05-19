@@ -70,7 +70,7 @@ defmodule Jido.Connect.Demo.Integrations do
       module: Jido.Connect.Google.Sheets,
       status: :available,
       description:
-        "Google OAuth user flow and Google Sheets catalog tools for local smoke testing.",
+        "Google OAuth user flow and multi-product catalog tools (Sheets, Gmail, Drive, Calendar) for local smoke testing.",
       paths: %{
         console: "/integrations/google",
         oauth_start: "/integrations/google/oauth/start",
@@ -95,10 +95,15 @@ defmodule Jido.Connect.Demo.Integrations do
   end
 
   def catalog(opts \\ []) do
+    modules =
+      integration_modules() ++
+        Jido.Connect.Demo.GoogleRuntime.google_modules()
+
     opts
-    |> Keyword.put(:modules, available_modules())
+    |> Keyword.put(:modules, Enum.uniq(modules))
     |> Catalog.discover()
     |> Enum.map(&Catalog.to_map/1)
+    |> Enum.uniq_by(& &1.package)
   end
 
   def api_index do
@@ -136,7 +141,7 @@ defmodule Jido.Connect.Demo.Integrations do
     |> Map.put_new(:triggers, [])
   end
 
-  defp available_modules do
+  defp integration_modules do
     @integrations
     |> Enum.flat_map(fn
       %{module: module, status: :available} -> [module]
