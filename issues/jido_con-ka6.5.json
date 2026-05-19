@@ -5,11 +5,15 @@
   "created": "2026-05-19T14:15:42Z",
   "description": "Add webhook lifecycle and normalized card/board event triggers, catalog packs, scope matrix, README examples, .env.example placeholders, and read-only live smoke hooks. Verify package tests and generated modules compile.",
   "id": "jido_con-ka6.5",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "trello",
+    "work-management"
+  ],
   "parent": "jido_con-ka6",
   "priority": 2,
   "status": "open",
   "title": "[G28-S05] Add Trello webhook triggers catalog docs and smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:42Z"
+  "updated_at": "2026-05-19T14:15:43Z"
 }
