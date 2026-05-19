@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:16:54Z",
   "description": "Implement list/get guilds, channels, messages, users/members, reactions, and threads where supported. Cover permissions, snowflake ids, pagination, auth errors, rate limits, and provider errors offline.",
   "id": "jido_con-jag.3",
-  "labels": [],
+  "labels": [
+    "chat",
+    "connector-roadmap",
+    "discord"
+  ],
   "parent": "jido_con-jag",
   "priority": 2,
   "status": "open",
