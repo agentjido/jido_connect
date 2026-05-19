@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-q2q.5"
+  ],
   "blocks": [
     "jido_con-fui.2"
   ],
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G33-S01] Scaffold Mailchimp package",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:18Z"
+  "updated_at": "2026-05-19T14:17:08Z"
 }
