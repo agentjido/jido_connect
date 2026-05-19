@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-id6.2"
+  ],
   "created": "2026-05-19T14:15:53Z",
   "description": "Create apps/jido_connect_azure_devops with integration DSL, OAuth/PAT auth metadata, organization/project base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-id6.1",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G30-S01] Scaffold Azure DevOps package",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:53Z"
+  "updated_at": "2026-05-19T14:15:57Z"
 }

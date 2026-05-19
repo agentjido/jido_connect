@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-id6.1"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:53Z",
   "description": "Add structs/schemas and fixtures for organizations/projects, work items, fields, comments, repos, pull requests, builds, continuation tokens, and service hook payloads. Include normalization tests and privacy fixture review.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G30-S02] Add Azure DevOps normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:54Z"
+  "updated_at": "2026-05-19T14:15:57Z"
 }
