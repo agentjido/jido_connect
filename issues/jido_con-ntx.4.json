@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T13:52:17Z",
+  "description": "Implement write actions for Outlook mail: create draft, update draft, send draft, send message, reply/reply-all where reasonable. Require confirmation for AI writes, use least scopes, normalize responses, add offline tests, and keep destructive/live behavior opt-in only.",
+  "id": "jido_con-ntx.4",
+  "labels": [],
+  "parent": "jido_con-ntx",
+  "priority": 1,
+  "status": "open",
+  "title": "[G13-S04] Implement Outlook draft and send actions",
+  "type": "task",
+  "updated_at": "2026-05-19T13:52:17Z"
+}
