@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-zya.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:16Z",
   "description": "Implement list/search contacts, get contact, list/get conversations, admins/teams lookups where useful. Cover provider pagination, query filters, auth errors, rate limits, and error normalization offline.",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G17-S03] Implement Intercom read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:17Z"
+  "updated_at": "2026-05-19T14:03:19Z"
 }
