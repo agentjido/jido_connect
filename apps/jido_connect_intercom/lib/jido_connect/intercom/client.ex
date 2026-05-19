@@ -2,8 +2,8 @@ defmodule Jido.Connect.Intercom.Client do
   @moduledoc """
   Intercom REST client boundary.
 
-  Provides methods for contact, conversation, admin, and team read/search
-  operations against the Intercom REST API.
+  Provides methods for contact, conversation, admin, team, and tag
+  read/search/write operations against the Intercom REST API.
 
   ## Error normalization
 
@@ -148,6 +148,146 @@ defmodule Jido.Connect.Intercom.Client do
   end
 
   # ---------------------------------------------------------------------------
+  # Contact write
+  # ---------------------------------------------------------------------------
+
+  @doc "Creates a new Intercom contact."
+  def create_contact(attrs, access_token, opts \\ [])
+      when is_map(attrs) and is_binary(access_token) and is_list(opts) do
+    payload = build_contact_payload(attrs)
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.post(url: "/contacts", json: payload)
+    |> Response.handle_single_response("contact", &normalize_contact_item/1)
+  end
+
+  @doc "Updates an existing Intercom contact by ID."
+  def update_contact(contact_id, attrs, access_token, opts \\ [])
+      when is_binary(contact_id) and is_map(attrs) and is_binary(access_token) and
+             is_list(opts) do
+    payload = build_contact_payload(attrs)
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.put(url: "/contacts/#{contact_id}", json: payload)
+    |> Response.handle_single_response("contact", &normalize_contact_item/1)
+  end
+
+  defp build_contact_payload(attrs) do
+    payload = %{}
+    payload = maybe_put(payload, :role, Map.get(attrs, :role))
+    payload = maybe_put(payload, :name, Map.get(attrs, :name))
+    payload = maybe_put(payload, :email, Map.get(attrs, :email))
+    payload = maybe_put(payload, :phone, Map.get(attrs, :phone))
+    payload = maybe_put(payload, :external_id, Map.get(attrs, :external_id))
+
+    case Map.get(attrs, :custom_attributes) do
+      nil -> payload
+      ca when map_size(ca) == 0 -> payload
+      ca -> Map.put(payload, :custom_attributes, ca)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Conversation write
+  # ---------------------------------------------------------------------------
+
+  @doc "Replies to an Intercom conversation."
+  def reply_conversation(conversation_id, attrs, access_token, opts \\ [])
+      when is_binary(conversation_id) and is_map(attrs) and is_binary(access_token) and
+             is_list(opts) do
+    payload = build_conversation_part_payload(attrs)
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.post(url: "/conversations/#{conversation_id}/parts", json: payload)
+    |> Response.handle_single_response("conversation_part", &normalize_conversation_part_item/1)
+  end
+
+  @doc "Adds an internal note to an Intercom conversation."
+  def add_note(conversation_id, attrs, access_token, opts \\ [])
+      when is_binary(conversation_id) and is_map(attrs) and is_binary(access_token) and
+             is_list(opts) do
+    payload =
+      attrs
+      |> Map.put(:message_type, "note")
+      |> build_conversation_part_payload()
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.post(url: "/conversations/#{conversation_id}/parts", json: payload)
+    |> Response.handle_single_response("conversation_part", &normalize_conversation_part_item/1)
+  end
+
+  @doc "Assigns an Intercom conversation to an admin or team."
+  def assign_conversation(conversation_id, attrs, access_token, opts \\ [])
+      when is_binary(conversation_id) and is_map(attrs) and is_binary(access_token) and
+             is_list(opts) do
+    payload =
+      attrs
+      |> Map.put(:message_type, "assignment")
+      |> build_conversation_part_payload()
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.post(url: "/conversations/#{conversation_id}/parts", json: payload)
+    |> Response.handle_single_response("conversation_part", &normalize_conversation_part_item/1)
+  end
+
+  defp build_conversation_part_payload(attrs) do
+    payload = %{message_type: Map.get(attrs, :message_type, "comment")}
+    payload = maybe_put(payload, :body, Map.get(attrs, :body))
+
+    payload =
+      case Map.get(attrs, :admin_id) do
+        nil -> payload
+        admin_id -> Map.put(payload, :admin_id, admin_id)
+      end
+
+    payload =
+      case Map.get(attrs, :assignee_id) do
+        nil -> payload
+        assignee_id -> Map.put(payload, :assignee_id, assignee_id)
+      end
+
+    payload
+  end
+
+  # ---------------------------------------------------------------------------
+  # Tag write
+  # ---------------------------------------------------------------------------
+
+  @doc "Applies a tag to one or more Intercom contacts."
+  def tag_contact(name, contact_ids, access_token, opts \\ [])
+      when is_binary(name) and is_list(contact_ids) and is_binary(access_token) and
+             is_list(opts) do
+    payload = %{
+      name: name,
+      contacts: Enum.map(contact_ids, &%{id: &1})
+    }
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.post(url: "/tags", json: payload)
+    |> Response.handle_single_response("tag", &normalize_tag_item/1)
+  end
+
+  @doc "Removes a tag from one or more Intercom contacts."
+  def untag_contact(tag_id, contact_ids, access_token, opts \\ [])
+      when is_binary(tag_id) and is_list(contact_ids) and is_binary(access_token) and
+             is_list(opts) do
+    payload = %{
+      contacts: Enum.map(contact_ids, &%{id: &1, untags: [tag_id]})
+    }
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.delete(url: "/tags/#{tag_id}/contacts", json: payload)
+    |> Response.handle_single_response("tag", &normalize_tag_item/1)
+  end
+
+  # ---------------------------------------------------------------------------
   # Client resolution
   # ---------------------------------------------------------------------------
 
@@ -240,6 +380,13 @@ defmodule Jido.Connect.Intercom.Client do
     end
   end
 
+  defp normalize_conversation_part_item(payload) do
+    case Normalizer.conversation_part(payload) do
+      {:ok, struct} -> Map.from_struct(struct) |> Map.drop([:metadata])
+      {:error, _} -> nil
+    end
+  end
+
   defp normalize_admin_item(payload) do
     case Normalizer.admin(payload) do
       {:ok, struct} -> Map.from_struct(struct) |> Map.drop([:metadata])
@@ -249,6 +396,13 @@ defmodule Jido.Connect.Intercom.Client do
 
   defp normalize_team_item(payload) do
     case Normalizer.team(payload) do
+      {:ok, struct} -> Map.from_struct(struct) |> Map.drop([:metadata])
+      {:error, _} -> nil
+    end
+  end
+
+  defp normalize_tag_item(payload) do
+    case Normalizer.tag(payload) do
       {:ok, struct} -> Map.from_struct(struct) |> Map.drop([:metadata])
       {:error, _} -> nil
     end

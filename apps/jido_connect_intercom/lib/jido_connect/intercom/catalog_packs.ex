@@ -28,7 +28,15 @@ defmodule Jido.Connect.Intercom.CatalogPacks do
     "intercom.team.list"
   ]
 
-  @write_tools []
+  @write_tools [
+    "intercom.contact.create",
+    "intercom.contact.update",
+    "intercom.conversation.reply",
+    "intercom.conversation.add_note",
+    "intercom.conversation.assign",
+    "intercom.contact.tag",
+    "intercom.contact.untag"
+  ]
   @editor_tools @reader_tools ++ @write_tools
 
   @doc "Returns all built-in Intercom catalog packs."

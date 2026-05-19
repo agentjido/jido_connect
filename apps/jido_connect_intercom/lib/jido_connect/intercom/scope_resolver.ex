@@ -10,9 +10,16 @@ defmodule Jido.Connect.Intercom.ScopeResolver do
     "intercom.contact.list" => ["contacts:read"],
     "intercom.contact.search" => ["contacts:read"],
     "intercom.contact.get" => ["contacts:read"],
+    "intercom.contact.create" => ["contacts:write"],
+    "intercom.contact.update" => ["contacts:write"],
+    "intercom.contact.tag" => ["tags:write", "contacts:write"],
+    "intercom.contact.untag" => ["tags:write", "contacts:write"],
     "intercom.conversation.list" => ["conversations:read"],
     "intercom.conversation.search" => ["conversations:read"],
     "intercom.conversation.get" => ["conversations:read"],
+    "intercom.conversation.reply" => ["conversations:write"],
+    "intercom.conversation.add_note" => ["conversations:write"],
+    "intercom.conversation.assign" => ["conversations:write"],
     "intercom.admin.list" => ["admins:read"],
     "intercom.team.list" => ["admins:read"]
   }

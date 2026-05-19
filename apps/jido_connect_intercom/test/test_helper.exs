@@ -168,6 +168,206 @@ defmodule Jido.Connect.Intercom.MockClient do
   end
 
   # ---------------------------------------------------------------------------
+  # Contact write
+  # ---------------------------------------------------------------------------
+
+  def create_contact(%{email: "new@example.com"} = _attrs, "token", _opts) do
+    {:ok,
+     %{
+       id: "661300",
+       name: "New User",
+       email: "new@example.com",
+       role: "user",
+       created_at: 1_718_500_000,
+       updated_at: 1_718_500_000
+     }}
+  end
+
+  def create_contact(_attrs, "token", _opts) do
+    {:ok,
+     %{
+       id: "661301",
+       name: "Created Contact",
+       email: "created@example.com",
+       role: "user",
+       created_at: 1_718_500_000,
+       updated_at: 1_718_500_000
+     }}
+  end
+
+  def create_contact(_attrs, "error_token", _opts) do
+    {:error,
+     %Error.ProviderError{
+       message: "Intercom API request failed",
+       provider: :intercom,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Unauthorized", body: %{"type" => "error.list"}}
+     }}
+  end
+
+  def update_contact("661240", _attrs, "token", _opts) do
+    {:ok,
+     %{
+       id: "661240",
+       name: "Alice Updated",
+       email: "alice-updated@example.com",
+       role: "user",
+       updated_at: 1_718_506_000
+     }}
+  end
+
+  def update_contact(_contact_id, _attrs, "error_token", _opts) do
+    {:error,
+     %Error.ProviderError{
+       message: "Intercom API request failed",
+       provider: :intercom,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Unauthorized", body: %{"type" => "error.list"}}
+     }}
+  end
+
+  # ---------------------------------------------------------------------------
+  # Conversation write
+  # ---------------------------------------------------------------------------
+
+  def reply_conversation("401", _attrs, "token", _opts) do
+    {:ok,
+     %{
+       id: "part-100",
+       part_type: "comment",
+       body: "<p>Reply text</p>",
+       created_at: 1_718_506_000
+     }}
+  end
+
+  def reply_conversation(_conversation_id, _attrs, "error_token", _opts) do
+    {:error,
+     %Error.ProviderError{
+       message: "Intercom API request failed",
+       provider: :intercom,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Unauthorized", body: %{"type" => "error.list"}}
+     }}
+  end
+
+  def add_note("401", _attrs, "token", _opts) do
+    {:ok,
+     %{
+       id: "part-200",
+       part_type: "note",
+       body: "<p>Internal note</p>",
+       created_at: 1_718_506_000
+     }}
+  end
+
+  def add_note(_conversation_id, _attrs, "error_token", _opts) do
+    {:error,
+     %Error.ProviderError{
+       message: "Intercom API request failed",
+       provider: :intercom,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Unauthorized", body: %{"type" => "error.list"}}
+     }}
+  end
+
+  def assign_conversation("401", %{admin_id: admin_id} = _attrs, "token", _opts)
+      when is_binary(admin_id) do
+    {:ok,
+     %{
+       id: "part-300",
+       part_type: "assignment",
+       assigned_to: %{type: "admin", id: admin_id},
+       created_at: 1_718_506_000
+     }}
+  end
+
+  def assign_conversation(
+        "401",
+        %{assignee_id: %{type: "team", id: team_id}} = _attrs,
+        "token",
+        _opts
+      ) do
+    {:ok,
+     %{
+       id: "part-301",
+       part_type: "assignment",
+       assigned_to: %{type: "team", id: team_id},
+       created_at: 1_718_506_000
+     }}
+  end
+
+  def assign_conversation(_conversation_id, _attrs, "error_token", _opts) do
+    {:error,
+     %Error.ProviderError{
+       message: "Intercom API request failed",
+       provider: :intercom,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Unauthorized", body: %{"type" => "error.list"}}
+     }}
+  end
+
+  # ---------------------------------------------------------------------------
+  # Tag write
+  # ---------------------------------------------------------------------------
+
+  def tag_contact("vip", ["661240"], "token", _opts) do
+    {:ok,
+     %{
+       id: "tag-100",
+       name: "vip",
+       type: "tag",
+       applied_to: %{type: "contact", contacts: [%{id: "661240"}]}
+     }}
+  end
+
+  def tag_contact(_name, _contact_ids, "token", _opts) do
+    {:ok,
+     %{
+       id: "tag-101",
+       name: "test-tag",
+       type: "tag",
+       applied_to: %{type: "contact", contacts: []}
+     }}
+  end
+
+  def tag_contact(_name, _contact_ids, "error_token", _opts) do
+    {:error,
+     %Error.ProviderError{
+       message: "Intercom API request failed",
+       provider: :intercom,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Unauthorized", body: %{"type" => "error.list"}}
+     }}
+  end
+
+  def untag_contact("tag-100", ["661240"], "token", _opts) do
+    {:ok,
+     %{
+       id: "tag-100",
+       name: "vip",
+       type: "tag",
+       applied_to: %{type: "contact", contacts: [%{id: "661240"}]}
+     }}
+  end
+
+  def untag_contact(_tag_id, _contact_ids, "error_token", _opts) do
+    {:error,
+     %Error.ProviderError{
+       message: "Intercom API request failed",
+       provider: :intercom,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Unauthorized", body: %{"type" => "error.list"}}
+     }}
+  end
+
+  # ---------------------------------------------------------------------------
   # Client resolution helpers
   # ---------------------------------------------------------------------------
 

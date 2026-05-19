@@ -35,12 +35,22 @@ defmodule Jido.Connect.Intercom.CatalogPacksTest do
       assert length(reader.allowed_tools) == 8
     end
 
-    test "editor pack has write risk and includes read tools" do
+    test "editor pack has write risk and includes read + write tools" do
       packs = Intercom.catalog_packs()
       editor = Enum.find(packs, &(&1.id == :intercom_editor))
 
       assert editor.metadata.risk == :write
-      assert length(editor.allowed_tools) == 8
+
+      # Editor pack includes all 8 read tools + 7 write tools
+      assert length(editor.allowed_tools) == 15
+
+      assert "intercom.contact.create" in editor.allowed_tools
+      assert "intercom.contact.update" in editor.allowed_tools
+      assert "intercom.conversation.reply" in editor.allowed_tools
+      assert "intercom.conversation.add_note" in editor.allowed_tools
+      assert "intercom.conversation.assign" in editor.allowed_tools
+      assert "intercom.contact.tag" in editor.allowed_tools
+      assert "intercom.contact.untag" in editor.allowed_tools
     end
   end
 end
