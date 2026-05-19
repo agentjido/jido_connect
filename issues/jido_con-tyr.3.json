@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-tyr.4"
   ],
+  "closed_at": "2026-05-19T20:31:14Z",
+  "close_reason": "Implemented in bef4ca1 by pi-connector-factory",
   "created": "2026-05-19T13:54:20Z",
   "description": "Implement list drives, get drive, list children, get item, search, download content, and delta/read change actions. Handle @odata.nextLink, @microsoft.graph.downloadUrl, binary responses, and provider errors with offline tests.",
   "id": "jido_con-tyr.3",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-tyr",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G15-S03] Implement OneDrive read and content actions",
   "type": "task",
-  "updated_at": "2026-05-19T20:18:55Z"
+  "updated_at": "2026-05-19T20:31:14Z"
 }
