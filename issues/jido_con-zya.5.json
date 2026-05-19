@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-zya.4"
   ],
@@ -17,8 +17,8 @@
   ],
   "parent": "jido_con-zya",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G17-S05] Add Intercom webhook triggers catalog docs and smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T14:05:35Z"
+  "updated_at": "2026-05-19T22:22:52Z"
 }
