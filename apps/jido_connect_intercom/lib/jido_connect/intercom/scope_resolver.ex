@@ -21,7 +21,15 @@ defmodule Jido.Connect.Intercom.ScopeResolver do
     "intercom.conversation.add_note" => ["conversations:write"],
     "intercom.conversation.assign" => ["conversations:write"],
     "intercom.admin.list" => ["admins:read"],
-    "intercom.team.list" => ["admins:read"]
+    "intercom.team.list" => ["admins:read"],
+    "intercom.conversation.user.created" => ["conversations:read"],
+    "intercom.conversation.admin.replied" => ["conversations:read"],
+    "intercom.conversation.user.replied" => ["conversations:read"],
+    "intercom.conversation.admin.assigned" => ["conversations:read"],
+    "intercom.conversation.admin.closed" => ["conversations:read"],
+    "intercom.contact.created" => ["contacts:read"],
+    "intercom.contact.updated" => ["contacts:read"],
+    "intercom.contact.deleted" => ["contacts:read"]
   }
 
   @doc """

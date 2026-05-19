@@ -1,0 +1,17 @@
+{
+  "type": "notification_event",
+  "topic": "conversation.admin.assigned",
+  "delivery_id": "delivery-005",
+  "delivery_attempt": 1,
+  "created_at": 1718496900,
+  "app_id": "app-123",
+  "data": {
+    "type": "notification_event_data",
+    "item": {
+      "type": "conversation",
+      "id": "401",
+      "state": "open"
+    }
+  },
+  "self": "https://api.intercom.io/notification_events/delivery-005"
+}

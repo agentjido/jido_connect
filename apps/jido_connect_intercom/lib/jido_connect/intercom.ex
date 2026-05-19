@@ -29,7 +29,12 @@ defmodule Jido.Connect.Intercom do
   """
 
   use Jido.Connect,
-    fragments: [Jido.Connect.Intercom.Actions.Reads, Jido.Connect.Intercom.Actions.Writes]
+    fragments: [
+      Jido.Connect.Intercom.Actions.Reads,
+      Jido.Connect.Intercom.Actions.Writes,
+      Jido.Connect.Intercom.Triggers.Conversations,
+      Jido.Connect.Intercom.Triggers.Contacts
+    ]
 
   defdelegate catalog_packs, to: Jido.Connect.Intercom.CatalogPacks, as: :all
 

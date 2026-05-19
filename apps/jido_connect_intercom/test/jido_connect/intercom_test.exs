@@ -14,7 +14,17 @@ defmodule Jido.Connect.IntercomTest do
     assert spec.status == :experimental
     assert spec.tags == [:support, :messaging, :customer_service]
     assert length(spec.actions) == 15
-    assert spec.triggers == []
+    assert length(spec.triggers) == 8
+
+    trigger_ids = Enum.map(spec.triggers, & &1.id)
+    assert "intercom.conversation.user.created" in trigger_ids
+    assert "intercom.conversation.admin.replied" in trigger_ids
+    assert "intercom.conversation.user.replied" in trigger_ids
+    assert "intercom.conversation.admin.assigned" in trigger_ids
+    assert "intercom.conversation.admin.closed" in trigger_ids
+    assert "intercom.contact.created" in trigger_ids
+    assert "intercom.contact.updated" in trigger_ids
+    assert "intercom.contact.deleted" in trigger_ids
 
     action_ids = Enum.map(spec.actions, & &1.id)
     assert "intercom.contact.list" in action_ids
@@ -72,7 +82,7 @@ defmodule Jido.Connect.IntercomTest do
 
     action_modules = Intercom.jido_action_modules()
     assert length(action_modules) == 15
-    assert Intercom.jido_sensor_modules() == []
+    assert length(Intercom.jido_sensor_modules()) == 8
     assert Intercom.jido_plugin_module() == Jido.Connect.Intercom.Plugin
 
     assert %Connect.Catalog.Manifest{
@@ -82,7 +92,7 @@ defmodule Jido.Connect.IntercomTest do
            } = Intercom.jido_connect_manifest()
 
     assert length(generated.actions) == 15
-    assert generated.sensors == []
+    assert length(generated.sensors) == 8
     assert generated.plugin == Jido.Connect.Intercom.Plugin
 
     assert %Jido.Plugin.Spec{
@@ -95,12 +105,13 @@ defmodule Jido.Connect.IntercomTest do
   end
 
   describe "plugin tool availability" do
-    test "reports availability for all actions" do
+    test "reports availability for all actions and triggers" do
       plugin_module = Intercom.jido_plugin_module()
       availability = plugin_module.tool_availability()
-      assert length(availability) == 15
+      assert length(availability) == 23
 
       tool_ids = Enum.map(availability, & &1.tool)
+      # Actions (15)
       assert "intercom.contact.list" in tool_ids
       assert "intercom.contact.search" in tool_ids
       assert "intercom.contact.get" in tool_ids
@@ -116,6 +127,15 @@ defmodule Jido.Connect.IntercomTest do
       assert "intercom.conversation.assign" in tool_ids
       assert "intercom.admin.list" in tool_ids
       assert "intercom.team.list" in tool_ids
+      # Triggers (8)
+      assert "intercom.conversation.user.created" in tool_ids
+      assert "intercom.conversation.admin.replied" in tool_ids
+      assert "intercom.conversation.user.replied" in tool_ids
+      assert "intercom.conversation.admin.assigned" in tool_ids
+      assert "intercom.conversation.admin.closed" in tool_ids
+      assert "intercom.contact.created" in tool_ids
+      assert "intercom.contact.updated" in tool_ids
+      assert "intercom.contact.deleted" in tool_ids
     end
   end
 end

@@ -13,7 +13,7 @@ The Spark DSL declaration lives in
 ## Status
 
 This is an **experimental** package. Action fragments, normalized structs,
-client transport, and webhook handlers will be added in subsequent waves.
+client transport, webhook triggers, and trigger handlers are implemented.
 
 ## Installation
 
@@ -58,11 +58,66 @@ Write scopes should be requested only when mutation actions are needed.
 
 ## Actions
 
-> Action fragments will be added in a subsequent wave.
+The provider declares 15 action tools across contacts, conversations, admins, and teams:
+
+| Action ID | Verb | Description |
+|---|---|---|
+| `intercom.contact.list` | list | List contacts with pagination |
+| `intercom.contact.search` | search | Search contacts by query |
+| `intercom.contact.get` | get | Fetch a single contact by ID |
+| `intercom.contact.create` | create | Create a new contact |
+| `intercom.contact.update` | update | Update an existing contact |
+| `intercom.contact.tag` | tag | Apply a tag to contacts |
+| `intercom.contact.untag` | untag | Remove a tag from contacts |
+| `intercom.conversation.list` | list | List conversations with pagination |
+| `intercom.conversation.search` | search | Search conversations by query |
+| `intercom.conversation.get` | get | Fetch a single conversation by ID |
+| `intercom.conversation.reply` | reply | Reply to a conversation |
+| `intercom.conversation.add_note` | note | Add an internal note to a conversation |
+| `intercom.conversation.assign` | assign | Assign a conversation to an admin or team |
+| `intercom.admin.list` | list | List admins (teammates) |
+| `intercom.team.list` | list | List teams |
 
 ## Webhook Triggers
 
-> Webhook trigger fragments will be added in a subsequent wave.
+The provider ships with webhook triggers for conversation and contact events:
+
+### Conversation Triggers
+
+| Trigger ID | Topic | Description |
+|---|---|---|
+| `intercom.conversation.user.created` | `conversation.user.created` | New conversation started by a user |
+| `intercom.conversation.admin.replied` | `conversation.admin.replied` | Admin replied to a conversation |
+| `intercom.conversation.user.replied` | `conversation.user.replied` | User replied to a conversation |
+| `intercom.conversation.admin.assigned` | `conversation.admin.assigned` | Conversation was assigned |
+| `intercom.conversation.admin.closed` | `conversation.admin.closed` | Conversation was closed |
+
+### Contact Triggers
+
+| Trigger ID | Topic | Description |
+|---|---|---|
+| `intercom.contact.created` | `contact.created` | New contact was created |
+| `intercom.contact.updated` | `contact.updated` | Contact was updated |
+| `intercom.contact.deleted` | `contact.deleted` | Contact was deleted |
+
+### Webhook Verification
+
+Intercom signs webhook payloads with an HMAC-SHA256 hex digest sent in the
+`X-Hub-Signature` header. The `Jido.Connect.Intercom.Webhook` module provides
+pure helpers for verification and normalization:
+
+```elixir
+alias Jido.Connect.Intercom.Webhook
+
+# Verify the signature (host computes from raw body + secret)
+computed = Webhook.compute_signature(raw_body, webhook_secret)
+:ok = Webhook.verify_signature(computed, signature_header)
+
+# Normalize the event payload into a signal map
+{:ok, signal} = Webhook.normalize_event(payload)
+```
+
+Triggers are subscribed to independently and are not included in catalog packs.
 
 ## Catalog Packs
 
@@ -73,7 +128,7 @@ The provider ships with curated catalog packs for scoped tool discovery:
 | `:intercom_reader` | read | Read-only Intercom queries |
 | `:intercom_editor` | write | Reader + write tools |
 
-Tool IDs will be populated when action fragments are added in subsequent waves.
+Tool IDs are populated from action and trigger fragments.
 
 Triggers are subscribed to independently and are not included in packs.
 
@@ -97,8 +152,8 @@ Catalog.search_tools("intercom",
 
 ## API Boundaries
 
-All Intercom API traffic will use a dedicated transport boundary module to be
-added in a subsequent wave. The base URL defaults to
+All Intercom API traffic uses the dedicated transport boundary module
+`Jido.Connect.Intercom.Client.Transport`. The base URL defaults to
 `https://api.intercom.io`.
 
 ## Package Quality Gates
