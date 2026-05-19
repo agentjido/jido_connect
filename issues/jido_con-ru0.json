@@ -5,7 +5,9 @@
   "created": "2026-05-19T14:03:44Z",
   "description": "Build jido_connect_stripe for revenue workflows with strict safety defaults: restricted/API key auth, customers, invoices, subscriptions, payment intents, charges, low-risk writes only, webhook verification, catalog packs, docs, and live smoke guidance.",
   "id": "jido_con-ru0",
-  "labels": [],
+  "labels": [
+    "connector-roadmap +payments +stripe"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[G22] Stripe Connector",
