@@ -33,7 +33,8 @@ defmodule Jido.Connect.Notion do
 
   use Jido.Connect,
     fragments: [
-      Jido.Connect.Notion.Actions.Read
+      Jido.Connect.Notion.Actions.Read,
+      Jido.Connect.Notion.Actions.Write
     ]
 
   defdelegate catalog_packs, to: Jido.Connect.Notion.CatalogPacks, as: :all

@@ -3,7 +3,7 @@ defmodule Jido.Connect.Notion.ScopeResolverTest do
 
   alias Jido.Connect.Notion.ScopeResolver
 
-  describe "required_scopes/3" do
+  describe "required_scopes/3 — read operations" do
     test "search requires read_content" do
       assert ScopeResolver.required_scopes(%{id: "notion.search"}, %{}, %{}) == ["read_content"]
     end
@@ -39,7 +39,41 @@ defmodule Jido.Connect.Notion.ScopeResolverTest do
       assert ScopeResolver.required_scopes(%{id: "notion.comment.list"}, %{}, %{}) ==
                ["read_comments"]
     end
+  end
 
+  describe "required_scopes/3 — write operations" do
+    test "create page requires insert_content" do
+      assert ScopeResolver.required_scopes(%{id: "notion.page.create"}, %{}, %{}) ==
+               ["insert_content"]
+    end
+
+    test "update page requires update_content" do
+      assert ScopeResolver.required_scopes(%{id: "notion.page.update"}, %{}, %{}) ==
+               ["update_content"]
+    end
+
+    test "append block children requires insert_content" do
+      assert ScopeResolver.required_scopes(%{id: "notion.block.append_children"}, %{}, %{}) ==
+               ["insert_content"]
+    end
+
+    test "update block requires update_content" do
+      assert ScopeResolver.required_scopes(%{id: "notion.block.update"}, %{}, %{}) ==
+               ["update_content"]
+    end
+
+    test "archive block requires update_content" do
+      assert ScopeResolver.required_scopes(%{id: "notion.block.archive"}, %{}, %{}) ==
+               ["update_content"]
+    end
+
+    test "create comment requires insert_comments" do
+      assert ScopeResolver.required_scopes(%{id: "notion.comment.create"}, %{}, %{}) ==
+               ["insert_comments"]
+    end
+  end
+
+  describe "required_scopes/3 — fallbacks" do
     test "unknown operation defaults to read_content" do
       assert ScopeResolver.required_scopes(%{id: "notion.unknown"}, %{}, %{}) ==
                ["read_content"]

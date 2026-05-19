@@ -29,7 +29,14 @@ defmodule Jido.Connect.Notion.CatalogPacks do
     "notion.block.list_children",
     "notion.comment.list"
   ]
-  @write_tools []
+  @write_tools [
+    "notion.page.create",
+    "notion.page.update",
+    "notion.block.append_children",
+    "notion.block.update",
+    "notion.block.archive",
+    "notion.comment.create"
+  ]
   @editor_tools @reader_tools ++ @write_tools
 
   @doc "Returns all built-in Notion catalog packs."

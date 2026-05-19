@@ -142,6 +142,22 @@ defmodule Jido.Connect.Notion.Client.Response do
   def handle_comment_list_response(response), do: Transport.handle_error_response(response)
 
   # ---------------------------------------------------------------------------
+  # Comment (single)
+  # ---------------------------------------------------------------------------
+
+  def handle_comment_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    Normalizer.comment(body)
+  end
+
+  def handle_comment_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Notion comment response was invalid", body)
+  end
+
+  def handle_comment_response(response), do: Transport.handle_error_response(response)
+
+  # ---------------------------------------------------------------------------
   # Helpers
   # ---------------------------------------------------------------------------
 

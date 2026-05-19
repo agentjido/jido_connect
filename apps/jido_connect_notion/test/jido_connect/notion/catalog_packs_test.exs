@@ -46,5 +46,34 @@ defmodule Jido.Connect.Notion.CatalogPacksTest do
       assert "notion.page.get" in editor.allowed_tools
       assert "notion.comment.list" in editor.allowed_tools
     end
+
+    test "editor pack includes write tools" do
+      packs = Notion.catalog_packs()
+      editor = Enum.find(packs, &(&1.id == :notion_editor))
+
+      write_tools = [
+        "notion.page.create",
+        "notion.page.update",
+        "notion.block.append_children",
+        "notion.block.update",
+        "notion.block.archive",
+        "notion.comment.create"
+      ]
+
+      for tool <- write_tools do
+        assert tool in editor.allowed_tools, "Expected #{tool} in editor allowed_tools"
+      end
+    end
+
+    test "editor pack includes all reader tools" do
+      packs = Notion.catalog_packs()
+      reader = Enum.find(packs, &(&1.id == :notion_reader))
+      editor = Enum.find(packs, &(&1.id == :notion_editor))
+
+      for tool <- reader.allowed_tools do
+        assert tool in editor.allowed_tools,
+               "Expected reader tool #{tool} in editor allowed_tools"
+      end
+    end
   end
 end
