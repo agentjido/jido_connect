@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:16:56Z",
   "description": "Document gateway vs webhook/interaction scope, add feasible webhook normalization helpers, catalog packs, scope/permission matrix, README examples, .env.example placeholders, and read-only live smoke hooks. Verify package tests and generated modules compile.",
   "id": "jido_con-jag.5",
-  "labels": [],
+  "labels": [
+    "chat",
+    "connector-roadmap",
+    "discord"
+  ],
   "parent": "jido_con-jag",
   "priority": 2,
   "status": "open",
