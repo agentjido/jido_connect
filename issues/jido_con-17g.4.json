@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:11Z",
   "description": "Implement create ticket, update ticket, add public/private comment, tag/status/assignee updates with explicit metadata for write/destructive scope. Gate live mutation smoke tests and cover offline success/error paths.",
   "id": "jido_con-17g.4",
-  "labels": [
-    "connector-roadmap +support +zendesk"
-  ],
+  "labels": [],
   "parent": "jido_con-17g",
   "priority": 2,
   "status": "open",
   "title": "[G16-S04] Implement Zendesk ticket write actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:14Z"
+  "updated_at": "2026-05-19T14:04:51Z"
 }
