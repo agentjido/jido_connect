@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:15:47Z",
+  "description": "Add structs/schemas and fixtures for boards, groups, items, columns, column values, updates, users, pagination, GraphQL errors, and webhook payloads. Include normalization tests and privacy fixture review.",
+  "id": "jido_con-3rz.2",
+  "labels": [],
+  "parent": "jido_con-3rz",
+  "priority": 2,
+  "status": "open",
+  "title": "[G29-S02] Add monday.com normalized structs and fixtures",
+  "type": "task",
+  "updated_at": "2026-05-19T14:15:47Z"
+}
