@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-fe6.2"
   ],
+  "closed_at": "2026-05-19T22:46:16Z",
+  "close_reason": "Implemented in 866e0d91 by pi-connector-factory",
   "created": "2026-05-19T14:03:20Z",
   "description": "Create apps/jido_connect_notion with integration DSL, OAuth/internal integration token profile metadata, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement resource actions yet.",
   "id": "jido_con-fe6.1",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-fe6",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S01] Scaffold Notion package",
   "type": "task",
-  "updated_at": "2026-05-19T22:38:41Z"
+  "updated_at": "2026-05-19T22:46:16Z"
 }
