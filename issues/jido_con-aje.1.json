@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-aje.2"
   ],
+  "closed_at": "2026-05-19T23:35:16Z",
+  "close_reason": "Implemented in e56570ab by pi-connector-factory",
   "created": "2026-05-19T14:03:26Z",
   "description": "Create apps/jido_connect_asana with integration DSL, OAuth/PAT auth metadata, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement task actions yet.",
   "id": "jido_con-aje.1",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-aje",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G19-S01] Scaffold Asana package",
   "type": "task",
-  "updated_at": "2026-05-19T23:28:51Z"
+  "updated_at": "2026-05-19T23:35:16Z"
 }
