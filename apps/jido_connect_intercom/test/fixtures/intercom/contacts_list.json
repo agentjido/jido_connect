@@ -1,0 +1,33 @@
+{
+  "type": "list",
+  "data": [
+    {
+      "type": "contact",
+      "id": "661240",
+      "name": "Alice Nakamura",
+      "email": "alice@example.com",
+      "created_at": 1717804800,
+      "updated_at": 1718496000
+    },
+    {
+      "type": "contact",
+      "id": "661241",
+      "name": "Bob Martinez",
+      "email": "bob@example.com",
+      "created_at": 1717900000,
+      "updated_at": 1718497000
+    }
+  ],
+  "total_count": 2,
+  "pages": {
+    "type": "pages",
+    "next": {
+      "page": 2,
+      "per_page": 20
+    },
+    "page": 1,
+    "per_page": 20,
+    "total_pages": 1,
+    "total_count": 2
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "conversation_part",
+  "id": "801",
+  "part_type": "note",
+  "body": "<p>Internal note about this ticket.</p>",
+  "created_at": 1718496400,
+  "author": {
+    "type": "admin",
+    "id": "991"
+  }
+}

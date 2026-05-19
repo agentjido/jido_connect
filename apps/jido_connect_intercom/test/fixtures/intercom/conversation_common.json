@@ -1,0 +1,79 @@
+{
+  "type": "conversation",
+  "id": "401",
+  "workspace_id": "this_is_an_id789_that_should_be_at_least_4",
+  "created_at": 1718496000,
+  "updated_at": 1718496600,
+  "waiting_since": 1718496600,
+  "snoozed_until": null,
+  "title": "Need help with API integration",
+  "state": "open",
+  "open": true,
+  "read": true,
+  "priority": "not_priority",
+  "source": {
+    "type": "conversation",
+    "id": "401",
+    "delivered_as": "customer_initiated",
+    "subject": "Need help with API integration",
+    "body": "I'm having trouble integrating the REST API with my application.",
+    "author": {
+      "type": "lead",
+      "id": "580e改为"
+    },
+    "url": "https://example.intercom-messages.com/a/401"
+  },
+  "contacts": {
+    "type": "contact.list",
+    "contacts": [
+      {"type": "contact", "id": "661240"}
+    ]
+  },
+  "teammates": {
+    "type": "admin.list",
+    "admins": [
+      {"type": "admin", "id": "991"}
+    ]
+  },
+  "assignee": {
+    "type": "admin",
+    "id": "991"
+  },
+  "tags": {
+    "type": "tag.list",
+    "tags": [
+      {"type": "tag", "id": "700", "name": "api"},
+      {"type": "tag", "id": "701", "name": "integration"}
+    ]
+  },
+  "conversation_parts": {
+    "type": "conversation_part.list",
+    "conversation_parts": [
+      {
+        "type": "conversation_part",
+        "id": "800",
+        "part_type": "comment",
+        "body": "<p>Let me check the documentation for you.</p>",
+        "created_at": 1718496300,
+        "updated_at": 1718496300,
+        "notified_at": 1718496310,
+        "author": {
+          "type": "admin",
+          "id": "991"
+        },
+        "attachments": []
+      }
+    ]
+  },
+  "statistics": {
+    "type": "conversation.statistics",
+    "first_contact_reply_created_at": 1718496000,
+    "first_admin_reply_created_at": 1718496300,
+    "admin_reply_count": 1,
+    "contact_reply_count": 1,
+    "time_to_admin_reply": 300,
+    "time_to_last_admin_reply": 300,
+    "median_time_to_reply": 300
+  },
+  "custom_attributes": {}
+}
