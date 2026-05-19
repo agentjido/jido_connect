@@ -144,22 +144,24 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
     assert resolver.required_scopes(%{}, %{}, %{}) == ["Mail.Read"]
   end
 
-  test "shell handlers return not implemented" do
-    assert {:error, :not_implemented} ==
+  test "read handlers reject missing credentials" do
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.GetProfile.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.ListMessages.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.GetMessage.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.ListFolders.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.GetFolder.run(%{}, %{})
+  end
 
+  test "write and destructive shell handlers return not implemented" do
     assert {:error, :not_implemented} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.SendMessage.run(%{}, %{})
 
