@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-5hk.5"
+  ],
   "blocks": [
     "jido_con-ru0.2"
   ],
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G22-S01] Scaffold Stripe package",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:49Z"
+  "updated_at": "2026-05-19T14:04:09Z"
 }
