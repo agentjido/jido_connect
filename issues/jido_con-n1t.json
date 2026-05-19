@@ -7,10 +7,14 @@
   "created": "2026-05-19T14:03:56Z",
   "description": "Build jido_connect_typeform for form/intake workflows: OAuth/token auth, forms, questions, responses, webhook lifecycle, normalized submissions, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-n1t",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "forms",
+    "typeform"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[G24] Typeform Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:05:09Z"
+  "updated_at": "2026-05-19T14:05:51Z"
 }
