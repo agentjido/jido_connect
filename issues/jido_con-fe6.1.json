@@ -9,11 +9,15 @@
   "created": "2026-05-19T14:03:20Z",
   "description": "Create apps/jido_connect_notion with integration DSL, OAuth/internal integration token profile metadata, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement resource actions yet.",
   "id": "jido_con-fe6.1",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "knowledge",
+    "notion"
+  ],
   "parent": "jido_con-fe6",
   "priority": 2,
   "status": "open",
   "title": "[G18-S01] Scaffold Notion package",
   "type": "task",
-  "updated_at": "2026-05-19T14:04:55Z"
+  "updated_at": "2026-05-19T14:05:36Z"
 }
