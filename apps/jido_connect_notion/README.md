@@ -13,7 +13,7 @@ The Spark DSL declaration lives in
 ## Status
 
 This is an **experimental** package. Action fragments, normalized structs,
-client transport, and webhook handlers will be added in subsequent waves.
+client transport, and action handlers are implemented.
 
 ## Installation
 
@@ -63,11 +63,37 @@ are needed.
 
 ## Actions
 
-> Action fragments will be added in a subsequent wave.
+The provider declares 13 action tools across search, pages, databases, blocks,
+and comments:
+
+### Read Actions
+
+| Action ID | Verb | Description |
+|---|---|---|
+| `notion.search` | list | Search pages and databases in a workspace |
+| `notion.page.get` | get | Retrieve a page by ID |
+| `notion.database.get` | get | Retrieve a database by ID |
+| `notion.database.query` | list | Query a database with filters and sorts |
+| `notion.block.get` | get | Retrieve a block by ID |
+| `notion.block.list_children` | list | List child blocks of a block or page |
+| `notion.comment.list` | list | List comments on a block or page |
+
+### Write Actions
+
+| Action ID | Verb | Effect | Description |
+|---|---|---|---|
+| `notion.page.create` | create | write | Create a new page |
+| `notion.page.update` | update | write | Update page properties or archive status |
+| `notion.block.append_children` | update | write | Append child blocks to a block or page |
+| `notion.block.update` | update | write | Update block content or archived status |
+| `notion.block.archive` | update | destructive | Archive (soft-delete) a block |
+| `notion.comment.create` | create | write | Create a comment on a page |
 
 ## Webhook Triggers
 
-> Webhook trigger fragments will be added in a subsequent wave.
+Notion does **not** provide broad generic webhooks for resource changes. There
+is no push-based notification mechanism that covers all resources in a
+workspace. See [Change Detection Strategy](#change-detection-strategy) below.
 
 ## Catalog Packs
 
@@ -75,10 +101,10 @@ The provider ships with curated catalog packs for scoped tool discovery:
 
 | Pack | Risk | Tools |
 |---|---|---|
-| `:notion_reader` | read | Read-only Notion queries |
-| `:notion_editor` | write | Reader + write tools |
+| `:notion_reader` | read | 7 read-only Notion queries |
+| `:notion_editor` | write | Reader + 6 write tools |
 
-Tool IDs will be populated when action fragments are added in subsequent waves.
+Tool IDs are populated from action fragments.
 
 Triggers are subscribed to independently and are not included in packs.
 
@@ -100,11 +126,51 @@ Catalog.search_tools("notion",
 )
 ```
 
+## Change Detection Strategy
+
+Notion lacks a general-purpose webhook subscription mechanism. To detect
+changes to pages, databases, and blocks, use polling:
+
+1. **Checkpoint store**: Persist the last-seen `last_edited_time` after each
+   poll cycle.
+2. **Incremental query**: Use `notion.database.query` or `notion.search` with
+   a filter for `last_edited_time > checkpoint` and sort ascending.
+3. **Backfill**: On first run or after a gap, perform a full scan and record
+   the latest timestamp as the new checkpoint.
+4. **Poll interval**: Balance freshness against API rate limits. Notion
+   recommends staying within 3 requests per second for integration tokens.
+
+See `docs/notion_scope_matrix.md` for the full scope/capability matrix and
+least-privilege guidance.
+
 ## API Boundaries
 
-All Notion API traffic will use a dedicated transport boundary module to be
-added in a subsequent wave. The base URL defaults to
+All Notion API traffic uses the dedicated transport boundary module
+`Jido.Connect.Notion.Client.Transport`. The base URL defaults to
 `https://api.notion.com/v1`.
+
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `NOTION_TOKEN` | Internal integration token for live smoke tests |
+| `NOTION_PAGE_ID` | Page ID fixture for live smoke read tests |
+| `NOTION_DATABASE_ID` | Database ID fixture for live smoke read tests |
+
+See the root `.env.example` for placeholder entries.
+
+## Live Smoke Tests
+
+The package includes env-gated read-only live smoke tests that exercise real
+Notion API calls without mutation. These tests only run when `NOTION_TOKEN` is
+set and `--include live_smoke` is passed:
+
+```sh
+NOTION_TOKEN=xxx mix test test/jido_connect/notion/live_smoke_test.exs --include live_smoke
+```
+
+All smoke tests are read-only — no pages, blocks, or comments are created,
+updated, or deleted.
 
 ## Package Quality Gates
 
