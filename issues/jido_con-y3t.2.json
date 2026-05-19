@@ -9,11 +9,16 @@
   "created": "2026-05-19T13:52:30Z",
   "description": "Add normalized structs/schemas for calendars, calendar groups if useful, events, attendees, locations, recurrence, freebusy/availability results, and Graph paging. Include representative fixtures and normalization tests.",
   "id": "jido_con-y3t.2",
-  "labels": [],
+  "labels": [
+    "calendar",
+    "connector-roadmap",
+    "graph",
+    "microsoft"
+  ],
   "parent": "jido_con-y3t",
   "priority": 1,
   "status": "open",
   "title": "[G14-S02] Add Microsoft Calendar normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T13:55:10Z"
+  "updated_at": "2026-05-19T13:55:27Z"
 }
