@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:15:52Z",
   "description": "Build jido_connect_azure_devops for enterprise dev workflows: OAuth/PAT auth, organizations/projects, work items, repos, pull requests, builds, comments, webhook/service-hook normalization, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-id6",
-  "labels": [],
+  "labels": [
+    "azure-devops",
+    "connector-roadmap",
+    "devtools"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[G30] Azure DevOps Connector",
