@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ntx.1"
+  ],
   "blocks": [],
   "created": "2026-05-19T13:52:07Z",
   "description": "Add normalized structs/schemas for mail folders, messages, recipients, attachments metadata, and Graph paging envelopes. Include representative Microsoft Graph fixtures and normalization tests. Keep this task read/shape only; no HTTP actions beyond fixture-driven normalizers.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G13-S02] Add Outlook normalized mail structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T13:52:07Z"
+  "updated_at": "2026-05-19T13:55:08Z"
 }

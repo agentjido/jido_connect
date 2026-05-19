@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-bcz.4"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ntx.2"
+  ],
   "created": "2026-05-19T13:52:03Z",
   "description": "Create apps/jido_connect_microsoft_outlook using the Microsoft foundation package. Add integration DSL, auth profile reuse, mix.exs, README/CHANGELOG, generated module tests, and basic action catalog shell. Do not implement full message actions yet.",
   "id": "jido_con-ntx.1",
