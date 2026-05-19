@@ -7,10 +7,14 @@
   "created": "2026-05-19T14:03:38Z",
   "description": "Build jido_connect_shopify for commerce workflows: OAuth/admin token auth, shop/products/customers/orders/fulfillments, controlled writes, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-5hk",
-  "labels": [],
+  "labels": [
+    "commerce",
+    "connector-roadmap",
+    "shopify"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[G21] Shopify Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:05:02Z"
+  "updated_at": "2026-05-19T14:05:43Z"
 }
