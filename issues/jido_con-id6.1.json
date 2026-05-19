@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:15:53Z",
   "description": "Create apps/jido_connect_azure_devops with integration DSL, OAuth/PAT auth metadata, organization/project base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-id6.1",
-  "labels": [],
+  "labels": [
+    "azure-devops",
+    "connector-roadmap",
+    "devtools"
+  ],
   "parent": "jido_con-id6",
   "priority": 2,
   "status": "open",
