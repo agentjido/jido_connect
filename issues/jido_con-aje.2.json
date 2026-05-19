@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-aje.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-aje.3"
+  ],
   "created": "2026-05-19T14:03:27Z",
   "description": "Add structs/schemas and fixtures for workspaces, projects, tasks, sections, users, stories/comments, tags, custom fields, pagination, and webhook events. Include normalization tests and privacy fixture review.",
   "id": "jido_con-aje.2",

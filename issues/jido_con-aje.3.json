@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-aje.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:27Z",
   "description": "Implement list workspaces/projects/tasks, get task, search tasks where supported, list stories/comments, and user lookups. Cover pagination, compact/full object expansion choices, auth errors, and provider errors offline.",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G19-S03] Implement Asana read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:28Z"
+  "updated_at": "2026-05-19T14:03:30Z"
 }
