@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:16:44Z",
   "description": "Create apps/jido_connect_bigcommerce with integration DSL, OAuth/API token auth metadata, store hash/base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-6cn.1",
-  "labels": [],
+  "labels": [
+    "bigcommerce",
+    "commerce",
+    "connector-roadmap"
+  ],
   "parent": "jido_con-6cn",
   "priority": 2,
   "status": "open",
