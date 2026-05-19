@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:45Z",
+  "description": "Add structs/schemas and fixtures for stores, products, variants, customers, orders, line items, shipments/fulfillments, pagination, and webhook payloads. Include normalization tests and privacy fixture review.",
+  "id": "jido_con-6cn.2",
+  "labels": [],
+  "parent": "jido_con-6cn",
+  "priority": 2,
+  "status": "open",
+  "title": "[G37-S02] Add BigCommerce normalized structs and fixtures",
+  "type": "task",
+  "updated_at": "2026-05-19T14:16:45Z"
+}
