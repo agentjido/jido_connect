@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-ka6.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ka6.3"
+  ],
   "created": "2026-05-19T14:15:40Z",
   "description": "Add structs/schemas and fixtures for boards, lists, cards, members, labels, checklists, comments/actions, webhooks, and pagination/limits. Include normalization tests and privacy fixture review.",
   "id": "jido_con-ka6.2",
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G28-S02] Add Trello normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:43Z"
+  "updated_at": "2026-05-19T14:15:44Z"
 }
