@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-19T13:50:31Z",
+  "close_reason": "All connector factory hardening child tasks are closed and branch is pushed.",
   "created": "2026-05-16T12:48:25Z",
   "description": "Review epic created after the Pi connector factory completed the Wave 4-6 connector backlog. The leaf implementation tasks are closed, but review found release-blocking and confidence-blocking issues that should be fixed before treating the generated packages as shippable. Scope: make package tests deterministic, make root warning-as-error verification meaningful, repair Req.Test/Plug setup, eliminate generated-test warnings, close completed parent epics only after verification, and document the expected post-factory release gate. This is intentionally a hardening epic, not new connector feature work.",
   "id": "jido_con-ime",
@@ -11,8 +13,8 @@
     "review"
   ],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[REVIEW] Harden connector factory output after Wave 4-6 buildout",
   "type": "epic",
-  "updated_at": "2026-05-16T12:49:39Z"
+  "updated_at": "2026-05-19T13:50:31Z"
 }
