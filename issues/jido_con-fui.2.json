@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-fui.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-fui.3"
+  ],
   "created": "2026-05-19T14:16:14Z",
   "description": "Add structs/schemas and fixtures for audiences/lists, members, tags, campaigns, reports, automations where useful, pagination, and webhook payloads. Include normalization tests and privacy fixture review.",
   "id": "jido_con-fui.2",
