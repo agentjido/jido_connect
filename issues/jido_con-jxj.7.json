@@ -4,7 +4,8 @@
     "jido_con-jxj.6"
   ],
   "blocks": [
-    "jido_con-bcz"
+    "jido_con-bcz",
+    "jido_con-bcz.1"
   ],
   "created": "2026-05-04T19:20:07Z",
   "description": "Planning ID: G11-S07\nEpic: G11 Cross-Google Hardening And Demo\nSource: MILESTONE_2.md\nDepends on: G11-S06\n\nAcceptance:\nQuality commands pass and remaining risks are tracked as explicit follow-up issues.",
