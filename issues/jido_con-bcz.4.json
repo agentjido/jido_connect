@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-bcz.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ntx"
+  ],
   "created": "2026-05-19T13:51:59Z",
   "description": "Add catalog/availability metadata for the Microsoft foundation where useful, update docs and .env.example, and document read-only live smoke expectations. This task should verify mix compile, package tests, and no accidental provider-specific action scope creep.",
   "id": "jido_con-bcz.4",
