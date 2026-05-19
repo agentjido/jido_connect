@@ -7,7 +7,8 @@ defmodule Jido.Connect.Google.Tasks.CatalogPacks do
     "google.tasks.tasklist.list",
     "google.tasks.tasklist.get",
     "google.tasks.task.list",
-    "google.tasks.task.get"
+    "google.tasks.task.get",
+    "google.tasks.task.changed"
   ]
 
   @editor_tools @readonly_tools ++
@@ -30,7 +31,8 @@ defmodule Jido.Connect.Google.Tasks.CatalogPacks do
     Pack.new!(%{
       id: :google_tasks_readonly,
       label: "Google Tasks read-only",
-      description: "Read Google Tasks task list and task data without mutation tools.",
+      description:
+        "Read Google Tasks task list and task data, and poll task changes, without mutation tools.",
       filters: %{provider: :google_tasks},
       allowed_tools: @readonly_tools,
       metadata: %{package: :jido_connect_google_tasks, risk: :read}

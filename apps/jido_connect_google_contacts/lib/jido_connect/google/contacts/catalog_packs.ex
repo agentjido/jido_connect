@@ -14,7 +14,8 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacks do
     "google.contacts.other.list",
     "google.contacts.other.search",
     "google.contacts.group.get",
-    "google.contacts.group.batch_get"
+    "google.contacts.group.batch_get",
+    "google.contacts.person.changed"
   ]
 
   @manager_tools @readonly_tools ++
@@ -40,7 +41,8 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacks do
     Pack.new!(%{
       id: :google_contacts_readonly,
       label: "Google Contacts read-only",
-      description: "Read Google Contacts people and contact groups without mutation tools.",
+      description:
+        "Read Google Contacts people and contact groups, and poll contact changes, without mutation tools.",
       filters: %{provider: :google_contacts},
       allowed_tools: @readonly_tools,
       metadata: %{package: :jido_connect_google_contacts, risk: :read}

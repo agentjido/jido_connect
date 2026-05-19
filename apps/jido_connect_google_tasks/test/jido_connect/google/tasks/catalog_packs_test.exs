@@ -9,7 +9,8 @@ defmodule Jido.Connect.Google.Tasks.CatalogPacksTest do
     "google.tasks.tasklist.list",
     "google.tasks.tasklist.get",
     "google.tasks.task.list",
-    "google.tasks.task.get"
+    "google.tasks.task.get",
+    "google.tasks.task.changed"
   ]
 
   @editor_tools @readonly_tools ++
@@ -102,6 +103,7 @@ defmodule Jido.Connect.Google.Tasks.CatalogPacksTest do
     assert "google.tasks.tasklist.get" in ids
     assert "google.tasks.task.list" in ids
     assert "google.tasks.task.get" in ids
+    assert "google.tasks.task.changed" in ids
     refute "google.tasks.tasklist.create" in ids
     refute "google.tasks.task.create" in ids
     refute "google.tasks.task.delete" in ids
@@ -115,6 +117,15 @@ defmodule Jido.Connect.Google.Tasks.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.tasks.task.get"
+
+    assert {:ok, trigger_descriptor} =
+             Catalog.describe_tool("google.tasks.task.changed",
+               modules: [Tasks],
+               packs: Tasks.catalog_packs(),
+               pack: :google_tasks_readonly
+             )
+
+    assert trigger_descriptor.tool.id == "google.tasks.task.changed"
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("google.tasks.task.create",
@@ -151,6 +162,15 @@ defmodule Jido.Connect.Google.Tasks.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.tasks.task.move"
+
+    assert {:ok, trigger_descriptor} =
+             Catalog.describe_tool("google.tasks.task.changed",
+               modules: [Tasks],
+               packs: Tasks.catalog_packs(),
+               pack: :google_tasks_editor
+             )
+
+    assert trigger_descriptor.tool.id == "google.tasks.task.changed"
   end
 
   # --- Catalog call_tool enforcement tests ---
