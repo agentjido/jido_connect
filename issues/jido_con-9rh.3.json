@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-9rh.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-9rh.4"
+  ],
   "created": "2026-05-19T14:15:27Z",
   "description": "Implement list/get accounts, balances, transactions, recipients, invoices, and related read-only endpoints. Cover pagination, date filters, auth errors, rate limits, and provider errors offline.",
   "id": "jido_con-9rh.3",
