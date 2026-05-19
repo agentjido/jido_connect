@@ -7,10 +7,14 @@
   "created": "2026-05-19T14:03:14Z",
   "description": "Build jido_connect_intercom for support/sales workflows: OAuth/access token auth, contacts, companies, conversations, admins/teams, replies/notes/tags, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-zya",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "intercom",
+    "support"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[G17] Intercom Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:04:52Z"
+  "updated_at": "2026-05-19T14:05:33Z"
 }
