@@ -9,11 +9,15 @@
   "created": "2026-05-19T14:03:35Z",
   "description": "Implement create/update issue, add note, create/update merge request where reasonable, and label/assignee/status actions. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-cja.4",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "devtools",
+    "gitlab"
+  ],
   "parent": "jido_con-cja",
   "priority": 2,
   "status": "open",
   "title": "[G20-S04] Implement GitLab issue merge request and note write actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:05:01Z"
+  "updated_at": "2026-05-19T14:05:42Z"
 }
