@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-y3t.4"
   ],
+  "closed_at": "2026-05-19T19:36:09Z",
+  "close_reason": "Implemented in c769d7e by pi-connector-factory",
   "created": "2026-05-19T13:53:52Z",
   "description": "Implement Microsoft Calendar read actions using Graph: list calendars, get calendar, list events, get event, find meeting times or free/busy/availability where Graph supports it. Keep write actions out of this task. Include Req.Test coverage for paging, timezone, attendee, recurrence, and provider error paths.",
   "id": "jido_con-y3t.3",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-y3t",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G14-S03] Implement Microsoft Calendar read and availability actions",
   "type": "task",
-  "updated_at": "2026-05-19T19:17:50Z"
+  "updated_at": "2026-05-19T19:36:09Z"
 }
