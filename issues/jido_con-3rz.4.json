@@ -5,11 +5,15 @@
   "created": "2026-05-19T14:15:48Z",
   "description": "Implement create/update item, change column value, add update/comment, move item where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-3rz.4",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "monday",
+    "work-management"
+  ],
   "parent": "jido_con-3rz",
   "priority": 2,
   "status": "open",
   "title": "[G29-S04] Implement monday.com item mutation actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:48Z"
+  "updated_at": "2026-05-19T14:15:49Z"
 }
