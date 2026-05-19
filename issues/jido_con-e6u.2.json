@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-e6u.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-e6u.3"
+  ],
   "created": "2026-05-19T14:16:00Z",
   "description": "Add structs/schemas and fixtures for remote files, directories, file metadata, connection config, operation results, and error cases. Include normalization tests without real credentials.",
   "id": "jido_con-e6u.2",
