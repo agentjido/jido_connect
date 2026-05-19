@@ -5,7 +5,9 @@
   "created": "2026-05-19T14:03:22Z",
   "description": "Implement search, get page, get database, query database, list block children, retrieve block, and list comments where supported. Cover pagination, property value normalization, auth errors, and provider errors offline.",
   "id": "jido_con-fe6.3",
-  "labels": [],
+  "labels": [
+    "connector-roadmap +knowledge +notion"
+  ],
   "parent": "jido_con-fe6",
   "priority": 2,
   "status": "open",
