@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-fui.2"
+  ],
   "created": "2026-05-19T14:16:13Z",
   "description": "Create apps/jido_connect_mailchimp with integration DSL, OAuth/API key auth metadata, data center/base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-fui.1",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G33-S01] Scaffold Mailchimp package",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:14Z"
+  "updated_at": "2026-05-19T14:16:18Z"
 }

@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-fui.1"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:14Z",
   "description": "Add structs/schemas and fixtures for audiences/lists, members, tags, campaigns, reports, automations where useful, pagination, and webhook payloads. Include normalization tests and privacy fixture review.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G33-S02] Add Mailchimp normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:15Z"
+  "updated_at": "2026-05-19T14:16:18Z"
 }
