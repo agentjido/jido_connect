@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-n1t.3"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:04:00Z",
   "description": "Implement list/create/delete webhook lifecycle actions and payload verification/normalization primitives. Cover signing/secret behavior, duplicate delivery metadata, and offline success/error paths.",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G24-S04] Implement Typeform webhook lifecycle actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:04:00Z"
+  "updated_at": "2026-05-19T14:04:02Z"
 }

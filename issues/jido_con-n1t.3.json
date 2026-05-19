@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-n1t.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-n1t.4"
+  ],
   "created": "2026-05-19T14:03:59Z",
   "description": "Implement list/get forms, list/get responses, and answer normalization helpers. Cover pagination, since/until filters, auth errors, provider errors, and offline fixtures.",
   "id": "jido_con-n1t.3",
