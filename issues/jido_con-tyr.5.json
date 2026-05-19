@@ -7,6 +7,8 @@
     "jido_con-17g",
     "jido_con-17g.1"
   ],
+  "closed_at": "2026-05-19T20:58:55Z",
+  "close_reason": "Implemented in eb61f16 by pi-connector-factory",
   "created": "2026-05-19T13:54:36Z",
   "description": "Add catalog packs, README/CHANGELOG examples, scope matrix, .env.example fixture ids, read-only live smoke hooks, and a delta/watch design note. Verify generated modules compile and package tests pass.",
   "id": "jido_con-tyr.5",
@@ -18,8 +20,8 @@
   ],
   "parent": "jido_con-tyr",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G15-S05] Add OneDrive catalog docs and live smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T20:49:23Z"
+  "updated_at": "2026-05-19T20:58:55Z"
 }
