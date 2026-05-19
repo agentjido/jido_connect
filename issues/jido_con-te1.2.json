@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:52Z",
   "description": "Add structs/schemas and fixtures for users, meetings, registrants, recordings, transcripts, pagination, and webhook payloads. Include normalization tests and privacy fixture review.",
   "id": "jido_con-te1.2",
-  "labels": [
-    "connector-roadmap +meetings +zoom"
-  ],
+  "labels": [],
   "parent": "jido_con-te1",
   "priority": 2,
   "status": "open",
   "title": "[G23-S02] Add Zoom normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:55Z"
+  "updated_at": "2026-05-19T14:05:07Z"
 }
