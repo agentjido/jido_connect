@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-jag.4"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:56Z",
   "description": "Document gateway vs webhook/interaction scope, add feasible webhook normalization helpers, catalog packs, scope/permission matrix, README examples, .env.example placeholders, and read-only live smoke hooks. Verify package tests and generated modules compile.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G38-S05] Add Discord webhook interaction strategy catalog docs and smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:56Z"
+  "updated_at": "2026-05-19T14:16:59Z"
 }
