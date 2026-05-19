@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:46Z",
   "description": "Implement list/get customers, invoices, subscriptions, payment intents, charges, and balance transaction reads. Cover cursor pagination, expandable fields policy, auth errors, rate limits, idempotency metadata where relevant, and provider errors offline.",
   "id": "jido_con-ru0.3",
-  "labels": [
-    "connector-roadmap +payments +stripe"
-  ],
+  "labels": [],
   "parent": "jido_con-ru0",
   "priority": 2,
   "status": "open",
   "title": "[G22-S03] Implement Stripe read actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:49Z"
+  "updated_at": "2026-05-19T14:05:05Z"
 }
