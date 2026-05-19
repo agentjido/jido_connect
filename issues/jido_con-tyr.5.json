@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T13:54:36Z",
+  "description": "Add catalog packs, README/CHANGELOG examples, scope matrix, .env.example fixture ids, read-only live smoke hooks, and a delta/watch design note. Verify generated modules compile and package tests pass.",
+  "id": "jido_con-tyr.5",
+  "labels": [],
+  "parent": "jido_con-tyr",
+  "priority": 2,
+  "status": "open",
+  "title": "[G15-S05] Add OneDrive catalog docs and live smoke hooks",
+  "type": "task",
+  "updated_at": "2026-05-19T13:54:36Z"
+}
