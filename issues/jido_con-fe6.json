@@ -5,7 +5,9 @@
   "created": "2026-05-19T14:03:20Z",
   "description": "Build jido_connect_notion for knowledge workspace workflows: OAuth/internal token auth, search, pages, databases, blocks, comments, controlled writes, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-fe6",
-  "labels": [],
+  "labels": [
+    "connector-roadmap +knowledge +notion"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[G18] Notion Connector",
