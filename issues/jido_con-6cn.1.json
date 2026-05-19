@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-l40.5"
+  ],
   "blocks": [
     "jido_con-6cn.2"
   ],
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G37-S01] Scaffold BigCommerce package",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:49Z"
+  "updated_at": "2026-05-19T14:17:12Z"
 }
