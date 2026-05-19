@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-aje.4"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:29Z",
   "description": "Add webhook verification/normalization triggers for task/project events, catalog packs, scope matrix, README examples, .env.example placeholders, and read-only live smoke hooks. Verify package tests and generated modules compile.",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G19-S05] Add Asana webhook triggers catalog docs and smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:29Z"
+  "updated_at": "2026-05-19T14:03:31Z"
 }
