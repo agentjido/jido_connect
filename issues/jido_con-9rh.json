@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-y2w.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:25Z",
   "description": "Build jido_connect_mercury for finance/ops workflows with strict safety defaults: API token auth, accounts, balances, transactions, recipients/invoices reads, guarded write policy, catalog packs, docs, and read-only live smoke guidance.",
@@ -14,5 +16,5 @@
   "status": "open",
   "title": "[G26] Mercury Banking Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:15:25Z"
+  "updated_at": "2026-05-19T14:17:00Z"
 }
