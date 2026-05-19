@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-ka6.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ka6.4"
+  ],
   "created": "2026-05-19T14:15:41Z",
   "description": "Implement list/get boards, lists, cards, members, labels, and card comments/actions. Cover query params, auth errors, rate limits, and provider errors offline.",
   "id": "jido_con-ka6.3",

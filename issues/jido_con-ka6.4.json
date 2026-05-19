@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ka6.3"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:41Z",
   "description": "Implement create/update card, move card, add comment, add/remove labels/members, and checklist helpers where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G28-S04] Implement Trello card mutation actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:42Z"
+  "updated_at": "2026-05-19T14:15:44Z"
 }
