@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-17g.4"
   ],
+  "closed_at": "2026-05-19T21:26:35Z",
+  "close_reason": "Implemented in 9d70eb1 by pi-connector-factory",
   "created": "2026-05-19T14:03:10Z",
   "description": "Implement list/search tickets, get ticket, list users/organizations where useful, and ticket comments read paths. Cover pagination, query params, auth errors, rate limits, and provider errors with offline tests.",
   "id": "jido_con-17g.3",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-17g",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G16-S03] Implement Zendesk ticket read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T21:15:37Z"
+  "updated_at": "2026-05-19T21:26:35Z"
 }
