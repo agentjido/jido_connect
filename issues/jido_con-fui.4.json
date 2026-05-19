@@ -5,11 +5,15 @@
   "created": "2026-05-19T14:16:16Z",
   "description": "Implement add/update member, tag/untag member, create/update campaign draft where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-fui.4",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "mailchimp",
+    "marketing"
+  ],
   "parent": "jido_con-fui",
   "priority": 2,
   "status": "open",
   "title": "[G33-S04] Implement Mailchimp member and campaign write actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:16Z"
+  "updated_at": "2026-05-19T14:16:17Z"
 }
