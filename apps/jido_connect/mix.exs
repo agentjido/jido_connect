@@ -46,6 +46,7 @@ defmodule JidoConnectCore.MixProject do
       {:jido_signal, "~> 2.1"},
       {:jason, "~> 1.4"},
       {:req, "~> 0.5"},
+      {:plug, "~> 1.19", only: :test},
       {:sourceror, "~> 1.7", only: [:dev, :test], runtime: false},
       {:splode, "~> 0.3.0"},
       {:spark, "~> 2.6"},

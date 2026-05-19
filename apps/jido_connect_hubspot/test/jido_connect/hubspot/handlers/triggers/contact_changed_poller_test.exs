@@ -103,8 +103,6 @@ defmodule Jido.Connect.HubSpot.Handlers.Triggers.ContactChangedPollerTest do
     def search_contacts(%{filter_groups: [_], updated_min: "2026-05-15T12:00:00.000Z"}, "token") do
       {:ok, %{items: []}}
     end
-
-
   end
 
   describe "poll/2 with no checkpoint" do

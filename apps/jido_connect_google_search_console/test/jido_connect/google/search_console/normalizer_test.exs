@@ -150,8 +150,7 @@ defmodule Jido.Connect.Google.SearchConsole.NormalizerTest do
     test "normalizes a URL inspection payload with full results" do
       payload = %{
         "inspectionResult" => %{
-          "inspectionResultLink" =>
-            "https://search.google.com/search-console/inspect?id=xyz",
+          "inspectionResultLink" => "https://search.google.com/search-console/inspect?id=xyz",
           "indexStatusResult" => %{
             "verdict" => "PASS",
             "coverageState" => "Submitted and indexed",

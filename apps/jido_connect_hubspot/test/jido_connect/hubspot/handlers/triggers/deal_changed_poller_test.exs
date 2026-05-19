@@ -60,8 +60,6 @@ defmodule Jido.Connect.HubSpot.Handlers.Triggers.DealChangedPollerTest do
         ) do
       {:ok, %{items: []}}
     end
-
-
   end
 
   describe "poll/2 with no checkpoint" do

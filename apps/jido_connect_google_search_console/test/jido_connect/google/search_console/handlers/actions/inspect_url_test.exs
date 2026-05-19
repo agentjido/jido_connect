@@ -11,8 +11,7 @@ defmodule Jido.Connect.Google.SearchConsole.Handlers.Actions.InspectURLTest do
         ) do
       {:ok,
        URLInspection.new!(%{
-         inspection_result_link:
-           "https://search.google.com/search-console/inspect?id=xyz",
+         inspection_result_link: "https://search.google.com/search-console/inspect?id=xyz",
          index_status: %{
            "verdict" => "PASS",
            "coverageState" => "Submitted and indexed"
@@ -37,7 +36,10 @@ defmodule Jido.Connect.Google.SearchConsole.Handlers.Actions.InspectURLTest do
     end
   end
 
-  @fake_credentials %{access_token: "token", google_search_console_client: FakeURLInspectionClient}
+  @fake_credentials %{
+    access_token: "token",
+    google_search_console_client: FakeURLInspectionClient
+  }
 
   describe "run/2 site_url validation" do
     test "returns error when site_url is missing" do
