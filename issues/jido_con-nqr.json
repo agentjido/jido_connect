@@ -8,6 +8,8 @@
   "blocks": [
     "jido_con-jxj"
   ],
+  "closed_at": "2026-05-19T13:50:31Z",
+  "close_reason": "All Search Console child tasks are closed; package implementation landed.",
   "created": "2026-05-04T19:20:00Z",
   "description": "Planning ID: G10\nSource: MILESTONE_2.md\nPurpose: add SEO/search reporting workflows that pair naturally with Analytics.\n\nThis epic was imported from the Milestone 2 Google connector backlog plan.",
   "id": "jido_con-nqr",
@@ -16,8 +18,8 @@
     "milestone-2"
   ],
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G10] Google Search Console Connector",
   "type": "epic",
-  "updated_at": "2026-05-14T22:13:14Z"
+  "updated_at": "2026-05-19T13:50:31Z"
 }
