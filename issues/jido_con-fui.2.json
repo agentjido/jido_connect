@@ -5,11 +5,15 @@
   "created": "2026-05-19T14:16:14Z",
   "description": "Add structs/schemas and fixtures for audiences/lists, members, tags, campaigns, reports, automations where useful, pagination, and webhook payloads. Include normalization tests and privacy fixture review.",
   "id": "jido_con-fui.2",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "mailchimp",
+    "marketing"
+  ],
   "parent": "jido_con-fui",
   "priority": 2,
   "status": "open",
   "title": "[G33-S02] Add Mailchimp normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:14Z"
+  "updated_at": "2026-05-19T14:16:15Z"
 }
