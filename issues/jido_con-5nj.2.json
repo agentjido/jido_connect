@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:29Z",
+  "description": "Add structs/schemas and fixtures for modules, leads, contacts, accounts, deals, notes, tasks, users, pagination, and provider errors. Include normalization tests and privacy fixture review.",
+  "id": "jido_con-5nj.2",
+  "labels": [],
+  "parent": "jido_con-5nj",
+  "priority": 2,
+  "status": "open",
+  "title": "[G35-S02] Add Zoho CRM normalized structs and fixtures",
+  "type": "task",
+  "updated_at": "2026-05-19T14:16:29Z"
+}
