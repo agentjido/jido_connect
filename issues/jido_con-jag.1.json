@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-jag.2"
+  ],
   "created": "2026-05-19T14:16:52Z",
   "description": "Create apps/jido_connect_discord with integration DSL, bot/OAuth auth metadata, API version/base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-jag.1",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G38-S01] Scaffold Discord package",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:52Z"
+  "updated_at": "2026-05-19T14:16:57Z"
 }
