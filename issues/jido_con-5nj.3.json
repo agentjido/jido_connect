@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:16:30Z",
   "description": "Implement list/search/get records for core modules, metadata/module reads, and related notes/tasks reads. Cover region/base URL behavior, pagination, auth errors, rate limits, and provider errors offline.",
   "id": "jido_con-5nj.3",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "crm",
+    "zoho"
+  ],
   "parent": "jido_con-5nj",
   "priority": 2,
   "status": "open",
