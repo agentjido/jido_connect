@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ka6.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:45Z",
   "description": "Build jido_connect_monday for board/workflow automation: API token/OAuth metadata, boards, groups, items, columns, updates, guarded item mutations, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
@@ -14,5 +16,5 @@
   "status": "open",
   "title": "[G29] monday.com Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:15:45Z"
+  "updated_at": "2026-05-19T14:17:03Z"
 }
