@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-9rh.4"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:29Z",
   "description": "Add catalog packs, scope/policy matrix, README examples, .env.example placeholders, and read-only live smoke hooks. Verify package tests and generated modules compile.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G26-S05] Add Mercury catalog docs and read-only smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:29Z"
+  "updated_at": "2026-05-19T14:15:31Z"
 }
