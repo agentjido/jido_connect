@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:15:41Z",
+  "description": "Implement list/get boards, lists, cards, members, labels, and card comments/actions. Cover query params, auth errors, rate limits, and provider errors offline.",
+  "id": "jido_con-ka6.3",
+  "labels": [],
+  "parent": "jido_con-ka6",
+  "priority": 2,
+  "status": "open",
+  "title": "[G28-S03] Implement Trello read actions",
+  "type": "task",
+  "updated_at": "2026-05-19T14:15:41Z"
+}
