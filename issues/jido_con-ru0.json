@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-5hk.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:44Z",
   "description": "Build jido_connect_stripe for revenue workflows with strict safety defaults: restricted/API key auth, customers, invoices, subscriptions, payment intents, charges, low-risk writes only, webhook verification, catalog packs, docs, and live smoke guidance.",
@@ -12,5 +14,5 @@
   "status": "open",
   "title": "[G22] Stripe Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:03:44Z"
+  "updated_at": "2026-05-19T14:04:08Z"
 }
