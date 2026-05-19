@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:03:08Z",
+  "description": "Build jido_connect_zendesk for support workflows: OAuth/API token auth, ticket/user/org/search actions, comments, tags/status updates, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
+  "id": "jido_con-17g",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "[G16] Zendesk Connector",
+  "type": "epic",
+  "updated_at": "2026-05-19T14:03:08Z"
+}
