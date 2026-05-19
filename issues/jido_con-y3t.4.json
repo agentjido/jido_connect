@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T13:53:58Z",
+  "description": "Implement event create, update, delete/cancel, RSVP/response, and focused utility actions that map cleanly to Microsoft Graph. Use explicit destructive/live flags for mutation smoke tests, validate required scopes/action metadata, and cover provider errors/offline fixtures.",
+  "id": "jido_con-y3t.4",
+  "labels": [],
+  "parent": "jido_con-y3t",
+  "priority": 1,
+  "status": "open",
+  "title": "[G14-S04] Implement Microsoft Calendar write actions",
+  "type": "task",
+  "updated_at": "2026-05-19T13:53:58Z"
+}
