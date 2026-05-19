@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-17g.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:14Z",
   "description": "Build jido_connect_intercom for support/sales workflows: OAuth/access token auth, contacts, companies, conversations, admins/teams, replies/notes/tags, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
@@ -12,5 +14,5 @@
   "status": "open",
   "title": "[G17] Intercom Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:03:15Z"
+  "updated_at": "2026-05-19T14:04:04Z"
 }
