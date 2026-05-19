@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-y3t.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T13:54:11Z",
   "description": "Create apps/jido_connect_microsoft_onedrive using the shared Microsoft Graph foundation. Add integration DSL, auth profile reuse, mix.exs, README/CHANGELOG, generated module tests, and an empty catalog/action shell. Do not implement full drive item actions yet.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G15-S01] Scaffold Microsoft OneDrive package",
   "type": "task",
-  "updated_at": "2026-05-19T13:54:11Z"
+  "updated_at": "2026-05-19T13:55:11Z"
 }
