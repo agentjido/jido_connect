@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-aje.5"
+  ],
   "blocks": [
     "jido_con-cja.2"
   ],
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G20-S01] Scaffold GitLab package",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:36Z"
+  "updated_at": "2026-05-19T14:04:07Z"
 }
