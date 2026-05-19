@@ -7,6 +7,8 @@
     "jido_con-tyr",
     "jido_con-tyr.1"
   ],
+  "closed_at": "2026-05-19T20:00:56Z",
+  "close_reason": "Implemented in 830086d by pi-connector-factory",
   "created": "2026-05-19T13:54:03Z",
   "description": "Add catalog packs, README/CHANGELOG examples, scope matrix, .env.example fixture ids, and read-only live smoke hooks. Document subscription/watch/delta options as design notes if not implemented in this wave. Verify generated modules compile and package tests pass.",
   "id": "jido_con-y3t.5",
@@ -18,8 +20,8 @@
   ],
   "parent": "jido_con-y3t",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G14-S05] Add Microsoft Calendar catalog docs and live smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T19:53:50Z"
+  "updated_at": "2026-05-19T20:00:56Z"
 }
