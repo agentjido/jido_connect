@@ -7,6 +7,8 @@
     "jido_con-aje",
     "jido_con-aje.1"
   ],
+  "closed_at": "2026-05-19T23:28:50Z",
+  "close_reason": "Implemented in dd32ecc1 by pi-connector-factory",
   "created": "2026-05-19T14:03:23Z",
   "description": "Add catalog packs, scope/capability matrix, README examples, .env.example placeholders, read-only live smoke hooks, and a polling/change-strategy note because Notion lacks broad generic webhooks. Verify package tests and generated modules compile.",
   "id": "jido_con-fe6.5",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-fe6",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S05] Add Notion catalog docs and change strategy",
   "type": "task",
-  "updated_at": "2026-05-19T23:19:40Z"
+  "updated_at": "2026-05-19T23:28:50Z"
 }
