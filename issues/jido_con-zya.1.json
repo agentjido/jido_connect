@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-zya.2"
+  ],
   "created": "2026-05-19T14:03:15Z",
   "description": "Create apps/jido_connect_intercom with integration DSL, auth profile metadata, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement resource actions yet.",
   "id": "jido_con-zya.1",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G17-S01] Scaffold Intercom package",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:15Z"
+  "updated_at": "2026-05-19T14:03:18Z"
 }
