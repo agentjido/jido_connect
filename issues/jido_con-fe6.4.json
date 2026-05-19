@@ -9,11 +9,15 @@
   "created": "2026-05-19T14:03:23Z",
   "description": "Implement create/update page, append block children, update block, archive block/page, and create comment where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-fe6.4",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "knowledge",
+    "notion"
+  ],
   "parent": "jido_con-fe6",
   "priority": 2,
   "status": "open",
   "title": "[G18-S04] Implement Notion page database and block write actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:04:56Z"
+  "updated_at": "2026-05-19T14:05:37Z"
 }
