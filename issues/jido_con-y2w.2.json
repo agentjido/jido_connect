@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:15:20Z",
   "description": "Create apps/jido_connect_http with integration DSL, auth profile metadata for API key/bearer/basic/custom headers, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Keep policy hooks visible from the first scaffold.",
   "id": "jido_con-y2w.2",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "generic",
+    "http"
+  ],
   "parent": "jido_con-y2w",
   "priority": 2,
   "status": "open",
