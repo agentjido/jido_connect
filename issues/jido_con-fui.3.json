@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:15Z",
+  "description": "Implement list/get audiences, members, campaigns, reports, and search/list helpers. Cover pagination, data center base URL behavior, auth errors, rate limits, and provider errors offline.",
+  "id": "jido_con-fui.3",
+  "labels": [],
+  "parent": "jido_con-fui",
+  "priority": 2,
+  "status": "open",
+  "title": "[G33-S03] Implement Mailchimp audience and campaign read actions",
+  "type": "task",
+  "updated_at": "2026-05-19T14:16:15Z"
+}
