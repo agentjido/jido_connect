@@ -1,0 +1,10 @@
+{
+  "object": "user",
+  "id": "user-001",
+  "type": "person",
+  "name": "Alice Nakamura",
+  "avatar_url": "https://example.com/avatar.png",
+  "person": {
+    "email": "alice@example.com"
+  }
+}

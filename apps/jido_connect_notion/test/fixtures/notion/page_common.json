@@ -1,0 +1,54 @@
+{
+  "object": "page",
+  "id": "page-001",
+  "created_time": "2026-04-15T10:00:00.000Z",
+  "last_edited_time": "2026-05-10T14:30:00.000Z",
+  "archived": false,
+  "in_trash": false,
+  "url": "https://www.notion.so/page-001",
+  "public_url": null,
+  "parent": {
+    "type": "workspace",
+    "workspace": true
+  },
+  "properties": {
+    "title": {
+      "id": "title-prop",
+      "type": "title",
+      "title": [
+        {
+          "type": "text",
+          "text": {"content": "Project Roadmap"},
+          "plain_text": "Project Roadmap"
+        }
+      ]
+    },
+    "Status": {
+      "id": "status-prop",
+      "type": "status",
+      "status": {
+        "id": "status-opt",
+        "name": "In Progress",
+        "color": "blue"
+      }
+    },
+    "Priority": {
+      "id": "priority-prop",
+      "type": "select",
+      "select": {
+        "id": "select-opt",
+        "name": "High",
+        "color": "red"
+      }
+    }
+  },
+  "children": [],
+  "cover": {
+    "type": "external",
+    "external": {"url": "https://example.com/cover.jpg"}
+  },
+  "icon": {
+    "type": "emoji",
+    "emoji": "📋"
+  }
+}
