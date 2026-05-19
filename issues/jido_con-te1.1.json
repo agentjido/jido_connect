@@ -5,7 +5,9 @@
   "created": "2026-05-19T14:03:51Z",
   "description": "Create apps/jido_connect_zoom with integration DSL, OAuth/server-to-server auth metadata, account/base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement meeting actions yet.",
   "id": "jido_con-te1.1",
-  "labels": [],
+  "labels": [
+    "connector-roadmap +meetings +zoom"
+  ],
   "parent": "jido_con-te1",
   "priority": 2,
   "status": "open",
