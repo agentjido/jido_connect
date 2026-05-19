@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5nj.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5nj.5"
+  ],
   "created": "2026-05-19T14:16:31Z",
   "description": "Implement create/update lead/contact/account/deal, add note/task where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-5nj.4",
