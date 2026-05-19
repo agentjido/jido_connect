@@ -5,11 +5,15 @@
   "created": "2026-05-19T14:16:00Z",
   "description": "Add structs/schemas and fixtures for remote files, directories, file metadata, connection config, operation results, and error cases. Include normalization tests without real credentials.",
   "id": "jido_con-e6u.2",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "files",
+    "sftp"
+  ],
   "parent": "jido_con-e6u",
   "priority": 2,
   "status": "open",
   "title": "[G31-S02] Add SFTP normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:00Z"
+  "updated_at": "2026-05-19T14:16:01Z"
 }
