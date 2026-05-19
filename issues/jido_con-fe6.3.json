@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-fe6.4"
   ],
+  "closed_at": "2026-05-19T23:09:37Z",
+  "close_reason": "Implemented in 4f073692 by pi-connector-factory",
   "created": "2026-05-19T14:03:22Z",
   "description": "Implement search, get page, get database, query database, list block children, retrieve block, and list comments where supported. Cover pagination, property value normalization, auth errors, and provider errors offline.",
   "id": "jido_con-fe6.3",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-fe6",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S03] Implement Notion search and read actions",
   "type": "task",
-  "updated_at": "2026-05-19T22:55:04Z"
+  "updated_at": "2026-05-19T23:09:37Z"
 }
