@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-n1t.5"
+  ],
   "blocks": [
     "jido_con-y2w.2"
   ],
@@ -18,5 +20,5 @@
   "status": "open",
   "title": "[G25-S01] Write Generic HTTP safety policy and package boundary",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:23Z"
+  "updated_at": "2026-05-19T14:17:00Z"
 }
