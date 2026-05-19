@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-9rh.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-9rh.3"
+  ],
   "created": "2026-05-19T14:15:26Z",
   "description": "Add structs/schemas and fixtures for accounts, balances, transactions, recipients, invoices, pagination, and provider error payloads. Include normalization tests and privacy fixture review.",
   "id": "jido_con-9rh.2",
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G26-S02] Add Mercury normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:29Z"
+  "updated_at": "2026-05-19T14:15:30Z"
 }
