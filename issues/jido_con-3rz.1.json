@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:15:46Z",
+  "description": "Create apps/jido_connect_monday with integration DSL, API token/OAuth auth metadata, GraphQL transport boundary, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
+  "id": "jido_con-3rz.1",
+  "labels": [],
+  "parent": "jido_con-3rz",
+  "priority": 2,
+  "status": "open",
+  "title": "[G29-S01] Scaffold monday.com package",
+  "type": "task",
+  "updated_at": "2026-05-19T14:15:46Z"
+}
