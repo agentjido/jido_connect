@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-yoe.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:23Z",
   "description": "Implement list/search/get contacts, accounts, deals, tags/lists, and relevant campaign/automation reads. Cover pagination, filters, auth errors, rate limits, and provider errors offline.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G34-S03] Implement ActiveCampaign read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:23Z"
+  "updated_at": "2026-05-19T14:16:26Z"
 }
