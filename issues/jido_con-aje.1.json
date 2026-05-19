@@ -5,7 +5,9 @@
   "created": "2026-05-19T14:03:26Z",
   "description": "Create apps/jido_connect_asana with integration DSL, OAuth/PAT auth metadata, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement task actions yet.",
   "id": "jido_con-aje.1",
-  "labels": [],
+  "labels": [
+    "connector-roadmap +work-management +asana"
+  ],
   "parent": "jido_con-aje",
   "priority": 2,
   "status": "open",
