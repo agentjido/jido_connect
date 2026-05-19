@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:03:41Z",
+  "description": "Implement low-risk create/update customer and product metadata actions first; document and gate higher-risk order/fulfillment mutation work behind explicit destructive/policy metadata. Cover offline success/error paths.",
+  "id": "jido_con-5hk.4",
+  "labels": [],
+  "parent": "jido_con-5hk",
+  "priority": 2,
+  "status": "open",
+  "title": "[G21-S04] Implement guarded Shopify write actions",
+  "type": "task",
+  "updated_at": "2026-05-19T14:03:41Z"
+}
