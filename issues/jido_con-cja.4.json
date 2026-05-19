@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-cja.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-cja.5"
+  ],
   "created": "2026-05-19T14:03:35Z",
   "description": "Implement create/update issue, add note, create/update merge request where reasonable, and label/assignee/status actions. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-cja.4",
