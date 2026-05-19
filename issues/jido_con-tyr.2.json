@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-tyr.3"
   ],
+  "closed_at": "2026-05-19T20:18:55Z",
+  "close_reason": "Implemented in de848e5 by pi-connector-factory",
   "created": "2026-05-19T13:54:16Z",
   "description": "Add normalized structs/schemas for drives, drive items, folders, files, thumbnails, sharing links, permissions, delta tokens, and download metadata. Include fixtures and normalization tests for representative Microsoft Graph payloads.",
   "id": "jido_con-tyr.2",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-tyr",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G15-S02] Add OneDrive normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T20:10:55Z"
+  "updated_at": "2026-05-19T20:18:55Z"
 }
