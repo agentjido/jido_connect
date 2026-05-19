@@ -9,11 +9,15 @@
   "created": "2026-05-19T14:03:16Z",
   "description": "Add structs/schemas and fixtures for contacts, companies, conversations, conversation parts, admins, teams, tags, pagination, and webhook payloads. Include normalization tests and privacy fixture review.",
   "id": "jido_con-zya.2",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "intercom",
+    "support"
+  ],
   "parent": "jido_con-zya",
   "priority": 2,
   "status": "open",
   "title": "[G17-S02] Add Intercom normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:04:53Z"
+  "updated_at": "2026-05-19T14:05:34Z"
 }
