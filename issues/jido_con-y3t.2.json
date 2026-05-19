@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-y3t.3"
   ],
+  "closed_at": "2026-05-19T19:17:49Z",
+  "close_reason": "Implemented in 1eec17d by pi-connector-factory",
   "created": "2026-05-19T13:52:30Z",
   "description": "Add normalized structs/schemas for calendars, calendar groups if useful, events, attendees, locations, recurrence, freebusy/availability results, and Graph paging. Include representative fixtures and normalization tests.",
   "id": "jido_con-y3t.2",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-y3t",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G14-S02] Add Microsoft Calendar normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T19:07:56Z"
+  "updated_at": "2026-05-19T19:17:49Z"
 }
