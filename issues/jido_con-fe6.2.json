@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-fe6.1"
   ],
@@ -16,8 +16,8 @@
   ],
   "parent": "jido_con-fe6",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G18-S02] Add Notion normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:05:37Z"
+  "updated_at": "2026-05-19T22:46:17Z"
 }
