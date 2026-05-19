@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:16:22Z",
   "description": "Add structs/schemas and fixtures for contacts, accounts, deals, tags, lists, custom fields, automations/events where useful, pagination, and webhook/poll payloads. Include normalization tests and privacy fixture review.",
   "id": "jido_con-yoe.2",
-  "labels": [],
+  "labels": [
+    "activecampaign",
+    "connector-roadmap",
+    "marketing"
+  ],
   "parent": "jido_con-yoe",
   "priority": 2,
   "status": "open",
