@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-ntx.5"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-y3t.2"
+  ],
   "created": "2026-05-19T13:52:26Z",
   "description": "Create apps/jido_connect_microsoft_calendar using the Microsoft foundation package. Add integration DSL, auth profile reuse, mix.exs, README/CHANGELOG, generated module tests, and basic action catalog shell. Do not implement full calendar/event actions yet.",
   "id": "jido_con-y3t.1",
