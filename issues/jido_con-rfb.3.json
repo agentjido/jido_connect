@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-rfb.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-rfb.4"
+  ],
   "created": "2026-05-19T14:15:34Z",
   "description": "Implement list/search tickets, get ticket, list conversations, contacts/companies lookups, and agent/group reads. Cover pagination, filters, auth errors, rate limits, and provider errors offline.",
   "id": "jido_con-rfb.3",
