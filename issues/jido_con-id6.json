@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-3rz.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:52Z",
   "description": "Build jido_connect_azure_devops for enterprise dev workflows: OAuth/PAT auth, organizations/projects, work items, repos, pull requests, builds, comments, webhook/service-hook normalization, catalog packs, docs, and read-only live smoke guidance.",
@@ -14,5 +16,5 @@
   "status": "open",
   "title": "[G30] Azure DevOps Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:15:52Z"
+  "updated_at": "2026-05-19T14:17:04Z"
 }
