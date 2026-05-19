@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T13:52:13Z",
+  "description": "Implement read-only Outlook actions and handlers: list mail folders, get mail folder, list messages, get message, search messages if supported cleanly by Graph query params. Use Microsoft Graph transport, normalized responses, dynamic scopes, offline Req tests, and catalog/action introspection tests.",
+  "id": "jido_con-ntx.3",
+  "labels": [],
+  "parent": "jido_con-ntx",
+  "priority": 1,
+  "status": "open",
+  "title": "[G13-S03] Implement Outlook read actions",
+  "type": "task",
+  "updated_at": "2026-05-19T13:52:13Z"
+}
