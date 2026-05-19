@@ -10,11 +10,15 @@
   "created": "2026-05-19T14:03:12Z",
   "description": "Add webhook verification/normalization triggers for ticket events, catalog packs, scope matrix, README examples, .env.example placeholders, and read-only live smoke hooks. Verify package tests and generated modules compile.",
   "id": "jido_con-17g.5",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "support",
+    "zendesk"
+  ],
   "parent": "jido_con-17g",
   "priority": 2,
   "status": "open",
   "title": "[G16-S05] Add Zendesk webhook triggers catalog docs and smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T14:04:51Z"
+  "updated_at": "2026-05-19T14:05:33Z"
 }
