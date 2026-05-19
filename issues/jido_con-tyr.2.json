@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-tyr.1"
   ],
@@ -17,8 +17,8 @@
   ],
   "parent": "jido_con-tyr",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G15-S02] Add OneDrive normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T13:55:30Z"
+  "updated_at": "2026-05-19T20:10:55Z"
 }
