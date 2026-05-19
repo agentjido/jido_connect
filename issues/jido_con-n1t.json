@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-te1.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:56Z",
   "description": "Build jido_connect_typeform for form/intake workflows: OAuth/token auth, forms, questions, responses, webhook lifecycle, normalized submissions, catalog packs, docs, and read-only live smoke guidance.",
@@ -12,5 +14,5 @@
   "status": "open",
   "title": "[G24] Typeform Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:03:57Z"
+  "updated_at": "2026-05-19T14:04:10Z"
 }
