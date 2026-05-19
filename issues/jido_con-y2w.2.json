@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-y2w.1"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:20Z",
   "description": "Create apps/jido_connect_http with integration DSL, auth profile metadata for API key/bearer/basic/custom headers, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Keep policy hooks visible from the first scaffold.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G25-S02] Scaffold Generic HTTP package",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:20Z"
+  "updated_at": "2026-05-19T14:15:23Z"
 }

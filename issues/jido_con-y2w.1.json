@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-y2w.2"
+  ],
   "created": "2026-05-19T14:15:19Z",
   "description": "Document SSRF/egress risks, allowed URL policy hooks, header/body redaction, credential handling, redirect behavior, timeout/retry limits, response-size limits, and host approval expectations. This task should produce an ADR/design doc before implementation.",
   "id": "jido_con-y2w.1",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[G25-S01] Write Generic HTTP safety policy and package boundary",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:19Z"
+  "updated_at": "2026-05-19T14:15:23Z"
 }
