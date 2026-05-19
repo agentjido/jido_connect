@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T13:51:15Z",
+  "description": "Build the Microsoft Outlook Mail connector on top of the shared Microsoft Graph foundation. Scope: mail folders, messages, search/list/get, draft/send/reply actions, normalized structs, catalog packs, docs, and read-only live smoke coverage first.",
+  "id": "jido_con-ntx",
+  "labels": [],
+  "priority": 1,
+  "status": "open",
+  "title": "[G13] Microsoft Outlook Mail Connector",
+  "type": "epic",
+  "updated_at": "2026-05-19T13:51:15Z"
+}
