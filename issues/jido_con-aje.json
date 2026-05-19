@@ -7,12 +7,10 @@
   "created": "2026-05-19T14:03:25Z",
   "description": "Build jido_connect_asana for task/project workflows: OAuth/PAT auth, workspaces/projects/tasks/users/stories, task mutation/comment actions, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-aje",
-  "labels": [
-    "connector-roadmap +work-management +asana"
-  ],
+  "labels": [],
   "priority": 2,
   "status": "open",
   "title": "[G19] Asana Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:04:06Z"
+  "updated_at": "2026-05-19T14:04:57Z"
 }
