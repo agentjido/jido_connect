@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-3rz.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-3rz.5"
+  ],
   "created": "2026-05-19T14:15:48Z",
   "description": "Implement create/update item, change column value, add update/comment, move item where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-3rz.4",
