@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-5nj.3"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:31Z",
   "description": "Implement create/update lead/contact/account/deal, add note/task where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G35-S04] Implement Zoho CRM record write actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:31Z"
+  "updated_at": "2026-05-19T14:16:34Z"
 }
