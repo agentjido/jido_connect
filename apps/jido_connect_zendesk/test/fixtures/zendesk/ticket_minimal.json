@@ -1,0 +1,33 @@
+{
+  "id": 12346,
+  "url": "https://example.zendesk.com/api/v2/tickets/12346.json",
+  "subject": "Billing inquiry for enterprise plan",
+  "description": "Need clarification on the enterprise plan billing cycle.",
+  "status": "pending",
+  "type": "question",
+  "priority": "high",
+  "requester_id": 9902,
+  "assignee_id": null,
+  "group_id": 102,
+  "organization_id": 202,
+  "tags": ["billing", "enterprise"],
+  "custom_fields": [],
+  "due_at": "2026-06-01T00:00:00Z",
+  "external_id": null,
+  "brand_id": 1,
+  "ticket_form_id": 10,
+  "via": {
+    "channel": "email",
+    "source": {
+      "from": {"address": "bob@example.com", "name": "Bob Martinez"},
+      "to": {"address": "support@example.zendesk.com", "name": "Support"},
+      "rel": null
+    }
+  },
+  "satisfaction_rating": {
+    "score": "good",
+    "id": 98765
+  },
+  "created_at": "2026-04-01T09:00:00Z",
+  "updated_at": "2026-04-02T11:30:00Z"
+}
