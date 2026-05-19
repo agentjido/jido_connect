@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-e6u.3"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:02Z",
   "description": "Implement upload, move/rename, mkdir, and delete where supported with root path sandboxing and destructive metadata. Gate live mutation smoke tests and cover client boundary errors.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[G31-S04] Implement guarded SFTP write actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:02Z"
+  "updated_at": "2026-05-19T14:16:05Z"
 }
