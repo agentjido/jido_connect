@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-ru0.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-ru0.4"
+  ],
   "created": "2026-05-19T14:03:46Z",
   "description": "Implement list/get customers, invoices, subscriptions, payment intents, charges, and balance transaction reads. Cover cursor pagination, expandable fields policy, auth errors, rate limits, idempotency metadata where relevant, and provider errors offline.",
   "id": "jido_con-ru0.3",
