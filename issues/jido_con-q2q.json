@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-e6u.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:06Z",
   "description": "Build jido_connect_youtube for media/channel workflows on the Google foundation: API key/OAuth auth, channels, videos, playlists, search, captions/comments where useful, catalog packs, docs, and read-only live smoke guidance.",
@@ -14,5 +16,5 @@
   "status": "open",
   "title": "[G32] YouTube Data Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:16:06Z"
+  "updated_at": "2026-05-19T14:17:06Z"
 }
