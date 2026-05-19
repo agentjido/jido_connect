@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-yoe.2"
+  ],
   "created": "2026-05-19T14:16:21Z",
   "description": "Create apps/jido_connect_activecampaign with integration DSL, API key auth metadata, account/base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-yoe.1",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G34-S01] Scaffold ActiveCampaign package",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:21Z"
+  "updated_at": "2026-05-19T14:16:25Z"
 }
