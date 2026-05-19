@@ -1,0 +1,61 @@
+{
+  "value": [
+    {
+      "scheduleId": "meganb@contoso.com",
+      "availabilityView": "110022001100",
+      "scheduleItems": [
+        {
+          "start": {
+            "dateTime": "2026-06-15T09:00:00",
+            "timeZone": "Pacific Standard Time"
+          },
+          "end": {
+            "dateTime": "2026-06-15T10:00:00",
+            "timeZone": "Pacific Standard Time"
+          },
+          "status": "busy"
+        },
+        {
+          "start": {
+            "dateTime": "2026-06-15T12:00:00",
+            "timeZone": "Pacific Standard Time"
+          },
+          "end": {
+            "dateTime": "2026-06-15T13:00:00",
+            "timeZone": "Pacific Standard Time"
+          },
+          "status": "tentative"
+        }
+      ],
+      "workingHours": {
+        "timeZone": {
+          "name": "Pacific Standard Time"
+        },
+        "daysOfWeek": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+        "startTime": "08:00:00",
+        "endTime": "17:00:00"
+      }
+    },
+    {
+      "scheduleId": "brianj@contoso.com",
+      "availabilityView": "000011000000",
+      "scheduleItems": [
+        {
+          "start": {
+            "dateTime": "2026-06-15T14:00:00",
+            "timeZone": "Pacific Standard Time"
+          },
+          "end": {
+            "dateTime": "2026-06-15T16:00:00",
+            "timeZone": "Pacific Standard Time"
+          },
+          "status": "busy"
+        }
+      ],
+      "error": {
+        "responseCode": "ErrorFreeBusyAccessDenied",
+        "message": "Cannot retrieve free/busy data for the specified user."
+      }
+    }
+  ]
+}

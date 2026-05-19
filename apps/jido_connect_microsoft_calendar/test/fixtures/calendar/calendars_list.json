@@ -1,0 +1,35 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('user%40contoso.com')/calendars",
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/me/calendars?$skip=10",
+  "value": [
+    {
+      "id": "AAMkAGI2TG93AAA=",
+      "name": "Calendar",
+      "color": "auto",
+      "isDefaultCalendar": true,
+      "isShared": false,
+      "canEdit": true,
+      "canShare": true,
+      "canViewPrivateItems": true,
+      "owner": {
+        "name": "Megan Bowen",
+        "address": "meganb@contoso.com"
+      }
+    },
+    {
+      "id": "AAMkAGI2TG93BBB=",
+      "name": "Team Events",
+      "color": "blue",
+      "hexColor": "#0000FF",
+      "isDefaultCalendar": false,
+      "isShared": true,
+      "canEdit": true,
+      "canShare": false,
+      "canViewPrivateItems": false,
+      "owner": {
+        "name": "All Users",
+        "address": "allusers@contoso.com"
+      }
+    }
+  ]
+}

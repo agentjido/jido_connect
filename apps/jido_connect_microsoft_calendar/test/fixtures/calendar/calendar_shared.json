@@ -1,0 +1,17 @@
+{
+  "id": "AAMkAGI2TG93BBB=",
+  "name": "Team Events",
+  "color": "blue",
+  "hexColor": "#0000FF",
+  "isDefaultCalendar": false,
+  "isShared": true,
+  "isTallyingReplies": true,
+  "canEdit": true,
+  "canShare": false,
+  "canViewPrivateItems": false,
+  "owner": {
+    "name": "All Users",
+    "address": "allusers@contoso.com"
+  },
+  "calendarGroupId": "AQMkAGI2GRP1AAA="
+}
