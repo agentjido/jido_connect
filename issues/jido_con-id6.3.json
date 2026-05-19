@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-id6.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:54Z",
   "description": "Implement list/get projects, query/get work items, list comments, list repos, pull requests, builds, and related read paths. Cover continuation tokens, API versions, auth errors, rate limits, and provider errors offline.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G30-S03] Implement Azure DevOps read actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:55Z"
+  "updated_at": "2026-05-19T14:15:57Z"
 }
