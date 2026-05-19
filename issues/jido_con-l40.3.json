@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:16:38Z",
   "description": "Implement list/search/get tickets, contacts/accounts, departments, comments/threads, and agents where useful. Cover pagination, region/org config, auth errors, rate limits, and provider errors offline.",
   "id": "jido_con-l40.3",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "support",
+    "zoho"
+  ],
   "parent": "jido_con-l40",
   "priority": 2,
   "status": "open",
