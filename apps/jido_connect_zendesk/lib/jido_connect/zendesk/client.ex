@@ -117,6 +117,45 @@ defmodule Jido.Connect.Zendesk.Client do
   end
 
   # ---------------------------------------------------------------------------
+  # Tickets (Write)
+  # ---------------------------------------------------------------------------
+
+  @doc "Creates a new Zendesk ticket."
+  def create_ticket(attrs, access_token, opts \\ [])
+      when is_map(attrs) and is_binary(access_token) and is_list(opts) do
+    payload = build_ticket_payload(attrs)
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.post(url: "/api/v2/tickets.json", json: %{"ticket" => payload})
+    |> Response.handle_ticket_write_response()
+  end
+
+  @doc "Updates a Zendesk ticket by ID."
+  def update_ticket(ticket_id, attrs, access_token, opts \\ [])
+      when is_integer(ticket_id) and is_map(attrs) and is_binary(access_token) and
+             is_list(opts) do
+    payload = build_ticket_payload(attrs)
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.put(url: "/api/v2/tickets/#{ticket_id}.json", json: %{"ticket" => payload})
+    |> Response.handle_ticket_write_response()
+  end
+
+  @doc "Adds a comment to a Zendesk ticket."
+  def add_ticket_comment(ticket_id, comment_attrs, access_token, opts \\ [])
+      when is_integer(ticket_id) and is_map(comment_attrs) and is_binary(access_token) and
+             is_list(opts) do
+    payload = %{"comment" => build_comment_payload(comment_attrs)}
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.put(url: "/api/v2/tickets/#{ticket_id}.json", json: %{"ticket" => payload})
+    |> Response.handle_comment_write_response()
+  end
+
+  # ---------------------------------------------------------------------------
   # Client resolution
   # ---------------------------------------------------------------------------
 
@@ -179,6 +218,45 @@ defmodule Jido.Connect.Zendesk.Client do
     case Normalizer.organization(payload) do
       {:ok, struct} -> Map.from_struct(struct) |> Map.drop([:metadata])
       {:error, _} -> nil
+    end
+  end
+
+  defp build_ticket_payload(attrs) do
+    fields = [
+      :subject,
+      :description,
+      :status,
+      :type,
+      :priority,
+      :requester_id,
+      :assignee_id,
+      :group_id,
+      :tags,
+      :additional_tags,
+      :remove_tags,
+      :custom_fields
+    ]
+
+    Enum.reduce(fields, %{}, fn key, acc ->
+      case Map.get(attrs, key) do
+        nil -> acc
+        value -> Map.put(acc, key, value)
+      end
+    end)
+  end
+
+  defp build_comment_payload(attrs) do
+    payload = %{body: Map.get(attrs, :body, "")}
+
+    payload =
+      case Map.get(attrs, :public) do
+        nil -> payload
+        public? -> Map.put(payload, :public, public?)
+      end
+
+    case Map.get(attrs, :author_id) do
+      nil -> payload
+      author_id -> Map.put(payload, :author_id, author_id)
     end
   end
 end

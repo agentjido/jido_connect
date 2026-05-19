@@ -40,6 +40,18 @@ defmodule Jido.Connect.Zendesk.CatalogPacksTest do
       # Editor includes all reader tools plus write tools
       assert "zendesk.ticket.list" in editor.allowed_tools
       assert "zendesk.ticket.get" in editor.allowed_tools
+      assert "zendesk.ticket.create" in editor.allowed_tools
+      assert "zendesk.ticket.update" in editor.allowed_tools
+      assert "zendesk.ticket.comment.add" in editor.allowed_tools
+    end
+
+    test "reader pack excludes write tools" do
+      packs = Zendesk.catalog_packs()
+      reader = Enum.find(packs, &(&1.id == :zendesk_reader))
+
+      refute "zendesk.ticket.create" in reader.allowed_tools
+      refute "zendesk.ticket.update" in reader.allowed_tools
+      refute "zendesk.ticket.comment.add" in reader.allowed_tools
     end
   end
 end

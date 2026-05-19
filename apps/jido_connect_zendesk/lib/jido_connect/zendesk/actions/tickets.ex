@@ -174,6 +174,217 @@ defmodule Jido.Connect.Zendesk.Actions.Tickets do
       end
     end
 
+    action :create_ticket do
+      id("zendesk.ticket.create")
+      resource(:ticket)
+      verb(:create)
+      data_classification(:workspace_content)
+      label("Create ticket")
+      description("Create a new Zendesk ticket.")
+      handler(Jido.Connect.Zendesk.Handlers.Actions.CreateTicket)
+      effect(:write, confirmation: :required_for_ai)
+
+      access do
+        auth([:api_token, :oauth2], default: :api_token)
+        policies([:instance_access])
+        scopes(["write", "tickets:write"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:subject, :string,
+          required?: true,
+          description: "Subject of the ticket."
+        )
+
+        field(:description, :string,
+          required?: true,
+          description: "Initial comment body for the ticket."
+        )
+
+        field(:requester_id, :integer,
+          default: nil,
+          description: "Requester user ID."
+        )
+
+        field(:assignee_id, :integer,
+          default: nil,
+          description: "Assignee user ID."
+        )
+
+        field(:group_id, :integer,
+          default: nil,
+          description: "Group ID to assign the ticket to."
+        )
+
+        field(:type, :string,
+          default: nil,
+          description: "Ticket type: problem, incident, question, or task."
+        )
+
+        field(:priority, :string,
+          default: nil,
+          description: "Priority: urgent, high, normal, or low."
+        )
+
+        field(:tags, {:array, :string},
+          default: nil,
+          description: "Tags to apply to the new ticket."
+        )
+
+        field(:custom_fields, {:array, :map},
+          default: nil,
+          description: "Custom field entries."
+        )
+      end
+
+      output do
+        field(:id, :integer)
+        field(:subject, :string)
+        field(:status, :string)
+        field(:priority, :string)
+        field(:type, :string)
+        field(:requester_id, :integer)
+        field(:assignee_id, :integer)
+        field(:group_id, :integer)
+        field(:organization_id, :integer)
+        field(:tags, {:array, :string})
+        field(:created_at, :string)
+        field(:updated_at, :string)
+      end
+    end
+
+    action :update_ticket do
+      id("zendesk.ticket.update")
+      resource(:ticket)
+      verb(:update)
+      data_classification(:workspace_content)
+      label("Update ticket")
+      description("Update ticket fields including status, priority, assignee, group, and tags.")
+      handler(Jido.Connect.Zendesk.Handlers.Actions.UpdateTicket)
+      effect(:write, confirmation: :required_for_ai)
+
+      access do
+        auth([:api_token, :oauth2], default: :api_token)
+        policies([:instance_access])
+        scopes(["write", "tickets:write"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:ticket_id, :integer,
+          required?: true,
+          description: "Zendesk ticket ID to update."
+        )
+
+        field(:status, :string,
+          default: nil,
+          description: "New status: new, open, pending, hold, solved, closed."
+        )
+
+        field(:priority, :string,
+          default: nil,
+          description: "New priority: urgent, high, normal, low."
+        )
+
+        field(:type, :string,
+          default: nil,
+          description: "New type: problem, incident, question, task."
+        )
+
+        field(:assignee_id, :integer,
+          default: nil,
+          description: "New assignee user ID."
+        )
+
+        field(:group_id, :integer,
+          default: nil,
+          description: "New group ID."
+        )
+
+        field(:tags, {:array, :string},
+          default: nil,
+          description: "Replace tags on the ticket."
+        )
+
+        field(:additional_tags, {:array, :string},
+          default: nil,
+          description: "Tags to append to the ticket."
+        )
+
+        field(:remove_tags, {:array, :string},
+          default: nil,
+          description: "Tags to remove from the ticket."
+        )
+
+        field(:custom_fields, {:array, :map},
+          default: nil,
+          description: "Custom field entries to set."
+        )
+      end
+
+      output do
+        field(:id, :integer)
+        field(:subject, :string)
+        field(:status, :string)
+        field(:priority, :string)
+        field(:type, :string)
+        field(:requester_id, :integer)
+        field(:assignee_id, :integer)
+        field(:group_id, :integer)
+        field(:organization_id, :integer)
+        field(:tags, {:array, :string})
+        field(:created_at, :string)
+        field(:updated_at, :string)
+      end
+    end
+
+    action :add_ticket_comment do
+      id("zendesk.ticket.comment.add")
+      resource(:comment)
+      verb(:create)
+      data_classification(:workspace_content)
+      label("Add ticket comment")
+      description("Add a public or private comment to a Zendesk ticket.")
+      handler(Jido.Connect.Zendesk.Handlers.Actions.AddTicketComment)
+      effect(:write, confirmation: :required_for_ai)
+
+      access do
+        auth([:api_token, :oauth2], default: :api_token)
+        policies([:instance_access])
+        scopes(["write", "tickets:write"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:ticket_id, :integer,
+          required?: true,
+          description: "Zendesk ticket ID."
+        )
+
+        field(:body, :string,
+          required?: true,
+          description: "Comment body text."
+        )
+
+        field(:public, :boolean,
+          default: true,
+          description: "Whether the comment is public (true) or private/internal note (false)."
+        )
+
+        field(:author_id, :integer,
+          default: nil,
+          description: "Author user ID (defaults to authenticated user)."
+        )
+      end
+
+      output do
+        field(:id, :integer)
+        field(:body, :string)
+        field(:public, :boolean)
+        field(:author_id, :integer)
+        field(:ticket_id, :integer)
+        field(:created_at, :string)
+      end
+    end
+
     action :list_organizations do
       id("zendesk.organization.list")
       resource(:organization)

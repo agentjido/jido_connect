@@ -168,4 +168,155 @@ defmodule Jido.Connect.Zendesk.Client.ResponseTest do
       assert {:error, _} = Response.handle_map_response(resp)
     end
   end
+
+  describe "handle_ticket_write_response/1" do
+    test "normalizes a created ticket response" do
+      resp =
+        {:ok,
+         %{
+           status: 201,
+           body: %{
+             "ticket" => %{
+               "id" => 99001,
+               "subject" => "Login issue",
+               "status" => "new",
+               "priority" => "normal",
+               "type" => "incident",
+               "tags" => ["urgent"],
+               "created_at" => "2026-05-19T10:00:00Z",
+               "updated_at" => "2026-05-19T10:00:00Z"
+             }
+           }
+         }}
+
+      assert {:ok, ticket} = Response.handle_ticket_write_response(resp)
+      assert ticket.id == 99001
+      assert ticket.subject == "Login issue"
+      assert ticket.status == "new"
+      assert ticket.tags == ["urgent"]
+    end
+
+    test "returns error for missing ticket key" do
+      resp = {:ok, %{status: 200, body: %{"error" => "InvalidAttribute"}}}
+      assert {:error, _} = Response.handle_ticket_write_response(resp)
+    end
+
+    test "returns error for 422 validation failure" do
+      resp =
+        {:ok,
+         %{
+           status: 422,
+           body: %{"error" => "InvalidAttribute", "description" => "Subject is required"}
+         }}
+
+      assert {:error, error} = Response.handle_ticket_write_response(resp)
+      assert error.status == 422
+    end
+
+    test "returns error for 401 unauthorized" do
+      resp =
+        {:ok,
+         %{
+           status: 401,
+           body: %{"error" => "Unauthorized"}
+         }}
+
+      assert {:error, error} = Response.handle_ticket_write_response(resp)
+      assert error.status == 401
+    end
+  end
+
+  describe "handle_comment_write_response/1" do
+    test "extracts comment from audit events" do
+      resp =
+        {:ok,
+         %{
+           status: 200,
+           body: %{
+             "audit" => %{
+               "ticket_id" => 12345,
+               "events" => [
+                 %{
+                   "type" => "Comment",
+                   "id" => 60001,
+                   "body" => "Looking into this.",
+                   "public" => true,
+                   "author_id" => 9001,
+                   "created_at" => "2026-05-19T12:30:00Z"
+                 }
+               ]
+             }
+           }
+         }}
+
+      assert {:ok, comment} = Response.handle_comment_write_response(resp)
+      assert comment.id == 60001
+      assert comment.body == "Looking into this."
+      assert comment.public == true
+      assert comment.author_id == 9001
+      assert comment.ticket_id == 12345
+    end
+
+    test "extracts private comment from audit events" do
+      resp =
+        {:ok,
+         %{
+           status: 200,
+           body: %{
+             "audit" => %{
+               "ticket_id" => 12345,
+               "events" => [
+                 %{
+                   "type" => "Comment",
+                   "id" => 60002,
+                   "body" => "Internal note.",
+                   "public" => false,
+                   "author_id" => 9001,
+                   "created_at" => "2026-05-19T12:35:00Z"
+                 }
+               ]
+             }
+           }
+         }}
+
+      assert {:ok, comment} = Response.handle_comment_write_response(resp)
+      assert comment.public == false
+      assert comment.body == "Internal note."
+    end
+
+    test "returns error when no comment event in audit" do
+      resp =
+        {:ok,
+         %{
+           status: 200,
+           body: %{
+             "audit" => %{
+               "ticket_id" => 12345,
+               "events" => [
+                 %{"type" => "Change", "value" => "solved"}
+               ]
+             }
+           }
+         }}
+
+      assert {:error, _} = Response.handle_comment_write_response(resp)
+    end
+
+    test "returns error for 404 ticket not found" do
+      resp =
+        {:ok,
+         %{
+           status: 404,
+           body: %{"error" => "RecordNotFound"}
+         }}
+
+      assert {:error, error} = Response.handle_comment_write_response(resp)
+      assert error.status == 404
+    end
+
+    test "returns error for non-map body" do
+      resp = {:ok, %{status: 200, body: "not a map"}}
+      assert {:error, _} = Response.handle_comment_write_response(resp)
+    end
+  end
 end

@@ -10,7 +10,10 @@ defmodule Jido.Connect.Zendesk.ScopeResolver do
     "zendesk.ticket.list" => ["read", "tickets:read"],
     "zendesk.ticket.search" => ["read", "tickets:read"],
     "zendesk.ticket.get" => ["read", "tickets:read"],
+    "zendesk.ticket.create" => ["write", "tickets:write"],
+    "zendesk.ticket.update" => ["write", "tickets:write"],
     "zendesk.ticket.comment.list" => ["read", "tickets:read"],
+    "zendesk.ticket.comment.add" => ["write", "tickets:write"],
     "zendesk.user.list" => ["read", "users:read"],
     "zendesk.organization.list" => ["read"]
   }

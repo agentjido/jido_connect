@@ -206,6 +206,137 @@ defmodule Jido.Connect.Zendesk.MockClient do
       updated_at: "2026-05-10T14:22:00Z"
     }
   end
+
+  # ---------------------------------------------------------------------------
+  # Write operations (mock)
+  # ---------------------------------------------------------------------------
+
+  def create_ticket(attrs, "token", _opts) do
+    id = 99_001
+
+    ticket = %{
+      id: id,
+      subject: Map.get(attrs, :subject),
+      description: Map.get(attrs, :description),
+      status: Map.get(attrs, :status, "new"),
+      type: Map.get(attrs, :type),
+      priority: Map.get(attrs, :priority, "normal"),
+      requester_id: Map.get(attrs, :requester_id, 9901),
+      assignee_id: Map.get(attrs, :assignee_id),
+      group_id: Map.get(attrs, :group_id),
+      organization_id: 201,
+      tags: Map.get(attrs, :tags, []),
+      custom_fields: Map.get(attrs, :custom_fields, []),
+      created_at: "2026-05-19T10:00:00Z",
+      updated_at: "2026-05-19T10:00:00Z"
+    }
+
+    {:ok, ticket}
+  end
+
+  def create_ticket(_attrs, "error_token", _opts) do
+    {:error,
+     %Jido.Connect.Error.ProviderError{
+       message: "Zendesk API request failed",
+       provider: :zendesk,
+       reason: :http_error,
+       status: 422,
+       details: %{message: "Invalid attribute", body: %{"error" => "InvalidAttribute"}}
+     }}
+  end
+
+  def update_ticket(12345, attrs, "token", _opts) do
+    base = ticket_payload(12345, "Cannot reset password", "open", "normal", "incident")
+
+    updated =
+      Map.merge(base, %{
+        status: Map.get(attrs, :status, base.status),
+        priority: Map.get(attrs, :priority, base.priority),
+        type: Map.get(attrs, :type, base.type),
+        assignee_id: Map.get(attrs, :assignee_id, base.assignee_id),
+        group_id: Map.get(attrs, :group_id, base.group_id),
+        updated_at: "2026-05-19T12:00:00Z"
+      })
+
+    updated =
+      case Map.get(attrs, :tags) do
+        nil -> updated
+        tags -> Map.put(updated, :tags, tags)
+      end
+
+    updated =
+      case Map.get(attrs, :additional_tags) do
+        nil -> updated
+        add -> Map.update!(updated, :tags, &(&1 ++ add))
+      end
+
+    updated =
+      case Map.get(attrs, :remove_tags) do
+        nil -> updated
+        remove -> Map.update!(updated, :tags, &Enum.reject(&1, fn t -> t in remove end))
+      end
+
+    {:ok, updated}
+  end
+
+  def update_ticket(99999, _attrs, "token", _opts) do
+    {:error,
+     %Jido.Connect.Error.ProviderError{
+       message: "Zendesk API request failed",
+       provider: :zendesk,
+       reason: :http_error,
+       status: 404,
+       details: %{message: "Not found", body: %{"error" => "RecordNotFound"}}
+     }}
+  end
+
+  def update_ticket(_ticket_id, _attrs, "error_token", _opts) do
+    {:error,
+     %Jido.Connect.Error.ProviderError{
+       message: "Zendesk API request failed",
+       provider: :zendesk,
+       reason: :http_error,
+       status: 422,
+       details: %{message: "Invalid attribute", body: %{"error" => "InvalidAttribute"}}
+     }}
+  end
+
+  def add_ticket_comment(12345, comment_attrs, "token", _opts) do
+    comment_id = 60_001
+
+    comment = %{
+      id: comment_id,
+      body: Map.get(comment_attrs, :body, ""),
+      public: Map.get(comment_attrs, :public, true),
+      author_id: Map.get(comment_attrs, :author_id, 9001),
+      ticket_id: 12345,
+      created_at: "2026-05-19T12:30:00Z"
+    }
+
+    {:ok, comment}
+  end
+
+  def add_ticket_comment(99999, _comment_attrs, "token", _opts) do
+    {:error,
+     %Jido.Connect.Error.ProviderError{
+       message: "Zendesk API request failed",
+       provider: :zendesk,
+       reason: :http_error,
+       status: 404,
+       details: %{message: "Not found", body: %{"error" => "RecordNotFound"}}
+     }}
+  end
+
+  def add_ticket_comment(_ticket_id, _comment_attrs, "error_token", _opts) do
+    {:error,
+     %Jido.Connect.Error.ProviderError{
+       message: "Zendesk API request failed",
+       provider: :zendesk,
+       reason: :http_error,
+       status: 422,
+       details: %{message: "Invalid attribute", body: %{"error" => "InvalidAttribute"}}
+     }}
+  end
 end
 
 # Ensure Req.Test.Ownership is running so that client tests using

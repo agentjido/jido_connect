@@ -29,7 +29,13 @@ defmodule Jido.Connect.Zendesk.CatalogPacks do
     "zendesk.organization.list"
   ]
 
-  @editor_tools @reader_tools ++ []
+  @write_tools [
+    "zendesk.ticket.create",
+    "zendesk.ticket.update",
+    "zendesk.ticket.comment.add"
+  ]
+
+  @editor_tools @reader_tools ++ @write_tools
 
   @doc "Returns all built-in Zendesk catalog packs."
   def all, do: [reader(), editor()]
