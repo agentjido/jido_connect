@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-e6u.4"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:03Z",
   "description": "Add new/changed file polling trigger design or implementation, catalog packs, README examples, .env.example placeholders, and local container/sandbox smoke guidance. Verify package tests and generated modules compile.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G31-S05] Add SFTP polling trigger catalog docs and smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:03Z"
+  "updated_at": "2026-05-19T14:16:05Z"
 }

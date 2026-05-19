@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-e6u.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-e6u.5"
+  ],
   "created": "2026-05-19T14:16:02Z",
   "description": "Implement upload, move/rename, mkdir, and delete where supported with root path sandboxing and destructive metadata. Gate live mutation smoke tests and cover client boundary errors.",
   "id": "jido_con-e6u.4",
