@@ -139,23 +139,78 @@ Refresh tokens stay in host-owned durable storage.
 
 ## Shared Helpers
 
-Scope catalog:
+### Scopes
 
 ```elixir
 Jido.Connect.Microsoft.Scopes.product(:mail)
 Jido.Connect.Microsoft.Scopes.missing(granted_scopes, required_scopes)
 ```
 
-Transport boundary:
+### Transport
+
+Build an authenticated Graph request:
 
 ```elixir
 request = Jido.Connect.Microsoft.Transport.request(access_token)
 ```
 
-Pagination helpers:
+Override the base URL (for sovereign cloud or proxy):
+
+```elixir
+request = Jido.Connect.Microsoft.Transport.request(access_token,
+  base_url: "https://graph.microsoft.us/v1.0"
+)
+```
+
+Normalize provider errors:
+
+```elixir
+{:error, error} = Jido.Connect.Microsoft.Transport.handle_error_response(response)
+{:error, error} = Jido.Connect.Microsoft.Transport.invalid_success_response("bad payload", body)
+```
+
+Extract retry and rate-limit metadata:
+
+```elixir
+meta = Jido.Connect.Microsoft.Transport.response_metadata({:ok, raw_response})
+# => %{rate_limited: true, retry_after: 30, request_id: "abc-123"}
+
+Jido.Connect.Microsoft.Transport.rate_limited?({:ok, raw_response})
+# => true when HTTP 429
+
+Jido.Connect.Microsoft.Transport.retryable?({:ok, raw_response})
+# => true for 429, 503, 504 and transport errors
+```
+
+### Pagination
+
+Build OData query parameters:
 
 ```elixir
 query = Jido.Connect.Microsoft.Pagination.query(%{}, page_size: 25)
+# => %{:"$top" => 25}
+
+query = Jido.Connect.Microsoft.Pagination.query(%{q: "test"}, page_size: 25, skip: 50)
+# => %{q: "test", :"$top" => 25, :"$skip" => 50}
+```
+
+Extract pagination links from response bodies:
+
+```elixir
 next = Jido.Connect.Microsoft.Pagination.next_link(response_body)
 delta = Jido.Connect.Microsoft.Pagination.delta_link(response_body)
+```
+
+Extract values and check for more pages:
+
+```elixir
+items = Jido.Connect.Microsoft.Pagination.values(response_body)
+has_more = Jido.Connect.Microsoft.Pagination.has_more?(response_body)
+```
+
+Build checkpoint metadata for durable pagination cursors:
+
+```elixir
+checkpoint = Jido.Connect.Microsoft.Pagination.checkpoint(response_body, %{sync_id: "abc"})
+# => %{next_link: "...", value_count: 25, sync_id: "abc"}
 ```
