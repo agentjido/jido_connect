@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:16:24Z",
   "description": "Implement create/update contact, add/remove tag, subscribe/unsubscribe list, create/update deal where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-yoe.4",
-  "labels": [],
+  "labels": [
+    "activecampaign",
+    "connector-roadmap",
+    "marketing"
+  ],
   "parent": "jido_con-yoe",
   "priority": 2,
   "status": "open",
