@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:17Z",
   "description": "Implement create/update contact, add note, reply to conversation, assign conversation, and tag/untag where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-zya.4",
-  "labels": [
-    "connector-roadmap +support +intercom"
-  ],
+  "labels": [],
   "parent": "jido_con-zya",
   "priority": 2,
   "status": "open",
   "title": "[G17-S04] Implement Intercom conversation and contact write actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:19Z"
+  "updated_at": "2026-05-19T14:04:53Z"
 }
