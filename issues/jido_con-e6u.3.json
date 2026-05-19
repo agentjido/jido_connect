@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:01Z",
+  "description": "Implement list directory, stat file, download file/content metadata with root path sandboxing, host key checks, timeout handling, and offline/unit tests around client boundary mocks.",
+  "id": "jido_con-e6u.3",
+  "labels": [],
+  "parent": "jido_con-e6u",
+  "priority": 2,
+  "status": "open",
+  "title": "[G31-S03] Implement SFTP read and download actions",
+  "type": "task",
+  "updated_at": "2026-05-19T14:16:01Z"
+}
