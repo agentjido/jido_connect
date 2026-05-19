@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-jxj.5"
   ],
@@ -15,8 +15,8 @@
   ],
   "parent": "jido_con-jxj",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G11-S06] Write service account/domain delegation ADR",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:29Z"
+  "updated_at": "2026-05-19T15:42:13Z"
 }
