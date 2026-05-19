@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-5nj.5"
+  ],
   "blocks": [
     "jido_con-l40.2"
   ],
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G36-S01] Scaffold Zoho Desk package",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:40Z"
+  "updated_at": "2026-05-19T14:17:11Z"
 }
