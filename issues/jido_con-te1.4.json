@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:03:53Z",
+  "description": "Implement create/update/delete meeting and registrant utility actions where supported. Mark destructive metadata precisely, gate live mutation smoke tests, and cover offline success/error paths.",
+  "id": "jido_con-te1.4",
+  "labels": [],
+  "parent": "jido_con-te1",
+  "priority": 2,
+  "status": "open",
+  "title": "[G23-S04] Implement guarded Zoom meeting write actions",
+  "type": "task",
+  "updated_at": "2026-05-19T14:03:53Z"
+}
