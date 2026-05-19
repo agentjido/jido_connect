@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ru0.4"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:48Z",
   "description": "Add webhook signature verification and normalized triggers for customer/invoice/payment events, catalog packs, scope/policy matrix, README examples, .env.example placeholders, and live smoke hooks that default to read-only. Verify package tests and generated modules compile.",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G22-S05] Add Stripe webhook triggers catalog docs and safety policy",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:48Z"
+  "updated_at": "2026-05-19T14:03:50Z"
 }
