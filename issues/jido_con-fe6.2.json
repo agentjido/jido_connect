@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:21Z",
   "description": "Add structs/schemas and fixtures for pages, databases, blocks, rich text, users, comments, files, parent refs, pagination, and common property values. Include normalization tests and privacy fixture review.",
   "id": "jido_con-fe6.2",
-  "labels": [
-    "connector-roadmap +knowledge +notion"
-  ],
+  "labels": [],
   "parent": "jido_con-fe6",
   "priority": 2,
   "status": "open",
   "title": "[G18-S02] Add Notion normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:24Z"
+  "updated_at": "2026-05-19T14:04:55Z"
 }
