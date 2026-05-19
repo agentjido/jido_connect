@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-yoe.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-yoe.5"
+  ],
   "created": "2026-05-19T14:16:24Z",
   "description": "Implement create/update contact, add/remove tag, subscribe/unsubscribe list, create/update deal where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-yoe.4",
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G34-S04] Implement ActiveCampaign contact and deal write actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:26Z"
+  "updated_at": "2026-05-19T14:16:27Z"
 }
