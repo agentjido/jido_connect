@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-y3t.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-y3t.5"
+  ],
   "created": "2026-05-19T13:53:58Z",
   "description": "Implement event create, update, delete/cancel, RSVP/response, and focused utility actions that map cleanly to Microsoft Graph. Use explicit destructive/live flags for mutation smoke tests, validate required scopes/action metadata, and cover provider errors/offline fixtures.",
   "id": "jido_con-y3t.4",

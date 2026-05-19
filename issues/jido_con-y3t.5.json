@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-y3t.4"
+  ],
   "blocks": [],
   "created": "2026-05-19T13:54:03Z",
   "description": "Add catalog packs, README/CHANGELOG examples, scope matrix, .env.example fixture ids, and read-only live smoke hooks. Document subscription/watch/delta options as design notes if not implemented in this wave. Verify generated modules compile and package tests pass.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "[G14-S05] Add Microsoft Calendar catalog docs and live smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T13:54:03Z"
+  "updated_at": "2026-05-19T13:55:11Z"
 }
