@@ -5,11 +5,13 @@
   "created": "2026-05-19T16:14:49Z",
   "description": "Planning ID: G11-S07-R1\nSource: G11-S07 Release Readiness Review\n\nThe jido_mcp git dependency transitively requires anubis_mcp, jido, and zoi from Hex. These packages exist in the local cache but Mix cannot verify them without network access. This blocks format checks and tests for jido_connect_mcp in offline environments.\n\nFix options:\n- Pin jido_mcp as a Hex dependency (once published)\n- Mirror the git dep's transitive Hex deps explicitly in jido_connect_mcp mix.exs",
   "id": "jido_con-jxj.9",
-  "labels": [],
+  "labels": [
+    "risk"
+  ],
   "parent": "jido_con-jxj",
   "priority": 2,
   "status": "open",
   "title": "jido_connect_mcp dep resolution requires network access",
   "type": "task",
-  "updated_at": "2026-05-19T16:14:49Z"
+  "updated_at": "2026-05-19T16:15:11Z"
 }
