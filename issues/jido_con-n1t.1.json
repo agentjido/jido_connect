@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-te1.5"
+  ],
   "blocks": [
     "jido_con-n1t.2"
   ],
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G24-S01] Scaffold Typeform package",
   "type": "task",
-  "updated_at": "2026-05-19T14:04:01Z"
+  "updated_at": "2026-05-19T14:04:10Z"
 }
