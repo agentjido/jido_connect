@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:15:29Z",
   "description": "Add catalog packs, scope/policy matrix, README examples, .env.example placeholders, and read-only live smoke hooks. Verify package tests and generated modules compile.",
   "id": "jido_con-9rh.5",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "finance",
+    "mercury"
+  ],
   "parent": "jido_con-9rh",
   "priority": 2,
   "status": "open",
