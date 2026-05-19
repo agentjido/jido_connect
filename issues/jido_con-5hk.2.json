@@ -9,11 +9,15 @@
   "created": "2026-05-19T14:03:39Z",
   "description": "Add structs/schemas and fixtures for shop, products, variants, customers, orders, line items, fulfillments, transactions, pagination, and webhook payloads. Include normalization tests and privacy fixture review.",
   "id": "jido_con-5hk.2",
-  "labels": [],
+  "labels": [
+    "commerce",
+    "connector-roadmap",
+    "shopify"
+  ],
   "parent": "jido_con-5hk",
   "priority": 2,
   "status": "open",
   "title": "[G21-S02] Add Shopify normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:05:02Z"
+  "updated_at": "2026-05-19T14:05:44Z"
 }
