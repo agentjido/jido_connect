@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-3rz.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-3rz.4"
+  ],
   "created": "2026-05-19T14:15:47Z",
   "description": "Implement list/get boards, groups, items, columns, users, and item updates using GraphQL transport helpers. Cover pagination, query variables, auth errors, rate limits, and GraphQL/provider errors offline.",
   "id": "jido_con-3rz.3",
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G29-S03] Implement monday.com read actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:50Z"
+  "updated_at": "2026-05-19T14:15:51Z"
 }
