@@ -7,10 +7,14 @@
   "created": "2026-05-19T13:51:10Z",
   "description": "Build the shared Microsoft Graph foundation package for future Microsoft connectors. Scope: OAuth2 auth profiles, token refresh helpers, Graph transport, pagination/error normalization, test helpers, docs, and live-smoke env guidance. This should land before Outlook, Calendar, and OneDrive packages.",
   "id": "jido_con-bcz",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "graph",
+    "microsoft"
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G12] Microsoft Graph Foundation",
   "type": "epic",
-  "updated_at": "2026-05-19T13:55:06Z"
+  "updated_at": "2026-05-19T13:55:23Z"
 }
