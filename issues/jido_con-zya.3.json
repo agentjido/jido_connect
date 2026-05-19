@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-zya.4"
   ],
+  "closed_at": "2026-05-19T22:11:35Z",
+  "close_reason": "Implemented in c02f248b by pi-connector-factory",
   "created": "2026-05-19T14:03:16Z",
   "description": "Implement list/search contacts, get contact, list/get conversations, admins/teams lookups where useful. Cover provider pagination, query filters, auth errors, rate limits, and error normalization offline.",
   "id": "jido_con-zya.3",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-zya",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G17-S03] Implement Intercom read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T21:59:45Z"
+  "updated_at": "2026-05-19T22:11:35Z"
 }
