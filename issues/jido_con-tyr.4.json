@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-tyr.5"
   ],
+  "closed_at": "2026-05-19T20:49:23Z",
+  "close_reason": "Implemented in 7ed76fe by pi-connector-factory",
   "created": "2026-05-19T13:54:25Z",
   "description": "Implement upload/create folder/update item/delete item, create sharing link, invite/grant permission, list/get/delete permissions where Graph supports it. Gate destructive live smoke tests, document permission semantics, and cover offline success/error paths.",
   "id": "jido_con-tyr.4",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-tyr",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G15-S04] Implement OneDrive write sharing and permission actions",
   "type": "task",
-  "updated_at": "2026-05-19T20:31:15Z"
+  "updated_at": "2026-05-19T20:49:23Z"
 }
