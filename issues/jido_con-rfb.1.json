@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-rfb.2"
+  ],
   "created": "2026-05-19T14:15:32Z",
   "description": "Create apps/jido_connect_freshdesk with integration DSL, API key/OAuth auth metadata, domain/base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-rfb.1",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G27-S01] Scaffold Freshdesk package",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:32Z"
+  "updated_at": "2026-05-19T14:15:36Z"
 }
