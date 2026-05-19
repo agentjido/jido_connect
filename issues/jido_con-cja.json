@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-aje.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:31Z",
   "description": "Build jido_connect_gitlab for dev-work workflows: OAuth/PAT auth, projects, issues, merge requests, pipelines/jobs, comments/notes, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
@@ -12,5 +14,5 @@
   "status": "open",
   "title": "[G20] GitLab Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:03:32Z"
+  "updated_at": "2026-05-19T14:04:07Z"
 }
