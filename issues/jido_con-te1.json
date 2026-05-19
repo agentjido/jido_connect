@@ -5,10 +5,12 @@
   "created": "2026-05-19T14:03:50Z",
   "description": "Build jido_connect_zoom for meeting workflows: OAuth/server-to-server auth metadata, users, meetings, recordings, transcripts, controlled meeting writes, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-te1",
-  "labels": [],
+  "labels": [
+    "connector-roadmap +meetings +zoom"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[G23] Zoom Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:03:50Z"
+  "updated_at": "2026-05-19T14:03:51Z"
 }
