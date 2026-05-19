@@ -2,6 +2,8 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-05-19T16:39:53Z",
+  "close_reason": "Implemented in 190471e by pi-connector-factory",
   "created": "2026-05-19T16:15:02Z",
   "description": "Planning ID: G11-S07-R2\nSource: G11-S07 Release Readiness Review\n\ntest/jido_connect/posthog/handlers/actions/get_insight_test.exs defines ErrorGetInsightMock inline alongside the test module. With certain random seeds (e.g. 999), the mock module is not yet compiled when the async test executes, causing UndefinedFunctionError. Tests pass with seed 0.\n\nFix: Move inline error mock modules to dedicated test support files under test/support/.",
   "id": "jido_con-jxj.10",
@@ -10,8 +12,8 @@
   ],
   "parent": "jido_con-jxj",
   "priority": 3,
-  "status": "in_progress",
+  "status": "closed",
   "title": "PostHog seed-dependent test failure from inline mock",
   "type": "bug",
-  "updated_at": "2026-05-19T16:34:06Z"
+  "updated_at": "2026-05-19T16:39:53Z"
 }
