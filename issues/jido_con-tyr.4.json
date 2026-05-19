@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-tyr.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-tyr.5"
+  ],
   "created": "2026-05-19T13:54:25Z",
   "description": "Implement upload/create folder/update item/delete item, create sharing link, invite/grant permission, list/get/delete permissions where Graph supports it. Gate destructive live smoke tests, document permission semantics, and cover offline success/error paths.",
   "id": "jido_con-tyr.4",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G15-S04] Implement OneDrive write sharing and permission actions",
   "type": "task",
-  "updated_at": "2026-05-19T13:55:12Z"
+  "updated_at": "2026-05-19T13:55:13Z"
 }
