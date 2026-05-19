@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:51Z",
+  "description": "Build jido_connect_discord for community/chat workflows: bot/OAuth auth, guilds, channels, messages, users, reactions, guarded sends, interaction/webhook strategy, catalog packs, docs, and read-only live smoke guidance.",
+  "id": "jido_con-jag",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "[G38] Discord Connector",
+  "type": "epic",
+  "updated_at": "2026-05-19T14:16:51Z"
+}
