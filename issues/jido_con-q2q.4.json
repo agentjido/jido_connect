@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-q2q.3"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:09Z",
   "description": "Implement low-risk playlist/comment utility actions only where useful, with explicit write/destructive metadata and quota documentation. Gate live mutation smoke tests and cover offline success/error paths.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G32-S04] Implement guarded YouTube write utility actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:10Z"
+  "updated_at": "2026-05-19T14:16:12Z"
 }
