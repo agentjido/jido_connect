@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-y2w.5"
+  ],
   "blocks": [
     "jido_con-9rh.2"
   ],
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G26-S01] Scaffold Mercury package",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:29Z"
+  "updated_at": "2026-05-19T14:17:01Z"
 }

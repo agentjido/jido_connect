@@ -4,7 +4,8 @@
     "jido_con-y2w.4"
   ],
   "blocks": [
-    "jido_con-9rh"
+    "jido_con-9rh",
+    "jido_con-9rh.1"
   ],
   "created": "2026-05-19T14:15:22Z",
   "description": "Add catalog packs, README examples, security caveats, .env.example placeholders, and smoke hooks using safe public/local endpoints only. Verify package tests and generated modules compile.",
@@ -20,5 +21,5 @@
   "status": "open",
   "title": "[G25-S05] Add Generic HTTP catalog docs and smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T14:17:00Z"
+  "updated_at": "2026-05-19T14:17:01Z"
 }
