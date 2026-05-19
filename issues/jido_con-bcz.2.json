@@ -9,11 +9,15 @@
   "created": "2026-05-19T13:51:48Z",
   "description": "Add Microsoft OAuth authorize URL, exchange_code, refresh_token, token normalization, sanitized error handling, and offline Req.Test coverage. Keep credential fields compatible with Jido.Connect.Connection and CredentialLease. Add env.example placeholders for Microsoft client id, secret, redirect uri, access token, and refresh token.",
   "id": "jido_con-bcz.2",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "graph",
+    "microsoft"
+  ],
   "parent": "jido_con-bcz",
   "priority": 1,
   "status": "open",
   "title": "[G12-S02] Implement Microsoft OAuth token helpers",
   "type": "task",
-  "updated_at": "2026-05-19T13:55:07Z"
+  "updated_at": "2026-05-19T13:55:24Z"
 }
