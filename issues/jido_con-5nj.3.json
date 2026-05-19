@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-5nj.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:30Z",
   "description": "Implement list/search/get records for core modules, metadata/module reads, and related notes/tasks reads. Cover region/base URL behavior, pagination, auth errors, rate limits, and provider errors offline.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G35-S03] Implement Zoho CRM read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:30Z"
+  "updated_at": "2026-05-19T14:16:33Z"
 }
