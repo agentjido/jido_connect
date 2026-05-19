@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:07Z",
+  "description": "Add structs/schemas and fixtures for channels, videos, playlists, playlist items, search results, comments/captions where useful, pagination, and provider errors. Include normalization tests and privacy fixture review.",
+  "id": "jido_con-q2q.2",
+  "labels": [],
+  "parent": "jido_con-q2q",
+  "priority": 2,
+  "status": "open",
+  "title": "[G32-S02] Add YouTube normalized structs and fixtures",
+  "type": "task",
+  "updated_at": "2026-05-19T14:16:07Z"
+}
