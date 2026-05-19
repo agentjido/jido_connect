@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-17g.5"
+  ],
   "blocks": [
     "jido_con-zya.2"
   ],
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G17-S01] Scaffold Intercom package",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:18Z"
+  "updated_at": "2026-05-19T14:04:04Z"
 }
