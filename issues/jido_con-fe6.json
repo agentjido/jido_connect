@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-zya.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:20Z",
   "description": "Build jido_connect_notion for knowledge workspace workflows: OAuth/internal token auth, search, pages, databases, blocks, comments, controlled writes, catalog packs, docs, and read-only live smoke guidance.",
@@ -12,5 +14,5 @@
   "status": "open",
   "title": "[G18] Notion Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:03:20Z"
+  "updated_at": "2026-05-19T14:04:05Z"
 }
