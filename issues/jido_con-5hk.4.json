@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-5hk.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-5hk.5"
+  ],
   "created": "2026-05-19T14:03:41Z",
   "description": "Implement low-risk create/update customer and product metadata actions first; document and gate higher-risk order/fulfillment mutation work behind explicit destructive/policy metadata. Cover offline success/error paths.",
   "id": "jido_con-5hk.4",
