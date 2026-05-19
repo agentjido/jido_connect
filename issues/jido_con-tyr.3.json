@@ -9,11 +9,16 @@
   "created": "2026-05-19T13:54:20Z",
   "description": "Implement list drives, get drive, list children, get item, search, download content, and delta/read change actions. Handle @odata.nextLink, @microsoft.graph.downloadUrl, binary responses, and provider errors with offline tests.",
   "id": "jido_con-tyr.3",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "graph",
+    "microsoft",
+    "onedrive"
+  ],
   "parent": "jido_con-tyr",
   "priority": 1,
   "status": "open",
   "title": "[G15-S03] Implement OneDrive read and content actions",
   "type": "task",
-  "updated_at": "2026-05-19T13:55:12Z"
+  "updated_at": "2026-05-19T13:55:30Z"
 }
