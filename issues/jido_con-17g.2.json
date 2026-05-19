@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:10Z",
   "description": "Add structs/schemas and fixtures for tickets, users, organizations, comments, tags, groups, pagination cursors, and webhook payloads. Include normalization tests and privacy fixture review.",
   "id": "jido_con-17g.2",
-  "labels": [
-    "connector-roadmap +support +zendesk"
-  ],
+  "labels": [],
   "parent": "jido_con-17g",
   "priority": 2,
   "status": "open",
   "title": "[G16-S02] Add Zendesk normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:13Z"
+  "updated_at": "2026-05-19T14:04:50Z"
 }
