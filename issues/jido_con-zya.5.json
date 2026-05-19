@@ -10,13 +10,11 @@
   "created": "2026-05-19T14:03:18Z",
   "description": "Add webhook verification/normalization triggers for conversation/contact events, catalog packs, scope matrix, README examples, .env.example placeholders, and read-only live smoke hooks. Verify package tests and generated modules compile.",
   "id": "jido_con-zya.5",
-  "labels": [
-    "connector-roadmap +support +intercom"
-  ],
+  "labels": [],
   "parent": "jido_con-zya",
   "priority": 2,
   "status": "open",
   "title": "[G17-S05] Add Intercom webhook triggers catalog docs and smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T14:04:05Z"
+  "updated_at": "2026-05-19T14:04:54Z"
 }
