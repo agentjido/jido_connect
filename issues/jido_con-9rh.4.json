@@ -5,7 +5,12 @@
   "created": "2026-05-19T14:15:28Z",
   "description": "Document and, only where low-risk, implement guarded recipient/invoice helper actions. Do not implement money movement without explicit policy metadata, destructive/live flags, idempotency requirements, and host approval boundaries.",
   "id": "jido_con-9rh.4",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "finance",
+    "mercury",
+    "policy"
+  ],
   "parent": "jido_con-9rh",
   "priority": 2,
   "status": "open",
