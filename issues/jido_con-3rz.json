@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:15:45Z",
   "description": "Build jido_connect_monday for board/workflow automation: API token/OAuth metadata, boards, groups, items, columns, updates, guarded item mutations, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-3rz",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "monday",
+    "work-management"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[G29] monday.com Connector",
