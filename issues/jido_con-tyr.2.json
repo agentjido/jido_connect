@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-tyr.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-tyr.3"
+  ],
   "created": "2026-05-19T13:54:16Z",
   "description": "Add normalized structs/schemas for drives, drive items, folders, files, thumbnails, sharing links, permissions, delta tokens, and download metadata. Include fixtures and normalization tests for representative Microsoft Graph payloads.",
   "id": "jido_con-tyr.2",
