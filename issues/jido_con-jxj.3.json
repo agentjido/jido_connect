@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-jxj.4"
   ],
+  "closed_at": "2026-05-19T15:24:21Z",
+  "close_reason": "Implemented in a338743 by pi-connector-factory",
   "created": "2026-05-04T19:20:07Z",
   "description": "Planning ID: G11-S03\nEpic: G11 Cross-Google Hardening And Demo\nSource: MILESTONE_2.md\nDepends on: G11-S02\n\nAcceptance:\nPacks restrict search/describe/call and avoid accidental broad-risk tool exposure.",
   "id": "jido_con-jxj.3",
@@ -15,8 +17,8 @@
   ],
   "parent": "jido_con-jxj",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G11-S03] Audit catalog packs across Google products",
   "type": "task",
-  "updated_at": "2026-05-19T14:57:06Z"
+  "updated_at": "2026-05-19T15:24:21Z"
 }
