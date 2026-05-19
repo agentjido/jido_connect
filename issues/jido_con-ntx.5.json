@@ -10,11 +10,16 @@
   "created": "2026-05-19T13:52:22Z",
   "description": "Finish Outlook package docs, catalog packs, privacy audit, action availability metadata, and env-gated read-only live smoke hooks. Include .env.example fixture placeholders and verify package tests plus root warnings-as-errors compile.",
   "id": "jido_con-ntx.5",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "graph",
+    "microsoft",
+    "outlook"
+  ],
   "parent": "jido_con-ntx",
   "priority": 2,
   "status": "open",
   "title": "[G13-S05] Add Outlook catalog packs docs and live smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T13:55:10Z"
+  "updated_at": "2026-05-19T13:55:26Z"
 }
