@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-2fj.8",
     "jido_con-4hm.8",
@@ -21,8 +21,8 @@
   ],
   "parent": "jido_con-jxj",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G11-S02] Run cross-product scope audit",
   "type": "task",
-  "updated_at": "2026-05-04T19:22:29Z"
+  "updated_at": "2026-05-19T14:46:20Z"
 }
