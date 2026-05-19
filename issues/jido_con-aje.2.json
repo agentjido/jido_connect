@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:03:27Z",
+  "description": "Add structs/schemas and fixtures for workspaces, projects, tasks, sections, users, stories/comments, tags, custom fields, pagination, and webhook events. Include normalization tests and privacy fixture review.",
+  "id": "jido_con-aje.2",
+  "labels": [],
+  "parent": "jido_con-aje",
+  "priority": 2,
+  "status": "open",
+  "title": "[G19-S02] Add Asana normalized structs and fixtures",
+  "type": "task",
+  "updated_at": "2026-05-19T14:03:27Z"
+}
