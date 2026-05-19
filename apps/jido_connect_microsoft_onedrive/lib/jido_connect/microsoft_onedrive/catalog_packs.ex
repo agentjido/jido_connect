@@ -29,8 +29,23 @@ defmodule Jido.Connect.MicrosoftOnedrive.CatalogPacks do
                          "microsoft.onedrive.item.delete"
                        ]
 
+  @sharing_tools @destructive_tools ++
+                   [
+                     "microsoft.onedrive.item.create_link",
+                     "microsoft.onedrive.item.permissions.list",
+                     "microsoft.onedrive.item.permission.get",
+                     "microsoft.onedrive.item.permission.create"
+                   ]
+
+  @admin_tools @sharing_tools ++
+                 [
+                   "microsoft.onedrive.item.permission.delete"
+                 ]
+
   @doc "Returns all built-in Microsoft OneDrive catalog packs."
-  def all, do: [metadata(), triage(), write(), destructive()]
+  def all do
+    [metadata(), triage(), write(), destructive(), sharing(), admin()]
+  end
 
   @doc "Read-only Microsoft OneDrive metadata pack."
   def metadata do
@@ -92,6 +107,51 @@ defmodule Jido.Connect.MicrosoftOnedrive.CatalogPacks do
       filters: %{provider: :microsoft_onedrive},
       allowed_tools: @destructive_tools,
       metadata: %{package: :jido_connect_microsoft_onedrive, risk: :destructive}
+    })
+  end
+
+  @doc """
+  Microsoft OneDrive sharing pack for creating links and managing item permissions.
+
+  Includes all read, write, and delete item tools plus sharing link creation and
+  permission listing, inspection, and invitation. Permission deletion is excluded
+  to prevent accidental access revocation.
+  """
+  def sharing do
+    Pack.new!(%{
+      id: :microsoft_onedrive_sharing,
+      label: "Microsoft OneDrive sharing",
+      description:
+        "Microsoft OneDrive sharing link creation, permission listing, inspection, and invitation. Excludes permission deletion.",
+      filters: %{provider: :microsoft_onedrive},
+      allowed_tools: @sharing_tools,
+      metadata: %{
+        package: :jido_connect_microsoft_onedrive,
+        excludes: [
+          "microsoft.onedrive.item.permission.delete"
+        ]
+      }
+    })
+  end
+
+  @doc """
+  Microsoft OneDrive admin pack with full permission management including deletion.
+
+  Includes all sharing and permission management tools, including the ability to
+  remove permissions. This pack carries elevated risk due to permission deletion.
+  """
+  def admin do
+    Pack.new!(%{
+      id: :microsoft_onedrive_admin,
+      label: "Microsoft OneDrive admin",
+      description:
+        "Full Microsoft OneDrive access including sharing, permission management, and permission deletion.",
+      filters: %{provider: :microsoft_onedrive},
+      allowed_tools: @admin_tools,
+      metadata: %{
+        package: :jido_connect_microsoft_onedrive,
+        risk: :destructive
+      }
     })
   end
 end

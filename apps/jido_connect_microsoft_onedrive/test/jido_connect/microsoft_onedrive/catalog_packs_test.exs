@@ -26,6 +26,11 @@ defmodule Jido.Connect.MicrosoftOnedrive.CatalogPacksTest do
     refute "microsoft.onedrive.item.update" in ids
     refute "microsoft.onedrive.item.upload" in ids
     refute "microsoft.onedrive.item.delete" in ids
+    refute "microsoft.onedrive.item.create_link" in ids
+    refute "microsoft.onedrive.item.permissions.list" in ids
+    refute "microsoft.onedrive.item.permission.get" in ids
+    refute "microsoft.onedrive.item.permission.create" in ids
+    refute "microsoft.onedrive.item.permission.delete" in ids
 
     assert {:ok, descriptor} =
              Catalog.describe_tool("microsoft.onedrive.items.list",
@@ -132,5 +137,72 @@ defmodule Jido.Connect.MicrosoftOnedrive.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "microsoft.onedrive.item.delete"
+  end
+
+  test "sharing pack exposes sharing link, permission listing, inspection, and invitation" do
+    assert {:ok, link_descriptor} =
+             Catalog.describe_tool("microsoft.onedrive.item.create_link",
+               modules: [MicrosoftOnedrive],
+               packs: MicrosoftOnedrive.catalog_packs(),
+               pack: :microsoft_onedrive_sharing
+             )
+
+    assert link_descriptor.tool.id == "microsoft.onedrive.item.create_link"
+
+    assert {:ok, list_descriptor} =
+             Catalog.describe_tool("microsoft.onedrive.item.permissions.list",
+               modules: [MicrosoftOnedrive],
+               packs: MicrosoftOnedrive.catalog_packs(),
+               pack: :microsoft_onedrive_sharing
+             )
+
+    assert list_descriptor.tool.id == "microsoft.onedrive.item.permissions.list"
+
+    assert {:ok, get_descriptor} =
+             Catalog.describe_tool("microsoft.onedrive.item.permission.get",
+               modules: [MicrosoftOnedrive],
+               packs: MicrosoftOnedrive.catalog_packs(),
+               pack: :microsoft_onedrive_sharing
+             )
+
+    assert get_descriptor.tool.id == "microsoft.onedrive.item.permission.get"
+
+    assert {:ok, create_descriptor} =
+             Catalog.describe_tool("microsoft.onedrive.item.permission.create",
+               modules: [MicrosoftOnedrive],
+               packs: MicrosoftOnedrive.catalog_packs(),
+               pack: :microsoft_onedrive_sharing
+             )
+
+    assert create_descriptor.tool.id == "microsoft.onedrive.item.permission.create"
+
+    # Sharing pack excludes permission deletion
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("microsoft.onedrive.item.permission.delete",
+               modules: [MicrosoftOnedrive],
+               packs: MicrosoftOnedrive.catalog_packs(),
+               pack: :microsoft_onedrive_sharing
+             )
+  end
+
+  test "admin pack exposes permission deletion" do
+    assert {:ok, descriptor} =
+             Catalog.describe_tool("microsoft.onedrive.item.permission.delete",
+               modules: [MicrosoftOnedrive],
+               packs: MicrosoftOnedrive.catalog_packs(),
+               pack: :microsoft_onedrive_admin
+             )
+
+    assert descriptor.tool.id == "microsoft.onedrive.item.permission.delete"
+
+    # Admin pack also includes sharing tools
+    assert {:ok, link_descriptor} =
+             Catalog.describe_tool("microsoft.onedrive.item.create_link",
+               modules: [MicrosoftOnedrive],
+               packs: MicrosoftOnedrive.catalog_packs(),
+               pack: :microsoft_onedrive_admin
+             )
+
+    assert link_descriptor.tool.id == "microsoft.onedrive.item.create_link"
   end
 end

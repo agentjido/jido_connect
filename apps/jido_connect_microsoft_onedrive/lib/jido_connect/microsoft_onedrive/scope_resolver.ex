@@ -32,7 +32,18 @@ defmodule Jido.Connect.MicrosoftOnedrive.ScopeResolver do
   ]
 
   @destructive_actions [
-    "microsoft.onedrive.item.delete"
+    "microsoft.onedrive.item.delete",
+    "microsoft.onedrive.item.permission.delete"
+  ]
+
+  @sharing_read_actions [
+    "microsoft.onedrive.item.permissions.list",
+    "microsoft.onedrive.item.permission.get"
+  ]
+
+  @sharing_write_actions [
+    "microsoft.onedrive.item.create_link",
+    "microsoft.onedrive.item.permission.create"
   ]
 
   @doc "Returns the required Microsoft Graph scopes for the given operation."
@@ -62,6 +73,26 @@ defmodule Jido.Connect.MicrosoftOnedrive.ScopeResolver do
   end
 
   defp required_for_operation(operation_id, %{scopes: scopes})
+       when operation_id in @sharing_write_actions and is_list(scopes) do
+    cond do
+      @files_read_write in scopes -> [@files_read_write]
+      @files_read_write_all in scopes -> [@files_read_write_all]
+      true -> [@files_read_write]
+    end
+  end
+
+  defp required_for_operation(operation_id, %{scopes: scopes})
+       when operation_id in @sharing_read_actions and is_list(scopes) do
+    cond do
+      @files_read in scopes -> [@files_read]
+      @files_read_all in scopes -> [@files_read_all]
+      @files_read_write in scopes -> [@files_read_write]
+      @files_read_write_all in scopes -> [@files_read_write_all]
+      true -> [@files_read]
+    end
+  end
+
+  defp required_for_operation(operation_id, %{scopes: scopes})
        when operation_id in @read_actions and is_list(scopes) do
     cond do
       @files_read in scopes -> [@files_read]
@@ -79,6 +110,14 @@ defmodule Jido.Connect.MicrosoftOnedrive.ScopeResolver do
   defp required_for_operation(operation_id, _connection)
        when operation_id in @destructive_actions,
        do: [@files_read_write]
+
+  defp required_for_operation(operation_id, _connection)
+       when operation_id in @sharing_write_actions,
+       do: [@files_read_write]
+
+  defp required_for_operation(operation_id, _connection)
+       when operation_id in @sharing_read_actions,
+       do: [@files_read]
 
   defp required_for_operation(operation_id, _connection)
        when operation_id in @read_all_actions,

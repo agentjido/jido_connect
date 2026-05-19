@@ -23,7 +23,12 @@ defmodule Jido.Connect.MicrosoftOnedrive.PrivacyAuditTest do
         "microsoft.onedrive.item.create",
         "microsoft.onedrive.item.update",
         "microsoft.onedrive.item.upload",
-        "microsoft.onedrive.item.delete"
+        "microsoft.onedrive.item.delete",
+        "microsoft.onedrive.item.create_link",
+        "microsoft.onedrive.item.permissions.list",
+        "microsoft.onedrive.item.permission.get",
+        "microsoft.onedrive.item.permission.create",
+        "microsoft.onedrive.item.permission.delete"
       ])
 
     assert MapSet.new(Map.keys(actions_by_id)) == expected
@@ -64,6 +69,17 @@ defmodule Jido.Connect.MicrosoftOnedrive.PrivacyAuditTest do
     assert items_delta.risk == :read
     assert items_delta.confirmation == :none
 
+    # ── Sharing read actions ───────────────────────────────────────────
+    perms_list = actions_by_id["microsoft.onedrive.item.permissions.list"]
+    assert perms_list.data_classification == :personal_data
+    assert perms_list.risk == :read
+    assert perms_list.confirmation == :none
+
+    perm_get = actions_by_id["microsoft.onedrive.item.permission.get"]
+    assert perm_get.data_classification == :personal_data
+    assert perm_get.risk == :read
+    assert perm_get.confirmation == :none
+
     # ── Write / external_write actions ─────────────────────────────────
     item_create = actions_by_id["microsoft.onedrive.item.create"]
     assert item_create.data_classification == :personal_data
@@ -80,11 +96,27 @@ defmodule Jido.Connect.MicrosoftOnedrive.PrivacyAuditTest do
     assert item_upload.risk == :external_write
     assert item_upload.confirmation == :required_for_ai
 
+    # ── Sharing write actions ──────────────────────────────────────────
+    create_link = actions_by_id["microsoft.onedrive.item.create_link"]
+    assert create_link.data_classification == :personal_data
+    assert create_link.risk == :external_write
+    assert create_link.confirmation == :always
+
+    create_perm = actions_by_id["microsoft.onedrive.item.permission.create"]
+    assert create_perm.data_classification == :personal_data
+    assert create_perm.risk == :external_write
+    assert create_perm.confirmation == :always
+
     # ── Destructive actions ────────────────────────────────────────────
     item_delete = actions_by_id["microsoft.onedrive.item.delete"]
     assert item_delete.data_classification == :personal_data
     assert item_delete.risk == :destructive
     assert item_delete.confirmation == :always
+
+    delete_perm = actions_by_id["microsoft.onedrive.item.permission.delete"]
+    assert delete_perm.data_classification == :personal_data
+    assert delete_perm.risk == :destructive
+    assert delete_perm.confirmation == :always
   end
 
   test "privacy module lists storage content and personal data fields" do

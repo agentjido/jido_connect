@@ -10,7 +10,9 @@ defmodule Jido.Connect.MicrosoftOnedrive do
     fragments: [
       Jido.Connect.MicrosoftOnedrive.Actions.Read,
       Jido.Connect.MicrosoftOnedrive.Actions.Write,
-      Jido.Connect.MicrosoftOnedrive.Actions.Destructive
+      Jido.Connect.MicrosoftOnedrive.Actions.Destructive,
+      Jido.Connect.MicrosoftOnedrive.Actions.Sharing,
+      Jido.Connect.MicrosoftOnedrive.Actions.Permissions
     ]
 
   alias Jido.Connect.Microsoft.Scopes
@@ -63,4 +65,6 @@ defmodule Jido.Connect.MicrosoftOnedrive do
   defdelegate triage_pack, to: Jido.Connect.MicrosoftOnedrive.CatalogPacks, as: :triage
   defdelegate write_pack, to: Jido.Connect.MicrosoftOnedrive.CatalogPacks, as: :write
   defdelegate destructive_pack, to: Jido.Connect.MicrosoftOnedrive.CatalogPacks, as: :destructive
+  defdelegate sharing_pack, to: Jido.Connect.MicrosoftOnedrive.CatalogPacks, as: :sharing
+  defdelegate admin_pack, to: Jido.Connect.MicrosoftOnedrive.CatalogPacks, as: :admin
 end
