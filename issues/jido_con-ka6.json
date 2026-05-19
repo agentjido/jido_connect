@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:15:38Z",
   "description": "Build jido_connect_trello for lightweight work management: API key/token auth, boards, lists, cards, members, comments, card moves/updates, webhooks, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-ka6",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "trello",
+    "work-management"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[G28] Trello Connector",
