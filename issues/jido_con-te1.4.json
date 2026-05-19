@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-te1.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-te1.5"
+  ],
   "created": "2026-05-19T14:03:53Z",
   "description": "Implement create/update/delete meeting and registrant utility actions where supported. Mark destructive metadata precisely, gate live mutation smoke tests, and cover offline success/error paths.",
   "id": "jido_con-te1.4",
