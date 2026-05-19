@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:16:37Z",
   "description": "Add structs/schemas and fixtures for departments, tickets, contacts, accounts, agents, comments/threads, attachments metadata, pagination, and provider errors. Include normalization tests and privacy fixture review.",
   "id": "jido_con-l40.2",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "support",
+    "zoho"
+  ],
   "parent": "jido_con-l40",
   "priority": 2,
   "status": "open",
