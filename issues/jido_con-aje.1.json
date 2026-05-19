@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-fe6.5"
+  ],
   "blocks": [
     "jido_con-aje.2"
   ],
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G19-S01] Scaffold Asana package",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:30Z"
+  "updated_at": "2026-05-19T14:04:06Z"
 }
