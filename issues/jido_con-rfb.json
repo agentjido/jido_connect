@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:15:31Z",
   "description": "Build jido_connect_freshdesk for support workflows: API key/OAuth metadata, tickets, contacts, companies, agents/groups, notes/replies, webhook or poll strategy, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-rfb",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "freshdesk",
+    "support"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[G27] Freshdesk Connector",
