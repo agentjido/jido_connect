@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-id6.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-id6.5"
+  ],
   "created": "2026-05-19T14:15:55Z",
   "description": "Implement create/update work item, add comment, update PR metadata where reasonable. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-id6.4",

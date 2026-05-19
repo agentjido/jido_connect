@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-id6.4"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:56Z",
   "description": "Add service hook verification/normalization triggers for work item, PR, and build events; add catalog packs, scope matrix, README examples, .env.example placeholders, and read-only live smoke hooks. Verify package tests and generated modules compile.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G30-S05] Add Azure DevOps service hook triggers catalog docs and smoke hooks",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:56Z"
+  "updated_at": "2026-05-19T14:15:58Z"
 }
