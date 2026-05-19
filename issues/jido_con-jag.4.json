@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:16:55Z",
   "description": "Implement send message, edit message, delete own message, add reaction, and thread helpers where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-jag.4",
-  "labels": [],
+  "labels": [
+    "chat",
+    "connector-roadmap",
+    "discord"
+  ],
   "parent": "jido_con-jag",
   "priority": 2,
   "status": "open",
