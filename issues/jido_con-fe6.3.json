@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:22Z",
   "description": "Implement search, get page, get database, query database, list block children, retrieve block, and list comments where supported. Cover pagination, property value normalization, auth errors, and provider errors offline.",
   "id": "jido_con-fe6.3",
-  "labels": [
-    "connector-roadmap +knowledge +notion"
-  ],
+  "labels": [],
   "parent": "jido_con-fe6",
   "priority": 2,
   "status": "open",
   "title": "[G18-S03] Implement Notion search and read actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:25Z"
+  "updated_at": "2026-05-19T14:04:56Z"
 }
