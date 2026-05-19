@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-y2w.3"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:21Z",
   "description": "Add structured response helpers, JSON decode behavior, optional result extraction, cursor/header pagination helpers where generic enough, retry/rate-limit metadata, and provider-neutral error taxonomy tests.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G25-S04] Add HTTP response transforms pagination and error normalization",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:22Z"
+  "updated_at": "2026-05-19T14:15:24Z"
 }
