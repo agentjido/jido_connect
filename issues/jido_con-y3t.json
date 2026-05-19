@@ -7,10 +7,15 @@
   "created": "2026-05-19T13:51:19Z",
   "description": "Build the Microsoft Calendar connector on top of the shared Microsoft Graph foundation. Scope: calendars, events, create/update/delete, freebusy/availability, subscription/watch design, normalized structs, catalog packs, docs, and read-only live smoke coverage first.",
   "id": "jido_con-y3t",
-  "labels": [],
+  "labels": [
+    "calendar",
+    "connector-roadmap",
+    "graph",
+    "microsoft"
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G14] Microsoft Calendar Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T13:55:09Z"
+  "updated_at": "2026-05-19T13:55:27Z"
 }
