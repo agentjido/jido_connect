@@ -9,11 +9,15 @@
   "created": "2026-05-19T13:51:42Z",
   "description": "Create apps/jido_connect_microsoft as the shared Microsoft Graph foundation package. Follow existing Google foundation conventions where they fit: integration module, OAuth2 user auth profile, connection helpers, mix.exs, README/CHANGELOG, and baseline tests. Do not build Outlook/Calendar/OneDrive resource actions in this task.",
   "id": "jido_con-bcz.1",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "graph",
+    "microsoft"
+  ],
   "parent": "jido_con-bcz",
   "priority": 1,
   "status": "open",
   "title": "[G12-S01] Scaffold shared Microsoft Graph foundation package",
   "type": "task",
-  "updated_at": "2026-05-19T13:55:06Z"
+  "updated_at": "2026-05-19T13:55:23Z"
 }
