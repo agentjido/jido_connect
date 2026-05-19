@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-6cn.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:46Z",
   "description": "Implement list/get products, customers, orders, store info, and shipment/order metadata reads. Cover pagination, store hash config, auth errors, rate limits, and provider errors offline.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G37-S03] Implement BigCommerce read actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:46Z"
+  "updated_at": "2026-05-19T14:16:49Z"
 }
