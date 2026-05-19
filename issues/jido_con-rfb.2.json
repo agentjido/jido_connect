@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:15:33Z",
+  "description": "Add structs/schemas and fixtures for tickets, contacts, companies, agents, groups, conversations/notes, pagination, and webhook/poll payloads. Include normalization tests and privacy fixture review.",
+  "id": "jido_con-rfb.2",
+  "labels": [],
+  "parent": "jido_con-rfb",
+  "priority": 2,
+  "status": "open",
+  "title": "[G27-S02] Add Freshdesk normalized structs and fixtures",
+  "type": "task",
+  "updated_at": "2026-05-19T14:15:33Z"
+}
