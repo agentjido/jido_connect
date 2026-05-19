@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ru0.5"
+  ],
   "blocks": [
     "jido_con-te1.2"
   ],
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G23-S01] Scaffold Zoom package",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:55Z"
+  "updated_at": "2026-05-19T14:04:09Z"
 }
