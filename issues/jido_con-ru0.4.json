@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:47Z",
   "description": "Implement create/update customer and create draft invoice item/invoice where reasonable, with explicit policy/destructive metadata and idempotency support. Do not implement direct charge/capture/refund actions in this task unless separately approved.",
   "id": "jido_con-ru0.4",
-  "labels": [
-    "connector-roadmap +payments +stripe"
-  ],
+  "labels": [],
   "parent": "jido_con-ru0",
   "priority": 2,
   "status": "open",
   "title": "[G22-S04] Implement guarded Stripe low-risk write actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:50Z"
+  "updated_at": "2026-05-19T14:05:05Z"
 }
