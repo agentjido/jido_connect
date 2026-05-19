@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-fe6.5"
   ],
+  "closed_at": "2026-05-19T23:19:39Z",
+  "close_reason": "Implemented in 3b05471e by pi-connector-factory",
   "created": "2026-05-19T14:03:23Z",
   "description": "Implement create/update page, append block children, update block, archive block/page, and create comment where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-fe6.4",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-fe6",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G18-S04] Implement Notion page database and block write actions",
   "type": "task",
-  "updated_at": "2026-05-19T23:09:38Z"
+  "updated_at": "2026-05-19T23:19:39Z"
 }
