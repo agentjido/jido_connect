@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T13:54:16Z",
+  "description": "Add normalized structs/schemas for drives, drive items, folders, files, thumbnails, sharing links, permissions, delta tokens, and download metadata. Include fixtures and normalization tests for representative Microsoft Graph payloads.",
+  "id": "jido_con-tyr.2",
+  "labels": [],
+  "parent": "jido_con-tyr",
+  "priority": 1,
+  "status": "open",
+  "title": "[G15-S02] Add OneDrive normalized structs and fixtures",
+  "type": "task",
+  "updated_at": "2026-05-19T13:54:16Z"
+}
