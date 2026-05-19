@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-bcz.3"
   ],
+  "closed_at": "2026-05-19T17:11:52Z",
+  "close_reason": "Implemented in d85ac54 by pi-connector-factory",
   "created": "2026-05-19T13:51:48Z",
   "description": "Add Microsoft OAuth authorize URL, exchange_code, refresh_token, token normalization, sanitized error handling, and offline Req.Test coverage. Keep credential fields compatible with Jido.Connect.Connection and CredentialLease. Add env.example placeholders for Microsoft client id, secret, redirect uri, access token, and refresh token.",
   "id": "jido_con-bcz.2",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-bcz",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G12-S02] Implement Microsoft OAuth token helpers",
   "type": "task",
-  "updated_at": "2026-05-19T16:49:09Z"
+  "updated_at": "2026-05-19T17:11:52Z"
 }
