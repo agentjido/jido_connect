@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-l40.2"
+  ],
   "created": "2026-05-19T14:16:36Z",
   "description": "Create apps/jido_connect_zoho_desk with integration DSL, OAuth auth metadata, region/base URL handling, org/department config, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-l40.1",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G36-S01] Scaffold Zoho Desk package",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:36Z"
+  "updated_at": "2026-05-19T14:16:40Z"
 }
