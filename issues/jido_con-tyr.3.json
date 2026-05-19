@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-tyr.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-tyr.4"
+  ],
   "created": "2026-05-19T13:54:20Z",
   "description": "Implement list drives, get drive, list children, get item, search, download content, and delta/read change actions. Handle @odata.nextLink, @microsoft.graph.downloadUrl, binary responses, and provider errors with offline tests.",
   "id": "jido_con-tyr.3",
