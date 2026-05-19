@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:15:47Z",
   "description": "Add structs/schemas and fixtures for boards, groups, items, columns, column values, updates, users, pagination, GraphQL errors, and webhook payloads. Include normalization tests and privacy fixture review.",
   "id": "jido_con-3rz.2",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "monday",
+    "work-management"
+  ],
   "parent": "jido_con-3rz",
   "priority": 2,
   "status": "open",
