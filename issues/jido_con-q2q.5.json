@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-q2q.4"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-fui"
+  ],
   "created": "2026-05-19T14:16:10Z",
   "description": "Add catalog packs, scope/quota matrix, README examples, .env.example placeholders, read-only live smoke hooks, and new-video polling strategy. Verify package tests and generated modules compile.",
   "id": "jido_con-q2q.5",
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G32-S05] Add YouTube catalog docs and polling strategy",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:12Z"
+  "updated_at": "2026-05-19T14:17:07Z"
 }
