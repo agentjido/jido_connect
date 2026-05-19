@@ -5,10 +5,14 @@
   "created": "2026-05-19T14:16:27Z",
   "description": "Build jido_connect_zoho_crm for CRM workflows: OAuth auth, org/modules, leads, contacts, accounts, deals, notes/tasks, guarded writes, trigger strategy, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-5nj",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "crm",
+    "zoho"
+  ],
   "priority": 2,
   "status": "open",
   "title": "[G35] Zoho CRM Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:16:27Z"
+  "updated_at": "2026-05-19T14:16:28Z"
 }
