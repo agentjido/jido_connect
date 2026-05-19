@@ -5,7 +5,9 @@
   "created": "2026-05-19T14:03:39Z",
   "description": "Create apps/jido_connect_shopify with integration DSL, OAuth/admin token auth metadata, shop domain/base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement commerce actions yet.",
   "id": "jido_con-5hk.1",
-  "labels": [],
+  "labels": [
+    "connector-roadmap +commerce +shopify"
+  ],
   "parent": "jido_con-5hk",
   "priority": 2,
   "status": "open",
