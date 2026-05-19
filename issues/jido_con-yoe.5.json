@@ -4,7 +4,8 @@
     "jido_con-yoe.4"
   ],
   "blocks": [
-    "jido_con-5nj"
+    "jido_con-5nj",
+    "jido_con-5nj.1"
   ],
   "created": "2026-05-19T14:16:25Z",
   "description": "Add webhook or polling trigger strategy for contact/deal changes, catalog packs, scope matrix, README examples, .env.example placeholders, and read-only live smoke hooks. Verify package tests and generated modules compile.",
