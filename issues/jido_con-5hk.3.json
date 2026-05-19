@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:03:40Z",
+  "description": "Implement get shop, list/get products, list/get customers, list/get orders, and fulfillment/order reads where useful. Cover cursor pagination, shop domain config, auth errors, rate-limit metadata, and provider errors offline.",
+  "id": "jido_con-5hk.3",
+  "labels": [],
+  "parent": "jido_con-5hk",
+  "priority": 2,
+  "status": "open",
+  "title": "[G21-S03] Implement Shopify read actions",
+  "type": "task",
+  "updated_at": "2026-05-19T14:03:40Z"
+}
