@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:15:34Z",
+  "description": "Implement create/update ticket, add note/reply, status/priority/assignee/tag updates where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
+  "id": "jido_con-rfb.4",
+  "labels": [],
+  "parent": "jido_con-rfb",
+  "priority": 2,
+  "status": "open",
+  "title": "[G27-S04] Implement Freshdesk ticket write actions",
+  "type": "task",
+  "updated_at": "2026-05-19T14:15:34Z"
+}
