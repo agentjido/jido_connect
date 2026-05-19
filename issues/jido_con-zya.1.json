@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-zya.2"
   ],
+  "closed_at": "2026-05-19T21:51:49Z",
+  "close_reason": "Implemented in 471e371b by pi-connector-factory",
   "created": "2026-05-19T14:03:15Z",
   "description": "Create apps/jido_connect_intercom with integration DSL, auth profile metadata, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement resource actions yet.",
   "id": "jido_con-zya.1",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-zya",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G17-S01] Scaffold Intercom package",
   "type": "task",
-  "updated_at": "2026-05-19T21:46:03Z"
+  "updated_at": "2026-05-19T21:51:49Z"
 }
