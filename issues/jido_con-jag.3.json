@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-jag.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:54Z",
   "description": "Implement list/get guilds, channels, messages, users/members, reactions, and threads where supported. Cover permissions, snowflake ids, pagination, auth errors, rate limits, and provider errors offline.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G38-S03] Implement Discord read actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:54Z"
+  "updated_at": "2026-05-19T14:16:58Z"
 }
