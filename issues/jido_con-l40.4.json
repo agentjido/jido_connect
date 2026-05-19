@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-l40.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-l40.5"
+  ],
   "created": "2026-05-19T14:16:39Z",
   "description": "Implement create/update ticket, add comment/reply, status/priority/assignee updates where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-l40.4",
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G36-S04] Implement Zoho Desk ticket write actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:41Z"
+  "updated_at": "2026-05-19T14:16:42Z"
 }
