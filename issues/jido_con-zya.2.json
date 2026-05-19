@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-zya.3"
   ],
+  "closed_at": "2026-05-19T21:59:44Z",
+  "close_reason": "Implemented in 11035c62 by pi-connector-factory",
   "created": "2026-05-19T14:03:16Z",
   "description": "Add structs/schemas and fixtures for contacts, companies, conversations, conversation parts, admins, teams, tags, pagination, and webhook payloads. Include normalization tests and privacy fixture review.",
   "id": "jido_con-zya.2",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-zya",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G17-S02] Add Intercom normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T21:51:50Z"
+  "updated_at": "2026-05-19T21:59:44Z"
 }
