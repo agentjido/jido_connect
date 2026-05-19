@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:37Z",
+  "description": "Add structs/schemas and fixtures for departments, tickets, contacts, accounts, agents, comments/threads, attachments metadata, pagination, and provider errors. Include normalization tests and privacy fixture review.",
+  "id": "jido_con-l40.2",
+  "labels": [],
+  "parent": "jido_con-l40",
+  "priority": 2,
+  "status": "open",
+  "title": "[G36-S02] Add Zoho Desk normalized structs and fixtures",
+  "type": "task",
+  "updated_at": "2026-05-19T14:16:37Z"
+}
