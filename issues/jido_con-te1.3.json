@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-te1.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:52Z",
   "description": "Implement list/get users, list/get meetings, list/get recordings, and transcript/recording metadata reads where supported. Cover pagination, account/user scoping, auth errors, rate limits, and provider errors offline.",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G23-S03] Implement Zoom read actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:53Z"
+  "updated_at": "2026-05-19T14:03:55Z"
 }

@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-te1.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-te1.3"
+  ],
   "created": "2026-05-19T14:03:52Z",
   "description": "Add structs/schemas and fixtures for users, meetings, registrants, recordings, transcripts, pagination, and webhook payloads. Include normalization tests and privacy fixture review.",
   "id": "jido_con-te1.2",
