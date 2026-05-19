@@ -31,7 +31,10 @@ defmodule Jido.Connect.Notion do
   - `read_users`
   """
 
-  use Jido.Connect, fragments: []
+  use Jido.Connect,
+    fragments: [
+      Jido.Connect.Notion.Actions.Read
+    ]
 
   defdelegate catalog_packs, to: Jido.Connect.Notion.CatalogPacks, as: :all
 

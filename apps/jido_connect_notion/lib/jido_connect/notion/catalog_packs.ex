@@ -20,7 +20,15 @@ defmodule Jido.Connect.Notion.CatalogPacks do
 
   alias Jido.Connect.Catalog.Pack
 
-  @reader_tools []
+  @reader_tools [
+    "notion.search",
+    "notion.page.get",
+    "notion.database.get",
+    "notion.database.query",
+    "notion.block.get",
+    "notion.block.list_children",
+    "notion.comment.list"
+  ]
   @write_tools []
   @editor_tools @reader_tools ++ @write_tools
 

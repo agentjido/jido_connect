@@ -13,7 +13,7 @@ defmodule Jido.Connect.NotionTest do
     assert spec.category == :productivity
     assert spec.status == :experimental
     assert spec.tags == [:productivity, :documents, :databases, :notes, :knowledge]
-    assert spec.actions == []
+    assert length(spec.actions) == 7
     assert spec.triggers == []
 
     assert [
@@ -51,10 +51,27 @@ defmodule Jido.Connect.NotionTest do
     assert MapSet.member?(features, :api_access)
   end
 
-  test "compiles generated Jido plugin surface with no actions" do
+  test "compiles generated Jido plugin surface with 7 read actions" do
     assert Application.get_env(:jido_connect_notion, :jido_connect_providers) == [Notion]
 
-    assert Notion.jido_action_modules() == []
+    action_modules = Notion.jido_action_modules()
+    assert length(action_modules) == 7
+
+    action_ids =
+      Notion.integration().actions
+      |> Enum.map(& &1.id)
+      |> Enum.sort()
+
+    assert action_ids == [
+             "notion.block.get",
+             "notion.block.list_children",
+             "notion.comment.list",
+             "notion.database.get",
+             "notion.database.query",
+             "notion.page.get",
+             "notion.search"
+           ]
+
     assert Notion.jido_sensor_modules() == []
     assert Notion.jido_plugin_module() == Jido.Connect.Notion.Plugin
 
@@ -64,22 +81,34 @@ defmodule Jido.Connect.NotionTest do
              generated_modules: generated
            } = Notion.jido_connect_manifest()
 
-    assert generated.actions == []
+    assert Enum.sort(generated.actions) ==
+             Enum.sort([
+               Jido.Connect.Notion.Actions.GetDatabase,
+               Jido.Connect.Notion.Actions.GetPage,
+               Jido.Connect.Notion.Actions.ListBlockChildren,
+               Jido.Connect.Notion.Actions.ListComments,
+               Jido.Connect.Notion.Actions.QueryDatabase,
+               Jido.Connect.Notion.Actions.RetrieveBlock,
+               Jido.Connect.Notion.Actions.Search
+             ])
+
     assert generated.sensors == []
     assert generated.plugin == Jido.Connect.Notion.Plugin
 
     assert %Jido.Plugin.Spec{
              name: "notion",
              module: Jido.Connect.Notion.Plugin,
-             actions: []
+             actions: actions
            } = Jido.Connect.Notion.Plugin.plugin_spec()
+
+    assert length(actions) == 7
   end
 
   describe "plugin tool availability" do
-    test "reports empty availability with no actions" do
+    test "reports availability for 7 read actions" do
       plugin_module = Notion.jido_plugin_module()
       availability = plugin_module.tool_availability()
-      assert availability == []
+      assert length(availability) == 7
     end
   end
 end
