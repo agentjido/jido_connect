@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:16:03Z",
   "description": "Add new/changed file polling trigger design or implementation, catalog packs, README examples, .env.example placeholders, and local container/sandbox smoke guidance. Verify package tests and generated modules compile.",
   "id": "jido_con-e6u.5",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "files",
+    "sftp"
+  ],
   "parent": "jido_con-e6u",
   "priority": 2,
   "status": "open",
