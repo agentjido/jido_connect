@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-y3t.2"
   ],
+  "closed_at": "2026-05-19T19:07:55Z",
+  "close_reason": "Implemented in 2f7413e by pi-connector-factory",
   "created": "2026-05-19T13:52:26Z",
   "description": "Create apps/jido_connect_microsoft_calendar using the Microsoft foundation package. Add integration DSL, auth profile reuse, mix.exs, README/CHANGELOG, generated module tests, and basic action catalog shell. Do not implement full calendar/event actions yet.",
   "id": "jido_con-y3t.1",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-y3t",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G14-S01] Scaffold Microsoft Calendar package",
   "type": "task",
-  "updated_at": "2026-05-19T18:59:05Z"
+  "updated_at": "2026-05-19T19:07:55Z"
 }
