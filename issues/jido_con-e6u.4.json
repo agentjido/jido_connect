@@ -5,7 +5,12 @@
   "created": "2026-05-19T14:16:02Z",
   "description": "Implement upload, move/rename, mkdir, and delete where supported with root path sandboxing and destructive metadata. Gate live mutation smoke tests and cover client boundary errors.",
   "id": "jido_con-e6u.4",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "files",
+    "policy",
+    "sftp"
+  ],
   "parent": "jido_con-e6u",
   "priority": 2,
   "status": "open",
