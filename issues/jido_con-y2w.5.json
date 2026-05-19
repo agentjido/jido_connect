@@ -5,7 +5,12 @@
   "created": "2026-05-19T14:15:22Z",
   "description": "Add catalog packs, README examples, security caveats, .env.example placeholders, and smoke hooks using safe public/local endpoints only. Verify package tests and generated modules compile.",
   "id": "jido_con-y2w.5",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "generic",
+    "http",
+    "policy"
+  ],
   "parent": "jido_con-y2w",
   "priority": 2,
   "status": "open",
