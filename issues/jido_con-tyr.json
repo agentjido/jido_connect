@@ -7,10 +7,15 @@
   "created": "2026-05-19T13:51:24Z",
   "description": "Build the Microsoft OneDrive connector on top of the shared Microsoft Graph foundation. Scope: drives/items/folders, search/list/get, upload/download, sharing/permissions, delta change polling design, normalized structs, catalog packs, docs, and read-only live smoke coverage first.",
   "id": "jido_con-tyr",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "graph",
+    "microsoft",
+    "onedrive"
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G15] Microsoft OneDrive Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T13:55:11Z"
+  "updated_at": "2026-05-19T13:55:29Z"
 }
