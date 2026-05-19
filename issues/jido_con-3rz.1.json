@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:15:46Z",
   "description": "Create apps/jido_connect_monday with integration DSL, API token/OAuth auth metadata, GraphQL transport boundary, mix.exs, README/CHANGELOG, generated module tests, and catalog shell.",
   "id": "jido_con-3rz.1",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "monday",
+    "work-management"
+  ],
   "parent": "jido_con-3rz",
   "priority": 2,
   "status": "open",
