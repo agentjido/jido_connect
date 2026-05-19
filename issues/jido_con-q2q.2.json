@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-q2q.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-q2q.3"
+  ],
   "created": "2026-05-19T14:16:07Z",
   "description": "Add structs/schemas and fixtures for channels, videos, playlists, playlist items, search results, comments/captions where useful, pagination, and provider errors. Include normalization tests and privacy fixture review.",
   "id": "jido_con-q2q.2",

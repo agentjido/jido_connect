@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-q2q.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:08Z",
   "description": "Implement search, list/get channels, videos, playlists, playlist items, and comments/captions reads where supported. Cover quota metadata, page tokens, auth/API key behavior, and provider errors offline.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G32-S03] Implement YouTube search and read actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:09Z"
+  "updated_at": "2026-05-19T14:16:11Z"
 }
