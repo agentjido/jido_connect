@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-tyr.2"
   ],
+  "closed_at": "2026-05-19T20:10:54Z",
+  "close_reason": "Implemented in 21fd55b by pi-connector-factory",
   "created": "2026-05-19T13:54:11Z",
   "description": "Create apps/jido_connect_microsoft_onedrive using the shared Microsoft Graph foundation. Add integration DSL, auth profile reuse, mix.exs, README/CHANGELOG, generated module tests, and an empty catalog/action shell. Do not implement full drive item actions yet.",
   "id": "jido_con-tyr.1",
@@ -17,8 +19,8 @@
   ],
   "parent": "jido_con-tyr",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G15-S01] Scaffold Microsoft OneDrive package",
   "type": "task",
-  "updated_at": "2026-05-19T20:00:57Z"
+  "updated_at": "2026-05-19T20:10:54Z"
 }
