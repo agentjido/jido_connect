@@ -13,14 +13,21 @@ defmodule Jido.Connect.Intercom.CatalogPacks do
   | `:intercom_editor` | write | reader + mutations |
 
   Triggers are subscribed to independently and are not listed in packs.
-
-  Tool IDs will be populated when action fragments are added in subsequent
-  waves.
   """
 
   alias Jido.Connect.Catalog.Pack
 
-  @reader_tools []
+  @reader_tools [
+    "intercom.contact.list",
+    "intercom.contact.search",
+    "intercom.contact.get",
+    "intercom.conversation.list",
+    "intercom.conversation.search",
+    "intercom.conversation.get",
+    "intercom.admin.list",
+    "intercom.team.list"
+  ]
+
   @write_tools []
   @editor_tools @reader_tools ++ @write_tools
 

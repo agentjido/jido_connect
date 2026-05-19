@@ -19,20 +19,28 @@ defmodule Jido.Connect.Intercom.CatalogPacksTest do
       end
     end
 
-    test "reader pack has read risk" do
+    test "reader pack has read risk and read tool IDs" do
       packs = Intercom.catalog_packs()
       reader = Enum.find(packs, &(&1.id == :intercom_reader))
 
       assert reader.metadata.risk == :read
-      assert reader.allowed_tools == []
+      assert "intercom.contact.list" in reader.allowed_tools
+      assert "intercom.contact.search" in reader.allowed_tools
+      assert "intercom.contact.get" in reader.allowed_tools
+      assert "intercom.conversation.list" in reader.allowed_tools
+      assert "intercom.conversation.search" in reader.allowed_tools
+      assert "intercom.conversation.get" in reader.allowed_tools
+      assert "intercom.admin.list" in reader.allowed_tools
+      assert "intercom.team.list" in reader.allowed_tools
+      assert length(reader.allowed_tools) == 8
     end
 
-    test "editor pack has write risk" do
+    test "editor pack has write risk and includes read tools" do
       packs = Intercom.catalog_packs()
       editor = Enum.find(packs, &(&1.id == :intercom_editor))
 
       assert editor.metadata.risk == :write
-      assert editor.allowed_tools == []
+      assert length(editor.allowed_tools) == 8
     end
   end
 end

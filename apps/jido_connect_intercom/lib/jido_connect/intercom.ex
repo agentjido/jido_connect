@@ -28,7 +28,7 @@ defmodule Jido.Connect.Intercom do
   - `tags:read` / `tags:write`
   """
 
-  use Jido.Connect, fragments: []
+  use Jido.Connect, fragments: [Jido.Connect.Intercom.Actions.Reads]
 
   defdelegate catalog_packs, to: Jido.Connect.Intercom.CatalogPacks, as: :all
 
