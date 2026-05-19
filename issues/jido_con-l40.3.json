@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-l40.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:16:38Z",
   "description": "Implement list/search/get tickets, contacts/accounts, departments, comments/threads, and agents where useful. Cover pagination, region/org config, auth errors, rate limits, and provider errors offline.",
@@ -15,5 +17,5 @@
   "status": "open",
   "title": "[G36-S03] Implement Zoho Desk read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:16:38Z"
+  "updated_at": "2026-05-19T14:16:41Z"
 }
