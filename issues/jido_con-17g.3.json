@@ -5,11 +5,13 @@
   "created": "2026-05-19T14:03:10Z",
   "description": "Implement list/search tickets, get ticket, list users/organizations where useful, and ticket comments read paths. Cover pagination, query params, auth errors, rate limits, and provider errors with offline tests.",
   "id": "jido_con-17g.3",
-  "labels": [],
+  "labels": [
+    "connector-roadmap +support +zendesk"
+  ],
   "parent": "jido_con-17g",
   "priority": 2,
   "status": "open",
   "title": "[G16-S03] Implement Zendesk ticket read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:10Z"
+  "updated_at": "2026-05-19T14:03:11Z"
 }
