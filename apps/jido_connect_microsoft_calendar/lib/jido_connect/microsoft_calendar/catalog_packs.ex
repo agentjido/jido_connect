@@ -17,14 +17,19 @@ defmodule Jido.Connect.MicrosoftCalendar.CatalogPacks do
                   ]
 
   @write_tools @metadata_tools ++
+                 @triage_tools ++
                  [
                    "microsoft.calendar.event.create",
-                   "microsoft.calendar.event.update"
+                   "microsoft.calendar.event.update",
+                   "microsoft.calendar.event.accept",
+                   "microsoft.calendar.event.decline",
+                   "microsoft.calendar.event.tentatively_accept"
                  ]
 
-  @destructive_tools @metadata_tools ++
+  @destructive_tools @write_tools ++
                        [
-                         "microsoft.calendar.event.delete"
+                         "microsoft.calendar.event.delete",
+                         "microsoft.calendar.event.cancel"
                        ]
 
   @doc "Returns all built-in Microsoft Calendar catalog packs."
@@ -57,39 +62,41 @@ defmodule Jido.Connect.MicrosoftCalendar.CatalogPacks do
         excludes: [
           "microsoft.calendar.event.create",
           "microsoft.calendar.event.update",
-          "microsoft.calendar.event.delete"
+          "microsoft.calendar.event.accept",
+          "microsoft.calendar.event.decline",
+          "microsoft.calendar.event.tentatively_accept",
+          "microsoft.calendar.event.delete",
+          "microsoft.calendar.event.cancel"
         ]
       }
     })
   end
 
-  @doc "Microsoft Calendar write pack for event create and update workflows."
+  @doc "Microsoft Calendar write pack for event create, update, and RSVP workflows."
   def write do
     Pack.new!(%{
       id: :microsoft_calendar_write,
       label: "Microsoft Calendar write",
       description:
-        "Read Microsoft Calendar metadata and create or update events. Excludes delete tools.",
+        "Read Microsoft Calendar metadata, create or update events, and respond to event invitations. Excludes delete and cancel tools.",
       filters: %{provider: :microsoft_calendar},
       allowed_tools: @write_tools,
       metadata: %{
         package: :jido_connect_microsoft_calendar,
         excludes: [
-          "microsoft.calendar.calendar.get",
-          "microsoft.calendar.event.get",
-          "microsoft.calendar.event.delete"
+          "microsoft.calendar.event.delete",
+          "microsoft.calendar.event.cancel"
         ]
       }
     })
   end
 
-  @doc "Microsoft Calendar destructive pack for explicit event delete workflows."
+  @doc "Microsoft Calendar destructive pack for explicit event delete and cancel workflows."
   def destructive do
     Pack.new!(%{
       id: :microsoft_calendar_destructive,
       label: "Microsoft Calendar destructive",
-      description:
-        "Read Microsoft Calendar metadata and expose explicit event delete operations.",
+      description: "Full Microsoft Calendar access including event delete and cancel operations.",
       filters: %{provider: :microsoft_calendar},
       allowed_tools: @destructive_tools,
       metadata: %{package: :jido_connect_microsoft_calendar, risk: :destructive}

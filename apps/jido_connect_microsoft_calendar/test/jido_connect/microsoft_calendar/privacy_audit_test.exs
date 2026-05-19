@@ -21,7 +21,11 @@ defmodule Jido.Connect.MicrosoftCalendar.PrivacyAuditTest do
         "microsoft.calendar.meeting_times.find",
         "microsoft.calendar.event.create",
         "microsoft.calendar.event.update",
-        "microsoft.calendar.event.delete"
+        "microsoft.calendar.event.accept",
+        "microsoft.calendar.event.decline",
+        "microsoft.calendar.event.tentatively_accept",
+        "microsoft.calendar.event.delete",
+        "microsoft.calendar.event.cancel"
       ])
 
     assert MapSet.new(Map.keys(actions_by_id)) == expected
@@ -73,6 +77,27 @@ defmodule Jido.Connect.MicrosoftCalendar.PrivacyAuditTest do
     assert event_delete.data_classification == :personal_data
     assert event_delete.risk == :destructive
     assert event_delete.confirmation == :always
+
+    event_cancel = actions_by_id["microsoft.calendar.event.cancel"]
+    assert event_cancel.data_classification == :personal_data
+    assert event_cancel.risk == :destructive
+    assert event_cancel.confirmation == :always
+
+    # ── RSVP / response actions ────────────────────────────────────────
+    event_accept = actions_by_id["microsoft.calendar.event.accept"]
+    assert event_accept.data_classification == :personal_data
+    assert event_accept.risk == :external_write
+    assert event_accept.confirmation == :required_for_ai
+
+    event_decline = actions_by_id["microsoft.calendar.event.decline"]
+    assert event_decline.data_classification == :personal_data
+    assert event_decline.risk == :external_write
+    assert event_decline.confirmation == :required_for_ai
+
+    event_tentative = actions_by_id["microsoft.calendar.event.tentatively_accept"]
+    assert event_tentative.data_classification == :personal_data
+    assert event_tentative.risk == :external_write
+    assert event_tentative.confirmation == :required_for_ai
   end
 
   test "privacy module lists calendar content and personal data fields" do

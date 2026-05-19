@@ -14,7 +14,11 @@ defmodule Jido.Connect.MicrosoftCalendarTest do
     Jido.Connect.MicrosoftCalendar.Actions.FindMeetingTimes,
     Jido.Connect.MicrosoftCalendar.Actions.CreateEvent,
     Jido.Connect.MicrosoftCalendar.Actions.UpdateEvent,
-    Jido.Connect.MicrosoftCalendar.Actions.DeleteEvent
+    Jido.Connect.MicrosoftCalendar.Actions.AcceptEvent,
+    Jido.Connect.MicrosoftCalendar.Actions.DeclineEvent,
+    Jido.Connect.MicrosoftCalendar.Actions.TentativelyAcceptEvent,
+    Jido.Connect.MicrosoftCalendar.Actions.DeleteEvent,
+    Jido.Connect.MicrosoftCalendar.Actions.CancelEvent
   ]
 
   @calendar_dsl_fragments [
@@ -56,7 +60,11 @@ defmodule Jido.Connect.MicrosoftCalendarTest do
              "microsoft.calendar.meeting_times.find",
              "microsoft.calendar.event.create",
              "microsoft.calendar.event.update",
-             "microsoft.calendar.event.delete"
+             "microsoft.calendar.event.accept",
+             "microsoft.calendar.event.decline",
+             "microsoft.calendar.event.tentatively_accept",
+             "microsoft.calendar.event.delete",
+             "microsoft.calendar.event.cancel"
            ]
 
     create_action = Enum.find(spec.actions, &(&1.id == "microsoft.calendar.event.create"))
@@ -70,6 +78,14 @@ defmodule Jido.Connect.MicrosoftCalendarTest do
     delete_action = Enum.find(spec.actions, &(&1.id == "microsoft.calendar.event.delete"))
     assert delete_action.risk == :destructive
     assert delete_action.confirmation == :always
+
+    cancel_action = Enum.find(spec.actions, &(&1.id == "microsoft.calendar.event.cancel"))
+    assert cancel_action.risk == :destructive
+    assert cancel_action.confirmation == :always
+
+    accept_action = Enum.find(spec.actions, &(&1.id == "microsoft.calendar.event.accept"))
+    assert accept_action.risk == :external_write
+    assert accept_action.confirmation == :required_for_ai
   end
 
   test "compiles generated Jido modules for actions and plugin" do
@@ -165,14 +181,26 @@ defmodule Jido.Connect.MicrosoftCalendarTest do
              Jido.Connect.MicrosoftCalendar.Handlers.Actions.FindMeetingTimes.run(%{}, %{})
   end
 
-  test "write and destructive shell handlers return not implemented" do
-    assert {:error, :not_implemented} ==
+  test "write and destructive handlers return missing_access_token without credentials" do
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftCalendar.Handlers.Actions.CreateEvent.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftCalendar.Handlers.Actions.UpdateEvent.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftCalendar.Handlers.Actions.DeleteEvent.run(%{}, %{})
+
+    assert {:error, :missing_access_token} ==
+             Jido.Connect.MicrosoftCalendar.Handlers.Actions.CancelEvent.run(%{}, %{})
+
+    assert {:error, :missing_access_token} ==
+             Jido.Connect.MicrosoftCalendar.Handlers.Actions.AcceptEvent.run(%{}, %{})
+
+    assert {:error, :missing_access_token} ==
+             Jido.Connect.MicrosoftCalendar.Handlers.Actions.DeclineEvent.run(%{}, %{})
+
+    assert {:error, :missing_access_token} ==
+             Jido.Connect.MicrosoftCalendar.Handlers.Actions.TentativelyAcceptEvent.run(%{}, %{})
   end
 end

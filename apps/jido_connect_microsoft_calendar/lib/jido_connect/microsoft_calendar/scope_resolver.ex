@@ -23,11 +23,15 @@ defmodule Jido.Connect.MicrosoftCalendar.ScopeResolver do
 
   @write_actions [
     "microsoft.calendar.event.create",
-    "microsoft.calendar.event.update"
+    "microsoft.calendar.event.update",
+    "microsoft.calendar.event.accept",
+    "microsoft.calendar.event.decline",
+    "microsoft.calendar.event.tentatively_accept"
   ]
 
   @destructive_actions [
-    "microsoft.calendar.event.delete"
+    "microsoft.calendar.event.delete",
+    "microsoft.calendar.event.cancel"
   ]
 
   @doc "Returns the required Microsoft Graph scopes for the given operation."

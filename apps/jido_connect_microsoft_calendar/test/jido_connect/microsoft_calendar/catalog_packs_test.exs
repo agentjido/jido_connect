@@ -94,7 +94,7 @@ defmodule Jido.Connect.MicrosoftCalendar.CatalogPacksTest do
              )
   end
 
-  test "write pack allows create and update tools and rejects destructive" do
+  test "write pack allows create, update, and RSVP tools and rejects destructive" do
     assert {:ok, descriptor} =
              Catalog.describe_tool("microsoft.calendar.event.create",
                modules: [MicrosoftCalendar],
@@ -113,6 +113,24 @@ defmodule Jido.Connect.MicrosoftCalendar.CatalogPacksTest do
 
     assert update_descriptor.tool.id == "microsoft.calendar.event.update"
 
+    assert {:ok, accept_descriptor} =
+             Catalog.describe_tool("microsoft.calendar.event.accept",
+               modules: [MicrosoftCalendar],
+               packs: MicrosoftCalendar.catalog_packs(),
+               pack: :microsoft_calendar_write
+             )
+
+    assert accept_descriptor.tool.id == "microsoft.calendar.event.accept"
+
+    assert {:ok, decline_descriptor} =
+             Catalog.describe_tool("microsoft.calendar.event.decline",
+               modules: [MicrosoftCalendar],
+               packs: MicrosoftCalendar.catalog_packs(),
+               pack: :microsoft_calendar_write
+             )
+
+    assert decline_descriptor.tool.id == "microsoft.calendar.event.decline"
+
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("microsoft.calendar.event.delete",
                modules: [MicrosoftCalendar],
@@ -121,14 +139,14 @@ defmodule Jido.Connect.MicrosoftCalendar.CatalogPacksTest do
              )
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
-             Catalog.describe_tool("microsoft.calendar.event.get",
+             Catalog.describe_tool("microsoft.calendar.event.cancel",
                modules: [MicrosoftCalendar],
                packs: MicrosoftCalendar.catalog_packs(),
                pack: :microsoft_calendar_write
              )
   end
 
-  test "destructive pack exposes delete tool" do
+  test "destructive pack exposes delete and cancel tools" do
     assert {:ok, descriptor} =
              Catalog.describe_tool("microsoft.calendar.event.delete",
                modules: [MicrosoftCalendar],
@@ -138,18 +156,13 @@ defmodule Jido.Connect.MicrosoftCalendar.CatalogPacksTest do
 
     assert descriptor.tool.id == "microsoft.calendar.event.delete"
 
-    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
-             Catalog.describe_tool("microsoft.calendar.event.create",
+    assert {:ok, cancel_descriptor} =
+             Catalog.describe_tool("microsoft.calendar.event.cancel",
                modules: [MicrosoftCalendar],
                packs: MicrosoftCalendar.catalog_packs(),
                pack: :microsoft_calendar_destructive
              )
 
-    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
-             Catalog.describe_tool("microsoft.calendar.event.update",
-               modules: [MicrosoftCalendar],
-               packs: MicrosoftCalendar.catalog_packs(),
-               pack: :microsoft_calendar_destructive
-             )
+    assert cancel_descriptor.tool.id == "microsoft.calendar.event.cancel"
   end
 end
