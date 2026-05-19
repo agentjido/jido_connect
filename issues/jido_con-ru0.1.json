@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:44Z",
   "description": "Create apps/jido_connect_stripe with integration DSL, restricted/API key auth metadata, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement payment actions yet.",
   "id": "jido_con-ru0.1",
-  "labels": [
-    "connector-roadmap +payments +stripe"
-  ],
+  "labels": [],
   "parent": "jido_con-ru0",
   "priority": 2,
   "status": "open",
   "title": "[G22-S01] Scaffold Stripe package",
   "type": "task",
-  "updated_at": "2026-05-19T14:04:09Z"
+  "updated_at": "2026-05-19T14:05:04Z"
 }
