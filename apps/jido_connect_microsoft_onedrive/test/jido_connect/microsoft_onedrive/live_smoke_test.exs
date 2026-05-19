@@ -15,7 +15,7 @@ defmodule Jido.Connect.MicrosoftOnedrive.LiveSmokeTest do
 
   ## Safety
 
-  - Read-only tests run without gating.
+  - Read-only tests exercise list, get, search, and delta endpoints.
   - Destructive and write tests are gated behind `MICROSOFT_LIVE_DESTRUCTIVE`
     to prevent accidental data mutation in live environments.
   - No tokens, secrets, or credential material are ever logged or exposed in
@@ -39,8 +39,24 @@ defmodule Jido.Connect.MicrosoftOnedrive.LiveSmokeTest do
 
   @moduletag :live_smoke
 
+  alias Jido.Connect.MicrosoftOnedrive.Handlers.Actions
+
+  # ── Env guard ─────────────────────────────────────────────────────────
+
+  defp access_token do
+    System.get_env("MICROSOFT_ACCESS_TOKEN")
+  end
+
+  defp onedrive_drive_id do
+    System.get_env("MICROSOFT_ONEDRIVE_DRIVE_ID")
+  end
+
+  defp onedrive_item_id do
+    System.get_env("MICROSOFT_ONEDRIVE_ITEM_ID")
+  end
+
   setup_all do
-    token = System.get_env("MICROSOFT_ACCESS_TOKEN")
+    token = access_token()
 
     if token && token != "" do
       {:ok, token: token}
@@ -49,72 +65,175 @@ defmodule Jido.Connect.MicrosoftOnedrive.LiveSmokeTest do
     end
   end
 
+  # ── Helper ────────────────────────────────────────────────────────────
+
+  defp credentials(token) do
+    %{credentials: %{access_token: token}}
+  end
+
+  # ── Read-only: List Items ─────────────────────────────────────────────
+
   describe "list items (live)" do
-    @tag :skip
     test "returns a page of items for the authenticated user", %{token: token} do
       assert {:ok, %{items: items}} =
-               Jido.Connect.MicrosoftOnedrive.Handlers.Actions.ListItems.run(
+               Actions.ListItems.run(
                  %{page_size: 5},
-                 %{credentials: %{access_token: token}}
+                 credentials(token)
                )
 
       assert is_list(items)
     end
   end
 
+  # ── Read-only: Get Drive ──────────────────────────────────────────────
+
+  describe "get drive (live)" do
+    test "returns default drive metadata for the authenticated user", %{token: token} do
+      assert {:ok, %{drive: drive}} =
+               Actions.GetDrive.run(%{}, credentials(token))
+
+      assert is_map(drive)
+      assert Map.has_key?(drive, :drive_id) or Map.has_key?(drive, :name)
+    end
+  end
+
+  # ── Read-only: List Drives ────────────────────────────────────────────
+
+  describe "list drives (live)" do
+    test "returns a page of drives", %{token: token} do
+      assert {:ok, %{drives: drives}} =
+               Actions.ListDrives.run(
+                 %{page_size: 5},
+                 credentials(token)
+               )
+
+      assert is_list(drives)
+    end
+
+    test "fetches a specific drive when MICROSOFT_ONEDRIVE_DRIVE_ID is set", %{
+      token: token
+    } do
+      drive_id = onedrive_drive_id()
+
+      if drive_id && drive_id != "" do
+        # GetDrive fetches the default drive; if a specific drive id is
+        # available, list drives and verify it appears in the results.
+        assert {:ok, %{drives: drives}} =
+                 Actions.ListDrives.run(
+                   %{page_size: 50},
+                   credentials(token)
+                 )
+
+        ids = Enum.map(drives, &Map.get(&1, :drive_id))
+        assert drive_id in ids
+      end
+    end
+  end
+
+  # ── Read-only: Search Items ───────────────────────────────────────────
+
+  describe "search items (live)" do
+    test "returns search results for a query", %{token: token} do
+      assert {:ok, %{items: items}} =
+               Actions.Search.run(
+                 %{query: "test", page_size: 5},
+                 credentials(token)
+               )
+
+      assert is_list(items)
+    end
+  end
+
+  # ── Read-only: Get Item ───────────────────────────────────────────────
+
+  describe "get item (live)" do
+    test "fetches a specific item when MICROSOFT_ONEDRIVE_ITEM_ID is set", %{token: token} do
+      item_id = onedrive_item_id()
+
+      if item_id && item_id != "" do
+        assert {:ok, %{item: item}} =
+                 Actions.GetItem.run(
+                   %{item_id: item_id},
+                   credentials(token)
+                 )
+
+        assert is_map(item)
+        assert Map.get(item, :item_id) == item_id
+      end
+    end
+  end
+
+  # ── Read-only: Delta ──────────────────────────────────────────────────
+
+  describe "delta (live)" do
+    test "returns an initial delta response", %{token: token} do
+      assert {:ok, result} =
+               Actions.Delta.run(%{}, credentials(token))
+
+      assert is_list(Map.get(result, :items, []))
+
+      # Initial sync should include a delta_link or delta_token
+      assert Map.get(result, :delta_link) || Map.get(result, :delta_token)
+    end
+  end
+
+  # ── Destructive: Create and Delete Item ───────────────────────────────
+
   describe "create and delete item (live, destructive)" do
-    @tag :skip
     @tag :live_destructive
     test "creates a folder and then deletes it", %{token: token} do
       skip_unless_destructive!()
 
       assert {:ok, %{item: created}} =
-               Jido.Connect.MicrosoftOnedrive.Handlers.Actions.CreateItem.run(
+               Actions.CreateItem.run(
                  %{
                    name: "smoke-test-folder-#{System.unique_integer([:positive])}",
                    type: "folder"
                  },
-                 %{credentials: %{access_token: token}}
+                 credentials(token)
                )
 
       assert created.item_id
 
       assert {:ok, %{deleted: true}} =
-               Jido.Connect.MicrosoftOnedrive.Handlers.Actions.DeleteItem.run(
+               Actions.DeleteItem.run(
                  %{item_id: created.item_id},
-                 %{credentials: %{access_token: token}}
+                 credentials(token)
                )
     end
   end
 
+  # ── Destructive: Create Sharing Link and Delete Permission ────────────
+
   describe "create sharing link and delete permission (live, destructive)" do
-    @tag :skip
     @tag :live_destructive
     test "creates a view link and revokes the permission", %{token: token} do
       skip_unless_destructive!()
 
       # First, find an item to share
       assert {:ok, %{items: [item | _]}} =
-               Jido.Connect.MicrosoftOnedrive.Handlers.Actions.ListItems.run(
+               Actions.ListItems.run(
                  %{page_size: 1},
-                 %{credentials: %{access_token: token}}
+                 credentials(token)
                )
 
       assert {:ok, %{permission: perm}} =
-               Jido.Connect.MicrosoftOnedrive.Handlers.Actions.CreateSharingLink.run(
+               Actions.CreateSharingLink.run(
                  %{item_id: item.item_id, type: "view"},
-                 %{credentials: %{access_token: token}}
+                 credentials(token)
                )
 
       assert perm.permission_id
 
       assert {:ok, %{deleted: true}} =
-               Jido.Connect.MicrosoftOnedrive.Handlers.Actions.DeletePermission.run(
+               Actions.DeletePermission.run(
                  %{item_id: item.item_id, permission_id: perm.permission_id},
-                 %{credentials: %{access_token: token}}
+                 credentials(token)
                )
     end
   end
+
+  # ── Helper ────────────────────────────────────────────────────────────
 
   defp skip_unless_destructive! do
     unless System.get_env("MICROSOFT_LIVE_DESTRUCTIVE") == "true" do
