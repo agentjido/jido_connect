@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-3rz.5"
+  ],
   "blocks": [
     "jido_con-id6.2"
   ],
@@ -17,5 +19,5 @@
   "status": "open",
   "title": "[G30-S01] Scaffold Azure DevOps package",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:57Z"
+  "updated_at": "2026-05-19T14:17:05Z"
 }
