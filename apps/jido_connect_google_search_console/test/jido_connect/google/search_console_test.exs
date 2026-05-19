@@ -89,8 +89,7 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
         ) do
       {:ok,
        SearchConsole.URLInspection.new!(%{
-         inspection_result_link:
-           "https://search.google.com/search-console/inspect?id=xyz",
+         inspection_result_link: "https://search.google.com/search-console/inspect?id=xyz",
          index_status: %{"verdict" => "PASS", "coverageState" => "Submitted and indexed"},
          mobile_usability_result: %{"verdict" => "PASS"},
          rich_results: []
@@ -118,6 +117,12 @@ defmodule Jido.Connect.Google.SearchConsoleTest do
            ]
 
     assert spec.triggers == []
+
+    ConnectorContracts.assert_google_naming_and_catalog_conventions(SearchConsole,
+      id_prefix: "google.search_console.",
+      pack_id_prefix: "google_search_console_",
+      module_namespace: Jido.Connect.Google.SearchConsole
+    )
 
     assert [%{id: :user, kind: :oauth2, refresh?: true, pkce?: true} = profile] =
              spec.auth_profiles

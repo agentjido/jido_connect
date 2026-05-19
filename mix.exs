@@ -59,6 +59,7 @@ defmodule JidoConnect.MixProject do
         "docs/google_connector_conventions.md",
         "docs/google_extension_patterns.md",
         "docs/google_polling_checkpoints.md",
+        "docs/google_scope_audit.md",
         "docs/host_owned_storage.md",
         "docs/github_auth.md",
         "docs/github_webhooks.md",
