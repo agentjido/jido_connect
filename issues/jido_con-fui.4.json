@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-fui.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-fui.5"
+  ],
   "created": "2026-05-19T14:16:16Z",
   "description": "Implement add/update member, tag/untag member, create/update campaign draft where supported. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-fui.4",
