@@ -9,13 +9,11 @@
   "created": "2026-05-19T14:03:39Z",
   "description": "Create apps/jido_connect_shopify with integration DSL, OAuth/admin token auth metadata, shop domain/base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement commerce actions yet.",
   "id": "jido_con-5hk.1",
-  "labels": [
-    "connector-roadmap +commerce +shopify"
-  ],
+  "labels": [],
   "parent": "jido_con-5hk",
   "priority": 2,
   "status": "open",
   "title": "[G21-S01] Scaffold Shopify package",
   "type": "task",
-  "updated_at": "2026-05-19T14:04:08Z"
+  "updated_at": "2026-05-19T14:05:02Z"
 }
