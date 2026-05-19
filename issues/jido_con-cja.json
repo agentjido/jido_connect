@@ -7,12 +7,10 @@
   "created": "2026-05-19T14:03:31Z",
   "description": "Build jido_connect_gitlab for dev-work workflows: OAuth/PAT auth, projects, issues, merge requests, pipelines/jobs, comments/notes, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
   "id": "jido_con-cja",
-  "labels": [
-    "connector-roadmap +devtools +gitlab"
-  ],
+  "labels": [],
   "priority": 2,
   "status": "open",
   "title": "[G20] GitLab Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:04:07Z"
+  "updated_at": "2026-05-19T14:04:59Z"
 }
