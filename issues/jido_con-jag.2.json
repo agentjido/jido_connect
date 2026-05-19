@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:53Z",
+  "description": "Add structs/schemas and fixtures for guilds, channels, messages, users, members, roles, reactions, threads, webhooks/interactions where useful, pagination, and provider errors. Include normalization tests and privacy fixture review.",
+  "id": "jido_con-jag.2",
+  "labels": [],
+  "parent": "jido_con-jag",
+  "priority": 2,
+  "status": "open",
+  "title": "[G38-S02] Add Discord normalized structs and fixtures",
+  "type": "task",
+  "updated_at": "2026-05-19T14:16:53Z"
+}
