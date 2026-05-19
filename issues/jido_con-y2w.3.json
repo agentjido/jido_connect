@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-y2w.2"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:20Z",
   "description": "Implement request/get_json/post_json actions with explicit policy checks, allowed method handling, safe header/body redaction, timeout/redirect controls, and Req.Test coverage. Do not allow unconstrained URLs without host policy approval.",
@@ -16,5 +18,5 @@
   "status": "open",
   "title": "[G25-S03] Implement policy-gated HTTP request actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:15:21Z"
+  "updated_at": "2026-05-19T14:15:23Z"
 }
