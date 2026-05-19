@@ -9,11 +9,15 @@
   "created": "2026-05-19T14:03:59Z",
   "description": "Implement list/get forms, list/get responses, and answer normalization helpers. Cover pagination, since/until filters, auth errors, provider errors, and offline fixtures.",
   "id": "jido_con-n1t.3",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "forms",
+    "typeform"
+  ],
   "parent": "jido_con-n1t",
   "priority": 2,
   "status": "open",
   "title": "[G24-S03] Implement Typeform form and response read actions",
   "type": "task",
-  "updated_at": "2026-05-19T14:05:10Z"
+  "updated_at": "2026-05-19T14:05:52Z"
 }
