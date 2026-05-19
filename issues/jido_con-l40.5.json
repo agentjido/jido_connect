@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:40Z",
+  "description": "Add webhook/poll trigger strategy for ticket changes, catalog packs, scope matrix, README examples, .env.example placeholders, and read-only live smoke hooks. Verify package tests and generated modules compile.",
+  "id": "jido_con-l40.5",
+  "labels": [],
+  "parent": "jido_con-l40",
+  "priority": 2,
+  "status": "open",
+  "title": "[G36-S05] Add Zoho Desk triggers catalog docs and smoke hooks",
+  "type": "task",
+  "updated_at": "2026-05-19T14:16:40Z"
+}
