@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-te1.2"
+  ],
   "created": "2026-05-19T14:03:51Z",
   "description": "Create apps/jido_connect_zoom with integration DSL, OAuth/server-to-server auth metadata, account/base URL handling, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement meeting actions yet.",
   "id": "jido_con-te1.1",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G23-S01] Scaffold Zoom package",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:51Z"
+  "updated_at": "2026-05-19T14:03:55Z"
 }

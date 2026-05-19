@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-te1.1"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:03:52Z",
   "description": "Add structs/schemas and fixtures for users, meetings, registrants, recordings, transcripts, pagination, and webhook payloads. Include normalization tests and privacy fixture review.",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "[G23-S02] Add Zoom normalized structs and fixtures",
   "type": "task",
-  "updated_at": "2026-05-19T14:03:52Z"
+  "updated_at": "2026-05-19T14:03:55Z"
 }
