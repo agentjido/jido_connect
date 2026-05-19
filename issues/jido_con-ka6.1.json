@@ -5,7 +5,11 @@
   "created": "2026-05-19T14:15:39Z",
   "description": "Create apps/jido_connect_trello with integration DSL, API key/token auth metadata, mix.exs, README/CHANGELOG, generated module tests, and catalog shell. Do not implement board/card actions yet.",
   "id": "jido_con-ka6.1",
-  "labels": [],
+  "labels": [
+    "connector-roadmap",
+    "trello",
+    "work-management"
+  ],
   "parent": "jido_con-ka6",
   "priority": 2,
   "status": "open",
