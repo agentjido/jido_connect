@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:16:42Z",
+  "description": "Build jido_connect_bigcommerce for commerce workflows: OAuth/API token auth, stores, products, customers, orders, guarded writes, webhook verification, catalog packs, docs, and read-only live smoke guidance.",
+  "id": "jido_con-6cn",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "[G37] BigCommerce Connector",
+  "type": "epic",
+  "updated_at": "2026-05-19T14:16:42Z"
+}
