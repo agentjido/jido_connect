@@ -15,6 +15,8 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
     Jido.Connect.MicrosoftOutlook.Actions.CreateDraft,
     Jido.Connect.MicrosoftOutlook.Actions.UpdateDraft,
     Jido.Connect.MicrosoftOutlook.Actions.SendDraft,
+    Jido.Connect.MicrosoftOutlook.Actions.ReplyMessage,
+    Jido.Connect.MicrosoftOutlook.Actions.ReplyAllMessage,
     Jido.Connect.MicrosoftOutlook.Actions.MoveMessage,
     Jido.Connect.MicrosoftOutlook.Actions.DeleteMessage,
     Jido.Connect.MicrosoftOutlook.Actions.DeleteDraft
@@ -61,6 +63,8 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
              "microsoft.outlook.draft.create",
              "microsoft.outlook.draft.update",
              "microsoft.outlook.draft.send",
+             "microsoft.outlook.message.reply",
+             "microsoft.outlook.message.reply_all",
              "microsoft.outlook.message.move",
              "microsoft.outlook.message.delete",
              "microsoft.outlook.draft.delete"
@@ -69,6 +73,14 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
     send_action = Enum.find(spec.actions, &(&1.id == "microsoft.outlook.message.send"))
     assert send_action.risk == :external_write
     assert send_action.confirmation == :required_for_ai
+
+    reply_action = Enum.find(spec.actions, &(&1.id == "microsoft.outlook.message.reply"))
+    assert reply_action.risk == :external_write
+    assert reply_action.confirmation == :required_for_ai
+
+    reply_all_action = Enum.find(spec.actions, &(&1.id == "microsoft.outlook.message.reply_all"))
+    assert reply_all_action.risk == :external_write
+    assert reply_all_action.confirmation == :required_for_ai
 
     update_draft_action =
       Enum.find(spec.actions, &(&1.id == "microsoft.outlook.draft.update"))
@@ -141,6 +153,18 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
              %{scopes: ["Mail.ReadWrite"]}
            ) == ["Mail.ReadWrite"]
 
+    assert resolver.required_scopes(
+             %{id: "microsoft.outlook.message.reply"},
+             %{},
+             %{scopes: ["Mail.Send"]}
+           ) == ["Mail.Send"]
+
+    assert resolver.required_scopes(
+             %{id: "microsoft.outlook.message.reply_all"},
+             %{},
+             %{scopes: ["Mail.Send"]}
+           ) == ["Mail.Send"]
+
     assert resolver.required_scopes(%{}, %{}, %{}) == ["Mail.Read"]
   end
 
@@ -161,19 +185,27 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.GetFolder.run(%{}, %{})
   end
 
-  test "write and destructive shell handlers return not implemented" do
-    assert {:error, :not_implemented} ==
+  test "write handlers reject missing credentials" do
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.SendMessage.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.CreateDraft.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.UpdateDraft.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.SendDraft.run(%{}, %{})
 
+    assert {:error, :missing_access_token} ==
+             Jido.Connect.MicrosoftOutlook.Handlers.Actions.ReplyMessage.run(%{}, %{})
+
+    assert {:error, :missing_access_token} ==
+             Jido.Connect.MicrosoftOutlook.Handlers.Actions.ReplyAllMessage.run(%{}, %{})
+  end
+
+  test "destructive shell handlers return not implemented" do
     assert {:error, :not_implemented} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.MoveMessage.run(%{}, %{})
 

@@ -24,7 +24,9 @@ defmodule Jido.Connect.MicrosoftOutlook.ScopeResolver do
     "microsoft.outlook.message.send",
     "microsoft.outlook.draft.create",
     "microsoft.outlook.draft.update",
-    "microsoft.outlook.draft.send"
+    "microsoft.outlook.draft.send",
+    "microsoft.outlook.message.reply",
+    "microsoft.outlook.message.reply_all"
   ]
 
   @mutation_actions [

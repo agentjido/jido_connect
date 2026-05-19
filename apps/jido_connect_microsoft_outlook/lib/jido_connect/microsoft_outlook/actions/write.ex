@@ -116,6 +116,58 @@ defmodule Jido.Connect.MicrosoftOutlook.Actions.Write do
       end
     end
 
+    action :reply_message do
+      id("microsoft.outlook.message.reply")
+      resource(:message)
+      verb(:create)
+      data_classification(:message_content)
+      label("Reply to Outlook Mail message")
+      description("Reply to an existing Outlook Mail message.")
+      handler(Jido.Connect.MicrosoftOutlook.Handlers.Actions.ReplyMessage)
+      effect(:external_write, confirmation: :required_for_ai)
+
+      access do
+        auth(:user)
+        scopes([@mail_send], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:message_id, :string, required?: true, example: "AAMkAGI2...")
+        field(:comment, :string, required?: true)
+      end
+
+      output do
+        field(:sent, :boolean)
+        field(:message_id, :string)
+      end
+    end
+
+    action :reply_all_message do
+      id("microsoft.outlook.message.reply_all")
+      resource(:message)
+      verb(:create)
+      data_classification(:message_content)
+      label("Reply-all to Outlook Mail message")
+      description("Reply-all to an existing Outlook Mail message.")
+      handler(Jido.Connect.MicrosoftOutlook.Handlers.Actions.ReplyAllMessage)
+      effect(:external_write, confirmation: :required_for_ai)
+
+      access do
+        auth(:user)
+        scopes([@mail_send], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:message_id, :string, required?: true, example: "AAMkAGI2...")
+        field(:comment, :string, required?: true)
+      end
+
+      output do
+        field(:sent, :boolean)
+        field(:message_id, :string)
+      end
+    end
+
     action :move_message do
       id("microsoft.outlook.message.move")
       resource(:message)

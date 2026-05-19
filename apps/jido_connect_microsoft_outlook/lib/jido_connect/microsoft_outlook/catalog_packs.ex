@@ -21,7 +21,9 @@ defmodule Jido.Connect.MicrosoftOutlook.CatalogPacks do
                   "microsoft.outlook.draft.create",
                   "microsoft.outlook.draft.update",
                   "microsoft.outlook.draft.send",
-                  "microsoft.outlook.message.send"
+                  "microsoft.outlook.message.send",
+                  "microsoft.outlook.message.reply",
+                  "microsoft.outlook.message.reply_all"
                 ]
 
   @destructive_tools @metadata_tools ++
