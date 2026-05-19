@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-17g.2"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-17g.4"
+  ],
   "created": "2026-05-19T14:03:10Z",
   "description": "Implement list/search tickets, get ticket, list users/organizations where useful, and ticket comments read paths. Cover pagination, query params, auth errors, rate limits, and provider errors with offline tests.",
   "id": "jido_con-17g.3",
