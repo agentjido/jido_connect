@@ -17,6 +17,8 @@ defmodule Jido.Connect.MicrosoftCalendar.PrivacyAuditTest do
         "microsoft.calendar.calendar.get",
         "microsoft.calendar.events.list",
         "microsoft.calendar.event.get",
+        "microsoft.calendar.schedule.get",
+        "microsoft.calendar.meeting_times.find",
         "microsoft.calendar.event.create",
         "microsoft.calendar.event.update",
         "microsoft.calendar.event.delete"
@@ -44,6 +46,16 @@ defmodule Jido.Connect.MicrosoftCalendar.PrivacyAuditTest do
     assert event_get.data_classification == :personal_data
     assert event_get.risk == :read
     assert event_get.confirmation == :none
+
+    schedule_get = actions_by_id["microsoft.calendar.schedule.get"]
+    assert schedule_get.data_classification == :personal_data
+    assert schedule_get.risk == :read
+    assert schedule_get.confirmation == :none
+
+    meeting_times_find = actions_by_id["microsoft.calendar.meeting_times.find"]
+    assert meeting_times_find.data_classification == :personal_data
+    assert meeting_times_find.risk == :read
+    assert meeting_times_find.confirmation == :none
 
     # ── Write / external_write actions ─────────────────────────────────
     event_create = actions_by_id["microsoft.calendar.event.create"]

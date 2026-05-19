@@ -109,5 +109,88 @@ defmodule Jido.Connect.MicrosoftCalendar.Actions.Read do
         field(:event, :map)
       end
     end
+
+    action :get_schedule do
+      id("microsoft.calendar.schedule.get")
+      resource(:schedule)
+      verb(:get)
+      data_classification(:personal_data)
+      label("Get Microsoft Calendar free/busy schedule")
+
+      description(
+        "Get free/busy availability for users or resources via Microsoft Graph calendar/getSchedule."
+      )
+
+      handler(Jido.Connect.MicrosoftCalendar.Handlers.Actions.GetSchedule)
+      effect(:read)
+
+      access do
+        auth(:user)
+        scopes([@calendars_read], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:schedules, {:array, :string},
+          required?: true,
+          example: ["meganb@contoso.com", "brianj@contoso.com"]
+        )
+
+        field(:start_date_time, :string,
+          required?: true,
+          example: "2026-06-15T09:00:00"
+        )
+
+        field(:end_date_time, :string,
+          required?: true,
+          example: "2026-06-15T18:00:00"
+        )
+
+        field(:time_zone, :string, default: "UTC")
+        field(:availability_view_interval, :integer, default: 30)
+      end
+
+      output do
+        field(:results, {:array, :map})
+      end
+    end
+
+    action :find_meeting_times do
+      id("microsoft.calendar.meeting_times.find")
+      resource(:meeting_time)
+      verb(:get)
+      data_classification(:personal_data)
+      label("Find Microsoft Calendar meeting times")
+
+      description(
+        "Suggest meeting times based on attendee availability via Microsoft Graph findMeetingTimes."
+      )
+
+      handler(Jido.Connect.MicrosoftCalendar.Handlers.Actions.FindMeetingTimes)
+      effect(:read)
+
+      access do
+        auth(:user)
+        scopes([@calendars_read], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:attendees, {:array, :string},
+          example: ["meganb@contoso.com", "brianj@contoso.com"]
+        )
+
+        field(:start_date_time, :string, example: "2026-06-15T09:00:00")
+        field(:end_date_time, :string, example: "2026-06-15T18:00:00")
+        field(:time_zone, :string, default: "UTC")
+        field(:meeting_duration, :string, default: "PT1H")
+        field(:is_org_app_required, :boolean)
+        field(:return_suggestion_reasons, :boolean, default: true)
+        field(:minimum_attendee_percentage, :integer)
+      end
+
+      output do
+        field(:suggestions, {:array, :map})
+        field(:empty_suggestions_reason, :string)
+      end
+    end
   end
 end

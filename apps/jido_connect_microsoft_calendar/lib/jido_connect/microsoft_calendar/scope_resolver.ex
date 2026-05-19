@@ -16,7 +16,9 @@ defmodule Jido.Connect.MicrosoftCalendar.ScopeResolver do
     "microsoft.calendar.calendars.list",
     "microsoft.calendar.calendar.get",
     "microsoft.calendar.events.list",
-    "microsoft.calendar.event.get"
+    "microsoft.calendar.event.get",
+    "microsoft.calendar.schedule.get",
+    "microsoft.calendar.meeting_times.find"
   ]
 
   @write_actions [

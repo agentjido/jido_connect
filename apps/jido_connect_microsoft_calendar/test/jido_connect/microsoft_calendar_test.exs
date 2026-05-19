@@ -10,6 +10,8 @@ defmodule Jido.Connect.MicrosoftCalendarTest do
     Jido.Connect.MicrosoftCalendar.Actions.GetCalendar,
     Jido.Connect.MicrosoftCalendar.Actions.ListEvents,
     Jido.Connect.MicrosoftCalendar.Actions.GetEvent,
+    Jido.Connect.MicrosoftCalendar.Actions.GetSchedule,
+    Jido.Connect.MicrosoftCalendar.Actions.FindMeetingTimes,
     Jido.Connect.MicrosoftCalendar.Actions.CreateEvent,
     Jido.Connect.MicrosoftCalendar.Actions.UpdateEvent,
     Jido.Connect.MicrosoftCalendar.Actions.DeleteEvent
@@ -50,6 +52,8 @@ defmodule Jido.Connect.MicrosoftCalendarTest do
              "microsoft.calendar.calendar.get",
              "microsoft.calendar.events.list",
              "microsoft.calendar.event.get",
+             "microsoft.calendar.schedule.get",
+             "microsoft.calendar.meeting_times.find",
              "microsoft.calendar.event.create",
              "microsoft.calendar.event.update",
              "microsoft.calendar.event.delete"
@@ -121,6 +125,18 @@ defmodule Jido.Connect.MicrosoftCalendarTest do
            ) == ["Calendars.Read"]
 
     assert resolver.required_scopes(
+             %{id: "microsoft.calendar.schedule.get"},
+             %{},
+             %{scopes: ["Calendars.Read"]}
+           ) == ["Calendars.Read"]
+
+    assert resolver.required_scopes(
+             %{id: "microsoft.calendar.meeting_times.find"},
+             %{},
+             %{scopes: ["Calendars.Read"]}
+           ) == ["Calendars.Read"]
+
+    assert resolver.required_scopes(
              %{id: "microsoft.calendar.event.delete"},
              %{},
              %{scopes: ["Calendars.ReadWrite"]}
@@ -129,19 +145,27 @@ defmodule Jido.Connect.MicrosoftCalendarTest do
     assert resolver.required_scopes(%{}, %{}, %{}) == ["Calendars.Read"]
   end
 
-  test "all shell handlers return not implemented" do
-    assert {:error, :not_implemented} ==
+  test "read handlers return missing_access_token without credentials" do
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftCalendar.Handlers.Actions.ListCalendars.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftCalendar.Handlers.Actions.GetCalendar.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftCalendar.Handlers.Actions.ListEvents.run(%{}, %{})
 
-    assert {:error, :not_implemented} ==
+    assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftCalendar.Handlers.Actions.GetEvent.run(%{}, %{})
 
+    assert {:error, :missing_access_token} ==
+             Jido.Connect.MicrosoftCalendar.Handlers.Actions.GetSchedule.run(%{}, %{})
+
+    assert {:error, :missing_access_token} ==
+             Jido.Connect.MicrosoftCalendar.Handlers.Actions.FindMeetingTimes.run(%{}, %{})
+  end
+
+  test "write and destructive shell handlers return not implemented" do
     assert {:error, :not_implemented} ==
              Jido.Connect.MicrosoftCalendar.Handlers.Actions.CreateEvent.run(%{}, %{})
 

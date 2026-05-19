@@ -5,13 +5,15 @@ defmodule Jido.Connect.MicrosoftCalendar.CatalogPacks do
 
   @metadata_tools [
     "microsoft.calendar.calendars.list",
-    "microsoft.calendar.events.list"
+    "microsoft.calendar.events.list",
+    "microsoft.calendar.schedule.get"
   ]
 
   @triage_tools @metadata_tools ++
                   [
                     "microsoft.calendar.calendar.get",
-                    "microsoft.calendar.event.get"
+                    "microsoft.calendar.event.get",
+                    "microsoft.calendar.meeting_times.find"
                   ]
 
   @write_tools @metadata_tools ++
