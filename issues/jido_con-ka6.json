@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-rfb.5"
+  ],
   "blocks": [],
   "created": "2026-05-19T14:15:38Z",
   "description": "Build jido_connect_trello for lightweight work management: API key/token auth, boards, lists, cards, members, comments, card moves/updates, webhooks, catalog packs, docs, and read-only live smoke guidance.",
@@ -14,5 +16,5 @@
   "status": "open",
   "title": "[G28] Trello Connector",
   "type": "epic",
-  "updated_at": "2026-05-19T14:15:38Z"
+  "updated_at": "2026-05-19T14:17:02Z"
 }
