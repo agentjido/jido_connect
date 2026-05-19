@@ -44,7 +44,15 @@ defmodule JidoConnectMCP.MixProject do
       jido_connect_dep(),
       jido_mcp_dep(),
       {:jason, "~> 1.4"},
-      {:plug, "~> 1.19"}
+      {:plug, "~> 1.19"},
+      # Transitive Hex deps of the jido_mcp git dependency – declared
+      # explicitly so the umbrella can resolve them from the local Hex
+      # cache without network access.
+      {:anubis_mcp, "~> 1.1"},
+      {:jido, "~> 2.2"},
+      {:jido_action, "~> 2.2"},
+      {:jido_signal, "~> 2.1"},
+      {:zoi, "~> 0.17"}
     ]
   end
 
