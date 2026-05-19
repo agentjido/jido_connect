@@ -15,7 +15,14 @@ defmodule Jido.Connect.MicrosoftOnedrive.ScopeResolver do
   @read_actions [
     "microsoft.onedrive.items.list",
     "microsoft.onedrive.item.get",
-    "microsoft.onedrive.drive.get"
+    "microsoft.onedrive.drive.get",
+    "microsoft.onedrive.items.search",
+    "microsoft.onedrive.item.download",
+    "microsoft.onedrive.items.delta"
+  ]
+
+  @read_all_actions [
+    "microsoft.onedrive.drives.list"
   ]
 
   @write_actions [
@@ -72,6 +79,10 @@ defmodule Jido.Connect.MicrosoftOnedrive.ScopeResolver do
   defp required_for_operation(operation_id, _connection)
        when operation_id in @destructive_actions,
        do: [@files_read_write]
+
+  defp required_for_operation(operation_id, _connection)
+       when operation_id in @read_all_actions,
+       do: [@files_read_all]
 
   defp required_for_operation(_operation_id, _connection),
     do: [@files_read]

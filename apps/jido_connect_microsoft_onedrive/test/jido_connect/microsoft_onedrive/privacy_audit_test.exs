@@ -16,6 +16,10 @@ defmodule Jido.Connect.MicrosoftOnedrive.PrivacyAuditTest do
         "microsoft.onedrive.items.list",
         "microsoft.onedrive.item.get",
         "microsoft.onedrive.drive.get",
+        "microsoft.onedrive.drives.list",
+        "microsoft.onedrive.items.search",
+        "microsoft.onedrive.item.download",
+        "microsoft.onedrive.items.delta",
         "microsoft.onedrive.item.create",
         "microsoft.onedrive.item.update",
         "microsoft.onedrive.item.upload",
@@ -39,6 +43,26 @@ defmodule Jido.Connect.MicrosoftOnedrive.PrivacyAuditTest do
     assert drive_get.data_classification == :personal_data
     assert drive_get.risk == :read
     assert drive_get.confirmation == :none
+
+    drives_list = actions_by_id["microsoft.onedrive.drives.list"]
+    assert drives_list.data_classification == :personal_data
+    assert drives_list.risk == :read
+    assert drives_list.confirmation == :none
+
+    items_search = actions_by_id["microsoft.onedrive.items.search"]
+    assert items_search.data_classification == :personal_data
+    assert items_search.risk == :read
+    assert items_search.confirmation == :none
+
+    item_download = actions_by_id["microsoft.onedrive.item.download"]
+    assert item_download.data_classification == :personal_data
+    assert item_download.risk == :read
+    assert item_download.confirmation == :none
+
+    items_delta = actions_by_id["microsoft.onedrive.items.delta"]
+    assert items_delta.data_classification == :personal_data
+    assert items_delta.risk == :read
+    assert items_delta.confirmation == :none
 
     # ── Write / external_write actions ─────────────────────────────────
     item_create = actions_by_id["microsoft.onedrive.item.create"]

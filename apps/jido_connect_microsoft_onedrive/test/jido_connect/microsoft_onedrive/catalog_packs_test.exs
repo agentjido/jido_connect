@@ -17,7 +17,11 @@ defmodule Jido.Connect.MicrosoftOnedrive.CatalogPacksTest do
 
     assert "microsoft.onedrive.items.list" in ids
     assert "microsoft.onedrive.drive.get" in ids
+    assert "microsoft.onedrive.drives.list" in ids
+    assert "microsoft.onedrive.items.search" in ids
+    assert "microsoft.onedrive.items.delta" in ids
     refute "microsoft.onedrive.item.get" in ids
+    refute "microsoft.onedrive.item.download" in ids
     refute "microsoft.onedrive.item.create" in ids
     refute "microsoft.onedrive.item.update" in ids
     refute "microsoft.onedrive.item.upload" in ids
@@ -58,6 +62,15 @@ defmodule Jido.Connect.MicrosoftOnedrive.CatalogPacksTest do
              )
 
     assert drive_descriptor.tool.id == "microsoft.onedrive.drive.get"
+
+    assert {:ok, download_descriptor} =
+             Catalog.describe_tool("microsoft.onedrive.item.download",
+               modules: [MicrosoftOnedrive],
+               packs: MicrosoftOnedrive.catalog_packs(),
+               pack: :microsoft_onedrive_triage
+             )
+
+    assert download_descriptor.tool.id == "microsoft.onedrive.item.download"
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("microsoft.onedrive.item.create",

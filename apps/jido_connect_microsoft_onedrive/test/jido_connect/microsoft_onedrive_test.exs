@@ -9,6 +9,10 @@ defmodule Jido.Connect.MicrosoftOnedriveTest do
     Jido.Connect.MicrosoftOnedrive.Actions.ListItems,
     Jido.Connect.MicrosoftOnedrive.Actions.GetItem,
     Jido.Connect.MicrosoftOnedrive.Actions.GetDrive,
+    Jido.Connect.MicrosoftOnedrive.Actions.ListDrives,
+    Jido.Connect.MicrosoftOnedrive.Actions.Search,
+    Jido.Connect.MicrosoftOnedrive.Actions.DownloadContent,
+    Jido.Connect.MicrosoftOnedrive.Actions.Delta,
     Jido.Connect.MicrosoftOnedrive.Actions.CreateItem,
     Jido.Connect.MicrosoftOnedrive.Actions.UpdateItem,
     Jido.Connect.MicrosoftOnedrive.Actions.UploadItem,
@@ -49,6 +53,10 @@ defmodule Jido.Connect.MicrosoftOnedriveTest do
              "microsoft.onedrive.items.list",
              "microsoft.onedrive.item.get",
              "microsoft.onedrive.drive.get",
+             "microsoft.onedrive.drives.list",
+             "microsoft.onedrive.items.search",
+             "microsoft.onedrive.item.download",
+             "microsoft.onedrive.items.delta",
              "microsoft.onedrive.item.create",
              "microsoft.onedrive.item.update",
              "microsoft.onedrive.item.upload",
@@ -138,6 +146,30 @@ defmodule Jido.Connect.MicrosoftOnedriveTest do
            ) == ["Files.Read"]
 
     assert resolver.required_scopes(
+             %{id: "microsoft.onedrive.items.search"},
+             %{},
+             %{scopes: ["Files.Read"]}
+           ) == ["Files.Read"]
+
+    assert resolver.required_scopes(
+             %{id: "microsoft.onedrive.item.download"},
+             %{},
+             %{scopes: ["Files.Read"]}
+           ) == ["Files.Read"]
+
+    assert resolver.required_scopes(
+             %{id: "microsoft.onedrive.items.delta"},
+             %{},
+             %{scopes: ["Files.Read"]}
+           ) == ["Files.Read"]
+
+    assert resolver.required_scopes(
+             %{id: "microsoft.onedrive.drives.list"},
+             %{},
+             %{scopes: ["Files.Read.All"]}
+           ) == ["Files.Read.All"]
+
+    assert resolver.required_scopes(
              %{id: "microsoft.onedrive.item.delete"},
              %{},
              %{scopes: ["Files.ReadWrite"]}
@@ -147,15 +179,6 @@ defmodule Jido.Connect.MicrosoftOnedriveTest do
   end
 
   test "handlers return not_implemented in scaffold phase" do
-    assert {:error, :not_implemented} ==
-             Jido.Connect.MicrosoftOnedrive.Handlers.Actions.ListItems.run(%{}, %{})
-
-    assert {:error, :not_implemented} ==
-             Jido.Connect.MicrosoftOnedrive.Handlers.Actions.GetItem.run(%{}, %{})
-
-    assert {:error, :not_implemented} ==
-             Jido.Connect.MicrosoftOnedrive.Handlers.Actions.GetDrive.run(%{}, %{})
-
     assert {:error, :not_implemented} ==
              Jido.Connect.MicrosoftOnedrive.Handlers.Actions.CreateItem.run(%{}, %{})
 

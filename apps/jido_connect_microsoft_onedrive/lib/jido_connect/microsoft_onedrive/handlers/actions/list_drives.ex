@@ -1,27 +1,25 @@
-defmodule Jido.Connect.MicrosoftOnedrive.Handlers.Actions.ListItems do
+defmodule Jido.Connect.MicrosoftOnedrive.Handlers.Actions.ListDrives do
   @moduledoc false
 
   alias Jido.Connect.Microsoft.{Pagination, Transport}
   alias Jido.Connect.MicrosoftOnedrive.Normalizer
 
   @doc """
-  Lists children of the authenticated user's OneDrive root or a specific folder.
+  Lists drives available to the authenticated user via Microsoft Graph.
 
   Supports:
-  - `parent_id` (optional) - targets children of a specific folder item
   - `page_size` (default: 25) - maps to `$top`
   """
   def run(input, %{credentials: %{access_token: access_token}})
       when is_binary(access_token) do
     request = Transport.request(access_token)
-    url = children_url(Map.get(input, :parent_id))
     params = Pagination.query(%{}, page_size: Map.get(input, :page_size, 25))
 
-    case Transport.request(request, :get, url: url, params: params) do
+    case Transport.request(request, :get, url: "/me/drives", params: params) do
       {:ok, %{status: 200, body: body}} when is_map(body) ->
-        case Normalizer.page(body, &Normalizer.drive_item/1) do
-          {:ok, %{items: items, next_link: next_link}} ->
-            {:ok, %{items: items, next_link: next_link}}
+        case Normalizer.page(body, &Normalizer.drive/1) do
+          {:ok, %{items: drives, next_link: next_link}} ->
+            {:ok, %{drives: drives, next_link: next_link}}
 
           {:error, _reason} = error ->
             error
@@ -29,18 +27,15 @@ defmodule Jido.Connect.MicrosoftOnedrive.Handlers.Actions.ListItems do
 
       {:ok, response} ->
         Transport.handle_error_response({:ok, response},
-          message: "Failed to list Microsoft OneDrive items"
+          message: "Failed to list Microsoft OneDrive drives"
         )
 
       {:error, _reason} = error ->
         Transport.handle_error_response(error,
-          message: "Failed to list Microsoft OneDrive items"
+          message: "Failed to list Microsoft OneDrive drives"
         )
     end
   end
 
   def run(_input, _context), do: {:error, :missing_access_token}
-
-  defp children_url(nil), do: "/me/drive/root/children"
-  defp children_url(parent_id), do: "/me/drive/items/#{parent_id}/children"
 end

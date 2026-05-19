@@ -5,12 +5,16 @@ defmodule Jido.Connect.MicrosoftOnedrive.CatalogPacks do
 
   @metadata_tools [
     "microsoft.onedrive.items.list",
-    "microsoft.onedrive.drive.get"
+    "microsoft.onedrive.drive.get",
+    "microsoft.onedrive.drives.list",
+    "microsoft.onedrive.items.search",
+    "microsoft.onedrive.items.delta"
   ]
 
   @triage_tools @metadata_tools ++
                   [
-                    "microsoft.onedrive.item.get"
+                    "microsoft.onedrive.item.get",
+                    "microsoft.onedrive.item.download"
                   ]
 
   @write_tools @triage_tools ++
