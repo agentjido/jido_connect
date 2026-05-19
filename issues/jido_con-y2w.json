@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-05-19T14:15:18Z",
+  "description": "Build jido_connect_http as a policy-first generic outbound HTTP connector: SSRF/egress policy, auth profiles, request templates, JSON helpers, response transforms, error normalization, catalog packs, docs, and smoke guidance. This epic intentionally starts with security boundaries before arbitrary request actions.",
+  "id": "jido_con-y2w",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "[G25] Generic HTTP Policy And Connector",
+  "type": "epic",
+  "updated_at": "2026-05-19T14:15:18Z"
+}
