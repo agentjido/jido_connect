@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-aje.4"
   ],
+  "closed_at": "2026-05-20T00:04:45Z",
+  "close_reason": "Implemented in e1be85f0 by pi-connector-factory",
   "created": "2026-05-19T14:03:27Z",
   "description": "Implement list workspaces/projects/tasks, get task, search tasks where supported, list stories/comments, and user lookups. Cover pagination, compact/full object expansion choices, auth errors, and provider errors offline.",
   "id": "jido_con-aje.3",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-aje",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G19-S03] Implement Asana read and search actions",
   "type": "task",
-  "updated_at": "2026-05-19T23:45:23Z"
+  "updated_at": "2026-05-20T00:04:45Z"
 }
