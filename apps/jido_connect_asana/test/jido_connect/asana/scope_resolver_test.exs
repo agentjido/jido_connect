@@ -8,12 +8,22 @@ defmodule Jido.Connect.Asana.ScopeResolverTest do
       assert ScopeResolver.required_scopes(nil, %{}, %{}) == ["default"]
     end
 
-    test "returns default scope for map with id" do
-      assert ScopeResolver.required_scopes(%{id: "asana.task.get"}, %{}, %{}) == ["default"]
+    test "returns read scopes for task get" do
+      assert ScopeResolver.required_scopes(%{id: "asana.task.get"}, %{}, %{}) == [
+               "default",
+               "read"
+             ]
     end
 
-    test "returns default scope for map with action_id" do
+    test "returns read scopes for map with action_id" do
       assert ScopeResolver.required_scopes(%{action_id: "asana.task.get"}, %{}, %{}) == [
+               "default",
+               "read"
+             ]
+    end
+
+    test "returns default scope for workspace list" do
+      assert ScopeResolver.required_scopes(%{id: "asana.workspace.list"}, %{}, %{}) == [
                "default"
              ]
     end

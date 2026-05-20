@@ -29,7 +29,9 @@ defmodule Jido.Connect.Asana do
   """
 
   use Jido.Connect,
-    fragments: []
+    fragments: [
+      Jido.Connect.Asana.Actions.Read
+    ]
 
   defdelegate catalog_packs, to: Jido.Connect.Asana.CatalogPacks, as: :all
 

@@ -13,15 +13,23 @@ defmodule Jido.Connect.Asana.CatalogPacks do
   | `:asana_editor` | write | reader + mutations |
 
   Triggers are subscribed to independently and are not listed in packs.
-
-  Tool IDs will be populated when action fragments are added in subsequent
-  waves.
   """
 
   alias Jido.Connect.Catalog.Pack
 
-  @reader_tools []
-  @editor_tools @reader_tools ++ []
+  @reader_tools [
+    "asana.workspace.list",
+    "asana.project.list",
+    "asana.task.list",
+    "asana.task.get",
+    "asana.task.search",
+    "asana.story.list",
+    "asana.user.get",
+    "asana.user.list"
+  ]
+
+  @write_tools []
+  @editor_tools @reader_tools ++ @write_tools
 
   @doc "Returns all built-in Asana catalog packs."
   def all, do: [reader(), editor()]

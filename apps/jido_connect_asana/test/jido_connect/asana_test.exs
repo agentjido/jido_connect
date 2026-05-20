@@ -13,8 +13,19 @@ defmodule Jido.Connect.AsanaTest do
     assert spec.category == :project_management
     assert spec.status == :experimental
     assert spec.tags == [:work_management, :tasks, :projects, :collaboration]
-    assert spec.actions == []
+    assert length(spec.actions) == 8
     assert spec.triggers == []
+
+    action_ids = Enum.map(spec.actions, & &1.id)
+
+    assert "asana.workspace.list" in action_ids
+    assert "asana.project.list" in action_ids
+    assert "asana.task.list" in action_ids
+    assert "asana.task.get" in action_ids
+    assert "asana.task.search" in action_ids
+    assert "asana.story.list" in action_ids
+    assert "asana.user.get" in action_ids
+    assert "asana.user.list" in action_ids
 
     assert [
              %{id: :pat, kind: :api_key} = pat_profile,
@@ -51,11 +62,11 @@ defmodule Jido.Connect.AsanaTest do
     assert MapSet.member?(features, :api_access)
   end
 
-  test "compiles generated Jido plugin surface with 0 actions" do
+  test "compiles generated Jido plugin surface with 8 read actions" do
     assert Application.get_env(:jido_connect_asana, :jido_connect_providers) == [Asana]
 
     action_modules = Asana.jido_action_modules()
-    assert action_modules == []
+    assert length(action_modules) == 8
 
     assert Asana.jido_sensor_modules() == []
     assert Asana.jido_plugin_module() == Jido.Connect.Asana.Plugin
@@ -66,22 +77,24 @@ defmodule Jido.Connect.AsanaTest do
              generated_modules: generated
            } = Asana.jido_connect_manifest()
 
-    assert generated.actions == []
+    assert length(generated.actions) == 8
     assert generated.sensors == []
     assert generated.plugin == Jido.Connect.Asana.Plugin
 
     assert %Jido.Plugin.Spec{
              name: "asana",
              module: Jido.Connect.Asana.Plugin,
-             actions: []
+             actions: actions
            } = Jido.Connect.Asana.Plugin.plugin_spec()
+
+    assert length(actions) == 8
   end
 
   describe "plugin tool availability" do
-    test "reports availability for 0 actions when no fragments are loaded" do
+    test "reports availability for 8 read actions" do
       plugin_module = Asana.jido_plugin_module()
       availability = plugin_module.tool_availability()
-      assert availability == []
+      assert length(availability) == 8
     end
   end
 end

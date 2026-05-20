@@ -19,20 +19,28 @@ defmodule Jido.Connect.Asana.CatalogPacksTest do
       end
     end
 
-    test "reader pack has read risk" do
+    test "reader pack has read risk and includes read tools" do
       packs = Asana.catalog_packs()
       reader = Enum.find(packs, &(&1.id == :asana_reader))
 
       assert reader.metadata.risk == :read
-      assert reader.allowed_tools == []
+      assert "asana.workspace.list" in reader.allowed_tools
+      assert "asana.project.list" in reader.allowed_tools
+      assert "asana.task.list" in reader.allowed_tools
+      assert "asana.task.get" in reader.allowed_tools
+      assert "asana.task.search" in reader.allowed_tools
+      assert "asana.story.list" in reader.allowed_tools
+      assert "asana.user.get" in reader.allowed_tools
+      assert "asana.user.list" in reader.allowed_tools
     end
 
-    test "editor pack has write risk" do
+    test "editor pack has write risk and includes reader tools" do
       packs = Asana.catalog_packs()
       editor = Enum.find(packs, &(&1.id == :asana_editor))
 
       assert editor.metadata.risk == :write
-      assert editor.allowed_tools == []
+      assert "asana.workspace.list" in editor.allowed_tools
+      assert "asana.task.get" in editor.allowed_tools
     end
 
     test "editor pack includes all reader tools" do
