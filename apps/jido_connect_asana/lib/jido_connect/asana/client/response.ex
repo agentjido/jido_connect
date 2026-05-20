@@ -122,6 +122,31 @@ defmodule Jido.Connect.Asana.Client.Response do
 
   def handle_story_list_response(response), do: Transport.handle_error_response(response)
 
+  @doc "Handles an Asana single story (comment) response."
+  def handle_story_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case Map.get(body, "data") do
+      item when is_map(item) ->
+        Normalizer.story(item)
+
+      _other ->
+        Transport.invalid_success_response("Asana story response was invalid", body)
+    end
+  end
+
+  def handle_story_response({:ok, %{status: status, body: body}}) when status in 200..299 do
+    Transport.invalid_success_response("Asana story response was invalid", body)
+  end
+
+  def handle_story_response(response), do: Transport.handle_error_response(response)
+
+  @doc "Handles an Asana empty 200 response (add/remove project/tag)."
+  def handle_empty_response({:ok, %{status: status}}) when status in 200..299 do
+    {:ok, %{}}
+  end
+
+  def handle_empty_response(response), do: Transport.handle_error_response(response)
+
   # ---------------------------------------------------------------------------
   # Users
   # ---------------------------------------------------------------------------

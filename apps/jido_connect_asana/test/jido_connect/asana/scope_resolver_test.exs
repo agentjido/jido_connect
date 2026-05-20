@@ -31,5 +31,35 @@ defmodule Jido.Connect.Asana.ScopeResolverTest do
     test "returns default scope for unknown operation" do
       assert ScopeResolver.required_scopes(%{id: "asana.unknown"}, %{}, %{}) == ["default"]
     end
+
+    test "returns write scope for task create" do
+      assert ScopeResolver.required_scopes(%{id: "asana.task.create"}, %{}, %{}) == [
+               "write"
+             ]
+    end
+
+    test "returns write scope for task update" do
+      assert ScopeResolver.required_scopes(%{id: "asana.task.update"}, %{}, %{}) == [
+               "write"
+             ]
+    end
+
+    test "returns write scope for complete task" do
+      assert ScopeResolver.required_scopes(%{id: "asana.task.complete"}, %{}, %{}) == [
+               "write"
+             ]
+    end
+
+    test "returns write scope for story create" do
+      assert ScopeResolver.required_scopes(%{id: "asana.story.create"}, %{}, %{}) == [
+               "write"
+             ]
+    end
+
+    test "returns write scope for add task project" do
+      assert ScopeResolver.required_scopes(%{id: "asana.task.add_project"}, %{}, %{}) == [
+               "write"
+             ]
+    end
   end
 end

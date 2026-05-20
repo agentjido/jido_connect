@@ -53,5 +53,36 @@ defmodule Jido.Connect.Asana.CatalogPacksTest do
                "Expected reader tool #{tool} in editor allowed_tools"
       end
     end
+
+    test "editor pack includes write tools" do
+      packs = Asana.catalog_packs()
+      editor = Enum.find(packs, &(&1.id == :asana_editor))
+
+      write_tools = [
+        "asana.task.create",
+        "asana.task.update",
+        "asana.task.complete",
+        "asana.task.uncomplete",
+        "asana.task.add_project",
+        "asana.task.remove_project",
+        "asana.task.add_tag",
+        "asana.task.remove_tag",
+        "asana.story.create"
+      ]
+
+      for tool <- write_tools do
+        assert tool in editor.allowed_tools,
+               "Expected write tool #{tool} in editor allowed_tools"
+      end
+    end
+
+    test "reader pack does not include write tools" do
+      packs = Asana.catalog_packs()
+      reader = Enum.find(packs, &(&1.id == :asana_reader))
+
+      refute "asana.task.create" in reader.allowed_tools
+      refute "asana.task.update" in reader.allowed_tools
+      refute "asana.story.create" in reader.allowed_tools
+    end
   end
 end

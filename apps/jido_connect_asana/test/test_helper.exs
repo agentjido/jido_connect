@@ -179,6 +179,132 @@ defmodule Jido.Connect.Asana.MockClient do
      }}
   end
 
+  def create_task("token", task_params) do
+    gid = "998899"
+    name = Map.get(task_params, "name", "Untitled task")
+
+    {:ok,
+     %{
+       gid: gid,
+       name: name,
+       resource_type: "task",
+       completed: false,
+       notes: Map.get(task_params, "notes"),
+       assignee_gid: Map.get(task_params, "assignee"),
+       workspace_gid: Map.get(task_params, "workspace"),
+       project_gids: Map.get(task_params, "projects", []),
+       tag_gids: Map.get(task_params, "tags", []),
+       parent_gid: Map.get(task_params, "parent")
+     }}
+  end
+
+  def create_task("error_token", _task_params) do
+    {:error,
+     %Error.ProviderError{
+       message: "Asana API request failed",
+       provider: :asana,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Not Authorized", body: %{}}
+     }}
+  end
+
+  def update_task("998877", "token", task_params) do
+    {:ok,
+     %{
+       gid: "998877",
+       name: Map.get(task_params, "name", "Design new landing page"),
+       resource_type: "task",
+       completed: Map.get(task_params, "completed", false),
+       notes: Map.get(task_params, "notes", "Create wireframes"),
+       assignee_gid: Map.get(task_params, "assignee", "123456"),
+       workspace_gid: "112233",
+       project_gids: ["445566"]
+     }}
+  end
+
+  def update_task("unknown", "token", _task_params) do
+    {:error,
+     %Error.ProviderError{
+       message: "Asana API request failed",
+       provider: :asana,
+       reason: :not_found,
+       status: 404,
+       details: %{message: "task: Not an object", body: %{}}
+     }}
+  end
+
+  def update_task(_gid, "error_token", _task_params) do
+    {:error,
+     %Error.ProviderError{
+       message: "Asana API request failed",
+       provider: :asana,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Not Authorized", body: %{}}
+     }}
+  end
+
+  def add_task_project("998877", "token", _project_gid) do
+    {:ok, %{}}
+  end
+
+  def add_task_project(_task_gid, "error_token", _project_gid) do
+    {:error,
+     %Error.ProviderError{
+       message: "Asana API request failed",
+       provider: :asana,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Not Authorized", body: %{}}
+     }}
+  end
+
+  def remove_task_project("998877", "token", _project_gid) do
+    {:ok, %{}}
+  end
+
+  def remove_task_project(_task_gid, "error_token", _project_gid) do
+    {:error,
+     %Error.ProviderError{
+       message: "Asana API request failed",
+       provider: :asana,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Not Authorized", body: %{}}
+     }}
+  end
+
+  def add_task_tag("998877", "token", _tag_gid) do
+    {:ok, %{}}
+  end
+
+  def add_task_tag(_task_gid, "error_token", _tag_gid) do
+    {:error,
+     %Error.ProviderError{
+       message: "Asana API request failed",
+       provider: :asana,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Not Authorized", body: %{}}
+     }}
+  end
+
+  def remove_task_tag("998877", "token", _tag_gid) do
+    {:ok, %{}}
+  end
+
+  def remove_task_tag(_task_gid, "error_token", _tag_gid) do
+    {:error,
+     %Error.ProviderError{
+       message: "Asana API request failed",
+       provider: :asana,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Not Authorized", body: %{}}
+     }}
+  end
+
   # ---------------------------------------------------------------------------
   # Stories
   # ---------------------------------------------------------------------------
@@ -199,6 +325,32 @@ defmodule Jido.Connect.Asana.MockClient do
   end
 
   def list_stories(_task_gid, "error_token", _opts) do
+    {:error,
+     %Error.ProviderError{
+       message: "Asana API request failed",
+       provider: :asana,
+       reason: :unauthorized,
+       status: 401,
+       details: %{message: "Not Authorized", body: %{}}
+     }}
+  end
+
+  def create_story("998877", "token", story_params) do
+    text = Map.get(story_params, "text", "")
+
+    {:ok,
+     %{
+       gid: "334456",
+       resource_type: "story",
+       resource_subtype: "comment_added",
+       text: text,
+       created_by: %{gid: "123456", name: "Alice Nakamura", resource_type: "user"},
+       task_gid: "998877",
+       target_gid: "998877"
+     }}
+  end
+
+  def create_story(_task_gid, "error_token", _story_params) do
     {:error,
      %Error.ProviderError{
        message: "Asana API request failed",

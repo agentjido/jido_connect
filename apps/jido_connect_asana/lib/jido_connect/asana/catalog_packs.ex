@@ -28,7 +28,18 @@ defmodule Jido.Connect.Asana.CatalogPacks do
     "asana.user.list"
   ]
 
-  @write_tools []
+  @write_tools [
+    "asana.task.create",
+    "asana.task.update",
+    "asana.task.complete",
+    "asana.task.uncomplete",
+    "asana.task.add_project",
+    "asana.task.remove_project",
+    "asana.task.add_tag",
+    "asana.task.remove_tag",
+    "asana.story.create"
+  ]
+
   @editor_tools @reader_tools ++ @write_tools
 
   @doc "Returns all built-in Asana catalog packs."

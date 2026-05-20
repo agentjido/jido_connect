@@ -75,6 +75,85 @@ defmodule Jido.Connect.Asana.Client.Tasks do
     |> Response.handle_task_list_response()
   end
 
+  @spec create(String.t(), map(), keyword()) :: {:ok, map()} | {:error, term()}
+  def create(access_token, task_params, opts \\ [])
+      when is_binary(access_token) and is_map(task_params) and is_list(opts) do
+    body = %{"data" => task_params}
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.post(url: "/tasks", json: body)
+    |> Response.handle_task_response()
+  end
+
+  @spec update(String.t(), String.t(), map(), keyword()) :: {:ok, map()} | {:error, term()}
+  def update(task_gid, access_token, task_params, opts \\ [])
+      when is_binary(task_gid) and is_binary(access_token) and is_map(task_params) and
+             is_list(opts) do
+    body = %{"data" => task_params}
+    encoded_task = URI.encode(task_gid, &URI.char_unreserved?/1)
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.put(url: "/tasks/#{encoded_task}", json: body)
+    |> Response.handle_task_response()
+  end
+
+  @spec add_project(String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, map()} | {:error, term()}
+  def add_project(task_gid, access_token, project_gid, opts \\ [])
+      when is_binary(task_gid) and is_binary(access_token) and is_binary(project_gid) and
+             is_list(opts) do
+    body = %{"data" => %{"project" => project_gid}}
+    encoded_task = URI.encode(task_gid, &URI.char_unreserved?/1)
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.post(url: "/tasks/#{encoded_task}/addProject", json: body)
+    |> Response.handle_empty_response()
+  end
+
+  @spec remove_project(String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, map()} | {:error, term()}
+  def remove_project(task_gid, access_token, project_gid, opts \\ [])
+      when is_binary(task_gid) and is_binary(access_token) and is_binary(project_gid) and
+             is_list(opts) do
+    body = %{"data" => %{"project" => project_gid}}
+    encoded_task = URI.encode(task_gid, &URI.char_unreserved?/1)
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.post(url: "/tasks/#{encoded_task}/removeProject", json: body)
+    |> Response.handle_empty_response()
+  end
+
+  @spec add_tag(String.t(), String.t(), String.t(), keyword()) :: {:ok, map()} | {:error, term()}
+  def add_tag(task_gid, access_token, tag_gid, opts \\ [])
+      when is_binary(task_gid) and is_binary(access_token) and is_binary(tag_gid) and
+             is_list(opts) do
+    body = %{"data" => %{"tag" => tag_gid}}
+    encoded_task = URI.encode(task_gid, &URI.char_unreserved?/1)
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.post(url: "/tasks/#{encoded_task}/addTag", json: body)
+    |> Response.handle_empty_response()
+  end
+
+  @spec remove_tag(String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, map()} | {:error, term()}
+  def remove_tag(task_gid, access_token, tag_gid, opts \\ [])
+      when is_binary(task_gid) and is_binary(access_token) and is_binary(tag_gid) and
+             is_list(opts) do
+    body = %{"data" => %{"tag" => tag_gid}}
+    encoded_task = URI.encode(task_gid, &URI.char_unreserved?/1)
+
+    access_token
+    |> Transport.request(base_url: Keyword.get(opts, :base_url))
+    |> Req.post(url: "/tasks/#{encoded_task}/removeTag", json: body)
+    |> Response.handle_empty_response()
+  end
+
   defp maybe_put(params, _key, nil), do: params
   defp maybe_put(params, key, value), do: Map.put(params, key, value)
 end

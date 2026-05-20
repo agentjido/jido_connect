@@ -13,11 +13,12 @@ defmodule Jido.Connect.AsanaTest do
     assert spec.category == :project_management
     assert spec.status == :experimental
     assert spec.tags == [:work_management, :tasks, :projects, :collaboration]
-    assert length(spec.actions) == 8
+    assert length(spec.actions) == 17
     assert spec.triggers == []
 
     action_ids = Enum.map(spec.actions, & &1.id)
 
+    # Read actions
     assert "asana.workspace.list" in action_ids
     assert "asana.project.list" in action_ids
     assert "asana.task.list" in action_ids
@@ -26,6 +27,17 @@ defmodule Jido.Connect.AsanaTest do
     assert "asana.story.list" in action_ids
     assert "asana.user.get" in action_ids
     assert "asana.user.list" in action_ids
+
+    # Write actions
+    assert "asana.task.create" in action_ids
+    assert "asana.task.update" in action_ids
+    assert "asana.task.complete" in action_ids
+    assert "asana.task.uncomplete" in action_ids
+    assert "asana.task.add_project" in action_ids
+    assert "asana.task.remove_project" in action_ids
+    assert "asana.task.add_tag" in action_ids
+    assert "asana.task.remove_tag" in action_ids
+    assert "asana.story.create" in action_ids
 
     assert [
              %{id: :pat, kind: :api_key} = pat_profile,
@@ -62,11 +74,11 @@ defmodule Jido.Connect.AsanaTest do
     assert MapSet.member?(features, :api_access)
   end
 
-  test "compiles generated Jido plugin surface with 8 read actions" do
+  test "compiles generated Jido plugin surface with 17 actions" do
     assert Application.get_env(:jido_connect_asana, :jido_connect_providers) == [Asana]
 
     action_modules = Asana.jido_action_modules()
-    assert length(action_modules) == 8
+    assert length(action_modules) == 17
 
     assert Asana.jido_sensor_modules() == []
     assert Asana.jido_plugin_module() == Jido.Connect.Asana.Plugin
@@ -77,7 +89,7 @@ defmodule Jido.Connect.AsanaTest do
              generated_modules: generated
            } = Asana.jido_connect_manifest()
 
-    assert length(generated.actions) == 8
+    assert length(generated.actions) == 17
     assert generated.sensors == []
     assert generated.plugin == Jido.Connect.Asana.Plugin
 
@@ -87,14 +99,14 @@ defmodule Jido.Connect.AsanaTest do
              actions: actions
            } = Jido.Connect.Asana.Plugin.plugin_spec()
 
-    assert length(actions) == 8
+    assert length(actions) == 17
   end
 
   describe "plugin tool availability" do
-    test "reports availability for 8 read actions" do
+    test "reports availability for 17 actions" do
       plugin_module = Asana.jido_plugin_module()
       availability = plugin_module.tool_availability()
-      assert length(availability) == 8
+      assert length(availability) == 17
     end
   end
 end

@@ -39,6 +39,34 @@ defmodule Jido.Connect.Asana.Client do
     to: __MODULE__.Tasks,
     as: :search
 
+  defdelegate create_task(access_token, task_params, opts \\ []),
+    to: __MODULE__.Tasks,
+    as: :create
+
+  defdelegate update_task(task_gid, access_token, task_params, opts \\ []),
+    to: __MODULE__.Tasks,
+    as: :update
+
+  defdelegate add_task_project(task_gid, access_token, project_gid, opts \\ []),
+    to: __MODULE__.Tasks,
+    as: :add_project
+
+  defdelegate remove_task_project(task_gid, access_token, project_gid, opts \\ []),
+    to: __MODULE__.Tasks,
+    as: :remove_project
+
+  defdelegate add_task_tag(task_gid, access_token, tag_gid, opts \\ []),
+    to: __MODULE__.Tasks,
+    as: :add_tag
+
+  defdelegate remove_task_tag(task_gid, access_token, tag_gid, opts \\ []),
+    to: __MODULE__.Tasks,
+    as: :remove_tag
+
+  defdelegate create_story(task_gid, access_token, story_params, opts \\ []),
+    to: __MODULE__.Stories,
+    as: :create
+
   defdelegate list_stories(task_gid, access_token, opts \\ []),
     to: __MODULE__.Stories,
     as: :list

@@ -15,7 +15,17 @@ defmodule Jido.Connect.Asana.ScopeResolver do
     "asana.task.search" => ["default", "read"],
     "asana.story.list" => ["default", "read"],
     "asana.user.get" => ["default", "read"],
-    "asana.user.list" => ["default", "read"]
+    "asana.user.list" => ["default", "read"],
+    # Write actions
+    "asana.task.create" => ["write"],
+    "asana.task.update" => ["write"],
+    "asana.task.complete" => ["write"],
+    "asana.task.uncomplete" => ["write"],
+    "asana.task.add_project" => ["write"],
+    "asana.task.remove_project" => ["write"],
+    "asana.task.add_tag" => ["write"],
+    "asana.task.remove_tag" => ["write"],
+    "asana.story.create" => ["write"]
   }
 
   @spec required_scopes(term(), term(), term()) :: [String.t()]
