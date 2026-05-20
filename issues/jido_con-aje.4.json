@@ -6,6 +6,8 @@
   "blocks": [
     "jido_con-aje.5"
   ],
+  "closed_at": "2026-05-20T00:17:30Z",
+  "close_reason": "Implemented in ef3b1b3e by pi-connector-factory",
   "created": "2026-05-19T14:03:28Z",
   "description": "Implement create/update task, add comment/story, add/remove project or tag where supported, and complete/uncomplete task. Mark write/destructive metadata precisely and gate live mutation smoke tests.",
   "id": "jido_con-aje.4",
@@ -16,8 +18,8 @@
   ],
   "parent": "jido_con-aje",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G19-S04] Implement Asana task mutation actions",
   "type": "task",
-  "updated_at": "2026-05-20T00:04:46Z"
+  "updated_at": "2026-05-20T00:17:30Z"
 }
