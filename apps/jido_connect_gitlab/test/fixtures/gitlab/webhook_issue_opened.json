@@ -1,0 +1,35 @@
+{
+  "object_kind": "issue",
+  "user": {
+    "id": 42,
+    "username": "alice_dev",
+    "name": "Alice Nakamura"
+  },
+  "project": {
+    "id": 101,
+    "name": "jido_connect",
+    "path_with_namespace": "engineering/jido_connect"
+  },
+  "object_attributes": {
+    "id": 201,
+    "iid": 14,
+    "title": "Fix OAuth token refresh edge case",
+    "state": "opened",
+    "action": "open",
+    "project_id": 101,
+    "created_at": "2026-04-10T08:30:00.000Z",
+    "updated_at": "2026-05-15T14:22:00.000Z"
+  },
+  "labels": [
+    {
+      "id": 1,
+      "title": "bug",
+      "color": "#FF0000"
+    },
+    {
+      "id": 2,
+      "title": "auth",
+      "color": "#5B5DEF"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "object_kind": "build",
+  "user": {
+    "id": 42,
+    "username": "alice_dev",
+    "name": "Alice Nakamura"
+  },
+  "project": {
+    "id": 101,
+    "name": "jido_connect",
+    "path_with_namespace": "engineering/jido_connect"
+  },
+  "object_attributes": {
+    "id": 601,
+    "name": "test",
+    "stage": "test",
+    "status": "success",
+    "ref": "main",
+    "pipeline_id": 401,
+    "project_id": 101,
+    "created_at": "2026-05-15T14:01:00.000Z",
+    "finished_at": "2026-05-15T14:10:00.000Z"
+  },
+  "runner": {
+    "id": 10,
+    "description": "shared-runner-1"
+  }
+}

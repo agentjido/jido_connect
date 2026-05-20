@@ -1,0 +1,13 @@
+{
+  "id": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+  "short_id": "a1b2c3d4",
+  "title": "Add GitLab normalized structs",
+  "message": "Add GitLab normalized structs\n\nIntroduce Zoi-based structs for all GitLab entities.",
+  "author_name": "Alice Nakamura",
+  "author_email": "alice@example.com",
+  "authored_date": "2026-05-15T13:50:00.000Z",
+  "committer_name": "Alice Nakamura",
+  "committer_email": "alice@example.com",
+  "committed_date": "2026-05-15T13:55:00.000Z",
+  "web_url": "https://gitlab.example.com/engineering/jido_connect/-/commit/a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0"
+}

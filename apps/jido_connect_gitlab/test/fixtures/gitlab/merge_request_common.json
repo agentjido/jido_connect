@@ -1,0 +1,40 @@
+{
+  "id": 301,
+  "iid": 7,
+  "title": "Add normalized structs for GitLab entities",
+  "description": "Introduce Zoi-based structs for projects, issues, merge requests, etc.",
+  "state": "merged",
+  "merge_status": "can_be_merged",
+  "source_branch": "feature/gitlab-structs",
+  "target_branch": "main",
+  "author": {
+    "id": 42,
+    "username": "alice_dev",
+    "name": "Alice Nakamura",
+    "state": "active"
+  },
+  "assignees": [
+    {
+      "id": 42,
+      "username": "alice_dev",
+      "name": "Alice Nakamura",
+      "state": "active"
+    }
+  ],
+  "reviewers": [
+    {
+      "id": 43,
+      "username": "bob_eng",
+      "name": "Bob Martinez",
+      "state": "active"
+    }
+  ],
+  "project_id": 101,
+  "source_project_id": 101,
+  "target_project_id": 101,
+  "web_url": "https://gitlab.example.com/engineering/jido_connect/-/merge_requests/7",
+  "created_at": "2026-05-01T10:00:00.000Z",
+  "updated_at": "2026-05-10T16:45:00.000Z",
+  "merged_at": "2026-05-10T16:45:00.000Z",
+  "closed_at": null
+}

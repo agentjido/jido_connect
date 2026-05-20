@@ -1,0 +1,29 @@
+{
+  "object_kind": "merge_request",
+  "user": {
+    "id": 42,
+    "username": "alice_dev",
+    "name": "Alice Nakamura"
+  },
+  "project": {
+    "id": 101,
+    "name": "jido_connect",
+    "path_with_namespace": "engineering/jido_connect"
+  },
+  "object_attributes": {
+    "id": 301,
+    "iid": 7,
+    "title": "Add normalized structs for GitLab entities",
+    "state": "merged",
+    "action": "merge",
+    "merge_status": "can_be_merged",
+    "source_branch": "feature/gitlab-structs",
+    "target_branch": "main",
+    "project_id": 101,
+    "source_project_id": 101,
+    "target_project_id": 101,
+    "created_at": "2026-05-01T10:00:00.000Z",
+    "updated_at": "2026-05-10T16:45:00.000Z",
+    "merged_at": "2026-05-10T16:45:00.000Z"
+  }
+}

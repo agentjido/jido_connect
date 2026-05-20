@@ -1,0 +1,8 @@
+{
+  "x-page": 1,
+  "x-per-page": 20,
+  "x-total": 42,
+  "x-total-pages": 3,
+  "x-next-page": 2,
+  "x-prev-page": null
+}

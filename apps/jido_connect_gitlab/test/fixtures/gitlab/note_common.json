@@ -1,0 +1,16 @@
+{
+  "id": 501,
+  "body": "Investigated the refresh flow. The issue is in the retry logic after a 401.",
+  "attachment": null,
+  "author": {
+    "id": 42,
+    "username": "alice_dev",
+    "name": "Alice Nakamura",
+    "state": "active"
+  },
+  "noteable_id": 201,
+  "noteable_type": "Issue",
+  "system": false,
+  "created_at": "2026-05-01T10:30:00.000Z",
+  "updated_at": "2026-05-01T10:30:00.000Z"
+}

@@ -1,0 +1,7 @@
+{
+  "id": 1,
+  "name": "bug",
+  "color": "#FF0000",
+  "text_color": "#FFFFFF",
+  "description": "Something isn't working"
+}

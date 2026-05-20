@@ -1,0 +1,46 @@
+{
+  "id": 201,
+  "iid": 14,
+  "title": "Fix OAuth token refresh edge case",
+  "description": "When the refresh token expires mid-session, the client should surface a re-auth prompt.",
+  "state": "opened",
+  "labels": [
+    {
+      "id": 1,
+      "name": "bug",
+      "color": "#FF0000",
+      "text_color": "#FFFFFF",
+      "description": "Something isn't working"
+    },
+    {
+      "id": 2,
+      "name": "auth",
+      "color": "#5B5DEF",
+      "text_color": "#FFFFFF",
+      "description": "Authentication and authorization"
+    }
+  ],
+  "milestone": {
+    "id": 5,
+    "title": "v2.0 Release"
+  },
+  "assignees": [
+    {
+      "id": 42,
+      "username": "alice_dev",
+      "name": "Alice Nakamura",
+      "state": "active"
+    }
+  ],
+  "author": {
+    "id": 43,
+    "username": "bob_eng",
+    "name": "Bob Martinez",
+    "state": "active"
+  },
+  "project_id": 101,
+  "web_url": "https://gitlab.example.com/engineering/jido_connect/-/issues/14",
+  "created_at": "2026-04-10T08:30:00.000Z",
+  "updated_at": "2026-05-15T14:22:00.000Z",
+  "closed_at": null
+}
