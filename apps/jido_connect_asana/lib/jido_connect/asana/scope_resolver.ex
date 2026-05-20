@@ -25,7 +25,12 @@ defmodule Jido.Connect.Asana.ScopeResolver do
     "asana.task.remove_project" => ["write"],
     "asana.task.add_tag" => ["write"],
     "asana.task.remove_tag" => ["write"],
-    "asana.story.create" => ["write"]
+    "asana.story.create" => ["write"],
+    # Triggers
+    "asana.task.changed" => ["default", "read"],
+    "asana.task.added" => ["default", "read"],
+    "asana.task.deleted" => ["default", "read"],
+    "asana.project.changed" => ["default", "read"]
   }
 
   @spec required_scopes(term(), term(), term()) :: [String.t()]

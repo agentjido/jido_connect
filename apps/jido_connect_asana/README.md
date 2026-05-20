@@ -6,15 +6,15 @@ It includes:
 
 - `Jido.Connect.Asana`, a Spark-authored provider that compiles into Jido tools
 - Catalog packs for scoped tool discovery (`:asana_reader`, `:asana_editor`)
+- Webhook triggers for task and project events
 
 The Spark DSL declaration lives in
 `lib/jido_connect/asana.ex`.
 
 ## Status
 
-This is an **experimental** scaffold package. Action fragments, normalized
-structs, client transport, and action handlers will be added in subsequent
-waves.
+This is an **experimental** package. Action fragments, normalized structs,
+client transport, webhook triggers, and trigger handlers are implemented.
 
 ## Installation
 
@@ -54,10 +54,93 @@ The provider declares Asana permission scopes:
 auth profiles. The `write` scope should be requested only when mutation actions
 are needed.
 
+### Scope Matrix
+
+| Tool ID | Required Scopes |
+|---|---|
+| `asana.workspace.list` | `default` |
+| `asana.project.list` | `default`, `read` |
+| `asana.task.list` | `default`, `read` |
+| `asana.task.get` | `default`, `read` |
+| `asana.task.search` | `default`, `read` |
+| `asana.story.list` | `default`, `read` |
+| `asana.user.get` | `default`, `read` |
+| `asana.user.list` | `default`, `read` |
+| `asana.task.create` | `write` |
+| `asana.task.update` | `write` |
+| `asana.task.complete` | `write` |
+| `asana.task.uncomplete` | `write` |
+| `asana.task.add_project` | `write` |
+| `asana.task.remove_project` | `write` |
+| `asana.task.add_tag` | `write` |
+| `asana.task.remove_tag` | `write` |
+| `asana.story.create` | `write` |
+| `asana.task.changed` | `default`, `read` |
+| `asana.task.added` | `default`, `read` |
+| `asana.task.deleted` | `default`, `read` |
+| `asana.project.changed` | `default`, `read` |
+
 ## Actions
 
-Action fragments have not been added yet. Tool IDs will be populated as
-actions are implemented in subsequent waves.
+The provider declares 17 action tools across workspaces, projects, tasks,
+stories, and users:
+
+| Action ID | Verb | Effect | Description |
+|---|---|---|---|
+| `asana.workspace.list` | list | read | List workspaces |
+| `asana.project.list` | list | read | List projects |
+| `asana.task.list` | list | read | List tasks |
+| `asana.task.get` | get | read | Get a task by GID |
+| `asana.task.search` | search | read | Search tasks in a workspace |
+| `asana.story.list` | list | read | List stories for a task |
+| `asana.user.get` | get | read | Get a user by GID |
+| `asana.user.list` | list | read | List users |
+| `asana.task.create` | create | write | Create a new task |
+| `asana.task.update` | update | write | Update a task |
+| `asana.task.complete` | update | write | Mark a task complete |
+| `asana.task.uncomplete` | update | write | Mark a task incomplete |
+| `asana.task.add_project` | update | write | Add a task to a project |
+| `asana.task.remove_project` | update | write | Remove a task from a project |
+| `asana.task.add_tag` | update | write | Add a tag to a task |
+| `asana.task.remove_tag` | update | write | Remove a tag from a task |
+| `asana.story.create` | create | write | Add a comment to a task |
+
+## Webhook Triggers
+
+The provider ships with webhook triggers for task and project events:
+
+### Task Triggers
+
+| Trigger ID | Action | Description |
+|---|---|---|
+| `asana.task.changed` | `changed` | Task was updated |
+| `asana.task.added` | `added` | Task was created |
+| `asana.task.deleted` | `deleted` | Task was deleted |
+
+### Project Triggers
+
+| Trigger ID | Action | Description |
+|---|---|---|
+| `asana.project.changed` | `changed` | Project was updated |
+
+### Webhook Verification
+
+Asana signs webhook payloads with an HMAC-SHA256 hex digest sent in the
+`X-Hook-Signature` header. The `Jido.Connect.Asana.Webhook` module provides
+pure helpers for verification and normalization:
+
+```elixir
+alias Jido.Connect.Asana.Webhook
+
+# Verify the signature (host computes from raw body + secret)
+computed = Webhook.compute_signature(raw_body, webhook_secret)
+:ok = Webhook.verify_signature(computed, signature_header)
+
+# Normalize the event payload into a signal map
+{:ok, signal} = Webhook.normalize_event(payload)
+```
+
+Triggers are subscribed to independently and are not included in catalog packs.
 
 ## Catalog Packs
 
@@ -65,10 +148,8 @@ The provider ships with curated catalog packs for scoped tool discovery:
 
 | Pack | Risk | Tools |
 |---|---|---|
-| `:asana_reader` | read | _to be populated_ |
-| `:asana_editor` | write | _to be populated_ |
-
-Tool IDs are populated from action fragments.
+| `:asana_reader` | read | Read-only queries |
+| `:asana_editor` | write | Reader + write tools |
 
 Triggers are subscribed to independently and are not included in packs.
 
@@ -92,16 +173,31 @@ Catalog.search_tools("asana",
 
 ## API Boundaries
 
-All Asana API traffic will use a dedicated transport boundary module. The base
-URL defaults to `https://app.asana.com/api/1.0`.
+All Asana API traffic uses the dedicated transport boundary module
+`Jido.Connect.Asana.Client.Transport`. The base URL defaults to
+`https://app.asana.com/api/1.0`.
 
 ## Environment Variables
 
 | Variable | Description |
 |---|---|
-| `ASANA_TOKEN` | Personal access token for live smoke tests |
-| `ASANA_WORKSPACE_ID` | Workspace ID fixture for live smoke tests |
-| `ASANA_PROJECT_ID` | Project ID fixture for live smoke tests |
+| `ASANA_ACCESS_TOKEN` | Personal access token for live smoke tests |
+| `ASANA_WEBHOOK_SECRET` | Webhook shared secret for live signature tests |
+| `ASANA_WORKSPACE_GID` | Workspace GID fixture for live smoke tests |
+| `ASANA_PROJECT_GID` | Project GID fixture for live smoke tests |
+| `ASANA_TASK_GID` | Task GID fixture for live smoke tests |
+
+## Live Smoke Tests
+
+Env-gated read-only live smoke hooks exercise real Asana API calls when
+credentials are available:
+
+```sh
+ASANA_ACCESS_TOKEN=xxx mix test test/jido_connect/asana/live_smoke_test.exs --include live_smoke
+```
+
+All smoke tests are read-only — no tasks, projects, or stories are created,
+updated, or deleted.
 
 ## Package Quality Gates
 

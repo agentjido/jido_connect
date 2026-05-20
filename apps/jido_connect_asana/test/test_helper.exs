@@ -1,4 +1,4 @@
-ExUnit.start()
+ExUnit.start(exclude: [:live_smoke])
 
 defmodule Jido.Connect.Asana.MockClient do
   @moduledoc false

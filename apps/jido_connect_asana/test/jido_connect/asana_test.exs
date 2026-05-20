@@ -14,7 +14,13 @@ defmodule Jido.Connect.AsanaTest do
     assert spec.status == :experimental
     assert spec.tags == [:work_management, :tasks, :projects, :collaboration]
     assert length(spec.actions) == 17
-    assert spec.triggers == []
+    assert length(spec.triggers) == 4
+
+    trigger_ids = Enum.map(spec.triggers, & &1.id)
+    assert "asana.task.changed" in trigger_ids
+    assert "asana.task.added" in trigger_ids
+    assert "asana.task.deleted" in trigger_ids
+    assert "asana.project.changed" in trigger_ids
 
     action_ids = Enum.map(spec.actions, & &1.id)
 
@@ -74,13 +80,12 @@ defmodule Jido.Connect.AsanaTest do
     assert MapSet.member?(features, :api_access)
   end
 
-  test "compiles generated Jido plugin surface with 17 actions" do
+  test "compiles generated Jido plugin surface with 17 actions and 4 triggers" do
     assert Application.get_env(:jido_connect_asana, :jido_connect_providers) == [Asana]
 
     action_modules = Asana.jido_action_modules()
     assert length(action_modules) == 17
-
-    assert Asana.jido_sensor_modules() == []
+    assert length(Asana.jido_sensor_modules()) == 4
     assert Asana.jido_plugin_module() == Jido.Connect.Asana.Plugin
 
     assert %Connect.Catalog.Manifest{
@@ -90,7 +95,7 @@ defmodule Jido.Connect.AsanaTest do
            } = Asana.jido_connect_manifest()
 
     assert length(generated.actions) == 17
-    assert generated.sensors == []
+    assert length(generated.sensors) == 4
     assert generated.plugin == Jido.Connect.Asana.Plugin
 
     assert %Jido.Plugin.Spec{
@@ -103,10 +108,18 @@ defmodule Jido.Connect.AsanaTest do
   end
 
   describe "plugin tool availability" do
-    test "reports availability for 17 actions" do
+    test "reports availability for 17 actions and 4 triggers" do
       plugin_module = Asana.jido_plugin_module()
       availability = plugin_module.tool_availability()
-      assert length(availability) == 17
+      assert length(availability) == 21
+
+      tool_ids = Enum.map(availability, & &1.tool)
+
+      # Triggers
+      assert "asana.task.changed" in tool_ids
+      assert "asana.task.added" in tool_ids
+      assert "asana.task.deleted" in tool_ids
+      assert "asana.project.changed" in tool_ids
     end
   end
 end

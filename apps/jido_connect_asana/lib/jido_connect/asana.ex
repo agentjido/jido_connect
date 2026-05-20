@@ -31,7 +31,9 @@ defmodule Jido.Connect.Asana do
   use Jido.Connect,
     fragments: [
       Jido.Connect.Asana.Actions.Read,
-      Jido.Connect.Asana.Actions.Write
+      Jido.Connect.Asana.Actions.Write,
+      Jido.Connect.Asana.Triggers.Tasks,
+      Jido.Connect.Asana.Triggers.Projects
     ]
 
   defdelegate catalog_packs, to: Jido.Connect.Asana.CatalogPacks, as: :all
