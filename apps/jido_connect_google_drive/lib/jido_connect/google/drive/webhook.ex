@@ -8,6 +8,7 @@ defmodule Jido.Connect.Google.Drive.Webhook do
   """
 
   alias Jido.Connect.{Data, Error, WebhookDelivery}
+  alias Jido.Connect.Webhook, as: CoreWebhook
 
   @required_headers %{
     channel_id: "x-goog-channel-id",
@@ -16,6 +17,91 @@ defmodule Jido.Connect.Google.Drive.Webhook do
     resource_state: "x-goog-resource-state",
     resource_uri: "x-goog-resource-uri"
   }
+
+  @header_keys %{
+    channel_id: "x-goog-channel-id",
+    channel_token: "x-goog-channel-token",
+    channel_expiration: "x-goog-channel-expiration",
+    resource_id: "x-goog-resource-id",
+    resource_uri: "x-goog-resource-uri",
+    resource_state: "x-goog-resource-state",
+    message_number: "x-goog-message-number",
+    changed: "x-goog-changed"
+  }
+
+  @doc "Extracts normalized Google Drive push notification headers."
+  def parse_headers(headers) when is_map(headers) or is_list(headers) do
+    Map.new(@header_keys, fn {key, header_name} -> {key, header(headers, header_name)} end)
+  end
+
+  @doc "Verifies an optional channel token using constant-time comparison."
+  def verify_token(headers, expected_token)
+
+  def verify_token(_headers, expected_token) when expected_token in [nil, ""] do
+    {:error,
+     Error.auth("Google Drive webhook expected channel token is required",
+       reason: :missing_expected_token
+     )}
+  end
+
+  def verify_token(headers, expected_token) when is_binary(expected_token) do
+    token = headers |> parse_headers() |> Map.get(:channel_token)
+
+    cond do
+      token in [nil, ""] ->
+        {:error,
+         Error.auth("Google Drive webhook channel token is required", reason: :missing_token)}
+
+      Jido.Connect.Security.secure_compare?(token, expected_token) ->
+        :ok
+
+      true ->
+        {:error,
+         Error.auth("Google Drive webhook channel token is invalid", reason: :invalid_token)}
+    end
+  end
+
+  @doc "Builds a normalized provider-neutral delivery from Google Drive headers."
+  def normalize_delivery(headers, body \\ nil, opts \\ [])
+      when is_map(headers) or is_list(headers) do
+    headers = header_map(headers)
+    parsed = parse_headers(headers)
+    delivery_id = delivery_id(parsed)
+
+    attrs = %{
+      provider: :google_drive,
+      event: parsed.resource_state,
+      delivery_id: delivery_id,
+      received_at: Keyword.get(opts, :received_at, DateTime.utc_now()),
+      signature_state: Keyword.get(opts, :signature_state, :unverified),
+      duplicate?: CoreWebhook.duplicate?(delivery_id, Keyword.get(opts, :seen_delivery_ids, [])),
+      source: "google_drive_push",
+      headers: headers,
+      payload: decode_body(body),
+      metadata: %{
+        channel_id: parsed.channel_id,
+        channel_token_present: present?(parsed.channel_token),
+        channel_expiration: parsed.channel_expiration,
+        resource_id: parsed.resource_id,
+        resource_uri: parsed.resource_uri,
+        resource_state: parsed.resource_state,
+        message_number: parsed.message_number,
+        changed: changed_values(parsed.changed)
+      }
+    }
+
+    with {:ok, delivery} <- WebhookDelivery.new(attrs) do
+      {:ok, WebhookDelivery.put_signal(delivery, signal_from_headers(parsed, delivery))}
+    end
+  end
+
+  @doc "Verifies the optional token and returns a normalized delivery."
+  def verify_delivery(headers, expected_token, opts \\ []) do
+    with :ok <- verify_token(headers, expected_token),
+         {:ok, delivery} <- normalize_delivery(headers, Keyword.get(opts, :body), opts) do
+      {:ok, %{delivery | signature_state: :verified}}
+    end
+  end
 
   @doc "Normalizes a webhook delivery into a Drive file changed signal."
   @spec normalize_signal(WebhookDelivery.t() | map()) ::
@@ -77,38 +163,56 @@ defmodule Jido.Connect.Google.Drive.Webhook do
     |> Enum.filter(fn name -> blank?(header(headers, name)) end)
   end
 
-  defp header(headers, name) when is_map(headers) do
-    headers
-    |> Enum.find_value(fn {key, value} ->
-      if normalize_header_name(key) == name, do: header_value(value)
-    end)
-    |> trim()
+  defp signal_from_headers(parsed, %WebhookDelivery{} = delivery) do
+    %{
+      channel_id: parsed.channel_id,
+      channel_token_present: present?(parsed.channel_token),
+      channel_expiration: parsed.channel_expiration,
+      resource_id: parsed.resource_id,
+      resource_uri: parsed.resource_uri,
+      resource_state: parsed.resource_state,
+      message_number: parsed.message_number,
+      changed: changed_values(parsed.changed),
+      file_id: file_id_from_resource_uri(parsed.resource_uri),
+      resource_changed: resource_changed?(parsed.resource_state),
+      delivery: %{
+        provider: delivery.provider,
+        event: delivery.event,
+        id: delivery.delivery_id,
+        duplicate?: delivery.duplicate?,
+        received_at: delivery.received_at
+      }
+    }
+    |> Data.compact()
   end
 
-  defp header(headers, name) when is_list(headers) do
-    Enum.find_value(headers, fn
-      {key, value} ->
-        if normalize_header_name(key) == name, do: header_value(value)
+  defp delivery_id(%{channel_id: channel_id, message_number: message_number})
+       when is_binary(channel_id) and is_binary(message_number),
+       do: "#{channel_id}:#{message_number}"
 
-      _other ->
-        nil
-    end)
+  defp delivery_id(%{channel_id: channel_id}) when is_binary(channel_id), do: channel_id
+  defp delivery_id(_parsed), do: nil
+
+  defp header(headers, name) when is_map(headers) or is_list(headers) do
+    headers
+    |> header_map()
+    |> CoreWebhook.header(name)
+    |> header_value()
     |> trim()
   end
 
   defp header(_headers, _name), do: nil
 
-  defp normalize_header_name(name) do
-    name
-    |> to_string()
-    |> String.downcase()
-  end
+  defp header_map(headers) when is_map(headers), do: headers
+  defp header_map(headers) when is_list(headers), do: Map.new(headers)
 
   defp header_value([value | _rest]), do: value
   defp header_value(value), do: value
 
   defp trim(value) when is_binary(value), do: String.trim(value)
   defp trim(value), do: value
+
+  defp present?(value), do: value not in [nil, ""]
 
   defp changed_values(value) when is_binary(value) do
     value
@@ -147,4 +251,16 @@ defmodule Jido.Connect.Google.Drive.Webhook do
       received_at: delivery.received_at
     })
   end
+
+  defp decode_body(nil), do: nil
+  defp decode_body(""), do: nil
+
+  defp decode_body(body) when is_binary(body) do
+    case Jason.decode(body) do
+      {:ok, decoded} -> decoded
+      {:error, _error} -> body
+    end
+  end
+
+  defp decode_body(body), do: body
 end

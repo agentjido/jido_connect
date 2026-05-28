@@ -1144,6 +1144,7 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
                  spaces: "drive",
                  include_removed: true,
                  channel_id: "channel-123",
+                 channel_type: "webhook",
                  address: "https://example.com/drive/webhook",
                  token: "route=drive",
                  expiration_ms: 1_770_000_000_000
