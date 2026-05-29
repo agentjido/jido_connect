@@ -51,7 +51,7 @@ defmodule JidoConnectCore.MixProject do
       {:splode, "~> 0.3.0"},
       {:spark, "~> 2.6"},
       {:telemetry, "~> 1.3"},
-      {:zoi, "~> 0.17.1"},
+      {:zoi, "~> 0.18"},
       # Transitive runtime deps of jido – declared explicitly so the
       # umbrella adds them to the code path in every Mix env.
       {:deep_merge, "~> 1.0"},

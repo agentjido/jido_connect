@@ -1,3 +1,11 @@
+defmodule Jido.Connect.PostHog.ErrorQueryMock do
+  @moduledoc false
+
+  def run_query("token", "INVALID QUERY", _opts) do
+    {:ok, %Req.Response{status: 400, body: %{"detail" => "Invalid HogQL query."}}}
+  end
+end
+
 defmodule Jido.Connect.PostHog.Handlers.Actions.RunQueryTest do
   use ExUnit.Case, async: true
 
@@ -52,13 +60,5 @@ defmodule Jido.Connect.PostHog.Handlers.Actions.RunQueryTest do
       assert {:error, %Jido.Connect.Error.ProviderError{provider: :posthog}} =
                RunQuery.run(input, %{credentials: credentials})
     end
-  end
-end
-
-defmodule Jido.Connect.PostHog.ErrorQueryMock do
-  @moduledoc false
-
-  def run_query("token", "INVALID QUERY", _opts) do
-    {:ok, %Req.Response{status: 400, body: %{"detail" => "Invalid HogQL query."}}}
   end
 end

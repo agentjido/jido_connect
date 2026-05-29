@@ -4,6 +4,85 @@ defmodule Jido.Connect.AirtableTest do
   alias Jido.Connect
   alias Jido.Connect.Airtable
 
+  defmodule FakeClient do
+    @moduledoc false
+
+    alias Jido.Connect.Airtable
+
+    def list_bases(_params, "token") do
+      {:ok,
+       [
+         Airtable.Base.new!(%{base_id: "appTest1", name: "Test Base"})
+       ]}
+    end
+
+    def get_base(%{base_id: "appTest1"}, "token") do
+      {:ok, Airtable.Base.new!(%{base_id: "appTest1", name: "Test Base"})}
+    end
+
+    def list_tables(%{base_id: "appTest1"}, "token") do
+      {:ok,
+       %{
+         tables: [Airtable.Table.new!(%{table_id: "tblTest1", name: "Tasks"})]
+       }}
+    end
+
+    def list_records(_params, "token") do
+      {:ok,
+       %{
+         records: [Airtable.Record.new!(%{record_id: "rec1", fields: %{"Name" => "Test"}})]
+       }}
+    end
+
+    def get_record(%{record_id: "rec1"}, "token") do
+      {:ok, Airtable.Record.new!(%{record_id: "rec1", fields: %{"Name" => "Test"}})}
+    end
+
+    def create_record(%{fields: %{"Name" => "New"}}, "token") do
+      {:ok, Airtable.Record.new!(%{record_id: "rec2", fields: %{"Name" => "New"}})}
+    end
+
+    def update_record(%{record_id: "rec1", fields: %{"Name" => "Updated"}}, "token") do
+      {:ok, Airtable.Record.new!(%{record_id: "rec1", fields: %{"Name" => "Updated"}})}
+    end
+
+    def delete_record(%{record_id: "rec1"}, "token") do
+      {:ok, Airtable.Record.new!(%{record_id: "rec1"})}
+    end
+
+    def create_records(%{records: [%{"Name" => "New 1"}, %{"Name" => "New 2"}]}, "token") do
+      {:ok,
+       [
+         Airtable.Record.new!(%{record_id: "rec2", fields: %{"Name" => "New 1"}}),
+         Airtable.Record.new!(%{record_id: "rec3", fields: %{"Name" => "New 2"}})
+       ]}
+    end
+
+    def update_records(
+          %{
+            records: [
+              %{id: "rec1", fields: %{"Name" => "Updated 1"}},
+              %{id: "rec2", fields: %{"Name" => "Updated 2"}}
+            ]
+          },
+          "token"
+        ) do
+      {:ok,
+       [
+         Airtable.Record.new!(%{record_id: "rec1", fields: %{"Name" => "Updated 1"}}),
+         Airtable.Record.new!(%{record_id: "rec2", fields: %{"Name" => "Updated 2"}})
+       ]}
+    end
+
+    def delete_records(%{record_ids: ["rec1", "rec2"]}, "token") do
+      {:ok,
+       [
+         Airtable.Record.new!(%{record_id: "rec1"}),
+         Airtable.Record.new!(%{record_id: "rec2"})
+       ]}
+    end
+  end
+
   @airtable_action_modules [
     Jido.Connect.Airtable.Actions.ListBases,
     Jido.Connect.Airtable.Actions.GetBase,
@@ -435,89 +514,10 @@ defmodule Jido.Connect.AirtableTest do
         provider: :airtable,
         profile: :personal_access_token,
         expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
-        fields: %{api_key: "token", airtable_client: FakeAirtableClient},
+        fields: %{api_key: "token", airtable_client: FakeClient},
         scopes: @test_scopes
       })
 
     {context, lease}
-  end
-end
-
-defmodule FakeAirtableClient do
-  @moduledoc false
-
-  alias Jido.Connect.Airtable
-
-  def list_bases(_params, "token") do
-    {:ok,
-     [
-       Airtable.Base.new!(%{base_id: "appTest1", name: "Test Base"})
-     ]}
-  end
-
-  def get_base(%{base_id: "appTest1"}, "token") do
-    {:ok, Airtable.Base.new!(%{base_id: "appTest1", name: "Test Base"})}
-  end
-
-  def list_tables(%{base_id: "appTest1"}, "token") do
-    {:ok,
-     %{
-       tables: [Airtable.Table.new!(%{table_id: "tblTest1", name: "Tasks"})]
-     }}
-  end
-
-  def list_records(_params, "token") do
-    {:ok,
-     %{
-       records: [Airtable.Record.new!(%{record_id: "rec1", fields: %{"Name" => "Test"}})]
-     }}
-  end
-
-  def get_record(%{record_id: "rec1"}, "token") do
-    {:ok, Airtable.Record.new!(%{record_id: "rec1", fields: %{"Name" => "Test"}})}
-  end
-
-  def create_record(%{fields: %{"Name" => "New"}}, "token") do
-    {:ok, Airtable.Record.new!(%{record_id: "rec2", fields: %{"Name" => "New"}})}
-  end
-
-  def update_record(%{record_id: "rec1", fields: %{"Name" => "Updated"}}, "token") do
-    {:ok, Airtable.Record.new!(%{record_id: "rec1", fields: %{"Name" => "Updated"}})}
-  end
-
-  def delete_record(%{record_id: "rec1"}, "token") do
-    {:ok, Airtable.Record.new!(%{record_id: "rec1"})}
-  end
-
-  def create_records(%{records: [%{"Name" => "New 1"}, %{"Name" => "New 2"}]}, "token") do
-    {:ok,
-     [
-       Airtable.Record.new!(%{record_id: "rec2", fields: %{"Name" => "New 1"}}),
-       Airtable.Record.new!(%{record_id: "rec3", fields: %{"Name" => "New 2"}})
-     ]}
-  end
-
-  def update_records(
-        %{
-          records: [
-            %{id: "rec1", fields: %{"Name" => "Updated 1"}},
-            %{id: "rec2", fields: %{"Name" => "Updated 2"}}
-          ]
-        },
-        "token"
-      ) do
-    {:ok,
-     [
-       Airtable.Record.new!(%{record_id: "rec1", fields: %{"Name" => "Updated 1"}}),
-       Airtable.Record.new!(%{record_id: "rec2", fields: %{"Name" => "Updated 2"}})
-     ]}
-  end
-
-  def delete_records(%{record_ids: ["rec1", "rec2"]}, "token") do
-    {:ok,
-     [
-       Airtable.Record.new!(%{record_id: "rec1"}),
-       Airtable.Record.new!(%{record_id: "rec2"})
-     ]}
   end
 end

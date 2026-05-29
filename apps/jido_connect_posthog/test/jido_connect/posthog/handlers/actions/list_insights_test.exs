@@ -1,3 +1,11 @@
+defmodule Jido.Connect.PostHog.ErrorMockClient do
+  @moduledoc false
+
+  def list_insights("token", _opts) do
+    {:ok, %Req.Response{status: 401, body: %{"detail" => "Invalid token."}}}
+  end
+end
+
 defmodule Jido.Connect.PostHog.Handlers.Actions.ListInsightsTest do
   use ExUnit.Case, async: true
 
@@ -47,13 +55,5 @@ defmodule Jido.Connect.PostHog.Handlers.Actions.ListInsightsTest do
       assert {:error, %Jido.Connect.Error.ProviderError{provider: :posthog}} =
                ListInsights.run(input, %{credentials: credentials})
     end
-  end
-end
-
-defmodule Jido.Connect.PostHog.ErrorMockClient do
-  @moduledoc false
-
-  def list_insights("token", _opts) do
-    {:ok, %Req.Response{status: 401, body: %{"detail" => "Invalid token."}}}
   end
 end

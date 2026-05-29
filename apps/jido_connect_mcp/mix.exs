@@ -49,10 +49,11 @@ defmodule JidoConnectMCP.MixProject do
       # explicitly so the umbrella can resolve them from the local Hex
       # cache without network access.
       {:anubis_mcp, "~> 1.1"},
+      {:peri, "~> 0.8.5", override: true},
       {:jido, "~> 2.2"},
       {:jido_action, "~> 2.2"},
       {:jido_signal, "~> 2.1"},
-      {:zoi, "~> 0.17"}
+      {:zoi, "~> 0.18"}
     ]
   end
 
