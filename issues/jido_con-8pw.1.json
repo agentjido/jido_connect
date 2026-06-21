@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
   "created": "2026-06-21T14:09:29Z",
@@ -8,8 +8,8 @@
   "labels": [],
   "parent": "jido_con-8pw",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G39-S01] Implement Nextcloud connector package",
   "type": "task",
-  "updated_at": "2026-06-21T14:09:29Z"
+  "updated_at": "2026-06-21T14:09:41Z"
 }
