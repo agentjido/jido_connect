@@ -18,11 +18,14 @@ Current slice:
 - GitHub integration app at `apps/jido_connect_github`
 - Slack integration app at `apps/jido_connect_slack`
 - MCP bridge app at `apps/jido_connect_mcp`
+- Nextcloud integration app at `apps/jido_connect_nextcloud`
 - GitHub actions for `github.issue.list` and `github.issue.create`
 - GitHub poll trigger contract for `github.issue.new`
 - Slack actions for `slack.channel.list`, `slack.message.post`,
   `slack.message.update`, `slack.message.delete`, and `slack.file.upload`
 - MCP actions for `mcp.tools.list` and `mcp.tool.call`
+- Nextcloud actions for files, folders, shares, sharee lookup, and Office
+  launch metadata through WebDAV and OCS APIs
 - Catalog discovery, deterministic tool search, descriptors, and safe action
   calling through `Jido.Connect.Catalog`
 - Generic ngrok tunnel helper: `mix jido.connect.ngrok`
