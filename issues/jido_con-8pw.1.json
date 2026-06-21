@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-06-21T14:09:29Z",
+  "description": "Add apps/jido_connect_nextcloud as a single provider package. Include auth metadata for app password and OAuth2, WebDAV and OCS transports, Files/Shares/Office action fragments, handlers, normalizers, catalog packs, docs, tests, README status updates, and quality verification.",
+  "id": "jido_con-8pw.1",
+  "labels": [],
+  "parent": "jido_con-8pw",
+  "priority": 2,
+  "status": "open",
+  "title": "[G39-S01] Implement Nextcloud connector package",
+  "type": "task",
+  "updated_at": "2026-06-21T14:09:29Z"
+}
