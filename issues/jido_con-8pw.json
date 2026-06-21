@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-06-21T14:09:22Z",
+  "description": "Implement a single jido_connect_nextcloud package for Nextcloud Files, OCS sharing, and initial Office capability metadata. Track future groupware and Talk as later package-internal phases.",
+  "id": "jido_con-8pw",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "[G39] Nextcloud Connector",
+  "type": "epic",
+  "updated_at": "2026-06-21T14:09:22Z"
+}
