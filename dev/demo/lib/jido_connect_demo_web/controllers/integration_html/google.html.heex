@@ -111,11 +111,11 @@
       </div>
     </div>
   </section>
-
-  <!-- Sheets Actions -->
+  
+<!-- Sheets Actions -->
   <section class="mt-6 grid gap-4 lg:grid-cols-2">
     <div class="rounded-lg border border-base-300 p-5">
-      <h2 class="text-lg font-semibold">Sheets: Get Values</h2>
+      <h2 class="text-lg font-semibold">Get Sheet Values</h2>
       <.form
         for={%{}}
         action="/integrations/google/actions/get_values"
@@ -133,8 +133,8 @@
         <button class="btn btn-outline" type="submit">Get Values</button>
       </.form>
     </div>
-
-    <!-- Gmail Actions -->
+    
+<!-- Gmail Actions -->
     <div class="rounded-lg border border-base-300 p-5">
       <h2 class="text-lg font-semibold">Gmail: Get Profile</h2>
       <.form
@@ -159,7 +159,12 @@
         class="mt-4 grid gap-3"
       >
         <input class="input input-bordered" name="connection_id" value={default_connection_id} />
-        <input class="input input-bordered" name="max_results" value="10" placeholder="max results" />
+        <input
+          class="input input-bordered"
+          name="max_results"
+          value="10"
+          placeholder="max results"
+        />
         <input class="input input-bordered" name="query" placeholder="e.g. is:unread" />
         <button class="btn btn-outline" type="submit">List Messages</button>
       </.form>
@@ -219,8 +224,18 @@
         class="mt-4 grid gap-3"
       >
         <input class="input input-bordered" name="connection_id" value={default_connection_id} />
-        <input class="input input-bordered" name="calendar_id" value="primary" placeholder="calendar id" />
-        <input class="input input-bordered" name="max_results" value="10" placeholder="max results" />
+        <input
+          class="input input-bordered"
+          name="calendar_id"
+          value="primary"
+          placeholder="calendar id"
+        />
+        <input
+          class="input input-bordered"
+          name="max_results"
+          value="10"
+          placeholder="max results"
+        />
         <input class="input input-bordered" name="time_min" placeholder="ISO 8601 time_min" />
         <input class="input input-bordered" name="time_max" placeholder="ISO 8601 time_max" />
         <button class="btn btn-outline" type="submit">List Events</button>
