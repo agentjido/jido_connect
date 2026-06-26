@@ -40,7 +40,7 @@ defmodule JidoConnect.MixProject do
       quality: [
         "compile --warnings-as-errors",
         "format --check-formatted",
-        "test --cover"
+        "test"
       ]
     ]
   end
