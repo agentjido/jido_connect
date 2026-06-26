@@ -208,7 +208,6 @@ defmodule Jido.Connect.Catalog.Input do
   defp blank?(""), do: true
   defp blank?(_value), do: false
 
-  defp type_name(value) when is_map(value), do: :map
   defp type_name(value) when is_list(value), do: :list
   defp type_name(value) when is_binary(value), do: :string
   defp type_name(value) when is_atom(value), do: :atom

@@ -64,7 +64,15 @@ defmodule Jido.Connect.Catalog.Search do
       Enum.map(entry.schemas, &[&1.id, &1.label, &1.description]),
       Enum.map(
         entry.auth_profiles,
-        &[&1.id, &1.kind, &1.label, &1.scopes, &1.default_scopes, &1.credential_fields]
+        &[
+          &1.id,
+          &1.kind,
+          &1.label,
+          &1.scopes,
+          &1.default_scopes,
+          &1.credential_fields,
+          &1.lease_fields
+        ]
       ),
       Enum.map(entry.actions, &tool_search_text/1),
       Enum.map(entry.triggers, &tool_search_text/1)

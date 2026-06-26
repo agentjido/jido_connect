@@ -53,7 +53,7 @@ defmodule Jido.Connect.Notion.ScopeResolver do
   defp operation_id(nil), do: nil
   defp operation_id(%{id: id}), do: id
   defp operation_id(%{action_id: action_id}), do: action_id
-  defp operation_id(operation), do: Map.get(operation, :id)
+  defp operation_id(_operation), do: nil
 
   defp scopes_for_operation(nil), do: ["read_content"]
 

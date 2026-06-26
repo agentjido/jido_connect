@@ -166,8 +166,8 @@ defmodule Jido.Connect.Catalog.Pack do
 
   defp normalize_one_pack(other), do: invalid_pack(other, :invalid_pack)
 
-  defp normalize_pack_attrs(%{} = attrs, id), do: Map.put_new(attrs, :id, id)
   defp normalize_pack_attrs(%__MODULE__{} = pack, _id), do: pack
+  defp normalize_pack_attrs(%{} = attrs, id), do: Map.put_new(attrs, :id, id)
   defp normalize_pack_attrs(attrs, id), do: %{id: id, allowed_tools: List.wrap(attrs)}
 
   defp maybe_put_default_id(%{} = attrs) do

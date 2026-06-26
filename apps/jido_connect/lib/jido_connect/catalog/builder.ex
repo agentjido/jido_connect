@@ -20,15 +20,15 @@ defmodule Jido.Connect.Catalog.Builder do
 
   @spec entry_from_spec(Jido.Connect.Spec.t(), module(), term(), keyword()) :: Entry.t()
   def entry_from_spec(spec, integration_module, projection, opts \\ []) do
+    package = spec_package(spec)
+
     Entry.new!(%{
       id: spec.id,
       name: spec.name,
       description: spec.description,
       category: spec.category,
-      package: spec.package || Map.get(spec.metadata, :package),
-      version:
-        Keyword.get(opts, :version) || metadata_value(spec.metadata, :version) ||
-          package_version(spec.package || Map.get(spec.metadata, :package)),
+      package: package,
+      version: spec_version(spec, package, opts),
       module: integration_module,
       status:
         Keyword.get(opts, :status, spec.status || Map.get(spec.metadata, :status, :available)),
@@ -55,15 +55,15 @@ defmodule Jido.Connect.Catalog.Builder do
 
   @spec manifest_from_spec(Jido.Connect.Spec.t(), module(), term(), keyword()) :: Manifest.t()
   def manifest_from_spec(spec, integration_module, projection, opts \\ []) do
+    package = spec_package(spec)
+
     Entry.new!(%{
       id: spec.id,
       name: spec.name,
       description: spec.description,
       category: spec.category,
-      package: spec.package || Map.get(spec.metadata, :package),
-      version:
-        Keyword.get(opts, :version) || metadata_value(spec.metadata, :version) ||
-          package_version(spec.package || Map.get(spec.metadata, :package)),
+      package: package,
+      version: spec_version(spec, package, opts),
       module: integration_module,
       status:
         Keyword.get(opts, :status, spec.status || Map.get(spec.metadata, :status, :available)),
@@ -281,6 +281,33 @@ defmodule Jido.Connect.Catalog.Builder do
       version -> to_string(version)
     end
   end
+
+  defp package_version(package) when is_binary(package) do
+    package
+    |> normalize_package()
+    |> package_version()
+  end
+
+  defp spec_package(%{package: package, metadata: metadata}) do
+    normalize_package(package) || normalize_package(metadata_value(metadata, :package))
+  end
+
+  defp spec_version(spec, package, opts) do
+    Keyword.get(opts, :version) || metadata_value(spec.metadata, :version) ||
+      package_version(package)
+  end
+
+  defp normalize_package(package) when is_atom(package), do: package
+
+  defp normalize_package(package) when is_binary(package) do
+    package
+    |> String.trim()
+    |> String.to_existing_atom()
+  rescue
+    ArgumentError -> nil
+  end
+
+  defp normalize_package(_package), do: nil
 
   defp metadata_value(metadata, key) when is_map(metadata) do
     Map.get(metadata, key) || Map.get(metadata, Atom.to_string(key))

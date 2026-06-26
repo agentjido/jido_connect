@@ -108,6 +108,42 @@ defmodule Jido.Connect.CatalogTest do
     end
   end
 
+  defmodule MetadataPackageIntegration do
+    use Jido.Connect
+
+    integration do
+      id :metadata_package
+      name "Metadata Package"
+      category :test
+    end
+
+    catalog do
+      metadata %{package: "jido_connect", version: "9.9.9"}
+    end
+
+    auth do
+      api_key :user do
+        default? true
+        owner :app_user
+        subject :user
+        label "User API key"
+        credential_fields [:api_key]
+      end
+    end
+
+    actions do
+      action :get_item do
+        id "metadata.item.get"
+        resource :item
+        verb :get
+        data_classification :workspace_metadata
+        label "Get metadata item"
+        handler Handler
+        effect :read
+      end
+    end
+  end
+
   test "catalog entries derive host-facing metadata from specs" do
     entry = Catalog.entry(CatalogFixtures.Integration)
     manifest = Catalog.manifest(CatalogFixtures.Integration)
@@ -164,6 +200,26 @@ defmodule Jido.Connect.CatalogTest do
              version: "1.2.3",
              generated_modules: %{actions: [], sensors: [], plugin: nil}
            } = manifest
+  end
+
+  test "catalog entries normalize package metadata before deriving versions" do
+    assert %Catalog.Entry{
+             package: :jido_connect,
+             version: "9.9.9"
+           } = Catalog.entry(MetadataPackageIntegration)
+
+    assert %Catalog.Manifest{
+             package: :jido_connect,
+             version: "9.9.9"
+           } = MetadataPackageIntegration.jido_connect_manifest()
+
+    assert [
+             %Catalog.ToolEntry{
+               id: "metadata.item.get",
+               package: :jido_connect,
+               package_version: "9.9.9"
+             }
+           ] = Catalog.tools(modules: [MetadataPackageIntegration])
   end
 
   test "catalog discovery searches and filters configured modules" do
@@ -442,6 +498,26 @@ defmodule Jido.Connect.CatalogTest do
              )
 
     assert [] = Catalog.search_tools("missing", modules: modules)
+  end
+
+  test "catalog entry search includes auth lease field summaries" do
+    entry =
+      Catalog.Entry.new!(%{
+        id: :lease_search,
+        name: "Lease Search",
+        module: __MODULE__,
+        auth_profiles: [
+          Catalog.AuthProfileSummary.new!(%{
+            id: :user,
+            kind: :oauth2,
+            owner: :user,
+            subject: :user,
+            lease_fields: [:resolved_access_token]
+          })
+        ]
+      })
+
+    assert [^entry] = Catalog.search([entry], "resolved_access_token")
   end
 
   test "tool lookup resolves ids and provider-qualified references" do

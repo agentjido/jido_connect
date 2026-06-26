@@ -34,9 +34,6 @@ defmodule Jido.Connect.Google.Drive.Handlers.Actions.UpdatePermission do
         |> String.trim()
         |> validate_role_value(role)
 
-      role when role in @permission_roles ->
-        :ok
-
       role ->
         validation_error("Invalid Google Drive permission role",
           field: :role,
