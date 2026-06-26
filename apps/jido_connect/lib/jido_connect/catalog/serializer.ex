@@ -30,6 +30,7 @@ defmodule Jido.Connect.Catalog.Serializer do
       description: entry.description,
       category: entry.category,
       package: entry.package,
+      version: entry.version,
       module: inspect(entry.module),
       status: entry.status,
       tags: entry.tags,
@@ -85,12 +86,14 @@ defmodule Jido.Connect.Catalog.Serializer do
       provider_name: tool.provider_name,
       category: tool.category,
       package: tool.package,
+      package_version: tool.package_version,
       integration_module: inspect(tool.integration_module),
       type: tool.type,
       id: tool.id,
       name: tool.name,
       label: tool.label,
       description: tool.description,
+      tags: tool.tags,
       module: module_name(tool.module),
       resource: tool.resource,
       verb: tool.verb,
@@ -145,7 +148,9 @@ defmodule Jido.Connect.Catalog.Serializer do
       default?: auth_profile.default?,
       scopes: auth_profile.scopes,
       default_scopes: auth_profile.default_scopes,
-      optional_scopes: auth_profile.optional_scopes
+      optional_scopes: auth_profile.optional_scopes,
+      credential_fields: auth_profile.credential_fields,
+      lease_fields: auth_profile.lease_fields
     }
   end
 
@@ -178,6 +183,7 @@ defmodule Jido.Connect.Catalog.Serializer do
       name: tool.name,
       label: tool.label,
       description: tool.description,
+      tags: tool.tags,
       module: module_name(tool.module),
       resource: tool.resource,
       verb: tool.verb,

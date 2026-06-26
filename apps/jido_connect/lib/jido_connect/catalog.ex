@@ -432,10 +432,12 @@ defmodule Jido.Connect.Catalog do
       metadata: %{
         provider: tool.provider,
         provider_name: tool.provider_name,
+        package_version: tool.package_version,
         integration_module: inspect(tool.integration_module),
         resource: tool.resource,
         verb: tool.verb,
         data_classification: tool.data_classification,
+        tags: tool.tags,
         auth_profile: tool.auth_profile,
         auth_profiles: tool.auth_profiles,
         auth_kinds: tool.auth_kinds,
@@ -447,9 +449,10 @@ defmodule Jido.Connect.Catalog do
   end
 
   defp action_catalog_tags(%ToolEntry{} = tool) do
-    [tool.provider, tool.category, tool.resource, tool.verb]
+    [tool.provider, tool.category, tool.resource, tool.verb | tool.tags]
     |> Enum.reject(&is_nil/1)
     |> Enum.map(&to_string/1)
+    |> Enum.uniq()
   end
 
   defp action_catalog_capabilities(%ToolEntry{} = tool) do

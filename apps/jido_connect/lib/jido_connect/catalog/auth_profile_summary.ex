@@ -13,7 +13,9 @@ defmodule Jido.Connect.Catalog.AuthProfileSummary do
               default?: Zoi.boolean() |> Zoi.default(false),
               scopes: Zoi.list(Zoi.string()) |> Zoi.default([]),
               default_scopes: Zoi.list(Zoi.string()) |> Zoi.default([]),
-              optional_scopes: Zoi.list(Zoi.string()) |> Zoi.default([])
+              optional_scopes: Zoi.list(Zoi.string()) |> Zoi.default([]),
+              credential_fields: Zoi.list(Zoi.atom()) |> Zoi.default([]),
+              lease_fields: Zoi.list(Zoi.atom()) |> Zoi.default([])
             },
             coerce: true
           )

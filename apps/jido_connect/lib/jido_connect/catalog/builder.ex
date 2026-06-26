@@ -26,6 +26,9 @@ defmodule Jido.Connect.Catalog.Builder do
       description: spec.description,
       category: spec.category,
       package: spec.package || Map.get(spec.metadata, :package),
+      version:
+        Keyword.get(opts, :version) || metadata_value(spec.metadata, :version) ||
+          package_version(spec.package || Map.get(spec.metadata, :package)),
       module: integration_module,
       status:
         Keyword.get(opts, :status, spec.status || Map.get(spec.metadata, :status, :available)),
@@ -58,6 +61,9 @@ defmodule Jido.Connect.Catalog.Builder do
       description: spec.description,
       category: spec.category,
       package: spec.package || Map.get(spec.metadata, :package),
+      version:
+        Keyword.get(opts, :version) || metadata_value(spec.metadata, :version) ||
+          package_version(spec.package || Map.get(spec.metadata, :package)),
       module: integration_module,
       status:
         Keyword.get(opts, :status, spec.status || Map.get(spec.metadata, :status, :available)),
@@ -83,7 +89,9 @@ defmodule Jido.Connect.Catalog.Builder do
       app: entry.package,
       package: entry.package,
       module: entry.module,
-      version: Map.get(entry.metadata, :version),
+      version:
+        entry.version || metadata_value(entry.metadata, :version) ||
+          package_version(entry.package),
       status: entry.status,
       category: entry.category,
       tags: entry.tags,
@@ -114,7 +122,9 @@ defmodule Jido.Connect.Catalog.Builder do
       default?: auth_profile.default?,
       scopes: auth_profile.scopes,
       default_scopes: auth_profile.default_scopes,
-      optional_scopes: auth_profile.optional_scopes
+      optional_scopes: auth_profile.optional_scopes,
+      credential_fields: auth_profile.credential_fields,
+      lease_fields: auth_profile.lease_fields
     })
   end
 
@@ -125,6 +135,7 @@ defmodule Jido.Connect.Catalog.Builder do
       name: action.name,
       label: action.label,
       description: action.description,
+      tags: action.tags,
       module: projection_module(projection, :actions, action.id),
       resource: action.resource,
       verb: action.verb,
@@ -145,6 +156,7 @@ defmodule Jido.Connect.Catalog.Builder do
       name: trigger.name,
       label: trigger.label,
       description: trigger.description,
+      tags: trigger.tags,
       module: projection_module(projection, :sensors, trigger.id),
       resource: trigger.resource,
       verb: trigger.verb,
@@ -202,12 +214,14 @@ defmodule Jido.Connect.Catalog.Builder do
       provider_name: entry.name,
       category: entry.category,
       package: entry.package,
+      package_version: entry.version,
       integration_module: entry.module,
       type: tool.type,
       id: tool.id,
       name: tool.name,
       label: tool.label,
       description: tool.description,
+      tags: tool.tags,
       module: tool.module,
       resource: tool.resource,
       verb: tool.verb,
@@ -255,4 +269,22 @@ defmodule Jido.Connect.Catalog.Builder do
     |> String.trim()
     |> String.to_atom()
   end
+
+  defp package_version(nil), do: nil
+
+  defp package_version(package) when is_atom(package) do
+    package
+    |> Application.spec(:vsn)
+    |> case do
+      nil -> nil
+      version when is_list(version) -> List.to_string(version)
+      version -> to_string(version)
+    end
+  end
+
+  defp metadata_value(metadata, key) when is_map(metadata) do
+    Map.get(metadata, key) || Map.get(metadata, Atom.to_string(key))
+  end
+
+  defp metadata_value(_metadata, _key), do: nil
 end

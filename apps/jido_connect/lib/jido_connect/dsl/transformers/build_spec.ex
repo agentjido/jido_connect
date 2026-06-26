@@ -15,7 +15,12 @@ defmodule Jido.Connect.Dsl.Transformers.BuildSpec do
          {:ok, spec} <- SpecBuilder.build(dsl_state, Transformer) do
       integration_module = Transformer.get_persisted(dsl_state, :module)
       projection = ProjectionBuilder.build(integration_module, spec)
-      manifest = Builder.manifest_from_spec(spec, integration_module, projection)
+
+      manifest =
+        Builder.manifest_from_spec(spec, integration_module, projection,
+          version: project_version(spec.package)
+        )
+
       generated_modules = ModuleGenerator.generated_modules_ast(projection)
 
       dsl_state =
@@ -65,5 +70,17 @@ defmodule Jido.Connect.Dsl.Transformers.BuildSpec do
       [] -> :ok
       [violation | _] -> {:error, OperationRules.dsl_error(violation)}
     end
+  end
+
+  defp project_version(package) do
+    if Code.ensure_loaded?(Mix.Project) and function_exported?(Mix.Project, :config, 0) do
+      config = Mix.Project.config()
+
+      if Keyword.get(config, :app) == package do
+        Keyword.get(config, :version)
+      end
+    end
+  rescue
+    _error -> nil
   end
 end

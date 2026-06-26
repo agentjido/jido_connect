@@ -9,6 +9,7 @@ defmodule Jido.Connect.Catalog.Tool do
               name: Zoi.atom(),
               label: Zoi.string(),
               description: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              tags: Zoi.list(Zoi.atom()) |> Zoi.default([]),
               module: Zoi.module() |> Zoi.nullish() |> Zoi.optional(),
               resource: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),
               verb: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),

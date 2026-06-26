@@ -17,6 +17,8 @@ defmodule Jido.Connect.CatalogFixtures do
           label: "User OAuth",
           scopes: ["read"],
           default_scopes: ["read"],
+          credential_fields: [:access_token],
+          lease_fields: [:access_token],
           default?: true
         })
 
@@ -25,6 +27,7 @@ defmodule Jido.Connect.CatalogFixtures do
           id: "catalog.item.get",
           name: :get_item,
           label: "Get item",
+          tags: [:inventory, :read_model],
           resource: :item,
           verb: :get,
           data_classification: :workspace_metadata,
@@ -44,6 +47,7 @@ defmodule Jido.Connect.CatalogFixtures do
           name: :item_created,
           kind: :poll,
           label: "Item created",
+          tags: [:inventory, :events],
           resource: :item,
           verb: :watch,
           data_classification: :workspace_metadata,
@@ -67,7 +71,7 @@ defmodule Jido.Connect.CatalogFixtures do
         package: :jido_connect_catalog,
         tags: [:catalog_test],
         docs: ["https://example.test/docs"],
-        metadata: %{package: :jido_connect_catalog},
+        metadata: %{package: :jido_connect_catalog, version: "1.2.3"},
         policies: [
           Connect.PolicyRequirement.new!(%{
             id: :item_access,
