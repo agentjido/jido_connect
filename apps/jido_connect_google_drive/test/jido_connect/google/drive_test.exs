@@ -1815,6 +1815,7 @@ defmodule Jido.Connect.Google.DriveTest do
             %{
               changes: [
                 %{
+                  change_id: "change123",
                   file_id: "file123",
                   file: %{file_id: "file123", name: "Budget.pdf"}
                 }
