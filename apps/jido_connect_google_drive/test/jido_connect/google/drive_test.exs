@@ -726,6 +726,25 @@ defmodule Jido.Connect.Google.DriveTest do
 
     def list_changes(
           %{
+            page_token: "minimal-change",
+            page_size: 100,
+            spaces: "drive",
+            include_items_from_all_drives: false,
+            include_removed: true,
+            restrict_to_my_drive: false,
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         changes: [%{change_id: "change-minimal", file_id: "file-minimal"}],
+         new_start_page_token: "minimal-next-token"
+       }}
+    end
+
+    def list_changes(
+          %{
             page_token: "loop-token",
             page_size: 100,
             spaces: "drive",
@@ -1814,6 +1833,19 @@ defmodule Jido.Connect.Google.DriveTest do
                context: context,
                credential_lease: lease
              )
+
+    assert {:ok, %{changes: [minimal_change]}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.changes.list",
+               %{page_token: "minimal-change"},
+               context: context,
+               credential_lease: lease
+             )
+
+    refute Map.has_key?(minimal_change, :owners)
+    refute Map.has_key?(minimal_change, :permissions)
+    refute Map.has_key?(minimal_change, :file)
 
     assert {:ok,
             %{

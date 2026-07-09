@@ -36,10 +36,18 @@ defmodule Jido.Connect.Google.Drive.Handlers.Actions.ListChanges do
 
   defp public_map(map) when is_map(map) do
     map
-    |> Map.update(:owners, [], &public_map/1)
-    |> Map.update(:permissions, [], &public_map/1)
-    |> Map.update(:file, nil, &public_map/1)
+    |> update_present(:owners)
+    |> update_present(:permissions)
+    |> update_present(:file)
   end
 
   defp public_map(value), do: value
+
+  defp update_present(map, key) do
+    if Map.has_key?(map, key) do
+      Map.update!(map, key, &public_map/1)
+    else
+      map
+    end
+  end
 end
