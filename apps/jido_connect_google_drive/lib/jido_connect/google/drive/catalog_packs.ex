@@ -19,6 +19,8 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
     "google.drive.reply.get",
     "google.drive.shared_drives.list",
     "google.drive.shared_drive.get",
+    "google.drive.changes.get_start_page_token",
+    "google.drive.changes.list",
     "google.drive.file.changed",
     "google.drive.file.changed.push"
   ]

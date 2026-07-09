@@ -46,6 +46,8 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
     assert "google.drive.reply.get" in ids
     assert "google.drive.shared_drives.list" in ids
     assert "google.drive.shared_drive.get" in ids
+    assert "google.drive.changes.get_start_page_token" in ids
+    assert "google.drive.changes.list" in ids
     refute "google.drive.changes.watch" in ids
     refute "google.drive.file.create" in ids
     refute "google.drive.permission.update" in ids
@@ -147,6 +149,24 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.drive.changes.watch"
+
+    assert {:ok, token_descriptor} =
+             Catalog.describe_tool("google.drive.changes.get_start_page_token",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_watch
+             )
+
+    assert token_descriptor.tool.id == "google.drive.changes.get_start_page_token"
+
+    assert {:ok, list_descriptor} =
+             Catalog.describe_tool("google.drive.changes.list",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_watch
+             )
+
+    assert list_descriptor.tool.id == "google.drive.changes.list"
 
     assert {:ok, file_descriptor} =
              Catalog.describe_tool("google.drive.file.watch",

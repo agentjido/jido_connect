@@ -109,6 +109,12 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
         action("google.drive.shared_drive.unhide", :workspace_metadata, :write, :required_for_ai,
           text_includes: ["shared drive"]
         ),
+        action("google.drive.changes.get_start_page_token", :workspace_metadata, :read, :none,
+          text_includes: ["cursor"]
+        ),
+        action("google.drive.changes.list", :workspace_metadata, :read, :none,
+          text_includes: ["changes"]
+        ),
         action("google.drive.changes.watch", :workspace_metadata, :write, :required_for_ai,
           text_includes: ["push", "notification"]
         ),
