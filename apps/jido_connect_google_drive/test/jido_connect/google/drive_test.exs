@@ -734,7 +734,7 @@ defmodule Jido.Connect.Google.DriveTest do
         ) do
       {:ok,
        %{
-         changes: [%{file_id: "file-minimal"}],
+         changes: [%{change_id: "change-minimal", file_id: "file-minimal"}],
          new_start_page_token: "minimal-next-token"
        }}
     end
