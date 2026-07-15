@@ -6,9 +6,15 @@
   "description": "Sync local main to origin/main, inspect PR #41 metadata, diff, checks, and tests, and report actionable review findings.",
   "id": "jido_con-7k4",
   "labels": [],
+  "comments": [
+    {
+      "text": "Review finding: P1 - the new google.drive.changes.list action uses Client.Params.change_list_fields/0 by default, which requests changeId. Google Drive API v3 Change has no changeId field, and invalid fields selectors return HTTP 400. Existing mocked tests fabricate changeId and do not exercise the live v3 schema. Focused Google Drive tests: 125 passed; GitHub CI at 29beaa35: success.",
+      "timestamp": "2026-07-15T01:22:45Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Review GitHub PR #41",
   "type": "task",
-  "updated_at": "2026-07-15T01:18:51Z"
+  "updated_at": "2026-07-15T01:22:45Z"
 }
