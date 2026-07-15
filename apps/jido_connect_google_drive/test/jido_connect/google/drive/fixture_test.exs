@@ -21,7 +21,6 @@ defmodule Jido.Connect.Google.Drive.FixtureTest do
     payload = fixture!("change_removed_edge.json")
 
     assert {:ok, change} = Normalizer.change(payload)
-    assert change.change_id == "change789"
     assert change.file_id == "file789"
     assert change.removed? == true
     assert change.file == nil

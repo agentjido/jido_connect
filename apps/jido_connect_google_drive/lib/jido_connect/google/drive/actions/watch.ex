@@ -30,7 +30,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Watch do
         field(:page_token, :string,
           required?: true,
           description:
-            "Start page token from google.drive.file.changed polling or changes.getStartPageToken."
+            "Start page token from google.drive.changes.get_start_page_token or google.drive.changes.list."
         )
 
         field(:channel_id, :string,
