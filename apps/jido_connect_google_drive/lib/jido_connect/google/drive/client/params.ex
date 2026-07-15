@@ -5,7 +5,6 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   alias Jido.Connect.Google.Drive.Fields
 
   @default_change_fields [
-    "changeId",
     "fileId",
     "removed",
     "time",

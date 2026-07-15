@@ -607,7 +607,6 @@ defmodule Jido.Connect.Google.DriveTest do
        %{
          changes: [
            Drive.Change.new!(%{
-             change_id: "change123",
              file_id: "file123",
              removed?: false,
              time: "2026-05-05T12:00:00Z",
@@ -640,7 +639,6 @@ defmodule Jido.Connect.Google.DriveTest do
        %{
          changes: [
            Drive.Change.new!(%{
-             change_id: "change123",
              file_id: "file123",
              removed?: false,
              time: "2026-05-05T12:00:00Z",
@@ -673,7 +671,6 @@ defmodule Jido.Connect.Google.DriveTest do
        %{
          changes: [
            Drive.Change.new!(%{
-             change_id: "change123",
              file_id: "file123",
              removed?: false,
              time: "2026-05-05T12:00:00Z",
@@ -686,7 +683,6 @@ defmodule Jido.Connect.Google.DriveTest do
                })
            }),
            Drive.Change.new!(%{
-             change_id: "change456",
              file_id: "file456",
              removed?: false,
              time: "2026-05-05T12:05:00Z",
@@ -738,7 +734,7 @@ defmodule Jido.Connect.Google.DriveTest do
         ) do
       {:ok,
        %{
-         changes: [%{change_id: "change-minimal", file_id: "file-minimal"}],
+         changes: [%{file_id: "file-minimal"}],
          new_start_page_token: "minimal-next-token"
        }}
     end
@@ -1035,7 +1031,7 @@ defmodule Jido.Connect.Google.DriveTest do
               id: "google.drive.file.changed",
               kind: :poll,
               checkpoint: :page_token,
-              dedupe: %{key: [:change_id, :file_id]},
+              dedupe: %{key: [:change_type, :file_id, :drive_id, :time]},
               scope_resolver: Jido.Connect.Google.Drive.ScopeResolver
             }} =
              Connect.trigger(spec, "google.drive.file.changed")
@@ -1819,7 +1815,6 @@ defmodule Jido.Connect.Google.DriveTest do
             %{
               changes: [
                 %{
-                  change_id: "change123",
                   file_id: "file123",
                   file: %{file_id: "file123", name: "Budget.pdf"}
                 }
@@ -2163,7 +2158,6 @@ defmodule Jido.Connect.Google.DriveTest do
             %{
               signals: [
                 %{
-                  change_id: "change123",
                   file_id: "file123",
                   removed: false,
                   time: "2026-05-05T12:00:00Z",
@@ -2190,12 +2184,10 @@ defmodule Jido.Connect.Google.DriveTest do
             %{
               signals: [
                 %{
-                  change_id: "change123",
                   file_id: "file123",
                   file: %{name: "Budget.pdf"}
                 },
                 %{
-                  change_id: "change456",
                   file_id: "file456",
                   file: %{name: "Forecast.pdf"}
                 }
