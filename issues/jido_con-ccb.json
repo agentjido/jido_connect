@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-07-15T01:26:09Z",
+  "description": "Patch PR #41 so google.drive.changes.list uses only valid Drive API v3 Change fields, update affected normalization and regression tests, verify, commit, and push to the PR source branch.",
+  "id": "jido_con-ccb",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "Fix Drive v3 change fields in PR #41",
+  "type": "task",
+  "updated_at": "2026-07-15T01:26:09Z"
+}
