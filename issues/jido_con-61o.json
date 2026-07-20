@@ -6,9 +6,15 @@
   "description": "Review the current PR #43 head after commit 4bed7c29. Refactor and streamline the Google Drive collection change implementation, add missing hardening tests, run umbrella and demo quality gates, and update the existing PR head branch.",
   "id": "jido_con-61o",
   "labels": [],
+  "comments": [
+    {
+      "text": "Hardening pass complete. Split provider-derived Drive change-log configuration into CollectionChanges.Config; reduced public watch/list/poll contracts; validate folder IDs, page sizes, checkpoints, response shapes, repeated page tokens, and terminal checkpoints; filter non-file changes; emit JSON-safe match/change strings; preserve moved-out events; fix initial sync webhook semantics; make pagination accumulation linear. Verification: Google Drive 139 tests pass; umbrella mix quality passes; demo format check, warnings-as-errors compile, and 21 tests pass.",
+      "timestamp": "2026-07-20T22:24:34Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Refine Google Drive collection fixes on PR 43",
   "type": "task",
-  "updated_at": "2026-07-20T22:05:55Z"
+  "updated_at": "2026-07-20T22:24:34Z"
 }
