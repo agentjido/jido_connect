@@ -67,6 +67,31 @@ defmodule Jido.Connect.Google.Drive.WebhookTest do
             }} = Webhook.normalize_channel_notification(headers, %{"kind" => "drive#changes"})
   end
 
+  test "normalizes collection changes push as a lightweight refresh signal" do
+    headers = [
+      {"x-goog-channel-id", "channel-123"},
+      {"x-goog-message-number", "11"},
+      {"x-goog-resource-id", "resource-123"},
+      {"x-goog-resource-state", "change"},
+      {"x-goog-resource-uri", "https://www.googleapis.com/drive/v3/changes"}
+    ]
+
+    assert {:ok,
+            %{
+              collection_changed?: true,
+              channel_id: "channel-123",
+              resource_id: "resource-123",
+              message_number: "11",
+              resource_state: "change"
+            } = signal} =
+             Jido.Connect.Google.Drive.Handlers.Triggers.CollectionChangesWebhook.normalize_channel_notification(
+               headers,
+               %{"kind" => "drive#changes"}
+             )
+
+    refute Map.has_key?(signal, :file_id)
+  end
+
   test "accepts string-keyed delivery maps" do
     assert {:ok,
             %{

@@ -41,6 +41,7 @@ defmodule Jido.Connect.Google.Drive.ScopeResolver do
   ]
   @watch_actions [
     "google.drive.changes.watch",
+    "google.drive.collection.watch",
     "google.drive.file.watch",
     "google.drive.channel.stop"
   ]

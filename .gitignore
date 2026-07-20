@@ -25,3 +25,4 @@ apps/*/*-0.1.0/
 .env
 *.env.local
 .secrets/
+.serena/
