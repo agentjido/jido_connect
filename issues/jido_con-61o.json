@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-07-20T22:05:47Z",
+  "description": "Review the current PR #43 head after commit 4bed7c29. Refactor and streamline the Google Drive collection change implementation, add missing hardening tests, run umbrella and demo quality gates, and update the existing PR head branch.",
+  "id": "jido_con-61o",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "Refine Google Drive collection fixes on PR 43",
+  "type": "task",
+  "updated_at": "2026-07-20T22:05:47Z"
+}
