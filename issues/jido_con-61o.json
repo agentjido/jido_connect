@@ -10,11 +10,15 @@
     {
       "text": "Hardening pass complete. Split provider-derived Drive change-log configuration into CollectionChanges.Config; reduced public watch/list/poll contracts; validate folder IDs, page sizes, checkpoints, response shapes, repeated page tokens, and terminal checkpoints; filter non-file changes; emit JSON-safe match/change strings; preserve moved-out events; fix initial sync webhook semantics; make pagination accumulation linear. Verification: Google Drive 139 tests pass; umbrella mix quality passes; demo format check, warnings-as-errors compile, and 21 tests pass.",
       "timestamp": "2026-07-20T22:24:34Z"
+    },
+    {
+      "text": "Committed as c91da518 and pushed to PR 43. GitHub CI Quality passed. PR is open, mergeable, CLEAN, and all review threads are resolved.",
+      "timestamp": "2026-07-20T22:29:08Z"
     }
   ],
   "priority": 2,
   "status": "in_progress",
   "title": "Refine Google Drive collection fixes on PR 43",
   "type": "task",
-  "updated_at": "2026-07-20T22:24:34Z"
+  "updated_at": "2026-07-20T22:29:08Z"
 }
