@@ -642,7 +642,6 @@ defmodule Jido.Connect.Google.DriveTest do
        %{
          changes: [
            Drive.Change.new!(%{
-             change_id: "folder-change",
              file_id: "file-in-folder",
              removed?: false,
              time: "2026-05-05T12:00:00Z",
@@ -656,14 +655,12 @@ defmodule Jido.Connect.Google.DriveTest do
                })
            }),
            Drive.Change.new!(%{
-             change_id: "removed-unknown",
              file_id: "removed-file",
              removed?: true,
              time: "2026-05-05T12:01:00Z",
              change_type: "file"
            }),
            Drive.Change.new!(%{
-             change_id: "other-folder",
              file_id: "other-file",
              removed?: false,
              time: "2026-05-05T12:02:00Z",
@@ -697,7 +694,6 @@ defmodule Jido.Connect.Google.DriveTest do
        %{
          changes: [
            Drive.Change.new!(%{
-             change_id: "second-page-change",
              file_id: "second-page-file",
              removed?: false,
              time: "2026-05-05T12:03:00Z",
@@ -826,7 +822,7 @@ defmodule Jido.Connect.Google.DriveTest do
         ) do
       {:ok,
        %{
-         changes: [%{change_id: "change-minimal", file_id: "file-minimal"}],
+         changes: [%{file_id: "file-minimal"}],
          new_start_page_token: "minimal-next-token"
        }}
     end
@@ -1180,7 +1176,7 @@ defmodule Jido.Connect.Google.DriveTest do
               id: "google.drive.collection.changes",
               kind: :poll,
               checkpoint: :checkpoint,
-              dedupe: %{key: [:change_id, :provider_record_id]},
+              dedupe: %{key: [:collection_id, :change_type, :provider_record_id, :changed_at]},
               scope_resolver: Jido.Connect.Google.Drive.ScopeResolver
             }} =
              Connect.trigger(spec, "google.drive.collection.changes")
@@ -2050,7 +2046,6 @@ defmodule Jido.Connect.Google.DriveTest do
              )
 
     assert %{
-             change_id: "file:file-in-folder:2026-05-05T12:00:00Z",
              provider: "google_drive",
              collection_id: "folder123",
              collection_match: :yes,
@@ -2062,7 +2057,6 @@ defmodule Jido.Connect.Google.DriveTest do
            } = matched_signal
 
     assert %{
-             change_id: "file:removed-file:2026-05-05T12:01:00Z",
              provider: "google_drive",
              collection_id: "folder123",
              collection_match: :unknown,
@@ -2072,7 +2066,6 @@ defmodule Jido.Connect.Google.DriveTest do
            } = unknown_signal
 
     assert %{
-             change_id: "file:second-page-file:2026-05-05T12:03:00Z",
              collection_match: :yes,
              provider_record_id: "second-page-file",
              record: %{name: "Forecast.pdf"}
@@ -2522,7 +2515,6 @@ defmodule Jido.Connect.Google.DriveTest do
              )
 
     assert %{
-             change_id: "file:file-in-folder:2026-05-05T12:00:00Z",
              collection_id: "folder123",
              collection_match: :yes,
              provider: "google_drive",
@@ -2533,7 +2525,6 @@ defmodule Jido.Connect.Google.DriveTest do
            } = matched_signal
 
     assert %{
-             change_id: "file:removed-file:2026-05-05T12:01:00Z",
              collection_match: :unknown,
              provider_record_id: "removed-file",
              change_type: :deleted,
@@ -2541,7 +2532,6 @@ defmodule Jido.Connect.Google.DriveTest do
            } = unknown_signal
 
     assert %{
-             change_id: "file:second-page-file:2026-05-05T12:03:00Z",
              provider_record_id: "second-page-file"
            } = second_page_signal
   end

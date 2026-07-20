@@ -57,7 +57,7 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
 
       interval_ms(300_000)
       checkpoint(:checkpoint)
-      dedupe(%{key: [:change_id, :provider_record_id]})
+      dedupe(%{key: [:collection_id, :change_type, :provider_record_id, :changed_at]})
       handler(Jido.Connect.Google.Drive.Handlers.Triggers.CollectionChangesPoller)
 
       access do
@@ -78,7 +78,6 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
       end
 
       signal do
-        field(:change_id, :string)
         field(:collection_id, :string)
         field(:collection_match, :any)
         field(:provider, :string)
