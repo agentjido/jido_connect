@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
   "created": "2026-07-20T22:05:47Z",
@@ -7,8 +7,8 @@
   "id": "jido_con-61o",
   "labels": [],
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "Refine Google Drive collection fixes on PR 43",
   "type": "task",
-  "updated_at": "2026-07-20T22:05:47Z"
+  "updated_at": "2026-07-20T22:05:55Z"
 }
