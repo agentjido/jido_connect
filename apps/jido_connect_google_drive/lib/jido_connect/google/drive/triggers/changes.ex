@@ -68,7 +68,6 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
       config do
         field(:collection_id, :string, required?: true)
         field(:page_size, :integer, default: 100)
-        field(:fields, :string)
         field(:spaces, :string, default: "drive")
         field(:drive_id, :string)
         field(:include_items_from_all_drives, :boolean, default: false)

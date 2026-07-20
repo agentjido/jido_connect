@@ -5,7 +5,6 @@ defmodule Jido.Connect.Google.Drive.Handlers.Triggers.CollectionChangesPoller do
 
   def poll(config, %{credentials: credentials, checkpoint: checkpoint}) do
     with {:ok, client} <- fetch_client(credentials) do
-      config = CollectionChanges.normalize_config(config)
       access_token = Map.get(credentials, :access_token)
 
       if checkpoint in [nil, ""] do

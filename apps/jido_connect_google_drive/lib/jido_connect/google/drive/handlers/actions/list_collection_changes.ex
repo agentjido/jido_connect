@@ -10,7 +10,7 @@ defmodule Jido.Connect.Google.Drive.Handlers.Actions.ListCollectionChanges do
          {:ok, result} <-
            CollectionChanges.list(
              client,
-             CollectionChanges.normalize_config(input),
+             input,
              checkpoint,
              Map.get(credentials, :access_token)
            ) do

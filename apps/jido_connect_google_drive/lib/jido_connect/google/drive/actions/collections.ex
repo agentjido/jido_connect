@@ -32,6 +32,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
 
       input do
         field(:collection_id, :string,
+          required?: true,
           description:
             "Drive folder id to associate with this watch. Drive watches changes globally and filters during list_collection_changes."
         )
@@ -73,6 +74,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
         field(:channel, :map)
         field(:checkpoint, :string)
         field(:collection_id, :string)
+        field(:drive_id, :string)
         field(:provider, :string)
         field(:provider_resource, :string)
       end
@@ -106,11 +108,11 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
         field(:cursor, :string, description: "Deprecated alias for checkpoint.")
 
         field(:collection_id, :string,
+          required?: true,
           description: "Drive folder id used to filter relevant changes."
         )
 
         field(:page_size, :integer, default: 100)
-        field(:fields, :string, description: "Google Drive changes.list fields expression.")
         field(:spaces, :string, default: "drive")
         field(:drive_id, :string)
         field(:include_items_from_all_drives, :boolean, default: false)

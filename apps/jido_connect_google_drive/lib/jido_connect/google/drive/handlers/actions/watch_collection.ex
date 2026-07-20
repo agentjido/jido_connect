@@ -1,13 +1,16 @@
 defmodule Jido.Connect.Google.Drive.Handlers.Actions.WatchCollection do
   @moduledoc false
 
-  alias Jido.Connect.Google.Drive.Client
+  alias Jido.Connect.Google.Drive.{Client, CollectionChanges}
   alias Jido.Connect.Google.Drive.Handlers.Actions.ChannelLifecycle
 
   def run(input, %{credentials: credentials}) do
+    input = ChannelLifecycle.normalize_input(input, defaults())
+
     with :ok <- ChannelLifecycle.validate_watch_input(input, []),
          {:ok, client} <- fetch_client(credentials),
          access_token = Map.get(credentials, :access_token),
+         {:ok, input} <- CollectionChanges.resolve_config(client, input, access_token),
          {:ok, %{start_page_token: start_page_token}} <-
            client.get_start_page_token(token_params(input), access_token),
          {:ok, channel} <-
@@ -17,6 +20,7 @@ defmodule Jido.Connect.Google.Drive.Handlers.Actions.WatchCollection do
          channel: ChannelLifecycle.public_map(channel),
          checkpoint: start_page_token,
          collection_id: Map.get(input, :collection_id),
+         drive_id: Map.get(input, :drive_id),
          provider: "google_drive",
          provider_resource: "changes"
        }
@@ -34,7 +38,6 @@ defmodule Jido.Connect.Google.Drive.Handlers.Actions.WatchCollection do
     input
     |> Map.put(:page_token, start_page_token)
     |> Map.delete(:collection_id)
-    |> ChannelLifecycle.normalize_input(defaults())
   end
 
   defp defaults do

@@ -113,6 +113,22 @@ defmodule Jido.Connect.Google.DriveTest do
        })}
     end
 
+    def get_file(
+          %{
+            file_id: "folder123",
+            fields: "id,name,mimeType,driveId",
+            supports_all_drives: true
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.File.new!(%{
+         file_id: "folder123",
+         name: "Reports",
+         mime_type: "application/vnd.google-apps.folder"
+       })}
+    end
+
     def create_file(
           %{
             name: "Notes",
@@ -2033,7 +2049,7 @@ defmodule Jido.Connect.Google.DriveTest do
 
     assert {:ok,
             %{
-              signals: [matched_signal, unknown_signal, second_page_signal],
+              signals: [matched_signal, unknown_signal, non_member_signal, second_page_signal],
               checkpoint: "collection-next",
               has_more?: false
             }} =
@@ -2064,6 +2080,12 @@ defmodule Jido.Connect.Google.DriveTest do
              change_type: :deleted,
              removed?: true
            } = unknown_signal
+
+    assert %{
+             collection_match: :no,
+             provider_record_id: "other-file",
+             record: %{parents: ["folder999"]}
+           } = non_member_signal
 
     assert %{
              collection_match: :yes,
@@ -2502,7 +2524,7 @@ defmodule Jido.Connect.Google.DriveTest do
 
     assert {:ok,
             %{
-              signals: [matched_signal, unknown_signal, second_page_signal],
+              signals: [matched_signal, unknown_signal, non_member_signal, second_page_signal],
               checkpoint: "collection-next"
             }} =
              Connect.poll(
@@ -2530,6 +2552,12 @@ defmodule Jido.Connect.Google.DriveTest do
              change_type: :deleted,
              removed?: true
            } = unknown_signal
+
+    assert %{
+             collection_match: :no,
+             provider_record_id: "other-file",
+             record: %{parents: ["folder999"]}
+           } = non_member_signal
 
     assert %{
              provider_record_id: "second-page-file"

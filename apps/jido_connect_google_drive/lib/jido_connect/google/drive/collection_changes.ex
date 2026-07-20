@@ -5,17 +5,47 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
   alias Jido.Connect.Google.Checkpoint
 
   @folder_mime_type "application/vnd.google-apps.folder"
+  @collection_lookup_fields "id,name,mimeType,driveId"
 
   def init_checkpoint(client, config, access_token) do
-    with {:ok, %{start_page_token: start_page_token}} <-
+    with {:ok, config} <- resolve_config(client, config, access_token),
+         {:ok, %{start_page_token: start_page_token}} <-
            client.get_start_page_token(token_params(config), access_token) do
       {:ok, %{signals: [], checkpoint: start_page_token, has_more?: false}}
     end
   end
 
   def list(client, config, checkpoint, access_token) when is_binary(checkpoint) do
-    params = normalize_config(config) |> Map.put(:page_token, checkpoint)
+    with {:ok, config} <- resolve_config(client, config, access_token) do
+      params = Map.put(config, :page_token, checkpoint)
+      fetch_changes(client, params, checkpoint, access_token)
+    end
+  end
 
+  def resolve_config(client, config, access_token) do
+    config = normalize_config(config)
+
+    with {:ok, collection_id} <- collection_id(config),
+         {:ok, drive_id} <- resolve_drive_id(client, config, collection_id, access_token) do
+      {:ok, configure_change_log(config, collection_id, drive_id)}
+    end
+  end
+
+  def normalize_config(config) do
+    config
+    |> Data.atomize_existing_keys()
+    |> Map.drop([:cursor, :checkpoint, :fields])
+    |> Map.put_new(:page_size, 100)
+    |> Map.put_new(:spaces, "drive")
+    |> Map.put_new(:include_items_from_all_drives, false)
+    |> Map.put_new(:include_removed, true)
+    |> Map.put_new(:restrict_to_my_drive, false)
+    |> Map.put_new(:supports_all_drives, false)
+    |> trim_string(:collection_id)
+    |> trim_string(:drive_id)
+  end
+
+  defp fetch_changes(client, params, checkpoint, access_token) do
     case fetch_pages(client, params, access_token, [], nil, MapSet.new([checkpoint])) do
       {:error, %Error.ProviderError{} = error} ->
         if Checkpoint.expired_provider_error?(error) do
@@ -27,18 +57,6 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
       result ->
         result
     end
-  end
-
-  def normalize_config(config) do
-    config
-    |> Map.delete(:cursor)
-    |> Map.delete(:checkpoint)
-    |> Map.put_new(:page_size, 100)
-    |> Map.put_new(:spaces, "drive")
-    |> Map.put_new(:include_items_from_all_drives, false)
-    |> Map.put_new(:include_removed, true)
-    |> Map.put_new(:restrict_to_my_drive, false)
-    |> Map.put_new(:supports_all_drives, false)
   end
 
   defp token_params(config) do
@@ -88,8 +106,61 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
   defp normalize_signals(changes, collection_id) do
     changes
     |> Enum.map(&{&1, collection_match(&1, collection_id)})
-    |> Enum.reject(fn {_change, match} -> match == :no end)
     |> Enum.map(fn {change, match} -> normalize_signal(change, collection_id, match) end)
+  end
+
+  defp collection_id(config) do
+    case Map.get(config, :collection_id) do
+      collection_id when is_binary(collection_id) and collection_id != "" ->
+        {:ok, collection_id}
+
+      _other ->
+        {:error,
+         Error.validation("Google Drive collection_id must be a non-empty string",
+           reason: :invalid_drive_collection,
+           details: %{field: :collection_id}
+         )}
+    end
+  end
+
+  defp resolve_drive_id(_client, %{drive_id: drive_id}, _collection_id, _access_token)
+       when is_binary(drive_id) and drive_id != "",
+       do: {:ok, drive_id}
+
+  defp resolve_drive_id(client, _config, collection_id, access_token) do
+    with {:ok, file} <-
+           client.get_file(
+             %{
+               file_id: collection_id,
+               fields: @collection_lookup_fields,
+               supports_all_drives: true
+             },
+             access_token
+           ) do
+      {:ok, Map.get(file, :drive_id)}
+    end
+  end
+
+  defp configure_change_log(config, collection_id, nil) do
+    config
+    |> Map.put(:collection_id, collection_id)
+    |> Map.delete(:drive_id)
+  end
+
+  defp configure_change_log(config, collection_id, drive_id) do
+    config
+    |> Map.put(:collection_id, collection_id)
+    |> Map.put(:drive_id, drive_id)
+    |> Map.put(:include_items_from_all_drives, true)
+    |> Map.put(:restrict_to_my_drive, false)
+    |> Map.put(:supports_all_drives, true)
+  end
+
+  defp trim_string(config, field) do
+    case Map.get(config, field) do
+      value when is_binary(value) -> Map.put(config, field, String.trim(value))
+      _other -> config
+    end
   end
 
   defp collection_match(change, collection_id) do
