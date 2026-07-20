@@ -6,9 +6,15 @@
   "description": "Fix all actionable findings on agentjido/jido_connect PR #43, verify the Google Drive collection watch behavior, push the fixes to the PR head branch, and resolve the addressed review threads.",
   "id": "jido_con-v23",
   "labels": [],
+  "comments": [
+    {
+      "text": "Implemented all PR #43 findings: emit non-member signals for moved-out files, require nonblank collection IDs, resolve shared-drive change logs before watch/list, and prevent unsafe fields overrides. Added focused regression coverage. Google Drive tests (133), full mix quality, and demo format/compile/test pass under OTP 28.3.2 and Elixir 1.19.5.",
+      "timestamp": "2026-07-20T21:51:03Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Address Google Drive collection review findings",
   "type": "task",
-  "updated_at": "2026-07-20T21:37:17Z"
+  "updated_at": "2026-07-20T21:51:03Z"
 }
