@@ -116,7 +116,7 @@ defmodule Jido.Connect.Google.DriveTest do
     def get_file(
           %{
             file_id: "folder123",
-            fields: "id,name,mimeType,driveId",
+            fields: "id,mimeType,driveId",
             supports_all_drives: true
           },
           "token"
@@ -560,7 +560,6 @@ defmodule Jido.Connect.Google.DriveTest do
             expiration_ms: 1_770_000_000_000,
             page_size: 100,
             spaces: "drive",
-            include_corpus_removals: false,
             include_items_from_all_drives: false,
             include_removed: true,
             restrict_to_my_drive: false,
@@ -2064,9 +2063,9 @@ defmodule Jido.Connect.Google.DriveTest do
     assert %{
              provider: "google_drive",
              collection_id: "folder123",
-             collection_match: :yes,
+             collection_match: "yes",
              provider_record_id: "file-in-folder",
-             change_type: :updated,
+             change_type: "updated",
              changed_at: "2026-05-05T12:00:00Z",
              removed?: false,
              record: %{id: "file-in-folder", parents: ["folder123"]}
@@ -2075,20 +2074,20 @@ defmodule Jido.Connect.Google.DriveTest do
     assert %{
              provider: "google_drive",
              collection_id: "folder123",
-             collection_match: :unknown,
+             collection_match: "unknown",
              provider_record_id: "removed-file",
-             change_type: :deleted,
+             change_type: "deleted",
              removed?: true
            } = unknown_signal
 
     assert %{
-             collection_match: :no,
+             collection_match: "no",
              provider_record_id: "other-file",
              record: %{parents: ["folder999"]}
            } = non_member_signal
 
     assert %{
-             collection_match: :yes,
+             collection_match: "yes",
              provider_record_id: "second-page-file",
              record: %{name: "Forecast.pdf"}
            } = second_page_signal
@@ -2538,23 +2537,23 @@ defmodule Jido.Connect.Google.DriveTest do
 
     assert %{
              collection_id: "folder123",
-             collection_match: :yes,
+             collection_match: "yes",
              provider: "google_drive",
              provider_record_id: "file-in-folder",
-             change_type: :updated,
+             change_type: "updated",
              removed?: false,
              record: %{id: "file-in-folder", name: "Budget.pdf", parents: ["folder123"]}
            } = matched_signal
 
     assert %{
-             collection_match: :unknown,
+             collection_match: "unknown",
              provider_record_id: "removed-file",
-             change_type: :deleted,
+             change_type: "deleted",
              removed?: true
            } = unknown_signal
 
     assert %{
-             collection_match: :no,
+             collection_match: "no",
              provider_record_id: "other-file",
              record: %{parents: ["folder999"]}
            } = non_member_signal

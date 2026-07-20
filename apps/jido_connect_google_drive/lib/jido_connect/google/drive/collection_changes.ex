@@ -3,46 +3,29 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
 
   alias Jido.Connect.{Data, Error}
   alias Jido.Connect.Google.Checkpoint
-
-  @folder_mime_type "application/vnd.google-apps.folder"
-  @collection_lookup_fields "id,name,mimeType,driveId"
+  alias Jido.Connect.Google.Drive.CollectionChanges.Config
 
   def init_checkpoint(client, config, access_token) do
-    with {:ok, config} <- resolve_config(client, config, access_token),
-         {:ok, %{start_page_token: start_page_token}} <-
-           client.get_start_page_token(token_params(config), access_token) do
-      {:ok, %{signals: [], checkpoint: start_page_token, has_more?: false}}
+    with {:ok, %{checkpoint: checkpoint}} <- start_checkpoint(client, config, access_token) do
+      {:ok, %{signals: [], checkpoint: checkpoint, has_more?: false}}
     end
   end
 
-  def list(client, config, checkpoint, access_token) when is_binary(checkpoint) do
-    with {:ok, config} <- resolve_config(client, config, access_token) do
+  def start_checkpoint(client, config, access_token) do
+    with {:ok, config} <- Config.resolve(client, config, access_token),
+         {:ok, result} <-
+           client.get_start_page_token(Config.start_page_token_params(config), access_token),
+         {:ok, checkpoint} <- start_page_token(result) do
+      {:ok, %{checkpoint: checkpoint, config: config}}
+    end
+  end
+
+  def list(client, config, checkpoint, access_token) do
+    with {:ok, checkpoint} <- normalize_checkpoint(checkpoint),
+         {:ok, config} <- Config.resolve(client, config, access_token) do
       params = Map.put(config, :page_token, checkpoint)
       fetch_changes(client, params, checkpoint, access_token)
     end
-  end
-
-  def resolve_config(client, config, access_token) do
-    config = normalize_config(config)
-
-    with {:ok, collection_id} <- collection_id(config),
-         {:ok, drive_id} <- resolve_drive_id(client, config, collection_id, access_token) do
-      {:ok, configure_change_log(config, collection_id, drive_id)}
-    end
-  end
-
-  def normalize_config(config) do
-    config
-    |> Data.atomize_existing_keys()
-    |> Map.drop([:cursor, :checkpoint, :fields])
-    |> Map.put_new(:page_size, 100)
-    |> Map.put_new(:spaces, "drive")
-    |> Map.put_new(:include_items_from_all_drives, false)
-    |> Map.put_new(:include_removed, true)
-    |> Map.put_new(:restrict_to_my_drive, false)
-    |> Map.put_new(:supports_all_drives, false)
-    |> trim_string(:collection_id)
-    |> trim_string(:drive_id)
   end
 
   defp fetch_changes(client, params, checkpoint, access_token) do
@@ -59,27 +42,16 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
     end
   end
 
-  defp token_params(config) do
-    config
-    |> Map.take([:drive_id, :supports_all_drives])
-    |> Map.put_new(:supports_all_drives, false)
-  end
+  defp fetch_pages(client, params, access_token, signal_pages, latest_checkpoint, seen) do
+    with {:ok, result} <- client.list_changes(Map.delete(params, :collection_id), access_token),
+         {:ok, page} <- normalize_page(result) do
+      page_signals = normalize_signals(page.changes, Map.fetch!(params, :collection_id))
+      signal_pages = [page_signals | signal_pages]
+      latest_checkpoint = page.new_start_page_token || latest_checkpoint
 
-  defp fetch_pages(client, params, access_token, signals, latest_checkpoint, seen) do
-    with {:ok, result} <- client.list_changes(Map.delete(params, :collection_id), access_token) do
-      collection_id = Map.get(params, :collection_id)
-      page_signals = normalize_signals(Map.get(result, :changes, []), collection_id)
-      signals = signals ++ page_signals
-      latest_checkpoint = Map.get(result, :new_start_page_token) || latest_checkpoint
-
-      case Map.get(result, :next_page_token) do
+      case page.next_page_token do
         nil ->
-          {:ok,
-           %{
-             signals: dedupe_signals(signals),
-             checkpoint: latest_checkpoint || Map.fetch!(params, :page_token),
-             has_more?: false
-           }}
+          finish_pages(signal_pages, latest_checkpoint)
 
         page_token ->
           if MapSet.member?(seen, page_token) do
@@ -89,7 +61,7 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
               client,
               Map.put(params, :page_token, page_token),
               access_token,
-              signals,
+              signal_pages,
               latest_checkpoint,
               MapSet.put(seen, page_token)
             )
@@ -98,92 +70,44 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
     end
   end
 
-  defp normalize_signals(changes, nil),
-    do: Enum.map(changes, &normalize_signal(&1, nil, :unknown))
+  defp finish_pages(signal_pages, checkpoint)
+       when is_binary(checkpoint) and checkpoint != "" do
+    signals = signal_pages |> Enum.reverse() |> Enum.concat() |> dedupe_signals()
 
-  defp normalize_signals(changes, ""), do: Enum.map(changes, &normalize_signal(&1, nil, :unknown))
+    {:ok, %{signals: signals, checkpoint: checkpoint, has_more?: false}}
+  end
+
+  defp finish_pages(_signal_pages, _checkpoint) do
+    invalid_page(:new_start_page_token)
+  end
 
   defp normalize_signals(changes, collection_id) do
     changes
-    |> Enum.map(&{&1, collection_match(&1, collection_id)})
-    |> Enum.map(fn {change, match} -> normalize_signal(change, collection_id, match) end)
-  end
-
-  defp collection_id(config) do
-    case Map.get(config, :collection_id) do
-      collection_id when is_binary(collection_id) and collection_id != "" ->
-        {:ok, collection_id}
-
-      _other ->
-        {:error,
-         Error.validation("Google Drive collection_id must be a non-empty string",
-           reason: :invalid_drive_collection,
-           details: %{field: :collection_id}
-         )}
-    end
-  end
-
-  defp resolve_drive_id(_client, %{drive_id: drive_id}, _collection_id, _access_token)
-       when is_binary(drive_id) and drive_id != "",
-       do: {:ok, drive_id}
-
-  defp resolve_drive_id(client, _config, collection_id, access_token) do
-    with {:ok, file} <-
-           client.get_file(
-             %{
-               file_id: collection_id,
-               fields: @collection_lookup_fields,
-               supports_all_drives: true
-             },
-             access_token
-           ) do
-      {:ok, Map.get(file, :drive_id)}
-    end
-  end
-
-  defp configure_change_log(config, collection_id, nil) do
-    config
-    |> Map.put(:collection_id, collection_id)
-    |> Map.delete(:drive_id)
-  end
-
-  defp configure_change_log(config, collection_id, drive_id) do
-    config
-    |> Map.put(:collection_id, collection_id)
-    |> Map.put(:drive_id, drive_id)
-    |> Map.put(:include_items_from_all_drives, true)
-    |> Map.put(:restrict_to_my_drive, false)
-    |> Map.put(:supports_all_drives, true)
-  end
-
-  defp trim_string(config, field) do
-    case Map.get(config, field) do
-      value when is_binary(value) -> Map.put(config, field, String.trim(value))
-      _other -> config
-    end
+    |> Enum.filter(&file_change?/1)
+    |> Enum.map(fn change ->
+      normalize_signal(change, collection_id, collection_match(change, collection_id))
+    end)
   end
 
   defp collection_match(change, collection_id) do
     file = Map.get(change, :file)
+    file_id = Map.get(change, :file_id) || record_id(file)
 
     cond do
       Map.get(change, :removed?, false) and is_nil(file) ->
-        :unknown
+        "unknown"
 
-      Map.get(change, :file_id) == collection_id ->
-        :yes
-
-      folder?(file) and Map.get(file, :file_id) == collection_id ->
-        :yes
+      file_id == collection_id ->
+        "yes"
 
       is_map(file) and collection_id in Map.get(file, :parents, []) ->
-        :yes
+        "yes"
 
       is_nil(file) ->
-        :unknown
+        "unknown"
 
       true ->
-        :no
+        "no"
     end
   end
 
@@ -203,10 +127,9 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
     |> Data.compact()
   end
 
-  defp change_type(%{removed?: true}), do: :deleted
-  defp change_type(%{change_type: "file"}), do: :updated
-  defp change_type(%{change_type: "drive"}), do: :updated
-  defp change_type(_change), do: :unknown
+  defp change_type(%{removed?: true}), do: "deleted"
+  defp change_type(%{change_type: "file"}), do: "updated"
+  defp change_type(_change), do: "unknown"
 
   defp record(file) when is_map(file) do
     %{
@@ -227,32 +150,77 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
   defp record_id(file) when is_map(file), do: Map.get(file, :file_id)
   defp record_id(_file), do: nil
 
-  defp folder?(%{mime_type: @folder_mime_type}), do: true
-  defp folder?(_file), do: false
-
   defp dedupe_signals(signals) do
-    {_seen, unique} =
-      Enum.reduce(signals, {MapSet.new(), []}, fn signal, {seen, acc} ->
-        key = {
-          Map.get(signal, :collection_id),
-          Map.get(signal, :change_type),
-          Map.get(signal, :provider_record_id),
-          Map.get(signal, :changed_at)
-        }
+    Enum.uniq_by(signals, fn signal ->
+      {
+        Map.get(signal, :collection_id),
+        Map.get(signal, :change_type),
+        Map.get(signal, :provider_record_id),
+        Map.get(signal, :changed_at)
+      }
+    end)
+  end
 
-        cond do
-          key == {nil, nil, nil, nil} ->
-            {seen, acc}
+  defp file_change?(%{change_type: "file"}), do: true
+  defp file_change?(%{file_id: file_id}) when is_binary(file_id) and file_id != "", do: true
+  defp file_change?(_change), do: false
 
-          MapSet.member?(seen, key) ->
-            {seen, acc}
+  defp normalize_checkpoint(checkpoint) when is_binary(checkpoint) do
+    case String.trim(checkpoint) do
+      "" -> invalid_checkpoint()
+      normalized -> {:ok, normalized}
+    end
+  end
 
-          true ->
-            {MapSet.put(seen, key), [signal | acc]}
-        end
-      end)
+  defp normalize_checkpoint(_checkpoint), do: invalid_checkpoint()
 
-    Enum.reverse(unique)
+  defp start_page_token(%{start_page_token: token})
+       when is_binary(token) and token != "",
+       do: {:ok, token}
+
+  defp start_page_token(_result), do: invalid_page(:start_page_token)
+
+  defp normalize_page(result) when is_map(result) do
+    changes = Map.get(result, :changes, [])
+
+    with true <- is_list(changes),
+         {:ok, next_page_token} <- optional_page_token(result, :next_page_token),
+         {:ok, new_start_page_token} <- optional_page_token(result, :new_start_page_token) do
+      {:ok,
+       %{
+         changes: changes,
+         next_page_token: next_page_token,
+         new_start_page_token: new_start_page_token
+       }}
+    else
+      false -> invalid_page(:changes)
+      {:error, _error} = error -> error
+    end
+  end
+
+  defp normalize_page(_result), do: invalid_page(:response)
+
+  defp optional_page_token(result, field) do
+    case Map.get(result, field) do
+      nil -> {:ok, nil}
+      token when is_binary(token) and token != "" -> {:ok, token}
+      _token -> invalid_page(field)
+    end
+  end
+
+  defp invalid_checkpoint do
+    {:error,
+     Error.validation(
+       "A cursor or checkpoint is required to list Google Drive collection changes",
+       field: :checkpoint,
+       reason: :required
+     )}
+  end
+
+  defp invalid_page(field) do
+    Checkpoint.invalid_response("Google Drive collection changes response was invalid", %{
+      field: field
+    })
   end
 
   defp invalid_repeated_page_token(page_token) do

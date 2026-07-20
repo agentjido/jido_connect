@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Drive.Handlers.Actions.ListCollectionChanges do
   @moduledoc false
 
-  alias Jido.Connect.Error
+  alias Jido.Connect.{Data, Error}
   alias Jido.Connect.Google.Drive.{Client, CollectionChanges}
 
   def run(input, %{credentials: credentials}) do
@@ -19,11 +19,26 @@ defmodule Jido.Connect.Google.Drive.Handlers.Actions.ListCollectionChanges do
   end
 
   defp fetch_checkpoint(input) do
-    case Map.get(input, :cursor) || Map.get(input, :checkpoint) do
-      cursor when is_binary(cursor) and cursor != "" -> {:ok, cursor}
-      _other -> invalid_checkpoint()
+    input
+    |> checkpoint_candidates()
+    |> Enum.find_value(&normalize_checkpoint/1)
+    |> case do
+      nil -> invalid_checkpoint()
+      checkpoint -> {:ok, checkpoint}
     end
   end
+
+  defp checkpoint_candidates(input),
+    do: [Data.get(input, :checkpoint), Data.get(input, :cursor)]
+
+  defp normalize_checkpoint(checkpoint) when is_binary(checkpoint) do
+    case String.trim(checkpoint) do
+      "" -> nil
+      normalized -> normalized
+    end
+  end
+
+  defp normalize_checkpoint(_checkpoint), do: nil
 
   defp invalid_checkpoint do
     {:error,

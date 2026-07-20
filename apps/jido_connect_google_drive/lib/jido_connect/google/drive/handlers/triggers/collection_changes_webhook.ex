@@ -17,7 +17,7 @@ defmodule Jido.Connect.Google.Drive.Handlers.Triggers.CollectionChangesWebhook d
 
   defp collection_signal(signal) do
     %{
-      collection_changed?: true,
+      collection_changed?: Map.get(signal, :resource_changed, false),
       channel_id: Map.get(signal, :channel_id),
       resource_id: Map.get(signal, :resource_id),
       message_number: Map.get(signal, :message_number),

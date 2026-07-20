@@ -67,21 +67,19 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
 
       config do
         field(:collection_id, :string, required?: true)
-        field(:page_size, :integer, default: 100)
-        field(:spaces, :string, default: "drive")
-        field(:drive_id, :string)
-        field(:include_items_from_all_drives, :boolean, default: false)
-        field(:include_removed, :boolean, default: true)
-        field(:restrict_to_my_drive, :boolean, default: false)
-        field(:supports_all_drives, :boolean, default: false)
+
+        field(:page_size, :integer,
+          default: 100,
+          description: "Maximum changes per Drive page, from 1 through 1000."
+        )
       end
 
       signal do
         field(:collection_id, :string)
-        field(:collection_match, :any)
+        field(:collection_match, :string, enum: ["yes", "no", "unknown"])
         field(:provider, :string)
         field(:provider_record_id, :string)
-        field(:change_type, :any)
+        field(:change_type, :string, enum: ["updated", "deleted", "unknown"])
         field(:removed?, :boolean)
         field(:changed_at, :string)
         field(:record, :map)

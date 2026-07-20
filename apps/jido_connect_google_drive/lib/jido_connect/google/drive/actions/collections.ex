@@ -3,8 +3,6 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
 
   use Spark.Dsl.Fragment, of: Jido.Connect
 
-  alias Jido.Connect.Google.Drive.Fields
-
   @metadata_scope "https://www.googleapis.com/auth/drive.metadata.readonly"
   @scope_resolver Jido.Connect.Google.Drive.ScopeResolver
   @auth_profiles [:user, :service_account, :domain_delegated_service_account]
@@ -34,7 +32,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
         field(:collection_id, :string,
           required?: true,
           description:
-            "Drive folder id to associate with this watch. Drive watches changes globally and filters during list_collection_changes."
+            "Drive folder id to watch. The connector selects the correct My Drive or shared-drive change log."
         )
 
         field(:channel_id, :string,
@@ -53,21 +51,6 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
         field(:expiration_ms, :integer, description: "Requested Unix timestamp in milliseconds.")
         field(:payload, :boolean)
         field(:delivery_params, :map)
-        field(:page_size, :integer, default: 100)
-        field(:spaces, :string, default: "drive")
-        field(:drive_id, :string)
-        field(:include_corpus_removals, :boolean, default: false)
-        field(:include_items_from_all_drives, :boolean, default: false)
-        field(:include_removed, :boolean, default: true)
-        field(:restrict_to_my_drive, :boolean, default: false)
-
-        field(:include_permissions_for_view, :string,
-          enum: Fields.permission_views(),
-          example: "published"
-        )
-
-        field(:include_labels, :string)
-        field(:supports_all_drives, :boolean, default: false)
       end
 
       output do
@@ -112,13 +95,10 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
           description: "Drive folder id used to filter relevant changes."
         )
 
-        field(:page_size, :integer, default: 100)
-        field(:spaces, :string, default: "drive")
-        field(:drive_id, :string)
-        field(:include_items_from_all_drives, :boolean, default: false)
-        field(:include_removed, :boolean, default: true)
-        field(:restrict_to_my_drive, :boolean, default: false)
-        field(:supports_all_drives, :boolean, default: false)
+        field(:page_size, :integer,
+          default: 100,
+          description: "Maximum changes per Drive page, from 1 through 1000."
+        )
       end
 
       output do
