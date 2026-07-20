@@ -83,7 +83,6 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
         field(:collection_match, :any)
         field(:provider, :string)
         field(:provider_record_id, :string)
-        field(:provider_change_id, :string)
         field(:change_type, :any)
         field(:removed?, :boolean)
         field(:changed_at, :string)

@@ -120,12 +120,11 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
     file = Map.get(change, :file)
 
     %{
-      change_id: Map.get(change, :change_id),
+      change_id: change_id(change),
       collection_id: collection_id,
       collection_match: collection_match,
       provider: "google_drive",
       provider_record_id: Map.get(change, :file_id) || record_id(file),
-      provider_change_id: Map.get(change, :change_id),
       change_type: change_type(change),
       removed?: Map.get(change, :removed?, false),
       changed_at: Map.get(change, :time),
@@ -138,6 +137,18 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
   defp change_type(%{change_type: "file"}), do: :updated
   defp change_type(%{change_type: "drive"}), do: :updated
   defp change_type(_change), do: :unknown
+
+  defp change_id(change) do
+    [
+      Map.get(change, :change_type),
+      Map.get(change, :file_id),
+      Map.get(change, :drive_id),
+      Map.get(change, :time)
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(":")
+    |> empty_to_nil()
+  end
 
   defp record(file) when is_map(file) do
     %{
@@ -164,10 +175,14 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
   defp dedupe_signals(signals) do
     {_seen, unique} =
       Enum.reduce(signals, {MapSet.new(), []}, fn signal, {seen, acc} ->
-        key = {Map.get(signal, :change_id), Map.get(signal, :provider_record_id)}
+        key = {
+          Map.get(signal, :change_type),
+          Map.get(signal, :provider_record_id),
+          Map.get(signal, :changed_at)
+        }
 
         cond do
-          key == {nil, nil} ->
+          key == {nil, nil, nil} ->
             {seen, acc}
 
           MapSet.member?(seen, key) ->
@@ -186,4 +201,7 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
       next_page_token: page_token
     })
   end
+
+  defp empty_to_nil(""), do: nil
+  defp empty_to_nil(value), do: value
 end

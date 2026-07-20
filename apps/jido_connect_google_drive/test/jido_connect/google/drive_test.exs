@@ -1982,7 +1982,6 @@ defmodule Jido.Connect.Google.DriveTest do
             %{
               changes: [
                 %{
-                  change_id: "change123",
                   file_id: "file123",
                   file: %{file_id: "file123", name: "Budget.pdf"}
                 }
@@ -2051,12 +2050,11 @@ defmodule Jido.Connect.Google.DriveTest do
              )
 
     assert %{
-             change_id: "folder-change",
+             change_id: "file:file-in-folder:2026-05-05T12:00:00Z",
              provider: "google_drive",
              collection_id: "folder123",
              collection_match: :yes,
              provider_record_id: "file-in-folder",
-             provider_change_id: "folder-change",
              change_type: :updated,
              changed_at: "2026-05-05T12:00:00Z",
              removed?: false,
@@ -2064,7 +2062,7 @@ defmodule Jido.Connect.Google.DriveTest do
            } = matched_signal
 
     assert %{
-             change_id: "removed-unknown",
+             change_id: "file:removed-file:2026-05-05T12:01:00Z",
              provider: "google_drive",
              collection_id: "folder123",
              collection_match: :unknown,
@@ -2074,7 +2072,7 @@ defmodule Jido.Connect.Google.DriveTest do
            } = unknown_signal
 
     assert %{
-             change_id: "second-page-change",
+             change_id: "file:second-page-file:2026-05-05T12:03:00Z",
              collection_match: :yes,
              provider_record_id: "second-page-file",
              record: %{name: "Forecast.pdf"}
@@ -2524,19 +2522,18 @@ defmodule Jido.Connect.Google.DriveTest do
              )
 
     assert %{
-             change_id: "folder-change",
+             change_id: "file:file-in-folder:2026-05-05T12:00:00Z",
              collection_id: "folder123",
              collection_match: :yes,
              provider: "google_drive",
              provider_record_id: "file-in-folder",
-             provider_change_id: "folder-change",
              change_type: :updated,
              removed?: false,
              record: %{id: "file-in-folder", name: "Budget.pdf", parents: ["folder123"]}
            } = matched_signal
 
     assert %{
-             change_id: "removed-unknown",
+             change_id: "file:removed-file:2026-05-05T12:01:00Z",
              collection_match: :unknown,
              provider_record_id: "removed-file",
              change_type: :deleted,
@@ -2544,7 +2541,7 @@ defmodule Jido.Connect.Google.DriveTest do
            } = unknown_signal
 
     assert %{
-             change_id: "second-page-change",
+             change_id: "file:second-page-file:2026-05-05T12:03:00Z",
              provider_record_id: "second-page-file"
            } = second_page_signal
   end
