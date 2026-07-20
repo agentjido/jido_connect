@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-07-20T21:36:43Z",
+  "description": "Fix all actionable findings on agentjido/jido_connect PR #43, verify the Google Drive collection watch behavior, push the fixes to the PR head branch, and resolve the addressed review threads.",
+  "id": "jido_con-v23",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "Address Google Drive collection review findings",
+  "type": "task",
+  "updated_at": "2026-07-20T21:36:43Z"
+}
