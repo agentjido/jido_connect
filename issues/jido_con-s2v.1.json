@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-07-21T12:58:45Z",
+  "description": "Create and push an annotated archival tag at the current main commit before any integration work.",
+  "id": "jido_con-s2v.1",
+  "labels": [],
+  "parent": "jido_con-s2v",
+  "priority": 2,
+  "status": "open",
+  "title": "Safeguard main before consolidation",
+  "type": "task",
+  "updated_at": "2026-07-21T12:58:45Z"
+}
