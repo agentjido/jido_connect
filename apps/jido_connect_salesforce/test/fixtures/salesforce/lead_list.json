@@ -1,0 +1,40 @@
+{
+  "totalSize": 2,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "Lead",
+        "url": "/services/data/v60.0/sobjects/Lead/00Q5g00000DEFgH1AA"
+      },
+      "Id": "00Q5g00000DEFgH1AA",
+      "FirstName": "Diana",
+      "LastName": "Chen",
+      "Email": "diana@example.com",
+      "Phone": "+1-555-0201",
+      "Company": "Globex Inc",
+      "Title": "CTO",
+      "Status": "Working - Contacted",
+      "LeadSource": "Web",
+      "CreatedDate": "2026-03-01T09:00:00.000Z",
+      "LastModifiedDate": "2026-05-10T11:30:00.000Z"
+    },
+    {
+      "attributes": {
+        "type": "Lead",
+        "url": "/services/data/v60.0/sobjects/Lead/00Q5g00000DEFgH2BB"
+      },
+      "Id": "00Q5g00000DEFgH2BB",
+      "FirstName": "Ethan",
+      "LastName": "Nguyen",
+      "Email": "ethan@example.com",
+      "Phone": "+1-555-0202",
+      "Company": "Initech",
+      "Title": "VP Engineering",
+      "Status": "Open - Not Contacted",
+      "LeadSource": "Partner Referral",
+      "CreatedDate": "2026-04-05T14:00:00.000Z",
+      "LastModifiedDate": "2026-04-05T14:00:00.000Z"
+    }
+  ]
+}

@@ -18,6 +18,29 @@ defmodule Jido.Connect.Calcom.ScopeResolverTest do
 
     assert ScopeResolver.required_scopes(%{id: "calcom.bookings.reschedule"}, %{}, %{}) ==
              ["BOOKING_WRITE"]
+
+    assert ScopeResolver.required_scopes(%{id: "calcom.webhooks.create"}, %{}, %{}) ==
+             ["WEBHOOK_WRITE"]
+
+    assert ScopeResolver.required_scopes(%{id: "calcom.webhooks.list"}, %{}, %{}) ==
+             ["WEBHOOK_READ"]
+
+    assert ScopeResolver.required_scopes(%{id: "calcom.webhooks.delete"}, %{}, %{}) ==
+             ["WEBHOOK_WRITE"]
+  end
+
+  test "returns scopes for trigger operations" do
+    assert ScopeResolver.required_scopes(%{id: "calcom.booking.created"}, %{}, %{}) ==
+             ["BOOKING_READ"]
+
+    assert ScopeResolver.required_scopes(%{id: "calcom.booking.updated"}, %{}, %{}) ==
+             ["BOOKING_READ"]
+
+    assert ScopeResolver.required_scopes(%{id: "calcom.booking.canceled"}, %{}, %{}) ==
+             ["BOOKING_READ"]
+
+    assert ScopeResolver.required_scopes(%{id: "calcom.booking.rescheduled"}, %{}, %{}) ==
+             ["BOOKING_READ"]
   end
 
   test "returns empty scopes for unknown operations" do

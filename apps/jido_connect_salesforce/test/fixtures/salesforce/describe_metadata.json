@@ -1,0 +1,45 @@
+{
+  "name": "Contact",
+  "label": "Contact",
+  "labelPlural": "Contacts",
+  "keyPrefix": "003",
+  "createable": true,
+  "updateable": true,
+  "deletable": true,
+  "queryable": true,
+  "searchable": true,
+  "fields": [
+    {
+      "name": "Id",
+      "label": "Contact ID",
+      "type": "id",
+      "length": 18,
+      "createable": false,
+      "updateable": false
+    },
+    {
+      "name": "FirstName",
+      "label": "First Name",
+      "type": "string",
+      "length": 40,
+      "createable": true,
+      "updateable": true
+    },
+    {
+      "name": "LastName",
+      "label": "Last Name",
+      "type": "string",
+      "length": 80,
+      "createable": true,
+      "updateable": true
+    },
+    {
+      "name": "Email",
+      "label": "Email",
+      "type": "email",
+      "length": 254,
+      "createable": true,
+      "updateable": true
+    }
+  ]
+}

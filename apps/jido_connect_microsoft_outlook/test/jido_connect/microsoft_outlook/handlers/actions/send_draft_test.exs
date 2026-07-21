@@ -1,0 +1,58 @@
+defmodule Jido.Connect.MicrosoftOutlook.Handlers.Actions.SendDraftTest do
+  use ExUnit.Case, async: false
+
+  alias Jido.Connect.MicrosoftOutlook.Handlers.Actions.SendDraft
+
+  setup do
+    Application.put_env(:jido_connect_microsoft, :microsoft_graph_base_url, "https://graph.test")
+
+    Application.put_env(:jido_connect_microsoft, :microsoft_req_options,
+      plug: {Req.Test, __MODULE__},
+      retry: false
+    )
+
+    on_exit(fn ->
+      Application.delete_env(:jido_connect_microsoft, :microsoft_graph_base_url)
+      Application.delete_env(:jido_connect_microsoft, :microsoft_req_options)
+    end)
+  end
+
+  describe "run/2" do
+    test "sends an existing draft" do
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert conn.method == "POST"
+        assert conn.request_path == "/me/messages/AAMkAGI2TG93AAAqBGDRAAA=/send"
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn |> Plug.Conn.put_status(202) |> Plug.Conn.send_resp(202, "")
+      end)
+
+      context = %{credentials: %{access_token: "test-token"}}
+
+      assert {:ok, %{sent: true, draft_id: "AAMkAGI2TG93AAAqBGDRAAA="}} =
+               SendDraft.run(%{draft_id: "AAMkAGI2TG93AAAqBGDRAAA="}, context)
+    end
+
+    test "returns error when draft_id is missing" do
+      context = %{credentials: %{access_token: "test-token"}}
+      assert {:error, :draft_id_required} = SendDraft.run(%{}, context)
+    end
+
+    test "returns error when access token is missing" do
+      assert {:error, :missing_access_token} = SendDraft.run(%{}, %{})
+    end
+
+    test "returns error for HTTP 404" do
+      Req.Test.stub(__MODULE__, fn conn ->
+        Req.Test.json(conn |> Plug.Conn.put_status(404), %{
+          "error" => %{"message" => "The specified message was not found."}
+        })
+      end)
+
+      context = %{credentials: %{access_token: "test-token"}}
+
+      assert {:error, %Jido.Connect.Error.ProviderError{provider: :microsoft}} =
+               SendDraft.run(%{draft_id: "nonexistent"}, context)
+    end
+  end
+end

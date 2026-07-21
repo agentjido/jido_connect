@@ -216,7 +216,6 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
   test "normalizes change payloads with embedded files" do
     assert {:ok, %Change{} = change} =
              Normalizer.change(%{
-               "changeId" => 42,
                "fileId" => "file123",
                "removed" => false,
                "time" => "2026-05-02T10:00:00Z",
@@ -227,7 +226,6 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
                }
              })
 
-    assert change.change_id == "42"
     assert change.file_id == "file123"
     assert change.file.name == "Budget.pdf"
     refute change.removed?
@@ -254,7 +252,6 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
   test "returns errors instead of raising for malformed embedded change files" do
     assert {:error, _error} =
              Normalizer.change(%{
-               "changeId" => 42,
                "fileId" => "file123",
                "file" => %{"id" => "file123"}
              })

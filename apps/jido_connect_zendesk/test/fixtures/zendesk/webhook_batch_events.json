@@ -1,0 +1,55 @@
+[
+  {
+    "type": "Ticket Created",
+    "id": "wh-invocation-001",
+    "account_id": "example",
+    "ticket": {
+      "id": 12345,
+      "subject": "Cannot reset password",
+      "status": "open",
+      "priority": "normal",
+      "type": "incident",
+      "group_id": 101,
+      "assignee_id": 9001,
+      "requester_id": 9901,
+      "organization_id": 201,
+      "tags": ["password", "login"],
+      "created_at": "2026-03-15T10:30:00Z",
+      "updated_at": "2026-03-15T10:30:00Z",
+      "via": {"channel": "web"}
+    },
+    "current": {
+      "id": 12345,
+      "subject": "Cannot reset password",
+      "status": "open",
+      "priority": "normal",
+      "type": "incident",
+      "group_id": 101,
+      "assignee_id": 9001,
+      "requester_id": 9901,
+      "organization_id": 201,
+      "tags": ["password", "login"],
+      "created_at": "2026-03-15T10:30:00Z",
+      "updated_at": "2026-03-15T10:30:00Z"
+    },
+    "previous": null,
+    "timestamp": "2026-03-15T10:30:00Z"
+  },
+  {
+    "type": "Comment Created",
+    "id": "wh-invocation-003",
+    "account_id": "example",
+    "ticket": {
+      "id": 12345,
+      "subject": "Cannot reset password"
+    },
+    "current": {
+      "id": 50001,
+      "body": "I've checked the email configuration. Please check your spam folder.",
+      "html_body": "<p>I've checked the email configuration. Please check your spam folder.</p>",
+      "public": true,
+      "author_id": 9001
+    },
+    "timestamp": "2026-03-15T11:00:00Z"
+  }
+]

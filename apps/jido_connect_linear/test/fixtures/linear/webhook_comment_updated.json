@@ -1,0 +1,20 @@
+{
+  "action": "update",
+  "type": "Comment",
+  "webhookId": "wh-45",
+  "createdAt": "2026-05-15T16:30:00.000Z",
+  "data": {
+    "id": "comment-webhook-1",
+    "body": "This looks great, merging to main after QA sign-off.",
+    "issue": {
+      "id": "uuid-001",
+      "identifier": "LIN-123"
+    },
+    "user": {
+      "id": "user-1",
+      "name": "Alice Nakamura"
+    },
+    "createdAt": "2026-05-15T16:00:00.000Z",
+    "updatedAt": "2026-05-15T16:30:00.000Z"
+  }
+}

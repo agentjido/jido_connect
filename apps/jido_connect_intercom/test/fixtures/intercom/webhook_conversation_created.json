@@ -1,0 +1,28 @@
+{
+  "type": "notification_event",
+  "topic": "conversation.user.created",
+  "delivery_id": "delivery-001",
+  "delivery_attempt": 1,
+  "created_at": 1718496000,
+  "app_id": "app-123",
+  "data": {
+    "type": "notification_event_data",
+    "item": {
+      "type": "conversation",
+      "id": "401",
+      "state": "open",
+      "title": "Need help with API integration",
+      "source": {
+        "type": "conversation",
+        "delivered_as": "customer_initiated",
+        "subject": "Need help with API integration",
+        "body": "I'm having trouble integrating the REST API.",
+        "author": {
+          "type": "contact",
+          "id": "661240"
+        }
+      }
+    }
+  },
+  "self": "https://api.intercom.io/notification_events/delivery-001"
+}

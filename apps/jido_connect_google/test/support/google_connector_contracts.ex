@@ -8,8 +8,12 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
   @google_fixture_roots %{
     gmail: "../../fixtures/gmail",
     google_calendar: "../../../fixtures/google_calendar",
+    google_docs: "../../../fixtures/google_docs",
     google_drive: "../../../fixtures/google_drive",
-    google_sheets: "../../../fixtures/google_sheets"
+    google_forms: "../../../fixtures/google_forms",
+    google_sheets: "../../../fixtures/google_sheets",
+    google_slides: "../../../fixtures/google_slides",
+    google_tasks: "../../../fixtures/google_tasks"
   }
 
   @doc "Asserts the generated Jido action, sensor, manifest, and plugin surface."
@@ -106,6 +110,7 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
     module_namespace = Keyword.fetch!(opts, :module_namespace)
 
     spec = provider.integration()
+    scope_catalog = provider_scope_catalog(spec)
     action_ids = Enum.map(spec.actions, & &1.id)
     trigger_ids = Enum.map(spec.triggers, & &1.id)
     tool_ids = MapSet.new(action_ids ++ trigger_ids)
@@ -119,7 +124,7 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
       assert_known_data_classification(action.data_classification)
       assert_known_risk(action.risk)
       assert_known_confirmation(action.confirmation)
-      assert action.scope_resolver
+      assert_action_scope_metadata(action, scope_catalog)
 
       if action.mutation? do
         assert action.risk in [:write, :external_write, :destructive]
@@ -141,6 +146,7 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
       assert_present(trigger.label)
       assert_known_data_classification(trigger.data_classification)
       assert trigger.scope_resolver
+      assert_scope_resolver(trigger.scope_resolver, trigger.id, scope_catalog)
 
       if trigger.kind == :poll do
         assert trigger.checkpoint
@@ -224,6 +230,22 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
     end
   end
 
+  @doc """
+  Asserts every Google action has audited scope metadata.
+
+  Static scope metadata documents the least-privilege scope advertised in the
+  action catalog. The resolver documents the dynamic scope behavior used at
+  runtime, such as accepting a broader already-granted scope for read actions.
+  """
+  def assert_google_scope_audit(provider) do
+    spec = provider.integration()
+    scope_catalog = provider_scope_catalog(spec)
+
+    for action <- spec.actions do
+      assert_action_scope_metadata(action, scope_catalog)
+    end
+  end
+
   @doc "Asserts every action and trigger has reviewed privacy and risk metadata."
   def assert_privacy_matrix(provider, action_rows, trigger_rows \\ []) do
     spec = provider.integration()
@@ -304,6 +326,53 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
 
   defp assert_known_confirmation(confirmation) do
     assert Taxonomy.known_confirmation?(confirmation)
+  end
+
+  defp provider_scope_catalog(spec) do
+    spec.auth_profiles
+    |> Enum.flat_map(fn profile ->
+      Map.get(profile, :default_scopes, []) ++ Map.get(profile, :optional_scopes, [])
+    end)
+    |> MapSet.new()
+  end
+
+  defp assert_action_scope_metadata(action, scope_catalog) do
+    assert action.scope_resolver,
+           "#{action.id} must declare a scope resolver for dynamic scope checks"
+
+    assert action.scopes != [],
+           "#{action.id} must declare static least-privilege scope metadata"
+
+    assert Enum.all?(action.scopes, &is_binary/1),
+           "#{action.id} static scopes must be strings"
+
+    assert_scopes_in_catalog(action.scopes, scope_catalog, "#{action.id} static scopes")
+    assert_scope_resolver(action.scope_resolver, action.id, scope_catalog)
+  end
+
+  defp assert_scope_resolver(resolver, tool_id, scope_catalog) do
+    assert {:module, ^resolver} = Code.ensure_loaded(resolver),
+           "#{inspect(resolver)} must be loadable for #{tool_id}"
+
+    assert function_exported?(resolver, :required_scopes, 3),
+           "#{inspect(resolver)} must export required_scopes/3 for #{tool_id}"
+
+    required_scopes = resolver.required_scopes(%{id: tool_id}, %{}, %{scopes: []})
+
+    assert required_scopes != [],
+           "#{tool_id} resolver must return at least one required scope"
+
+    assert Enum.all?(required_scopes, &is_binary/1),
+           "#{tool_id} resolver scopes must be strings"
+
+    assert_scopes_in_catalog(required_scopes, scope_catalog, "#{tool_id} resolved scopes")
+  end
+
+  defp assert_scopes_in_catalog(scopes, scope_catalog, label) do
+    missing = Enum.reject(scopes, &MapSet.member?(scope_catalog, &1))
+
+    assert missing == [],
+           "#{label} are not declared by the provider auth profiles: #{inspect(missing)}"
   end
 
   defp assert_action_allow_list_availability(_plugin_module, %{actions: []}), do: :ok

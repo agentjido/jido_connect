@@ -4,7 +4,7 @@ defmodule JidoConnectCore.MixProject do
   def project do
     [
       app: :jido_connect,
-      version: "0.1.0",
+      version: "0.8.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -14,7 +14,7 @@ defmodule JidoConnectCore.MixProject do
       description: description(),
       package: package(),
       docs: docs(),
-      source_url: "https://github.com/mikehostetler/jido_connect",
+      source_url: "https://github.com/agentjido/jido_connect",
       test_coverage: test_coverage(),
       test_ignore_filters: [~r/test\/support\//],
       deps: deps(),
@@ -41,16 +41,17 @@ defmodule JidoConnectCore.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jido, "~> 2.2"},
-      {:jido_action, "~> 2.2"},
-      {:jido_signal, "~> 2.1"},
+      {:jido, "~> 2.3"},
+      {:jido_action, "~> 2.3"},
+      {:jido_signal, "~> 2.2"},
       {:jason, "~> 1.4"},
-      {:req, "~> 0.5"},
-      {:sourceror, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:req, "~> 0.6"},
+      {:plug, "~> 1.20", only: :test},
+      {:sourceror, "~> 1.12", only: [:dev, :test], runtime: false},
       {:splode, "~> 0.3.0"},
-      {:spark, "~> 2.6"},
+      {:spark, "~> 2.7"},
       {:telemetry, "~> 1.3"},
-      {:zoi, "~> 0.17.1"}
+      {:zoi, "~> 0.18"}
     ]
   end
 
@@ -73,7 +74,7 @@ defmodule JidoConnectCore.MixProject do
     [
       licenses: ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/mikehostetler/jido_connect",
+        "GitHub" => "https://github.com/agentjido/jido_connect",
         "Docs" => "https://hexdocs.pm/jido_connect"
       },
       files: ~w(lib guides mix.exs README.md LICENSE CHANGELOG.md)
@@ -84,7 +85,7 @@ defmodule JidoConnectCore.MixProject do
     [
       main: "readme",
       extras: ["README.md", "CHANGELOG.md", "guides/authoring_connector.md"],
-      source_ref: "v0.1.0"
+      source_ref: "v0.8.0"
     ]
   end
 

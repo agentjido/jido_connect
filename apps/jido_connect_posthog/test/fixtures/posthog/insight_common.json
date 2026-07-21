@@ -1,0 +1,16 @@
+{
+  "id": "insight-001",
+  "short_id": "iNbXkq2a",
+  "name": "Pageviews over time",
+  "derived_name": "Pageviews over time",
+  "kind": "InsightLineChart",
+  "description": "Trend of pageview events over the last 30 days.",
+  "result": [
+    {
+      "data": [120, 145, 130, 180, 210, 195, 220],
+      "labels": ["2026-05-09", "2026-05-10", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15"]
+    }
+  ],
+  "created_at": "2026-05-01T00:00:00.000Z",
+  "updated_at": "2026-05-15T00:00:00.000Z"
+}

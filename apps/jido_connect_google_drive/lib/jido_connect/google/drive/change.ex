@@ -4,7 +4,6 @@ defmodule Jido.Connect.Google.Drive.Change do
   @schema Zoi.struct(
             __MODULE__,
             %{
-              change_id: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               file_id: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               file: Jido.Connect.Google.Drive.File.schema() |> Zoi.nullish() |> Zoi.optional(),
               removed?: Zoi.boolean() |> Zoi.default(false),

@@ -1,0 +1,19 @@
+{
+  "results": [
+    {
+      "id": "person-001",
+      "distinct_ids": ["user-1"],
+      "properties": {"name": "Alice Nakamura", "email": "alice@example.com"},
+      "created_at": "2026-05-01T00:00:00.000Z"
+    },
+    {
+      "id": "person-002",
+      "distinct_ids": ["user-2"],
+      "properties": {"name": "Bob Martinez", "email": "bob@example.com"},
+      "created_at": "2026-05-02T00:00:00.000Z"
+    }
+  ],
+  "next": "https://app.posthog.com/api/projects/1/persons/?offset=100",
+  "previous": null,
+  "count": 142
+}

@@ -1,0 +1,27 @@
+{
+  "object": "list",
+  "results": [
+    {
+      "object": "page",
+      "id": "page-001",
+      "created_time": "2026-04-15T10:00:00.000Z",
+      "last_edited_time": "2026-05-10T14:30:00.000Z",
+      "archived": false,
+      "url": "https://www.notion.so/page-001",
+      "properties": {},
+      "parent": {"type": "workspace", "workspace": true}
+    },
+    {
+      "object": "page",
+      "id": "page-002",
+      "created_time": "2026-04-16T10:00:00.000Z",
+      "last_edited_time": "2026-05-11T14:30:00.000Z",
+      "archived": false,
+      "url": "https://www.notion.so/page-002",
+      "properties": {},
+      "parent": {"type": "page_id", "page_id": "page-001"}
+    }
+  ],
+  "has_more": true,
+  "next_cursor": "cursor-page-003"
+}

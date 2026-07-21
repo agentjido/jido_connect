@@ -4,7 +4,7 @@ defmodule Jido.Connect.Demo.MixProject do
   def project do
     [
       app: :jido_connect_demo,
-      version: "0.1.0",
+      version: "0.8.0",
       build_path: "../../_build",
       config_path: "config/config.exs",
       deps_path: "../../deps",
@@ -44,13 +44,13 @@ defmodule Jido.Connect.Demo.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.8.5"},
-      {:phoenix_html, "~> 4.1"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.1.0"},
-      {:lazy_html, ">= 0.1.0", only: :test},
+      {:phoenix, "~> 1.8.9"},
+      {:phoenix_html, "~> 4.3"},
+      {:phoenix_live_reload, "~> 1.6", only: :dev},
+      {:phoenix_live_view, "~> 1.2"},
+      {:lazy_html, "~> 0.1", only: :test},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.5", runtime: Mix.env() == :dev},
       {:heroicons,
        github: "tailwindlabs/heroicons",
        tag: "v2.2.0",
@@ -58,15 +58,18 @@ defmodule Jido.Connect.Demo.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:telemetry_metrics, "~> 1.0"},
-      {:telemetry_poller, "~> 1.0"},
-      {:jason, "~> 1.2"},
+      {:telemetry_metrics, "~> 1.1"},
+      {:telemetry_poller, "~> 1.3"},
+      {:jason, "~> 1.4"},
       {:dns_cluster, "~> 0.2.0"},
-      {:bandit, "~> 1.5"},
+      {:bandit, "~> 1.12"},
       {:jido_connect, path: "../../apps/jido_connect"},
       {:jido_connect_github, path: "../../apps/jido_connect_github"},
       {:jido_connect_google, path: "../../apps/jido_connect_google"},
       {:jido_connect_google_sheets, path: "../../apps/jido_connect_google_sheets"},
+      {:jido_connect_gmail, path: "../../apps/jido_connect_gmail"},
+      {:jido_connect_google_drive, path: "../../apps/jido_connect_google_drive"},
+      {:jido_connect_google_calendar, path: "../../apps/jido_connect_google_calendar"},
       {:jido_connect_mcp, path: "../../apps/jido_connect_mcp"},
       {:jido_connect_slack, path: "../../apps/jido_connect_slack"}
     ]

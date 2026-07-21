@@ -1,0 +1,22 @@
+{
+  "results": [
+    {
+      "id": "501",
+      "properties": {
+        "email": "bella@example.com",
+        "firstname": "Bella",
+        "lastname": "Martinez",
+        "phone": "+1-555-0101",
+        "company": "Acme Corp",
+        "jobtitle": "Product Manager",
+        "lifecyclestage": "customer",
+        "createdate": "2026-01-15T10:30:00.000Z",
+        "lastmodifieddate": "2026-05-01T14:22:00.000Z"
+      },
+      "createdAt": "2026-01-15T10:30:00.000Z",
+      "updatedAt": "2026-05-01T14:22:00.000Z",
+      "archived": false
+    }
+  ],
+  "total": 1
+}

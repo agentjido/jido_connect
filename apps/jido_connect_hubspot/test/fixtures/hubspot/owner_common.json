@@ -1,0 +1,11 @@
+{
+  "id": "401",
+  "email": "alice@example.com",
+  "firstName": "Alice",
+  "lastName": "Nakamura",
+  "userId": "12345",
+  "teamId": "90",
+  "archived": false,
+  "createdAt": "2025-06-01T12:00:00.000Z",
+  "updatedAt": "2026-01-10T09:00:00.000Z"
+}

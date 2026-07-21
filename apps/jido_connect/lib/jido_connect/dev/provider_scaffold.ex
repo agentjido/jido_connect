@@ -65,7 +65,7 @@ defmodule Jido.Connect.Dev.ProviderScaffold do
       def project do
         [
           app: :#{app},
-          version: "0.1.0",
+          version: "0.8.0",
           elixir: "~> 1.19",
           deps: deps()
         ]
@@ -76,7 +76,7 @@ defmodule Jido.Connect.Dev.ProviderScaffold do
       defp deps do
         [
           {:jido_connect, path: "../jido_connect"},
-          {:req, "~> 0.5"}
+          {:req, "~> 0.6"}
         ]
       end
     end

@@ -1,0 +1,50 @@
+{
+  "type": "contact",
+  "id": "661240",
+  "workspace_id": "this_is_an_id123_that_should_be_at_least_4",
+  "external_id": "70",
+  "name": "Alice Nakamura",
+  "email": "alice@example.com",
+  "phone": "+1-555-0100",
+  "avatar": {
+    "type": "avatar",
+    "image_url": "https://example.com/avatars/661240.png"
+  },
+  "role": "user",
+  "has_hard_bounced": false,
+  "marked_email_as_spam": false,
+  "unsubscribed_from_emails": false,
+  "created_at": 1717804800,
+  "updated_at": 1718496000,
+  "signed_up_at": 1717804800,
+  "last_seen_at": 1718496000,
+  "last_replied_at": 1718409600,
+  "last_email_opened_at": 1718410000,
+  "last_contacted_at": 1718409600,
+  "browser": "Chrome",
+  "browser_version": "125.0",
+  "os": "macOS",
+  "location": {
+    "type": "location",
+    "country": "US",
+    "region": "California",
+    "city": "San Francisco"
+  },
+  "tags": {
+    "type": "tag.list",
+    "tags": [
+      {"type": "tag", "id": "123", "name": "enterprise"},
+      {"type": "tag", "id": "456", "name": "priority"}
+    ]
+  },
+  "companies": {
+    "type": "company.list",
+    "companies": [
+      {"type": "company", "id": "531", "name": "Acme Corp"}
+    ]
+  },
+  "custom_attributes": {
+    "subscription_tier": "premium",
+    "account_owner": true
+  }
+}

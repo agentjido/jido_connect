@@ -1,0 +1,19 @@
+{
+  "resource": {
+    "gid": "998899",
+    "name": "Write API documentation",
+    "resource_type": "task"
+  },
+  "action": "added",
+  "parent": {
+    "gid": "445566",
+    "name": "Website Redesign",
+    "resource_type": "project"
+  },
+  "user": {
+    "gid": "123456",
+    "name": "Alice Nakamura",
+    "resource_type": "user"
+  },
+  "created_at": "2026-05-17T10:00:00.000Z"
+}

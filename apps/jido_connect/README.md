@@ -32,7 +32,7 @@ with the canonical form. Every action and trigger must declare `resource`,
 ```elixir
 def deps do
   [
-    {:jido_connect, "~> 0.1.0"}
+    {:jido_connect, "~> 0.8"}
   ]
 end
 ```
@@ -301,7 +301,7 @@ path dependencies to the app folders:
 Once published, prefer the provider package directly:
 
 ```elixir
-{:jido_connect_github, "~> 0.1"}
+{:jido_connect_github, "~> 0.8"}
 ```
 
 Manual catalog registration remains available for private providers:

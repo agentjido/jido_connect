@@ -1,0 +1,10 @@
+{
+  "flag_key": "new-dashboard",
+  "enabled": true,
+  "variant": "variant-a",
+  "reason": "matched_condition",
+  "payload": {
+    "color_scheme": "dark",
+    "layout": "grid"
+  }
+}

@@ -78,10 +78,10 @@ Score each backend from 1 to 5. The first pass used the Sheets
 | Codex taskability | 3 | 5 | Generated names are discoverable but noisy. Handwritten modules are smaller and match existing provider patterns. |
 | Long-term maintainability | 3 | 5 | Generated clients are useful references, but production code should stay around small Jido-owned facades first. |
 
-Initial decision: use handwritten Req clients for first-wave Google product
-connectors, backed by `Jido.Connect.Google.Transport`. Keep `google_api_*`
-packages as dev/test spike references until a product surface proves that
-generated coverage is worth the runtime dependency.
+Final decision: use handwritten Req clients for first-wave Google product
+connectors, backed by `Jido.Connect.Google.Transport`. The 0.8.0 release removes
+the generated-client spike and its test-only dependencies. Use generated Google
+packages as external references unless a later ADR approves one.
 
 ## ADR Template
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 
 type Issue = {
   id: string;
@@ -37,6 +37,11 @@ async function main() {
   const [command = "help", ...rest] = process.argv.slice(2);
   const args = parseArgs(rest);
 
+  if (wantsHelp(args)) {
+    commandHelp(command);
+    return;
+  }
+
   switch (command) {
     case "doctor":
       doctor();
@@ -45,10 +50,19 @@ async function main() {
       prompt(args);
       break;
     case "step":
-      step(args);
+      await step(args);
       break;
     case "loop":
-      loop(args);
+      await loop(args);
+      break;
+    case "verify-wave":
+      verifyWave(args);
+      break;
+    case "status":
+      statusCommand();
+      break;
+    case "recover":
+      recoverCommand(args);
       break;
     case "help":
     case "--help":
@@ -64,14 +78,129 @@ function help() {
   console.log(`Pi Connector Factory
 
 Usage:
-  bun run doctor
-  bun run prompt [--issue <id>] [--allow-epic]
-  bun run step [--issue <id>] [--allow-epic]
-  bun run loop [--limit <n>] [--allow-epic]
+  bun run src/cli.ts <command> [options]
+
+Commands:
+  doctor        Check local wiring and show the next ready task
+  prompt        Preview the Pi prompt for a task without running Pi
+  step          Run exactly one ready Beadwork task through Pi
+  loop          Run multiple tasks in sequence
+  verify-wave   Serial connector-wave verification (compile + package tests)
+  status        Show current factory state (git, beadwork, last run)
+  recover       Guided recovery after a failed or timed-out step
+  help          Show this help message
+
+Global options:
+  --help, -h   Show help for a command (no side effects)
 
 Beadwork owns the backlog. This wrapper selects one ready Beadwork task and
 asks Pi + Z.ai to produce exactly one clean Git commit.
 `);
+}
+
+function wantsHelp(args: Args): boolean {
+  return args.options["help"] === true;
+}
+
+function commandHelp(command: string): void {
+  switch (command) {
+    case "doctor":
+      console.log(`Usage: bun run src/cli.ts doctor
+
+Check that all required tools and config are present, then show the next
+ready Beadwork task.
+
+This command is read-only and has no side effects.
+`);
+      break;
+    case "prompt":
+      console.log(`Usage: bun run src/cli.ts prompt [--issue <id>] [--allow-epic]
+
+Render the Pi prompt for the next ready task (or a specific --issue) and
+write it to the runs directory.
+
+Options:
+  --issue <id>     Select a specific Beadwork issue instead of the next ready one
+  --allow-epic     Allow selecting an epic issue
+`);
+      break;
+    case "step":
+      console.log(`Usage: bun run src/cli.ts step [--issue <id>] [--allow-epic]
+
+Run exactly one Beadwork task through Pi. Requires a clean Git worktree.
+Pi must produce exactly one commit; the task is closed automatically.
+
+Options:
+  --issue <id>     Select a specific Beadwork issue instead of the next ready one
+  --allow-epic     Allow selecting an epic issue
+`);
+      break;
+    case "loop":
+      console.log(`Usage: bun run src/cli.ts loop [--limit <n>] [--allow-epic]
+
+Run multiple Beadwork tasks in sequence, one step at a time. Stops when
+there are no ready tasks left or when one step fails.
+
+Options:
+  --limit <n>      Maximum number of tasks to run (default: 5)
+  --allow-epic     Allow selecting epic issues
+`);
+      break;
+    case "verify-wave":
+      console.log(`Usage: bun run src/cli.ts verify-wave [--skip-compile] [--package <name> ...]
+
+Serial connector-wave verification. Runs root compile/warnings check, then
+tests each connector package one at a time to avoid Mix build lock contention.
+
+Prints a concise pass/fail summary and exits non-zero if any step fails.
+
+Options:
+  --skip-compile   Skip the root compile --warnings-as-errors check
+  --package <name> Run only the named package(s) (e.g. --package calcom --package jira)
+                    Package names match the app directory suffix (calcom, hubspot, etc.)
+
+When to use:
+  Run after a factory loop finishes to verify the entire connector family
+  is healthy. This is broader than a single-task check; it catches dependency
+  drift, warnings, and package test failures across all connectors.
+
+How it differs from 'bun run loop':
+  'bun run loop' runs Pi implementation tasks one at a time. It only checks
+  that Pi produces a clean commit for each individual task. It does NOT verify
+  that other connector packages still pass their tests.
+
+  'verify-wave' is a post-loop gate: after the factory finishes a batch of
+  connector tasks, run this to confirm the whole wave is green.
+`);
+      break;
+    case "status":
+      console.log(`Usage: bun run src/cli.ts status
+
+Show current factory state: whether the git worktree is clean, whether any
+Beadwork issues are in_progress, and the last run directory.
+
+This command is read-only and has no side effects.
+`);
+      break;
+    case "recover":
+      console.log(`Usage: bun run src/cli.ts recover [--stash] [--reopen]
+
+Show guided recovery after a failed or timed-out step. By default, this only
+prints status and recommended next steps. It does NOT modify git or Beadwork.
+
+Options:
+  --stash    Stash uncommitted changes with a descriptive name (e.g.
+             factory-recover-<issue-id>-<timestamp>)
+  --reopen   Reopen the in_progress Beadwork issue so it can be re-attempted
+
+Recovery preserves your WIP by default. Use --stash only when you want to
+save changes and restore a clean tree.
+`);
+      break;
+    default:
+      help();
+      break;
+  }
 }
 
 function doctor() {
@@ -89,7 +218,7 @@ function doctor() {
     console.log(`${ok ? "ok " : "NO "} ${name}`);
   }
 
-  const ready = readyIssues();
+  const ready = queueIssues();
   const nextTask = ready.find((issue) => issue.type !== "epic");
 
   console.log("");
@@ -117,7 +246,7 @@ function prompt(args: Args) {
   console.log(`wrote ${relativeToRepo(join(runDir, "prompt.md"))}`);
 }
 
-function step(args: Args) {
+async function step(args: Args) {
   ensureCleanGit("before starting Pi");
 
   const issue = selectIssue(args);
@@ -133,7 +262,15 @@ function step(args: Args) {
   console.log(`issue: ${startedIssue.id} ${startedIssue.title}`);
   console.log(`run:   ${relativeToRepo(runDir)}`);
 
-  const piOutput = runPi(promptText, runDir);
+  let piOutput: RunResult;
+  try {
+    piOutput = await runPi(promptText, runDir);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    reportFailure(issue.id, runDir, message);
+    process.exit(1);
+  }
+
   writeFileSync(join(runDir, "pi.stdout.log"), piOutput.stdout);
   writeFileSync(join(runDir, "pi.stderr.log"), piOutput.stderr);
 
@@ -141,10 +278,16 @@ function step(args: Args) {
   const commitCount = Number(git(["rev-list", "--count", `${beforeHead}..${afterHead}`]).stdout);
 
   if (afterHead === beforeHead || commitCount !== 1) {
-    fail(`Pi must create exactly one Git commit; found ${commitCount}`);
+    reportFailure(issue.id, runDir, `Pi must create exactly one Git commit; found ${commitCount}`);
+    process.exit(1);
   }
 
-  ensureCleanGit("after Pi commit");
+  try {
+    ensureCleanGit("after Pi commit");
+  } catch {
+    reportFailure(issue.id, runDir, "Git worktree is dirty after Pi commit");
+    process.exit(1);
+  }
 
   const shortSha = git(["rev-parse", "--short", "HEAD"]).stdout.trim();
   const finalIssue = showIssue(issue.id);
@@ -158,7 +301,7 @@ function step(args: Args) {
   console.log(`done: ${issue.id} -> ${shortSha}`);
 }
 
-function loop(args: Args) {
+async function loop(args: Args) {
   const limit = Number(args.options.limit || "5");
   if (!Number.isFinite(limit) || limit < 1) fail("--limit must be a positive number");
 
@@ -171,8 +314,369 @@ function loop(args: Args) {
     }
 
     console.log(`\n[${index + 1}/${limit}] ${issue.id} ${issue.title}`);
-    step({ positional: [], options: { ...args.options, issue: issue.id } });
+
+    try {
+      await step({ positional: [], options: { ...args.options, issue: issue.id } });
+    } catch {
+      // step already reported the failure and exited; this is unreachable
+      // but satisfies the type checker for the loop.
+      process.exit(1);
+    }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Failure reporting & recovery
+// ---------------------------------------------------------------------------
+
+type RecoveryInfo = {
+  issueId: string;
+  runDir: string;
+  error: string;
+  gitDirty: boolean;
+  gitStatus: string;
+  beadworkInProgress: boolean;
+  timestamp: string;
+};
+
+function reportFailure(issueId: string, runDir: string, error: string): never {
+  const gitStatus = gitStatusOutput();
+  const gitDirty = gitStatus.length > 0;
+  const beadworkInProgress = beadworkIssueIsInProgress(issueId);
+  const timestamp = new Date().toISOString();
+
+  const info: RecoveryInfo = {
+    issueId,
+    runDir: relativeToRepo(runDir),
+    error,
+    gitDirty,
+    gitStatus,
+    beadworkInProgress,
+    timestamp
+  };
+
+  // Write a recovery marker that `status` and `recover` can read later.
+  writeFileSync(join(runDir, "recovery.json"), JSON.stringify(info, null, 2));
+
+  console.error("");
+  console.error("=== FACTORY STEP FAILED ===");
+  console.error("");
+  console.error(`Issue:         ${issueId}`);
+  console.error(`Run dir:       ${relativeToRepo(runDir)}`);
+  console.error(`Log path:      ${relativeToRepo(join(runDir, "pi.stdout.log"))}`);
+  console.error(`Error:         ${error}`);
+  console.error(`Git dirty:     ${gitDirty}`);
+  if (gitDirty) {
+    console.error(`Dirty files:`);
+    for (const line of gitStatus.split("\n")) {
+      if (line.trim()) console.error(`  ${line}`);
+    }
+  }
+  console.error(`Beadwork:      ${beadworkInProgress ? "in_progress" : "not in_progress"}`);
+  console.error("");
+  console.error("Recovery commands:");
+  console.error("  bun run src/cli.ts status          # check current factory state");
+  console.error("  bun run src/cli.ts recover          # show guided recovery steps");
+  if (gitDirty) {
+    console.error(`  git stash push -m "factory-recover-${issueId}"   # stash WIP manually`);
+  }
+  if (beadworkInProgress) {
+    console.error(`  bw reopen ${issueId}                   # reopen the Beadwork issue`);
+  }
+  console.error("");
+
+  process.exit(1);
+}
+
+function statusCommand() {
+  const gitStatus = gitStatusOutput();
+  const gitDirty = gitStatus.length > 0;
+  const inProgressIssues = beadworkInProgressIssues();
+  const lastRun = findLatestRunDir();
+  const recovery = lastRun ? findRecoveryMarker(lastRun) : undefined;
+
+  console.log("");
+  console.log("=== Factory Status ===");
+  console.log("");
+  console.log(`Repo:           ${repoRoot}`);
+  console.log(`Branch:         ${git(["branch", "--show-current"]).stdout.trim()}`);
+  console.log(`Git clean:      ${!gitDirty}`);
+  if (gitDirty) {
+    console.log(`Dirty files:`);
+    for (const line of gitStatus.split("\n")) {
+      if (line.trim()) console.log(`  ${line}`);
+    }
+  }
+  console.log(`Beadwork active: ${inProgressIssues.length > 0 ? inProgressIssues.map((i) => i.id).join(", ") : "none"}`);
+  for (const issue of inProgressIssues) {
+    console.log(`  ${issue.id}  ${issue.title}`);
+  }
+
+  if (lastRun) {
+    console.log(`Last run:       ${relativeToRepo(lastRun)}`);
+  }
+
+  if (recovery) {
+    console.log("");
+    console.log("=== Last Run Failed ===");
+    console.log(`Issue:     ${recovery.issueId}`);
+    console.log(`Error:     ${recovery.error}`);
+    console.log(`Git dirty: ${recovery.gitDirty}`);
+    console.log(`Beadwork:  ${recovery.beadworkInProgress ? "in_progress" : "not in_progress"}`);
+    console.log(`Failed at: ${recovery.timestamp}`);
+    console.log("");
+    console.log("Run `bun run src/cli.ts recover` for guided recovery.");
+  } else {
+    console.log("\nFactory idle. No failed step detected.");
+  }
+
+  console.log("");
+}
+
+function recoverCommand(args: Args) {
+  const doStash = args.options["stash"] === true;
+  const doReopen = args.options["reopen"] === true;
+  const gitStatus = gitStatusOutput();
+  const gitDirty = gitStatus.length > 0;
+  const inProgressIssues = beadworkInProgressIssues();
+  const lastRun = findLatestRunDir();
+  const recovery = lastRun ? findRecoveryMarker(lastRun) : undefined;
+
+  console.log("");
+  console.log("=== Factory Recovery ===");
+  console.log("");
+
+  // Show current state
+  console.log(`Git clean:      ${!gitDirty}`);
+  console.log(`Beadwork active: ${inProgressIssues.length > 0 ? inProgressIssues.map((i) => i.id).join(", ") : "none"}`);
+
+  if (recovery) {
+    console.log(`Failed issue:   ${recovery.issueId}`);
+    console.log(`Run dir:        ${recovery.runDir}`);
+    console.log(`Error:          ${recovery.error}`);
+    console.log(`Failed at:      ${recovery.timestamp}`);
+  }
+
+  // Act: stash
+  if (doStash && gitDirty) {
+    const issueId = recovery?.issueId || "unknown";
+    const stashName = `factory-recover-${issueId}-${Date.now()}`;
+    git(["stash", "push", "-m", stashName]);
+    console.log(`\nStashed changes as: ${stashName}`);
+  } else if (doStash && !gitDirty) {
+    console.log("\n--stash requested but git is already clean; nothing to stash.");
+  } else if (gitDirty) {
+    const issueId = recovery?.issueId || "unknown";
+    console.log(`\nTo stash WIP manually:`);
+    console.log(`  git stash push -m "factory-recover-${issueId}"`);
+  }
+
+  // Act: reopen
+  if (doReopen && inProgressIssues.length > 0) {
+    for (const issue of inProgressIssues) {
+      run("bw", ["reopen", issue.id], { cwd: repoRoot });
+      console.log(`Reopened Beadwork issue: ${issue.id}`);
+    }
+  } else if (doReopen && inProgressIssues.length === 0) {
+    console.log("\n--reopen requested but no Beadwork issues are in_progress; nothing to reopen.");
+  } else if (inProgressIssues.length > 0) {
+    console.log("\nTo reopen Beadwork issues manually:");
+    for (const issue of inProgressIssues) {
+      console.log(`  bw reopen ${issue.id}`);
+    }
+  }
+
+  // Summary of next steps
+  console.log("");
+  console.log("=== Next Steps ===");
+  if (gitDirty && !doStash) {
+    console.log("1. Decide what to do with uncommitted changes (stash, commit, or drop).");
+  } else if (doStash && gitDirty) {
+    console.log("1. WIP stashed. Review with `git stash list`.");
+  }
+  if (inProgressIssues.length > 0 && !doReopen) {
+    console.log("2. Reopen Beadwork issue(s) so they can be re-attempted.");
+  } else if (doReopen && inProgressIssues.length > 0) {
+    console.log("2. Beadwork issue(s) reopened and ready for re-attempt.");
+  }
+  console.log("3. Run `bun run doctor` to verify environment.");
+  console.log("4. Run `bun run step` to re-attempt or move to the next task.");
+  console.log("");
+}
+
+// ---------------------------------------------------------------------------
+// Recovery helpers
+// ---------------------------------------------------------------------------
+
+function gitStatusOutput(): string {
+  const result = spawnSync("git", ["status", "--short"], {
+    cwd: repoRoot,
+    env: process.env,
+    stdio: "pipe",
+    encoding: "utf8"
+  });
+  return (result.stdout || "").trim();
+}
+
+function beadworkIssueIsInProgress(id: string): boolean {
+  try {
+    const issue = showIssue(id);
+    return issue.status === "in_progress";
+  } catch {
+    return false;
+  }
+}
+
+function beadworkInProgressIssues(): Issue[] {
+  const allIssues = issueList(
+    run("bw", ["list", "--status", "in_progress", "--json"], { cwd: repoRoot, capture: true }).stdout
+  );
+  return allIssues.filter((issue) => issue.status === "in_progress");
+}
+
+function findLatestRunDir(): string | undefined {
+  const runsDir = join(factoryRoot, "runs");
+  if (!existsSync(runsDir)) return undefined;
+
+  const entries = readdirSync(runsDir)
+    .filter((name) => name.endsWith("-step"))
+    .sort();
+
+  if (entries.length === 0) return undefined;
+
+  return join(runsDir, entries[entries.length - 1]);
+}
+
+function findRecoveryMarker(runDir: string): RecoveryInfo | undefined {
+  const markerPath = join(runDir, "recovery.json");
+  if (!existsSync(markerPath)) return undefined;
+
+  try {
+    return parseJson<RecoveryInfo>(readFileSync(markerPath, "utf8"));
+  } catch {
+    return undefined;
+  }
+}
+
+const CONNECTOR_PACKAGES = [
+  "calcom",
+  "hubspot",
+  "airtable",
+  "webhook",
+  "jira",
+  "linear",
+  "posthog",
+  "calendly",
+  "salesforce",
+] as const;
+
+function verifyWave(args: Args) {
+  const skipCompile = args.options["skip-compile"] === true;
+  const requestedPackages = collectPackages(args);
+  const packages = requestedPackages ?? [...CONNECTOR_PACKAGES];
+
+  const results: { name: string; passed: boolean; detail?: string }[] = [];
+
+  console.log("=== Connector Wave Verification ===\n");
+
+  // Phase 1: Root compile / warnings check
+  if (!skipCompile) {
+    console.log("[1/2] Root compile --warnings-as-errors ...");
+    const compileResult = spawnSync("mix", ["compile", "--warnings-as-errors", "--no-deps-check"], {
+      cwd: repoRoot,
+      env: process.env,
+      stdio: "pipe",
+      encoding: "utf8",
+      maxBuffer: 128 * 1024 * 1024,
+    });
+
+    const passed = compileResult.status === 0;
+    const detail = passed ? undefined : (compileResult.stderr || compileResult.stdout || "").trim().split("\n").slice(-5).join("\n");
+    results.push({ name: "root-compile", passed, detail });
+    mark(passed, "root-compile");
+    if (!passed) {
+      if (detail) console.log(`       ${detail.split("\n").join("\n       ")}`);
+    }
+    console.log("");
+  } else {
+    console.log("[1/2] Root compile -- skipped (--skip-compile)\n");
+  }
+
+  // Phase 2: Serial package tests
+  console.log(`[2/2] Package tests (${packages.length} packages, serial) ...`);
+  for (const pkg of packages) {
+    const appDir = join(repoRoot, "apps", `jido_connect_${pkg}`);
+    if (!existsSync(appDir)) {
+      results.push({ name: pkg, passed: false, detail: `app directory not found: ${appDir}` });
+      mark(false, pkg, "dir missing");
+      continue;
+    }
+
+    const testResult = spawnSync("mix", ["test", "--no-deps-check"], {
+      cwd: appDir,
+      env: process.env,
+      stdio: "pipe",
+      encoding: "utf8",
+      maxBuffer: 128 * 1024 * 1024,
+    });
+
+    const passed = testResult.status === 0;
+    const detail = passed
+      ? undefined
+      : (testResult.stderr || testResult.stdout || "").trim().split("\n").slice(-3).join("\n");
+    results.push({ name: pkg, passed, detail });
+    mark(passed, pkg, passed ? undefined : "FAILED");
+    if (!passed && detail) {
+      console.log(`       ${detail.split("\n").join("\n       ")}`);
+    }
+  }
+
+  // Summary
+  console.log("");
+  console.log("=== Summary ===");
+  const passed = results.filter((r) => r.passed);
+  const failed = results.filter((r) => !r.passed);
+
+  for (const r of passed) console.log(`  PASS  ${r.name}`);
+  for (const r of failed) console.log(`  FAIL  ${r.name}` + (r.detail ? ` — ${r.detail.split("\n")[0]}` : ""));
+
+  console.log("");
+  console.log(`${passed.length} passed, ${failed.length} failed, ${results.length} total`);
+
+  if (failed.length > 0) {
+    process.exit(1);
+  }
+}
+
+function collectPackages(args: Args): string[] | undefined {
+  const list: string[] = [];
+
+  // Handle both --package calcom --package jira and --package calcom jira
+  for (let i = 0; i < args.positional.length; i++) {
+    const arg = args.positional[i];
+    if (arg === "--package") {
+      const next = args.positional[i + 1];
+      if (next && !next.startsWith("--")) {
+        list.push(next);
+        i += 1;
+      }
+      continue;
+    }
+  }
+
+  // Also check options for repeated --package flags
+  const optionPkg = args.options["package"];
+  if (typeof optionPkg === "string") {
+    list.push(optionPkg);
+  }
+
+  return list.length > 0 ? list : undefined;
+}
+
+function mark(passed: boolean, name: string, suffix?: string) {
+  const label = passed ? "ok" : "FAIL";
+  const extra = suffix ? ` (${suffix})` : passed ? "" : "";
+  console.log(`  ${label}  ${name}${extra}`);
 }
 
 function selectIssue(args: Args, nullable?: false): Issue;
@@ -180,7 +684,7 @@ function selectIssue(args: Args, nullable: true): Issue | undefined;
 function selectIssue(args: Args, nullable = false) {
   const issueId = stringOption(args.options.issue);
   const allowEpic = args.options["allow-epic"] === true;
-  const issue = issueId ? showIssue(issueId) : readyIssues().find((item) => allowEpic || item.type !== "epic");
+  const issue = issueId ? showIssue(issueId) : queueIssues().find((item) => allowEpic || item.type !== "epic");
 
   if (!issue) {
     if (nullable) return undefined;
@@ -205,7 +709,55 @@ function startIssue(issue: Issue) {
 }
 
 function readyIssues() {
-  return parseJson<Issue[]>(run("bw", ["ready", "--json"], { cwd: repoRoot, capture: true }).stdout);
+  return issueList(run("bw", ["ready", "--json"], { cwd: repoRoot, capture: true }).stdout);
+}
+
+function queueIssues() {
+  const rawReady = readyIssues();
+  const queue = new Map<string, Issue>();
+  const blockerStatus = new Map<string, string>();
+
+  for (const issue of rawReady) {
+    if (issue.type !== "epic") {
+      queue.set(issue.id, issue);
+      continue;
+    }
+
+    for (const child of childIssues(issue.id)) {
+      if (isReadyLeaf(child, blockerStatus)) {
+        queue.set(child.id, child);
+      }
+    }
+
+    queue.set(issue.id, issue);
+  }
+
+  return [...queue.values()];
+}
+
+function childIssues(parentId: string) {
+  return issueList(run("bw", ["list", "--parent", parentId, "--json"], { cwd: repoRoot, capture: true }).stdout);
+}
+
+function issueList(value: string) {
+  const issues = parseJson<Issue[] | null>(value);
+  return Array.isArray(issues) ? issues : [];
+}
+
+function isReadyLeaf(issue: Issue, blockerStatus: Map<string, string>) {
+  if (issue.type === "epic") return false;
+  if (!["open", "in_progress"].includes(issue.status)) return false;
+
+  return (issue.blocked_by || []).every((blockerId) => {
+    let status = blockerStatus.get(blockerId);
+
+    if (!status) {
+      status = showIssue(blockerId).status;
+      blockerStatus.set(blockerId, status);
+    }
+
+    return status === "closed";
+  });
 }
 
 function showIssue(id: string) {
@@ -219,7 +771,7 @@ function renderPrompt(issue: Issue) {
   });
 }
 
-function runPi(promptText: string, runDir: string): RunResult {
+async function runPi(promptText: string, runDir: string): Promise<RunResult> {
   if (!process.env.ZAI_API_KEY) {
     fail("ZAI_API_KEY is missing. Put it in pi-connector-factory/.env or the repo root .env.");
   }
@@ -227,48 +779,210 @@ function runPi(promptText: string, runDir: string): RunResult {
   const sessionDir = join(runDir, "sessions");
   mkdirSync(sessionDir, { recursive: true });
 
-  const result = spawnSync(
-    "pi",
-    [
-      "--provider",
-      piProvider(),
-      "--model",
-      piModel(),
-      "--thinking",
-      piThinking(),
-      "--mode",
-      "text",
-      "--session-dir",
-      sessionDir,
-      "--no-extensions",
-      "--no-skills",
-      "--no-prompt-templates",
-      "--tools",
-      "read,bash,edit,write,grep,find,ls",
-      "-p",
-      promptText
-    ],
-    {
+  console.log(`logs:  ${relativeToRepo(sessionDir)}/*.jsonl`);
+
+  const args = [
+    "--provider",
+    piProvider(),
+    "--model",
+    piModel(),
+    "--thinking",
+    piThinking(),
+    "--mode",
+    "text",
+    "--session-dir",
+    sessionDir,
+    "--no-extensions",
+    "--no-skills",
+    "--no-prompt-templates",
+    "--tools",
+    "read,bash,edit,write,grep,find,ls",
+    "-p",
+    promptText
+  ];
+
+  const stdoutChunks: Buffer[] = [];
+  const stderrChunks: Buffer[] = [];
+  const streamer = startSessionStreamer(sessionDir);
+  const timeoutMs = Number(process.env.PI_TIMEOUT_MS || "1800000");
+
+  return await new Promise<RunResult>((resolvePromise, reject) => {
+    let timedOut = false;
+    const child = spawn("pi", args, {
       cwd: repoRoot,
       env: process.env,
-      encoding: "utf8",
-      maxBuffer: 512 * 1024 * 1024,
-      timeout: Number(process.env.PI_TIMEOUT_MS || "900000")
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+
+    const timeout =
+      timeoutMs > 0
+        ? setTimeout(() => {
+            timedOut = true;
+            child.kill("SIGTERM");
+          }, timeoutMs)
+        : undefined;
+
+    child.stdout.on("data", (chunk: Buffer) => {
+      stdoutChunks.push(chunk);
+      process.stdout.write(chunk);
+    });
+
+    child.stderr.on("data", (chunk: Buffer) => {
+      stderrChunks.push(chunk);
+      process.stderr.write(chunk);
+    });
+
+    child.on("error", (error) => {
+      if (timeout) clearTimeout(timeout);
+      streamer.stop();
+      reject(error);
+    });
+
+    child.on("close", (status, signal) => {
+      if (timeout) clearTimeout(timeout);
+      streamer.stop();
+
+      const stdout = Buffer.concat(stdoutChunks).toString("utf8");
+      const stderr = Buffer.concat(stderrChunks).toString("utf8");
+
+      if (timedOut) {
+        writeFileSync(join(runDir, "pi.stdout.log"), stdout);
+        writeFileSync(join(runDir, "pi.stderr.log"), stderr);
+        reject(new Error(`pi timed out after ${timeoutMs}ms`));
+        return;
+      }
+
+      if (status !== 0) {
+        writeFileSync(join(runDir, "pi.stdout.log"), stdout);
+        writeFileSync(join(runDir, "pi.stderr.log"), stderr);
+        reject(new Error(`pi exited with status ${status ?? `signal ${signal}`}`));
+        return;
+      }
+
+      resolvePromise({ stdout, stderr });
+    });
+  });
+}
+
+type SessionStreamState = {
+  buffer: string;
+  offset: number;
+};
+
+function startSessionStreamer(sessionDir: string) {
+  const states = new Map<string, SessionStreamState>();
+  const pollMs = Number(process.env.PI_LOG_POLL_MS || "1000");
+  const timer = setInterval(flush, pollMs);
+
+  function flush() {
+    for (const path of sessionFiles(sessionDir)) {
+      streamSessionFile(path, states);
     }
-  );
-
-  if (result.error) fail(result.error.message);
-
-  if (result.status !== 0) {
-    writeFileSync(join(runDir, "pi.stdout.log"), result.stdout || "");
-    writeFileSync(join(runDir, "pi.stderr.log"), result.stderr || "");
-    fail(`pi exited with status ${result.status}`);
   }
 
-  return {
-    stdout: result.stdout || "",
-    stderr: result.stderr || ""
-  };
+  function stop() {
+    clearInterval(timer);
+    flush();
+  }
+
+  flush();
+
+  return { stop };
+}
+
+function sessionFiles(sessionDir: string) {
+  if (!existsSync(sessionDir)) return [];
+
+  return readdirSync(sessionDir)
+    .filter((file) => file.endsWith(".jsonl"))
+    .sort()
+    .map((file) => join(sessionDir, file));
+}
+
+function streamSessionFile(path: string, states: Map<string, SessionStreamState>) {
+  const state = states.get(path) || { buffer: "", offset: 0 };
+  const size = statSync(path).size;
+
+  if (size <= state.offset) {
+    states.set(path, state);
+    return;
+  }
+
+  const chunk = readFileSync(path).subarray(state.offset, size).toString("utf8");
+  state.offset = size;
+
+  const lines = `${state.buffer}${chunk}`.split(/\r?\n/);
+  state.buffer = lines.pop() || "";
+  states.set(path, state);
+
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    streamSessionLine(line);
+  }
+}
+
+function streamSessionLine(line: string) {
+  try {
+    const event = JSON.parse(line);
+    streamSessionEvent(event);
+  } catch {
+    console.log(`[pi:log] ${line}`);
+  }
+}
+
+function streamSessionEvent(event: any) {
+  if (event?.type !== "message") return;
+
+  const message = event.message;
+  const content = Array.isArray(message?.content) ? message.content : [];
+
+  if (message?.role === "assistant") {
+    for (const item of content) {
+      if (item?.type === "text") {
+        streamText("pi", item.text);
+      }
+
+      if (item?.type === "toolCall") {
+        console.log(`[pi:${item.name}] ${summarizeToolCall(item.name, item.arguments || {})}`);
+      }
+    }
+  }
+
+  if (message?.role === "toolResult") {
+    const text = content.map((item: any) => item?.text).filter(Boolean).join("\n");
+    if (text && text !== "(no output)") {
+      streamText(`pi:${message.toolName || "result"}`, text, toolResultLimit());
+    }
+  }
+}
+
+function summarizeToolCall(name: string, args: Record<string, unknown>) {
+  if (name === "bash") return String(args.command || "");
+  if (typeof args.path === "string") return args.path;
+
+  return JSON.stringify(args);
+}
+
+function streamText(label: string, text: unknown, limit = assistantTextLimit()) {
+  if (typeof text !== "string" || text.trim().length === 0) return;
+
+  const trimmed = truncate(text.trim(), limit);
+  for (const line of trimmed.split(/\r?\n/)) {
+    console.log(`[${label}] ${line}`);
+  }
+}
+
+function truncate(value: string, limit: number) {
+  if (value.length <= limit) return value;
+  return `${value.slice(0, limit)}\n... truncated ${value.length - limit} chars`;
+}
+
+function assistantTextLimit() {
+  return Number(process.env.PI_LOG_ASSISTANT_CHARS || "2000");
+}
+
+function toolResultLimit() {
+  return Number(process.env.PI_LOG_RESULT_CHARS || "2000");
 }
 
 function ensureCleanGit(reason: string) {

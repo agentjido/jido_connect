@@ -4,7 +4,7 @@ defmodule Jido.Connect.Catalog.Plugin do
 
   This is the canonical Jido runtime surface for Connect catalog operations.
   The plugin exposes only three stable actions and routes all execution through
-  `Jido.Connect.Catalog.call_tool/4`.
+  `Jido.Connect.Catalog.call_tool/3`.
   """
 
   alias Jido.Connect.Catalog.Actions.{CallTool, DescribeTool, SearchTools}

@@ -265,7 +265,7 @@ Auth profiles: `user`, `service_account`,
 
 | ID | Kind | Checkpoint | Dedupe | Scope | Signal |
 | --- | --- | --- | --- | --- | --- |
-| `google.drive.file.changed` | poll | `page_token` | `change_id`, `file_id` | `drive.metadata.readonly` | `change_id`, `file_id`, removed, time, drive ID, change type, file |
+| `google.drive.file.changed` | poll | `page_token` | `change_type`, `file_id`, `drive_id`, `time` | `drive.metadata.readonly` | `file_id`, removed, time, drive ID, change type, file |
 | `google.drive.file.changed.push` | webhook | none | `channel_id`, `resource_id`, `message_number` | `drive.metadata.readonly` | channel id, resource id, resource URI, state, changed parts, optional file id, delivery metadata |
 
 ### Catalog Packs

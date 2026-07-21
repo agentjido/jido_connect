@@ -1,0 +1,12 @@
+{
+  "eventId": "2001",
+  "subscriptionId": "52",
+  "portalId": "123456",
+  "objectId": "301",
+  "eventType": "deal.propertyChange",
+  "propertyName": "dealstage",
+  "propertyValue": "closedwon",
+  "changeSource": "CRM_UI",
+  "occurredAt": 1747353600000,
+  "appId": "99999"
+}

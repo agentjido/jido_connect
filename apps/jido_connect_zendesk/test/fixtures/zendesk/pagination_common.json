@@ -1,0 +1,12 @@
+{
+  "meta": {
+    "has_more": true,
+    "after_cursor": "eyJvIjoiL2FwaS92Mi90aWNrZXRzLmpzb24/cGFnZT0yIiwidiI6IjEifQ==",
+    "before_cursor": null
+  },
+  "links": {
+    "next": "https://example.zendesk.com/api/v2/tickets.json?page=2",
+    "prev": null
+  },
+  "count": 100
+}

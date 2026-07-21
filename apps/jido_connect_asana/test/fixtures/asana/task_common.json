@@ -1,0 +1,80 @@
+{
+  "gid": "998877",
+  "name": "Design new landing page",
+  "resource_type": "task",
+  "assignee": {
+    "gid": "123456",
+    "name": "Alice Nakamura",
+    "resource_type": "user"
+  },
+  "assignee_status": "upcoming",
+  "completed": false,
+  "completed_at": null,
+  "due_on": "2026-07-15",
+  "due_at": "2026-07-15T17:00:00.000Z",
+  "start_on": "2026-07-01",
+  "notes": "Create wireframes and visual designs for the new landing page",
+  "html_notes": "<body>Create wireframes and visual designs for the new landing page</body>",
+  "num_hearts": 3,
+  "num_likes": 5,
+  "parent": null,
+  "workspace": {
+    "gid": "112233",
+    "name": "Acme Corp",
+    "resource_type": "workspace"
+  },
+  "projects": [
+    {
+      "gid": "445566",
+      "name": "Website Redesign",
+      "resource_type": "project"
+    }
+  ],
+  "tags": [
+    {
+      "gid": "556677",
+      "name": "design",
+      "resource_type": "tag"
+    }
+  ],
+  "memberships": [
+    {
+      "project": {
+        "gid": "445566",
+        "name": "Website Redesign",
+        "resource_type": "project"
+      },
+      "section": {
+        "gid": "889900",
+        "name": "In Progress",
+        "resource_type": "section"
+      }
+    }
+  ],
+  "custom_fields": [
+    {
+      "gid": "667788",
+      "name": "Priority",
+      "resource_type": "custom_field",
+      "resource_subtype": "enum",
+      "type": "enum",
+      "enum_value": {
+        "gid": "771100",
+        "name": "High",
+        "resource_type": "enum_option",
+        "enabled": true,
+        "color": "red"
+      }
+    },
+    {
+      "gid": "667789",
+      "name": "Estimated Hours",
+      "resource_type": "custom_field",
+      "resource_subtype": "number",
+      "type": "number",
+      "number_value": 16.0
+    }
+  ],
+  "created_at": "2026-05-01T10:00:00.000Z",
+  "modified_at": "2026-05-18T14:30:00.000Z"
+}

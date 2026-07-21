@@ -1,0 +1,33 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('user%40contoso.com')/mailFolders",
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/me/mailFolders?$skip=10",
+  "value": [
+    {
+      "id": "AAMkAGI2TG93AAA=",
+      "displayName": "Inbox",
+      "parentFolderId": "AAMkAGI2AABhAAA=",
+      "childFolderCount": 2,
+      "unreadItemCount": 5,
+      "totalItemCount": 42,
+      "wellKnownName": "inbox"
+    },
+    {
+      "id": "AAMkAGI2TG94BBB=",
+      "displayName": "Sent Items",
+      "parentFolderId": "AAMkAGI2AABhAAA=",
+      "childFolderCount": 0,
+      "unreadItemCount": 0,
+      "totalItemCount": 18,
+      "wellKnownName": "sentitems"
+    },
+    {
+      "id": "AAMkAGI2TG95CCC=",
+      "displayName": "Drafts",
+      "parentFolderId": "AAMkAGI2AABhAAA=",
+      "childFolderCount": 0,
+      "unreadItemCount": 3,
+      "totalItemCount": 3,
+      "wellKnownName": "drafts"
+    }
+  ]
+}

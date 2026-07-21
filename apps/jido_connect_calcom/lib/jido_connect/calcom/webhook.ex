@@ -1,5 +1,9 @@
 defmodule Jido.Connect.Calcom.Webhook do
-  @moduledoc "Normalized Cal.com webhook."
+  @moduledoc """
+  Cal.com webhook struct and event verification/normalization facade.
+  """
+
+  alias Jido.Connect.Calcom.Webhook.{Normalizer, Verification}
 
   @schema Zoi.struct(
             __MODULE__,
@@ -21,4 +25,16 @@ defmodule Jido.Connect.Calcom.Webhook do
   def schema, do: @schema
   def new!(attrs), do: Zoi.parse!(@schema, attrs)
   def new(attrs), do: Zoi.parse(@schema, attrs)
+
+  # Verification delegates
+
+  defdelegate verify_signature(body, headers, webhook_secret), to: Verification
+  defdelegate verify_request(body, headers, webhook_secret), to: Verification
+  defdelegate verify_delivery(body, headers, webhook_secret, opts \\ []), to: Verification
+
+  # Normalization delegates
+
+  defdelegate normalize_signal(delivery), to: Normalizer
+  defdelegate normalize_signal(event, payload), to: Normalizer
+  defdelegate normalize_event(payload), to: Normalizer
 end

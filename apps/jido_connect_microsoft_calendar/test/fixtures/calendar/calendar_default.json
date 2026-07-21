@@ -1,0 +1,17 @@
+{
+  "id": "AAMkAGI2TG93AAA=",
+  "name": "Calendar",
+  "color": "auto",
+  "hexColor": "",
+  "isDefaultCalendar": true,
+  "isShared": false,
+  "isTallyingReplies": false,
+  "canEdit": true,
+  "canShare": true,
+  "canViewPrivateItems": true,
+  "owner": {
+    "name": "Megan Bowen",
+    "address": "meganb@contoso.com"
+  },
+  "calendarGroupId": null
+}

@@ -1,0 +1,11 @@
+{
+  "uri": "https://api.calendly.com/organizations/e5f6g7h8",
+  "name": "Example Corp",
+  "slug": "example-corp",
+  "invite_url": "https://calendly.com/invite/example-corp",
+  "scheduling_url": "https://calendly.com/example-corp",
+  "owner": "https://api.calendly.com/users/a1b2c3d4",
+  "created_at": "2026-01-10T08:00:00.000000Z",
+  "updated_at": "2026-03-15T12:00:00.000000Z",
+  "resource": "organization"
+}

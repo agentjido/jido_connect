@@ -1,0 +1,32 @@
+{
+  "gid": "445566",
+  "name": "Website Redesign",
+  "resource_type": "project",
+  "color": "dark-green",
+  "archived": false,
+  "public": true,
+  "due_date": "2026-09-30",
+  "due_on": "2026-09-30",
+  "start_on": "2026-06-01",
+  "notes": "Full redesign of the marketing website",
+  "html_notes": "<body>Full redesign of the marketing website</body>",
+  "current_status": "on_track",
+  "default_view": "board",
+  "workspace": {
+    "gid": "112233",
+    "name": "Acme Corp",
+    "resource_type": "workspace"
+  },
+  "team": {
+    "gid": "778899",
+    "name": "Engineering",
+    "resource_type": "team"
+  },
+  "owner": {
+    "gid": "123456",
+    "name": "Alice Nakamura",
+    "resource_type": "user"
+  },
+  "created_at": "2026-04-01T09:00:00.000Z",
+  "modified_at": "2026-05-15T11:30:00.000Z"
+}

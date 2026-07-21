@@ -21,7 +21,7 @@ The Spark DSL declaration lives in
 ```elixir
 def deps do
   [
-    {:jido_connect_github, "~> 0.1.0"}
+    {:jido_connect_github, "~> 0.8"}
   ]
 end
 ```

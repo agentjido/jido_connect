@@ -1,0 +1,103 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('user%40contoso.com')/events('AAMkEV1AAA%3D')/$entity",
+  "@odata.etag": "W/\"CQAAABYAAAAiIsqM/0aa0eeByQAUANEVAABtEV1AA==\"",
+  "id": "AAMkEV1AAA=",
+  "iCalUId": "040000008200E00074C5B7101A82E00800000000B14C7B2E6D92DA01000000000000000010000000E1C2B3A4D5E6F7A8B9C0D1E2F3A4B5C6",
+  "subject": "Quarterly planning sync",
+  "bodyPreview": "Please join us for the quarterly planning meeting. We will review OKRs and roadmap priorities.",
+  "body": {
+    "contentType": "html",
+    "content": "<html><head></head><body><p>Please join us for the quarterly planning meeting.</p><p>We will review OKRs and roadmap priorities.</p></body></html>"
+  },
+  "start": {
+    "dateTime": "2026-06-15T10:00:00",
+    "timeZone": "Pacific Standard Time"
+  },
+  "end": {
+    "dateTime": "2026-06-15T11:30:00",
+    "timeZone": "Pacific Standard Time"
+  },
+  "organizer": {
+    "emailAddress": {
+      "name": "Megan Bowen",
+      "address": "meganb@contoso.com"
+    }
+  },
+  "attendees": [
+    {
+      "type": "required",
+      "status": {
+        "response": "accepted",
+        "time": "2026-05-19T14:00:00Z"
+      },
+      "emailAddress": {
+        "name": "Brian Johnson",
+        "address": "brianj@contoso.com"
+      }
+    },
+    {
+      "type": "optional",
+      "status": {
+        "response": "none",
+        "time": "0001-01-01T00:00:00Z"
+      },
+      "emailAddress": {
+        "name": "All Users",
+        "address": "allusers@contoso.com"
+      }
+    }
+  ],
+  "location": {
+    "displayName": "Conference Room 1",
+    "locationUri": "https://contoso.com/rooms/cr1",
+    "locationType": "conferenceRoom",
+    "address": {
+      "street": "123 Main St",
+      "city": "Redmond",
+      "state": "WA",
+      "countryOrRegion": "US",
+      "postalCode": "98052"
+    },
+    "coordinates": {
+      "latitude": 47.6405,
+      "longitude": -122.1293
+    }
+  },
+  "locations": [
+    {
+      "displayName": "Conference Room 1",
+      "locationType": "conferenceRoom"
+    }
+  ],
+  "recurrence": {
+    "pattern": {
+      "type": "weekly",
+      "interval": 2,
+      "firstDayOfWeek": "monday",
+      "daysOfWeek": ["monday"]
+    },
+    "range": {
+      "type": "endDate",
+      "startDate": "2026-06-15",
+      "endDate": "2026-12-31",
+      "recurrenceTimeZone": "Pacific Standard Time"
+    }
+  },
+  "isAllDay": false,
+  "isCancelled": false,
+  "isOrganizer": true,
+  "sensitivity": "normal",
+  "showAs": "busy",
+  "responseStatus": {
+    "response": "organizer",
+    "time": "0001-01-01T00:00:00Z"
+  },
+  "hasAttachments": false,
+  "onlineMeetingUrl": "https://teams.microsoft.com/l/meetup/19abc123",
+  "onlineMeeting": {
+    "joinUrl": "https://teams.microsoft.com/l/meetup/19abc123",
+    "conferenceId": "conf123",
+    "tollFreeNumber": "+1-800-555-0100",
+    "tollNumber": "+1-425-555-0100"
+  }
+}

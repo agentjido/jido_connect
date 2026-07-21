@@ -42,6 +42,8 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.DeleteSharedDrive,
     Jido.Connect.Google.Drive.Actions.HideSharedDrive,
     Jido.Connect.Google.Drive.Actions.UnhideSharedDrive,
+    Jido.Connect.Google.Drive.Actions.GetStartPageToken,
+    Jido.Connect.Google.Drive.Actions.ListChanges,
     Jido.Connect.Google.Drive.Actions.WatchChanges,
     Jido.Connect.Google.Drive.Actions.WatchFile,
     Jido.Connect.Google.Drive.Actions.StopChannel
@@ -57,6 +59,7 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.Comments,
     Jido.Connect.Google.Drive.Actions.Replies,
     Jido.Connect.Google.Drive.Actions.SharedDrives,
+    Jido.Connect.Google.Drive.Actions.Changes,
     Jido.Connect.Google.Drive.Actions.Watch,
     Jido.Connect.Google.Drive.Triggers.Changes
   ]
@@ -604,7 +607,6 @@ defmodule Jido.Connect.Google.DriveTest do
        %{
          changes: [
            Drive.Change.new!(%{
-             change_id: "change123",
              file_id: "file123",
              removed?: false,
              time: "2026-05-05T12:00:00Z",
@@ -637,7 +639,6 @@ defmodule Jido.Connect.Google.DriveTest do
        %{
          changes: [
            Drive.Change.new!(%{
-             change_id: "change123",
              file_id: "file123",
              removed?: false,
              time: "2026-05-05T12:00:00Z",
@@ -670,7 +671,6 @@ defmodule Jido.Connect.Google.DriveTest do
        %{
          changes: [
            Drive.Change.new!(%{
-             change_id: "change123",
              file_id: "file123",
              removed?: false,
              time: "2026-05-05T12:00:00Z",
@@ -683,7 +683,6 @@ defmodule Jido.Connect.Google.DriveTest do
                })
            }),
            Drive.Change.new!(%{
-             change_id: "change456",
              file_id: "file456",
              removed?: false,
              time: "2026-05-05T12:05:00Z",
@@ -719,6 +718,25 @@ defmodule Jido.Connect.Google.DriveTest do
          status: 410,
          details: %{message: "Start page token is no longer valid"}
        )}
+    end
+
+    def list_changes(
+          %{
+            page_token: "minimal-change",
+            page_size: 100,
+            spaces: "drive",
+            include_items_from_all_drives: false,
+            include_removed: true,
+            restrict_to_my_drive: false,
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         changes: [%{file_id: "file-minimal"}],
+         new_start_page_token: "minimal-next-token"
+       }}
     end
 
     def list_changes(
@@ -838,6 +856,8 @@ defmodule Jido.Connect.Google.DriveTest do
              "google.drive.shared_drive.delete",
              "google.drive.shared_drive.hide",
              "google.drive.shared_drive.unhide",
+             "google.drive.changes.get_start_page_token",
+             "google.drive.changes.list",
              "google.drive.changes.watch",
              "google.drive.file.watch",
              "google.drive.channel.stop"
@@ -931,10 +951,16 @@ defmodule Jido.Connect.Google.DriveTest do
     assert hide_shared_drive.risk == :write
     assert hide_shared_drive.confirmation == :required_for_ai
 
+    get_start_page_token =
+      Enum.find(spec.actions, &(&1.id == "google.drive.changes.get_start_page_token"))
+
+    list_changes = Enum.find(spec.actions, &(&1.id == "google.drive.changes.list"))
     watch_changes = Enum.find(spec.actions, &(&1.id == "google.drive.changes.watch"))
     watch_file = Enum.find(spec.actions, &(&1.id == "google.drive.file.watch"))
     stop_channel = Enum.find(spec.actions, &(&1.id == "google.drive.channel.stop"))
 
+    assert get_start_page_token.risk == :read
+    assert list_changes.risk == :read
     assert watch_changes.risk == :write
     assert watch_file.risk == :write
     assert stop_channel.risk == :write
@@ -1005,7 +1031,7 @@ defmodule Jido.Connect.Google.DriveTest do
               id: "google.drive.file.changed",
               kind: :poll,
               checkpoint: :page_token,
-              dedupe: %{key: [:change_id, :file_id]},
+              dedupe: %{key: [:change_type, :file_id, :drive_id, :time]},
               scope_resolver: Jido.Connect.Google.Drive.ScopeResolver
             }} =
              Connect.trigger(spec, "google.drive.file.changed")
@@ -1102,6 +1128,18 @@ defmodule Jido.Connect.Google.DriveTest do
              %{},
              %{scopes: ["https://www.googleapis.com/auth/drive.file"]}
            ) == ["https://www.googleapis.com/auth/drive.file"]
+
+    assert resolver.required_scopes(
+             %{id: "google.drive.changes.get_start_page_token"},
+             %{},
+             %{scopes: []}
+           ) == ["https://www.googleapis.com/auth/drive.metadata.readonly"]
+
+    assert resolver.required_scopes(
+             %{id: "google.drive.changes.list"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/drive.readonly"]}
+           ) == ["https://www.googleapis.com/auth/drive.readonly"]
 
     assert resolver.required_scopes(%{}, %{}, %{}) == [
              "https://www.googleapis.com/auth/drive.metadata.readonly"
@@ -1764,6 +1802,46 @@ defmodule Jido.Connect.Google.DriveTest do
   test "invokes changes watch through injected client and lease" do
     {context, lease} = context_and_lease()
 
+    assert {:ok, %{start_page_token: "start-token"}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.changes.get_start_page_token",
+               %{},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok,
+            %{
+              changes: [
+                %{
+                  file_id: "file123",
+                  file: %{file_id: "file123", name: "Budget.pdf"}
+                }
+              ],
+              new_start_page_token: "next-token"
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.changes.list",
+               %{page_token: "start-token"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{changes: [minimal_change]}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.changes.list",
+               %{page_token: "minimal-change"},
+               context: context,
+               credential_lease: lease
+             )
+
+    refute Map.has_key?(minimal_change, :owners)
+    refute Map.has_key?(minimal_change, :permissions)
+    refute Map.has_key?(minimal_change, :file)
+
     assert {:ok,
             %{
               channel: %{
@@ -2080,7 +2158,6 @@ defmodule Jido.Connect.Google.DriveTest do
             %{
               signals: [
                 %{
-                  change_id: "change123",
                   file_id: "file123",
                   removed: false,
                   time: "2026-05-05T12:00:00Z",
@@ -2107,12 +2184,10 @@ defmodule Jido.Connect.Google.DriveTest do
             %{
               signals: [
                 %{
-                  change_id: "change123",
                   file_id: "file123",
                   file: %{name: "Budget.pdf"}
                 },
                 %{
-                  change_id: "change456",
                   file_id: "file456",
                   file: %{name: "Forecast.pdf"}
                 }

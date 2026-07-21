@@ -1,0 +1,10 @@
+{
+  "id": 101,
+  "name": "Support Team",
+  "url": "https://example.zendesk.com/api/v2/groups/101.json",
+  "description": "First-level customer support team handling initial ticket triage.",
+  "default": true,
+  "deleted": false,
+  "created_at": "2025-01-01T00:00:00Z",
+  "updated_at": "2026-04-15T10:00:00Z"
+}

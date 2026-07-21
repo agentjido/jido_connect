@@ -1,0 +1,73 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('user%40contoso.com')/messages('AAMkAGI2TG93AAAqBGHNAAA%3D')/$entity",
+  "@odata.etag": "W/\"CQAAABYAAAAiIsqM/0aa0eeByQAUANEVAABtEDaI\"",
+  "id": "AAMkAGI2TG93AAAqBGHNAAA=",
+  "createdDateTime": "2026-05-19T12:00:00Z",
+  "lastModifiedDateTime": "2026-05-19T12:05:00Z",
+  "changeKey": "CQAAABYAAAAiIsqM/0aa0eeByQAUANEVAABtEDaI",
+  "categories": [],
+  "receivedDateTime": "2026-05-19T12:00:00Z",
+  "sentDateTime": "2026-05-19T11:59:00Z",
+  "hasAttachments": true,
+  "internetMessageId": "<CWYP123456789abcdef0@contoso.com>",
+  "subject": "Quarterly budget review",
+  "bodyPreview": "Hi team, Please review the attached quarterly budget spreadsheet before our meeting on Friday.",
+  "importance": "normal",
+  "parentFolderId": "AAMkAGI2TG93AAA=",
+  "conversationId": "AAQkAGI2NGVhMzAzLTEwZmItNGIyOC04MTkzLTAyMjA3MzU0NjEwZQAQAMg9J6HMlJFtkfYbOlUQUhg=",
+  "isRead": false,
+  "isDraft": false,
+  "sender": {
+    "emailAddress": {
+      "name": "Megan Bowen",
+      "address": "meganb@contoso.com"
+    }
+  },
+  "from": {
+    "emailAddress": {
+      "name": "Megan Bowen",
+      "address": "meganb@contoso.com"
+    }
+  },
+  "toRecipients": [
+    {
+      "emailAddress": {
+        "name": "All Users",
+        "address": "allusers@contoso.com"
+      }
+    }
+  ],
+  "ccRecipients": [
+    {
+      "emailAddress": {
+        "name": "Brian Johnson",
+        "address": "brianj@contoso.com"
+      }
+    }
+  ],
+  "bccRecipients": [],
+  "body": {
+    "contentType": "html",
+    "content": "<html><head></head><body><p>Hi team,</p><p>Please review the attached quarterly budget spreadsheet before our meeting on Friday.</p></body></html>"
+  },
+  "attachments": [
+    {
+      "@odata.type": "#microsoft.graph.fileAttachment",
+      "id": "AAMkAGI2TG93AAAqBGHNAAAqBGHLAAA=",
+      "lastModifiedDateTime": "2026-05-19T12:00:00Z",
+      "name": "budget_q2_2026.xlsx",
+      "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "size": 45678,
+      "isInline": false
+    },
+    {
+      "@odata.type": "#microsoft.graph.fileAttachment",
+      "id": "AAMkAGI2TG93AAAqBGHNAAAqBGHMAAA=",
+      "lastModifiedDateTime": "2026-05-19T12:00:00Z",
+      "name": "logo.png",
+      "contentType": "image/png",
+      "size": 12345,
+      "isInline": true
+    }
+  ]
+}

@@ -6,7 +6,13 @@ defmodule Jido.Connect.Google.SearchConsole do
   Search Console surface is implemented.
   """
 
-  use Jido.Connect
+  use Jido.Connect,
+    fragments: [
+      Jido.Connect.Google.SearchConsole.Actions.Sites,
+      Jido.Connect.Google.SearchConsole.Actions.SearchAnalytics,
+      Jido.Connect.Google.SearchConsole.Actions.Sitemaps,
+      Jido.Connect.Google.SearchConsole.Actions.URLInspection
+    ]
 
   integration do
     id(:google_search_console)
@@ -25,6 +31,8 @@ defmodule Jido.Connect.Google.SearchConsole do
     status(:experimental)
     tags([:google, :workspace, :search, :seo, :marketing])
   end
+
+  defdelegate catalog_packs, to: Jido.Connect.Google.SearchConsole.CatalogPacks, as: :all
 
   auth do
     oauth2 :user do

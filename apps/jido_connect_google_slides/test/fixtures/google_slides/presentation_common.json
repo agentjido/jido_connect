@@ -1,0 +1,132 @@
+{
+  "presentationId": "pres_abc123",
+  "title": "Q4 Strategy Review",
+  "locale": "en_US",
+  "revisionId": "rev001",
+  "pageSize": {
+    "width": {
+      "magnitude": 9144000,
+      "unit": "EMU"
+    },
+    "height": {
+      "magnitude": 6858000,
+      "unit": "EMU"
+    }
+  },
+  "slides": [
+    {
+      "objectId": "slide_title",
+      "slideProperties": {
+        "layoutObjectId": "layout_title",
+        "masterObjectId": "master_default"
+      },
+      "pageElements": [
+        {
+          "objectId": "elem_title_text",
+          "size": {
+            "width": {
+              "magnitude": 8382000,
+              "unit": "EMU"
+            },
+            "height": {
+              "magnitude": 1143000,
+              "unit": "EMU"
+            }
+          },
+          "transform": {
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "translateX": 381000,
+            "translateY": 381000,
+            "unit": "EMU"
+          },
+          "shape": {
+            "shapeType": "TEXT_BOX",
+            "text": {
+              "textElements": [
+                {
+                  "textRun": {
+                    "content": "Q4 Strategy Review"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "objectId": "slide_content",
+      "slideProperties": {
+        "layoutObjectId": "layout_title_body",
+        "masterObjectId": "master_default"
+      },
+      "pageElements": [
+        {
+          "objectId": "elem_heading",
+          "size": {
+            "width": {
+              "magnitude": 8382000,
+              "unit": "EMU"
+            },
+            "height": {
+              "magnitude": 1143000,
+              "unit": "EMU"
+            }
+          },
+          "transform": {
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "translateX": 381000,
+            "translateY": 381000,
+            "unit": "EMU"
+          },
+          "shape": {
+            "shapeType": "TEXT_BOX",
+            "text": {
+              "textElements": [
+                {
+                  "textRun": {
+                    "content": "Key Metrics"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "objectId": "elem_body_text",
+          "size": {
+            "width": {
+              "magnitude": 8382000,
+              "unit": "EMU"
+            },
+            "height": {
+              "magnitude": 4572000,
+              "unit": "EMU"
+            }
+          },
+          "transform": {
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "translateX": 381000,
+            "translateY": 1524000,
+            "unit": "EMU"
+          },
+          "shape": {
+            "shapeType": "TEXT_BOX",
+            "text": {
+              "textElements": [
+                {
+                  "textRun": {
+                    "content": "Revenue grew 15% quarter-over-quarter."
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

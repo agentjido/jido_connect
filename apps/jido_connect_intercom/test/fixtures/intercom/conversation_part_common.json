@@ -1,0 +1,27 @@
+{
+  "type": "conversation_part",
+  "id": "800",
+  "part_type": "comment",
+  "body": "<p>Let me check the documentation for you.</p>",
+  "created_at": 1718496300,
+  "updated_at": 1718496300,
+  "notified_at": 1718496310,
+  "assigned_to": {
+    "type": "admin",
+    "id": "991"
+  },
+  "author": {
+    "type": "admin",
+    "id": "991",
+    "name": "Carol Chen"
+  },
+  "attachments": [
+    {
+      "type": "file",
+      "name": "api-guide.pdf",
+      "content_type": "application/pdf",
+      "filesize": 102400,
+      "url": "https://example.com/files/api-guide.pdf"
+    }
+  ]
+}

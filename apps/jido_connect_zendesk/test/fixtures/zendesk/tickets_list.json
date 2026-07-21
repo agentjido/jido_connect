@@ -1,0 +1,51 @@
+{
+  "tickets": [
+    {
+      "id": 12345,
+      "url": "https://example.zendesk.com/api/v2/tickets/12345.json",
+      "subject": "Cannot reset password",
+      "description": "I've tried resetting my password multiple times but never receive the reset email.",
+      "status": "open",
+      "type": "incident",
+      "priority": "normal",
+      "requester_id": 9901,
+      "assignee_id": 9001,
+      "group_id": 101,
+      "organization_id": 201,
+      "tags": ["password", "login", "urgent"],
+      "custom_fields": [],
+      "via": {"channel": "web"},
+      "created_at": "2026-03-15T10:30:00Z",
+      "updated_at": "2026-05-10T14:22:00Z"
+    },
+    {
+      "id": 12346,
+      "url": "https://example.zendesk.com/api/v2/tickets/12346.json",
+      "subject": "Billing inquiry for enterprise plan",
+      "description": "Need clarification on the enterprise plan billing cycle.",
+      "status": "pending",
+      "type": "question",
+      "priority": "high",
+      "requester_id": 9902,
+      "assignee_id": 9002,
+      "group_id": 102,
+      "organization_id": 202,
+      "tags": ["billing", "enterprise"],
+      "custom_fields": [
+        {"id": 123, "value": "enterprise"}
+      ],
+      "via": {"channel": "email"},
+      "created_at": "2026-04-01T09:00:00Z",
+      "updated_at": "2026-04-02T11:30:00Z"
+    }
+  ],
+  "meta": {
+    "has_more": true,
+    "after_cursor": "eyJvIjoiL2FwaS92Mi90aWNrZXRzLmpzb24/cGFnZT0yIiwidiI6IjEifQ==",
+    "before_cursor": null
+  },
+  "links": {
+    "next": "https://example.zendesk.com/api/v2/tickets.json?page=2",
+    "prev": null
+  }
+}
