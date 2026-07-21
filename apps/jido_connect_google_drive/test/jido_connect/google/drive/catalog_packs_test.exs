@@ -48,7 +48,11 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
     assert "google.drive.shared_drive.get" in ids
     assert "google.drive.changes.get_start_page_token" in ids
     assert "google.drive.changes.list" in ids
+    assert "google.drive.collection.changes.list" in ids
+    assert "google.drive.collection.changes" in ids
+    assert "google.drive.collection.changes.push" in ids
     refute "google.drive.changes.watch" in ids
+    refute "google.drive.collection.watch" in ids
     refute "google.drive.file.create" in ids
     refute "google.drive.permission.update" in ids
     refute "google.drive.revision.delete" in ids
@@ -138,6 +142,13 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
                packs: Drive.catalog_packs(),
                pack: :google_drive_file_writer
              )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.drive.collection.watch",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_file_writer
+             )
   end
 
   test "watch pack exposes Drive channel lifecycle and webhook metadata" do
@@ -167,6 +178,42 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
              )
 
     assert list_descriptor.tool.id == "google.drive.changes.list"
+
+    assert {:ok, collection_watch_descriptor} =
+             Catalog.describe_tool("google.drive.collection.watch",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_watch
+             )
+
+    assert collection_watch_descriptor.tool.id == "google.drive.collection.watch"
+
+    assert {:ok, collection_changes_descriptor} =
+             Catalog.describe_tool("google.drive.collection.changes.list",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_watch
+             )
+
+    assert collection_changes_descriptor.tool.id == "google.drive.collection.changes.list"
+
+    assert {:ok, collection_poll_descriptor} =
+             Catalog.describe_tool("google.drive.collection.changes",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_watch
+             )
+
+    assert collection_poll_descriptor.tool.id == "google.drive.collection.changes"
+
+    assert {:ok, collection_push_descriptor} =
+             Catalog.describe_tool("google.drive.collection.changes.push",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_watch
+             )
+
+    assert collection_push_descriptor.tool.id == "google.drive.collection.changes.push"
 
     assert {:ok, file_descriptor} =
              Catalog.describe_tool("google.drive.file.watch",

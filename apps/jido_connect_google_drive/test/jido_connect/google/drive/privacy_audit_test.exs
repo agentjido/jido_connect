@@ -115,6 +115,12 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
         action("google.drive.changes.list", :workspace_metadata, :read, :none,
           text_includes: ["changes"]
         ),
+        action("google.drive.collection.watch", :workspace_metadata, :write, :required_for_ai,
+          text_includes: ["collection", "cursor"]
+        ),
+        action("google.drive.collection.changes.list", :workspace_metadata, :read, :none,
+          text_includes: ["collection", "signals"]
+        ),
         action("google.drive.changes.watch", :workspace_metadata, :write, :required_for_ai,
           text_includes: ["push", "notification"]
         ),
@@ -131,6 +137,12 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
         ),
         trigger("google.drive.file.changed.push", :workspace_metadata,
           text_includes: ["push", "notification"]
+        ),
+        trigger("google.drive.collection.changes", :workspace_metadata,
+          text_includes: ["collection", "deltas"]
+        ),
+        trigger("google.drive.collection.changes.push", :workspace_metadata,
+          text_includes: ["collection", "push"]
         )
       ]
     )

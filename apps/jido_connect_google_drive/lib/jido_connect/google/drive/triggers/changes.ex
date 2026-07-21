@@ -46,6 +46,46 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
       end
     end
 
+    poll :collection_changes do
+      id("google.drive.collection.changes")
+      resource(:collection)
+      verb(:watch)
+      data_classification(:workspace_metadata)
+      label("Collection changes")
+
+      description("Poll Google Drive changes for provider-neutral folder-like collection deltas.")
+
+      interval_ms(300_000)
+      checkpoint(:checkpoint)
+      dedupe(%{key: [:collection_id, :change_type, :provider_record_id, :changed_at]})
+      handler(Jido.Connect.Google.Drive.Handlers.Triggers.CollectionChangesPoller)
+
+      access do
+        auth(@auth_profiles, default: :user)
+        scopes([@metadata_scope], resolver: @scope_resolver)
+      end
+
+      config do
+        field(:collection_id, :string, required?: true)
+
+        field(:page_size, :integer,
+          default: 100,
+          description: "Maximum changes per Drive page, from 1 through 1000."
+        )
+      end
+
+      signal do
+        field(:collection_id, :string)
+        field(:collection_match, :string, enum: ["yes", "no", "unknown"])
+        field(:provider, :string)
+        field(:provider_record_id, :string)
+        field(:change_type, :string, enum: ["updated", "deleted", "unknown"])
+        field(:removed?, :boolean)
+        field(:changed_at, :string)
+        field(:record, :map)
+      end
+    end
+
     webhook :file_changed_push do
       id("google.drive.file.changed.push")
       resource(:file)
@@ -89,6 +129,47 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
         field(:changed, {:array, :string}, default: [])
         field(:file_id, :string)
         field(:payload_kind, :string)
+        field(:delivery, :map)
+      end
+    end
+
+    webhook :collection_changes_push do
+      id("google.drive.collection.changes.push")
+      resource(:collection)
+      verb(:watch)
+      data_classification(:workspace_metadata)
+      label("Collection changes push")
+
+      description(
+        "Receive Google Drive push notifications indicating collection changes may be available."
+      )
+
+      verification(%{
+        kind: :google_drive_channel,
+        token: :host_verified,
+        headers: :x_goog_channel
+      })
+
+      dedupe(%{key: [:channel_id, :resource_id, :message_number]})
+      handler(Jido.Connect.Google.Drive.Handlers.Triggers.CollectionChangesWebhook)
+
+      access do
+        auth(@auth_profiles, default: :user)
+        scopes([@metadata_scope], resolver: @scope_resolver)
+      end
+
+      config do
+        field(:channel_id, :string)
+        field(:resource_id, :string)
+        field(:token, :string)
+      end
+
+      signal do
+        field(:collection_changed?, :boolean)
+        field(:channel_id, :string)
+        field(:message_number, :string)
+        field(:resource_id, :string)
+        field(:resource_state, :string)
         field(:delivery, :map)
       end
     end

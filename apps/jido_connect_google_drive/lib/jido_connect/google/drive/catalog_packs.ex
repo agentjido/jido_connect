@@ -21,13 +21,17 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
     "google.drive.shared_drive.get",
     "google.drive.changes.get_start_page_token",
     "google.drive.changes.list",
+    "google.drive.collection.changes.list",
     "google.drive.file.changed",
-    "google.drive.file.changed.push"
+    "google.drive.file.changed.push",
+    "google.drive.collection.changes",
+    "google.drive.collection.changes.push"
   ]
 
   @watch_tools @readonly_tools ++
                  [
                    "google.drive.changes.watch",
+                   "google.drive.collection.watch",
                    "google.drive.file.watch",
                    "google.drive.channel.stop"
                  ]

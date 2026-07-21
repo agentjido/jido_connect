@@ -15,6 +15,7 @@ defmodule Jido.Connect.Google.Drive do
       Jido.Connect.Google.Drive.Actions.Replies,
       Jido.Connect.Google.Drive.Actions.SharedDrives,
       Jido.Connect.Google.Drive.Actions.Changes,
+      Jido.Connect.Google.Drive.Actions.Collections,
       Jido.Connect.Google.Drive.Actions.Watch,
       Jido.Connect.Google.Drive.Triggers.Changes
     ]
@@ -31,6 +32,72 @@ defmodule Jido.Connect.Google.Drive do
     package(:jido_connect_google_drive)
     status(:available)
     tags([:google, :workspace, :files, :productivity])
+
+    capability :watch_collection do
+      kind(:runtime)
+      feature(:watch_collection)
+      label("Watch collections")
+
+      description(
+        "Create provider-side watchers for folder-like Drive collections and return reusable cursors."
+      )
+
+      metadata(%{
+        generic_capability: :watch_collection,
+        tool_id: "google.drive.collection.watch",
+        checkpoint_field: :checkpoint,
+        provider_mapping: %{watch_collection: "changes.getStartPageToken + changes.watch"}
+      })
+    end
+
+    capability :list_collection_changes do
+      kind(:runtime)
+      feature(:list_collection_changes)
+      label("List collection changes")
+
+      description(
+        "Consume Drive change checkpoints and return provider-neutral collection signals."
+      )
+
+      metadata(%{
+        generic_capability: :list_collection_changes,
+        tool_id: "google.drive.collection.changes.list",
+        checkpoint_field: :checkpoint,
+        signal_shape: :collection_change,
+        provider_mapping: %{list_collection_changes: "changes.list"}
+      })
+    end
+
+    capability :collection_changes do
+      kind(:poll)
+      feature(:collection_changes)
+      label("Collection changes")
+
+      description("Poll provider-neutral Drive collection changes with opaque checkpoints.")
+
+      metadata(%{
+        generic_capability: :collection_changes,
+        trigger_id: "google.drive.collection.changes",
+        checkpoint_field: :checkpoint,
+        signal_shape: :collection_change
+      })
+    end
+
+    capability :collection_changes_push do
+      kind(:webhook)
+      feature(:collection_changes_push)
+      label("Collection changes push")
+
+      description("Receive lightweight Drive push notifications for collection change refreshes.")
+
+      metadata(%{
+        generic_capability: :collection_changes_push,
+        trigger_id: "google.drive.collection.changes.push",
+        follow_up_capability: :list_collection_changes,
+        checkpoint_field: :checkpoint,
+        signal_shape: :collection_change_available
+      })
+    end
   end
 
   auth do
