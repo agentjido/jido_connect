@@ -9,9 +9,15 @@
   "id": "jido_con-s2v.3",
   "labels": [],
   "parent": "jido_con-s2v",
+  "comments": [
+    {
+      "text": "Merged PR #44 to main at bcd8dc0 after green CI. Pushed annotated v0.8.0, retargeted open PRs to main, enabled vulnerability alerts and automated security updates, protected main with required PR and Quality checks, removed remote develop/release/merged Nextcloud branches, and pruned clean worktrees. Preserved unmerged local-only branches.",
+      "timestamp": "2026-07-21T13:42:10Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Publish 0.8.0 and clean branches",
   "type": "task",
-  "updated_at": "2026-07-21T13:34:42Z"
+  "updated_at": "2026-07-21T13:42:10Z"
 }
