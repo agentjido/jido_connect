@@ -4,6 +4,7 @@
     "jido_con-s2v.2"
   ],
   "blocks": [],
+  "closed_at": "2026-07-21T13:42:11Z",
   "created": "2026-07-21T12:58:46Z",
   "description": "After the integration PR passes, merge it to main, create and push v0.8.0 at the merged commit, retarget open PRs from develop to main, protect main, and remove only verified obsolete branches and stale worktree metadata.",
   "id": "jido_con-s2v.3",
@@ -16,8 +17,8 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Publish 0.8.0 and clean branches",
   "type": "task",
-  "updated_at": "2026-07-21T13:42:10Z"
+  "updated_at": "2026-07-21T13:42:11Z"
 }
