@@ -1,0 +1,6 @@
+{
+  "type": "team",
+  "id": "team-100",
+  "name": "Support",
+  "admin_ids": ["991", "992"]
+}

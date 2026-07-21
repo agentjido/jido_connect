@@ -1,0 +1,12 @@
+{
+  "gid": "889900",
+  "name": "In Progress",
+  "resource_type": "section",
+  "project": {
+    "gid": "445566",
+    "name": "Website Redesign",
+    "resource_type": "project"
+  },
+  "created_at": "2026-04-01T09:00:00.000Z",
+  "modified_at": "2026-05-10T16:00:00.000Z"
+}

@@ -81,7 +81,6 @@ defmodule Jido.Connect.Google.Drive.Handlers.Triggers.FileChangedPoller do
 
   defp normalize_signal(change) do
     %{
-      change_id: Map.get(change, :change_id),
       file_id: Map.get(change, :file_id),
       removed: Map.get(change, :removed?, false),
       time: Map.get(change, :time),
@@ -96,10 +95,16 @@ defmodule Jido.Connect.Google.Drive.Handlers.Triggers.FileChangedPoller do
   defp dedupe_signals(signals) do
     {_seen, unique} =
       Enum.reduce(signals, {MapSet.new(), []}, fn signal, {seen, acc} ->
-        key = {Map.get(signal, :change_id), Map.get(signal, :file_id)}
+        key =
+          {
+            Map.get(signal, :change_type),
+            Map.get(signal, :file_id),
+            Map.get(signal, :drive_id),
+            Map.get(signal, :time)
+          }
 
         cond do
-          key == {nil, nil} ->
+          key == {nil, nil, nil, nil} ->
             {seen, acc}
 
           MapSet.member?(seen, key) ->

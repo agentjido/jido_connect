@@ -1,0 +1,36 @@
+{
+  "id": 12345,
+  "url": "https://example.zendesk.com/api/v2/tickets/12345.json",
+  "subject": "Cannot reset password",
+  "description": "I've tried resetting my password multiple times but never receive the reset email.",
+  "status": "open",
+  "type": "incident",
+  "priority": "normal",
+  "requester_id": 9901,
+  "assignee_id": 9001,
+  "group_id": 101,
+  "organization_id": 201,
+  "tags": ["password", "login", "urgent"],
+  "custom_fields": [
+    {"id": 123, "value": "premium"},
+    {"id": 456, "value": null}
+  ],
+  "due_at": null,
+  "external_id": "EXT-98765",
+  "brand_id": 1,
+  "ticket_form_id": 10,
+  "via": {
+    "channel": "web",
+    "source": {
+      "from": {},
+      "to": {},
+      "rel": null
+    }
+  },
+  "satisfaction_rating": {
+    "score": "unoffered",
+    "id": null
+  },
+  "created_at": "2026-03-15T10:30:00Z",
+  "updated_at": "2026-05-10T14:22:00Z"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "601",
+  "properties": {
+    "hs_note_body": "Had a great discovery call. Follow up next week with pricing.",
+    "hubspot_owner_id": "401",
+    "hs_engagement_type": "NOTE"
+  },
+  "createdAt": "2026-05-01T15:00:00.000Z",
+  "updatedAt": "2026-05-01T15:00:00.000Z",
+  "archived": false,
+  "associations": {
+    "contacts": {
+      "results": [{"id": "501"}]
+    },
+    "companies": {
+      "results": [{"id": "201"}]
+    },
+    "deals": {
+      "results": [{"id": "301"}]
+    }
+  }
+}

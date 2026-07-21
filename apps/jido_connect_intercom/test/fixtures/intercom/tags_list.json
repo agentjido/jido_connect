@@ -1,0 +1,24 @@
+{
+  "type": "list",
+  "data": [
+    {
+      "type": "tag",
+      "id": "700",
+      "name": "api"
+    },
+    {
+      "type": "tag",
+      "id": "701",
+      "name": "integration"
+    }
+  ],
+  "total_count": 2,
+  "pages": {
+    "type": "pages",
+    "next": null,
+    "page": 1,
+    "per_page": 20,
+    "total_pages": 1,
+    "total_count": 2
+  }
+}

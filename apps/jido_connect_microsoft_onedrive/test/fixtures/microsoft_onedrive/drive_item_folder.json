@@ -1,0 +1,36 @@
+{
+  "id": "01FOLDER1",
+  "name": "Reports",
+  "size": 5120,
+  "webUrl": "https://contoso-my.sharepoint.com/personal/user_contoso_com/Documents/Reports",
+  "createdDateTime": "2026-01-10T08:00:00Z",
+  "lastModifiedDateTime": "2026-05-19T12:00:00Z",
+  "folder": {
+    "childCount": 12,
+    "view": {
+      "viewType": "thumbnails",
+      "sortBy": "name",
+      "sortOrder": "ascending"
+    }
+  },
+  "parentReference": {
+    "driveId": "b!DRIVE1",
+    "driveType": "personal",
+    "id": "01ROOT",
+    "path": "/drive/root:"
+  },
+  "createdBy": {
+    "user": {
+      "displayName": "Adele Vance",
+      "email": "adele@contoso.com",
+      "id": "USER1"
+    }
+  },
+  "lastModifiedBy": {
+    "user": {
+      "displayName": "Adele Vance",
+      "email": "adele@contoso.com",
+      "id": "USER1"
+    }
+  }
+}

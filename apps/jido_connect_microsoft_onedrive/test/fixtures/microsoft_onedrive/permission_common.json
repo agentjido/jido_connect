@@ -1,0 +1,21 @@
+{
+  "id": "PERM2",
+  "roles": ["read"],
+  "link": {
+    "webUrl": "https://contoso-my.sharepoint.com/:w:/r/personal/user_contoso_com/Documents/Shared?d=ABC123",
+    "type": "view",
+    "webHtml": "<a href='https://contoso-my.sharepoint.com/:w:/r/Shared'>View</a>",
+    "preventsDownload": true
+  },
+  "shareId": "SHARE123",
+  "hasPassword": false,
+  "grantedToIdentities": [
+    {
+      "user": {
+        "displayName": "Carol Davis",
+        "email": "carol@contoso.com",
+        "id": "USER3"
+      }
+    }
+  ]
+}

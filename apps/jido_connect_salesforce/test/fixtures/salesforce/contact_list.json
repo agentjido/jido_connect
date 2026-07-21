@@ -1,0 +1,37 @@
+{
+  "totalSize": 2,
+  "done": false,
+  "nextRecordsUrl": "/services/data/v60.0/query/01g5g00000QRS-2000",
+  "records": [
+    {
+      "attributes": {
+        "type": "Contact",
+        "url": "/services/data/v60.0/sobjects/Contact/0035g00000ABCdE1AA"
+      },
+      "Id": "0035g00000ABCdE1AA",
+      "FirstName": "Bella",
+      "LastName": "Martinez",
+      "Email": "bella@example.com",
+      "Phone": "+1-555-0101",
+      "Title": "Product Manager",
+      "AccountId": "0015g00000XYZaA1AA",
+      "CreatedDate": "2026-01-15T10:30:00.000Z",
+      "LastModifiedDate": "2026-05-01T14:22:00.000Z"
+    },
+    {
+      "attributes": {
+        "type": "Contact",
+        "url": "/services/data/v60.0/sobjects/Contact/0035g00000ABCdE2BB"
+      },
+      "Id": "0035g00000ABCdE2BB",
+      "FirstName": "Carlos",
+      "LastName": "Rivera",
+      "Email": "carlos@example.com",
+      "Phone": "+1-555-0102",
+      "Title": "Engineer",
+      "AccountId": "0015g00000XYZaB2BB",
+      "CreatedDate": "2026-02-10T08:00:00.000Z",
+      "LastModifiedDate": "2026-04-20T11:30:00.000Z"
+    }
+  ]
+}

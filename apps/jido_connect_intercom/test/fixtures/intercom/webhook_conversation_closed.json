@@ -1,0 +1,17 @@
+{
+  "type": "notification_event",
+  "topic": "conversation.admin.closed",
+  "delivery_id": "delivery-006",
+  "delivery_attempt": 1,
+  "created_at": 1718497200,
+  "app_id": "app-123",
+  "data": {
+    "type": "notification_event_data",
+    "item": {
+      "type": "conversation",
+      "id": "401",
+      "state": "closed"
+    }
+  },
+  "self": "https://api.intercom.io/notification_events/delivery-006"
+}

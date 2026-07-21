@@ -1,0 +1,20 @@
+{
+  "gid": "123456",
+  "name": "Alice Nakamura",
+  "resource_type": "user",
+  "email": "alice@example.com",
+  "photo": {
+    "image_21x21": "https://s3.amazonaws.com/photos/21.png",
+    "image_27x27": "https://s3.amazonaws.com/photos/27.png",
+    "image_36x36": "https://s3.amazonaws.com/photos/36.png",
+    "image_60x60": "https://s3.amazonaws.com/photos/60.png",
+    "image_128x128": "https://s3.amazonaws.com/photos/128.png"
+  },
+  "workspaces": [
+    {
+      "gid": "112233",
+      "name": "Acme Corp",
+      "resource_type": "workspace"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "formId": "1ABCdefGHIjklMNO_pqrSTU_vwx_YZ",
+  "formInfo": {
+    "title": "Customer Satisfaction Survey",
+    "description": "Please share your experience with our service."
+  },
+  "revisionId": "000001",
+  "responderUri": "https://docs.google.com/forms/d/e/1ABCdefGHIjklMNO_pqrSTU_vwx_YZ/viewform",
+  "editorFileUri": "https://docs.google.com/forms/d/1ABCdefGHIjklMNO_pqrSTU_vwx_YZ/edit",
+  "linkedSheetId": "1SPREADSHEET_ID_abc123",
+  "published": true,
+  "items": [
+    {
+      "itemId": "item_001",
+      "title": "How satisfied are you with our service?",
+      "questionItem": {
+        "question": {
+          "questionId": "question_001",
+          "required": true,
+          "multipleChoiceQuestion": {
+            "type": "RADIO",
+            "options": [
+              { "value": "Very Satisfied" },
+              { "value": "Satisfied" },
+              { "value": "Neutral" },
+              { "value": "Dissatisfied" },
+              { "value": "Very Dissatisfied" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "itemId": "item_002",
+      "title": "What could we improve?",
+      "description": "Please provide any additional feedback.",
+      "questionItem": {
+        "question": {
+          "questionId": "question_002",
+          "required": false,
+          "textQuestion": {
+            "paragraph": false
+          }
+        }
+      }
+    },
+    {
+      "itemId": "item_003",
+      "title": "Would you recommend us to a friend?",
+      "questionItem": {
+        "question": {
+          "questionId": "question_003",
+          "required": true,
+          "scaleQuestion": {
+            "low": 1,
+            "high": 10,
+            "lowLabel": "Not likely",
+            "highLabel": "Very likely"
+          }
+        }
+      }
+    }
+  ]
+}

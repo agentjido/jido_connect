@@ -1,0 +1,54 @@
+{
+  "action": "update",
+  "type": "Issue",
+  "webhookId": "wh-43",
+  "createdAt": "2026-05-15T15:00:00.000Z",
+  "data": {
+    "id": "uuid-001",
+    "identifier": "LIN-123",
+    "title": "Implement user authentication flow",
+    "description": "We need to add OAuth2 support for the login flow.",
+    "state": {
+      "id": "status-4",
+      "name": "Done",
+      "type": "completed",
+      "color": "#4ADE80"
+    },
+    "priority": 2,
+    "priorityLabel": "High",
+    "team": {
+      "id": "team-1",
+      "key": "LIN",
+      "name": "Linear Team"
+    },
+    "assignee": {
+      "id": "user-1",
+      "name": "Alice Nakamura",
+      "email": "alice@example.com"
+    },
+    "creator": {
+      "id": "user-2",
+      "name": "Bob Martinez",
+      "email": "bob@example.com"
+    },
+    "labels": [
+      {
+        "id": "label-1",
+        "name": "backend",
+        "color": "#E5484D"
+      },
+      {
+        "id": "label-2",
+        "name": "auth",
+        "color": "#5B5DEF"
+      },
+      {
+        "id": "label-3",
+        "name": "security",
+        "color": "#F5A623"
+      }
+    ],
+    "createdAt": "2026-04-10T08:30:00.000Z",
+    "updatedAt": "2026-05-15T15:00:00.000Z"
+  }
+}

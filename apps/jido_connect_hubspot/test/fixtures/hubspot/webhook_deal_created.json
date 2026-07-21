@@ -1,0 +1,10 @@
+{
+  "eventId": "2002",
+  "subscriptionId": "52",
+  "portalId": "123456",
+  "objectId": "301",
+  "eventType": "deal.creation",
+  "changeSource": "CRM_UI",
+  "occurredAt": 1747324800000,
+  "appId": "99999"
+}

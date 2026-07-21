@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Erlang and Elixir
         uses: erlef/setup-beam@v1
@@ -22,7 +22,7 @@ jobs:
           elixir-version: "1.19.5"
 
       - name: Restore dependencies cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             deps
@@ -52,3 +52,14 @@ jobs:
       - name: Test demo
         working-directory: dev/demo
         run: mix test
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install connector factory dependencies
+        working-directory: pi-connector-factory
+        run: bun install --frozen-lockfile
+
+      - name: Check connector factory
+        working-directory: pi-connector-factory
+        run: bun run check

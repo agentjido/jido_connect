@@ -1,0 +1,17 @@
+{
+  "formId": "1ABCdefGHIjklMNO_pqrSTU_vwx_YZ",
+  "replies": [
+    {
+      "updateFormInfo": {}
+    },
+    {
+      "createItem": {
+        "itemId": "item_new_001",
+        "questionId": ["question_new_001"]
+      }
+    }
+  ],
+  "writeControl": {
+    "requiredRevisionId": "000002"
+  }
+}

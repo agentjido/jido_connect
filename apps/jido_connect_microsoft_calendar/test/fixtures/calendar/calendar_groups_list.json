@@ -1,0 +1,19 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('user%40contoso.com')/calendarGroups",
+  "value": [
+    {
+      "id": "AQMkAGI2GRP1AAA=",
+      "name": "Work Calendars",
+      "classId": "AQMkAGI2GRP1CLS=",
+      "changeKey": "CQAAABYAAAAMg9J6HMlJFtkfYbOlUQUhg==",
+      "calendars": 2
+    },
+    {
+      "id": "AQMkAGI2GRP2BBB=",
+      "name": "Personal",
+      "classId": "AQMkAGI2GRP2CLS=",
+      "changeKey": "CQAAABYAAAANhF7jPOlJFtkfYbOlUQUhg==",
+      "calendars": 1
+    }
+  ]
+}

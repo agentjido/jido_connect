@@ -1,0 +1,13 @@
+{
+  "gid": "556677",
+  "name": "design",
+  "resource_type": "tag",
+  "color": "light-green",
+  "notes": "Design-related tasks",
+  "workspace": {
+    "gid": "112233",
+    "name": "Acme Corp",
+    "resource_type": "workspace"
+  },
+  "created_at": "2026-01-10T12:00:00.000Z"
+}

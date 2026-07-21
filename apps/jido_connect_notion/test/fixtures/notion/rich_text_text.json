@@ -1,0 +1,14 @@
+{
+  "type": "text",
+  "text": {"content": "Hello, world!", "link": null},
+  "plain_text": "Hello, world!",
+  "href": null,
+  "annotations": {
+    "bold": false,
+    "italic": false,
+    "strikethrough": false,
+    "underline": false,
+    "code": false,
+    "color": "default"
+  }
+}

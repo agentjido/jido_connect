@@ -1,0 +1,96 @@
+{
+  "documentId": "doc_abc123",
+  "title": "Project Plan",
+  "revisionId": "rev001",
+  "suggestionsViewMode": "SUGGESTIONS_INLINE",
+  "body": {
+    "content": [
+      {
+        "startIndex": 1,
+        "endIndex": 28,
+        "paragraph": {
+          "elements": [
+            {
+              "startIndex": 1,
+              "endIndex": 28,
+              "textRun": {
+                "content": "This is the first paragraph.\n",
+                "textStyle": {}
+              }
+            }
+          ],
+          "paragraphStyle": {
+            "namedStyleType": "NORMAL_TEXT"
+          }
+        }
+      },
+      {
+        "startIndex": 28,
+        "endIndex": 56,
+        "paragraph": {
+          "elements": [
+            {
+              "startIndex": 28,
+              "endIndex": 56,
+              "textRun": {
+                "content": "This is the second paragraph.\n",
+                "textStyle": {
+                  "bold": true
+                }
+              }
+            }
+          ],
+          "paragraphStyle": {
+            "namedStyleType": "NORMAL_TEXT"
+          }
+        }
+      }
+    ]
+  },
+  "documentStyle": {
+    "background": {
+      "color": {}
+    },
+    "pageSize": {
+      "height": {
+        "magnitude": 792,
+        "unit": "PT"
+      },
+      "width": {
+        "magnitude": 612,
+        "unit": "PT"
+      }
+    },
+    "marginTop": {
+      "magnitude": 72,
+      "unit": "PT"
+    },
+    "marginBottom": {
+      "magnitude": 72,
+      "unit": "PT"
+    },
+    "marginLeft": {
+      "magnitude": 72,
+      "unit": "PT"
+    },
+    "marginRight": {
+      "magnitude": 72,
+      "unit": "PT"
+    }
+  },
+  "namedStyles": {
+    "styles": [
+      {
+        "namedStyleType": "NORMAL_TEXT",
+        "textStyle": {
+          "bold": false,
+          "italic": false,
+          "underline": false
+        },
+        "paragraphStyle": {
+          "lineSpacing": 115.0
+        }
+      }
+    ]
+  }
+}

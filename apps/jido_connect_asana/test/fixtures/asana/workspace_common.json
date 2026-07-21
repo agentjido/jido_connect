@@ -1,0 +1,7 @@
+{
+  "gid": "112233",
+  "name": "Acme Corp",
+  "resource_type": "workspace",
+  "is_organization": true,
+  "email_domains": ["acme.example.com"]
+}

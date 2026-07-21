@@ -1,0 +1,532 @@
+defmodule Jido.Connect.Google.Forms.ClientTest do
+  use ExUnit.Case, async: false
+
+  alias Jido.Connect.Google.Forms.{Client, Form}
+
+  setup {Req.Test, :verify_on_exit!}
+
+  setup do
+    Application.put_env(
+      :jido_connect_google_forms,
+      :google_forms_api_base_url,
+      "https://forms.test"
+    )
+
+    Application.put_env(:jido_connect_google, :google_req_options, plug: {Req.Test, __MODULE__})
+
+    on_exit(fn ->
+      Application.delete_env(:jido_connect_google_forms, :google_forms_api_base_url)
+      Application.delete_env(:jido_connect_google, :google_req_options)
+    end)
+  end
+
+  test "gets form" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/forms/1ABCdefGHI"
+      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+      Req.Test.json(conn, form_payload())
+    end)
+
+    assert {:ok, %Form{} = form} =
+             Client.get_form(%{form_id: "1ABCdefGHI"}, "token")
+
+    assert form.form_id == "1ABCdefGHI"
+    assert form.title == "Customer Survey"
+  end
+
+  test "gets form with include linked sheets" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/forms/1ABCdefGHI"
+      assert conn.query_params["includeLinkedSheets"] == "true"
+
+      Req.Test.json(conn, form_payload())
+    end)
+
+    assert {:ok, %Form{} = form} =
+             Client.get_form(
+               %{form_id: "1ABCdefGHI", include_linked_sheets: true},
+               "token"
+             )
+
+    assert form.form_id == "1ABCdefGHI"
+  end
+
+  test "creates form" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/forms"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "info" => %{
+                 "title" => "New Survey",
+                 "description" => "Tell us what you think."
+               }
+             }
+
+      Req.Test.json(conn, %{
+        "formId" => "1NEW_form_id",
+        "info" => %{
+          "title" => "New Survey",
+          "description" => "Tell us what you think."
+        },
+        "revisionId" => "rev001"
+      })
+    end)
+
+    assert {:ok, %Form{} = form} =
+             Client.create_form(
+               %{title: "New Survey", description: "Tell us what you think."},
+               "token"
+             )
+
+    assert form.form_id == "1NEW_form_id"
+    assert form.title == "New Survey"
+  end
+
+  test "creates form without description" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/forms"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "info" => %{
+                 "title" => "Quick Poll"
+               }
+             }
+
+      Req.Test.json(conn, %{
+        "formId" => "1QUICK_form_id",
+        "info" => %{
+          "title" => "Quick Poll"
+        },
+        "revisionId" => "rev001"
+      })
+    end)
+
+    assert {:ok, %Form{} = form} =
+             Client.create_form(%{title: "Quick Poll"}, "token")
+
+    assert form.form_id == "1QUICK_form_id"
+    assert form.title == "Quick Poll"
+  end
+
+  test "rejects malformed form response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, ["bad"])
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.get_form(%{form_id: "1ABCdefGHI"}, "token")
+  end
+
+  test "handles API error response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Plug.Conn.send_resp(conn, 404, Jason.encode!(%{"error" => %{"message" => "not found"}}))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 404}} =
+             Client.get_form(%{form_id: "nonexistent"}, "token")
+  end
+
+  test "batch updates form" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/forms/1ABCdefGHI:batchUpdate"
+      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      decoded = Jason.decode!(body)
+      assert decoded["requests"] == [%{"updateFormTitle" => %{"title" => "Updated"}}]
+      assert decoded["writeControl"] == %{"requiredRevisionId" => "rev001"}
+
+      Req.Test.json(conn, %{
+        "formId" => "1ABCdefGHI",
+        "replies" => [%{"updateFormTitle" => %{}}]
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.batch_update(
+               %{
+                 form_id: "1ABCdefGHI",
+                 requests: [%{updateFormTitle: %{title: "Updated"}}],
+                 write_control: %{requiredRevisionId: "rev001"}
+               },
+               "token"
+             )
+
+    assert result.form_id == "1ABCdefGHI"
+    assert length(result.replies) == 1
+  end
+
+  test "batch updates form without write control" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/forms/1ABCdefGHI:batchUpdate"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      decoded = Jason.decode!(body)
+      assert decoded["requests"] == [%{"updateFormTitle" => %{"title" => "Updated"}}]
+      refute Map.has_key?(decoded, "writeControl")
+
+      Req.Test.json(conn, %{
+        "formId" => "1ABCdefGHI",
+        "replies" => []
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.batch_update(
+               %{
+                 form_id: "1ABCdefGHI",
+                 requests: [%{updateFormTitle: %{title: "Updated"}}]
+               },
+               "token"
+             )
+
+    assert result.form_id == "1ABCdefGHI"
+    assert result.replies == []
+  end
+
+  test "handles batch update API error response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Plug.Conn.send_resp(conn, 400, Jason.encode!(%{"error" => %{"message" => "bad request"}}))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 400}} =
+             Client.batch_update(
+               %{form_id: "1ABCdefGHI", requests: [%{updateFormTitle: %{}}]},
+               "token"
+             )
+  end
+
+  test "handles batch update malformed response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, ["bad"])
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.batch_update(
+               %{form_id: "1ABCdefGHI", requests: [%{updateFormTitle: %{}}]},
+               "token"
+             )
+  end
+
+  defp form_payload do
+    %{
+      "formId" => "1ABCdefGHI",
+      "info" => %{
+        "title" => "Customer Survey",
+        "description" => "Tell us what you think."
+      },
+      "revisionId" => "rev001"
+    }
+  end
+
+  test "lists responses" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/forms/1ABCdefGHI/responses"
+      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+      Req.Test.json(conn, %{
+        "responses" => [
+          %{
+            "responseId" => "ACYDBNhW_resp1",
+            "formId" => "1ABCdefGHI",
+            "createTime" => "2026-05-14T10:00:00.000Z"
+          },
+          %{
+            "responseId" => "ACYDBNhW_resp2",
+            "formId" => "1ABCdefGHI",
+            "createTime" => "2026-05-14T11:00:00.000Z"
+          }
+        ],
+        "nextPageToken" => "next_page_abc"
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.list_responses(%{form_id: "1ABCdefGHI"}, "token")
+
+    assert length(result.responses) == 2
+    assert result.next_page_token == "next_page_abc"
+    assert Enum.at(result.responses, 0).response_id == "ACYDBNhW_resp1"
+    assert Enum.at(result.responses, 1).response_id == "ACYDBNhW_resp2"
+  end
+
+  test "lists responses with pagination params" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/forms/1ABCdefGHI/responses"
+      assert conn.query_params["pageSize"] == "10"
+      assert conn.query_params["pageToken"] == "page_tok"
+      assert conn.query_params["filter"] == "timestamp >= '2026-01-01'"
+
+      Req.Test.json(conn, %{
+        "responses" => []
+      })
+    end)
+
+    assert {:ok, result} =
+             Client.list_responses(
+               %{
+                 form_id: "1ABCdefGHI",
+                 page_size: 10,
+                 page_token: "page_tok",
+                 filter: "timestamp >= '2026-01-01'"
+               },
+               "token"
+             )
+
+    assert result.responses == []
+    refute Map.has_key?(result, :next_page_token)
+  end
+
+  test "gets response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v1/forms/1ABCdefGHI/responses/ACYDBNhW_resp1"
+      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+      Req.Test.json(conn, %{
+        "responseId" => "ACYDBNhW_resp1",
+        "formId" => "1ABCdefGHI",
+        "respondentEmail" => "user@example.com",
+        "createTime" => "2026-05-14T10:00:00.000Z",
+        "lastSubmittedTime" => "2026-05-14T10:02:30.000Z",
+        "answers" => %{}
+      })
+    end)
+
+    assert {:ok, response} =
+             Client.get_response(
+               %{form_id: "1ABCdefGHI", response_id: "ACYDBNhW_resp1"},
+               "token"
+             )
+
+    assert response.response_id == "ACYDBNhW_resp1"
+    assert response.form_id == "1ABCdefGHI"
+    assert response.respondent_email == "user@example.com"
+  end
+
+  test "handles list responses API error response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Plug.Conn.send_resp(conn, 403, Jason.encode!(%{"error" => %{"message" => "forbidden"}}))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 403}} =
+             Client.list_responses(%{form_id: "1ABCdefGHI"}, "token")
+  end
+
+  test "handles list responses malformed response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, ["bad"])
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{}} =
+             Client.list_responses(%{form_id: "1ABCdefGHI"}, "token")
+  end
+
+  test "handles get response API error response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Plug.Conn.send_resp(conn, 404, Jason.encode!(%{"error" => %{"message" => "not found"}}))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 404}} =
+             Client.get_response(
+               %{form_id: "1ABCdefGHI", response_id: "nonexistent"},
+               "token"
+             )
+  end
+
+  test "handles get response malformed response" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, ["bad"])
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{}} =
+             Client.get_response(
+               %{form_id: "1ABCdefGHI", response_id: "ACYDBNhW_resp1"},
+               "token"
+             )
+  end
+
+  describe "watch lifecycle" do
+    test "creates watch" do
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert conn.method == "POST"
+        assert conn.request_path == "/v1/forms/1ABCdefGHI/watches"
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+        decoded = Jason.decode!(body)
+        assert decoded["eventType"] == "SCHEMA_RESPONSES"
+
+        Req.Test.json(conn, %{
+          "id" => "watch_abc123",
+          "targetId" => "1ABCdefGHI",
+          "state" => "ACTIVE",
+          "eventType" => "RESPONSE",
+          "createTime" => "2026-05-14T12:00:00.000Z",
+          "expireTime" => "2026-05-21T12:00:00.000Z"
+        })
+      end)
+
+      assert {:ok, watch} =
+               Client.create_watch(
+                 %{form_id: "1ABCdefGHI", event_type: "SCHEMA_RESPONSES"},
+                 "token"
+               )
+
+      assert watch.watch_id == "watch_abc123"
+      assert watch.target_id == "1ABCdefGHI"
+      assert watch.state == "ACTIVE"
+      assert watch.event_type == "RESPONSE"
+    end
+
+    test "creates watch with target" do
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert conn.method == "POST"
+        assert conn.request_path == "/v1/forms/1ABCdefGHI/watches"
+
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+        decoded = Jason.decode!(body)
+        assert decoded["eventType"] == "SCHEMA_RESPONSES"
+        assert decoded["target"]["topic"] == "projects/my-project/topics/forms"
+
+        Req.Test.json(conn, %{
+          "id" => "watch_xyz789",
+          "targetId" => "1ABCdefGHI",
+          "state" => "ACTIVE",
+          "eventType" => "RESPONSE"
+        })
+      end)
+
+      assert {:ok, watch} =
+               Client.create_watch(
+                 %{
+                   form_id: "1ABCdefGHI",
+                   event_type: "SCHEMA_RESPONSES",
+                   target: %{topic: "projects/my-project/topics/forms"}
+                 },
+                 "token"
+               )
+
+      assert watch.watch_id == "watch_xyz789"
+    end
+
+    test "renews watch" do
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert conn.method == "POST"
+        assert conn.request_path == "/v1/forms/1ABCdefGHI/watches/watch_abc123:renew"
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+        Req.Test.json(conn, %{
+          "id" => "watch_abc123",
+          "targetId" => "1ABCdefGHI",
+          "state" => "ACTIVE",
+          "eventType" => "RESPONSE",
+          "createTime" => "2026-05-14T12:00:00.000Z",
+          "expireTime" => "2026-05-28T12:00:00.000Z"
+        })
+      end)
+
+      assert {:ok, watch} =
+               Client.renew_watch(
+                 %{form_id: "1ABCdefGHI", watch_id: "watch_abc123"},
+                 "token"
+               )
+
+      assert watch.watch_id == "watch_abc123"
+      assert watch.expire_time == "2026-05-28T12:00:00.000Z"
+    end
+
+    test "deletes watch" do
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert conn.method == "DELETE"
+        assert conn.request_path == "/v1/forms/1ABCdefGHI/watches/watch_abc123"
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+        Plug.Conn.send_resp(conn, 200, "")
+      end)
+
+      assert {:ok, %{deleted?: true}} =
+               Client.delete_watch(
+                 %{form_id: "1ABCdefGHI", watch_id: "watch_abc123"},
+                 "token"
+               )
+    end
+
+    test "handles create watch API error response" do
+      Req.Test.stub(__MODULE__, fn conn ->
+        Plug.Conn.send_resp(
+          conn,
+          403,
+          Jason.encode!(%{"error" => %{"message" => "forbidden"}})
+        )
+      end)
+
+      assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 403}} =
+               Client.create_watch(
+                 %{form_id: "1ABCdefGHI", event_type: "SCHEMA_RESPONSES"},
+                 "token"
+               )
+    end
+
+    test "handles create watch malformed response" do
+      Req.Test.stub(__MODULE__, fn conn ->
+        Req.Test.json(conn, ["bad"])
+      end)
+
+      assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+               Client.create_watch(
+                 %{form_id: "1ABCdefGHI", event_type: "SCHEMA_RESPONSES"},
+                 "token"
+               )
+    end
+
+    test "handles renew watch API error response" do
+      Req.Test.stub(__MODULE__, fn conn ->
+        Plug.Conn.send_resp(
+          conn,
+          404,
+          Jason.encode!(%{"error" => %{"message" => "not found"}})
+        )
+      end)
+
+      assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 404}} =
+               Client.renew_watch(
+                 %{form_id: "1ABCdefGHI", watch_id: "nonexistent"},
+                 "token"
+               )
+    end
+
+    test "handles delete watch API error response" do
+      Req.Test.stub(__MODULE__, fn conn ->
+        Plug.Conn.send_resp(
+          conn,
+          404,
+          Jason.encode!(%{"error" => %{"message" => "not found"}})
+        )
+      end)
+
+      assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 404}} =
+               Client.delete_watch(
+                 %{form_id: "1ABCdefGHI", watch_id: "nonexistent"},
+                 "token"
+               )
+    end
+  end
+end

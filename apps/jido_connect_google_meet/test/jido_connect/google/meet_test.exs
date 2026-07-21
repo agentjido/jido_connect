@@ -153,6 +153,12 @@ defmodule Jido.Connect.Google.MeetTest do
 
     assert spec.triggers == []
 
+    ConnectorContracts.assert_google_naming_and_catalog_conventions(Meet,
+      id_prefix: "google.meet.",
+      pack_id_prefix: "google_meet_",
+      module_namespace: Jido.Connect.Google.Meet
+    )
+
     assert [%{id: :user, kind: :oauth2, refresh?: true, pkce?: true} = profile] =
              spec.auth_profiles
 

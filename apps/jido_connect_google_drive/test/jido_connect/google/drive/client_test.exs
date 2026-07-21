@@ -1073,11 +1073,11 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
       assert conn.query_params["pageSize"] == "50"
       assert conn.query_params["includeRemoved"] == "true"
       assert conn.query_params["fields"] =~ "newStartPageToken,changes"
+      refute conn.query_params["fields"] =~ "changeId"
 
       Req.Test.json(conn, %{
         "changes" => [
           %{
-            "changeId" => "change123",
             "fileId" => "file123",
             "removed" => false,
             "time" => "2026-05-05T12:00:00Z",
@@ -1103,7 +1103,6 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
                "token"
              )
 
-    assert change.change_id == "change123"
     assert change.file.file_id == "file123"
   end
 
@@ -1144,6 +1143,7 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
                  spaces: "drive",
                  include_removed: true,
                  channel_id: "channel-123",
+                 channel_type: "webhook",
                  address: "https://example.com/drive/webhook",
                  token: "route=drive",
                  expiration_ms: 1_770_000_000_000

@@ -1,0 +1,22 @@
+{
+  "type": "mention",
+  "mention": {
+    "type": "user",
+    "user": {
+      "id": "user-001",
+      "name": "Alice Nakamura",
+      "avatar_url": "https://example.com/avatar.png",
+      "type": "person"
+    }
+  },
+  "plain_text": "@Alice Nakamura",
+  "href": null,
+  "annotations": {
+    "bold": false,
+    "italic": false,
+    "strikethrough": false,
+    "underline": false,
+    "code": false,
+    "color": "default"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "attributes": {
+    "type": "Opportunity",
+    "url": "/services/data/v60.0/sobjects/Opportunity/0065g00000GHIjK1AA"
+  },
+  "Id": "0065g00000GHIjK1AA",
+  "Name": "Acme Enterprise License",
+  "Amount": 120000,
+  "StageName": "Contract Sent",
+  "Probability": 80,
+  "CloseDate": "2026-06-30",
+  "Type": "New Customer",
+  "CurrencyIsoCode": "USD",
+  "OwnerId": "0055g00000AAA1A1AA",
+  "AccountId": "0015g00000XYZaA1AA",
+  "Description": "Annual enterprise license deal",
+  "CreatedDate": "2026-03-01T09:00:00.000Z",
+  "LastModifiedDate": "2026-05-10T11:30:00.000Z"
+}

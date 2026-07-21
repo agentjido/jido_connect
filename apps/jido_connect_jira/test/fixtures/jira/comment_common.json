@@ -1,0 +1,40 @@
+{
+  "id": "20010",
+  "author": {
+    "accountId": "5f8a7b9c1d2e3f4a5b6c7d8e",
+    "displayName": "Alice Nakamura",
+    "active": true,
+    "emailAddress": "alice@example.com",
+    "avatarUrls": {
+      "48x48": "https://example.atlassian.net/secure/useravatar?avatarId=10100",
+      "24x24": "https://example.atlassian.net/secure/useravatar?size=small&avatarId=10100"
+    },
+    "timeZone": "America/Los_Angeles",
+    "accountType": "atlassian"
+  },
+  "body": {
+    "type": "doc",
+    "version": 1,
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Investigated the OAuth2 flow. Ready to start implementation."
+          }
+        ]
+      }
+    ]
+  },
+  "renderedBody": "<p>Investigated the OAuth2 flow. Ready to start implementation.</p>",
+  "updateAuthor": {
+    "accountId": "5f8a7b9c1d2e3f4a5b6c7d8e",
+    "displayName": "Alice Nakamura",
+    "active": true
+  },
+  "created": "2026-05-01T10:30:00.000+0000",
+  "updated": "2026-05-01T10:30:00.000+0000",
+  "jsdPublic": true,
+  "self": "https://example.atlassian.net/rest/api/3/issue/10001/comment/20010"
+}

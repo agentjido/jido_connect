@@ -1,0 +1,40 @@
+{
+  "totalSize": 2,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "url": "/services/data/v60.0/sobjects/Opportunity/0065g00000GHIjK1AA"
+      },
+      "Id": "0065g00000GHIjK1AA",
+      "Name": "Acme Enterprise License",
+      "Amount": 120000,
+      "StageName": "Contract Sent",
+      "Probability": 80,
+      "CloseDate": "2026-06-30",
+      "Type": "New Customer",
+      "CurrencyIsoCode": "USD",
+      "AccountId": "0015g00000XYZaA1AA",
+      "CreatedDate": "2026-03-01T09:00:00.000Z",
+      "LastModifiedDate": "2026-05-10T11:30:00.000Z"
+    },
+    {
+      "attributes": {
+        "type": "Opportunity",
+        "url": "/services/data/v60.0/sobjects/Opportunity/0065g00000GHIjL2BB"
+      },
+      "Id": "0065g00000GHIjL2BB",
+      "Name": "Globex Professional Services",
+      "Amount": 45000,
+      "StageName": "Qualification",
+      "Probability": 20,
+      "CloseDate": "2026-09-15",
+      "Type": "Existing Customer - Upgrade",
+      "CurrencyIsoCode": "USD",
+      "AccountId": "0015g00000XYZaB2BB",
+      "CreatedDate": "2026-04-10T10:00:00.000Z",
+      "LastModifiedDate": "2026-04-10T10:00:00.000Z"
+    }
+  ]
+}

@@ -119,7 +119,6 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
   def change(payload) when is_map(payload) do
     with {:ok, file} <- normalize_change_file(Data.get(payload, "file")) do
       %{
-        change_id: normalize_string(Data.get(payload, "changeId")),
         file_id: Data.get(payload, "fileId"),
         file: file,
         removed?: Data.get(payload, "removed", false),

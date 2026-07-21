@@ -1,0 +1,35 @@
+{
+  "type": "company",
+  "id": "531",
+  "workspace_id": "this_is_an_id456_that_should_be_at_least_4",
+  "name": "Acme Corp",
+  "company_id": "acme-001",
+  "remote_created_at": 1700000000,
+  "created_at": 1700000100,
+  "updated_at": 1718496000,
+  "last_request_at": 1718496000,
+  "monthly_spend": 500,
+  "session_count": 120,
+  "user_count": 42,
+  "tags": {
+    "type": "tag.list",
+    "tags": [
+      {"type": "tag", "id": "100", "name": "enterprise"}
+    ]
+  },
+  "segments": {
+    "type": "segment.list",
+    "segments": [
+      {"type": "segment", "id": "200", "name": "Active"}
+    ]
+  },
+  "plan": {
+    "type": "plan",
+    "id": "300",
+    "name": "Enterprise"
+  },
+  "custom_attributes": {
+    "industry": "Technology",
+    "revenue_band": "high"
+  }
+}

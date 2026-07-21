@@ -44,6 +44,7 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacksTest do
     assert "google.contacts.other.search" in ids
     assert "google.contacts.group.get" in ids
     assert "google.contacts.group.batch_get" in ids
+    assert "google.contacts.person.changed" in ids
     refute "google.contacts.person.create" in ids
     refute "google.contacts.person.batch_create" in ids
     refute "google.contacts.person.delete" in ids
@@ -67,6 +68,15 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacksTest do
                packs: Contacts.catalog_packs(),
                pack: :google_contacts_readonly
              )
+
+    assert {:ok, descriptor} =
+             Catalog.describe_tool("google.contacts.person.changed",
+               modules: [Contacts],
+               packs: Contacts.catalog_packs(),
+               pack: :google_contacts_readonly
+             )
+
+    assert descriptor.tool.id == "google.contacts.person.changed"
   end
 
   test "manager pack allows contact and group mutations" do
@@ -105,6 +115,15 @@ defmodule Jido.Connect.Google.Contacts.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.contacts.group.member.modify"
+
+    assert {:ok, descriptor} =
+             Catalog.describe_tool("google.contacts.person.changed",
+               modules: [Contacts],
+               packs: Contacts.catalog_packs(),
+               pack: :google_contacts_manager
+             )
+
+    assert descriptor.tool.id == "google.contacts.person.changed"
   end
 
   test "pack restrictions apply to call_tool" do

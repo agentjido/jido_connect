@@ -1,0 +1,14 @@
+{
+  "object": "user",
+  "id": "user-002",
+  "type": "bot",
+  "name": "Integration Bot",
+  "avatar_url": null,
+  "bot": {
+    "owner": {
+      "type": "workspace",
+      "workspace": true
+    },
+    "workspace_name": "Acme Corp"
+  }
+}

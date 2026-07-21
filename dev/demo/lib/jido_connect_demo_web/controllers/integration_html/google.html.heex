@@ -32,7 +32,7 @@
     <div class="rounded-lg border border-base-300 p-5">
       <h2 class="text-lg font-semibold">Google OAuth</h2>
       <p class="mt-2 text-sm text-base-content/70">
-        The OAuth start route requests the Sheets write scope for local smoke tests.
+        The OAuth start route requests Sheets, Gmail, Drive, and Calendar scopes.
       </p>
       <div class="mt-4 grid gap-3">
         <a class="btn btn-primary" href="/integrations/google/oauth/start">
@@ -93,6 +93,28 @@
     </div>
 
     <div class="rounded-lg border border-base-300 p-5">
+      <h2 class="text-lg font-semibold">Catalog (Describe)</h2>
+      <p class="mt-2 text-sm text-base-content/70">
+        Discovered tools across Sheets, Gmail, Drive, and Calendar.
+      </p>
+      <div class="mt-4 max-h-72 space-y-3 overflow-y-auto">
+        <div :for={entry <- @google_catalog} class="rounded-md bg-base-200 p-3 text-sm">
+          <p class="font-semibold">{entry.name}</p>
+          <p class="text-xs text-base-content/60">{entry.package} · {entry.category}</p>
+          <p class="mt-1 text-xs text-base-content/50">{entry.description}</p>
+          <ul class="mt-2 flex flex-wrap gap-1">
+            <li :for={action <- entry.actions} class="rounded bg-base-300 px-2 py-0.5 text-xs">
+              {action.id}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sheets Actions -->
+  <section class="mt-6 grid gap-4 lg:grid-cols-2">
+    <div class="rounded-lg border border-base-300 p-5">
       <h2 class="text-lg font-semibold">Get Sheet Values</h2>
       <.form
         for={%{}}
@@ -109,6 +131,114 @@
         />
         <input class="input input-bordered" name="range" value="Sheet1!A1:B2" />
         <button class="btn btn-outline" type="submit">Get Values</button>
+      </.form>
+    </div>
+
+    <!-- Gmail Actions -->
+    <div class="rounded-lg border border-base-300 p-5">
+      <h2 class="text-lg font-semibold">Gmail: Get Profile</h2>
+      <.form
+        for={%{}}
+        action="/integrations/google/actions/gmail_get_profile"
+        method="post"
+        class="mt-4 grid gap-3"
+      >
+        <input class="input input-bordered" name="connection_id" value={default_connection_id} />
+        <button class="btn btn-outline" type="submit">Get Profile</button>
+      </.form>
+    </div>
+  </section>
+
+  <section class="mt-6 grid gap-4 lg:grid-cols-2">
+    <div class="rounded-lg border border-base-300 p-5">
+      <h2 class="text-lg font-semibold">Gmail: List Messages</h2>
+      <.form
+        for={%{}}
+        action="/integrations/google/actions/gmail_list_messages"
+        method="post"
+        class="mt-4 grid gap-3"
+      >
+        <input class="input input-bordered" name="connection_id" value={default_connection_id} />
+        <input
+          class="input input-bordered"
+          name="max_results"
+          value="10"
+          placeholder="max results"
+        />
+        <input class="input input-bordered" name="query" placeholder="e.g. is:unread" />
+        <button class="btn btn-outline" type="submit">List Messages</button>
+      </.form>
+    </div>
+
+    <div class="rounded-lg border border-base-300 p-5">
+      <h2 class="text-lg font-semibold">Drive: Get About</h2>
+      <.form
+        for={%{}}
+        action="/integrations/google/actions/drive_get_about"
+        method="post"
+        class="mt-4 grid gap-3"
+      >
+        <input class="input input-bordered" name="connection_id" value={default_connection_id} />
+        <button class="btn btn-outline" type="submit">Get About</button>
+      </.form>
+    </div>
+  </section>
+
+  <section class="mt-6 grid gap-4 lg:grid-cols-2">
+    <div class="rounded-lg border border-base-300 p-5">
+      <h2 class="text-lg font-semibold">Drive: List Files</h2>
+      <.form
+        for={%{}}
+        action="/integrations/google/actions/drive_list_files"
+        method="post"
+        class="mt-4 grid gap-3"
+      >
+        <input class="input input-bordered" name="connection_id" value={default_connection_id} />
+        <input class="input input-bordered" name="page_size" value="10" placeholder="page size" />
+        <input class="input input-bordered" name="query" placeholder="e.g. name = 'hello'" />
+        <button class="btn btn-outline" type="submit">List Files</button>
+      </.form>
+    </div>
+
+    <div class="rounded-lg border border-base-300 p-5">
+      <h2 class="text-lg font-semibold">Calendar: List Calendars</h2>
+      <.form
+        for={%{}}
+        action="/integrations/google/actions/calendar_list_calendars"
+        method="post"
+        class="mt-4 grid gap-3"
+      >
+        <input class="input input-bordered" name="connection_id" value={default_connection_id} />
+        <button class="btn btn-outline" type="submit">List Calendars</button>
+      </.form>
+    </div>
+  </section>
+
+  <section class="mt-6 grid gap-4 lg:grid-cols-2">
+    <div class="rounded-lg border border-base-300 p-5">
+      <h2 class="text-lg font-semibold">Calendar: List Events</h2>
+      <.form
+        for={%{}}
+        action="/integrations/google/actions/calendar_list_events"
+        method="post"
+        class="mt-4 grid gap-3"
+      >
+        <input class="input input-bordered" name="connection_id" value={default_connection_id} />
+        <input
+          class="input input-bordered"
+          name="calendar_id"
+          value="primary"
+          placeholder="calendar id"
+        />
+        <input
+          class="input input-bordered"
+          name="max_results"
+          value="10"
+          placeholder="max results"
+        />
+        <input class="input input-bordered" name="time_min" placeholder="ISO 8601 time_min" />
+        <input class="input input-bordered" name="time_max" placeholder="ISO 8601 time_max" />
+        <button class="btn btn-outline" type="submit">List Events</button>
       </.form>
     </div>
   </section>

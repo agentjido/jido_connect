@@ -1,0 +1,38 @@
+{
+  "id": "21",
+  "name": "Start Progress",
+  "to": {
+    "id": "3",
+    "name": "In Progress",
+    "description": "This issue is being actively worked on.",
+    "iconUrl": "https://example.atlassian.net/images/icons/statuses/inprogress.png",
+    "statusCategory": {
+      "id": 4,
+      "key": "indeterminate",
+      "colorName": "yellow",
+      "name": "In Progress"
+    }
+  },
+  "hasScreen": true,
+  "isGlobal": false,
+  "isInitial": false,
+  "isConditional": true,
+  "fields": {
+    "assignee": {
+      "required": false,
+      "schema": {"type": "user", "system": "assignee"},
+      "name": "Assignee",
+      "key": "assignee",
+      "hasDefaultValue": false,
+      "operations": ["set"]
+    },
+    "resolution": {
+      "required": false,
+      "schema": {"type": "resolution", "system": "resolution"},
+      "name": "Resolution",
+      "key": "resolution",
+      "hasDefaultValue": false,
+      "operations": ["set"]
+    }
+  }
+}

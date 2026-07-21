@@ -1,0 +1,8 @@
+{
+  "id": "label-1",
+  "name": "backend",
+  "color": "#E5484D",
+  "description": "Backend engineering work.",
+  "isGroup": false,
+  "parent": null
+}

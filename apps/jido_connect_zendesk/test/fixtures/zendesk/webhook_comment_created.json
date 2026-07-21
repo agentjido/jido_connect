@@ -1,0 +1,17 @@
+{
+  "type": "Comment Created",
+  "id": "wh-invocation-003",
+  "account_id": "example",
+  "ticket": {
+    "id": 12345,
+    "subject": "Cannot reset password"
+  },
+  "current": {
+    "id": 50001,
+    "body": "I've checked the email configuration. Please check your spam folder.",
+    "html_body": "<p>I've checked the email configuration. Please check your spam folder.</p>",
+    "public": true,
+    "author_id": 9001
+  },
+  "timestamp": "2026-03-15T11:00:00Z"
+}

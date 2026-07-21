@@ -1,0 +1,8 @@
+{
+  "id": "appLkNDIC9N0juRia",
+  "name": "Project Tracker",
+  "permissionLevel": "create",
+  "description": "A base for tracking projects and tasks.",
+  "color": "blueLight1",
+  "icon": "kanban"
+}

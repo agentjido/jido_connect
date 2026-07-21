@@ -57,6 +57,24 @@ defmodule Jido.Connect.Google.Scopes do
     search_console: [
       "https://www.googleapis.com/auth/webmasters.readonly",
       "https://www.googleapis.com/auth/webmasters"
+    ],
+    docs: [
+      "https://www.googleapis.com/auth/documents.readonly",
+      "https://www.googleapis.com/auth/documents"
+    ],
+    slides: [
+      "https://www.googleapis.com/auth/presentations.readonly",
+      "https://www.googleapis.com/auth/presentations"
+    ],
+    forms: [
+      "https://www.googleapis.com/auth/forms.body.readonly",
+      "https://www.googleapis.com/auth/forms.body",
+      "https://www.googleapis.com/auth/forms.responses.readonly",
+      "https://www.googleapis.com/auth/forms.responses"
+    ],
+    tasks: [
+      "https://www.googleapis.com/auth/tasks.readonly",
+      "https://www.googleapis.com/auth/tasks"
     ]
   }
 

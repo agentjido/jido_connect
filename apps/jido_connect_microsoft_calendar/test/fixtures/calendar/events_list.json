@@ -1,0 +1,65 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('user%40contoso.com')/calendars('AAMkAGI2TG93AAA%3D')/events",
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/me/calendars/AAMkAGI2TG93AAA=/events?$skip=25",
+  "value": [
+    {
+      "id": "AAMkEV1AAA=",
+      "subject": "Quarterly planning sync",
+      "bodyPreview": "Please join us for the quarterly planning meeting.",
+      "start": {
+        "dateTime": "2026-06-15T10:00:00",
+        "timeZone": "Pacific Standard Time"
+      },
+      "end": {
+        "dateTime": "2026-06-15T11:30:00",
+        "timeZone": "Pacific Standard Time"
+      },
+      "organizer": {
+        "emailAddress": {
+          "name": "Megan Bowen",
+          "address": "meganb@contoso.com"
+        }
+      },
+      "attendees": [
+        {
+          "type": "required",
+          "status": {
+            "response": "accepted",
+            "time": "2026-05-19T14:00:00Z"
+          },
+          "emailAddress": {
+            "name": "Brian Johnson",
+            "address": "brianj@contoso.com"
+          }
+        }
+      ],
+      "location": {
+        "displayName": "Conference Room 1"
+      },
+      "isAllDay": false,
+      "showAs": "busy"
+    },
+    {
+      "id": "AAMkEV2BBB=",
+      "subject": "Lunch with team",
+      "bodyPreview": "Casual lunch at the usual spot.",
+      "start": {
+        "dateTime": "2026-06-16T12:00:00",
+        "timeZone": "Pacific Standard Time"
+      },
+      "end": {
+        "dateTime": "2026-06-16T13:00:00",
+        "timeZone": "Pacific Standard Time"
+      },
+      "organizer": {
+        "emailAddress": {
+          "name": "Brian Johnson",
+          "address": "brianj@contoso.com"
+        }
+      },
+      "attendees": [],
+      "isAllDay": false,
+      "showAs": "free"
+    }
+  ]
+}
