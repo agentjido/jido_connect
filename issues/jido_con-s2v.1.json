@@ -4,6 +4,8 @@
   "blocks": [
     "jido_con-s2v.2"
   ],
+  "closed_at": "2026-07-21T12:58:55Z",
+  "close_reason": "Archived current main on GitHub",
   "created": "2026-07-21T12:58:45Z",
   "description": "Create and push an annotated archival tag at the current main commit before any integration work.",
   "id": "jido_con-s2v.1",
@@ -16,8 +18,8 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Safeguard main before consolidation",
   "type": "task",
-  "updated_at": "2026-07-21T12:58:54Z"
+  "updated_at": "2026-07-21T12:58:55Z"
 }
