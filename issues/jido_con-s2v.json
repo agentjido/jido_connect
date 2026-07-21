@@ -2,13 +2,14 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-07-21T13:42:11Z",
   "created": "2026-07-21T12:58:32Z",
   "description": "Safeguard the old main state, integrate all current develop work, rewrite package documentation, set all package metadata to 0.8.0, resolve dependency and security issues, configure Dependabot, verify the umbrella and demo, merge to main, tag v0.8.0, and clean obsolete branches safely.",
   "id": "jido_con-s2v",
   "labels": [],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "Prepare jido_connect 0.8.0 and consolidate develop into main",
   "type": "epic",
-  "updated_at": "2026-07-21T12:58:32Z"
+  "updated_at": "2026-07-21T13:42:11Z"
 }
