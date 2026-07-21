@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-s2v.3"
   ],
+  "closed_at": "2026-07-21T13:27:11Z",
   "created": "2026-07-21T12:58:45Z",
   "description": "Merge origin/develop with main in an isolated worktree; resolve conflicts and Elixir 1.20 warnings; rewrite the root README; update every package to version 0.8.0 and correct package metadata; update all dependencies and lockfiles; resolve security advisories; configure Dependabot; run umbrella and demo verification; commit, push, and open a ready PR to main.",
   "id": "jido_con-s2v.2",
@@ -18,8 +19,8 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Build the 0.8.0 integration candidate",
   "type": "task",
-  "updated_at": "2026-07-21T13:27:10Z"
+  "updated_at": "2026-07-21T13:27:11Z"
 }
