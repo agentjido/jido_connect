@@ -470,10 +470,8 @@ defmodule Jido.Connect.Catalog do
   defp normalize_opts(opts) when is_map(opts), do: Map.to_list(opts)
   defp normalize_opts(_opts), do: []
 
-  defp maybe_get(map, key) when is_map(map), do: Map.get(map, key)
-  defp maybe_get(_map, _key), do: nil
+  defp maybe_get(map, key), do: Map.get(map, key)
 
-  defp type_name(value) when is_map(value), do: :map
   defp type_name(value) when is_list(value), do: :list
   defp type_name(value) when is_binary(value), do: :string
   defp type_name(value) when is_atom(value), do: :atom

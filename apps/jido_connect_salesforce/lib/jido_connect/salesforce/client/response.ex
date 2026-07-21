@@ -60,8 +60,6 @@ defmodule Jido.Connect.Salesforce.Client.Response do
      |> Data.compact()}
   end
 
-  defp pagination(_body), do: {:ok, nil}
-
   defp normalize_items(body, key, normalizer, message) do
     case Data.get(body, key, []) do
       items when is_list(items) ->

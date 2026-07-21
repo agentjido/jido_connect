@@ -19,7 +19,7 @@ Provider handlers live under `lib/jido_connect/slack/handlers/`.
 ```elixir
 def deps do
   [
-    {:jido_connect_slack, "~> 0.1.0"}
+    {:jido_connect_slack, "~> 0.8"}
   ]
 end
 ```

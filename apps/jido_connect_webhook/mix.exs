@@ -4,7 +4,7 @@ defmodule JidoConnectWebhook.MixProject do
   def project do
     [
       app: :jido_connect_webhook,
-      version: "0.1.0",
+      version: "0.8.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -14,7 +14,7 @@ defmodule JidoConnectWebhook.MixProject do
       description: description(),
       package: package(),
       docs: docs(),
-      source_url: "https://github.com/mikehostetler/jido_connect",
+      source_url: "https://github.com/agentjido/jido_connect",
       test_coverage: test_coverage(),
       deps: deps(),
       aliases: aliases()
@@ -48,7 +48,7 @@ defmodule JidoConnectWebhook.MixProject do
 
   defp jido_connect_dep do
     if hex_package_task?() do
-      {:jido_connect, "~> 0.1"}
+      {:jido_connect, "~> 0.8"}
     else
       {:jido_connect, in_umbrella: true}
     end
@@ -77,7 +77,7 @@ defmodule JidoConnectWebhook.MixProject do
     [
       licenses: ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/mikehostetler/jido_connect",
+        "GitHub" => "https://github.com/agentjido/jido_connect",
         "Docs" => "https://hexdocs.pm/jido_connect_webhook"
       },
       files: ~w(lib mix.exs README.md LICENSE CHANGELOG.md)
@@ -88,7 +88,7 @@ defmodule JidoConnectWebhook.MixProject do
     [
       main: "readme",
       extras: ["README.md", "CHANGELOG.md"],
-      source_ref: "v0.1.0"
+      source_ref: "v0.8.0"
     ]
   end
 

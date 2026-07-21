@@ -1,25 +1,26 @@
 # Release Checklist
 
-This is the baseline checklist before a release candidate or before starting
-another large connector expansion pass. It is intentionally not Hex publishing
-automation.
+Use this checklist before a release candidate. Hex publishing automation is not
+part of this repository.
 
 ## Baseline Guard
 
-1. Confirm the branch is clean except for intentional release-prep edits:
+1. Confirm that the branch has only intentional release changes:
 
    ```sh
    git status --short --branch
    ```
 
-2. Push the current baseline before starting another broad connector wave:
+2. Confirm that the release pull request has no whitespace errors and contains
+   the intended change set:
 
    ```sh
-   git push origin main
+   git diff --check
+   git diff --stat origin/main...
    ```
 
-   This repo can accumulate many small connector commits quickly; do not begin a
-   new batch while `main` is significantly ahead of `origin/main`.
+3. Create and push an annotated safeguard tag before a large branch
+   consolidation.
 
 ## Package Verification
 
@@ -29,34 +30,43 @@ Run the root quality gate from the umbrella root:
 mix quality
 ```
 
-If you need the expanded command list, it is:
+The quality gate runs these commands:
 
 ```sh
 mix format --check-formatted
 mix compile --warnings-as-errors
-mix test --cover
+mix test
 ```
 
-Run docs separately:
+Run the documentation and dependency checks separately:
 
 ```sh
 MIX_ENV=docs mix docs
+mix hex.outdated
+mix hex.audit
 ```
 
-Each package also exposes a local quality alias when you want to isolate a
-single app:
+Each package exposes a local quality alias when you must isolate one app. For
+example:
 
 ```sh
-cd apps/jido_connect && mix quality
-cd ../jido_connect_github && mix quality
-cd ../jido_connect_slack && mix quality
-cd ../jido_connect_mcp && mix quality
+cd apps/jido_connect
+mix quality
+```
+
+Check the connector factory separately:
+
+```sh
+cd pi-connector-factory
+bun install --frozen-lockfile
+bun outdated
+bun run check
 ```
 
 ## Demo Host Verification
 
-The Phoenix demo is not part of the packages, but it is the reference host for
-OAuth, app-installation callbacks, ngrok URLs, webhooks, action execution, and
+The Phoenix demo is not part of the packages. It is the reference host for
+OAuth, app installation callbacks, tunnel URLs, webhooks, action execution, and
 poll sensors.
 
 ```sh
@@ -68,19 +78,32 @@ mix test
 
 ## Package Inventory
 
-The repo currently prepares these package apps:
+The umbrella contains 36 package projects:
 
-- `apps/jido_connect`
-- `apps/jido_connect_github`
-- `apps/jido_connect_slack`
-- `apps/jido_connect_mcp`
+- Core: `jido_connect`
+- Shared services: `jido_connect_google`, `jido_connect_microsoft`,
+  `jido_connect_mcp`, and `jido_connect_webhook`
+- Google services: Analytics, Calendar, Contacts, Docs, Drive, Forms, Gmail,
+  Meet, Search Console, Sheets, Slides, and Tasks
+- Microsoft services: Calendar, OneDrive, and Outlook
+- Other providers: Airtable, Asana, Cal.com, Calendly, GitHub, GitLab, HubSpot,
+  Intercom, Jira, Linear, Nextcloud, Notion, PostHog, Salesforce, Slack, and
+  Zendesk
+
+Confirm that every package has the intended version before release:
+
+```sh
+rg 'version: "' apps/*/mix.exs
+```
 
 `dev/demo`, `.env`, `.secrets`, `_build`, `deps`, and generated docs are not
 included in Hex packages.
 
 ## Publishing Notes
 
-Hex publishing strategy is deliberately deferred. When that strategy is chosen,
-publish `jido_connect` first, then provider packages that depend on it. Keep the
-release task as a checklist until package ownership, versioning, and Git/GitHub
-dependency guidance are final.
+Hex publishing is deferred. When publishing starts, publish `jido_connect`
+first. Then publish the shared service packages and provider packages that use
+it. Create the release tag only from the verified commit on `main`.
+
+Dependabot must remain enabled for vulnerability alerts, security updates, and
+the update groups in `.github/dependabot.yml`.

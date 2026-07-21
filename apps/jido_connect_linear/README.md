@@ -30,7 +30,7 @@ waves.
 ```elixir
 def deps do
   [
-    {:jido_connect_linear, "~> 0.1.0"}
+    {:jido_connect_linear, "~> 0.8"}
   ]
 end
 ```

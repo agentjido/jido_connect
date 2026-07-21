@@ -63,8 +63,6 @@ defmodule Jido.Connect.MicrosoftOnedrive.Handlers.Actions.DownloadContent do
       Map.get(body, "@content.downloadUrl")
   end
 
-  defp get_download_url(_body), do: nil
-
   defp normalize_content(body, headers, item_id) do
     mime_type = response_mime_type(headers)
     is_binary = !text_content?(body)

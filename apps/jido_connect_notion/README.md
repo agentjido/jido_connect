@@ -20,7 +20,7 @@ client transport, and action handlers are implemented.
 ```elixir
 def deps do
   [
-    {:jido_connect_notion, "~> 0.1.0"}
+    {:jido_connect_notion, "~> 0.8"}
   ]
 end
 ```

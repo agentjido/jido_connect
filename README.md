@@ -1,200 +1,116 @@
 # Jido Connect
 
-Umbrella for Jido's integration/connectivity framework.
+Jido Connect is an integration framework for Elixir and Jido. It turns service
+APIs into typed Jido actions, sensors, plugins, and catalog tools.
 
-The public core entrypoint is `Jido.Connect`. The first provider app is
-`jido_connect_github`, exposed as `Jido.Connect.GitHub`.
+The repository is an Elixir umbrella. It contains a small core runtime, shared
+provider foundations, and independent connector packages. A host application
+can install only the connectors that it needs.
 
-The repository is an umbrella for development and publishing, but host apps do
-not need to depend on every connector. Each app under `apps/` is intended to be
-a separate package. A Phoenix project that only wants GitHub should depend on
-`jido_connect_github`; it brings in `jido_connect` as its core dependency and
-does not compile Slack or MCP.
+> **Release status:** All packages in this repository use version `0.8.0`.
+> The packages are not yet published on Hex. Use local path dependencies for
+> development and evaluation. Release and Hex publishing automation are not yet
+> part of this repository.
 
-Current slice:
+## What Jido Connect Provides
 
-- Zoi-backed top-level contracts in `apps/jido_connect/lib/jido_connect/`
-- Spark DSL extension under `apps/jido_connect/lib/jido_connect/dsl/`
-- GitHub integration app at `apps/jido_connect_github`
-- Slack integration app at `apps/jido_connect_slack`
-- MCP bridge app at `apps/jido_connect_mcp`
-- Nextcloud integration app at `apps/jido_connect_nextcloud`
-- GitHub actions for `github.issue.list` and `github.issue.create`
-- GitHub poll trigger contract for `github.issue.new`
-- Slack actions for `slack.channel.list`, `slack.message.post`,
-  `slack.message.update`, `slack.message.delete`, and `slack.file.upload`
-- MCP actions for `mcp.tools.list` and `mcp.tool.call`
-- Nextcloud actions for files, folders, shares, sharee lookup, and Office
-  launch metadata through WebDAV and OCS APIs
-- Catalog discovery, deterministic tool search, descriptors, and safe action
-  calling through `Jido.Connect.Catalog`
-- Generic ngrok tunnel helper: `mix jido.connect.ngrok`
-- Local Phoenix demo host under `dev/demo`
+- A Spark DSL for integration metadata, authentication profiles, policies,
+  actions, triggers, schemas, and catalog data.
+- Generated Jido action, sensor, and plugin modules.
+- One authorization path for connections, short-lived credential leases,
+  scopes, policy checks, risk, and confirmation.
+- Deterministic catalog discovery, search, description, and tool execution.
+- Normalized errors, provider responses, webhook deliveries, and checkpoints.
+- Sanitized telemetry and public payloads.
+- Provider clients, normalizers, webhook helpers, and catalog packs.
+- A Phoenix demo host for local OAuth, webhook, catalog, and action tests.
 
-See `docs/architecture.md` for the package boundaries and connector-factory
-shape.
+## Architecture
 
-See `docs/github_end_to_end.md` for the local demo and live integration testing
-plan.
+The core package owns common contracts and runtime rules. Connector packages
+own provider API behavior. The host owns credentials, persistence, policy, and
+audit data.
 
-Copy `.env.example` to `.env` for local ngrok and GitHub credentials. `.env` is
-ignored by git.
+```mermaid
+flowchart LR
+    A["Connector Spark DSL"] --> B["Generated actions, sensors, and plugin"]
+    B --> C["Jido.Connect authorization runtime"]
+    C --> D["Provider handler and client"]
+    D --> E["External service API"]
+    F["Host application"] --> C
+    F --> G["Credential and connection storage"]
+    F --> H["Policy, webhook dedupe, and audit storage"]
+```
 
-The Phoenix demo host is intentionally outside the package umbrella at
-`dev/demo`. It depends on the local packages by path and gives us one place to
-exercise OAuth callbacks, GitHub App setup callbacks, webhooks, and future
-provider routes without turning every provider into a demo app.
+Every connector uses the same main flow:
 
-Run the demo host:
+1. The connector declares its contract with `use Jido.Connect`.
+2. Jido Connect compiles thin action, sensor, and plugin modules.
+3. A host resolves a connection and a short-lived credential lease.
+4. The core runtime validates the auth profile, lease binding, scopes, policy,
+   risk, and confirmation rules.
+5. The provider handler calls the service API.
+6. The connector returns normalized data or a `Jido.Connect.Error`.
+
+For more detail, see [Architecture](docs/architecture.md),
+[Connector Authoring](docs/authoring_integrations.md), and
+[Generated Modules](docs/generated_jido_modules.md).
+
+## Packages
+
+The umbrella contains 36 Mix projects. All projects use the same `0.8.0`
+release version.
+
+### Core and shared foundations
+
+| Package | Purpose |
+| --- | --- |
+| `jido_connect` | Spark DSL, runtime contracts, authorization, catalog, generated modules, telemetry, sanitization, and normalized errors |
+| `jido_connect_google` | Shared Google OAuth, service-account, scope, transport, pagination, and checkpoint support |
+| `jido_connect_microsoft` | Shared Microsoft identity and Graph transport support |
+| `jido_connect_webhook` | Generic inbound webhook verification and normalization primitives |
+| `jido_connect_mcp` | MCP server bridge and MCP catalog tools |
+
+### Service connectors
+
+| Product area | Packages |
+| --- | --- |
+| Collaboration and development | `jido_connect_github`, `jido_connect_gitlab`, `jido_connect_jira`, `jido_connect_linear`, `jido_connect_slack` |
+| CRM and customer service | `jido_connect_hubspot`, `jido_connect_intercom`, `jido_connect_salesforce`, `jido_connect_zendesk` |
+| Work and data | `jido_connect_airtable`, `jido_connect_asana`, `jido_connect_nextcloud`, `jido_connect_notion`, `jido_connect_posthog` |
+| Scheduling | `jido_connect_calcom`, `jido_connect_calendly` |
+| Google Workspace | `jido_connect_gmail`, `jido_connect_google_calendar`, `jido_connect_google_contacts`, `jido_connect_google_docs`, `jido_connect_google_drive`, `jido_connect_google_forms`, `jido_connect_google_meet`, `jido_connect_google_sheets`, `jido_connect_google_slides`, `jido_connect_google_tasks` |
+| Google data | `jido_connect_google_analytics`, `jido_connect_google_search_console` |
+| Microsoft 365 | `jido_connect_microsoft_calendar`, `jido_connect_microsoft_onedrive`, `jido_connect_microsoft_outlook` |
+
+Each connector has its own README, changelog, package metadata, source tree, and
+tests under `apps/`. Connector coverage and maturity differ. Use the connector
+catalog status and its package README as the source of truth.
+
+## Local Setup
+
+Requirements:
+
+- Erlang/OTP 28
+- Elixir 1.19 or later
+- Git
+
+Clone the repository and install the umbrella dependencies:
 
 ```sh
-cd dev/demo
+git clone https://github.com/agentjido/jido_connect.git
+cd jido_connect
 mix deps.get
-mix phx.server
-```
-
-In another shell, from the repo root:
-
-```sh
-mix jido.connect.ngrok --provider github --port 4000
-```
-
-Run the package quality gate:
-
-```sh
 mix quality
 ```
 
-See `docs/release_checklist.md` for the full baseline verification checklist
-before a release candidate or another large connector expansion pass.
+`mix quality` checks formatting, compiles with warnings as errors, and runs the
+umbrella tests.
 
-## Catalog Plugin And Tool Lookup
+## Use a Connector in a Host Application
 
-Host apps can use `Jido.Connect.Catalog` directly, or install
-`Jido.Connect.Catalog.Plugin` as the canonical Jido runtime surface for
-catalog search, description, and execution. Core search is deterministic and
-offline-capable:
-
-```elixir
-Jido.Connect.Catalog.search_tools("post slack message",
-  type: :action,
-  provider: :slack
-)
-```
-
-The plugin exposes exactly three actions and routes:
-
-```elixir
-plugin = Jido.Connect.Catalog.Plugin.plugin_spec(%{
-  modules: [Jido.Connect.GitHub],
-  ranker: MyApp.ConnectToolRanker
-})
-
-Jido.Connect.Catalog.Plugin.signal_routes(plugin.config)
-#=> [
-#=>   {"connect.catalog.search", Jido.Connect.Catalog.Actions.SearchTools},
-#=>   {"connect.catalog.describe", Jido.Connect.Catalog.Actions.DescribeTool},
-#=>   {"connect.catalog.call", Jido.Connect.Catalog.Actions.CallTool}
-#=> ]
-```
-
-Describe a tool before rendering a form or handing it to an agent:
-
-```elixir
-{:ok, descriptor} =
-  Jido.Connect.Catalog.describe_tool({:github, "github.issue.create"},
-    modules: [Jido.Connect.GitHub]
-  )
-
-Jido.Connect.Catalog.to_map(descriptor)
-```
-
-Execute only through `call_tool/4`; it delegates to `Jido.Connect.invoke/4`, so
-connections, credential leases, expiry, scopes, policy, and confirmation still
-apply:
-
-```elixir
-Jido.Connect.Catalog.call_tool(
-  {:github, "github.issue.create"},
-  %{repo: "acme/app", title: "Follow up"},
-  modules: [Jido.Connect.GitHub],
-  context: context,
-  credential_lease: lease
-)
-```
-
-Curated packs can restrict what a tool picker or agent sees without adding a
-registry process or persistence:
-
-```elixir
-safe_issue_pack =
-  Jido.Connect.Catalog.Pack.new!(%{
-    id: "safe_github_issues",
-    filters: %{provider: :github, type: :action, resource: :issue},
-    allowed_tools: ["github.issue.list", "github.issue.create"]
-  })
-
-Jido.Connect.Catalog.search_tools("issue",
-  modules: [Jido.Connect.GitHub],
-  pack: safe_issue_pack
-)
-```
-
-Optional rankers can reorder sanitized catalog candidates, but they cannot
-execute tools or see credentials. Future `req_llm` support should live in a
-separate optional package that returns ranked candidate ids and reasons only.
-
-Live GitHub App validation has covered app creation, app installation,
-installation-token minting, generated issue creation/listing, issue cleanup,
-and verified issue webhooks through ngrok.
-
-## Using One Connector In A Host App
-
-After Hex publishing, a GitHub-only Phoenix app can use:
-
-```elixir
-def deps do
-  [
-    {:jido_connect_github, "~> 0.1"}
-  ]
-end
-```
-
-Do not also add `jido_connect_slack` unless that host should expose Slack tools.
-The provider package registers itself through its application environment:
-
-```elixir
-def application do
-  [
-    extra_applications: [:logger],
-    env: [jido_connect_providers: [Jido.Connect.GitHub]]
-  ]
-end
-```
-
-That lets catalog discovery find installed providers without a host-maintained
-manifest:
-
-```elixir
-Jido.Connect.Catalog.discover()
-#=> [%Jido.Connect.Catalog.Entry{id: :github, ...}]
-```
-
-If Slack is not in `deps/0`, Slack is not loaded and will not appear in the
-catalog. Hosts can still opt into manual registration for private/local
-connectors:
-
-```elixir
-config :jido_connect,
-  catalog_modules: [MyApp.Connectors.Internal]
-```
-
-Use `Jido.Connect.Catalog.discover_with_diagnostics/1` in admin screens, CI, and
-demo apps when a broken or missing connector should be visible as a diagnostic
-instead of being silently skipped.
-
-Before Hex publishing, use path dependencies from a sibling checkout when
-testing a host app against this monorepo:
+The packages are not on Hex. Use an explicit checkout and path dependencies.
+For example, a host that needs GitHub can use:
 
 ```elixir
 def deps do
@@ -205,20 +121,213 @@ def deps do
 end
 ```
 
-Direct Git dependency syntax for individual apps should be finalized with the
-package release strategy; the reliable local development path today is an
-explicit checkout plus path dependencies.
+Do not add connector packages that the host does not use. Connector packages
+self-register their integration modules through application metadata. An
+uninstalled connector is not compiled and does not appear in catalog discovery.
 
-## Pi Connector Factory
+After the packages are published on Hex, the intended dependency form is:
 
-`pi-connector-factory/` is a small Beadwork-driven wrapper for connector build
-tasks. Beadwork owns the backlog; the factory asks Pi + Z.ai to implement one
-ready task at a time and requires exactly one clean Git commit before closing
-the task.
+```elixir
+{:jido_connect_github, "~> 0.8"}
+```
+
+The connector package brings in the compatible core package.
+
+## Discover and Search Tools
+
+Installed connectors register themselves with `Jido.Connect.Catalog`:
+
+```elixir
+Jido.Connect.Catalog.discover()
+#=> [%Jido.Connect.Catalog.Entry{id: :github, ...}]
+```
+
+Search is deterministic and works without an LLM:
+
+```elixir
+Jido.Connect.Catalog.search_tools("create github issue",
+  type: :action,
+  provider: :github
+)
+```
+
+Describe a tool before a UI or agent collects its input:
+
+```elixir
+{:ok, descriptor} =
+  Jido.Connect.Catalog.describe_tool(
+    {:github, "github.issue.create"},
+    modules: [Jido.Connect.GitHub]
+  )
+
+Jido.Connect.Catalog.to_map(descriptor)
+```
+
+Catalog packs provide restricted views of installed tools:
+
+```elixir
+pack =
+  Jido.Connect.Catalog.Pack.new!(%{
+    id: "safe_github_issues",
+    filters: %{provider: :github, type: :action, resource: :issue},
+    allowed_tools: ["github.issue.list", "github.issue.create"]
+  })
+
+Jido.Connect.Catalog.search_tools("issue",
+  modules: [Jido.Connect.GitHub],
+  pack: pack
+)
+```
+
+Optional rankers receive sanitized catalog metadata only. They do not receive
+credentials, credential leases, provider responses, or private host context.
+
+## Execute a Tool Safely
+
+`Jido.Connect.Catalog.call_tool/3` delegates to the common execution runtime.
+It does not bypass authorization:
+
+```elixir
+Jido.Connect.Catalog.call_tool(
+  {:github, "github.issue.create"},
+  %{repo: "acme/app", title: "Follow up"},
+  modules: [Jido.Connect.GitHub],
+  context: context,
+  credential_lease: credential_lease
+)
+```
+
+The runtime checks:
+
+- connection state and ownership
+- credential lease state, expiry, and connection binding
+- allowed authentication profiles
+- static and input-dependent scopes
+- host policy decisions
+- tool risk and confirmation rules
+
+Triggers are discoverable and describable. They are not executable through the
+action call path.
+
+## Host Responsibilities
+
+Jido Connect stays storage-free. A host application must own:
+
+- durable connection records
+- encrypted access tokens, refresh tokens, API keys, and signing secrets
+- OAuth state and callback sessions
+- credential refresh and short-lived lease creation
+- tenant, actor, and shared-resource authorization
+- webhook delivery deduplication
+- polling checkpoint persistence
+- audit and retention storage
+
+Never put raw secrets in a connection struct, catalog entry, signal, telemetry
+event, or public payload. Use `Jido.Connect.CredentialLease` for short-lived
+credential material. Use `Jido.Connect.Sanitizer` before data leaves a private
+runtime boundary.
+
+See [Host-owned Storage](docs/host_owned_storage.md) for the full boundary.
+
+## Generated Jido Modules
+
+Every provider built with `use Jido.Connect` generates thin modules:
+
+- `<Provider>.Actions.*`
+- `<Provider>.Sensors.*`
+- `<Provider>.Plugin`
+
+These modules carry metadata and delegate to the core runtime. Provider API
+logic remains in capability-focused clients and handlers.
+
+## Create a Connector
+
+Start with the authoring guide:
+
+- [Authoring Integrations](docs/authoring_integrations.md)
+- [Connector Authoring Guide](apps/jido_connect/guides/authoring_connector.md)
+- [Generated Jido Modules](docs/generated_jido_modules.md)
+- [Google Connector Conventions](docs/google_connector_conventions.md)
+
+A connector normally defines:
+
+- integration and catalog metadata
+- authentication profiles
+- reusable schemas
+- actions and triggers grouped by capability
+- provider clients and response normalization
+- scope resolution
+- webhook verification and event normalization
+- catalog packs and tests
+
+Keep generated modules thin. Keep provider API behavior in provider clients and
+handlers. Keep persistence and secret storage in the host.
+
+## Demo Host
+
+`dev/demo` is a local Phoenix host. It demonstrates provider setup, OAuth
+callbacks, webhooks, catalog discovery, and action execution. It is not part of
+the published packages.
 
 ```sh
-cd pi-connector-factory
-bun run doctor
-bun run step
-bun run loop -- --limit 5
+cd dev/demo
+mix deps.get
+mix phx.server
 ```
+
+For a public callback URL, run this from the repository root in another shell:
+
+```sh
+mix jido.connect.ngrok --provider github --port 4000
+```
+
+Copy `.env.example` to `.env` for local credentials. Git ignores `.env`. Never
+commit provider secrets.
+
+## Verification
+
+Run the umbrella quality gate from the repository root:
+
+```sh
+mix quality
+```
+
+Run the demo checks separately:
+
+```sh
+cd dev/demo
+mix format --check-formatted
+mix compile --warnings-as-errors
+mix test
+```
+
+Live tests are opt-in and require provider-specific environment variables. See
+the connector README before you run a live test.
+
+## Dependency Maintenance
+
+GitHub Dependabot monitors Mix, demo, factory, and GitHub Actions dependencies.
+It opens grouped update pull requests against `main`. Security alerts and
+security update pull requests are enabled for the repository.
+
+Before a release candidate, review dependency advisories and run all quality
+gates. See [Release Checklist](docs/release_checklist.md).
+
+## Repository Layout
+
+```text
+apps/                   Core, foundation, bridge, and connector packages
+config/                 Umbrella configuration
+dev/demo/               Local Phoenix host
+docs/                   Architecture and operation guides
+pi-connector-factory/   Beadwork-driven connector build helper
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Durable work is tracked with Beadwork.
+Run `bw prime` before repository work.
+
+## License
+
+Jido Connect is available under the [MIT License](LICENSE).
