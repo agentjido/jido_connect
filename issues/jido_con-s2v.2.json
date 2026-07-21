@@ -11,9 +11,15 @@
   "id": "jido_con-s2v.2",
   "labels": [],
   "parent": "jido_con-s2v",
+  "comments": [
+    {
+      "text": "Prepared and verified commit 33abc960. All 36 packages use 0.8.0 and v0.8.0 metadata. mix quality, strict forced compile, docs generation, demo formatting/compile/tests, Hex outdated/audit, Dependabot YAML, and Bun checks pass. Removed the obsolete google_api_sheets spike and its old Tesla/Poison stack.",
+      "timestamp": "2026-07-21T13:27:10Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Build the 0.8.0 integration candidate",
   "type": "task",
-  "updated_at": "2026-07-21T12:58:56Z"
+  "updated_at": "2026-07-21T13:27:10Z"
 }
