@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-s2v.1"
   ],
@@ -12,8 +12,8 @@
   "labels": [],
   "parent": "jido_con-s2v",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "Build the 0.8.0 integration candidate",
   "type": "task",
-  "updated_at": "2026-07-21T12:58:53Z"
+  "updated_at": "2026-07-21T12:58:56Z"
 }
