@@ -9,6 +9,12 @@
   "id": "jido_con-s2v.1",
   "labels": [],
   "parent": "jido_con-s2v",
+  "comments": [
+    {
+      "text": "Created and pushed annotated tag main-pre-develop-merge-20260721 at 2127033966ecbb0dc52a38e88ce1adab73cbb127.",
+      "timestamp": "2026-07-21T12:58:54Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Safeguard main before consolidation",
