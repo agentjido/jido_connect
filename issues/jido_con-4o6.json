@@ -6,9 +6,15 @@
   "description": "Address GitHub issue #45. Make collection_id optional for google.drive.collection.changes.list so drive-wide watch channels can list changes, add regression tests, verify quality, and publish a PR.",
   "id": "jido_con-4o6",
   "labels": [],
+  "comments": [
+    {
+      "text": "Implemented drive-wide collection change listing while keeping watch and poll collection IDs required. Focused tests: 60 passed. Full mix quality passed. Demo format, warnings-as-errors compile, and 21 tests passed.",
+      "timestamp": "2026-07-23T12:23:56Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Allow drive-wide Google Drive change listing",
   "type": "task",
-  "updated_at": "2026-07-23T12:17:30Z"
+  "updated_at": "2026-07-23T12:23:56Z"
 }
