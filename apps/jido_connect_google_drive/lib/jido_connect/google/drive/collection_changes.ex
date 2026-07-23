@@ -22,7 +22,7 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
 
   def list(client, config, checkpoint, access_token) do
     with {:ok, checkpoint} <- normalize_checkpoint(checkpoint),
-         {:ok, config} <- Config.resolve(client, config, access_token) do
+         {:ok, config} <- Config.resolve_list(client, config, access_token) do
       params = Map.put(config, :page_token, checkpoint)
       fetch_changes(client, params, checkpoint, access_token)
     end
@@ -45,7 +45,7 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
   defp fetch_pages(client, params, access_token, signal_pages, latest_checkpoint, seen) do
     with {:ok, result} <- client.list_changes(Map.delete(params, :collection_id), access_token),
          {:ok, page} <- normalize_page(result) do
-      page_signals = normalize_signals(page.changes, Map.fetch!(params, :collection_id))
+      page_signals = normalize_signals(page.changes, Map.get(params, :collection_id))
       signal_pages = [page_signals | signal_pages]
       latest_checkpoint = page.new_start_page_token || latest_checkpoint
 
@@ -79,6 +79,12 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges do
 
   defp finish_pages(_signal_pages, _checkpoint) do
     invalid_page(:new_start_page_token)
+  end
+
+  defp normalize_signals(changes, nil) do
+    changes
+    |> Enum.filter(&file_change?/1)
+    |> Enum.map(&normalize_signal(&1, nil, "unknown"))
   end
 
   defp normalize_signals(changes, collection_id) do

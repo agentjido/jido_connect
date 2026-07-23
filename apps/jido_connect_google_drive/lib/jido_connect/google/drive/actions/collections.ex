@@ -91,8 +91,8 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
         field(:cursor, :string, description: "Deprecated alias for checkpoint.")
 
         field(:collection_id, :string,
-          required?: true,
-          description: "Drive folder id used to filter relevant changes."
+          description:
+            "Optional Drive folder id used to classify changes. Omit it to return changes for the full change log."
         )
 
         field(:page_size, :integer,

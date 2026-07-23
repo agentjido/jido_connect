@@ -32,6 +32,25 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges.Config do
 
   def resolve(_client, _config, _access_token), do: invalid_collection_id()
 
+  def resolve_list(client, config, access_token) when is_map(config) do
+    config = normalize(config)
+
+    with :ok <- validate_page_size(config) do
+      case Map.get(config, :collection_id) do
+        nil ->
+          {:ok, change_log_config(config, nil, nil)}
+
+        collection_id when is_binary(collection_id) and collection_id != "" ->
+          resolve_collection(client, config, collection_id, access_token)
+
+        _other ->
+          invalid_collection_id()
+      end
+    end
+  end
+
+  def resolve_list(_client, _config, _access_token), do: invalid_collection_id()
+
   def start_page_token_params(config) do
     config
     |> Map.take([:drive_id, :supports_all_drives])
@@ -53,6 +72,12 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges.Config do
 
       _other ->
         invalid_collection_id()
+    end
+  end
+
+  defp resolve_collection(client, config, collection_id, access_token) do
+    with {:ok, drive_id} <- collection_drive_id(client, collection_id, access_token) do
+      {:ok, change_log_config(config, collection_id, drive_id)}
     end
   end
 

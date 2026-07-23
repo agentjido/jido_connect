@@ -326,7 +326,7 @@ defmodule Jido.Connect.Google.Drive.CollectionChangesTest do
              )
   end
 
-  test "collection actions require IDs and do not expose unsafe field masks" do
+  test "collection watch and poll require IDs while list supports a drive-wide change log" do
     spec = Drive.integration()
 
     watch = Enum.find(spec.actions, &(&1.id == "google.drive.collection.watch"))
@@ -334,7 +334,8 @@ defmodule Jido.Connect.Google.Drive.CollectionChangesTest do
     poll = Enum.find(spec.triggers, &(&1.id == "google.drive.collection.changes"))
 
     assert Enum.find(watch.input, &(&1.name == :collection_id)).required?
-    assert Enum.find(list.input, &(&1.name == :collection_id)).required?
+    refute Enum.find(list.input, &(&1.name == :collection_id)).required?
+    assert Enum.find(poll.config, &(&1.name == :collection_id)).required?
 
     derived_fields = [
       :fields,
