@@ -11,7 +11,7 @@ defmodule Jido.Connect.Google.Drive.Handlers.Actions.WatchCollection do
          {:ok, client} <- fetch_client(credentials),
          access_token = Map.get(credentials, :access_token),
          {:ok, %{checkpoint: checkpoint, config: config}} <-
-           CollectionChanges.start_checkpoint(client, input, access_token),
+           CollectionChanges.start_watch_checkpoint(client, input, access_token),
          {:ok, channel} <-
            client.watch_changes(watch_params(config, checkpoint), access_token) do
       {:ok,

@@ -2045,6 +2045,29 @@ defmodule Jido.Connect.Google.DriveTest do
 
     assert {:ok,
             %{
+              channel: %{channel_id: "channel-123"},
+              checkpoint: "start-token",
+              provider: "google_drive",
+              provider_resource: "changes"
+            } = drive_wide_watch} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.collection.watch",
+               %{
+                 channel_id: " channel-123 ",
+                 address: " https://example.com/drive/webhook ",
+                 token: "route=drive",
+                 expiration_ms: 1_770_000_000_000
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    refute Map.has_key?(drive_wide_watch, :collection_id)
+    refute Map.has_key?(drive_wide_watch, :drive_id)
+
+    assert {:ok,
+            %{
               channel: %{
                 channel_id: "channel-123",
                 resource_id: "resource-123",

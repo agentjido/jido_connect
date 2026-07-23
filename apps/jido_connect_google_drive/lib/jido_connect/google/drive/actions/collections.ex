@@ -30,9 +30,8 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
 
       input do
         field(:collection_id, :string,
-          required?: true,
           description:
-            "Drive folder id to watch. The connector selects the correct My Drive or shared-drive change log."
+            "Optional Drive folder id to watch. Omit it to create one channel for the full My Drive change log."
         )
 
         field(:channel_id, :string,

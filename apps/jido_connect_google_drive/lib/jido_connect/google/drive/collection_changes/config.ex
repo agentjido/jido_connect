@@ -32,7 +32,7 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges.Config do
 
   def resolve(_client, _config, _access_token), do: invalid_collection_id()
 
-  def resolve_list(client, config, access_token) when is_map(config) do
+  def resolve_optional(client, config, access_token) when is_map(config) do
     config = normalize(config)
 
     with :ok <- validate_page_size(config) do
@@ -49,7 +49,7 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges.Config do
     end
   end
 
-  def resolve_list(_client, _config, _access_token), do: invalid_collection_id()
+  def resolve_optional(_client, _config, _access_token), do: invalid_collection_id()
 
   def start_page_token_params(config) do
     config
