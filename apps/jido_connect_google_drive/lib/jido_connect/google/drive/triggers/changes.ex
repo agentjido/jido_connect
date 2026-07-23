@@ -141,7 +141,7 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
       label("Collection changes push")
 
       description(
-        "Receive Google Drive push notifications indicating collection changes may be available."
+        "Receive Google Drive push notifications indicating that user or collection changes may be available."
       )
 
       verification(%{

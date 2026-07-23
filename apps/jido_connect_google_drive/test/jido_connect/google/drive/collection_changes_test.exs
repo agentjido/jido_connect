@@ -73,6 +73,29 @@ defmodule Jido.Connect.Google.Drive.CollectionChangesTest do
 
     def watch_changes(
           %{
+            page_token: "my-drive-start-token",
+            page_size: 100,
+            spaces: "drive",
+            include_items_from_all_drives: false,
+            include_removed: true,
+            restrict_to_my_drive: false,
+            supports_all_drives: false,
+            channel_id: "global-channel-123",
+            address: "https://example.com/drive/webhook",
+            channel_type: "web_hook"
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.Channel.new!(%{
+         channel_id: "global-channel-123",
+         resource_id: "resource-123",
+         resource_uri: "https://www.googleapis.com/drive/v3/changes"
+       })}
+    end
+
+    def watch_changes(
+          %{
             page_token: "shared-start-token",
             drive_id: "drive123",
             include_items_from_all_drives: true,
@@ -228,6 +251,31 @@ defmodule Jido.Connect.Google.Drive.CollectionChangesTest do
              )
   end
 
+  test "creates one drive-wide change watch when collection ID is omitted" do
+    assert {:ok,
+            %{
+              channel: %{channel_id: "global-channel-123"},
+              checkpoint: "my-drive-start-token",
+              provider: "google_drive",
+              provider_resource: "changes"
+            } = result} =
+             WatchCollection.run(
+               %{
+                 channel_id: "global-channel-123",
+                 address: "https://example.com/drive/webhook"
+               },
+               %{
+                 credentials: %{
+                   access_token: "token",
+                   google_drive_client: FakeDriveClient
+                 }
+               }
+             )
+
+    refute Map.has_key?(result, :collection_id)
+    refute Map.has_key?(result, :drive_id)
+  end
+
   test "uses the resolved shared-drive change log when it lists changes" do
     assert {:ok, %{signals: [], checkpoint: "shared-next-token"}} =
              CollectionChanges.list(
@@ -326,15 +374,16 @@ defmodule Jido.Connect.Google.Drive.CollectionChangesTest do
              )
   end
 
-  test "collection actions require IDs and do not expose unsafe field masks" do
+  test "collection watch and list support drive-wide change logs while poll requires an ID" do
     spec = Drive.integration()
 
     watch = Enum.find(spec.actions, &(&1.id == "google.drive.collection.watch"))
     list = Enum.find(spec.actions, &(&1.id == "google.drive.collection.changes.list"))
     poll = Enum.find(spec.triggers, &(&1.id == "google.drive.collection.changes"))
 
-    assert Enum.find(watch.input, &(&1.name == :collection_id)).required?
-    assert Enum.find(list.input, &(&1.name == :collection_id)).required?
+    refute Enum.find(watch.input, &(&1.name == :collection_id)).required?
+    refute Enum.find(list.input, &(&1.name == :collection_id)).required?
+    assert Enum.find(poll.config, &(&1.name == :collection_id)).required?
 
     derived_fields = [
       :fields,
