@@ -22,11 +22,15 @@
     {
       "text": "Final PR follow-up: align action, trigger, and catalog descriptions with optional collection_id and Google Drive user change-log terminology.",
       "timestamp": "2026-07-23T16:06:48Z"
+    },
+    {
+      "text": "Updated action, trigger, and catalog descriptions to use Google Drive user change-log terminology and document optional folder association. Focused tests: 65 passed. Full mix quality and demo checks passed.",
+      "timestamp": "2026-07-23T16:07:52Z"
     }
   ],
   "priority": 2,
   "status": "in_progress",
   "title": "Allow drive-wide Google Drive change listing",
   "type": "task",
-  "updated_at": "2026-07-23T16:06:48Z"
+  "updated_at": "2026-07-23T16:07:52Z"
 }
