@@ -18,6 +18,10 @@
     {
       "text": "Added drive-wide watch support. Focused Google Drive tests: 61 passed. Full mix quality passed with 140 Google Drive tests. Demo format, warnings-as-errors compile, and 21 tests passed.",
       "timestamp": "2026-07-23T16:01:48Z"
+    },
+    {
+      "text": "Final PR follow-up: align action, trigger, and catalog descriptions with optional collection_id and Google Drive user change-log terminology.",
+      "timestamp": "2026-07-23T16:06:48Z"
     }
   ],
   "priority": 2,
