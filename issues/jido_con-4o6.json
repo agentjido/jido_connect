@@ -1,8 +1,7 @@
 {
-  "assignee": "Mike Hostetler",
+  "assignee": "",
   "blocked_by": [],
   "blocks": [],
-  "closed_at": "2026-07-23T16:01:49Z",
   "created": "2026-07-23T12:17:23Z",
   "description": "Address GitHub issue #45. Make collection_id optional for google.drive.collection.changes.list so drive-wide watch channels can list changes, add regression tests, verify quality, and publish a PR.",
   "id": "jido_con-4o6",
@@ -22,8 +21,8 @@
     }
   ],
   "priority": 2,
-  "status": "closed",
+  "status": "open",
   "title": "Allow drive-wide Google Drive change listing",
   "type": "task",
-  "updated_at": "2026-07-23T16:01:49Z"
+  "updated_at": "2026-07-23T16:06:47Z"
 }
