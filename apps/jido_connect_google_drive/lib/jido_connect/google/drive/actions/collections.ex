@@ -17,7 +17,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
       label("Watch Drive collection")
 
       description(
-        "Create a Google Drive changes watch channel for a folder-like collection and return a provider cursor."
+        "Create a Google Drive change-log watch channel and return a provider cursor. Associate it with a folder or omit the folder to watch the user's change log."
       )
 
       handler(Jido.Connect.Google.Drive.Handlers.Actions.WatchCollection)
@@ -31,7 +31,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
       input do
         field(:collection_id, :string,
           description:
-            "Optional Drive folder id to watch. Omit it to create one channel for the full My Drive change log."
+            "Optional Drive folder id associated with the watch. Omit it to watch the user's change log."
         )
 
         field(:channel_id, :string,
@@ -70,7 +70,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
       label("List Drive collection changes")
 
       description(
-        "Consume a Drive changes checkpoint and return provider-neutral collection signals."
+        "Consume a Drive changes checkpoint and return provider-neutral signals, optionally classified for a folder."
       )
 
       handler(Jido.Connect.Google.Drive.Handlers.Actions.ListCollectionChanges)
@@ -91,7 +91,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Collections do
 
         field(:collection_id, :string,
           description:
-            "Optional Drive folder id used to classify changes. Omit it to return changes for the full change log."
+            "Optional Drive folder id used to classify changes. Omit it to return unclassified changes from the user's change log."
         )
 
         field(:page_size, :integer,

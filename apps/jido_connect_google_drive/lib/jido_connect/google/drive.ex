@@ -39,7 +39,7 @@ defmodule Jido.Connect.Google.Drive do
       label("Watch collections")
 
       description(
-        "Create provider-side watchers for folder-like Drive collections and return reusable cursors."
+        "Create Drive change-log watchers for the user or an associated folder and return reusable cursors."
       )
 
       metadata(%{
@@ -56,7 +56,7 @@ defmodule Jido.Connect.Google.Drive do
       label("List collection changes")
 
       description(
-        "Consume Drive change checkpoints and return provider-neutral collection signals."
+        "Consume Drive change checkpoints and return provider-neutral signals, optionally classified for a folder."
       )
 
       metadata(%{
@@ -88,7 +88,9 @@ defmodule Jido.Connect.Google.Drive do
       feature(:collection_changes_push)
       label("Collection changes push")
 
-      description("Receive lightweight Drive push notifications for collection change refreshes.")
+      description(
+        "Receive lightweight Drive push notifications for user or collection change refreshes."
+      )
 
       metadata(%{
         generic_capability: :collection_changes_push,
