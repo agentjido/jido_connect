@@ -10,11 +10,15 @@
     {
       "text": "Implemented drive-wide collection change listing while keeping watch and poll collection IDs required. Focused tests: 60 passed. Full mix quality passed. Demo format, warnings-as-errors compile, and 21 tests passed.",
       "timestamp": "2026-07-23T12:23:56Z"
+    },
+    {
+      "text": "PR 46 follow-up: allow google.drive.collection.watch without collection_id so the composite action can create one drive-wide changes channel.",
+      "timestamp": "2026-07-23T15:59:16Z"
     }
   ],
   "priority": 2,
   "status": "in_progress",
   "title": "Allow drive-wide Google Drive change listing",
   "type": "task",
-  "updated_at": "2026-07-23T15:59:15Z"
+  "updated_at": "2026-07-23T15:59:16Z"
 }
