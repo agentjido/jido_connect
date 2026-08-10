@@ -1,6 +1,7 @@
 defmodule Jido.Connect.Google.Sheets.Client.Values do
   @moduledoc "Google Sheets values API boundary."
 
+  alias Jido.Connect.Http
   alias Jido.Connect.Google.Sheets.{DataFilter, Client.Params, Client.Response, Client.Transport}
 
   def get_values(%{spreadsheet_id: spreadsheet_id, range: range} = params, access_token)
@@ -9,8 +10,10 @@ defmodule Jido.Connect.Google.Sheets.Client.Values do
     |> Transport.request()
     |> Req.get(
       url:
-        "/v4/spreadsheets/#{encode_path_segment(spreadsheet_id)}/values/#{encode_path_segment(range)}",
-      params: Params.values_get_params(params)
+        Http.url_with_query(
+          "/v4/spreadsheets/#{encode_path_segment(spreadsheet_id)}/values/#{encode_path_segment(range)}",
+          Params.values_get_params(params)
+        )
     )
     |> Response.handle_value_range_response()
   end
@@ -20,8 +23,11 @@ defmodule Jido.Connect.Google.Sheets.Client.Values do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v4/spreadsheets/#{encode_path_segment(spreadsheet_id)}/values:batchGet",
-      params: Params.values_batch_get_params(params)
+      url:
+        Http.url_with_query(
+          "/v4/spreadsheets/#{encode_path_segment(spreadsheet_id)}/values:batchGet",
+          Params.values_batch_get_params(params)
+        )
     )
     |> Response.handle_value_ranges_response()
   end

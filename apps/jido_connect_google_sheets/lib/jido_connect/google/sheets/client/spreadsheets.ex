@@ -1,6 +1,7 @@
 defmodule Jido.Connect.Google.Sheets.Client.Spreadsheets do
   @moduledoc "Google Sheets spreadsheet API boundary."
 
+  alias Jido.Connect.Http
   alias Jido.Connect.Google.Sheets.{DataFilter, Client.Params, Client.Response, Client.Transport}
 
   def get_spreadsheet(%{spreadsheet_id: spreadsheet_id} = params, access_token)
@@ -8,8 +9,11 @@ defmodule Jido.Connect.Google.Sheets.Client.Spreadsheets do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v4/spreadsheets/#{URI.encode(spreadsheet_id)}",
-      params: Params.spreadsheet_get_params(params)
+      url:
+        Http.url_with_query(
+          "/v4/spreadsheets/#{URI.encode(spreadsheet_id)}",
+          Params.spreadsheet_get_params(params)
+        )
     )
     |> Response.handle_spreadsheet_response()
   end

@@ -1,14 +1,14 @@
 defmodule Jido.Connect.Google.Contacts.Client.ContactGroups do
   @moduledoc "Google People API boundary for contact group reads and mutations."
 
+  alias Jido.Connect.Http
   alias Jido.Connect.Google.Contacts.Client.{Params, Response, Transport}
 
   def list_contact_groups(params, access_token) when is_map(params) and is_binary(access_token) do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v1/contactGroups",
-      params: Params.list_contact_groups_params(params)
+      url: Http.url_with_query("/v1/contactGroups", Params.list_contact_groups_params(params))
     )
     |> Response.handle_contact_group_list_response()
   end
@@ -18,8 +18,11 @@ defmodule Jido.Connect.Google.Contacts.Client.ContactGroups do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v1/#{resource_path(resource_name)}",
-      params: Params.get_contact_group_params(params)
+      url:
+        Http.url_with_query(
+          "/v1/#{resource_path(resource_name)}",
+          Params.get_contact_group_params(params)
+        )
     )
     |> Response.handle_contact_group_response()
   end
@@ -29,8 +32,11 @@ defmodule Jido.Connect.Google.Contacts.Client.ContactGroups do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v1/contactGroups:batchGet",
-      params: Params.batch_get_contact_groups_params(params)
+      url:
+        Http.url_with_query(
+          "/v1/contactGroups:batchGet",
+          Params.batch_get_contact_groups_params(params)
+        )
     )
     |> Response.handle_contact_group_batch_get_response()
   end

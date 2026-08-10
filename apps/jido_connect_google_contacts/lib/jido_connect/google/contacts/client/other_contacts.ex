@@ -1,14 +1,14 @@
 defmodule Jido.Connect.Google.Contacts.Client.OtherContacts do
   @moduledoc "Google People API boundary for otherContacts resources."
 
+  alias Jido.Connect.Http
   alias Jido.Connect.Google.Contacts.Client.{Params, Response, Transport}
 
   def list_other_contacts(params, access_token) when is_map(params) and is_binary(access_token) do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v1/otherContacts",
-      params: Params.list_other_contacts_params(params)
+      url: Http.url_with_query("/v1/otherContacts", Params.list_other_contacts_params(params))
     )
     |> Response.handle_other_contacts_list_response()
   end
@@ -18,8 +18,11 @@ defmodule Jido.Connect.Google.Contacts.Client.OtherContacts do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v1/otherContacts:search",
-      params: Params.search_other_contacts_params(params)
+      url:
+        Http.url_with_query(
+          "/v1/otherContacts:search",
+          Params.search_other_contacts_params(params)
+        )
     )
     |> Response.handle_person_search_response()
   end
