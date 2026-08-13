@@ -303,6 +303,40 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     assert file.parents == ["folder123"]
   end
 
+  test "adds required file response fields to upload projections" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.query_params["fields"] == "id,name"
+
+      Req.Test.json(conn, %{"id" => "uploaded123", "name" => "report.txt"})
+    end)
+
+    assert {:ok, %File{} = file} =
+             Client.upload_file(%{name: "report.txt", content: "hello", fields: "id"}, "token")
+
+    assert file.file_id == "uploaded123"
+    assert file.name == "report.txt"
+  end
+
+  test "preserves configured proxy path prefixes for uploads" do
+    Application.put_env(
+      :jido_connect_google_drive,
+      :google_drive_api_base_url,
+      "https://drive.test/googleapis/drive"
+    )
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/googleapis/upload/drive/v3/files"
+
+      Req.Test.json(conn, %{"id" => "uploaded123", "name" => "report.txt"})
+    end)
+
+    assert {:ok, %File{} = file} =
+             Client.upload_file(%{name: "report.txt", content: "hello"}, "token")
+
+    assert file.file_id == "uploaded123"
+  end
+
   test "uploads binary content unchanged" do
     binary = <<0, 1, 2, 255, 10, 13>>
 

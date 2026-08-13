@@ -86,6 +86,7 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   def file_upload_params(params) do
     params
     |> file_mutation_params()
+    |> Map.put(:fields, file_upload_fields(params))
     |> Map.put(:uploadType, "multipart")
   end
 
@@ -120,6 +121,27 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
 
     {IO.iodata_to_binary(body), "multipart/related; boundary=#{boundary}"}
   end
+
+  defp file_upload_fields(params) do
+    params
+    |> Data.get(:fields, default_file_fields())
+    |> ensure_file_response_fields()
+  end
+
+  defp ensure_file_response_fields(fields) when is_binary(fields) do
+    requested =
+      fields
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+      |> Enum.reject(&(&1 == ""))
+
+    ["id", "name"]
+    |> Enum.concat(requested)
+    |> Enum.uniq()
+    |> Enum.join(",")
+  end
+
+  defp ensure_file_response_fields(_fields), do: default_file_fields()
 
   @doc "Builds query params for metadata updates."
   def file_update_params(params) do
