@@ -17,6 +17,7 @@ defmodule Jido.Connect.Google.Drive.Client do
   defdelegate list_files(params, access_token), to: Files
   defdelegate get_file(params, access_token), to: Files
   defdelegate create_file(params, access_token), to: Files
+  defdelegate upload_file(params, access_token), to: Files
   defdelegate create_folder(params, access_token), to: Files
   defdelegate copy_file(params, access_token), to: Files
   defdelegate update_file(params, access_token), to: Files

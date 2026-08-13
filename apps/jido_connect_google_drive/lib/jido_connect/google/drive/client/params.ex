@@ -82,6 +82,45 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     |> Data.compact()
   end
 
+  @doc "Builds query params for multipart file uploads."
+  def file_upload_params(params) do
+    params
+    |> file_mutation_params()
+    |> Map.put(:uploadType, "multipart")
+  end
+
+  @doc "Builds a Google Drive multipart upload body."
+  def file_upload_multipart_body(params) do
+    boundary =
+      "jido-connect-drive-" <> Base.url_encode64(:crypto.strong_rand_bytes(18), padding: false)
+
+    mime_type = Data.get(params, :mime_type, "application/octet-stream")
+    metadata = params |> file_metadata_body() |> Jason.encode!()
+    content = Data.get(params, :content)
+
+    body = [
+      "--",
+      boundary,
+      "\r\n",
+      "Content-Type: application/json; charset=UTF-8\r\n\r\n",
+      metadata,
+      "\r\n",
+      "--",
+      boundary,
+      "\r\n",
+      "Content-Type: ",
+      mime_type,
+      "\r\n\r\n",
+      content,
+      "\r\n",
+      "--",
+      boundary,
+      "--\r\n"
+    ]
+
+    {IO.iodata_to_binary(body), "multipart/related; boundary=#{boundary}"}
+  end
+
   @doc "Builds query params for metadata updates."
   def file_update_params(params) do
     params

@@ -11,6 +11,7 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.GetFile,
     Jido.Connect.Google.Drive.Actions.CreateFile,
     Jido.Connect.Google.Drive.Actions.CreateFolder,
+    Jido.Connect.Google.Drive.Actions.UploadFile,
     Jido.Connect.Google.Drive.Actions.CopyFile,
     Jido.Connect.Google.Drive.Actions.UpdateFile,
     Jido.Connect.Google.Drive.Actions.ExportFile,
@@ -141,6 +142,25 @@ defmodule Jido.Connect.Google.DriveTest do
       {:ok,
        Drive.File.new!(%{
          file_id: "created123",
+         name: "Notes",
+         mime_type: "text/plain",
+         parents: ["folder123"]
+       })}
+    end
+
+    def upload_file(
+          %{
+            name: "Notes",
+            content: "hello",
+            mime_type: "text/plain",
+            parents: ["folder123"],
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.File.new!(%{
+         file_id: "uploaded123",
          name: "Notes",
          mime_type: "text/plain",
          parents: ["folder123"]
@@ -951,6 +971,7 @@ defmodule Jido.Connect.Google.DriveTest do
              "google.drive.file.get",
              "google.drive.file.create",
              "google.drive.folder.create",
+             "google.drive.file.upload",
              "google.drive.file.copy",
              "google.drive.file.update",
              "google.drive.file.export",
@@ -1465,6 +1486,24 @@ defmodule Jido.Connect.Google.DriveTest do
                Drive.integration(),
                "google.drive.folder.create",
                %{name: "Reports", parents: ["root"]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes upload file through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{file: %{file_id: "uploaded123", name: "Notes", parents: ["folder123"]}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{
+                 name: "Notes",
+                 content: "hello",
+                 mime_type: "text/plain",
+                 parents: ["folder123"]
+               },
                context: context,
                credential_lease: lease
              )

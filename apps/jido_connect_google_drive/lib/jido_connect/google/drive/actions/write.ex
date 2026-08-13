@@ -65,6 +65,40 @@ defmodule Jido.Connect.Google.Drive.Actions.Write do
       end
     end
 
+    action :upload_file do
+      id("google.drive.file.upload")
+      resource(:file)
+      verb(:upload)
+      data_classification(:workspace_content)
+      label("Upload Google Drive file")
+
+      description(
+        "Upload a new file with content to Google Drive and return the created file metadata."
+      )
+
+      handler(Jido.Connect.Google.Drive.Handlers.Actions.UploadFile)
+      effect(:external_write, confirmation: :required_for_ai)
+
+      access do
+        auth(@auth_profiles, default: :user)
+        scopes([@file_scope], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:name, :string, required?: true, example: "report.txt")
+        field(:content, :string, required?: true)
+        field(:mime_type, :string, default: "application/octet-stream")
+        field(:parents, {:array, :string}, default: [])
+        field(:description, :string)
+        field(:fields, :string)
+        field(:supports_all_drives, :boolean, default: false)
+      end
+
+      output do
+        field(:file, :map)
+      end
+    end
+
     action :copy_file do
       id("google.drive.file.copy")
       resource(:file)

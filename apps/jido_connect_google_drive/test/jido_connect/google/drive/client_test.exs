@@ -255,6 +255,80 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     assert file.parents == ["folder123"]
   end
 
+  test "uploads plain text files with multipart metadata and content" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/upload/drive/v3/files"
+      assert conn.query_params["uploadType"] == "multipart"
+      assert conn.query_params["supportsAllDrives"] == "true"
+      assert conn.query_params["fields"] == "id,name,mimeType,parents"
+
+      [content_type] = Plug.Conn.get_req_header(conn, "content-type")
+      assert content_type =~ "multipart/related; boundary="
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      boundary = content_type |> String.split("boundary=") |> List.last()
+
+      assert body =~ "--#{boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"
+      assert body =~ ~s("name":"report.txt")
+      assert body =~ ~s("mimeType":"text/plain")
+      assert body =~ ~s("parents":["folder123"])
+      assert body =~ ~s("description":"Quarterly report")
+      assert body =~ "\r\n--#{boundary}\r\nContent-Type: text/plain\r\n\r\nhello\r\n"
+      assert body =~ "\r\n--#{boundary}--\r\n"
+
+      Req.Test.json(conn, %{
+        "id" => "uploaded123",
+        "name" => "report.txt",
+        "mimeType" => "text/plain",
+        "parents" => ["folder123"]
+      })
+    end)
+
+    assert {:ok, %File{} = file} =
+             Client.upload_file(
+               %{
+                 name: "report.txt",
+                 content: "hello",
+                 mime_type: "text/plain",
+                 parents: ["folder123"],
+                 description: "Quarterly report",
+                 fields: "id,name,mimeType,parents",
+                 supports_all_drives: true
+               },
+               "token"
+             )
+
+    assert file.file_id == "uploaded123"
+    assert file.parents == ["folder123"]
+  end
+
+  test "uploads binary content unchanged" do
+    binary = <<0, 1, 2, 255, 10, 13>>
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      [content_type] = Plug.Conn.get_req_header(conn, "content-type")
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      boundary = content_type |> String.split("boundary=") |> List.last()
+
+      assert body =~ "\r\n--#{boundary}\r\nContent-Type: image/png\r\n\r\n" <> binary <> "\r\n"
+
+      Req.Test.json(conn, %{
+        "id" => "image123",
+        "name" => "image.png",
+        "mimeType" => "image/png"
+      })
+    end)
+
+    assert {:ok, %File{} = file} =
+             Client.upload_file(
+               %{name: "image.png", content: binary, mime_type: "image/png"},
+               "token"
+             )
+
+    assert file.file_id == "image123"
+  end
+
   test "creates folders" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "POST"

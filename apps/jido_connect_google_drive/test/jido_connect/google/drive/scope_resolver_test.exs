@@ -72,6 +72,12 @@ defmodule Jido.Connect.Google.Drive.ScopeResolverTest do
         expected: @file_scope
       },
       %{
+        label: "file upload requires drive.file scope",
+        operation: "google.drive.file.upload",
+        granted: [@readonly_scope],
+        expected: @file_scope
+      },
+      %{
         label: "file mutation accepts full drive grant",
         operation: "google.drive.file.update",
         granted: [@drive_scope],

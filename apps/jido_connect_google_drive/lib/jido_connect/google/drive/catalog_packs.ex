@@ -40,6 +40,7 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
                        [
                          "google.drive.file.create",
                          "google.drive.folder.create",
+                         "google.drive.file.upload",
                          "google.drive.file.copy",
                          "google.drive.file.update"
                        ]
@@ -66,7 +67,7 @@ defmodule Jido.Connect.Google.Drive.CatalogPacks do
       id: :google_drive_file_writer,
       label: "Google Drive file writer",
       description:
-        "Read and mutate Drive file metadata. Excludes deletes, collaboration changes, and shared-drive administration.",
+        "Read Drive files, upload file content, and mutate file metadata. Excludes deletes, collaboration changes, and shared-drive administration.",
       filters: %{provider: :google_drive},
       allowed_tools: @file_writer_tools,
       metadata: %{
