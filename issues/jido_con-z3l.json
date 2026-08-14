@@ -6,9 +6,15 @@
   "description": "Update draft PR #40 onto current main, review and repair the catalog metadata implementation, run umbrella and demo verification, make the PR ready, squash-merge it, and confirm GitHub closes issue #36.",
   "id": "jido_con-z3l",
   "labels": [],
+  "comments": [
+    {
+      "text": "Using existing GitHub PR #40 branch codex/action-catalog-metadata because GitHub cannot retarget an open PR to a replacement local branch. Work remains isolated in a dedicated worktree.",
+      "timestamp": "2026-08-14T21:45:38Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Finish GitHub issue #36 catalog metadata",
   "type": "task",
-  "updated_at": "2026-08-14T21:45:37Z"
+  "updated_at": "2026-08-14T21:45:38Z"
 }
