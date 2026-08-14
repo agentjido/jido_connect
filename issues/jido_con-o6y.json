@@ -6,9 +6,15 @@
   "description": "Review PR 49 after commit 51e6ab87, patch confirmed correctness or maintainability issues, add regression coverage, run required checks, and push updates to the existing PR.",
   "id": "jido_con-o6y",
   "labels": [],
+  "comments": [
+    {
+      "text": "Reviewing PR 49 at head 51e6ab87. Scope: re-check upload input contract, multipart framing and limits, fields normalization, error behavior, shared helper refactor, and regression coverage before any patch.",
+      "timestamp": "2026-08-14T12:52:57Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Refine Google Drive upload PR after second review",
   "type": "task",
-  "updated_at": "2026-08-14T12:52:56Z"
+  "updated_at": "2026-08-14T12:52:57Z"
 }
