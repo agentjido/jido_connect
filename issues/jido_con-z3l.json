@@ -10,11 +10,15 @@
     {
       "text": "Using existing GitHub PR #40 branch codex/action-catalog-metadata because GitHub cannot retarget an open PR to a replacement local branch. Work remains isolated in a dedicated worktree.",
       "timestamp": "2026-08-14T21:45:38Z"
+    },
+    {
+      "text": "Merged GitHub PR #40 with squash commit ffa64cbaa76f327803dd4f1d4c49a858e66f6cbe. GitHub issue #36 is closed. mix quality passed; focused catalog tests passed 29/29; demo format, strict compile, and 21 tests passed; GitHub Quality passed.",
+      "timestamp": "2026-08-14T22:04:38Z"
     }
   ],
   "priority": 2,
   "status": "in_progress",
   "title": "Finish GitHub issue #36 catalog metadata",
   "type": "task",
-  "updated_at": "2026-08-14T21:45:38Z"
+  "updated_at": "2026-08-14T22:04:38Z"
 }
