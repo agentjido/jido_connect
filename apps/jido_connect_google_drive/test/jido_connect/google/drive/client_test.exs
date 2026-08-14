@@ -307,6 +307,9 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.query_params["fields"] == "id,name"
 
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      assert body =~ "Content-Type: application/octet-stream\r\n\r\nhello\r\n"
+
       Req.Test.json(conn, %{"id" => "uploaded123", "name" => "report.txt"})
     end)
 
@@ -387,6 +390,32 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
               subject: :content,
               details: %{actual_bytes: 5_242_881, max_bytes: 5_242_880}
             }} = Client.upload_file(%{name: "large.bin", content: content}, "token")
+  end
+
+  test "rejects invalid upload MIME types before sending a request" do
+    assert {:error,
+            %Jido.Connect.Error.ValidationError{
+              reason: :invalid_mime_type,
+              subject: :mime_type
+            }} =
+             Client.upload_file(
+               %{
+                 name: "report.txt",
+                 content: "hello",
+                 mime_type: "text/plain\r\nx-injected: true"
+               },
+               "token"
+             )
+
+    assert {:error,
+            %Jido.Connect.Error.ValidationError{
+              reason: :invalid_mime_type,
+              subject: :mime_type
+            }} =
+             Client.upload_file(
+               %{name: "report.txt", content: "hello", mime_type: "*/*"},
+               "token"
+             )
   end
 
   test "creates folders" do

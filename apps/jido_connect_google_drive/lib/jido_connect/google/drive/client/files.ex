@@ -35,7 +35,11 @@ defmodule Jido.Connect.Google.Drive.Client.Files do
 
   def upload_file(%{name: name, content: content} = params, access_token)
       when is_binary(name) and is_binary(content) and is_binary(access_token) do
-    with :ok <- Params.validate_file_upload_size(content) do
+    mime_type = Map.get(params, :mime_type) || "application/octet-stream"
+
+    with :ok <- Params.validate_file_upload_mime_type(mime_type),
+         :ok <- Params.validate_file_upload_size(content) do
+      params = Map.put(params, :mime_type, mime_type)
       {body, content_type} = Params.file_upload_multipart_body(params)
 
       access_token

@@ -97,7 +97,11 @@ defmodule Jido.Connect.Google.Drive.Actions.Write do
             "Base64-encoded file bytes for JSON callers. Set content or content_base64, but not both. The decoded file must be 5 MiB or less."
         )
 
-        field(:mime_type, :string, default: "application/octet-stream")
+        field(:mime_type, :string,
+          default: "application/octet-stream",
+          description: "Valid media MIME type without parameters or wildcards."
+        )
+
         field(:parents, {:array, :string}, default: [])
         field(:description, :string)
         field(:fields, :string)

@@ -171,7 +171,7 @@ defmodule Jido.Connect.Google.DriveTest do
           %{
             name: "Image",
             content: <<0, 255>>,
-            mime_type: "image/png",
+            mime_type: "application/octet-stream",
             supports_all_drives: false
           },
           "token"
@@ -180,7 +180,7 @@ defmodule Jido.Connect.Google.DriveTest do
        Drive.File.new!(%{
          file_id: "image123",
          name: "Image",
-         mime_type: "image/png"
+         mime_type: "application/octet-stream"
        })}
     end
 
@@ -1526,7 +1526,7 @@ defmodule Jido.Connect.Google.DriveTest do
              )
   end
 
-  test "decodes base64 file content before invoking the upload client" do
+  test "decodes base64 file content and applies the default MIME type" do
     {context, lease} = context_and_lease(scopes: write_scopes())
 
     assert {:ok, %{file: %{file_id: "image123", name: "Image"}}} =
@@ -1535,15 +1535,14 @@ defmodule Jido.Connect.Google.DriveTest do
                "google.drive.file.upload",
                %{
                  name: "Image",
-                 content_base64: Base.encode64(<<0, 255>>),
-                 mime_type: "image/png"
+                 content_base64: Base.encode64(<<0, 255>>)
                },
                context: context,
                credential_lease: lease
              )
   end
 
-  test "rejects missing, ambiguous, and invalid upload content" do
+  test "rejects missing, ambiguous, invalid, and oversized upload content" do
     {context, lease} = context_and_lease(scopes: write_scopes())
     opts = [context: context, credential_lease: lease]
 
@@ -1595,6 +1594,41 @@ defmodule Jido.Connect.Google.DriveTest do
                "google.drive.file.upload",
                %{name: "Large", content: oversized_content},
                opts
+             )
+
+    oversized_base64 = :binary.copy("A", 4 * div(5 * 1024 * 1024 + 2, 3) + 4)
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :upload_too_large,
+              subject: :content_base64
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Large base64", content_base64: oversized_base64},
+               opts
+             )
+  end
+
+  test "rejects invalid upload MIME types" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_mime_type,
+              subject: :mime_type
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{
+                 name: "Invalid MIME type",
+                 content: "hello",
+                 mime_type: "text/plain\r\nx-injected: true"
+               },
+               context: context,
+               credential_lease: lease
              )
   end
 

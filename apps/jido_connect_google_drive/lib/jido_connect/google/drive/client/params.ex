@@ -5,6 +5,8 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   alias Jido.Connect.Google.Drive.Fields
 
   @max_multipart_upload_bytes 5 * 1024 * 1024
+  @max_base64_upload_bytes 4 * div(@max_multipart_upload_bytes + 2, 3)
+  @mime_type_regex ~r/\A[0-9A-Za-z][!#$%&'*+\-.^_`|~0-9A-Za-z]*\/[0-9A-Za-z][!#$%&'*+\-.^_`|~0-9A-Za-z]*\z/
 
   @default_change_fields [
     "fileId",
@@ -109,6 +111,34 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     end
   end
 
+  @doc "Checks the Base64 size before decoding a Google Drive multipart upload."
+  def validate_file_upload_base64_size(content_base64) when is_binary(content_base64) do
+    if oversized_base64_content?(content_base64, 0) do
+      {:error,
+       Error.validation("Google Drive multipart uploads must be 5 MiB or smaller",
+         reason: :upload_too_large,
+         subject: :content_base64,
+         details: %{
+           encoded_bytes: byte_size(content_base64),
+           max_decoded_bytes: @max_multipart_upload_bytes
+         }
+       )}
+    else
+      :ok
+    end
+  end
+
+  @doc "Validates the media MIME type for a Google Drive multipart upload."
+  def validate_file_upload_mime_type(mime_type) when is_binary(mime_type) do
+    if Regex.match?(@mime_type_regex, mime_type) and not String.contains?(mime_type, "*") do
+      :ok
+    else
+      invalid_file_upload_mime_type()
+    end
+  end
+
+  def validate_file_upload_mime_type(_mime_type), do: invalid_file_upload_mime_type()
+
   @doc "Builds a Google Drive multipart upload body."
   def file_upload_multipart_body(params) do
     boundary =
@@ -179,6 +209,29 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     |> Enum.reverse()
     |> Enum.map(&(&1 |> List.to_string() |> String.trim()))
     |> Enum.reject(&(&1 == ""))
+  end
+
+  defp oversized_base64_content?(_content_base64, size)
+       when size > @max_base64_upload_bytes,
+       do: true
+
+  defp oversized_base64_content?(<<>>, _size), do: false
+
+  defp oversized_base64_content?(<<whitespace, rest::binary>>, size)
+       when whitespace in [?\s, ?\t, ?\r, ?\n] do
+    oversized_base64_content?(rest, size)
+  end
+
+  defp oversized_base64_content?(<<_byte, rest::binary>>, size) do
+    oversized_base64_content?(rest, size + 1)
+  end
+
+  defp invalid_file_upload_mime_type do
+    {:error,
+     Error.validation("Google Drive file upload MIME type is invalid",
+       reason: :invalid_mime_type,
+       subject: :mime_type
+     )}
   end
 
   @doc "Builds query params for metadata updates."

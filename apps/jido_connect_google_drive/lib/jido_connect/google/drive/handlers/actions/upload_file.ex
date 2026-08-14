@@ -6,11 +6,15 @@ defmodule Jido.Connect.Google.Drive.Handlers.Actions.UploadFile do
   alias Jido.Connect.Google.Drive.Handlers.Actions.FileMutation
 
   def run(input, %{credentials: credentials}) do
-    with {:ok, content} <- decode_content(input),
+    mime_type = Map.get(input, :mime_type) || "application/octet-stream"
+
+    with :ok <- Params.validate_file_upload_mime_type(mime_type),
+         {:ok, content} <- decode_content(input),
          :ok <- Params.validate_file_upload_size(content) do
       input
       |> Map.delete(:content_base64)
       |> Map.put(:content, content)
+      |> Map.put(:mime_type, mime_type)
       |> FileMutation.run(credentials, :upload_file)
     end
   end
@@ -32,16 +36,18 @@ defmodule Jido.Connect.Google.Drive.Handlers.Actions.UploadFile do
   end
 
   defp decode_base64(content_base64) do
-    case Base.decode64(content_base64, ignore: :whitespace) do
-      {:ok, content} ->
-        {:ok, content}
+    with :ok <- Params.validate_file_upload_base64_size(content_base64) do
+      case Base.decode64(content_base64, ignore: :whitespace) do
+        {:ok, content} ->
+          {:ok, content}
 
-      :error ->
-        {:error,
-         Error.validation("Google Drive file upload content must be valid base64",
-           reason: :invalid_upload_content,
-           subject: :content_base64
-         )}
+        :error ->
+          {:error,
+           Error.validation("Google Drive file upload content must be valid base64",
+             reason: :invalid_upload_content,
+             subject: :content_base64
+           )}
+      end
     end
   end
 
