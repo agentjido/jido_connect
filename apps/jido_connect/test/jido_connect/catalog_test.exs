@@ -672,7 +672,7 @@ defmodule Jido.Connect.CatalogTest do
              SearchTools.run(
                %{
                  "query" => "item",
-                 "filters" => %{"type" => "action"},
+                 "filters" => %{"type" => "action", "tool_tag" => "read_model"},
                  "limit" => "1",
                  "pack" => "actions"
                },
