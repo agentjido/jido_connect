@@ -17,6 +17,7 @@ defmodule Jido.Connect.Catalog.Entry do
               description: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               category: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),
               package: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),
+              version: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               module: Zoi.module(),
               status: Zoi.atom() |> Zoi.default(:available),
               tags: Zoi.list(Zoi.atom()) |> Zoi.default([]),

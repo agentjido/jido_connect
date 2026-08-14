@@ -63,6 +63,7 @@ defmodule Jido.Connect.CatalogTest do
     catalog do
       package :jido_connect_generated_catalog
       tags [:generated_catalog_test]
+      metadata %{version: "1.2.3"}
     end
 
     auth do
@@ -87,6 +88,7 @@ defmodule Jido.Connect.CatalogTest do
         data_classification :workspace_metadata
         label "Get generated item"
         description "Fetch an item through a generated action."
+        tags [:inventory, :read_model]
         handler Handler
         effect :read
 
@@ -106,6 +108,42 @@ defmodule Jido.Connect.CatalogTest do
     end
   end
 
+  defmodule MetadataPackageIntegration do
+    use Jido.Connect
+
+    integration do
+      id :metadata_package
+      name "Metadata Package"
+      category :test
+    end
+
+    catalog do
+      metadata %{package: "jido_connect", version: "9.9.9"}
+    end
+
+    auth do
+      api_key :user do
+        default? true
+        owner :app_user
+        subject :user
+        label "User API key"
+        credential_fields [:api_key]
+      end
+    end
+
+    actions do
+      action :get_item do
+        id "metadata.item.get"
+        resource :item
+        verb :get
+        data_classification :workspace_metadata
+        label "Get metadata item"
+        handler Handler
+        effect :read
+      end
+    end
+  end
+
   test "catalog entries derive host-facing metadata from specs" do
     entry = Catalog.entry(CatalogFixtures.Integration)
     manifest = Catalog.manifest(CatalogFixtures.Integration)
@@ -113,6 +151,7 @@ defmodule Jido.Connect.CatalogTest do
     assert %Catalog.Entry{
              id: :catalog,
              package: :jido_connect_catalog,
+             version: "1.2.3",
              tags: [:catalog_test],
              policies: [%{id: :item_access}]
            } = entry
@@ -120,15 +159,32 @@ defmodule Jido.Connect.CatalogTest do
     assert Enum.any?(entry.capabilities, &(&1.feature == :oauth2))
     assert Enum.any?(entry.capabilities, &(&1.feature == :generated_jido_actions))
     assert Enum.any?(entry.capabilities, &(&1.feature == :polling))
-    assert [%Catalog.AuthProfileSummary{id: :user, kind: :oauth2}] = entry.auth_profiles
 
-    assert [%Catalog.Tool{id: "catalog.item.get", type: :action, resource: :item, verb: :get}] =
+    assert [
+             %Catalog.AuthProfileSummary{
+               id: :user,
+               kind: :oauth2,
+               credential_fields: [:access_token],
+               lease_fields: [:access_token]
+             }
+           ] = entry.auth_profiles
+
+    assert [
+             %Catalog.Tool{
+               id: "catalog.item.get",
+               type: :action,
+               tags: [:inventory, :read_model],
+               resource: :item,
+               verb: :get
+             }
+           ] =
              entry.actions
 
     assert [
              %Catalog.Tool{
                id: "catalog.item.created",
                type: :trigger,
+               tags: [:inventory, :events],
                trigger_kind: :poll,
                resource: :item,
                verb: :watch
@@ -141,8 +197,29 @@ defmodule Jido.Connect.CatalogTest do
     assert %Catalog.Manifest{
              id: :catalog,
              package: :jido_connect_catalog,
+             version: "1.2.3",
              generated_modules: %{actions: [], sensors: [], plugin: nil}
            } = manifest
+  end
+
+  test "catalog entries normalize package metadata before deriving versions" do
+    assert %Catalog.Entry{
+             package: :jido_connect,
+             version: "9.9.9"
+           } = Catalog.entry(MetadataPackageIntegration)
+
+    assert %Catalog.Manifest{
+             package: :jido_connect,
+             version: "9.9.9"
+           } = MetadataPackageIntegration.jido_connect_manifest()
+
+    assert [
+             %Catalog.ToolEntry{
+               id: "metadata.item.get",
+               package: :jido_connect,
+               package_version: "9.9.9"
+             }
+           ] = Catalog.tools(modules: [MetadataPackageIntegration])
   end
 
   test "catalog discovery searches and filters configured modules" do
@@ -181,9 +258,10 @@ defmodule Jido.Connect.CatalogTest do
     assert %{
              id: :catalog,
              module: "Jido.Connect.CatalogFixtures.Integration",
+             version: "1.2.3",
              capabilities: [%{provider: :catalog} | _],
              policies: [%{id: :item_access}],
-             actions: [%{id: "catalog.item.get"}]
+             actions: [%{id: "catalog.item.get", tags: [:inventory, :read_model]}]
            } = Catalog.discover(modules: modules) |> hd() |> Catalog.to_map()
 
     assert [
@@ -191,6 +269,8 @@ defmodule Jido.Connect.CatalogTest do
                provider: :catalog,
                type: :action,
                id: "catalog.item.get",
+               package_version: "1.2.3",
+               tags: [:inventory, :read_model],
                auth_kinds: [:oauth2]
              },
              %Catalog.ToolEntry{
@@ -210,6 +290,9 @@ defmodule Jido.Connect.CatalogTest do
              Catalog.tools(modules: modules, query: "created")
 
     assert [%Catalog.ToolEntry{id: "catalog.item.get"}] =
+             Catalog.tools(modules: modules, tool_tag: :read_model)
+
+    assert [%Catalog.ToolEntry{id: "catalog.item.get"}] =
              Catalog.tools(modules: modules, tool: "catalog.item.get")
 
     assert [
@@ -220,7 +303,9 @@ defmodule Jido.Connect.CatalogTest do
     assert %{
              provider: :catalog,
              integration_module: "Jido.Connect.CatalogFixtures.Integration",
+             package_version: "1.2.3",
              id: "catalog.item.get",
+             tags: [:inventory, :read_model],
              auth_kinds: [:oauth2],
              policies: [:item_access],
              resource: :item,
@@ -359,6 +444,8 @@ defmodule Jido.Connect.CatalogTest do
     assert entry.scopes == ["read"]
     assert entry.read_only? == true
     assert entry.metadata.provider == :generated_catalog
+    assert "read_model" in entry.tags
+    assert entry.metadata.package_version == "1.2.3"
   end
 
   test "action catalog bridge skips non-generated catalog tools" do
@@ -382,6 +469,15 @@ defmodule Jido.Connect.CatalogTest do
     assert :id in matched_fields
 
     assert [
+             %Catalog.ToolSearchResult{
+               tool: %Catalog.ToolEntry{id: "catalog.item.get"},
+               matched_fields: tag_fields
+             }
+           ] = Catalog.search_tools("read_model", modules: [CatalogFixtures.Integration])
+
+    assert :tags in tag_fields
+
+    assert [
              %Catalog.ToolSearchResult{tool: %Catalog.ToolEntry{id: "catalog.item.created"}},
              %Catalog.ToolSearchResult{tool: %Catalog.ToolEntry{id: "catalog.item.created"}}
            ] =
@@ -394,7 +490,34 @@ defmodule Jido.Connect.CatalogTest do
                type: :action
              )
 
+    assert [%Catalog.ToolSearchResult{tool: %Catalog.ToolEntry{id: "catalog.item.get"}}] =
+             Catalog.search_tools("inventory",
+               modules: [CatalogFixtures.Integration],
+               type: :action,
+               tool_tag: :read_model
+             )
+
     assert [] = Catalog.search_tools("missing", modules: modules)
+  end
+
+  test "catalog entry search includes auth lease field summaries" do
+    entry =
+      Catalog.Entry.new!(%{
+        id: :lease_search,
+        name: "Lease Search",
+        module: __MODULE__,
+        auth_profiles: [
+          Catalog.AuthProfileSummary.new!(%{
+            id: :user,
+            kind: :oauth2,
+            owner: :user,
+            subject: :user,
+            lease_fields: [:resolved_access_token]
+          })
+        ]
+      })
+
+    assert [^entry] = Catalog.search([entry], "resolved_access_token")
   end
 
   test "tool lookup resolves ids and provider-qualified references" do
@@ -421,11 +544,15 @@ defmodule Jido.Connect.CatalogTest do
 
     assert {:ok,
             %Catalog.ToolDescriptor{
-              tool: %Catalog.ToolEntry{id: "catalog.item.get", source: :curated},
-              provider: %{id: :catalog, package: :jido_connect_catalog},
+              tool: %Catalog.ToolEntry{
+                id: "catalog.item.get",
+                tags: [:inventory, :read_model],
+                source: :curated
+              },
+              provider: %{id: :catalog, package: :jido_connect_catalog, version: "1.2.3"},
               input: [%{name: :id}],
               output: [%{name: :id}],
-              auth: [%{id: :user, kind: :oauth2}],
+              auth: [%{id: :user, kind: :oauth2, credential_fields: [:access_token]}],
               policies: [%{id: :item_access}],
               scopes: ["read"],
               source: :curated
@@ -433,11 +560,13 @@ defmodule Jido.Connect.CatalogTest do
              Catalog.describe_tool("catalog.item.get", modules: modules)
 
     assert %{
-             tool: %{id: "catalog.item.get", source: :curated},
-             provider: %{id: :catalog},
+             tool: %{id: "catalog.item.get", tags: [:inventory, :read_model], source: :curated},
+             provider: %{id: :catalog, version: "1.2.3"},
              input: [%{name: :id}],
              output: [%{name: :id}],
-             auth: [%{id: :user}],
+             auth: [
+               %{id: :user, credential_fields: [:access_token], lease_fields: [:access_token]}
+             ],
              policies: [%{id: :item_access}],
              source: :curated
            } = Catalog.to_map(descriptor)
@@ -543,7 +672,7 @@ defmodule Jido.Connect.CatalogTest do
              SearchTools.run(
                %{
                  "query" => "item",
-                 "filters" => %{"type" => "action"},
+                 "filters" => %{"type" => "action", "tool_tag" => "read_model"},
                  "limit" => "1",
                  "pack" => "actions"
                },

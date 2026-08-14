@@ -78,7 +78,8 @@ defmodule Jido.Connect.Catalog.ToolDescriber do
       status: spec.status || Map.get(spec.metadata, :status),
       tags: spec.tags,
       visibility: spec.visibility,
-      docs: spec.docs
+      docs: spec.docs,
+      version: tool.package_version
     }
   end
 
@@ -105,7 +106,9 @@ defmodule Jido.Connect.Catalog.ToolDescriber do
       default?: auth_profile.default?,
       scopes: auth_profile.scopes,
       default_scopes: auth_profile.default_scopes,
-      optional_scopes: auth_profile.optional_scopes
+      optional_scopes: auth_profile.optional_scopes,
+      credential_fields: auth_profile.credential_fields,
+      lease_fields: auth_profile.lease_fields
     })
   end
 

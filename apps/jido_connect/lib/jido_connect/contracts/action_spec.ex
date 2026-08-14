@@ -10,6 +10,7 @@ defmodule Jido.Connect.ActionSpec do
               name: Zoi.atom(),
               label: Zoi.string(),
               description: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              tags: Zoi.list(Zoi.atom()) |> Zoi.default([]),
               resource: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),
               verb: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),
               data_classification: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),

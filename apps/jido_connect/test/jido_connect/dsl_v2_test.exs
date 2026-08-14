@@ -69,6 +69,7 @@ defmodule Jido.Connect.DslV2Test do
         verb :list
         data_classification :workspace_content
         label "List items"
+        tags [:inventory, :read_model]
         handler Handler
         effect :read
         input_schema :item
@@ -89,6 +90,7 @@ defmodule Jido.Connect.DslV2Test do
         verb :watch
         data_classification :workspace_content
         label "Item created"
+        tags [:inventory, :events]
         verification %{kind: :hmac_sha256, header: "x-demo-signature"}
         handler Handler
         signal_schema :item
@@ -224,6 +226,7 @@ defmodule Jido.Connect.DslV2Test do
               policies: [:tenant_access],
               resource: :item,
               verb: :list,
+              tags: [:inventory, :read_model],
               scopes: ["items:read"]
             } = action} = Connect.action(spec, "v2.item.list")
 
@@ -235,6 +238,7 @@ defmodule Jido.Connect.DslV2Test do
               id: "v2.item.created",
               kind: :webhook,
               verification: %{kind: :hmac_sha256},
+              tags: [:inventory, :events],
               policies: [:tenant_access]
             } = trigger} = Connect.trigger(spec, "v2.item.created")
 
@@ -252,6 +256,11 @@ defmodule Jido.Connect.DslV2Test do
                plugin: Jido.Connect.DslV2Test.Integration.Plugin
              }
            } = Integration.jido_connect_manifest()
+
+    assert [%{id: "v2.item.list", tags: [:inventory, :read_model]}] =
+             Integration.jido_connect_manifest().actions
+
+    assert Integration.Actions.ListItems.tags() == ["inventory", "read_model"]
 
     assert Integration.jido_connect_modules() == %{
              actions: [Jido.Connect.DslV2Test.Integration.Actions.ListItems],

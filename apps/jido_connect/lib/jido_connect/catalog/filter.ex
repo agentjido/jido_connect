@@ -29,6 +29,7 @@ defmodule Jido.Connect.Catalog.Filter do
     |> filter_tool_equal(:data_classification, Keyword.get(opts, :data_classification))
     |> filter_tool_equal(:risk, Keyword.get(opts, :risk))
     |> filter_tool_equal(:confirmation, Keyword.get(opts, :confirmation))
+    |> filter_tool_tag(Keyword.get(opts, :tool_tag))
     |> filter_tool_auth_kind(Keyword.get(opts, :auth_kind))
     |> filter_tool_auth_profile(Keyword.get(opts, :auth_profile))
     |> filter_tool_scope(Keyword.get(opts, :scope))
@@ -144,6 +145,13 @@ defmodule Jido.Connect.Catalog.Filter do
   defp filter_tool_id(tools, tool) do
     tool = to_string(tool)
     Enum.filter(tools, &(&1.id == tool))
+  end
+
+  defp filter_tool_tag(tools, tag) when tag in [nil, ""], do: tools
+
+  defp filter_tool_tag(tools, tag) do
+    tag = normalize_filter_value(tag)
+    Enum.filter(tools, &(tag in &1.tags))
   end
 
   defp normalize_filter_value(value) when is_atom(value), do: value

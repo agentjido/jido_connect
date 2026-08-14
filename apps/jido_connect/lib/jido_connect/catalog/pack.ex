@@ -217,6 +217,7 @@ defmodule Jido.Connect.Catalog.Pack do
       "auth_kind" -> :auth_kind
       "auth_profile" -> :auth_profile
       "scope" -> :scope
+      "tool_tag" -> :tool_tag
       "tool" -> :tool
       _other -> :unknown_filter
     end
