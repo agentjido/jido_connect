@@ -30,7 +30,7 @@ support, and normalized structs may be added in subsequent waves.
 ```elixir
 def deps do
   [
-    {:jido_connect_posthog, "~> 0.1.0"}
+    {:jido_connect_posthog, "~> 0.8"}
   ]
 end
 ```

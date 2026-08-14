@@ -20,6 +20,9 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
           text_includes: ["metadata"]
         ),
         action("google.drive.folder.create", :workspace_metadata, :write, :required_for_ai),
+        action("google.drive.file.upload", :workspace_content, :external_write, :required_for_ai,
+          text_includes: ["Upload", "content"]
+        ),
         action("google.drive.file.copy", :workspace_metadata, :write, :required_for_ai),
         action("google.drive.file.update", :workspace_metadata, :write, :required_for_ai,
           text_includes: ["metadata"]
@@ -109,6 +112,18 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
         action("google.drive.shared_drive.unhide", :workspace_metadata, :write, :required_for_ai,
           text_includes: ["shared drive"]
         ),
+        action("google.drive.changes.get_start_page_token", :workspace_metadata, :read, :none,
+          text_includes: ["cursor"]
+        ),
+        action("google.drive.changes.list", :workspace_metadata, :read, :none,
+          text_includes: ["changes"]
+        ),
+        action("google.drive.collection.watch", :workspace_metadata, :write, :required_for_ai,
+          text_includes: ["collection", "cursor"]
+        ),
+        action("google.drive.collection.changes.list", :workspace_metadata, :read, :none,
+          text_includes: ["collection", "signals"]
+        ),
         action("google.drive.changes.watch", :workspace_metadata, :write, :required_for_ai,
           text_includes: ["push", "notification"]
         ),
@@ -125,6 +140,12 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
         ),
         trigger("google.drive.file.changed.push", :workspace_metadata,
           text_includes: ["push", "notification"]
+        ),
+        trigger("google.drive.collection.changes", :workspace_metadata,
+          text_includes: ["collection", "deltas"]
+        ),
+        trigger("google.drive.collection.changes.push", :workspace_metadata,
+          text_includes: ["collection", "push"]
         )
       ]
     )

@@ -80,6 +80,7 @@ As of 2026-05-19, the open queue is intentionally chained:
 26. `jido_con-l40` `[G36] Zoho Desk Connector`
 27. `jido_con-6cn` `[G37] BigCommerce Connector`
 28. `jido_con-jag` `[G38] Discord Connector`
+29. `jido_con-8pw` `[G39] Nextcloud Connector`
 
 `pi-connector-factory` resolves the next runnable leaf task as
 `jido_con-jxj.2` via `bun run doctor`. The fresh connector work is chained
@@ -133,15 +134,16 @@ task at a time without selecting unrelated connector work.
 | 41 | `jido_connect_shopify` | Shopify | queued | OAuth2 app, admin API token | list orders, get order, guarded customer/product writes | order/customer/product webhook | New Beadwork epic `jido_con-5hk`; commerce anchor. |
 | 42 | `jido_connect_stripe` | Stripe | queued | API key, restricted key, webhook signing | list customers, invoices, subscriptions, guarded low-risk writes | payment/invoice/customer webhook | New Beadwork epic `jido_con-ru0`; requires strict safety defaults. |
 | 43 | `jido_connect_sftp` | SFTP | queued | password, key-based auth | list files, download file, upload file, move file | new file poll | New Beadwork epic `jido_con-e6u`; proves non-HTTP credentials and host-key policy. |
-| 44 | `jido_connect_zoom` | Zoom | queued | OAuth2 server-to-server/user | list meetings, create meeting, get recording | meeting ended webhook, recording ready webhook | New Beadwork epic `jido_con-te1`; meetings and assistant workflows. |
-| 45 | `jido_connect_typeform` | Typeform | queued | OAuth2, personal token, webhook signing | list forms, get responses | new response webhook | New Beadwork epic `jido_con-n1t`; forms are high-value lead/support triggers. |
-| 46 | `jido_connect_youtube` | YouTube Data API | queued | OAuth2/API key | search videos, get video, list channel videos | new channel video poll | New Beadwork epic `jido_con-q2q`; complements the Google family. |
-| 47 | `jido_connect_mailchimp` | Mailchimp | queued | OAuth2/API key | list audiences, add/update member, create campaign | subscriber event webhook | New Beadwork epic `jido_con-fui`; marketing automation category. |
-| 48 | `jido_connect_activecampaign` | ActiveCampaign | queued | API key | search contacts, create/update contact, add tag | contact/deal webhook/poll | New Beadwork epic `jido_con-yoe`; marketing/sales automation. |
-| 49 | `jido_connect_zoho_crm` | Zoho CRM | queued | OAuth2 | search leads, create lead, update contact | record changed poll | New Beadwork epic `jido_con-5nj`; CRM breadth. |
-| 50 | `jido_connect_zoho_desk` | Zoho Desk | queued | OAuth2 | list tickets, create ticket, update ticket | ticket changed poll | New Beadwork epic `jido_con-l40`; support breadth. |
-| 51 | `jido_connect_bigcommerce` | BigCommerce | queued | OAuth2/API token | list orders, get order, guarded customer/product writes | order/customer/product webhook | New Beadwork epic `jido_con-6cn`; commerce breadth. |
-| 52 | `jido_connect_discord` | Discord | queued | OAuth2 bot | list channels, send message | webhook/interaction strategy | New Beadwork epic `jido_con-jag`; collaboration breadth after Slack/Teams. |
+| 44 | `jido_connect_nextcloud` | Nextcloud | shipped | app password, OAuth2 where configured | list/search/get/download/upload/move/copy/delete files, create folders, shares, sharee search, Office launch metadata | file polling later | Beadwork epic `jido_con-8pw`; implemented as a single provider package with modular WebDAV, OCS sharing, and Office internals. |
+| 45 | `jido_connect_zoom` | Zoom | queued | OAuth2 server-to-server/user | list meetings, create meeting, get recording | meeting ended webhook, recording ready webhook | New Beadwork epic `jido_con-te1`; meetings and assistant workflows. |
+| 46 | `jido_connect_typeform` | Typeform | queued | OAuth2, personal token, webhook signing | list forms, get responses | new response webhook | New Beadwork epic `jido_con-n1t`; forms are high-value lead/support triggers. |
+| 47 | `jido_connect_youtube` | YouTube Data API | queued | OAuth2/API key | search videos, get video, list channel videos | new channel video poll | New Beadwork epic `jido_con-q2q`; complements the Google family. |
+| 48 | `jido_connect_mailchimp` | Mailchimp | queued | OAuth2/API key | list audiences, add/update member, create campaign | subscriber event webhook | New Beadwork epic `jido_con-fui`; marketing automation category. |
+| 49 | `jido_connect_activecampaign` | ActiveCampaign | queued | API key | search contacts, create/update contact, add tag | contact/deal webhook/poll | New Beadwork epic `jido_con-yoe`; marketing/sales automation. |
+| 50 | `jido_connect_zoho_crm` | Zoho CRM | queued | OAuth2 | search leads, create lead, update contact | record changed poll | New Beadwork epic `jido_con-5nj`; CRM breadth. |
+| 51 | `jido_connect_zoho_desk` | Zoho Desk | queued | OAuth2 | list tickets, create ticket, update ticket | ticket changed poll | New Beadwork epic `jido_con-l40`; support breadth. |
+| 52 | `jido_connect_bigcommerce` | BigCommerce | queued | OAuth2/API token | list orders, get order, guarded customer/product writes | order/customer/product webhook | New Beadwork epic `jido_con-6cn`; commerce breadth. |
+| 53 | `jido_connect_discord` | Discord | queued | OAuth2 bot | list channels, send message | webhook/interaction strategy | New Beadwork epic `jido_con-jag`; collaboration breadth after Slack/Teams. |
 
 ## Suggested Build Waves
 

@@ -11,9 +11,9 @@ pagination, and account helpers.
 ```elixir
 def deps do
   [
-    {:jido_connect, "~> 0.1.0"},
-    {:jido_connect_google, "~> 0.1.0"},
-    {:jido_connect_google_sheets, "~> 0.1.0"}
+    {:jido_connect, "~> 0.8"},
+    {:jido_connect_google, "~> 0.8"},
+    {:jido_connect_google_sheets, "~> 0.8"}
   ]
 end
 ```

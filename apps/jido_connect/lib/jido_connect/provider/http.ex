@@ -30,6 +30,26 @@ defmodule Jido.Connect.Http do
   def maybe_merge_req_options(request, []), do: request
   def maybe_merge_req_options(request, req_options), do: Req.merge(request, req_options)
 
+  @doc "Adds query parameters to a URL without removing repeated keys."
+  @spec url_with_query(String.t(), [{term(), term()}] | map()) :: String.t()
+  def url_with_query(url, params) when is_binary(url) do
+    case URI.encode_query(params) do
+      "" ->
+        url
+
+      encoded_params ->
+        uri = URI.parse(url)
+
+        query =
+          [uri.query, encoded_params]
+          |> Enum.reject(&is_nil/1)
+          |> Enum.join("&")
+
+        %{uri | query: query}
+        |> URI.to_string()
+    end
+  end
+
   @spec handle_map_response(term(), keyword()) :: {:ok, map()} | {:error, Error.error()}
   def handle_map_response({:ok, %{status: status, body: body}}, _opts)
       when status in 200..299 and is_map(body) do

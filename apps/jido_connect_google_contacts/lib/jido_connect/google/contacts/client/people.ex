@@ -1,6 +1,7 @@
 defmodule Jido.Connect.Google.Contacts.Client.People do
   @moduledoc "Google People API boundary for person reads and search."
 
+  alias Jido.Connect.Http
   alias Jido.Connect.Google.Contacts.Client.{Params, Response, Transport}
 
   def list_people(%{resource_name: resource_name} = params, access_token)
@@ -8,8 +9,11 @@ defmodule Jido.Connect.Google.Contacts.Client.People do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v1/#{resource_path(resource_name)}/connections",
-      params: Params.list_people_params(params)
+      url:
+        Http.url_with_query(
+          "/v1/#{resource_path(resource_name)}/connections",
+          Params.list_people_params(params)
+        )
     )
     |> Response.handle_person_list_response()
   end
@@ -19,8 +23,11 @@ defmodule Jido.Connect.Google.Contacts.Client.People do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v1/#{resource_path(resource_name)}",
-      params: Params.get_person_params(params)
+      url:
+        Http.url_with_query(
+          "/v1/#{resource_path(resource_name)}",
+          Params.get_person_params(params)
+        )
     )
     |> Response.handle_person_response()
   end
@@ -30,8 +37,11 @@ defmodule Jido.Connect.Google.Contacts.Client.People do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v1/people:batchGet",
-      params: Params.batch_get_people_params(params)
+      url:
+        Http.url_with_query(
+          "/v1/people:batchGet",
+          Params.batch_get_people_params(params)
+        )
     )
     |> Response.handle_person_batch_get_response()
   end
@@ -41,8 +51,11 @@ defmodule Jido.Connect.Google.Contacts.Client.People do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v1/people:searchContacts",
-      params: Params.search_people_params(params)
+      url:
+        Http.url_with_query(
+          "/v1/people:searchContacts",
+          Params.search_people_params(params)
+        )
     )
     |> Response.handle_person_search_response()
   end
@@ -52,8 +65,11 @@ defmodule Jido.Connect.Google.Contacts.Client.People do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v1/people:listDirectoryPeople",
-      params: Params.list_directory_people_params(params)
+      url:
+        Http.url_with_query(
+          "/v1/people:listDirectoryPeople",
+          Params.list_directory_people_params(params)
+        )
     )
     |> Response.handle_directory_people_list_response()
   end
@@ -63,8 +79,11 @@ defmodule Jido.Connect.Google.Contacts.Client.People do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/v1/people:searchDirectoryPeople",
-      params: Params.search_directory_people_params(params)
+      url:
+        Http.url_with_query(
+          "/v1/people:searchDirectoryPeople",
+          Params.search_directory_people_params(params)
+        )
     )
     |> Response.handle_directory_people_search_response()
   end

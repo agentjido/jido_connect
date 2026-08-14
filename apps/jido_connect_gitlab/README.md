@@ -20,7 +20,7 @@ normalized structs, and webhook support will be added in subsequent waves.
 ```elixir
 def deps do
   [
-    {:jido_connect_gitlab, "~> 0.1.0"}
+    {:jido_connect_gitlab, "~> 0.8"}
   ]
 end
 ```

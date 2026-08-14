@@ -1,6 +1,7 @@
 defmodule Jido.Connect.HubSpot.Client.Companies do
   @moduledoc "HubSpot CRM v3 API boundary for company reads and search."
 
+  alias Jido.Connect.Http
   alias Jido.Connect.HubSpot.Client.{Params, Response, Transport}
   alias Jido.Connect.HubSpot.Normalizer
 
@@ -14,8 +15,11 @@ defmodule Jido.Connect.HubSpot.Client.Companies do
     access_token
     |> Transport.api_request()
     |> Req.get(
-      url: "#{@object_path}/#{company_id}",
-      params: Params.get_params(params, defaults)
+      url:
+        Http.url_with_query(
+          "#{@object_path}/#{company_id}",
+          Params.get_params(params, defaults)
+        )
     )
     |> Response.handle_get_response(&Normalizer.company/1)
   end
@@ -26,10 +30,7 @@ defmodule Jido.Connect.HubSpot.Client.Companies do
 
     access_token
     |> Transport.api_request()
-    |> Req.get(
-      url: @object_path,
-      params: Params.list_params(params, defaults)
-    )
+    |> Req.get(url: Http.url_with_query(@object_path, Params.list_params(params, defaults)))
     |> Response.handle_list_response(&Normalizer.company/1)
   end
 

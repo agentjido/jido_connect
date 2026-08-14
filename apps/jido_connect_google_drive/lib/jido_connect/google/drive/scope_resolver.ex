@@ -12,6 +12,7 @@ defmodule Jido.Connect.Google.Drive.ScopeResolver do
   @readonly_scope "https://www.googleapis.com/auth/drive.readonly"
   @write_actions [
     "google.drive.file.create",
+    "google.drive.file.upload",
     "google.drive.folder.create",
     "google.drive.file.copy",
     "google.drive.file.update",
@@ -41,6 +42,7 @@ defmodule Jido.Connect.Google.Drive.ScopeResolver do
   ]
   @watch_actions [
     "google.drive.changes.watch",
+    "google.drive.collection.watch",
     "google.drive.file.watch",
     "google.drive.channel.stop"
   ]

@@ -1,6 +1,7 @@
 defmodule Jido.Connect.Gmail.Client.Users do
   @moduledoc "Gmail users API boundary."
 
+  alias Jido.Connect.Http
   alias Jido.Connect.Gmail.Client.{Params, Response, Transport}
 
   def get_profile(params, access_token) when is_map(params) and is_binary(access_token) do
@@ -28,7 +29,9 @@ defmodule Jido.Connect.Gmail.Client.Users do
   def list_messages(params, access_token) when is_map(params) and is_binary(access_token) do
     access_token
     |> Transport.request()
-    |> Req.get(url: "/gmail/v1/users/me/messages", params: Params.message_list_params(params))
+    |> Req.get(
+      url: Http.url_with_query("/gmail/v1/users/me/messages", Params.message_list_params(params))
+    )
     |> Response.handle_message_list_response()
   end
 
@@ -37,8 +40,11 @@ defmodule Jido.Connect.Gmail.Client.Users do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/gmail/v1/users/me/messages/#{encode_path_segment(message_id)}",
-      params: Params.metadata_get_params(params)
+      url:
+        Http.url_with_query(
+          "/gmail/v1/users/me/messages/#{encode_path_segment(message_id)}",
+          Params.metadata_get_params(params)
+        )
     )
     |> Response.handle_message_response()
   end
@@ -46,7 +52,9 @@ defmodule Jido.Connect.Gmail.Client.Users do
   def list_threads(params, access_token) when is_map(params) and is_binary(access_token) do
     access_token
     |> Transport.request()
-    |> Req.get(url: "/gmail/v1/users/me/threads", params: Params.thread_list_params(params))
+    |> Req.get(
+      url: Http.url_with_query("/gmail/v1/users/me/threads", Params.thread_list_params(params))
+    )
     |> Response.handle_thread_list_response()
   end
 
@@ -55,8 +63,11 @@ defmodule Jido.Connect.Gmail.Client.Users do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/gmail/v1/users/me/threads/#{encode_path_segment(thread_id)}",
-      params: Params.metadata_get_params(params)
+      url:
+        Http.url_with_query(
+          "/gmail/v1/users/me/threads/#{encode_path_segment(thread_id)}",
+          Params.metadata_get_params(params)
+        )
     )
     |> Response.handle_thread_response()
   end
@@ -64,7 +75,9 @@ defmodule Jido.Connect.Gmail.Client.Users do
   def list_drafts(params, access_token) when is_map(params) and is_binary(access_token) do
     access_token
     |> Transport.request()
-    |> Req.get(url: "/gmail/v1/users/me/drafts", params: Params.draft_list_params(params))
+    |> Req.get(
+      url: Http.url_with_query("/gmail/v1/users/me/drafts", Params.draft_list_params(params))
+    )
     |> Response.handle_draft_list_response()
   end
 
@@ -73,8 +86,11 @@ defmodule Jido.Connect.Gmail.Client.Users do
     access_token
     |> Transport.request()
     |> Req.get(
-      url: "/gmail/v1/users/me/drafts/#{encode_path_segment(draft_id)}",
-      params: Params.metadata_get_params(params)
+      url:
+        Http.url_with_query(
+          "/gmail/v1/users/me/drafts/#{encode_path_segment(draft_id)}",
+          Params.metadata_get_params(params)
+        )
     )
     |> Response.handle_draft_response()
   end
@@ -83,7 +99,9 @@ defmodule Jido.Connect.Gmail.Client.Users do
       when is_binary(start_history_id) and is_binary(access_token) do
     access_token
     |> Transport.request()
-    |> Req.get(url: "/gmail/v1/users/me/history", params: Params.history_list_params(params))
+    |> Req.get(
+      url: Http.url_with_query("/gmail/v1/users/me/history", Params.history_list_params(params))
+    )
     |> Response.handle_history_list_response()
   end
 

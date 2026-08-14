@@ -21,7 +21,7 @@ client transport, webhook triggers, and trigger handlers are implemented.
 ```elixir
 def deps do
   [
-    {:jido_connect_asana, "~> 0.1.0"}
+    {:jido_connect_asana, "~> 0.8"}
   ]
 end
 ```

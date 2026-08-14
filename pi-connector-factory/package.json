@@ -1,6 +1,6 @@
 {
   "name": "jido-connect-pi-connector-factory",
-  "version": "0.1.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,7 +14,7 @@
     "recover": "bun run src/cli.ts recover"
   },
   "devDependencies": {
-    "@types/bun": "^1.3.3",
-    "typescript": "^5.9.3"
+    "@types/bun": "^1.3.14",
+    "typescript": "^7.0.2"
   }
 }

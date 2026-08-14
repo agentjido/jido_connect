@@ -65,6 +65,54 @@ defmodule Jido.Connect.Google.Drive.Actions.Write do
       end
     end
 
+    action :upload_file do
+      id("google.drive.file.upload")
+      resource(:file)
+      verb(:upload)
+      data_classification(:workspace_content)
+      label("Upload Google Drive file")
+
+      description(
+        "Upload content for a new file of 5 MiB or less to Google Drive and return the created file metadata."
+      )
+
+      handler(Jido.Connect.Google.Drive.Handlers.Actions.UploadFile)
+      effect(:external_write, confirmation: :required_for_ai)
+
+      access do
+        auth(@auth_profiles, default: :user)
+        scopes([@file_scope], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:name, :string, required?: true, example: "report.txt")
+
+        field(:content, :string,
+          description:
+            "UTF-8 text or raw bytes for in-process callers. Set content or content_base64, but not both. The decoded file must be 5 MiB or less."
+        )
+
+        field(:content_base64, :string,
+          description:
+            "Base64-encoded file bytes for JSON callers. Set content or content_base64, but not both. The decoded file must be 5 MiB or less."
+        )
+
+        field(:mime_type, :string,
+          default: "application/octet-stream",
+          description: "Valid media MIME type without parameters or wildcards."
+        )
+
+        field(:parents, {:array, :string}, default: [])
+        field(:description, :string)
+        field(:fields, :string)
+        field(:supports_all_drives, :boolean, default: false)
+      end
+
+      output do
+        field(:file, :map)
+      end
+    end
+
     action :copy_file do
       id("google.drive.file.copy")
       resource(:file)

@@ -27,9 +27,9 @@ The first evaluation slice compared one Sheets read operation:
 
 Use handwritten Req clients for first-wave Google product connectors.
 
-Keep generated `google_api_*` packages as spike/reference dependencies only
-until a product connector proves that generated endpoint coverage is worth the
-runtime dependency and mocking stack.
+Use generated `google_api_*` packages as external implementation references
+only. Do not keep them as package dependencies unless a later product decision
+shows that their endpoint coverage is worth the runtime and test stack.
 
 ## Rationale
 
@@ -58,6 +58,6 @@ at a time.
 
 ## Follow-Up
 
-- Remove `google_api_sheets` as a dev/test dependency before release if no
-  remaining tests use the spike facade.
+- Completed for 0.8.0: remove the test-only `google_api_sheets` spike and its
+  `google_gax`, Tesla, and Poison dependencies.
 - Use this decision for the initial `jido_connect_google_sheets` package.

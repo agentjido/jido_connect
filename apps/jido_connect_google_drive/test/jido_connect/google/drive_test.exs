@@ -11,6 +11,7 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.GetFile,
     Jido.Connect.Google.Drive.Actions.CreateFile,
     Jido.Connect.Google.Drive.Actions.CreateFolder,
+    Jido.Connect.Google.Drive.Actions.UploadFile,
     Jido.Connect.Google.Drive.Actions.CopyFile,
     Jido.Connect.Google.Drive.Actions.UpdateFile,
     Jido.Connect.Google.Drive.Actions.ExportFile,
@@ -42,6 +43,10 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.DeleteSharedDrive,
     Jido.Connect.Google.Drive.Actions.HideSharedDrive,
     Jido.Connect.Google.Drive.Actions.UnhideSharedDrive,
+    Jido.Connect.Google.Drive.Actions.GetStartPageToken,
+    Jido.Connect.Google.Drive.Actions.ListChanges,
+    Jido.Connect.Google.Drive.Actions.WatchCollection,
+    Jido.Connect.Google.Drive.Actions.ListCollectionChanges,
     Jido.Connect.Google.Drive.Actions.WatchChanges,
     Jido.Connect.Google.Drive.Actions.WatchFile,
     Jido.Connect.Google.Drive.Actions.StopChannel
@@ -57,6 +62,8 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.Comments,
     Jido.Connect.Google.Drive.Actions.Replies,
     Jido.Connect.Google.Drive.Actions.SharedDrives,
+    Jido.Connect.Google.Drive.Actions.Changes,
+    Jido.Connect.Google.Drive.Actions.Collections,
     Jido.Connect.Google.Drive.Actions.Watch,
     Jido.Connect.Google.Drive.Triggers.Changes
   ]
@@ -107,6 +114,22 @@ defmodule Jido.Connect.Google.DriveTest do
        })}
     end
 
+    def get_file(
+          %{
+            file_id: "folder123",
+            fields: "id,mimeType,driveId",
+            supports_all_drives: true
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.File.new!(%{
+         file_id: "folder123",
+         name: "Reports",
+         mime_type: "application/vnd.google-apps.folder"
+       })}
+    end
+
     def create_file(
           %{
             name: "Notes",
@@ -122,6 +145,42 @@ defmodule Jido.Connect.Google.DriveTest do
          name: "Notes",
          mime_type: "text/plain",
          parents: ["folder123"]
+       })}
+    end
+
+    def upload_file(
+          %{
+            name: "Notes",
+            content: "hello",
+            mime_type: "text/plain",
+            parents: ["folder123"],
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.File.new!(%{
+         file_id: "uploaded123",
+         name: "Notes",
+         mime_type: "text/plain",
+         parents: ["folder123"]
+       })}
+    end
+
+    def upload_file(
+          %{
+            name: "Image",
+            content: <<0, 255>>,
+            mime_type: "application/octet-stream",
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.File.new!(%{
+         file_id: "image123",
+         name: "Image",
+         mime_type: "application/octet-stream"
        })}
     end
 
@@ -538,7 +597,6 @@ defmodule Jido.Connect.Google.DriveTest do
             expiration_ms: 1_770_000_000_000,
             page_size: 100,
             spaces: "drive",
-            include_corpus_removals: false,
             include_items_from_all_drives: false,
             include_removed: true,
             restrict_to_my_drive: false,
@@ -604,7 +662,6 @@ defmodule Jido.Connect.Google.DriveTest do
        %{
          changes: [
            Drive.Change.new!(%{
-             change_id: "change123",
              file_id: "file123",
              removed?: false,
              time: "2026-05-05T12:00:00Z",
@@ -618,6 +675,91 @@ defmodule Jido.Connect.Google.DriveTest do
            })
          ],
          new_start_page_token: "next-token"
+       }}
+    end
+
+    def list_changes(
+          %{
+            page_token: "collection-token",
+            page_size: 100,
+            spaces: "drive",
+            include_items_from_all_drives: false,
+            include_removed: true,
+            restrict_to_my_drive: false,
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         changes: [
+           Drive.Change.new!(%{
+             file_id: "file-in-folder",
+             removed?: false,
+             time: "2026-05-05T12:00:00Z",
+             change_type: "file",
+             file:
+               Drive.File.new!(%{
+                 file_id: "file-in-folder",
+                 name: "Budget.pdf",
+                 mime_type: "application/pdf",
+                 parents: ["folder123"]
+               })
+           }),
+           Drive.Change.new!(%{
+             file_id: "removed-file",
+             removed?: true,
+             time: "2026-05-05T12:01:00Z",
+             change_type: "file"
+           }),
+           Drive.Change.new!(%{
+             file_id: "other-file",
+             removed?: false,
+             time: "2026-05-05T12:02:00Z",
+             change_type: "file",
+             file:
+               Drive.File.new!(%{
+                 file_id: "other-file",
+                 name: "Other.pdf",
+                 mime_type: "application/pdf",
+                 parents: ["folder999"]
+               })
+           })
+         ],
+         next_page_token: "collection-page-2"
+       }}
+    end
+
+    def list_changes(
+          %{
+            page_token: "collection-page-2",
+            page_size: 100,
+            spaces: "drive",
+            include_items_from_all_drives: false,
+            include_removed: true,
+            restrict_to_my_drive: false,
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         changes: [
+           Drive.Change.new!(%{
+             file_id: "second-page-file",
+             removed?: false,
+             time: "2026-05-05T12:03:00Z",
+             change_type: "file",
+             file:
+               Drive.File.new!(%{
+                 file_id: "second-page-file",
+                 name: "Forecast.pdf",
+                 mime_type: "application/pdf",
+                 parents: ["folder123"]
+               })
+           })
+         ],
+         new_start_page_token: "collection-next"
        }}
     end
 
@@ -637,7 +779,6 @@ defmodule Jido.Connect.Google.DriveTest do
        %{
          changes: [
            Drive.Change.new!(%{
-             change_id: "change123",
              file_id: "file123",
              removed?: false,
              time: "2026-05-05T12:00:00Z",
@@ -670,7 +811,6 @@ defmodule Jido.Connect.Google.DriveTest do
        %{
          changes: [
            Drive.Change.new!(%{
-             change_id: "change123",
              file_id: "file123",
              removed?: false,
              time: "2026-05-05T12:00:00Z",
@@ -683,7 +823,6 @@ defmodule Jido.Connect.Google.DriveTest do
                })
            }),
            Drive.Change.new!(%{
-             change_id: "change456",
              file_id: "file456",
              removed?: false,
              time: "2026-05-05T12:05:00Z",
@@ -719,6 +858,25 @@ defmodule Jido.Connect.Google.DriveTest do
          status: 410,
          details: %{message: "Start page token is no longer valid"}
        )}
+    end
+
+    def list_changes(
+          %{
+            page_token: "minimal-change",
+            page_size: 100,
+            spaces: "drive",
+            include_items_from_all_drives: false,
+            include_removed: true,
+            restrict_to_my_drive: false,
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       %{
+         changes: [%{file_id: "file-minimal"}],
+         new_start_page_token: "minimal-next-token"
+       }}
     end
 
     def list_changes(
@@ -759,6 +917,29 @@ defmodule Jido.Connect.Google.DriveTest do
     assert spec.package == :jido_connect_google_drive
     assert spec.name == "Google Drive"
     assert spec.tags == [:google, :workspace, :files, :productivity]
+
+    capability_features = spec.capabilities |> Enum.map(& &1.feature) |> MapSet.new()
+
+    assert MapSet.subset?(
+             MapSet.new([
+               :watch_collection,
+               :list_collection_changes,
+               :collection_changes,
+               :collection_changes_push
+             ]),
+             capability_features
+           )
+
+    list_collection_changes_capability =
+      Enum.find(spec.capabilities, &(&1.feature == :list_collection_changes))
+
+    assert list_collection_changes_capability.metadata.generic_capability ==
+             :list_collection_changes
+
+    assert list_collection_changes_capability.metadata.tool_id ==
+             "google.drive.collection.changes.list"
+
+    assert list_collection_changes_capability.metadata.checkpoint_field == :checkpoint
 
     ConnectorContracts.assert_google_naming_and_catalog_conventions(Drive,
       id_prefix: "google.drive.",
@@ -807,6 +988,7 @@ defmodule Jido.Connect.Google.DriveTest do
              "google.drive.file.get",
              "google.drive.file.create",
              "google.drive.folder.create",
+             "google.drive.file.upload",
              "google.drive.file.copy",
              "google.drive.file.update",
              "google.drive.file.export",
@@ -838,6 +1020,10 @@ defmodule Jido.Connect.Google.DriveTest do
              "google.drive.shared_drive.delete",
              "google.drive.shared_drive.hide",
              "google.drive.shared_drive.unhide",
+             "google.drive.changes.get_start_page_token",
+             "google.drive.changes.list",
+             "google.drive.collection.watch",
+             "google.drive.collection.changes.list",
              "google.drive.changes.watch",
              "google.drive.file.watch",
              "google.drive.channel.stop"
@@ -931,13 +1117,27 @@ defmodule Jido.Connect.Google.DriveTest do
     assert hide_shared_drive.risk == :write
     assert hide_shared_drive.confirmation == :required_for_ai
 
+    get_start_page_token =
+      Enum.find(spec.actions, &(&1.id == "google.drive.changes.get_start_page_token"))
+
+    list_changes = Enum.find(spec.actions, &(&1.id == "google.drive.changes.list"))
+    watch_collection = Enum.find(spec.actions, &(&1.id == "google.drive.collection.watch"))
+
+    list_collection_changes =
+      Enum.find(spec.actions, &(&1.id == "google.drive.collection.changes.list"))
+
     watch_changes = Enum.find(spec.actions, &(&1.id == "google.drive.changes.watch"))
     watch_file = Enum.find(spec.actions, &(&1.id == "google.drive.file.watch"))
     stop_channel = Enum.find(spec.actions, &(&1.id == "google.drive.channel.stop"))
 
+    assert get_start_page_token.risk == :read
+    assert list_changes.risk == :read
+    assert watch_collection.risk == :write
+    assert list_collection_changes.risk == :read
     assert watch_changes.risk == :write
     assert watch_file.risk == :write
     assert stop_channel.risk == :write
+    assert watch_collection.confirmation == :required_for_ai
     assert watch_changes.confirmation == :required_for_ai
     assert watch_file.confirmation == :required_for_ai
     assert stop_channel.confirmation == :required_for_ai
@@ -1005,7 +1205,7 @@ defmodule Jido.Connect.Google.DriveTest do
               id: "google.drive.file.changed",
               kind: :poll,
               checkpoint: :page_token,
-              dedupe: %{key: [:change_id, :file_id]},
+              dedupe: %{key: [:change_type, :file_id, :drive_id, :time]},
               scope_resolver: Jido.Connect.Google.Drive.ScopeResolver
             }} =
              Connect.trigger(spec, "google.drive.file.changed")
@@ -1023,6 +1223,30 @@ defmodule Jido.Connect.Google.DriveTest do
               scope_resolver: Jido.Connect.Google.Drive.ScopeResolver
             }} =
              Connect.trigger(spec, "google.drive.file.changed.push")
+
+    assert {:ok,
+            %{
+              id: "google.drive.collection.changes",
+              kind: :poll,
+              checkpoint: :checkpoint,
+              dedupe: %{key: [:collection_id, :change_type, :provider_record_id, :changed_at]},
+              scope_resolver: Jido.Connect.Google.Drive.ScopeResolver
+            }} =
+             Connect.trigger(spec, "google.drive.collection.changes")
+
+    assert {:ok,
+            %{
+              id: "google.drive.collection.changes.push",
+              kind: :webhook,
+              dedupe: %{key: [:channel_id, :resource_id, :message_number]},
+              verification: %{
+                kind: :google_drive_channel,
+                token: :host_verified,
+                headers: :x_goog_channel
+              },
+              scope_resolver: Jido.Connect.Google.Drive.ScopeResolver
+            }} =
+             Connect.trigger(spec, "google.drive.collection.changes.push")
   end
 
   test "compiles generated Jido modules for actions, sensors, and plugin" do
@@ -1037,10 +1261,22 @@ defmodule Jido.Connect.Google.DriveTest do
           signal_type: "google.drive.file.changed"
         },
         %{
+          module: Jido.Connect.Google.Drive.Sensors.CollectionChanges,
+          name: "google_drive_collection_changes",
+          trigger_id: "google.drive.collection.changes",
+          signal_type: "google.drive.collection.changes"
+        },
+        %{
           module: Jido.Connect.Google.Drive.Sensors.FileChangedPush,
           name: "google_drive_file_changed_push",
           trigger_id: "google.drive.file.changed.push",
           signal_type: "google.drive.file.changed.push"
+        },
+        %{
+          module: Jido.Connect.Google.Drive.Sensors.CollectionChangesPush,
+          name: "google_drive_collection_changes_push",
+          trigger_id: "google.drive.collection.changes.push",
+          signal_type: "google.drive.collection.changes.push"
         }
       ],
       plugin_module: Jido.Connect.Google.Drive.Plugin,
@@ -1102,6 +1338,24 @@ defmodule Jido.Connect.Google.DriveTest do
              %{},
              %{scopes: ["https://www.googleapis.com/auth/drive.file"]}
            ) == ["https://www.googleapis.com/auth/drive.file"]
+
+    assert resolver.required_scopes(
+             %{id: "google.drive.collection.watch"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/drive.file"]}
+           ) == ["https://www.googleapis.com/auth/drive.file"]
+
+    assert resolver.required_scopes(
+             %{id: "google.drive.changes.get_start_page_token"},
+             %{},
+             %{scopes: []}
+           ) == ["https://www.googleapis.com/auth/drive.metadata.readonly"]
+
+    assert resolver.required_scopes(
+             %{id: "google.drive.changes.list"},
+             %{},
+             %{scopes: ["https://www.googleapis.com/auth/drive.readonly"]}
+           ) == ["https://www.googleapis.com/auth/drive.readonly"]
 
     assert resolver.required_scopes(%{}, %{}, %{}) == [
              "https://www.googleapis.com/auth/drive.metadata.readonly"
@@ -1249,6 +1503,130 @@ defmodule Jido.Connect.Google.DriveTest do
                Drive.integration(),
                "google.drive.folder.create",
                %{name: "Reports", parents: ["root"]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes upload file through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{file: %{file_id: "uploaded123", name: "Notes", parents: ["folder123"]}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{
+                 name: "Notes",
+                 content: "hello",
+                 mime_type: "text/plain",
+                 parents: ["folder123"]
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "decodes base64 file content and applies the default MIME type" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{file: %{file_id: "image123", name: "Image"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{
+                 name: "Image",
+                 content_base64: Base.encode64(<<0, 255>>)
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "rejects missing, ambiguous, invalid, and oversized upload content" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+    opts = [context: context, credential_lease: lease]
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_upload_content,
+              subject: :content
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Missing"},
+               opts
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_upload_content,
+              subject: :content
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Ambiguous", content: "hello", content_base64: "aGVsbG8="},
+               opts
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_upload_content,
+              subject: :content_base64
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Invalid", content_base64: "%%%"},
+               opts
+             )
+
+    oversized_content = :binary.copy(<<0>>, 5 * 1024 * 1024 + 1)
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :upload_too_large,
+              subject: :content
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Large", content: oversized_content},
+               opts
+             )
+
+    oversized_base64 = :binary.copy("A", 4 * div(5 * 1024 * 1024 + 2, 3) + 4)
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :upload_too_large,
+              subject: :content_base64
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Large base64", content_base64: oversized_base64},
+               opts
+             )
+  end
+
+  test "rejects invalid upload MIME types" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_mime_type,
+              subject: :mime_type
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{
+                 name: "Invalid MIME type",
+                 content: "hello",
+                 mime_type: "text/plain\r\nx-injected: true"
+               },
                context: context,
                credential_lease: lease
              )
@@ -1764,6 +2142,164 @@ defmodule Jido.Connect.Google.DriveTest do
   test "invokes changes watch through injected client and lease" do
     {context, lease} = context_and_lease()
 
+    assert {:ok, %{start_page_token: "start-token"}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.changes.get_start_page_token",
+               %{},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok,
+            %{
+              changes: [
+                %{
+                  file_id: "file123",
+                  file: %{file_id: "file123", name: "Budget.pdf"}
+                }
+              ],
+              new_start_page_token: "next-token"
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.changes.list",
+               %{page_token: "start-token"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok, %{changes: [minimal_change]}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.changes.list",
+               %{page_token: "minimal-change"},
+               context: context,
+               credential_lease: lease
+             )
+
+    refute Map.has_key?(minimal_change, :owners)
+    refute Map.has_key?(minimal_change, :permissions)
+    refute Map.has_key?(minimal_change, :file)
+
+    assert {:ok,
+            %{
+              signals: [
+                %{
+                  provider: "google_drive",
+                  collection_match: "unknown",
+                  provider_record_id: "file123",
+                  change_type: "updated"
+                } = drive_wide_signal
+              ],
+              checkpoint: "next-token",
+              has_more?: false
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.collection.changes.list",
+               %{checkpoint: "start-token"},
+               context: context,
+               credential_lease: lease
+             )
+
+    refute Map.has_key?(drive_wide_signal, :collection_id)
+
+    assert {:ok,
+            %{
+              channel: %{channel_id: "channel-123"},
+              checkpoint: "start-token",
+              provider: "google_drive",
+              provider_resource: "changes"
+            } = drive_wide_watch} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.collection.watch",
+               %{
+                 channel_id: " channel-123 ",
+                 address: " https://example.com/drive/webhook ",
+                 token: "route=drive",
+                 expiration_ms: 1_770_000_000_000
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    refute Map.has_key?(drive_wide_watch, :collection_id)
+    refute Map.has_key?(drive_wide_watch, :drive_id)
+
+    assert {:ok,
+            %{
+              channel: %{
+                channel_id: "channel-123",
+                resource_id: "resource-123",
+                resource_uri: "https://www.googleapis.com/drive/v3/changes"
+              },
+              checkpoint: "start-token",
+              collection_id: "folder123",
+              provider: "google_drive",
+              provider_resource: "changes"
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.collection.watch",
+               %{
+                 collection_id: "folder123",
+                 channel_id: " channel-123 ",
+                 address: " https://example.com/drive/webhook ",
+                 token: "route=drive",
+                 expiration_ms: 1_770_000_000_000
+               },
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok,
+            %{
+              signals: [matched_signal, unknown_signal, non_member_signal, second_page_signal],
+              checkpoint: "collection-next",
+              has_more?: false
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.collection.changes.list",
+               %{checkpoint: "collection-token", collection_id: "folder123"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert %{
+             provider: "google_drive",
+             collection_id: "folder123",
+             collection_match: "yes",
+             provider_record_id: "file-in-folder",
+             change_type: "updated",
+             changed_at: "2026-05-05T12:00:00Z",
+             removed?: false,
+             record: %{id: "file-in-folder", parents: ["folder123"]}
+           } = matched_signal
+
+    assert %{
+             provider: "google_drive",
+             collection_id: "folder123",
+             collection_match: "unknown",
+             provider_record_id: "removed-file",
+             change_type: "deleted",
+             removed?: true
+           } = unknown_signal
+
+    assert %{
+             collection_match: "no",
+             provider_record_id: "other-file",
+             record: %{parents: ["folder999"]}
+           } = non_member_signal
+
+    assert %{
+             collection_match: "yes",
+             provider_record_id: "second-page-file",
+             record: %{name: "Forecast.pdf"}
+           } = second_page_signal
+
     assert {:ok,
             %{
               channel: %{
@@ -2080,7 +2616,6 @@ defmodule Jido.Connect.Google.DriveTest do
             %{
               signals: [
                 %{
-                  change_id: "change123",
                   file_id: "file123",
                   removed: false,
                   time: "2026-05-05T12:00:00Z",
@@ -2107,12 +2642,10 @@ defmodule Jido.Connect.Google.DriveTest do
             %{
               signals: [
                 %{
-                  change_id: "change123",
                   file_id: "file123",
                   file: %{name: "Budget.pdf"}
                 },
                 %{
-                  change_id: "change456",
                   file_id: "file456",
                   file: %{name: "Forecast.pdf"}
                 }
@@ -2178,6 +2711,64 @@ defmodule Jido.Connect.Google.DriveTest do
                credential_lease: lease,
                checkpoint: "loop-token"
              )
+  end
+
+  test "collection changes poll initializes checkpoint without replaying history" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{signals: [], checkpoint: "start-token"}} =
+             Connect.poll(
+               Drive.integration(),
+               "google.drive.collection.changes",
+               %{collection_id: "folder123"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "collection changes poll drains pages and emits provider-neutral signals" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok,
+            %{
+              signals: [matched_signal, unknown_signal, non_member_signal, second_page_signal],
+              checkpoint: "collection-next"
+            }} =
+             Connect.poll(
+               Drive.integration(),
+               "google.drive.collection.changes",
+               %{collection_id: "folder123"},
+               context: context,
+               credential_lease: lease,
+               checkpoint: "collection-token"
+             )
+
+    assert %{
+             collection_id: "folder123",
+             collection_match: "yes",
+             provider: "google_drive",
+             provider_record_id: "file-in-folder",
+             change_type: "updated",
+             removed?: false,
+             record: %{id: "file-in-folder", name: "Budget.pdf", parents: ["folder123"]}
+           } = matched_signal
+
+    assert %{
+             collection_match: "unknown",
+             provider_record_id: "removed-file",
+             change_type: "deleted",
+             removed?: true
+           } = unknown_signal
+
+    assert %{
+             collection_match: "no",
+             provider_record_id: "other-file",
+             record: %{parents: ["folder999"]}
+           } = non_member_signal
+
+    assert %{
+             provider_record_id: "second-page-file"
+           } = second_page_signal
   end
 
   defp write_scopes do

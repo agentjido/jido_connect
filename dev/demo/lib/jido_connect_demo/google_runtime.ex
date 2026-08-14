@@ -266,14 +266,18 @@ defmodule Jido.Connect.Demo.GoogleRuntime do
         connection,
         %{
           access_token: token,
-          google_sheets_client: Keyword.get(opts, :google_sheets_client) ||
-            Application.get_env(:jido_connect_demo, :google_sheets_client, Sheets.Client),
-          gmail_client: Keyword.get(opts, :gmail_client) ||
-            Application.get_env(:jido_connect_demo, :gmail_client, Gmail.Client),
-          google_drive_client: Keyword.get(opts, :google_drive_client) ||
-            Application.get_env(:jido_connect_demo, :google_drive_client, Drive.Client),
-          google_calendar_client: Keyword.get(opts, :google_calendar_client) ||
-            Application.get_env(:jido_connect_demo, :google_calendar_client, Calendar.Client)
+          google_sheets_client:
+            Keyword.get(opts, :google_sheets_client) ||
+              Application.get_env(:jido_connect_demo, :google_sheets_client, Sheets.Client),
+          gmail_client:
+            Keyword.get(opts, :gmail_client) ||
+              Application.get_env(:jido_connect_demo, :gmail_client, Gmail.Client),
+          google_drive_client:
+            Keyword.get(opts, :google_drive_client) ||
+              Application.get_env(:jido_connect_demo, :google_drive_client, Drive.Client),
+          google_calendar_client:
+            Keyword.get(opts, :google_calendar_client) ||
+              Application.get_env(:jido_connect_demo, :google_calendar_client, Calendar.Client)
         },
         expires_at: DateTime.add(DateTime.utc_now(), 3600, :second),
         metadata: %{mode: connection.metadata.mode}

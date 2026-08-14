@@ -29,7 +29,7 @@ This package does not own:
 ```elixir
 def deps do
   [
-    {:jido_connect_microsoft, "~> 0.1.0"}
+    {:jido_connect_microsoft, "~> 0.8"}
   ]
 end
 ```

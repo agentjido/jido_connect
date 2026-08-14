@@ -4,10 +4,10 @@ defmodule JidoConnect.MixProject do
   def project do
     [
       apps_path: "apps",
-      version: "0.1.0",
+      version: "0.8.0",
       start_permanent: Mix.env() == :prod,
       name: "Jido Connect",
-      source_url: "https://github.com/mikehostetler/jido_connect",
+      source_url: "https://github.com/agentjido/jido_connect",
       docs: docs(),
       deps: deps(),
       aliases: aliases()
@@ -30,7 +30,7 @@ defmodule JidoConnect.MixProject do
   # Run "mix help deps" for examples and options.
   defp deps do
     [
-      {:ex_doc, "~> 0.36", only: :docs, runtime: false}
+      {:ex_doc, "~> 0.40", only: :docs, runtime: false}
     ]
   end
 
@@ -40,7 +40,7 @@ defmodule JidoConnect.MixProject do
       quality: [
         "compile --warnings-as-errors",
         "format --check-formatted",
-        "test --cover"
+        "test"
       ]
     ]
   end
@@ -52,7 +52,9 @@ defmodule JidoConnect.MixProject do
         "README.md",
         "CHANGELOG.md",
         "CONTRIBUTING.md",
+        "LICENSE",
         "usage-rules.md",
+        "apps/jido_connect/guides/authoring_connector.md",
         "docs/architecture.md",
         "docs/authoring_integrations.md",
         "docs/generated_jido_modules.md",

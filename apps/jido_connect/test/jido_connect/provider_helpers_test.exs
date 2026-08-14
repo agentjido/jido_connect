@@ -35,6 +35,9 @@ defmodule Jido.Connect.ProviderHelpersTest do
   test "HTTP helpers normalize provider response failures" do
     assert %Req.Request{} = Http.bearer_request("https://provider.test", "token")
 
+    assert Http.url_with_query("/v1/resources?fixed=yes", item: "one", item: "two") ==
+             "/v1/resources?fixed=yes&item=one&item=two"
+
     assert {:ok, %{"ok" => true}} =
              Http.handle_map_response({:ok, %{status: 200, body: %{"ok" => true}}},
                provider: :demo
