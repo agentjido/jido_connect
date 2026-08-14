@@ -2,6 +2,7 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-08-14T12:45:59Z",
   "created": "2026-08-14T12:30:57Z",
   "description": "Patch PR 49 to add JSON-safe binary upload input, preserve nested Google Drive fields selectors, enforce the multipart upload size limit, and add regression tests.",
   "id": "jido_con-ejq",
@@ -17,8 +18,8 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Patch Google Drive upload review findings",
   "type": "task",
-  "updated_at": "2026-08-14T12:45:58Z"
+  "updated_at": "2026-08-14T12:45:59Z"
 }
