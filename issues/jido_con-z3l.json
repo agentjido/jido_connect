@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
   "created": "2026-08-14T21:45:32Z",
@@ -7,8 +7,8 @@
   "id": "jido_con-z3l",
   "labels": [],
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "Finish GitHub issue #36 catalog metadata",
   "type": "task",
-  "updated_at": "2026-08-14T21:45:32Z"
+  "updated_at": "2026-08-14T21:45:37Z"
 }
