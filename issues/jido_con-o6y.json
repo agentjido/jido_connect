@@ -10,11 +10,15 @@
     {
       "text": "Reviewing PR 49 at head 51e6ab87. Scope: re-check upload input contract, multipart framing and limits, fields normalization, error behavior, shared helper refactor, and regression coverage before any patch.",
       "timestamp": "2026-08-14T12:52:57Z"
+    },
+    {
+      "text": "Second review found two additional risks: Base64 input was decoded before its size was bounded, and an invalid MIME type could alter multipart headers. Added pre-decode size validation, strict media MIME validation, default MIME normalization, and regression tests. Focused suite: 113 passed. Full mix quality: passed, including 151 Google Drive tests. Demo format, warnings-as-errors compile, and 21 tests: passed.",
+      "timestamp": "2026-08-14T13:08:04Z"
     }
   ],
   "priority": 2,
   "status": "in_progress",
   "title": "Refine Google Drive upload PR after second review",
   "type": "task",
-  "updated_at": "2026-08-14T12:52:57Z"
+  "updated_at": "2026-08-14T13:08:04Z"
 }
