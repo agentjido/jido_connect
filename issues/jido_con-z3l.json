@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-08-14T21:45:32Z",
+  "description": "Update draft PR #40 onto current main, review and repair the catalog metadata implementation, run umbrella and demo verification, make the PR ready, squash-merge it, and confirm GitHub closes issue #36.",
+  "id": "jido_con-z3l",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "Finish GitHub issue #36 catalog metadata",
+  "type": "task",
+  "updated_at": "2026-08-14T21:45:32Z"
+}
