@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-08-14T12:30:57Z",
+  "description": "Patch PR 49 to add JSON-safe binary upload input, preserve nested Google Drive fields selectors, enforce the multipart upload size limit, and add regression tests.",
+  "id": "jido_con-ejq",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "Patch Google Drive upload review findings",
+  "type": "task",
+  "updated_at": "2026-08-14T12:30:57Z"
+}
