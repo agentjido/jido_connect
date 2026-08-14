@@ -167,6 +167,23 @@ defmodule Jido.Connect.Google.DriveTest do
        })}
     end
 
+    def upload_file(
+          %{
+            name: "Image",
+            content: <<0, 255>>,
+            mime_type: "image/png",
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.File.new!(%{
+         file_id: "image123",
+         name: "Image",
+         mime_type: "image/png"
+       })}
+    end
+
     def create_folder(
           %{name: "Reports", parents: ["root"], supports_all_drives: false},
           "token"
@@ -1506,6 +1523,78 @@ defmodule Jido.Connect.Google.DriveTest do
                },
                context: context,
                credential_lease: lease
+             )
+  end
+
+  test "decodes base64 file content before invoking the upload client" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{file: %{file_id: "image123", name: "Image"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{
+                 name: "Image",
+                 content_base64: Base.encode64(<<0, 255>>),
+                 mime_type: "image/png"
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "rejects missing, ambiguous, and invalid upload content" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+    opts = [context: context, credential_lease: lease]
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_upload_content,
+              subject: :content
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Missing"},
+               opts
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_upload_content,
+              subject: :content
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Ambiguous", content: "hello", content_base64: "aGVsbG8="},
+               opts
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_upload_content,
+              subject: :content_base64
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Invalid", content_base64: "%%%"},
+               opts
+             )
+
+    oversized_content = :binary.copy(<<0>>, 5 * 1024 * 1024 + 1)
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :upload_too_large,
+              subject: :content
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Large", content: oversized_content},
+               opts
              )
   end
 

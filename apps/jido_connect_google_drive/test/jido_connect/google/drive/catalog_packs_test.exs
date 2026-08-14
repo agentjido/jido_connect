@@ -117,7 +117,8 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
 
     input = Map.new(upload_descriptor.input, &{&1.name, &1})
     assert input.name.required?
-    assert input.content.required?
+    refute input.content.required?
+    refute input.content_base64.required?
     assert input.mime_type.default == "application/octet-stream"
     assert Map.has_key?(input, :parents)
     assert Map.has_key?(input, :description)

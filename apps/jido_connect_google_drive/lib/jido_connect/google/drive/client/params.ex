@@ -1,8 +1,10 @@
 defmodule Jido.Connect.Google.Drive.Client.Params do
   @moduledoc "Google Drive request parameter helpers."
 
-  alias Jido.Connect.Data
+  alias Jido.Connect.{Data, Error}
   alias Jido.Connect.Google.Drive.Fields
+
+  @max_multipart_upload_bytes 5 * 1024 * 1024
 
   @default_change_fields [
     "fileId",
@@ -90,6 +92,23 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     |> Map.put(:uploadType, "multipart")
   end
 
+  @doc "Validates the Google Drive multipart upload size limit."
+  def validate_file_upload_size(content) when is_binary(content) do
+    if byte_size(content) <= @max_multipart_upload_bytes do
+      :ok
+    else
+      {:error,
+       Error.validation("Google Drive multipart uploads must be 5 MiB or smaller",
+         reason: :upload_too_large,
+         subject: :content,
+         details: %{
+           actual_bytes: byte_size(content),
+           max_bytes: @max_multipart_upload_bytes
+         }
+       )}
+    end
+  end
+
   @doc "Builds a Google Drive multipart upload body."
   def file_upload_multipart_body(params) do
     boundary =
@@ -129,19 +148,38 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   end
 
   defp ensure_file_response_fields(fields) when is_binary(fields) do
-    requested =
-      fields
-      |> String.split(",")
-      |> Enum.map(&String.trim/1)
-      |> Enum.reject(&(&1 == ""))
-
-    ["id", "name"]
-    |> Enum.concat(requested)
-    |> Enum.uniq()
+    fields
+    |> top_level_field_selectors()
+    |> Enum.reject(&(&1 in ["id", "name"]))
+    |> then(&["id", "name" | &1])
     |> Enum.join(",")
   end
 
   defp ensure_file_response_fields(_fields), do: default_file_fields()
+
+  defp top_level_field_selectors(fields) do
+    {selectors, current, _depth} =
+      fields
+      |> String.to_charlist()
+      |> Enum.reduce({[], [], 0}, fn
+        ?,, {selectors, current, 0} ->
+          {[Enum.reverse(current) | selectors], [], 0}
+
+        ?(, {selectors, current, depth} ->
+          {selectors, [?( | current], depth + 1}
+
+        ?), {selectors, current, depth} when depth > 0 ->
+          {selectors, [?) | current], depth - 1}
+
+        character, {selectors, current, depth} ->
+          {selectors, [character | current], depth}
+      end)
+
+    [Enum.reverse(current) | selectors]
+    |> Enum.reverse()
+    |> Enum.map(&(&1 |> List.to_string() |> String.trim()))
+    |> Enum.reject(&(&1 == ""))
+  end
 
   @doc "Builds query params for metadata updates."
   def file_update_params(params) do

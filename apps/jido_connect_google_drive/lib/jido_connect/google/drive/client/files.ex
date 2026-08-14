@@ -35,17 +35,19 @@ defmodule Jido.Connect.Google.Drive.Client.Files do
 
   def upload_file(%{name: name, content: content} = params, access_token)
       when is_binary(name) and is_binary(content) and is_binary(access_token) do
-    {body, content_type} = Params.file_upload_multipart_body(params)
+    with :ok <- Params.validate_file_upload_size(content) do
+      {body, content_type} = Params.file_upload_multipart_body(params)
 
-    access_token
-    |> Transport.upload_request()
-    |> Req.post(
-      url: "/upload/drive/v3/files",
-      params: Params.file_upload_params(params),
-      headers: [{"content-type", content_type}],
-      body: body
-    )
-    |> Response.handle_file_response()
+      access_token
+      |> Transport.upload_request()
+      |> Req.post(
+        url: "/upload/drive/v3/files",
+        params: Params.file_upload_params(params),
+        headers: [{"content-type", content_type}],
+        body: body
+      )
+      |> Response.handle_file_response()
+    end
   end
 
   def create_folder(%{name: name} = params, access_token)

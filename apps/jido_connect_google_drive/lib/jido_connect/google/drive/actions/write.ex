@@ -73,7 +73,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Write do
       label("Upload Google Drive file")
 
       description(
-        "Upload a new file with content to Google Drive and return the created file metadata."
+        "Upload content for a new file of 5 MiB or less to Google Drive and return the created file metadata."
       )
 
       handler(Jido.Connect.Google.Drive.Handlers.Actions.UploadFile)
@@ -86,7 +86,17 @@ defmodule Jido.Connect.Google.Drive.Actions.Write do
 
       input do
         field(:name, :string, required?: true, example: "report.txt")
-        field(:content, :string, required?: true)
+
+        field(:content, :string,
+          description:
+            "UTF-8 text or raw bytes for in-process callers. Set content or content_base64, but not both. The decoded file must be 5 MiB or less."
+        )
+
+        field(:content_base64, :string,
+          description:
+            "Base64-encoded file bytes for JSON callers. Set content or content_base64, but not both. The decoded file must be 5 MiB or less."
+        )
+
         field(:mime_type, :string, default: "application/octet-stream")
         field(:parents, {:array, :string}, default: [])
         field(:description, :string)

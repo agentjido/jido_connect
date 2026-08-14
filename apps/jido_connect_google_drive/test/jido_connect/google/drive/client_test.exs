@@ -317,6 +317,21 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     assert file.name == "report.txt"
   end
 
+  test "preserves nested upload response field selectors" do
+    fields = "owners(displayName,emailAddress),lastModifyingUser(displayName,emailAddress)"
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.query_params["fields"] == "id,name,#{fields}"
+
+      Req.Test.json(conn, %{"id" => "uploaded123", "name" => "report.txt"})
+    end)
+
+    assert {:ok, %File{} = file} =
+             Client.upload_file(%{name: "report.txt", content: "hello", fields: fields}, "token")
+
+    assert file.file_id == "uploaded123"
+  end
+
   test "preserves configured proxy path prefixes for uploads" do
     Application.put_env(
       :jido_connect_google_drive,
@@ -361,6 +376,17 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
              )
 
     assert file.file_id == "image123"
+  end
+
+  test "rejects multipart uploads larger than 5 MiB before sending a request" do
+    content = :binary.copy(<<0>>, 5 * 1024 * 1024 + 1)
+
+    assert {:error,
+            %Jido.Connect.Error.ValidationError{
+              reason: :upload_too_large,
+              subject: :content,
+              details: %{actual_bytes: 5_242_881, max_bytes: 5_242_880}
+            }} = Client.upload_file(%{name: "large.bin", content: content}, "token")
   end
 
   test "creates folders" do
