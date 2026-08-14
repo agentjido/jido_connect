@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
   "created": "2026-08-14T12:52:24Z",
@@ -7,8 +7,8 @@
   "id": "jido_con-o6y",
   "labels": [],
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "Refine Google Drive upload PR after second review",
   "type": "task",
-  "updated_at": "2026-08-14T12:52:24Z"
+  "updated_at": "2026-08-14T12:52:56Z"
 }
