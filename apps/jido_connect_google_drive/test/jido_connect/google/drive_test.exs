@@ -11,6 +11,7 @@ defmodule Jido.Connect.Google.DriveTest do
     Jido.Connect.Google.Drive.Actions.GetFile,
     Jido.Connect.Google.Drive.Actions.CreateFile,
     Jido.Connect.Google.Drive.Actions.CreateFolder,
+    Jido.Connect.Google.Drive.Actions.UploadFile,
     Jido.Connect.Google.Drive.Actions.CopyFile,
     Jido.Connect.Google.Drive.Actions.UpdateFile,
     Jido.Connect.Google.Drive.Actions.ExportFile,
@@ -144,6 +145,42 @@ defmodule Jido.Connect.Google.DriveTest do
          name: "Notes",
          mime_type: "text/plain",
          parents: ["folder123"]
+       })}
+    end
+
+    def upload_file(
+          %{
+            name: "Notes",
+            content: "hello",
+            mime_type: "text/plain",
+            parents: ["folder123"],
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.File.new!(%{
+         file_id: "uploaded123",
+         name: "Notes",
+         mime_type: "text/plain",
+         parents: ["folder123"]
+       })}
+    end
+
+    def upload_file(
+          %{
+            name: "Image",
+            content: <<0, 255>>,
+            mime_type: "application/octet-stream",
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.File.new!(%{
+         file_id: "image123",
+         name: "Image",
+         mime_type: "application/octet-stream"
        })}
     end
 
@@ -951,6 +988,7 @@ defmodule Jido.Connect.Google.DriveTest do
              "google.drive.file.get",
              "google.drive.file.create",
              "google.drive.folder.create",
+             "google.drive.file.upload",
              "google.drive.file.copy",
              "google.drive.file.update",
              "google.drive.file.export",
@@ -1465,6 +1503,130 @@ defmodule Jido.Connect.Google.DriveTest do
                Drive.integration(),
                "google.drive.folder.create",
                %{name: "Reports", parents: ["root"]},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "invokes upload file through injected client and lease" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{file: %{file_id: "uploaded123", name: "Notes", parents: ["folder123"]}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{
+                 name: "Notes",
+                 content: "hello",
+                 mime_type: "text/plain",
+                 parents: ["folder123"]
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "decodes base64 file content and applies the default MIME type" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:ok, %{file: %{file_id: "image123", name: "Image"}}} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{
+                 name: "Image",
+                 content_base64: Base.encode64(<<0, 255>>)
+               },
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "rejects missing, ambiguous, invalid, and oversized upload content" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+    opts = [context: context, credential_lease: lease]
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_upload_content,
+              subject: :content
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Missing"},
+               opts
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_upload_content,
+              subject: :content
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Ambiguous", content: "hello", content_base64: "aGVsbG8="},
+               opts
+             )
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_upload_content,
+              subject: :content_base64
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Invalid", content_base64: "%%%"},
+               opts
+             )
+
+    oversized_content = :binary.copy(<<0>>, 5 * 1024 * 1024 + 1)
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :upload_too_large,
+              subject: :content
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Large", content: oversized_content},
+               opts
+             )
+
+    oversized_base64 = :binary.copy("A", 4 * div(5 * 1024 * 1024 + 2, 3) + 4)
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :upload_too_large,
+              subject: :content_base64
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{name: "Large base64", content_base64: oversized_base64},
+               opts
+             )
+  end
+
+  test "rejects invalid upload MIME types" do
+    {context, lease} = context_and_lease(scopes: write_scopes())
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_mime_type,
+              subject: :mime_type
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.upload",
+               %{
+                 name: "Invalid MIME type",
+                 content: "hello",
+                 mime_type: "text/plain\r\nx-injected: true"
+               },
                context: context,
                credential_lease: lease
              )

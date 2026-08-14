@@ -20,6 +20,9 @@ defmodule Jido.Connect.Google.Drive.PrivacyAuditTest do
           text_includes: ["metadata"]
         ),
         action("google.drive.folder.create", :workspace_metadata, :write, :required_for_ai),
+        action("google.drive.file.upload", :workspace_content, :external_write, :required_for_ai,
+          text_includes: ["Upload", "content"]
+        ),
         action("google.drive.file.copy", :workspace_metadata, :write, :required_for_ai),
         action("google.drive.file.update", :workspace_metadata, :write, :required_for_ai,
           text_includes: ["metadata"]

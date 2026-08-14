@@ -21,6 +21,23 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
          mime_type: "text/plain"
        })}
     end
+
+    def upload_file(
+          %{
+            name: "Notes",
+            content: "hello",
+            mime_type: "text/plain",
+            supports_all_drives: false
+          },
+          "token"
+        ) do
+      {:ok,
+       Drive.File.new!(%{
+         file_id: "uploaded123",
+         name: "Notes",
+         mime_type: "text/plain"
+       })}
+    end
   end
 
   test "readonly pack restricts search and describe to read tools" do
@@ -54,6 +71,7 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
     refute "google.drive.changes.watch" in ids
     refute "google.drive.collection.watch" in ids
     refute "google.drive.file.create" in ids
+    refute "google.drive.file.upload" in ids
     refute "google.drive.permission.update" in ids
     refute "google.drive.revision.delete" in ids
     refute "google.drive.comment.create" in ids
@@ -86,6 +104,26 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
              )
 
     assert descriptor.tool.id == "google.drive.file.create"
+
+    assert {:ok, upload_descriptor} =
+             Catalog.describe_tool("google.drive.file.upload",
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_file_writer
+             )
+
+    assert upload_descriptor.tool.id == "google.drive.file.upload"
+    assert upload_descriptor.tool.verb == :upload
+
+    input = Map.new(upload_descriptor.input, &{&1.name, &1})
+    assert input.name.required?
+    refute input.content.required?
+    refute input.content_base64.required?
+    assert input.mime_type.default == "application/octet-stream"
+    assert Map.has_key?(input, :parents)
+    assert Map.has_key?(input, :description)
+    assert Map.has_key?(input, :fields)
+    assert input.supports_all_drives.default == false
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("google.drive.file.delete",
@@ -255,10 +293,21 @@ defmodule Jido.Connect.Google.Drive.CatalogPacksTest do
                credential_lease: lease
              )
 
+    assert {:ok, %{file: %{file_id: "uploaded123"}}} =
+             Catalog.call_tool(
+               "google.drive.file.upload",
+               %{name: "Notes", content: "hello", mime_type: "text/plain"},
+               modules: [Drive],
+               packs: Drive.catalog_packs(),
+               pack: :google_drive_file_writer,
+               context: context,
+               credential_lease: lease
+             )
+
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.call_tool(
-               "google.drive.file.create",
-               %{name: "Notes", mime_type: "text/plain"},
+               "google.drive.file.upload",
+               %{name: "Notes", content: "hello", mime_type: "text/plain"},
                modules: [Drive],
                packs: Drive.catalog_packs(),
                pack: :google_drive_readonly,
