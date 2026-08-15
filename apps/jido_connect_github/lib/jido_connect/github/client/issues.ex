@@ -37,6 +37,14 @@ defmodule Jido.Connect.GitHub.Client.Issues do
     |> Response.handle_label_list_response()
   end
 
+  def remove_issue_label(repo, issue_number, label, access_token)
+      when is_integer(issue_number) and is_binary(label) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.delete(url: "/repos/#{repo}/issues/#{issue_number}/labels/#{encode_label(label)}")
+    |> Response.handle_label_list_response()
+  end
+
   def assign_issue(repo, issue_number, assignees, access_token)
       when is_integer(issue_number) and is_list(assignees) and is_binary(access_token) do
     access_token
@@ -93,4 +101,6 @@ defmodule Jido.Connect.GitHub.Client.Issues do
     |> Req.get(url: "/repos/#{repo}/issues", params: params)
     |> Response.handle_list_response()
   end
+
+  defp encode_label(label), do: URI.encode(label, &URI.char_unreserved?/1)
 end

@@ -13,6 +13,7 @@ defmodule Jido.Connect.GitHub.ScopeResolver do
       "github.issue_comment.list" -> ["metadata:read", "issues:read"]
       "github.issue.assign" -> ["metadata:read", "issues:write"]
       "github.issue.label.add" -> ["metadata:read", "issues:write"]
+      "github.issue.label.remove" -> ["metadata:read", "issues:write"]
       "github.issue.create" -> ["metadata:read", "issues:write"]
       "github.issue.list" -> ["metadata:read", "issues:read"]
       "github.release.create" -> ["metadata:read", "contents:write"]
