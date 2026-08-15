@@ -23,6 +23,7 @@ defmodule Jido.Connect.GitHub.Client do
   defdelegate create_issue(repo, attrs, access_token), to: Client.Issues
   defdelegate update_issue(repo, issue_number, attrs, access_token), to: Client.Issues
   defdelegate add_issue_labels(repo, issue_number, labels, access_token), to: Client.Issues
+  defdelegate remove_issue_label(repo, issue_number, label, access_token), to: Client.Issues
   defdelegate assign_issue(repo, issue_number, assignees, access_token), to: Client.Issues
   defdelegate create_issue_comment(repo, issue_number, body, access_token), to: Client.Issues
   defdelegate list_issue_comments(params, access_token), to: Client.Issues

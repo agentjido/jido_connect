@@ -30,5 +30,32 @@ defmodule Jido.Connect.GitHub.Actions.IssueLabels do
         field :labels, {:array, :map}
       end
     end
+
+    action :remove_issue_label do
+      id "github.issue.label.remove"
+      resource :issue
+      verb :update
+      data_classification :workspace_content
+      label "Remove label from issue"
+      description "Remove a label from an existing GitHub issue."
+      handler Jido.Connect.GitHub.Handlers.Actions.RemoveIssueLabel
+      effect :write, confirmation: :required_for_ai
+
+      access do
+        auth [:user, :installation], default: :user
+        policies [:repo_access]
+        scopes ["repo"], resolver: Jido.Connect.GitHub.ScopeResolver
+      end
+
+      input do
+        field :repo, :string, required?: true, example: "org/repo"
+        field :issue_number, :integer, required?: true
+        field :label, :string, required?: true, example: "bug"
+      end
+
+      output do
+        field :labels, {:array, :map}
+      end
+    end
   end
 end

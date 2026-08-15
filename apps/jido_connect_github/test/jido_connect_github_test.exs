@@ -577,6 +577,10 @@ defmodule Jido.Connect.GitHubTest do
        ]}
     end
 
+    def remove_issue_label("org/repo", 2, "bug", "token") do
+      {:ok, [%{name: "triage", color: "ededed"}]}
+    end
+
     def assign_issue("org/repo", 2, ["octocat", "mona"], "token") do
       {:ok,
        %{
@@ -937,6 +941,17 @@ defmodule Jido.Connect.GitHubTest do
 
     assert {:ok,
             %{
+              id: "github.issue.label.remove",
+              resource: :issue,
+              verb: :update,
+              mutation?: true,
+              confirmation: :required_for_ai,
+              policies: [:repo_access],
+              scope_resolver: Jido.Connect.GitHub.ScopeResolver
+            }} = Connect.action(spec, "github.issue.label.remove")
+
+    assert {:ok,
+            %{
               id: "github.issue.assign",
               resource: :issue,
               verb: :update,
@@ -1246,6 +1261,7 @@ defmodule Jido.Connect.GitHubTest do
              Jido.Connect.GitHub.Actions.ListIssues,
              Jido.Connect.GitHub.Actions.CreateIssue,
              Jido.Connect.GitHub.Actions.AddIssueLabels,
+             Jido.Connect.GitHub.Actions.RemoveIssueLabel,
              Jido.Connect.GitHub.Actions.AssignIssue,
              Jido.Connect.GitHub.Actions.ListPullRequests,
              Jido.Connect.GitHub.Actions.SearchIssues,
@@ -1295,6 +1311,7 @@ defmodule Jido.Connect.GitHubTest do
                  Jido.Connect.GitHub.Actions.ListIssues,
                  Jido.Connect.GitHub.Actions.CreateIssue,
                  Jido.Connect.GitHub.Actions.AddIssueLabels,
+                 Jido.Connect.GitHub.Actions.RemoveIssueLabel,
                  Jido.Connect.GitHub.Actions.AssignIssue,
                  Jido.Connect.GitHub.Actions.ListPullRequests,
                  Jido.Connect.GitHub.Actions.SearchIssues,
@@ -1358,6 +1375,9 @@ defmodule Jido.Connect.GitHubTest do
 
     assert {:module, Jido.Connect.GitHub.Actions.AddIssueLabels} =
              Code.ensure_loaded(Jido.Connect.GitHub.Actions.AddIssueLabels)
+
+    assert {:module, Jido.Connect.GitHub.Actions.RemoveIssueLabel} =
+             Code.ensure_loaded(Jido.Connect.GitHub.Actions.RemoveIssueLabel)
 
     assert {:module, Jido.Connect.GitHub.Actions.AssignIssue} =
              Code.ensure_loaded(Jido.Connect.GitHub.Actions.AssignIssue)
@@ -1436,6 +1456,7 @@ defmodule Jido.Connect.GitHubTest do
     assert function_exported?(Jido.Connect.GitHub.Actions.ReadFile, :run, 2)
     assert function_exported?(Jido.Connect.GitHub.Actions.UpdateFile, :run, 2)
     assert function_exported?(Jido.Connect.GitHub.Actions.AddIssueLabels, :run, 2)
+    assert function_exported?(Jido.Connect.GitHub.Actions.RemoveIssueLabel, :run, 2)
     assert function_exported?(Jido.Connect.GitHub.Actions.AssignIssue, :run, 2)
     assert function_exported?(Jido.Connect.GitHub.Actions.ListPullRequests, :run, 2)
     assert function_exported?(Jido.Connect.GitHub.Actions.SearchIssues, :run, 2)
@@ -1495,6 +1516,23 @@ defmodule Jido.Connect.GitHubTest do
     assert projection.auth_profiles == [:user, :installation]
     assert projection.scope_resolver == Jido.Connect.GitHub.ScopeResolver
     assert Jido.Connect.GitHub.Actions.AddIssueLabels.name() == "github_issue_label_add"
+  end
+
+  test "generated remove issue label action metadata tracks required label fields" do
+    projection = Jido.Connect.GitHub.Actions.RemoveIssueLabel.jido_connect_projection()
+
+    assert projection.action_id == "github.issue.label.remove"
+    assert projection.label == "Remove label from issue"
+    assert Enum.map(projection.input, & &1.name) == [:repo, :issue_number, :label]
+    assert Enum.map(projection.output, & &1.name) == [:labels]
+    assert projection.risk == :write
+    assert projection.confirmation == :required_for_ai
+    assert projection.resource == :issue
+    assert projection.verb == :update
+    assert projection.policies == [:repo_access]
+    assert projection.auth_profiles == [:user, :installation]
+    assert projection.scope_resolver == Jido.Connect.GitHub.ScopeResolver
+    assert Jido.Connect.GitHub.Actions.RemoveIssueLabel.name() == "github_issue_label_remove"
   end
 
   test "generated assign issue action metadata tracks required assignee fields" do
@@ -2828,6 +2866,16 @@ defmodule Jido.Connect.GitHubTest do
             %Connect.Error.AuthError{reason: :missing_scopes, missing_scopes: ["issues:write"]}} =
              Connect.invoke(
                Jido.Connect.GitHub.integration(),
+               "github.issue.label.remove",
+               %{repo: "org/repo", issue_number: 2, label: "bug"},
+               context: missing_write,
+               credential_lease: lease
+             )
+
+    assert {:error,
+            %Connect.Error.AuthError{reason: :missing_scopes, missing_scopes: ["issues:write"]}} =
+             Connect.invoke(
+               Jido.Connect.GitHub.integration(),
                "github.issue.assign",
                %{repo: "org/repo", issue_number: 2, assignees: ["octocat"]},
                context: missing_write,
@@ -2940,6 +2988,19 @@ defmodule Jido.Connect.GitHubTest do
              )
   end
 
+  test "invokes GitHub remove issue label action through injected client and lease" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{labels: [%{name: "triage", color: "ededed"}]}} =
+             Connect.invoke(
+               Jido.Connect.GitHub.integration(),
+               "github.issue.label.remove",
+               %{repo: "org/repo", issue_number: 2, label: "bug"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
   test "rejects empty label list before adding issue labels" do
     {context, lease} = context_and_lease()
 
@@ -2948,6 +3009,19 @@ defmodule Jido.Connect.GitHubTest do
                Jido.Connect.GitHub.integration(),
                "github.issue.label.add",
                %{repo: "org/repo", issue_number: 2, labels: []},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "rejects blank label before removing an issue label" do
+    {context, lease} = context_and_lease()
+
+    assert {:error, %Connect.Error.ValidationError{reason: :empty_label, subject: :label}} =
+             Connect.invoke(
+               Jido.Connect.GitHub.integration(),
+               "github.issue.label.remove",
+               %{repo: "org/repo", issue_number: 2, label: ""},
                context: context,
                credential_lease: lease
              )
@@ -3065,6 +3139,19 @@ defmodule Jido.Connect.GitHubTest do
             }} =
              Jido.Connect.GitHub.Actions.AddIssueLabels.run(
                %{repo: "org/repo", issue_number: 2, labels: ["bug", "triage"]},
+               %{
+                 integration_context: context,
+                 credential_lease: lease
+               }
+             )
+  end
+
+  test "generated remove issue label action delegates to integration invoke runtime" do
+    {context, lease} = context_and_lease()
+
+    assert {:ok, %{labels: [%{name: "triage", color: "ededed"}]}} =
+             Jido.Connect.GitHub.Actions.RemoveIssueLabel.run(
+               %{repo: "org/repo", issue_number: 2, label: "bug"},
                %{
                  integration_context: context,
                  credential_lease: lease
@@ -3620,6 +3707,7 @@ defmodule Jido.Connect.GitHubTest do
              Jido.Connect.GitHub.Actions.ListIssues,
              Jido.Connect.GitHub.Actions.CreateIssue,
              Jido.Connect.GitHub.Actions.AddIssueLabels,
+             Jido.Connect.GitHub.Actions.RemoveIssueLabel,
              Jido.Connect.GitHub.Actions.AssignIssue,
              Jido.Connect.GitHub.Actions.ListPullRequests,
              Jido.Connect.GitHub.Actions.SearchIssues,

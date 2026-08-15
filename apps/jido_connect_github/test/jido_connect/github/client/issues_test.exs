@@ -122,6 +122,31 @@ defmodule Jido.Connect.GitHub.Client.IssuesTest do
             ]} = Client.add_issue_labels("org/repo", 2, ["bug", "triage"], "token")
   end
 
+  test "remove issue label sends expected request" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "DELETE"
+      assert conn.request_path == "/repos/org/repo/issues/2/labels/bug"
+      assert ["Bearer token"] = Plug.Conn.get_req_header(conn, "authorization")
+
+      Req.Test.json(conn, [%{name: "triage", color: "ededed", description: nil}])
+    end)
+
+    assert {:ok, [%{name: "triage", color: "ededed"}]} =
+             Client.remove_issue_label("org/repo", 2, "bug", "token")
+  end
+
+  test "remove issue label percent-encodes the label name" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "DELETE"
+      assert conn.request_path == "/repos/org/repo/issues/2/labels/good%20first%20issue"
+
+      Req.Test.json(conn, [])
+    end)
+
+    assert {:ok, []} =
+             Client.remove_issue_label("org/repo", 2, "good first issue", "token")
+  end
+
   test "assign issue sends expected request" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "POST"
