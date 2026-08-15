@@ -220,7 +220,15 @@ defmodule Jido.Connect.PreparedActionTest do
 
     authorization = %{plan_id: prepared.id}
 
-    assert_stale(commit(state, prepared, authorization), :execution_id)
+    assert_stale(
+      Connect.commit(
+        state.spec,
+        prepared,
+        state.input,
+        commit_opts(state, authorization) ++ [idempotency_key: "idempotency_1"]
+      ),
+      :execution_id
+    )
 
     assert {:ok, _output} =
              Connect.commit(
