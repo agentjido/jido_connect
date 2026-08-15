@@ -9,11 +9,12 @@ defmodule Jido.Connect.Telemetry do
 
   alias Jido.Connect.{Error, Sanitizer}
 
-  @type operation :: :invoke | :poll
+  @type operation :: :invoke | :poll | :prepare | :commit
   @type phase :: :start | :stop | :exception
 
   @spec span(operation(), map(), (-> result)) :: result when result: term()
-  def span(operation, metadata, fun) when operation in [:invoke, :poll] and is_function(fun, 0) do
+  def span(operation, metadata, fun)
+      when operation in [:invoke, :poll, :prepare, :commit] and is_function(fun, 0) do
     start_time = System.monotonic_time()
 
     emit(operation, :start, %{system_time: System.system_time()}, metadata)
@@ -42,7 +43,8 @@ defmodule Jido.Connect.Telemetry do
 
   @spec emit(operation(), phase(), map(), map()) :: :ok
   def emit(operation, phase, measurements, metadata)
-      when operation in [:invoke, :poll] and phase in [:start, :stop, :exception] do
+      when operation in [:invoke, :poll, :prepare, :commit] and
+             phase in [:start, :stop, :exception] do
     :telemetry.execute(
       [:jido, :connect, operation, phase],
       measurements,

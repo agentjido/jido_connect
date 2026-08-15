@@ -41,6 +41,7 @@ defmodule Jido.Connect do
   alias Jido.Connect.{
     ActionSpec,
     Error,
+    PreparedAction,
     Provider,
     Runtime,
     Schema,
@@ -164,6 +165,58 @@ defmodule Jido.Connect do
        reason: :invalid_invocation,
        subject: action_id,
        details: %{input_type: type_name(input), opts_type: type_name(opts)}
+     )}
+  end
+
+  @doc """
+  Prepares an action without calling its provider handler.
+
+  The returned value contains hashes and public identifiers only. The host can
+  persist it with an approval record. Commit requires the input, context,
+  credential lease, and optional host binding again.
+  """
+  @spec prepare(integration_ref(), String.t(), map(), runtime_opts()) ::
+          {:ok, PreparedAction.t()} | {:error, Error.error()}
+  def prepare(integration_ref, action_id, input, opts \\ [])
+
+  def prepare(integration_ref, action_id, input, opts)
+      when is_binary(action_id) and is_map(input) and (is_list(opts) or is_map(opts)) do
+    with {:ok, integration} <- spec(integration_ref) do
+      Runtime.prepare(integration, action_id, input, opts)
+    end
+  end
+
+  def prepare(_integration_ref, action_id, _input, _opts) do
+    {:error,
+     Error.validation("Invalid action preparation",
+       reason: :invalid_preparation,
+       subject: action_id
+     )}
+  end
+
+  @doc """
+  Commits a prepared action after it revalidates all runtime state.
+
+  `opts` must include the same context and credential lease used at prepare.
+  It must also include `:execution_authorization` and
+  `:authorization_validator` when the prepared action requires confirmation.
+  """
+  @spec commit(integration_ref(), PreparedAction.t(), map(), runtime_opts()) ::
+          {:ok, map()} | {:error, Error.error()}
+  def commit(integration_ref, prepared, input, opts \\ [])
+
+  def commit(integration_ref, %PreparedAction{} = prepared, input, opts)
+      when is_map(input) and (is_list(opts) or is_map(opts)) do
+    with {:ok, integration} <- spec(integration_ref) do
+      Runtime.commit(integration, prepared, input, opts)
+    end
+  end
+
+  def commit(_integration_ref, prepared, _input, _opts) do
+    {:error,
+     Error.validation("Invalid prepared action commit",
+       reason: :invalid_commit,
+       subject: prepared
      )}
   end
 

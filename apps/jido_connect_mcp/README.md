@@ -6,8 +6,21 @@ keeps Connect responsible for policy, generated Jido modules, and credential
 boundaries.
 
 This package is intentionally conservative: tools are called through explicit
-Connect actions, endpoint and tool access is represented as scopes, and raw
-MCP server credentials stay in host-owned `jido_mcp` endpoint configuration.
+Connect actions, and endpoint and tool access is represented as scopes. Static
+MCP server credentials can stay in `jido_mcp` endpoint configuration. A
+persistent host can instead put one `%Jido.MCP.Endpoint{}` or endpoint attribute
+map in the short-lived lease field `:mcp_endpoint`.
+
+The host connection metadata can set `:mcp_endpoint_id` to the public endpoint
+name. The bridge derives a separate internal Jido MCP string ID from the
+connection ID. Thus, two connections can both expose `"slack"` without sharing
+a client or credential. Credential rotation replaces the endpoint under the
+same internal ID.
+
+Tool discovery returns `schema_hash` for each remote input schema. A typed
+connector can pass this value as `expected_schema_hash` to `mcp.tool.call`.
+The bridge discovers the tool again and rejects a changed schema before it
+calls the remote mutation.
 
 ## Catalog Plugin
 

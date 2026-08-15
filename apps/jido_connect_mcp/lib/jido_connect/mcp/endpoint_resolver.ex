@@ -1,23 +1,28 @@
 defmodule Jido.Connect.MCP.EndpointResolver do
   @moduledoc false
 
-  alias Jido.Connect.Error
+  alias Jido.Connect.{Context, CredentialLease, Error}
+  alias Jido.Connect.MCP.HostEndpoint
 
   @doc """
-  Resolves an MCP endpoint identifier (atom or binary) to a confirmed
-  endpoint atom.
+  Resolves an MCP endpoint identifier to a confirmed Jido MCP endpoint.
 
-  When `Jido.MCP.ClientPool` is loaded (the `jido_mcp` application has been
-  compiled), resolution delegates to the ClientPool GenServer so that
-  runtime-registered endpoints are visible.  Otherwise falls back to reading
-  the raw `:endpoints` config from the `:jido_mcp` application environment.
+  A host-owned connection can carry endpoint data in the credential lease.
+  This path registers a connection-specific string ID. Static configurations
+  continue to resolve through `Jido.MCP.ClientPool` or application config.
   """
-  def resolve(endpoint_id) when is_atom(endpoint_id), do: resolve(Atom.to_string(endpoint_id))
+  def resolve(endpoint_id, opts \\ [])
 
-  def resolve(endpoint_id) when is_binary(endpoint_id) do
-    case do_resolve(endpoint_id) do
+  def resolve(endpoint_id, opts) when is_atom(endpoint_id),
+    do: resolve(Atom.to_string(endpoint_id), opts)
+
+  def resolve(endpoint_id, opts) when is_binary(endpoint_id) do
+    case do_resolve(endpoint_id, opts) do
       {:ok, resolved} ->
         {:ok, resolved}
+
+      {:error, %_module{} = error} ->
+        {:error, error}
 
       {:error, reason} ->
         {:error,
@@ -29,9 +34,31 @@ defmodule Jido.Connect.MCP.EndpointResolver do
     end
   end
 
+  def resolve(endpoint_id, _opts) do
+    {:error,
+     Error.validation("Unknown MCP endpoint",
+       reason: :unknown_mcp_endpoint,
+       subject: endpoint_id,
+       details: %{mcp_reason: :invalid_endpoint_id}
+     )}
+  end
+
   # -- private ----------------------------------------------------------------
 
-  defp do_resolve(endpoint_id) do
+  defp do_resolve(endpoint_id, opts) do
+    case host_context(opts) do
+      {:ok, context, lease} ->
+        with {:ok, _public_id, internal_id} <-
+               HostEndpoint.resolve(endpoint_id, context.connection, lease) do
+          {:ok, internal_id}
+        end
+
+      :legacy ->
+        resolve_registered(endpoint_id)
+    end
+  end
+
+  defp resolve_registered(endpoint_id) do
     client_pool = Module.concat(Jido.MCP, ClientPool)
 
     if Code.ensure_loaded?(client_pool) and
@@ -41,6 +68,20 @@ defmodule Jido.Connect.MCP.EndpointResolver do
       resolve_from_config(endpoint_id)
     end
   end
+
+  defp host_context(%{
+         context: %Context{} = context,
+         credential_lease: %CredentialLease{} = lease
+       }) do
+    case {context.connection, CredentialLease.fetch_field(lease, :mcp_endpoint)} do
+      {connection, {:ok, _endpoint}} when not is_nil(connection) -> {:ok, context, lease}
+      _other -> :legacy
+    end
+  end
+
+  defp host_context(opts) when is_list(opts), do: opts |> Map.new() |> host_context()
+
+  defp host_context(_opts), do: :legacy
 
   defp resolve_from_config(endpoint_id) do
     trimmed = String.trim(endpoint_id)
@@ -52,7 +93,7 @@ defmodule Jido.Connect.MCP.EndpointResolver do
       true ->
         endpoints = raw_endpoints()
 
-        case Enum.find(Map.keys(endpoints), &(Atom.to_string(&1) == trimmed)) do
+        case Enum.find(Map.keys(endpoints), &(endpoint_key(&1) == trimmed)) do
           nil -> {:error, :unknown_endpoint}
           id -> {:ok, id}
         end
@@ -68,4 +109,8 @@ defmodule Jido.Connect.MCP.EndpointResolver do
   defp to_map(endpoints) when is_map(endpoints), do: endpoints
   defp to_map(endpoints) when is_list(endpoints), do: Enum.into(endpoints, %{})
   defp to_map(_), do: %{}
+
+  defp endpoint_key(key) when is_atom(key), do: Atom.to_string(key)
+  defp endpoint_key(key) when is_binary(key), do: key
+  defp endpoint_key(_key), do: nil
 end

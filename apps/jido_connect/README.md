@@ -54,6 +54,38 @@ Jido.Connect.invoke(Jido.Connect.GitHub, "github.issue.list", %{repo: "org/repo"
 )
 ```
 
+Use `prepare/4` and `commit/4` for mutations that need confirmation. Prepare
+does not call the provider. It returns an expiring, secret-free snapshot with a
+safe preview. Commit requires the input and current runtime state again. It
+rejects changes to the action, input, connection, lease, host binding,
+execution ID, or idempotency key.
+
+```elixir
+{:ok, prepared} =
+  Jido.Connect.prepare(MyConnector, "connector.item.create", input,
+    context: context,
+    credential_lease: lease,
+    binding_ref: persona_binding_id,
+    execution_id: execution_id,
+    idempotency_key: idempotency_key
+  )
+
+Jido.Connect.commit(MyConnector, prepared, input,
+  context: context,
+  credential_lease: current_lease,
+  binding_ref: persona_binding_id,
+  execution_id: execution_id,
+  idempotency_key: idempotency_key,
+  execution_authorization: host_approval,
+  authorization_validator: &MyApp.Approvals.validate/3
+)
+```
+
+Boolean confirmation is not valid evidence. The host validates its own scoped
+authorization record. Direct mutation calls are a temporary compatibility path
+and emit a warning. Set `config :jido_connect, direct_mutation_mode: :deny` in a
+strict host.
+
 For host UI discovery, use `Jido.Connect.spec/1`, `actions/1`, `triggers/1`,
 `auth_profiles/1`, or the richer `Jido.Connect.Catalog` APIs. `Catalog.discover/1`
 returns provider entries; `Catalog.tools/1` returns a flattened action/trigger
