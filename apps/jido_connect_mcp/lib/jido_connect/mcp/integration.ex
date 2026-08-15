@@ -109,6 +109,7 @@ defmodule Jido.Connect.MCP do
         field :endpoint_id, :string, required?: true, example: "filesystem"
         field :tool_name, :string, required?: true, example: "read_text_file"
         field :arguments, :map, default: %{}
+        field :expected_schema_hash, :string
         field :timeout, :integer
       end
 

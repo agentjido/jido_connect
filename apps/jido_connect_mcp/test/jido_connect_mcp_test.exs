@@ -64,6 +64,38 @@ defmodule Jido.Connect.MCPTest do
     def list_tools(:filesystem, _opts), do: raise("mcp exploded")
   end
 
+  defmodule HostMCPClient do
+    def list_tools(endpoint_id, opts) do
+      send(self(), {:host_mcp_discovered, endpoint_id, opts})
+
+      {:ok,
+       %{
+         status: :ok,
+         data: %{
+           "tools" => [
+             %{
+               "name" => "post_message",
+               "inputSchema" => %{
+                 "type" => "object",
+                 "properties" => %{"text" => %{"type" => "string"}}
+               }
+             }
+           ]
+         }
+       }}
+    end
+
+    def call_tool(endpoint_id, "post_message", %{"text" => text}, opts) do
+      send(self(), {:host_mcp_called, endpoint_id, text, opts})
+
+      {:ok,
+       %{
+         status: :ok,
+         data: %{"content" => [%{"type" => "text", "text" => "sent"}]}
+       }}
+    end
+  end
+
   setup do
     register_endpoint!(:filesystem)
 
@@ -156,6 +188,7 @@ defmodule Jido.Connect.MCPTest do
     assert tool.name == "read_text_file"
     assert tool.description == "Read a text file"
     assert tool.input_schema == %{"type" => "object"}
+    assert tool.schema_hash == Jido.Connect.MCP.Tool.schema_hash(tool.input_schema)
   end
 
   test "list tools supports clients without explicit timeout opts" do
@@ -277,6 +310,127 @@ defmodule Jido.Connect.MCPTest do
              Jido.Connect.MCP.EndpointResolver.resolve("runtime_registered")
   end
 
+  test "prepared commit routes a host-owned endpoint through Jido MCP" do
+    scopes = ["mcp:tools:call", "mcp:endpoint:slack", "mcp:tool:post_message"]
+
+    connection =
+      Connect.Connection.new!(%{
+        id: "slack-persona-a",
+        provider: :mcp,
+        profile: :endpoint,
+        tenant_id: "tenant_1",
+        owner_type: :tenant,
+        owner_id: "tenant_1",
+        status: :connected,
+        scopes: scopes,
+        metadata: %{mcp_endpoint_id: "slack"}
+      })
+
+    context =
+      Connect.Context.new!(%{
+        tenant_id: "tenant_1",
+        actor: %{id: "persona_a", type: :agent},
+        connection: connection
+      })
+
+    lease =
+      Connect.CredentialLease.from_connection!(
+        connection,
+        %{
+          mcp_client: HostMCPClient,
+          mcp_endpoint: %{
+            transport: {:stdio, [command: "echo"]},
+            client_info: %{name: "wayfinder-connect-test"}
+          }
+        },
+        expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
+        metadata: %{credential_version: 1}
+      )
+
+    input = %{
+      endpoint_id: "slack",
+      tool_name: "post_message",
+      arguments: %{"text" => "hello"},
+      expected_schema_hash:
+        Jido.Connect.MCP.Tool.schema_hash(%{
+          "type" => "object",
+          "properties" => %{"text" => %{"type" => "string"}}
+        }),
+      timeout: 1_000
+    }
+
+    assert {:ok, prepared} =
+             Connect.prepare(Jido.Connect.MCP, "mcp.tool.call", input,
+               context: context,
+               credential_lease: lease,
+               binding_ref: "persona-binding-a"
+             )
+
+    assert prepared.confirmation_required?
+    refute_received {:host_mcp_called, _endpoint_id, _text, _opts}
+
+    authorization = %{plan_id: prepared.id, approved_by: "user_1"}
+
+    assert {:ok,
+            %{
+              result: %{
+                endpoint_id: "slack",
+                tool_name: "post_message",
+                content: [%{"text" => "sent"}]
+              }
+            }} =
+             Connect.commit(Jido.Connect.MCP, prepared, input,
+               context: context,
+               credential_lease: lease,
+               binding_ref: "persona-binding-a",
+               execution_authorization: authorization,
+               authorization_validator: fn evidence, plan, commit_context ->
+                 evidence.plan_id == plan.id and commit_context.actor.id == "persona_a"
+               end
+             )
+
+    internal_id = Jido.Connect.MCP.HostEndpoint.internal_id(connection)
+    assert_received {:host_mcp_discovered, ^internal_id, [timeout: 1_000]}
+    assert_received {:host_mcp_called, ^internal_id, "hello", [timeout: 1_000]}
+    assert {:ok, _endpoint} = Jido.MCP.ClientPool.fetch_endpoint(internal_id)
+    assert {:ok, _endpoint} = Jido.MCP.unregister_endpoint(internal_id)
+  end
+
+  test "prepared commit rejects MCP tool schema drift before calling the tool" do
+    {context, lease} = host_context_and_lease("slack-schema-drift")
+
+    input = %{
+      endpoint_id: "slack",
+      tool_name: "post_message",
+      arguments: %{"text" => "hello"},
+      expected_schema_hash: String.duplicate("0", 64),
+      timeout: 1_000
+    }
+
+    assert {:ok, prepared} =
+             Connect.prepare(Jido.Connect.MCP, "mcp.tool.call", input,
+               context: context,
+               credential_lease: lease,
+               binding_ref: "persona-binding-drift"
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :mcp_tool_schema_changed}} =
+             Connect.commit(Jido.Connect.MCP, prepared, input,
+               context: context,
+               credential_lease: lease,
+               binding_ref: "persona-binding-drift",
+               execution_authorization: %{plan_id: prepared.id},
+               authorization_validator: fn evidence, plan, _context ->
+                 evidence.plan_id == plan.id
+               end
+             )
+
+    internal_id = Jido.Connect.MCP.HostEndpoint.internal_id(context.connection)
+    assert_received {:host_mcp_discovered, ^internal_id, [timeout: 1_000]}
+    refute_received {:host_mcp_called, ^internal_id, _text, _opts}
+    assert {:ok, _endpoint} = Jido.MCP.unregister_endpoint(internal_id)
+  end
+
   test "scope resolver rejects ungranted tools before handler execution" do
     {context, lease} = context_and_lease(scopes: ["mcp:tools:call", "mcp:endpoint:filesystem"])
 
@@ -361,6 +515,46 @@ defmodule Jido.Connect.MCPTest do
         expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
         fields: %{mcp_client: Keyword.get(opts, :mcp_client, FakeMCPClient)}
       })
+
+    {context, lease}
+  end
+
+  defp host_context_and_lease(connection_id) do
+    scopes = ["mcp:tools:call", "mcp:endpoint:slack", "mcp:tool:post_message"]
+
+    connection =
+      Connect.Connection.new!(%{
+        id: connection_id,
+        provider: :mcp,
+        profile: :endpoint,
+        tenant_id: "tenant_1",
+        owner_type: :tenant,
+        owner_id: "tenant_1",
+        status: :connected,
+        scopes: scopes,
+        metadata: %{mcp_endpoint_id: "slack"}
+      })
+
+    context =
+      Connect.Context.new!(%{
+        tenant_id: "tenant_1",
+        actor: %{id: "persona_drift", type: :agent},
+        connection: connection
+      })
+
+    lease =
+      Connect.CredentialLease.from_connection!(
+        connection,
+        %{
+          mcp_client: HostMCPClient,
+          mcp_endpoint: %{
+            transport: {:stdio, [command: "echo"]},
+            client_info: %{name: "wayfinder-connect-test"}
+          }
+        },
+        expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
+        metadata: %{credential_version: 1}
+      )
 
     {context, lease}
   end

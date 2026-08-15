@@ -10,6 +10,8 @@ Hosts own:
 - OAuth state/session persistence
 - webhook delivery dedupe
 - run and event audit history
+- persona records and persona-to-connection bindings
+- prepared-action approvals and atomic execution claims
 
 The package contracts are `Jido.Connect.Connection`,
 `Jido.Connect.ConnectionSelector`, `Jido.Connect.CredentialLease`,
@@ -117,3 +119,8 @@ without weakening the durable connection grant.
 Plugin availability accepts the same selector/resolver pattern, so UIs can
 show whether shared tenant or installation tools are available without exposing
 raw credentials.
+
+Persona selection stays outside Jido Connect. A host resolves the persona to an
+exact connection and passes a stable `binding_ref` during both prepare and
+commit. Jido Connect hashes that binding with the action, input, connection,
+and public lease identity. Commit fails when the binding or other state changes.

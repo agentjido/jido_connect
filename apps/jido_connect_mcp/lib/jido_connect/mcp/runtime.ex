@@ -5,7 +5,7 @@ defmodule Jido.Connect.MCP.Runtime do
   alias Jido.Connect.MCP.{EndpointResolver, Tool, ToolResult}
 
   def list_tools(input, opts) do
-    with {:ok, endpoint_id} <- EndpointResolver.resolve(input.endpoint_id),
+    with {:ok, endpoint_id} <- EndpointResolver.resolve(input.endpoint_id, opts),
          {:ok, data} <- call_mcp(opts, :list_tools, [endpoint_id], timeout(input)) do
       tools =
         data
@@ -13,12 +13,13 @@ defmodule Jido.Connect.MCP.Runtime do
         |> Enum.map(&Tool.from_mcp/1)
         |> Enum.map(&Tool.to_map/1)
 
-      {:ok, %{endpoint_id: to_string(endpoint_id), tools: tools}}
+      {:ok, %{endpoint_id: input.endpoint_id, tools: tools}}
     end
   end
 
   def call_tool(input, opts) do
-    with {:ok, endpoint_id} <- EndpointResolver.resolve(input.endpoint_id),
+    with {:ok, endpoint_id} <- EndpointResolver.resolve(input.endpoint_id, opts),
+         :ok <- verify_schema(input, opts, endpoint_id),
          {:ok, data} <-
            call_mcp(
              opts,
@@ -27,12 +28,55 @@ defmodule Jido.Connect.MCP.Runtime do
              timeout(input)
            ) do
       result =
-        endpoint_id
+        input.endpoint_id
         |> ToolResult.from_mcp(input.tool_name, data)
         |> ToolResult.to_map()
 
       {:ok, %{result: result}}
     end
+  end
+
+  defp verify_schema(%{expected_schema_hash: nil}, _opts, _endpoint_id), do: :ok
+
+  defp verify_schema(%{expected_schema_hash: expected_hash} = input, opts, endpoint_id) do
+    with {:ok, data} <- call_mcp(opts, :list_tools, [endpoint_id], timeout(input)),
+         {:ok, tool} <- find_tool(data, input.tool_name),
+         actual_hash = tool |> Tool.from_mcp() |> Map.fetch!(:schema_hash),
+         :ok <- require_schema_hash(input.tool_name, expected_hash, actual_hash) do
+      :ok
+    end
+  end
+
+  defp verify_schema(_input, _opts, _endpoint_id), do: :ok
+
+  defp find_tool(data, tool_name) do
+    tool =
+      data
+      |> Map.get("tools", Map.get(data, :tools, []))
+      |> Enum.find(&(Jido.Connect.Data.get(&1, "name") == tool_name))
+
+    case tool do
+      %{} ->
+        {:ok, tool}
+
+      nil ->
+        {:error,
+         Error.validation("MCP tool is not available on the selected endpoint",
+           reason: :unknown_mcp_tool,
+           subject: tool_name
+         )}
+    end
+  end
+
+  defp require_schema_hash(_tool_name, hash, hash), do: :ok
+
+  defp require_schema_hash(tool_name, expected_hash, actual_hash) do
+    {:error,
+     Error.validation("MCP tool schema changed before execution",
+       reason: :mcp_tool_schema_changed,
+       subject: tool_name,
+       details: %{expected_schema_hash: expected_hash, actual_schema_hash: actual_hash}
+     )}
   end
 
   defp call_mcp(opts, function, args, nil) do
