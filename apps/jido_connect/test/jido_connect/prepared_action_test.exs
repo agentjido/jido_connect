@@ -32,6 +32,20 @@ defmodule Jido.Connect.PreparedActionTest do
     def preview(_input, _context), do: :invalid
   end
 
+  defmodule ReservedPreview do
+    @behaviour Jido.Connect.ActionPreview
+
+    @impl true
+    def preview(_input, _context) do
+      %{
+        action_id: "provider-action",
+        connection: %{id: "provider-connection"},
+        input_fields: ["provider-field"],
+        note: "safe provider detail"
+      }
+    end
+  end
+
   setup do
     spec =
       RuntimeFixtures.spec(%{
@@ -231,6 +245,33 @@ defmodule Jido.Connect.PreparedActionTest do
     assert prepared.preview.action_id == "demo.repo.show"
     assert prepared.preview.connection.id == "conn_1"
     refute_received {:handler_called, _repo}
+  end
+
+  test "provider previews cannot replace reserved metadata after JSON storage", state do
+    spec =
+      RuntimeFixtures.spec(%{
+        action: %{
+          handler: Handler,
+          preview: ReservedPreview,
+          mutation?: true,
+          risk: :write,
+          confirmation: :always
+        }
+      })
+
+    assert {:ok, prepared} = prepare(%{state | spec: spec})
+    dump = Connect.PreparedAction.dump(prepared)
+
+    assert prepared.preview.action_id == "demo.repo.show"
+    assert prepared.preview.connection.id == "conn_1"
+    assert prepared.preview.input_fields == ["repo"]
+    assert prepared.preview["note"] == "safe provider detail"
+    refute Map.has_key?(prepared.preview, "action_id")
+    refute Map.has_key?(prepared.preview, "connection")
+    refute Map.has_key?(prepared.preview, "input_fields")
+    assert dump["preview"]["action_id"] == "demo.repo.show"
+    assert dump["preview"]["connection"]["id"] == "conn_1"
+    assert dump["preview"]["input_fields"] == ["repo"]
   end
 
   test "prepare rejects invalid provider preview results", state do

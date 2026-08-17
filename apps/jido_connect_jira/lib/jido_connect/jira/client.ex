@@ -22,7 +22,7 @@ defmodule Jido.Connect.Jira.Client do
 
     request
     |> Transport.request()
-    |> Req.get(url: "/rest/api/3/issue/#{issue_key}", params: params)
+    |> Req.get(url: Request.url(request, "/rest/api/3/issue/#{issue_key}"), params: params)
     |> Response.handle_issue_response()
   end
 
@@ -39,7 +39,7 @@ defmodule Jido.Connect.Jira.Client do
 
     request
     |> Transport.request()
-    |> Req.post(url: "/rest/api/3/search", json: body)
+    |> Req.post(url: Request.url(request, "/rest/api/3/search"), json: body)
     |> Response.handle_issue_search_response()
   end
 
@@ -47,7 +47,7 @@ defmodule Jido.Connect.Jira.Client do
   def create_issue(attrs, %Request{} = request) when is_map(attrs) do
     request
     |> Transport.request()
-    |> Req.post(url: "/rest/api/3/issue", json: %{fields: attrs})
+    |> Req.post(url: Request.url(request, "/rest/api/3/issue"), json: %{fields: attrs})
     |> Response.handle_issue_create_response()
   end
 
@@ -60,7 +60,7 @@ defmodule Jido.Connect.Jira.Client do
 
     request
     |> Transport.request()
-    |> Req.get(url: "/rest/api/3/project/search", params: params)
+    |> Req.get(url: Request.url(request, "/rest/api/3/project/search"), params: params)
     |> Response.handle_project_list_response()
   end
 
@@ -68,7 +68,7 @@ defmodule Jido.Connect.Jira.Client do
   def get_project(project_key, %Request{} = request, _opts \\ []) when is_binary(project_key) do
     request
     |> Transport.request()
-    |> Req.get(url: "/rest/api/3/project/#{project_key}")
+    |> Req.get(url: Request.url(request, "/rest/api/3/project/#{project_key}"))
     |> Response.handle_project_response()
   end
 
@@ -77,7 +77,10 @@ defmodule Jido.Connect.Jira.Client do
       when is_binary(issue_key) and is_map(fields) do
     request
     |> Transport.request()
-    |> Req.put(url: "/rest/api/3/issue/#{issue_key}", json: %{fields: fields})
+    |> Req.put(
+      url: Request.url(request, "/rest/api/3/issue/#{issue_key}"),
+      json: %{fields: fields}
+    )
     |> Response.handle_update_response()
   end
 
@@ -89,7 +92,10 @@ defmodule Jido.Connect.Jira.Client do
 
     request
     |> Transport.request()
-    |> Req.post(url: "/rest/api/3/issue/#{issue_key}/transitions", json: body)
+    |> Req.post(
+      url: Request.url(request, "/rest/api/3/issue/#{issue_key}/transitions"),
+      json: body
+    )
     |> Response.handle_transition_response()
   end
 
@@ -98,7 +104,10 @@ defmodule Jido.Connect.Jira.Client do
       when is_binary(issue_key) and is_binary(account_id) do
     request
     |> Transport.request()
-    |> Req.put(url: "/rest/api/3/issue/#{issue_key}/assignee", json: %{accountId: account_id})
+    |> Req.put(
+      url: Request.url(request, "/rest/api/3/issue/#{issue_key}/assignee"),
+      json: %{accountId: account_id}
+    )
     |> Response.handle_assign_response()
   end
 
@@ -115,7 +124,10 @@ defmodule Jido.Connect.Jira.Client do
 
     request
     |> Transport.request()
-    |> Req.post(url: "/rest/api/3/issue/#{issue_key}/comment", json: body)
+    |> Req.post(
+      url: Request.url(request, "/rest/api/3/issue/#{issue_key}/comment"),
+      json: body
+    )
     |> Response.handle_comment_response()
   end
 
@@ -125,7 +137,7 @@ defmodule Jido.Connect.Jira.Client do
 
     request
     |> Transport.request()
-    |> Req.get(url: "/rest/api/3/field", params: params)
+    |> Req.get(url: Request.url(request, "/rest/api/3/field"), params: params)
     |> Response.handle_field_schema_list_response()
   end
 end

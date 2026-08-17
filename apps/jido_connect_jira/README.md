@@ -156,7 +156,9 @@ All Jira API traffic uses a `Jido.Connect.Jira.Client.Request`. The request
 contains the selected `Jido.Connect.Connection`, its auth profile, its
 connection-specific endpoint, and the leased credential fields. API-token
 connections read `:site` from connection metadata. OAuth connections can use a
-`:cloud_endpoint`, such as the Atlassian API gateway URL for one cloud ID.
+`:cloud_endpoint`, such as the Atlassian API gateway URL for one cloud ID. Jira
+connection endpoints must use HTTPS. Tests should use a Req transport plug with
+an HTTPS endpoint instead of a plaintext credential endpoint.
 
 Hosts inject a test or custom client with the runtime `:provider_client` option.
 The client module is infrastructure. Do not put it in credential fields.

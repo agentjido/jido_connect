@@ -57,6 +57,12 @@ defmodule Jido.Connect.Jira.Client.Request do
   @spec credential(t(), atom()) :: term()
   def credential(%__MODULE__{credentials: credentials}, key), do: Data.get(credentials, key)
 
+  @doc "Builds an absolute provider URL without dropping the connection endpoint path."
+  @spec url(t(), String.t()) :: String.t()
+  def url(%__MODULE__{endpoint: endpoint}, path) when is_binary(path) do
+    endpoint <> "/" <> String.trim_leading(path, "/")
+  end
+
   defp endpoint(%Connection{metadata: metadata, id: connection_id}) do
     endpoint =
       Enum.find_value([:cloud_endpoint, :site, :base_url], fn key ->
@@ -67,16 +73,23 @@ defmodule Jido.Connect.Jira.Client.Request do
       end)
 
     case normalize_endpoint(endpoint) do
-      nil ->
+      {:ok, value} ->
+        {:ok, value}
+
+      {:error, :insecure} ->
+        {:error,
+         Error.auth("Jira connection endpoint must use HTTPS",
+           reason: :insecure_jira_endpoint,
+           connection_id: connection_id
+         )}
+
+      :error ->
         {:error,
          Error.auth("Jira connection endpoint is required",
            reason: :jira_endpoint_required,
            connection_id: connection_id,
            details: %{metadata_fields: [:cloud_endpoint, :site, :base_url]}
          )}
-
-      value ->
-        {:ok, value}
     end
   end
 
@@ -84,12 +97,19 @@ defmodule Jido.Connect.Jira.Client.Request do
     endpoint = String.trim_trailing(endpoint, "/")
     uri = URI.parse(endpoint)
 
-    if uri.scheme in ["http", "https"] and is_binary(uri.host) and uri.host != "" do
-      endpoint
+    cond do
+      uri.scheme == "https" and is_binary(uri.host) and uri.host != "" ->
+        {:ok, endpoint}
+
+      uri.scheme == "http" and is_binary(uri.host) and uri.host != "" ->
+        {:error, :insecure}
+
+      true ->
+        :error
     end
   end
 
-  defp normalize_endpoint(_endpoint), do: nil
+  defp normalize_endpoint(_endpoint), do: :error
 
   defp validate_credentials(:api_token, credentials) do
     require_fields(credentials, [:email, :api_token], :api_token)

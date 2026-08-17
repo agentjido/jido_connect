@@ -1,8 +1,24 @@
 defmodule Jido.Connect.Jira.Client.TransportTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias Jido.Connect.{Connection, Error}
+  alias Jido.Connect.Jira.Client
   alias Jido.Connect.Jira.Client.{Request, Transport}
+
+  setup {Req.Test, :verify_on_exit!}
+
+  setup do
+    previous = Application.get_env(:jido_connect_jira, :jira_req_options)
+    Application.put_env(:jido_connect_jira, :jira_req_options, plug: {Req.Test, __MODULE__})
+
+    on_exit(fn ->
+      if previous do
+        Application.put_env(:jido_connect_jira, :jira_req_options, previous)
+      else
+        Application.delete_env(:jido_connect_jira, :jira_req_options)
+      end
+    end)
+  end
 
   test "API token requests use Basic authentication and the connection site" do
     request_context =
@@ -35,6 +51,25 @@ defmodule Jido.Connect.Jira.Client.TransportTest do
 
     assert request.options.base_url == "https://api.atlassian.com/ex/jira/cloud-123"
     assert request.headers["authorization"] == ["Bearer oauth-token"]
+  end
+
+  test "OAuth operations preserve the cloud endpoint path" do
+    connection =
+      connection(
+        "oauth_conn",
+        :oauth2_user,
+        %{cloud_endpoint: "https://api.atlassian.com/ex/jira/cloud-123"}
+      )
+
+    assert {:ok, request_context} = Request.new(connection, %{access_token: "oauth-token"})
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.request_path == "/ex/jira/cloud-123/rest/api/3/issue/PROJ-123"
+      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer oauth-token"]
+      Req.Test.json(conn, %{"key" => "PROJ-123", "fields" => %{}})
+    end)
+
+    assert {:ok, %{key: "PROJ-123"}} = Client.get_issue("PROJ-123", request_context)
   end
 
   test "two concurrent connections keep separate endpoints and identities" do
@@ -81,6 +116,18 @@ defmodule Jido.Connect.Jira.Client.TransportTest do
              Request.new(connection("missing_email", :api_token, %{site: "https://a.test"}), %{
                api_token: "token"
              })
+  end
+
+  test "request context rejects plaintext credential endpoints" do
+    assert {:error,
+            %Error.AuthError{
+              reason: :insecure_jira_endpoint,
+              connection_id: "plaintext_site"
+            }} =
+             Request.new(
+               connection("plaintext_site", :api_token, %{site: "http://jira.example.test"}),
+               %{email: "user@example.com", api_token: "token"}
+             )
   end
 
   test "handle_error_response normalizes HTTP error bodies" do

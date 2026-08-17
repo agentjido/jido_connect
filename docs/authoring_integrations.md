@@ -173,7 +173,9 @@ end
 
 The preview callback gets parsed input and public action/connection metadata.
 It does not get credentials or a credential lease. It must be pure and must not
-call the provider. Core sanitizes its result before it stores the preview.
+call the provider. Core sanitizes its result before it stores the preview. Core
+also owns the `action_id`, `connection`, and `input_fields` preview keys and
+ignores provider values for these reserved keys.
 
 Use `minimum` and `maximum` for number fields. Use `min_length` and `max_length`
 for string fields. These rules apply at runtime and appear in strict catalog

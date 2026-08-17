@@ -3,6 +3,8 @@ defmodule Jido.Connect.ExecutionSnapshot do
 
   alias Jido.Connect.{ActionSpec, Callback, Connection, CredentialLease, Error, Sanitizer}
 
+  @reserved_preview_keys ["action_id", "connection", "input_fields"]
+
   @spec hash(term()) :: String.t()
   def hash(value) do
     value
@@ -76,6 +78,7 @@ defmodule Jido.Connect.ExecutionSnapshot do
             provider_preview
             |> Sanitizer.sanitize(:transport)
             |> Map.new()
+            |> Map.drop(@reserved_preview_keys)
 
           {:ok, Map.merge(provider_preview, base)}
         end
