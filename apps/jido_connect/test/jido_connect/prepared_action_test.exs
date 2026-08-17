@@ -208,6 +208,51 @@ defmodule Jido.Connect.PreparedActionTest do
     assert prepared.preview.connection.id == "conn_1"
   end
 
+  test "dump and load survive a JSON storage round trip", state do
+    stored_state = %{
+      state
+      | input: %{repo: "private/repository"},
+        lease: %{state.lease | fields: %{access_token: "secret-value"}}
+    }
+
+    assert {:ok, prepared} = prepare(stored_state)
+
+    dump = Connect.PreparedAction.dump(prepared)
+    encoded = Jason.encode!(dump)
+    decoded = Jason.decode!(encoded)
+
+    refute encoded =~ "private/repository"
+    refute encoded =~ "secret-value"
+    assert decoded["version"] == Connect.PreparedAction.format_version()
+
+    assert {:ok, loaded} = Connect.PreparedAction.load(decoded)
+    assert Connect.PreparedAction.dump(loaded) == decoded
+    assert loaded.prepared_at == prepared.prepared_at
+    assert loaded.expires_at == prepared.expires_at
+
+    assert {:ok, %{repo: "private/repository"}} =
+             commit(stored_state, loaded, %{plan_id: loaded.id})
+
+    assert_received {:handler_called, "private/repository"}
+  end
+
+  test "load rejects unknown versions and malformed dumps", state do
+    assert {:ok, prepared} = prepare(state)
+    dump = Connect.PreparedAction.dump(prepared)
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :unsupported_prepared_action_version,
+              subject: 2
+            }} = Connect.PreparedAction.load(Map.put(dump, "version", 2))
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_prepared_action_dump,
+              details: %{field: :expires_at}
+            }} = Connect.PreparedAction.load(Map.put(dump, "expires_at", "not-a-date"))
+  end
+
   test "commit freezes the execution and idempotency identifiers", state do
     assert {:ok, prepared} =
              Connect.prepare(state.spec, "demo.repo.show", state.input,
