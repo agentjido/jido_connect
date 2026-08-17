@@ -16,11 +16,15 @@
     {
       "text": "Implemented all three PR #56 review fixes. Focused tests passed (26 core, 14 Jira). Full umbrella mix quality passed. Demo format check, warnings-as-errors compile, and 21 tests passed. Commit recorded on the PR branch.",
       "timestamp": "2026-08-17T15:43:31Z"
+    },
+    {
+      "text": "Fresh review findings: require secure Jira endpoints, preserve OAuth gateway paths when resolving REST URLs, and prevent preview key normalization collisions from replacing trusted metadata.",
+      "timestamp": "2026-08-17T15:49:41Z"
     }
   ],
   "priority": 1,
   "status": "closed",
   "title": "Address PR 56 review findings",
   "type": "task",
-  "updated_at": "2026-08-17T15:43:32Z"
+  "updated_at": "2026-08-17T15:49:41Z"
 }
