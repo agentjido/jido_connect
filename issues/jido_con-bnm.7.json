@@ -1,7 +1,8 @@
 {
   "assignee": "",
   "blocked_by": [
-    "jido_con-bnm.2"
+    "jido_con-bnm.2",
+    "jido_con-bnm.4"
   ],
   "blocks": [],
   "created": "2026-08-17T17:35:05Z",
@@ -13,5 +14,5 @@
   "status": "open",
   "title": "Verify Things V1 provider action coverage",
   "type": "task",
-  "updated_at": "2026-08-17T17:35:08Z"
+  "updated_at": "2026-08-17T17:35:09Z"
 }
