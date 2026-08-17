@@ -6,9 +6,15 @@
   "description": "Implement GitHub issue #55: add the experimental jido_connect_things provider with Inbox list, create, and update actions; guarded prepare/commit writes; safe previews; connection and credential lease boundaries; catalog packs; deterministic wire contracts; and complete fake-based tests. Source: https://github.com/agentjido/jido_connect/issues/55",
   "id": "jido_con-yzf",
   "labels": [],
+  "comments": [
+    {
+      "text": "Started implementation from GitHub issue #55 in branch jido_con-yzf/things-inbox-provider. Scope includes provider package, guarded actions, safe previews, packs, and fake-based safety tests.",
+      "timestamp": "2026-08-17T15:24:48Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Add guarded Things Cloud Inbox provider",
   "type": "task",
-  "updated_at": "2026-08-17T15:24:47Z"
+  "updated_at": "2026-08-17T15:24:48Z"
 }
