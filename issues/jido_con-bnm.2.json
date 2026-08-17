@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-bnm.7"
   ],
+  "closed_at": "2026-08-17T18:34:22Z",
   "created": "2026-08-17T17:35:02Z",
   "description": "Add explicit storage-free read actions over the expanded state. Extend things.todo.list beyond Inbox with Inbox, Today, Evening, Anytime, Someday, Upcoming, Logbook, and Trash views plus status, text, relation, deadline, and scheduled-date filters. Add things.todo.get and things.todo.search. Add project, heading, area, and tag list actions. Return exact IDs, relations, checklist items where applicable, provider head, and freshness data. Keep strict input and output contracts and safe errors.",
   "id": "jido_con-bnm.2",
@@ -18,8 +19,8 @@
     }
   ],
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Add Things V1 query and lookup actions",
   "type": "task",
-  "updated_at": "2026-08-17T18:34:21Z"
+  "updated_at": "2026-08-17T18:34:22Z"
 }
