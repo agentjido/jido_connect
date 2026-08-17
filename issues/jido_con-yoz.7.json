@@ -5,7 +5,8 @@
     "jido_con-yoz.2",
     "jido_con-yoz.3",
     "jido_con-yoz.4",
-    "jido_con-yoz.5"
+    "jido_con-yoz.5",
+    "jido_con-yoz.6"
   ],
   "blocks": [],
   "created": "2026-08-17T11:32:24Z",
@@ -17,5 +18,5 @@
   "status": "open",
   "title": "Verify and publish issue 54 pull request",
   "type": "task",
-  "updated_at": "2026-08-17T11:32:26Z"
+  "updated_at": "2026-08-17T11:32:27Z"
 }

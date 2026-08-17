@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-yoz.7"
+  ],
   "created": "2026-08-17T11:32:23Z",
   "description": "Document host one-use claims, duplicate commit risk, uncertain writes, and provider idempotency support.",
   "id": "jido_con-yoz.6",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "Document replay and idempotency",
   "type": "task",
-  "updated_at": "2026-08-17T11:32:23Z"
+  "updated_at": "2026-08-17T11:32:27Z"
 }
