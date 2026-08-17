@@ -134,7 +134,7 @@ Provider results use four delivery states:
 Use `Jido.Connect.ProviderResponse.retry_guidance/1` or
 `Jido.Connect.Error.retry_guidance/1`. `:retry_with_idempotency` requires the
 same provider idempotency key. `:do_not_retry` prevents an automatic repeat of
-an uncertain, non-idempotent mutation.
+an uncertain or failed 5xx non-idempotent mutation.
 
 For host UI discovery, use `Jido.Connect.spec/1`, `actions/1`, `triggers/1`,
 `auth_profiles/1`, or the richer `Jido.Connect.Catalog` APIs. `Catalog.discover/1`

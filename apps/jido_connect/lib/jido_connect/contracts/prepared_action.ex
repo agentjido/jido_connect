@@ -34,7 +34,7 @@ defmodule Jido.Connect.PreparedAction do
 
   @type t :: %__MODULE__{
           id: String.t(),
-          integration_id: atom(),
+          integration_id: String.t(),
           action_id: String.t(),
           connection_id: String.t(),
           input_hash: String.t(),
@@ -73,7 +73,7 @@ defmodule Jido.Connect.PreparedAction do
     %{
       "version" => @format_version,
       "id" => prepared.id,
-      "integration_id" => Atom.to_string(prepared.integration_id),
+      "integration_id" => to_string(prepared.integration_id),
       "action_id" => prepared.action_id,
       "connection_id" => prepared.connection_id,
       "input_hash" => prepared.input_hash,
@@ -96,7 +96,7 @@ defmodule Jido.Connect.PreparedAction do
   @spec load(map()) :: {:ok, t()} | {:error, Error.ValidationError.t()}
   def load(payload) when is_map(payload) do
     with :ok <- require_version(payload),
-         {:ok, integration_id} <- existing_atom(payload, :integration_id),
+         {:ok, integration_id} <- integration_id(payload),
          {:ok, risk} <- existing_atom(payload, :risk),
          {:ok, confirmation} <- existing_atom(payload, :confirmation),
          {:ok, prepared_at} <- datetime(payload, :prepared_at),
@@ -191,6 +191,14 @@ defmodule Jido.Connect.PreparedAction do
            })}
       end
     end)
+  end
+
+  defp integration_id(payload) do
+    case Data.get(payload, :integration_id, :missing) do
+      value when is_binary(value) -> {:ok, value}
+      value when is_atom(value) and value != :missing -> {:ok, Atom.to_string(value)}
+      _value -> invalid_dump(%{field: :integration_id, expected: :string})
+    end
   end
 
   defp existing_atom(payload, field) do

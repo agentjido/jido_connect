@@ -129,4 +129,51 @@ defmodule Jido.Connect.ErrorTest do
     assert Error.retryable?(error)
     assert Error.retry_guidance(error) == :retry_with_idempotency
   end
+
+  test "blocks a non-idempotent mutation retry after a 5xx response" do
+    action =
+      RuntimeFixtures.spec(%{
+        action: %{
+          mutation?: true,
+          risk: :write,
+          confirmation: :always,
+          provider_idempotency?: false
+        }
+      }).actions
+      |> hd()
+
+    error =
+      Error.provider("Provider failed after processing the request",
+        provider: :demo,
+        status: 503
+      )
+      |> Error.with_action_context(action)
+
+    assert error.delivery == :rejected
+    refute Error.retryable?(error)
+    assert Error.retry_guidance(error) == :do_not_retry
+  end
+
+  test "requires idempotency for a mutation retry after a 5xx response" do
+    action =
+      RuntimeFixtures.spec(%{
+        action: %{
+          mutation?: true,
+          risk: :write,
+          confirmation: :always,
+          provider_idempotency?: true
+        }
+      }).actions
+      |> hd()
+
+    error =
+      Error.provider("Provider failed after processing the request",
+        provider: :demo,
+        status: 503
+      )
+      |> Error.with_action_context(action)
+
+    assert Error.retryable?(error)
+    assert Error.retry_guidance(error) == :retry_with_idempotency
+  end
 end

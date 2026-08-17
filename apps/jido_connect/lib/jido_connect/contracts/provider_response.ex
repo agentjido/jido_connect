@@ -62,6 +62,8 @@ defmodule Jido.Connect.ProviderResponse do
 
   @doc "Returns true when the response represents a retryable provider failure."
   @spec retryable?(t()) :: boolean()
+  def retryable?(%__MODULE__{delivery: :not_sent}), do: true
+
   def retryable?(%__MODULE__{
         delivery: :sent_outcome_unknown,
         mutation?: true,
@@ -69,7 +71,14 @@ defmodule Jido.Connect.ProviderResponse do
       }),
       do: false
 
-  def retryable?(%__MODULE__{delivery: :not_sent}), do: true
+  def retryable?(%__MODULE__{
+        status: status,
+        mutation?: true,
+        provider_idempotency?: false
+      })
+      when status in 500..599,
+      do: false
+
   def retryable?(%__MODULE__{status: status}) when status == 429 or status in 500..599, do: true
   def retryable?(%__MODULE__{reason: reason}) when reason in [:request_error, :timeout], do: true
   def retryable?(%__MODULE__{}), do: false
@@ -82,8 +91,10 @@ defmodule Jido.Connect.ProviderResponse do
       success?(response) ->
         :not_applicable
 
-      response.delivery == :sent_outcome_unknown and response.mutation? and
-          response.provider_idempotency? ->
+      response.delivery == :not_sent ->
+        :safe_to_retry
+
+      response.mutation? and response.provider_idempotency? and retryable?(response) ->
         :retry_with_idempotency
 
       retryable?(response) ->

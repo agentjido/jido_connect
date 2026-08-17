@@ -105,6 +105,30 @@ defmodule Jido.Connect.JiraTest do
              )
   end
 
+  test "validates normalized issue results against the strict declared output" do
+    runtime = Jido.Connect.Jira.TestRuntime.build()
+
+    lease =
+      Connect.CredentialLease.from_connection!(
+        runtime.context.connection,
+        runtime.credentials,
+        expires_at: DateTime.add(DateTime.utc_now(), 60, :second)
+      )
+
+    assert {:ok, issue} =
+             Connect.invoke(Jira, "jira.issue.get", %{issue_key: "PROJ-123"},
+               context: runtime.context,
+               credential_lease: lease,
+               provider_client: Jido.Connect.Jira.MockClient
+             )
+
+    assert issue.key == "PROJ-123"
+    assert issue.summary == "Test issue"
+    refute Map.has_key?(issue, :id)
+    refute Map.has_key?(issue, :url)
+    refute Map.has_key?(issue, :issue_type)
+  end
+
   test "prepares a safe Jira comment preview without calling the provider" do
     runtime = Jido.Connect.Jira.TestRuntime.build()
 

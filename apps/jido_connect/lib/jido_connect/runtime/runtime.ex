@@ -10,6 +10,7 @@ defmodule Jido.Connect.Runtime do
     Error,
     ExecutionAuthorization,
     ExecutionSnapshot,
+    Field,
     PreparedAction,
     Spec,
     Telemetry,
@@ -60,7 +61,7 @@ defmodule Jido.Connect.Runtime do
              credentials: lease.fields,
              provider_client: get_option(opts, :provider_client)
            }),
-         {:ok, parsed_output} <- parse_schema(action.output_schema, output, :output) do
+         {:ok, parsed_output} <- parse_output_schema(action, output) do
       {:ok, parsed_output}
     end
   end
@@ -80,7 +81,7 @@ defmodule Jido.Connect.Runtime do
       {:ok,
        %PreparedAction{
          id: prepared_id(),
-         integration_id: integration.id,
+         integration_id: to_string(integration.id),
          action_id: action.id,
          connection_id: connection.id,
          input_hash: ExecutionSnapshot.hash(parsed_input),
@@ -132,7 +133,7 @@ defmodule Jido.Connect.Runtime do
                idempotency_key: prepared.idempotency_key
              }
            }),
-         {:ok, parsed_output} <- parse_schema(action.output_schema, output, :output) do
+         {:ok, parsed_output} <- parse_output_schema(action, output) do
       {:ok, parsed_output}
     end
   end
@@ -288,6 +289,30 @@ defmodule Jido.Connect.Runtime do
     end
   end
 
+  defp parse_output_schema(%ActionSpec{} = action, output) do
+    action.output_schema
+    |> parse_schema(project_declared_output(output, action.output), :output)
+  end
+
+  defp project_declared_output(output, fields) when is_map(output) and is_list(fields) do
+    Enum.reduce(fields, %{}, fn %Field{} = field, projected ->
+      case fetch_output_field(output, field.name) do
+        {:ok, nil} when not field.required? -> projected
+        {:ok, value} -> Map.put(projected, field.name, value)
+        :error -> projected
+      end
+    end)
+  end
+
+  defp project_declared_output(output, _fields), do: output
+
+  defp fetch_output_field(output, name) do
+    case Map.fetch(output, name) do
+      {:ok, value} -> {:ok, value}
+      :error -> Map.fetch(output, Atom.to_string(name))
+    end
+  end
+
   defp normalize_schema_result({:ok, parsed}, _reason), do: {:ok, parsed}
   defp normalize_schema_result({:error, errors}, reason), do: {:error, Error.zoi(reason, errors)}
 
@@ -334,7 +359,7 @@ defmodule Jido.Connect.Runtime do
 
   defp require_matching_snapshot(integration, action, input, context, lease, prepared, opts) do
     current = %{
-      integration_id: integration.id,
+      integration_id: to_string(integration.id),
       action_id: action.id,
       connection_id: context.connection.id,
       input_hash: ExecutionSnapshot.hash(input),

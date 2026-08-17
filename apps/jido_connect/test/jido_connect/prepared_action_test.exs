@@ -287,6 +287,17 @@ defmodule Jido.Connect.PreparedActionTest do
     assert_received {:handler_called, "private/repository"}
   end
 
+  test "load restores an integration id that is not in the atom table", state do
+    assert {:ok, prepared} = prepare(state)
+    integration_id = "fresh_beam_integration_#{System.unique_integer([:positive])}"
+    dump = prepared |> Connect.PreparedAction.dump() |> Map.put("integration_id", integration_id)
+
+    refute existing_atom?(integration_id)
+    assert {:ok, loaded} = Connect.PreparedAction.load(dump)
+    assert loaded.integration_id == integration_id
+    refute existing_atom?(integration_id)
+  end
+
   test "load rejects unknown versions and malformed dumps", state do
     assert {:ok, prepared} = prepare(state)
     dump = Connect.PreparedAction.dump(prepared)
@@ -380,5 +391,12 @@ defmodule Jido.Connect.PreparedActionTest do
               reason: :prepared_action_stale,
               details: %{changed: ^field}
             }} = result
+  end
+
+  defp existing_atom?(value) do
+    String.to_existing_atom(value)
+    true
+  rescue
+    ArgumentError -> false
   end
 end

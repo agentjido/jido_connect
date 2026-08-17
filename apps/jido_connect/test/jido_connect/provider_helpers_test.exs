@@ -76,6 +76,25 @@ defmodule Jido.Connect.ProviderHelpersTest do
     assert ProviderResponse.retryable?(response)
     assert ProviderResponse.retry_guidance(response) == :safe_to_retry
 
+    non_idempotent_write_5xx =
+      ProviderResponse.from_result!(:demo, {:ok, %{status: 503, body: %{}}},
+        action_risk: :write,
+        mutation?: true
+      )
+
+    refute ProviderResponse.retryable?(non_idempotent_write_5xx)
+    assert ProviderResponse.retry_guidance(non_idempotent_write_5xx) == :do_not_retry
+
+    idempotent_write_5xx =
+      ProviderResponse.from_result!(:demo, {:ok, %{status: 503, body: %{}}},
+        action_risk: :write,
+        mutation?: true,
+        provider_idempotency?: true
+      )
+
+    assert ProviderResponse.retryable?(idempotent_write_5xx)
+    assert ProviderResponse.retry_guidance(idempotent_write_5xx) == :retry_with_idempotency
+
     assert ProviderResponse.to_public_map(response).body_summary == %{
              "type" => "map",
              "size" => 1,

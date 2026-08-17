@@ -397,6 +397,8 @@ defmodule Jido.Connect.Error do
   def error?(_error), do: false
 
   @spec retryable?(term()) :: boolean()
+  def retryable?(%ProviderError{delivery: :not_sent}), do: true
+
   def retryable?(%ProviderError{
         delivery: :sent_outcome_unknown,
         mutation?: true,
@@ -404,7 +406,13 @@ defmodule Jido.Connect.Error do
       }),
       do: false
 
-  def retryable?(%ProviderError{delivery: :not_sent}), do: true
+  def retryable?(%ProviderError{
+        status: status,
+        mutation?: true,
+        provider_idempotency?: false
+      })
+      when status in 500..599,
+      do: false
 
   def retryable?(%ProviderError{status: status}) when status == 429 or status in 500..599,
     do: true
@@ -421,22 +429,19 @@ defmodule Jido.Connect.Error do
   @doc "Returns stable retry guidance for a normalized provider failure."
   @spec retry_guidance(term()) ::
           :safe_to_retry | :retry_with_idempotency | :do_not_retry | :not_applicable
-  def retry_guidance(%ProviderError{
-        delivery: :sent_outcome_unknown,
-        mutation?: true,
-        provider_idempotency?: true
-      }),
-      do: :retry_with_idempotency
-
-  def retry_guidance(%ProviderError{
-        delivery: :sent_outcome_unknown,
-        mutation?: true,
-        provider_idempotency?: false
-      }),
-      do: :do_not_retry
+  def retry_guidance(%ProviderError{delivery: :not_sent}), do: :safe_to_retry
 
   def retry_guidance(%ProviderError{} = error) do
-    if retryable?(error), do: :safe_to_retry, else: :do_not_retry
+    cond do
+      error.mutation? and error.provider_idempotency? and retryable?(error) ->
+        :retry_with_idempotency
+
+      retryable?(error) ->
+        :safe_to_retry
+
+      true ->
+        :do_not_retry
+    end
   end
 
   def retry_guidance(_error), do: :not_applicable

@@ -179,6 +179,10 @@ Use `minimum` and `maximum` for number fields. Use `min_length` and `max_length`
 for string fields. These rules apply at runtime and appear in strict catalog
 JSON schemas.
 
+Action handlers can return normalized provider maps or structs. Before output
+validation, the runtime keeps only the top-level fields in the action `output`
+declaration. Hosts receive only the declared strict output contract.
+
 Declare provider idempotency only when the provider gives this guarantee and
 the handler sends the runtime key:
 
