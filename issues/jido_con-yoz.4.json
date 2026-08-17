@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-yoz.7"
+  ],
   "created": "2026-08-17T11:32:22Z",
   "description": "Expose strict input and output JSON Schema, a stable schema digest, and common field limits.",
   "id": "jido_con-yoz.4",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "Expose catalog JSON Schemas",
   "type": "task",
-  "updated_at": "2026-08-17T11:32:22Z"
+  "updated_at": "2026-08-17T11:32:26Z"
 }
