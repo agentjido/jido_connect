@@ -12,6 +12,26 @@ defmodule Jido.Connect.PreparedActionTest do
     end
   end
 
+  defmodule Preview do
+    @behaviour Jido.Connect.ActionPreview
+
+    @impl true
+    def preview(%{repo: repo}, %{action_id: action_id}) do
+      %{
+        repository: repo,
+        action: action_id,
+        api_token: "must-not-leak"
+      }
+    end
+  end
+
+  defmodule InvalidPreview do
+    @behaviour Jido.Connect.ActionPreview
+
+    @impl true
+    def preview(_input, _context), do: :invalid
+  end
+
   setup do
     spec =
       RuntimeFixtures.spec(%{
@@ -189,6 +209,37 @@ defmodule Jido.Connect.PreparedActionTest do
              )
 
     assert prepared.confirmation_required?
+  end
+
+  test "provider previews are pure, useful, and sanitized", state do
+    spec =
+      RuntimeFixtures.spec(%{
+        action: %{
+          handler: Handler,
+          preview: Preview,
+          mutation?: true,
+          risk: :write,
+          confirmation: :always
+        }
+      })
+
+    assert {:ok, prepared} = prepare(%{state | spec: spec})
+
+    assert prepared.preview["repository"] == "agentjido/jido_connect"
+    assert prepared.preview["action"] == "demo.repo.show"
+    assert prepared.preview["api_token"] == "[redacted]"
+    assert prepared.preview.action_id == "demo.repo.show"
+    assert prepared.preview.connection.id == "conn_1"
+    refute_received {:handler_called, _repo}
+  end
+
+  test "prepare rejects invalid provider preview results", state do
+    spec = RuntimeFixtures.spec(%{action: %{preview: InvalidPreview}})
+
+    assert {:error, %Connect.Error.ExecutionError{phase: :preview}} =
+             prepare(%{state | spec: spec})
+
+    refute_received {:handler_called, _repo}
   end
 
   test "the prepared value does not retain input or credential fields", state do

@@ -219,6 +219,7 @@ defmodule Jido.Connect.Dsl.SpecBuilder do
       auth_profiles: auth_profiles,
       policies: policies,
       handler: action.handler,
+      preview: action.preview,
       input: input,
       output: output,
       input_schema: Schema.zoi_schema_from_fields(input),

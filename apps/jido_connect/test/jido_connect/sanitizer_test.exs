@@ -6,6 +6,7 @@ defmodule Jido.Connect.SanitizerTest do
   test "redacts sensitive keys for telemetry and transport profiles" do
     value = %{
       :access_token => "secret-token",
+      :api_token => "secret-api-token",
       "client_secret" => "secret-client",
       "x-hub-signature-256" => "sha256=secret-signature",
       nested: %{refresh_token: "secret-refresh", ok: true}
@@ -13,6 +14,7 @@ defmodule Jido.Connect.SanitizerTest do
 
     assert %{
              :access_token => "[redacted]",
+             :api_token => "[redacted]",
              "client_secret" => "[redacted]",
              "x-hub-signature-256" => "[redacted]",
              nested: %{refresh_token: "[redacted]", ok: true}
@@ -20,6 +22,7 @@ defmodule Jido.Connect.SanitizerTest do
 
     assert %{
              "access_token" => "[redacted]",
+             "api_token" => "[redacted]",
              "client_secret" => "[redacted]",
              "nested" => %{"refresh_token" => "[redacted]", "ok" => true},
              "x-hub-signature-256" => "[redacted]"

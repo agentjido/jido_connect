@@ -71,7 +71,8 @@ defmodule Jido.Connect.Runtime do
          {:ok, context} <- fetch_context(opts),
          {:ok, lease} <- fetch_credential_lease(opts),
          :ok <- Authorization.authorize(action, parsed_input, context, lease, auth_opts(opts)),
-         {:ok, ttl_ms} <- prepare_ttl_ms(opts) do
+         {:ok, ttl_ms} <- prepare_ttl_ms(opts),
+         {:ok, preview} <- ExecutionSnapshot.preview(action, parsed_input, context.connection) do
       now = get_option(opts, :now) || DateTime.utc_now()
       expires_at = earliest_expiry(DateTime.add(now, ttl_ms, :millisecond), lease.expires_at)
       connection = context.connection
@@ -90,7 +91,7 @@ defmodule Jido.Connect.Runtime do
          risk: action.risk,
          confirmation: action.confirmation,
          confirmation_required?: ExecutionAuthorization.confirmation_required?(action, context),
-         preview: ExecutionSnapshot.preview(action, parsed_input, connection),
+         preview: preview,
          execution_id: get_option(opts, :execution_id),
          idempotency_key: get_option(opts, :idempotency_key),
          prepared_at: now,

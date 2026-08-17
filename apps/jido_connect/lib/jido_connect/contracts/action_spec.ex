@@ -18,6 +18,7 @@ defmodule Jido.Connect.ActionSpec do
               auth_profiles: Zoi.list(Zoi.atom()) |> Zoi.default([]),
               policies: Zoi.list(Zoi.atom()) |> Zoi.default([]),
               handler: Zoi.module(),
+              preview: Zoi.module() |> Zoi.nullish() |> Zoi.optional(),
               input: Zoi.list(Field.schema()) |> Zoi.default([]),
               output: Zoi.list(Field.schema()) |> Zoi.default([]),
               input_schema: Zoi.any(),

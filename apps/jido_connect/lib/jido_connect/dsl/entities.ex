@@ -144,6 +144,7 @@ defmodule Jido.Connect.Dsl.Action do
     :verb,
     :data_classification,
     :handler,
+    :preview,
     :auth_profiles,
     :access,
     :effect,

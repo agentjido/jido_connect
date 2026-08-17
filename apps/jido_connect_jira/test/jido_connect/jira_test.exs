@@ -105,6 +105,30 @@ defmodule Jido.Connect.JiraTest do
              )
   end
 
+  test "prepares a safe Jira comment preview without calling the provider" do
+    runtime = Jido.Connect.Jira.TestRuntime.build()
+
+    lease =
+      Connect.CredentialLease.from_connection!(
+        runtime.context.connection,
+        runtime.credentials,
+        expires_at: DateTime.add(DateTime.utc_now(), 60, :second)
+      )
+
+    assert {:ok, prepared} =
+             Connect.prepare(
+               Jira,
+               "jira.issue.comment.create",
+               %{issue_key: "PROJ-123", body: "Ready for review"},
+               context: runtime.context,
+               credential_lease: lease
+             )
+
+    assert prepared.preview["issue_key"] == "PROJ-123"
+    assert prepared.preview["comment_bytes"] == 16
+    assert prepared.preview.action_id == "jira.issue.comment.create"
+  end
+
   test "catalog entry exposes auth and runtime capabilities" do
     entry = Connect.Catalog.entry(Jira)
     features = entry.capabilities |> Enum.map(& &1.feature) |> MapSet.new()

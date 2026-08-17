@@ -1,7 +1,7 @@
 defmodule Jido.Connect.ExecutionSnapshot do
   @moduledoc false
 
-  alias Jido.Connect.{ActionSpec, Connection, CredentialLease}
+  alias Jido.Connect.{ActionSpec, Callback, Connection, CredentialLease, Error, Sanitizer}
 
   @spec hash(term()) :: String.t()
   def hash(value) do
@@ -19,6 +19,7 @@ defmodule Jido.Connect.ExecutionSnapshot do
       :id,
       :name,
       :handler,
+      :preview,
       :input,
       :output,
       :scopes,
@@ -46,18 +47,64 @@ defmodule Jido.Connect.ExecutionSnapshot do
     |> hash()
   end
 
-  @spec preview(ActionSpec.t(), map(), Connection.t()) :: map()
+  @spec preview(ActionSpec.t(), map(), Connection.t()) ::
+          {:ok, map()} | {:error, Error.error()}
   def preview(%ActionSpec{} = action, input, %Connection{} = connection) do
-    %{
+    base = %{
       action_id: action.id,
       connection: %{
         id: connection.id,
         provider: connection.provider,
         profile: connection.profile,
-        subject: Jido.Connect.Sanitizer.sanitize(connection.subject, :transport)
+        subject: Sanitizer.sanitize(connection.subject, :transport)
       },
       input_fields: input |> Map.keys() |> Enum.map(&field_name/1) |> Enum.sort()
     }
+
+    case action.preview do
+      nil ->
+        {:ok, base}
+
+      module ->
+        with {:ok, result} <-
+               Callback.call(module, :preview, [input, base],
+                 phase: :preview,
+                 details: %{operation_id: action.id}
+               ),
+             {:ok, provider_preview} <- normalize_preview(result, action.id) do
+          provider_preview =
+            provider_preview
+            |> Sanitizer.sanitize(:transport)
+            |> Map.new()
+
+          {:ok, Map.merge(provider_preview, base)}
+        end
+    end
+  end
+
+  defp normalize_preview({:ok, preview}, action_id), do: normalize_preview(preview, action_id)
+  defp normalize_preview(preview, _action_id) when is_map(preview), do: {:ok, preview}
+
+  defp normalize_preview({:error, %_module{} = error}, action_id) do
+    if Error.error?(error),
+      do: {:error, error},
+      else: {:error, preview_error(error, action_id)}
+  end
+
+  defp normalize_preview({:error, reason}, action_id),
+    do: {:error, preview_error(reason, action_id)}
+
+  defp normalize_preview(result, action_id),
+    do: {:error, preview_error({:invalid_result, result}, action_id)}
+
+  defp preview_error(reason, action_id) do
+    Error.execution("Provider preview failed",
+      phase: :preview,
+      details: %{
+        operation_id: action_id,
+        error: Sanitizer.sanitize(reason, :transport)
+      }
+    )
   end
 
   defp field_name(field) when is_atom(field), do: Atom.to_string(field)

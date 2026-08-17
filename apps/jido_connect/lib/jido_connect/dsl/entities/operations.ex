@@ -91,6 +91,7 @@ defmodule Jido.Connect.Dsl.Entities.Operations do
       risk: [type: :atom, default: :read],
       confirmation: [type: :atom, default: :none],
       handler: [type: :module, required: true],
+      preview: [type: :module],
       metadata: [type: :map, default: %{}]
     ]
   end
