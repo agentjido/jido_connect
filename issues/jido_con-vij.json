@@ -6,9 +6,15 @@
   "description": "Resolve every actionable review finding on PR #56 for issue #54 production hardening. Add regression tests, run umbrella and demo quality checks, commit, push to the existing PR branch, and recheck review and CI status.",
   "id": "jido_con-vij",
   "labels": [],
+  "comments": [
+    {
+      "text": "Review has three actionable findings. Plan: block non-idempotent mutation retries for 5xx outcomes in ProviderResponse and Error; retain strict schemas while projecting handler output to declared fields before validation; store PreparedAction integration IDs as strings so load does not depend on the atom table; add regression tests and run all required checks.",
+      "timestamp": "2026-08-17T15:26:39Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Address PR 56 review findings",
   "type": "task",
-  "updated_at": "2026-08-17T15:24:46Z"
+  "updated_at": "2026-08-17T15:26:39Z"
 }
