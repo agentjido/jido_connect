@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
   "created": "2026-08-17T15:24:37Z",
@@ -21,7 +21,7 @@
     }
   ],
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "Address PR 56 review findings",
   "type": "task",
   "updated_at": "2026-08-17T15:49:47Z"
