@@ -11,13 +11,18 @@ defmodule Jido.Connect.ThingsTest do
     "things.todo.search",
     "things.todo.create",
     "things.todo.update",
+    "things.todo.schedule",
+    "things.todo.deadline.set",
+    "things.todo.deadline.clear",
+    "things.todo.tags.set",
+    "things.todo.move",
     "things.project.list",
     "things.heading.list",
     "things.area.list",
     "things.tag.list"
   ]
 
-  test "registers the experimental provider and nine generated actions" do
+  test "registers the experimental provider and fourteen generated actions" do
     spec = Things.integration()
 
     assert spec.id == :things
@@ -36,6 +41,11 @@ defmodule Jido.Connect.ThingsTest do
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.SearchTodos)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.CreateInboxTodo)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.UpdateInboxTodo)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ScheduleTodo)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.SetTodoDeadline)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ClearTodoDeadline)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.SetTodoTags)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.MoveTodo)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListProjects)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListHeadings)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListAreas)
@@ -55,7 +65,15 @@ defmodule Jido.Connect.ThingsTest do
     assert actions["things.todo.list"].risk == :read
     assert actions["things.todo.list"].confirmation == :none
 
-    for id <- ["things.todo.create", "things.todo.update"] do
+    for id <- [
+          "things.todo.create",
+          "things.todo.update",
+          "things.todo.schedule",
+          "things.todo.deadline.set",
+          "things.todo.deadline.clear",
+          "things.todo.tags.set",
+          "things.todo.move"
+        ] do
       assert actions[id].risk == :external_write
       assert actions[id].confirmation == :required_for_ai
       assert actions[id].metadata.prepare_commit_required?
@@ -98,6 +116,16 @@ defmodule Jido.Connect.ThingsTest do
                id: "VJ1edXTP9q3PmFDUuy8EQh",
                expected_modified_at: "2026-08-17T12:00:00Z"
              })
+
+    assert {:error, _errors} =
+             Zoi.parse(actions["things.todo.schedule"].input_schema, Map.put(%{}, :unknown, true))
+
+    assert {:ok, %{tag_ids: []}} =
+             Zoi.parse(actions["things.todo.tags.set"].input_schema, %{
+               id: "VJ1edXTP9q3PmFDUuy8EQh",
+               expected_modified_at: "2026-08-17T12:00:00Z",
+               tag_ids: []
+             })
   end
 
   test "publishes reader and editor packs without raw or destructive tools" do
@@ -126,7 +154,12 @@ defmodule Jido.Connect.ThingsTest do
              "things.area.list",
              "things.tag.list",
              "things.todo.create",
-             "things.todo.update"
+             "things.todo.update",
+             "things.todo.schedule",
+             "things.todo.deadline.set",
+             "things.todo.deadline.clear",
+             "things.todo.tags.set",
+             "things.todo.move"
            ]
 
     refute Enum.any?(editor.allowed_tools, &String.contains?(&1, ["delete", "trash", "raw"]))
@@ -139,6 +172,6 @@ defmodule Jido.Connect.ThingsTest do
     refute serialized =~ "history-key"
     refute serialized =~ "commit body"
     refute serialized =~ "credential lease"
-    assert serialized =~ "unofficial_api"
+    assert :unofficial_api in Things.integration().tags
   end
 end

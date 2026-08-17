@@ -441,6 +441,39 @@ defmodule Jido.Connect.Things.RuntimeTest do
     refute_received {:request, :post, _url, _opts}
   end
 
+  test "prepares and commits an explicit organization action" do
+    parent = self()
+    transport = successful_update_transport(parent, @modified_at, @modified_at)
+    {context, lease} = runtime_contract("connection-A", "user@example.com")
+
+    input = %{
+      id: @id,
+      expected_modified_at: DateTime.to_iso8601(@modified_at),
+      schedule: "today"
+    }
+
+    assert {:ok, prepared} =
+             Jido.Connect.Things.prepare("things.todo.schedule", input,
+               context: context,
+               credential_lease: lease,
+               transport: transport,
+               now: @now,
+               today: ~D[2026-08-17],
+               lock: &direct_lock/2
+             )
+
+    assert prepared.action.preview.operation == "schedule"
+    assert prepared.action.preview.before.schedule == "inbox"
+    assert prepared.action.preview.after.schedule == "today"
+    flush_requests()
+
+    assert {:ok, %{receipt: %{action_id: "things.todo.schedule", delivery: "confirmed"}}} =
+             commit(prepared, input, context, lease, transport)
+
+    assert_received {:request, :post, _url, _opts}
+    refute_received {:request, :post, _url, _opts}
+  end
+
   test "rejects stale expected_modified_at again immediately before commit" do
     parent = self()
     changed = DateTime.add(@modified_at, 60, :second)

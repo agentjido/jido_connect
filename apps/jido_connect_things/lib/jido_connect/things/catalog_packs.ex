@@ -12,7 +12,16 @@ defmodule Jido.Connect.Things.CatalogPacks do
     "things.area.list",
     "things.tag.list"
   ]
-  @editor_tools @reader_tools ++ ["things.todo.create", "things.todo.update"]
+  @editor_tools @reader_tools ++
+                  [
+                    "things.todo.create",
+                    "things.todo.update",
+                    "things.todo.schedule",
+                    "things.todo.deadline.set",
+                    "things.todo.deadline.clear",
+                    "things.todo.tags.set",
+                    "things.todo.move"
+                  ]
 
   def all, do: [reader(), editor()]
 
