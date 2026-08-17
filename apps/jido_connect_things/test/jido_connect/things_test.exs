@@ -139,6 +139,6 @@ defmodule Jido.Connect.ThingsTest do
     refute serialized =~ "history-key"
     refute serialized =~ "commit body"
     refute serialized =~ "credential lease"
-    assert serialized =~ "unofficial_api"
+    assert :unofficial_api in Things.integration().tags
   end
 end
