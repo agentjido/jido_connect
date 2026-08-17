@@ -10,11 +10,15 @@
     {
       "text": "Started implementation from GitHub issue #55 in branch jido_con-yzf/things-inbox-provider. Scope includes provider package, guarded actions, safe previews, packs, and fake-based safety tests.",
       "timestamp": "2026-08-17T15:24:48Z"
+    },
+    {
+      "text": "Implemented the experimental Things provider, guarded prepare/commit runtime, strict schemas, schema-301 wire format, safe previews, catalog packs, redacted boundaries, delivery certainty, and fake-based tests. Verification passed: package mix quality (35 tests, 80.90% coverage), umbrella mix quality, and demo format/compile/test (21 tests).",
+      "timestamp": "2026-08-17T16:11:03Z"
     }
   ],
   "priority": 1,
   "status": "in_progress",
   "title": "Add guarded Things Cloud Inbox provider",
   "type": "task",
-  "updated_at": "2026-08-17T15:24:48Z"
+  "updated_at": "2026-08-17T16:11:03Z"
 }
