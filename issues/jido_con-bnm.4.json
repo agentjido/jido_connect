@@ -11,9 +11,15 @@
   "id": "jido_con-bnm.4",
   "labels": [],
   "parent": "jido_con-bnm",
+  "comments": [
+    {
+      "text": "Exposed guarded schedule, deadline set and clear, tag replacement, and atomic container move actions. Expanded create contracts for the approved V1 schedule, deadline, tag, and destination fields. Added the actions to the conservative editor pack and covered an exact prepare/commit schedule path. Package quality passed with 60 tests and 80.56% coverage. Root quality and demo checks passed.",
+      "timestamp": "2026-08-17T18:51:06Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Add guarded Things organization actions",
   "type": "task",
-  "updated_at": "2026-08-17T18:48:57Z"
+  "updated_at": "2026-08-17T18:51:06Z"
 }
