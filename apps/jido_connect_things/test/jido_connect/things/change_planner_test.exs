@@ -111,6 +111,13 @@ defmodule Jido.Connect.Things.ChangePlannerTest do
       assert payload(planned)["sp"] == @timestamp
     end
 
+    completed = state_fixture(task: %{status: :completed, stopped_at: @modified_at})
+    assert {:ok, reopen} = plan("things.todo.reopen", target_input(), completed)
+    assert reopen.preview.before.status == "completed"
+    assert reopen.preview.after.status == "open"
+    assert payload(reopen)["ss"] == 0
+    assert Map.fetch!(payload(reopen), "sp") == nil
+
     assert {:ok, trash} = plan("things.todo.trash", target_input())
     assert trash.risk == :destructive
     assert payload(trash)["tr"]
