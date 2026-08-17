@@ -4,14 +4,15 @@
   "blocks": [
     "jido_con-yoz.7"
   ],
+  "closed_at": "2026-08-17T11:55:50Z",
   "created": "2026-08-17T11:32:21Z",
   "description": "Add stable provider delivery or outcome data and risk-aware retry guidance for writes with uncertain outcomes.",
   "id": "jido_con-yoz.2",
   "labels": [],
   "parent": "jido_con-yoz",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Add mutation delivery certainty",
   "type": "task",
-  "updated_at": "2026-08-17T11:51:40Z"
+  "updated_at": "2026-08-17T11:55:50Z"
 }
