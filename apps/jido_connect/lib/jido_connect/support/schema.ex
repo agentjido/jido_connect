@@ -21,8 +21,8 @@ defmodule Jido.Connect.Schema do
     |> maybe_maximum(field)
     |> maybe_min_length(field)
     |> maybe_max_length(field)
-    |> maybe_default(field)
     |> maybe_optional(field)
+    |> maybe_default(field)
   end
 
   defp zoi_type(:string), do: Zoi.string()

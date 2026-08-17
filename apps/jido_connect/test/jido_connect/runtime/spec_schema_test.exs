@@ -71,6 +71,9 @@ defmodule Jido.Connect.Runtime.SpecSchemaTest do
                metadata: %{source: "test"},
                labels: ["bug"]
              })
+
+    assert {:ok, %{state: "open", limit: 100, labels: []}} =
+             Zoi.parse(schema, %{state: "open"})
   end
 
   test "field schemas enforce common limits and emit strict JSON Schema" do

@@ -58,7 +58,7 @@ For more detail, see [Architecture](docs/architecture.md),
 
 ## Packages
 
-The umbrella contains 36 Mix projects. All projects use the same `0.8.0`
+The umbrella contains 37 Mix projects. All projects use the same `0.8.0`
 release version.
 
 ### Core and shared foundations
@@ -77,7 +77,7 @@ release version.
 | --- | --- |
 | Collaboration and development | `jido_connect_github`, `jido_connect_gitlab`, `jido_connect_jira`, `jido_connect_linear`, `jido_connect_slack` |
 | CRM and customer service | `jido_connect_hubspot`, `jido_connect_intercom`, `jido_connect_salesforce`, `jido_connect_zendesk` |
-| Work and data | `jido_connect_airtable`, `jido_connect_asana`, `jido_connect_nextcloud`, `jido_connect_notion`, `jido_connect_posthog` |
+| Work and data | `jido_connect_airtable`, `jido_connect_asana`, `jido_connect_nextcloud`, `jido_connect_notion`, `jido_connect_posthog`, `jido_connect_things` |
 | Scheduling | `jido_connect_calcom`, `jido_connect_calendly` |
 | Google Workspace | `jido_connect_gmail`, `jido_connect_google_calendar`, `jido_connect_google_contacts`, `jido_connect_google_docs`, `jido_connect_google_drive`, `jido_connect_google_forms`, `jido_connect_google_meet`, `jido_connect_google_sheets`, `jido_connect_google_slides`, `jido_connect_google_tasks` |
 | Google data | `jido_connect_google_analytics`, `jido_connect_google_search_console` |

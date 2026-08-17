@@ -27,6 +27,7 @@ defmodule Jido.Connect.Taxonomy do
     :sales,
     :security,
     :social,
+    :task_management,
     :tool_bridge,
     :test
   ]

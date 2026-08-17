@@ -1,5 +1,8 @@
 # Changelog
 
+- Add the experimental `jido_connect_things` package for guarded Things Cloud
+  Inbox list, create, and update actions.
+
 ## 0.8.0 - 2026-07-21
 
 - Expand the umbrella to 36 packages for shared runtimes, inbound webhooks, MCP,

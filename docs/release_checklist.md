@@ -78,7 +78,7 @@ mix test
 
 ## Package Inventory
 
-The umbrella contains 36 package projects:
+The umbrella contains 37 package projects:
 
 - Core: `jido_connect`
 - Shared services: `jido_connect_google`, `jido_connect_microsoft`,
@@ -87,8 +87,8 @@ The umbrella contains 36 package projects:
   Meet, Search Console, Sheets, Slides, and Tasks
 - Microsoft services: Calendar, OneDrive, and Outlook
 - Other providers: Airtable, Asana, Cal.com, Calendly, GitHub, GitLab, HubSpot,
-  Intercom, Jira, Linear, Nextcloud, Notion, PostHog, Salesforce, Slack, and
-  Zendesk
+  Intercom, Jira, Linear, Nextcloud, Notion, PostHog, Salesforce, Slack, Things,
+  and Zendesk
 
 Confirm that every package has the intended version before release:
 
