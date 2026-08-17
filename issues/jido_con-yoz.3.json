@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-08-17T11:32:22Z",
+  "description": "Add a versioned JSON-safe secret-free dump/load contract that works across deployments.",
+  "id": "jido_con-yoz.3",
+  "labels": [],
+  "parent": "jido_con-yoz",
+  "priority": 1,
+  "status": "open",
+  "title": "Add prepared action dump and load",
+  "type": "task",
+  "updated_at": "2026-08-17T11:32:22Z"
+}
