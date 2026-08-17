@@ -92,6 +92,19 @@ defmodule Jido.Connect.Things.QueryTest do
   test "lists projects, headings, areas, tags, and checklist details" do
     state = state_fixture()
 
+    state = %{
+      state
+      | tasks:
+          Map.put(
+            state.tasks,
+            "ProjectClosed0000000001",
+            todo("ProjectClosed0000000001", "Closed project",
+              type: :project,
+              status: :completed
+            )
+          )
+    }
+
     assert {:ok, %{projects: [%{id: @project_id}], count: 1}} =
              Query.references(state, :project)
 
@@ -127,6 +140,9 @@ defmodule Jido.Connect.Things.QueryTest do
     assert {:error, %Error.ProviderError{reason: :invalid_filter}} =
              Query.list(state, %{view: "invalid"}, today: @today)
 
+    assert {:error, %Error.ProviderError{reason: :invalid_filter}} =
+             Query.search(state, %{query: "  \t "}, today: @today)
+
     assert {:error, %Error.ProviderError{reason: :invalid_date_filter}} =
              Query.list(state, %{deadline_from: "not-a-date"}, today: @today)
 
@@ -136,6 +152,28 @@ defmodule Jido.Connect.Things.QueryTest do
                %{deadline_from: "2026-08-18", deadline_to: "2026-08-17"},
                today: @today
              )
+  end
+
+  test "rejects unsupported task events but allows unrelated unknown history" do
+    state = state_fixture()
+
+    task_issue = %{
+      reason: :unsupported_event,
+      details: %{entity: "Task6", action: 99}
+    }
+
+    unsafe = %{state | write_safe?: false, issues: [task_issue]}
+
+    assert {:error, %Error.ProviderError{reason: :unsupported_task_event}} =
+             Query.list(unsafe, %{view: "all"}, today: @today)
+
+    unrelated_issue = %{
+      reason: :unsupported_event,
+      details: %{entity: "FutureEntity9", action: 0}
+    }
+
+    readable = %{state | write_safe?: false, issues: [unrelated_issue]}
+    assert {:ok, %{count: 9}} = Query.list(readable, %{view: "all"}, today: @today)
   end
 
   defp ids(state, view) do

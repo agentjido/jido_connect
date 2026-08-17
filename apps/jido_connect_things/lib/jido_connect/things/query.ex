@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Things.Query do
   @moduledoc "Read-only filters and safe public maps for Things V1 state."
 
-  alias Jido.Connect.Things.{Protocol, State, Todo}
+  alias Jido.Connect.Things.{Protocol, Reader, State, Todo}
 
   @views ~w(all inbox today evening anytime someday upcoming logbook trash)
   @statuses ~w(all open completed canceled)
@@ -9,7 +9,8 @@ defmodule Jido.Connect.Things.Query do
   def list(%State{} = state, input, opts \\ []) when is_map(input) do
     today = Keyword.get(opts, :today, Date.utc_today())
 
-    with {:ok, filters} <- normalize_filters(input),
+    with :ok <- Reader.validate_read_state(state),
+         {:ok, filters} <- normalize_filters(input),
          {:ok, tasks} <- filter_tasks(state, filters, today) do
       tasks = tasks |> sort(filters.view) |> Enum.take(filters.limit)
 
@@ -28,45 +29,56 @@ defmodule Jido.Connect.Things.Query do
   end
 
   def get(%State{} = state, id) when is_binary(id) do
-    with {:ok, todo} <- resolve_task(state, id) do
+    with :ok <- Reader.validate_read_state(state),
+         {:ok, todo} <- resolve_task(state, id) do
       {:ok, %{todo: todo_map(todo, state), freshness: freshness(state)}}
     end
   end
 
   def references(%State{} = state, :project) do
-    list_references(state, :projects, fn ->
-      state.tasks
-      |> Map.values()
-      |> Enum.filter(&(&1.type == :project and not &1.deleted and not &1.in_trash))
-      |> Enum.map(&todo_map(&1, state))
-    end)
+    with :ok <- Reader.validate_read_state(state) do
+      list_references(state, :projects, fn ->
+        state.tasks
+        |> Map.values()
+        |> Enum.filter(
+          &(&1.type == :project and &1.status == :open and not &1.deleted and not &1.in_trash)
+        )
+        |> Enum.map(&todo_map(&1, state))
+      end)
+    end
   end
 
   def references(%State{} = state, :heading) do
-    list_references(state, :headings, fn ->
-      state.tasks
-      |> Map.values()
-      |> Enum.filter(&(&1.type == :heading and not &1.deleted and not &1.in_trash))
-      |> Enum.map(&todo_map(&1, state))
-    end)
+    with :ok <- Reader.validate_read_state(state) do
+      list_references(state, :headings, fn ->
+        state.tasks
+        |> Map.values()
+        |> Enum.filter(&(&1.type == :heading and not &1.deleted and not &1.in_trash))
+        |> Enum.map(&todo_map(&1, state))
+      end)
+    end
   end
 
   def references(%State{} = state, :area) do
-    list_references(state, :areas, fn ->
-      state.areas
-      |> Map.values()
-      |> Enum.reject(& &1.deleted)
-      |> Enum.map(&reference_map/1)
-    end)
+    with :ok <- Reader.validate_read_state(state) do
+      list_references(state, :areas, fn ->
+        state.areas
+        |> Map.values()
+        |> Enum.reject(& &1.deleted)
+        |> Enum.map(&reference_map/1)
+      end)
+    end
   end
 
   def references(%State{} = state, :tag) do
-    list_references(state, :tags, fn ->
-      state.tags
-      |> Map.values()
-      |> Enum.reject(& &1.deleted)
-      |> Enum.map(&reference_map/1)
-    end)
+    with :ok <- Reader.validate_read_state(state) do
+      list_references(state, :tags, fn ->
+        state.tags
+        |> Map.values()
+        |> Enum.reject(& &1.deleted)
+        |> Enum.map(&reference_map/1)
+      end)
+    end
   end
 
   defp normalize_filters(input) do
@@ -76,13 +88,14 @@ defmodule Jido.Connect.Things.Query do
          {:ok, deadline_to} <- date(Map.get(input, :deadline_to), :deadline_to),
          {:ok, scheduled_from} <- date(Map.get(input, :scheduled_from), :scheduled_from),
          {:ok, scheduled_to} <- date(Map.get(input, :scheduled_to), :scheduled_to),
+         {:ok, query} <- query(Map.get(input, :query)),
          :ok <- ordered_range(deadline_from, deadline_to, :deadline),
          :ok <- ordered_range(scheduled_from, scheduled_to, :scheduled) do
       {:ok,
        %{
          view: view,
          status: status,
-         query: normalize_query(Map.get(input, :query)),
+         query: query,
          area_id: Map.get(input, :area_id),
          project_id: Map.get(input, :project_id),
          heading_id: Map.get(input, :heading_id),
@@ -348,8 +361,16 @@ defmodule Jido.Connect.Things.Query do
       else: query_error(:invalid_date_range, %{field: field})
   end
 
-  defp normalize_query(nil), do: nil
-  defp normalize_query(value), do: value |> String.trim() |> String.downcase()
+  defp query(nil), do: {:ok, nil}
+
+  defp query(value) when is_binary(value) do
+    case value |> String.trim() |> String.downcase() do
+      "" -> query_error(:invalid_filter, %{field: :query})
+      normalized -> {:ok, normalized}
+    end
+  end
+
+  defp query(_value), do: query_error(:invalid_filter, %{field: :query})
   defp downcase(value) when is_binary(value), do: String.downcase(value)
   defp downcase(_value), do: ""
   defp date_value(%DateTime{} = value), do: DateTime.to_date(value)

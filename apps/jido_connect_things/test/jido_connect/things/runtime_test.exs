@@ -346,7 +346,7 @@ defmodule Jido.Connect.Things.RuntimeTest do
     refute_received {:request, _method, _url, _opts}
   end
 
-  test "reports incomplete state for new or malformed task events" do
+  test "fails reads for new or malformed task events" do
     {context, lease} = runtime_contract("connection-A", "user@example.com")
 
     variants = [
@@ -357,26 +357,20 @@ defmodule Jido.Connect.Things.RuntimeTest do
     for {id, event} <- variants do
       transport = history_event_transport(%{id => event})
 
-      assert {:ok, %{count: 0, freshness: freshness}} =
+      assert {:error, %Error.ProviderError{reason: :unsupported_task_event}} =
                Jido.Connect.Things.invoke("things.todo.list", %{},
                  context: context,
                  credential_lease: lease,
                  transport: transport
                )
-
-      refute freshness.state_complete
-      assert freshness.issue_count == 1
     end
 
-    assert {:ok, %{count: 0, freshness: freshness}} =
+    assert {:error, %Error.ProviderError{reason: :unsupported_task_entity}} =
              Jido.Connect.Things.invoke("things.todo.list", %{},
                context: context,
                credential_lease: lease,
                transport: history_event_transport(%{@id => %{"e" => "Task7", "t" => 0}})
              )
-
-    refute freshness.state_complete
-    assert freshness.issue_count == 1
   end
 
   test "rejects a stale provider head before the commit send" do
