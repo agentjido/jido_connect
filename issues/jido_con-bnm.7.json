@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-bnm.2",
     "jido_con-bnm.4",
@@ -13,8 +13,8 @@
   "labels": [],
   "parent": "jido_con-bnm",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "Verify Things V1 provider action coverage",
   "type": "task",
-  "updated_at": "2026-08-17T17:35:10Z"
+  "updated_at": "2026-08-17T18:55:15Z"
 }
