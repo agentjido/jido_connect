@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-bnm.3"
+  ],
   "blocks": [],
   "created": "2026-08-17T17:35:03Z",
   "description": "Expose high-value non-recurring task organization actions through the guarded provider boundary. Expand things.todo.create for approved schedule, deadline, existing tags, and an existing area or project with optional heading. Add explicit schedule, deadline set and clear, tag replacement, and container move actions. Make relation changes atomic. Validate every destination against fresh state. Show implicit Inbox-to-Anytime changes in the preview. Add the actions to conservative catalog packs with strict contracts and fake-based tests.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "Add guarded Things organization actions",
   "type": "task",
-  "updated_at": "2026-08-17T17:35:03Z"
+  "updated_at": "2026-08-17T17:35:07Z"
 }
