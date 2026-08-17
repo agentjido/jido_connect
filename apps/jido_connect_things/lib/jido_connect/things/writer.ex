@@ -107,7 +107,7 @@ defmodule Jido.Connect.Things.Writer do
       lock = option(opts, :lock) || (&local_account_lock/2)
 
       case lock.(plan.account_binding, fn ->
-             preflight_and_commit(plan, input, operation, client, connection)
+             preflight_and_commit(plan, input, operation, client, connection, opts)
            end) do
         :aborted ->
           protocol_error(:write_lock_unavailable)
@@ -182,7 +182,7 @@ defmodule Jido.Connect.Things.Writer do
     end
   end
 
-  defp preflight_and_commit(plan, input, operation, client, connection) do
+  defp preflight_and_commit(plan, input, operation, client, connection, opts) do
     with :ok <- Protocol.validate_endpoint(client),
          {:ok, account} <- Client.verify_account(client),
          :ok <- Protocol.validate_account(client, account),
@@ -192,7 +192,15 @@ defmodule Jido.Connect.Things.Writer do
          :ok <- validate_fresh_head(plan, history),
          :ok <- recheck_plan(plan, input, operation, client, account, history),
          {:ok, server_head} <- post_once(client, account.history_key, plan, operation),
-         verified <- verify(client, account.history_key, plan, operation) do
+         verified <-
+           verify(
+             client,
+             account.history_key,
+             plan,
+             operation,
+             verification_attempts(opts),
+             verification_delay(opts)
+           ) do
       {:ok,
        %{
          receipt: %{
@@ -266,26 +274,39 @@ defmodule Jido.Connect.Things.Writer do
     end
   end
 
-  defp verify(client, history_key, plan, operation) do
+  defp verify(client, history_key, plan, operation, attempts, delay_ms) do
     expected_payload = operation.payload |> Jason.encode!() |> Jason.decode!()
 
-    case Client.history_page(client, history_key, plan.ancestor_index) do
-      {:ok, %{"items" => items}} ->
-        Enum.any?(items, fn
-          item when is_map(item) ->
-            case Map.get(item, operation.id) do
-              %{"e" => "Task6", "t" => action, "p" => payload} ->
-                action == operation.action and payload == expected_payload
+    verified =
+      case Client.history_page(client, history_key, plan.ancestor_index) do
+        {:ok, %{"items" => items}} ->
+          Enum.any?(items, fn
+            item when is_map(item) ->
+              case Map.get(item, operation.id) do
+                %{"e" => "Task6", "t" => action, "p" => payload} ->
+                  action == operation.action and payload == expected_payload
 
-              _other ->
-                false
-            end
+                _other ->
+                  false
+              end
 
-          _item ->
-            false
-        end)
+            _item ->
+              false
+          end)
 
-      _error ->
+        _error ->
+          false
+      end
+
+    cond do
+      verified ->
+        true
+
+      attempts > 1 ->
+        if delay_ms > 0, do: Process.sleep(delay_ms)
+        verify(client, history_key, plan, operation, attempts - 1, delay_ms)
+
+      true ->
         false
     end
   end
@@ -481,6 +502,20 @@ defmodule Jido.Connect.Things.Writer do
   end
 
   defp id_generator(opts), do: option(opts, :id_generator) || (&Identifier.new/0)
+
+  defp verification_attempts(opts) do
+    case option(opts, :verification_attempts) do
+      value when is_integer(value) and value in 1..10 -> value
+      _value -> 1
+    end
+  end
+
+  defp verification_delay(opts) do
+    case option(opts, :verification_delay_ms) do
+      value when is_integer(value) and value in 0..5_000 -> value
+      _value -> 0
+    end
+  end
 
   defp local_account_lock(account_binding, function) do
     :global.trans({{__MODULE__, account_binding}, self()}, function)

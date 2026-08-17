@@ -283,6 +283,30 @@ defmodule Jido.Connect.Things.RuntimeTest do
            end)
   end
 
+  test "polls verification reads without sending the write again" do
+    parent = self()
+    transport = eventually_verified_create_transport(parent)
+    {context, lease} = runtime_contract("connection-A", "user@example.com")
+    input = %{title: "Create me"}
+
+    assert {:ok, prepared} = prepare_create(context, lease, transport, input)
+    flush_requests()
+
+    assert {:ok, %{receipt: %{delivery: "confirmed", verified: true}}} =
+             commit(prepared, input, context, lease, transport,
+               verification_attempts: 2,
+               verification_delay_ms: 0
+             )
+
+    requests = drain_requests()
+    assert [_post] = requests_for(requests, :post)
+
+    assert 2 ==
+             Enum.count(requests_for(requests, :get), fn {:request, :get, url, _opts} ->
+               String.ends_with?(url, "/history/history-A/items")
+             end)
+  end
+
   test "rejects an account mismatch and unsupported schema during prepare" do
     {context, lease} = runtime_contract("connection-A", "user@example.com")
 
@@ -526,6 +550,47 @@ defmodule Jido.Connect.Things.RuntimeTest do
     refute_received {:request, :post, _url, _opts}
   end
 
+  test "requires destructive authorization before one exact Trash commit" do
+    parent = self()
+    transport = successful_update_transport(parent, @modified_at, @modified_at)
+    {context, lease} = runtime_contract("connection-A", "user@example.com")
+    input = %{id: @id, expected_modified_at: DateTime.to_iso8601(@modified_at)}
+
+    assert {:ok, prepared} =
+             Jido.Connect.Things.prepare("things.todo.trash", input,
+               context: context,
+               credential_lease: lease,
+               transport: transport,
+               now: @now,
+               lock: &direct_lock/2
+             )
+
+    assert prepared.provider_plan.risk == :destructive
+    assert prepared.action.preview.before.in_trash == false
+    assert prepared.action.preview.after.in_trash
+    flush_requests()
+
+    assert {:error, %Error.AuthError{reason: :destructive_confirmation_required}} =
+             Jido.Connect.Things.commit(prepared, input,
+               context: context,
+               credential_lease: lease,
+               transport: transport,
+               commit?: true,
+               now: @now,
+               lock: &direct_lock/2,
+               execution_authorization: %{plan_id: prepared.action.id},
+               authorization_validator: &authorize/4
+             )
+
+    refute_received {:request, :post, _url, _opts}
+
+    assert {:ok, %{receipt: %{action_id: "things.todo.trash", delivery: "confirmed"}}} =
+             commit(prepared, input, context, lease, transport)
+
+    assert_received {:request, :post, _url, _opts}
+    refute_received {:request, :post, _url, _opts}
+  end
+
   test "rejects stale expected_modified_at again immediately before commit" do
     parent = self()
     changed = DateTime.add(@modified_at, 60, :second)
@@ -742,19 +807,25 @@ defmodule Jido.Connect.Things.RuntimeTest do
     )
   end
 
-  defp commit(prepared, input, context, lease, transport) do
-    Jido.Connect.Things.commit(prepared, input,
-      context: context,
-      credential_lease: lease,
-      transport: transport,
-      commit?: true,
-      high_risk?: true,
-      destructive?: true,
-      now: @now,
-      lock: &direct_lock/2,
-      execution_authorization: %{plan_id: prepared.action.id},
-      authorization_validator: &authorize/4
-    )
+  defp commit(prepared, input, context, lease, transport, extra_options \\ []) do
+    options =
+      Keyword.merge(
+        [
+          context: context,
+          credential_lease: lease,
+          transport: transport,
+          commit?: true,
+          high_risk?: true,
+          destructive?: true,
+          now: @now,
+          lock: &direct_lock/2,
+          execution_authorization: %{plan_id: prepared.action.id},
+          authorization_validator: &authorize/4
+        ],
+        extra_options
+      )
+
+    Jido.Connect.Things.commit(prepared, input, options)
   end
 
   defp authorize(%{plan_id: id}, %{id: id}, _context, _validator_context), do: :ok
@@ -856,6 +927,36 @@ defmodule Jido.Connect.Things.RuntimeTest do
         String.ends_with?(url, "/history/history-A") -> history_response(1)
         method == :post -> {:ok, %{status: 200, body: %{"server-head-index" => 2}}}
         String.ends_with?(url, "/history/history-A/items") -> page_response([])
+      end
+    end
+  end
+
+  defp eventually_verified_create_transport(parent) do
+    item_calls = :counters.new(1, [])
+    body_key = {:posted_body, make_ref()}
+
+    fn method, url, opts ->
+      send(parent, {:request, method, url, opts})
+
+      cond do
+        String.contains?(url, "/account/") ->
+          account_response("user@example.com", "history-A")
+
+        String.ends_with?(url, "/history/history-A") ->
+          history_response(1)
+
+        method == :post ->
+          Process.put(body_key, Jason.decode!(Keyword.fetch!(opts, :body)))
+          {:ok, %{status: 200, body: %{"server-head-index" => 2}}}
+
+        String.ends_with?(url, "/history/history-A/items") ->
+          :counters.add(item_calls, 1, 1)
+
+          if :counters.get(item_calls, 1) == 1 do
+            page_response([])
+          else
+            page_response([Process.get(body_key)])
+          end
       end
     end
   end

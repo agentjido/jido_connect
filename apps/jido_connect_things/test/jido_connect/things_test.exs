@@ -19,13 +19,15 @@ defmodule Jido.Connect.ThingsTest do
     "things.todo.complete",
     "things.todo.cancel",
     "things.todo.reopen",
+    "things.todo.trash",
+    "things.todo.restore",
     "things.project.list",
     "things.heading.list",
     "things.area.list",
     "things.tag.list"
   ]
 
-  test "registers the experimental provider and seventeen generated actions" do
+  test "registers the experimental provider and nineteen generated actions" do
     spec = Things.integration()
 
     assert spec.id == :things
@@ -52,6 +54,8 @@ defmodule Jido.Connect.ThingsTest do
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.CompleteTodo)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.CancelTodo)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ReopenTodo)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.TrashTodo)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.RestoreTodo)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListProjects)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListHeadings)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListAreas)
@@ -81,7 +85,8 @@ defmodule Jido.Connect.ThingsTest do
           "things.todo.move",
           "things.todo.complete",
           "things.todo.cancel",
-          "things.todo.reopen"
+          "things.todo.reopen",
+          "things.todo.restore"
         ] do
       assert actions[id].risk == :external_write
       assert actions[id].confirmation == :required_for_ai
@@ -89,6 +94,10 @@ defmodule Jido.Connect.ThingsTest do
       assert actions[id].metadata.strict_input?
       assert actions[id].metadata.unofficial_api?
     end
+
+    assert actions["things.todo.trash"].risk == :destructive
+    assert actions["things.todo.trash"].confirmation == :always
+    assert actions["things.todo.trash"].metadata.prepare_commit_required?
   end
 
   test "uses strict input schemas with length and range contracts" do
@@ -171,10 +180,12 @@ defmodule Jido.Connect.ThingsTest do
              "things.todo.move",
              "things.todo.complete",
              "things.todo.cancel",
-             "things.todo.reopen"
+             "things.todo.reopen",
+             "things.todo.trash",
+             "things.todo.restore"
            ]
 
-    refute Enum.any?(editor.allowed_tools, &String.contains?(&1, ["delete", "trash", "raw"]))
+    refute Enum.any?(editor.allowed_tools, &String.contains?(&1, ["delete", "raw"]))
   end
 
   test "catalog data contains no protocol secrets" do

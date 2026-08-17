@@ -100,15 +100,13 @@ defmodule Jido.Connect.Things.State do
     |> attach_checklists(state.checklist_items)
   end
 
-  def write_safe_task(%__MODULE__{write_safe?: true} = state, id) do
+  def write_safe_task(%__MODULE__{} = state, id) do
     case Map.get(state.tasks, id) do
       %Todo{} = todo when not todo.deleted and todo.state_complete -> {:ok, todo}
       %Todo{} -> {:error, :unsafe_task_state}
       nil -> {:error, :todo_not_found}
     end
   end
-
-  def write_safe_task(%__MODULE__{}, _id), do: {:error, :unsafe_provider_state}
 
   defp apply_server_item(state, server_item, server_index) when is_map(server_item) do
     state =
