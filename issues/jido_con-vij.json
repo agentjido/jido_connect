@@ -1,9 +1,7 @@
 {
-  "assignee": "Mike Hostetler",
+  "assignee": "",
   "blocked_by": [],
   "blocks": [],
-  "closed_at": "2026-08-17T15:56:11Z",
-  "close_reason": "Resolved the original and fresh PR #56 review findings with regression tests and full verification.",
   "created": "2026-08-17T15:24:37Z",
   "description": "Resolve every actionable review finding on PR #56 for issue #54 production hardening. Add regression tests, run umbrella and demo quality checks, commit, push to the existing PR branch, and recheck review and CI status.",
   "id": "jido_con-vij",
@@ -31,8 +29,8 @@
     }
   ],
   "priority": 1,
-  "status": "closed",
+  "status": "open",
   "title": "Address PR 56 review findings",
   "type": "task",
-  "updated_at": "2026-08-17T15:56:11Z"
+  "updated_at": "2026-08-17T16:01:38Z"
 }
