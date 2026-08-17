@@ -5,7 +5,20 @@ defmodule Jido.Connect.Things.Runtime do
   alias Jido.Connect.Things.{Client, Input, PreparedWrite, Writer}
 
   @runtime_key :jido_connect_things_runtime
-  @write_actions ["things.todo.create", "things.todo.update"]
+  @write_actions [
+    "things.todo.create",
+    "things.todo.update",
+    "things.todo.schedule",
+    "things.todo.deadline.set",
+    "things.todo.deadline.clear",
+    "things.todo.tags.set",
+    "things.todo.move",
+    "things.todo.complete",
+    "things.todo.cancel",
+    "things.todo.reopen",
+    "things.todo.trash",
+    "things.todo.restore"
+  ]
 
   def prepare(action_id, input, opts) when action_id in @write_actions do
     with {:ok, input} <- Input.parse(action_id, input),
@@ -106,7 +119,16 @@ defmodule Jido.Connect.Things.Runtime do
   end
 
   defp runtime_options(opts) do
-    [:transport, :read_adapter, :id_generator, :now, :today, :lock]
+    [
+      :transport,
+      :read_adapter,
+      :id_generator,
+      :now,
+      :today,
+      :lock,
+      :high_risk?,
+      :destructive?
+    ]
     |> Enum.reduce(%{}, fn key, runtime ->
       case option(opts, key) do
         nil -> runtime

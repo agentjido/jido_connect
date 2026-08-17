@@ -10,12 +10,14 @@ defmodule Jido.Connect.Things.Writer do
   alias Jido.Connect.{Connection, Error, ExecutionSnapshot}
 
   alias Jido.Connect.Things.{
+    ChangePlanner,
     Client,
     Identifier,
     Input,
     Protocol,
     ReadAdapter,
     Reader,
+    State,
     Todo,
     WriteWire
   }
@@ -33,6 +35,7 @@ defmodule Jido.Connect.Things.Writer do
       :operation_hash,
       :body_hash,
       :wire_timestamp,
+      :wire_today,
       :expected_modified_at,
       :risk,
       :preview,
@@ -43,7 +46,20 @@ defmodule Jido.Connect.Things.Writer do
     def to_public_map(%__MODULE__{} = plan), do: Map.from_struct(plan)
   end
 
-  @write_actions ["things.todo.create", "things.todo.update"]
+  @write_actions [
+    "things.todo.create",
+    "things.todo.update",
+    "things.todo.schedule",
+    "things.todo.deadline.set",
+    "things.todo.deadline.clear",
+    "things.todo.tags.set",
+    "things.todo.move",
+    "things.todo.complete",
+    "things.todo.cancel",
+    "things.todo.reopen",
+    "things.todo.trash",
+    "things.todo.restore"
+  ]
 
   def prepare(action_id, input, client, connection, opts \\ [])
 
@@ -52,8 +68,10 @@ defmodule Jido.Connect.Things.Writer do
     with {:ok, input} <- Input.parse(action_id, input),
          :ok <- Protocol.validate_endpoint(client),
          {:ok, account, history} <- Reader.snapshot(client),
-         {:ok, operation, preview, expected_modified_at, wire_timestamp} <-
+         {:ok, planned, wire_timestamp, wire_today} <-
            prepare_operation(action_id, input, client, connection, account, history, opts) do
+      operation = planned.operation
+
       plan = %Plan{
         action_id: action_id,
         connection_id: connection.id,
@@ -65,9 +83,10 @@ defmodule Jido.Connect.Things.Writer do
         operation_hash: operation.operation_sha256,
         body_hash: operation.body_sha256,
         wire_timestamp: wire_timestamp,
-        expected_modified_at: expected_modified_at,
-        risk: :external_write,
-        preview: preview,
+        wire_today: wire_today,
+        expected_modified_at: planned.expected_modified_at,
+        risk: planned.risk,
+        preview: planned.preview,
         confirmation: ""
       }
 
@@ -82,6 +101,7 @@ defmodule Jido.Connect.Things.Writer do
   def commit(%Plan{} = plan, input, %Client{} = client, %Connection{} = connection, opts \\ []) do
     with {:ok, input} <- Input.parse(plan.action_id, input),
          :ok <- require_commit_option(opts),
+         :ok <- require_risk_gate(plan, opts),
          {:ok, operation} <- rebuild_operation(plan, input),
          :ok <- validate_plan(plan, operation, connection) do
       lock = option(opts, :lock) || (&local_account_lock/2)
@@ -98,74 +118,50 @@ defmodule Jido.Connect.Things.Writer do
     end
   end
 
-  defp prepare_operation(
-         "things.todo.create",
-         input,
-         _client,
-         _connection,
-         _account,
-         _history,
-         opts
-       ) do
-    id = id_generator(opts).()
+  defp prepare_operation(action_id, input, client, connection, account, history, opts) do
     wire_timestamp = timestamp(opts)
+    wire_today = today(opts)
+    id = if action_id == "things.todo.create", do: id_generator(opts).(), else: input.id
 
-    with {:ok, operation} <-
-           WriteWire.create(id, input.title, Map.get(input, :notes), wire_timestamp) do
-      {:ok, operation,
-       %{
-         operation: "create",
-         destination: "inbox",
-         title: input.title,
-         notes_present: Map.has_key?(input, :notes),
-         planned_external_id: id
-       }, nil, wire_timestamp}
+    with {:ok, state} <-
+           planning_state(action_id, input, client, connection, account, history, opts),
+         {:ok, planned} <-
+           ChangePlanner.prepare(action_id, input, state,
+             id: id,
+             timestamp: wire_timestamp,
+             today: wire_today
+           ) do
+      {:ok, planned, wire_timestamp, wire_today}
     end
   end
 
-  defp prepare_operation(
-         "things.todo.update",
-         input,
-         client,
-         connection,
-         account,
-         history,
-         opts
-       ) do
-    wire_timestamp = timestamp(opts)
-
-    with {:ok, todo} <- prepare_todo(input.id, client, connection, account, history, opts),
-         :ok <- validate_eligible(todo),
-         :ok <- validate_expected_modified_at(todo, input.expected_modified_at),
-         {:ok, operation} <- WriteWire.update(input.id, input, wire_timestamp) do
-      changed_fields =
-        [:title, :notes]
-        |> Enum.filter(&Map.has_key?(input, &1))
-        |> Enum.map(&Atom.to_string/1)
-
-      {:ok, operation,
-       %{
-         operation: "update",
-         task_id: input.id,
-         changed_fields: changed_fields,
-         expected_modified_at: input.expected_modified_at
-       }, input.expected_modified_at, wire_timestamp}
+  defp planning_state("things.todo.create", input, client, _connection, account, history, _opts) do
+    if Map.get(input, :tag_ids, []) == [] and
+         Enum.all?([:area_id, :project_id, :heading_id], &(not Map.has_key?(input, &1))) do
+      {:ok, empty_state(history.head)}
+    else
+      Reader.load_state(client, account, history)
     end
   end
 
-  defp prepare_todo(id, client, connection, account, history, opts) do
+  defp planning_state("things.todo.update", input, client, connection, account, history, opts) do
     case option(opts, :read_adapter) do
       nil ->
-        find_provider_todo(client, account, history, id)
+        Reader.load_state(client, account, history)
 
       adapter ->
-        with {:ok, result} <- ReadAdapter.get(adapter, connection.id, id, history.head),
+        with {:ok, result} <- ReadAdapter.get(adapter, connection.id, input.id, history.head),
              :ok <- validate_adapter_head(result, history.head),
              {:ok, todo} <- normalize_adapter_todo(result) do
-          {:ok, todo}
+          {:ok, %{empty_state(history.head) | tasks: %{todo.id => todo}}}
         end
     end
   end
+
+  defp planning_state(_action_id, _input, client, _connection, account, history, _opts),
+    do: Reader.load_state(client, account, history)
+
+  defp empty_state(head), do: %{State.new() | provider_head: head, last_server_index: head}
 
   defp validate_adapter_head(result, head) do
     observed = Map.get(result, :provider_head) || Map.get(result, "provider_head")
@@ -194,7 +190,7 @@ defmodule Jido.Connect.Things.Writer do
          {:ok, history} <- Client.history(client, account.history_key),
          :ok <- Protocol.validate_history(history),
          :ok <- validate_fresh_head(plan, history),
-         :ok <- recheck_update(plan.action_id, input, client, account, history),
+         :ok <- recheck_plan(plan, input, operation, client, account, history),
          {:ok, server_head} <- post_once(client, account.history_key, plan, operation),
          verified <- verify(client, account.history_key, plan, operation) do
       {:ok,
@@ -211,46 +207,29 @@ defmodule Jido.Connect.Things.Writer do
     end
   end
 
-  defp recheck_update("things.todo.create", _input, _client, _account, _history), do: :ok
+  defp recheck_plan(
+         %Plan{action_id: "things.todo.create"},
+         _input,
+         _operation,
+         _client,
+         _account,
+         _history
+       ),
+       do: :ok
 
-  defp recheck_update("things.todo.update", input, client, account, history) do
-    with {:ok, todo} <- find_provider_todo(client, account, history, input.id),
-         :ok <- validate_eligible(todo),
-         :ok <- validate_expected_modified_at(todo, input.expected_modified_at) do
-      :ok
-    end
-  end
-
-  defp find_provider_todo(client, account, history, id) do
-    with {:ok, todos} <- Reader.load(client, account, history) do
-      case Enum.find(todos, &(&1.id == id)) do
-        %Todo{} = todo -> {:ok, todo}
-        nil -> protocol_error(:todo_not_found, %{id: id})
-      end
-    end
-  end
-
-  defp validate_eligible(%Todo{} = todo) do
-    if Todo.eligible_inbox?(todo) do
+  defp recheck_plan(plan, input, operation, client, account, history) do
+    with {:ok, state} <- Reader.load_state(client, account, history),
+         {:ok, planned} <-
+           ChangePlanner.prepare(plan.action_id, input, state,
+             id: plan.operation_id,
+             timestamp: plan.wire_timestamp,
+             today: plan.wire_today
+           ),
+         true <- planned.operation.operation_sha256 == operation.operation_sha256 do
       :ok
     else
-      protocol_error(:todo_not_open_inbox, %{id: todo.id})
-    end
-  end
-
-  defp validate_expected_modified_at(%Todo{} = todo, expected) do
-    actual = DateTime.to_iso8601(todo.modified_at)
-
-    case DateTime.from_iso8601(expected) do
-      {:ok, expected_datetime, 0} ->
-        if DateTime.compare(todo.modified_at, expected_datetime) == :eq do
-          :ok
-        else
-          protocol_error(:stale_expected_modified_at, %{id: todo.id, actual_modified_at: actual})
-        end
-
-      _error ->
-        protocol_error(:stale_expected_modified_at, %{id: todo.id, actual_modified_at: actual})
+      false -> protocol_error(:operation_changed)
+      {:error, _error} = error -> error
     end
   end
 
@@ -366,12 +345,57 @@ defmodule Jido.Connect.Things.Writer do
   end
 
   defp rebuild_operation(%Plan{action_id: "things.todo.create"} = plan, input) do
-    WriteWire.create(plan.operation_id, input.title, Map.get(input, :notes), plan.wire_timestamp)
+    normalized =
+      input
+      |> Map.put(:schedule, get_in(plan.preview, [:after, :schedule]))
+      |> Map.put(:area_ids, get_in(plan.preview, [:after, :area_ids]))
+      |> Map.put(:project_ids, get_in(plan.preview, [:after, :project_ids]))
+      |> Map.put(:heading_ids, get_in(plan.preview, [:after, :heading_ids]))
+
+    WriteWire.create_task(plan.operation_id, normalized, plan.wire_timestamp, plan.wire_today)
   end
 
-  defp rebuild_operation(%Plan{action_id: "things.todo.update"} = plan, input) do
-    WriteWire.update(plan.operation_id, input, plan.wire_timestamp)
+  defp rebuild_operation(%Plan{} = plan, input) do
+    WriteWire.update(
+      plan.operation_id,
+      operation_attrs(plan.action_id, input, plan),
+      plan.wire_timestamp,
+      plan.wire_today
+    )
   end
+
+  defp operation_attrs("things.todo.update", input, _plan), do: Map.take(input, [:title, :notes])
+  defp operation_attrs("things.todo.schedule", input, _plan), do: %{schedule: input.schedule}
+  defp operation_attrs("things.todo.deadline.set", input, _plan), do: %{deadline: input.deadline}
+  defp operation_attrs("things.todo.deadline.clear", _input, _plan), do: %{deadline: nil}
+  defp operation_attrs("things.todo.tags.set", input, _plan), do: %{tag_ids: input.tag_ids}
+
+  defp operation_attrs("things.todo.move", input, plan) do
+    %{
+      area_ids: singleton(Map.get(input, :area_id)),
+      project_ids: singleton(Map.get(input, :project_id)),
+      heading_ids: singleton(Map.get(input, :heading_id))
+    }
+    |> maybe_put_schedule(
+      get_in(plan.preview, [:after, :schedule]),
+      get_in(plan.preview, [:before, :schedule])
+    )
+  end
+
+  defp operation_attrs(action_id, _input, plan)
+       when action_id in ["things.todo.complete", "things.todo.cancel"] do
+    status = if action_id == "things.todo.complete", do: :completed, else: :canceled
+    %{status: status, stopped_at: plan.wire_timestamp}
+  end
+
+  defp operation_attrs("things.todo.reopen", _input, _plan), do: %{status: :open, stopped_at: nil}
+  defp operation_attrs("things.todo.trash", _input, _plan), do: %{in_trash: true}
+  defp operation_attrs("things.todo.restore", _input, _plan), do: %{in_trash: false}
+
+  defp maybe_put_schedule(attrs, value, value), do: attrs
+  defp maybe_put_schedule(attrs, value, _before), do: Map.put(attrs, :schedule, value)
+  defp singleton(nil), do: []
+  defp singleton(value), do: [value]
 
   defp require_commit_option(opts) do
     if option(opts, :commit?) == true do
@@ -382,6 +406,28 @@ defmodule Jido.Connect.Things.Writer do
          reason: :commit_option_required
        )}
     end
+  end
+
+  defp require_risk_gate(%Plan{risk: :normal}, _opts), do: :ok
+
+  defp require_risk_gate(%Plan{risk: :high}, opts) do
+    if option(opts, :high_risk?) == true,
+      do: :ok,
+      else:
+        {:error,
+         Error.auth("Explicit Things high-risk confirmation is required",
+           reason: :high_risk_confirmation_required
+         )}
+  end
+
+  defp require_risk_gate(%Plan{risk: :destructive}, opts) do
+    if option(opts, :high_risk?) == true and option(opts, :destructive?) == true,
+      do: :ok,
+      else:
+        {:error,
+         Error.auth("Explicit Things destructive confirmation is required",
+           reason: :destructive_confirmation_required
+         )}
   end
 
   defp confirmation(%Plan{} = plan) do
@@ -423,6 +469,14 @@ defmodule Jido.Connect.Things.Writer do
       function when is_function(function, 0) -> timestamp(now: function.())
       nil -> System.system_time(:microsecond) / 1_000_000
       value -> value
+    end
+  end
+
+  defp today(opts) do
+    case option(opts, :today) do
+      %Date{} = date -> date
+      nil -> Date.utc_today()
+      _value -> Date.utc_today()
     end
   end
 
