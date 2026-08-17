@@ -14,11 +14,15 @@
     {
       "text": "Completed all seven V1 batches. The provider now has 19 actions: 7 reads and 12 guarded Task6 writes. All package, umbrella, and demo checks pass. Stacked PRs 58 through 64 carry the work above base PR 57.",
       "timestamp": "2026-08-17T18:57:08Z"
+    },
+    {
+      "text": "Added a packaged, excluded disposable-account live suite. The full schema-301 cycle passed through all 19 provider actions. Bounded verification polling repeats only GET requests and never repeats a write. All required package, umbrella, and demo checks pass.",
+      "timestamp": "2026-08-17T19:16:41Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "[G40] Things Task Conformance V1 action coverage",
   "type": "epic",
-  "updated_at": "2026-08-17T19:04:22Z"
+  "updated_at": "2026-08-17T19:16:41Z"
 }
