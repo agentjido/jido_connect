@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-08-17T17:35:01Z",
+  "description": "Expand the storage-free Things reader and normalized structs for the V1 state boundary. Read Task6, ChecklistItem3, Area3, Tag4, Tombstone2, and known legacy read families. Preserve unknown data safely. Materialize task type, status, stop time, schedule, Today and Evening data, deadline, Trash state, positions, area, project, heading, tags, checklist items, recurrence presence, alarm presence, timestamps, and provider head. Implement absent-versus-null fold rules, structured note handling, full-history and incremental-equivalence helpers, and fail-closed write eligibility. Use fake transports and source-linked fixtures only.",
+  "id": "jido_con-bnm.1",
+  "labels": [],
+  "parent": "jido_con-bnm",
+  "priority": 1,
+  "status": "open",
+  "title": "Materialize Things V1 current state",
+  "type": "task",
+  "updated_at": "2026-08-17T17:35:01Z"
+}
