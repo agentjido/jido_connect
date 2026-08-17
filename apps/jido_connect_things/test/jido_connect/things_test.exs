@@ -16,13 +16,16 @@ defmodule Jido.Connect.ThingsTest do
     "things.todo.deadline.clear",
     "things.todo.tags.set",
     "things.todo.move",
+    "things.todo.complete",
+    "things.todo.cancel",
+    "things.todo.reopen",
     "things.project.list",
     "things.heading.list",
     "things.area.list",
     "things.tag.list"
   ]
 
-  test "registers the experimental provider and fourteen generated actions" do
+  test "registers the experimental provider and seventeen generated actions" do
     spec = Things.integration()
 
     assert spec.id == :things
@@ -46,6 +49,9 @@ defmodule Jido.Connect.ThingsTest do
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ClearTodoDeadline)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.SetTodoTags)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.MoveTodo)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.CompleteTodo)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.CancelTodo)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ReopenTodo)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListProjects)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListHeadings)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListAreas)
@@ -72,7 +78,10 @@ defmodule Jido.Connect.ThingsTest do
           "things.todo.deadline.set",
           "things.todo.deadline.clear",
           "things.todo.tags.set",
-          "things.todo.move"
+          "things.todo.move",
+          "things.todo.complete",
+          "things.todo.cancel",
+          "things.todo.reopen"
         ] do
       assert actions[id].risk == :external_write
       assert actions[id].confirmation == :required_for_ai
@@ -159,7 +168,10 @@ defmodule Jido.Connect.ThingsTest do
              "things.todo.deadline.set",
              "things.todo.deadline.clear",
              "things.todo.tags.set",
-             "things.todo.move"
+             "things.todo.move",
+             "things.todo.complete",
+             "things.todo.cancel",
+             "things.todo.reopen"
            ]
 
     refute Enum.any?(editor.allowed_tools, &String.contains?(&1, ["delete", "trash", "raw"]))

@@ -20,7 +20,10 @@ defmodule Jido.Connect.Things.CatalogPacks do
                     "things.todo.deadline.set",
                     "things.todo.deadline.clear",
                     "things.todo.tags.set",
-                    "things.todo.move"
+                    "things.todo.move",
+                    "things.todo.complete",
+                    "things.todo.cancel",
+                    "things.todo.reopen"
                   ]
 
   def all, do: [reader(), editor()]
