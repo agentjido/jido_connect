@@ -18,11 +18,15 @@
     {
       "text": "Fresh review findings: require secure Jira endpoints, preserve OAuth gateway paths when resolving REST URLs, and prevent preview key normalization collisions from replacing trusted metadata.",
       "timestamp": "2026-08-17T15:49:41Z"
+    },
+    {
+      "text": "Implemented the three fresh-review fixes. Jira rejects HTTP endpoints, Jira Client uses absolute operation URLs that preserve OAuth gateway prefixes, and provider preview reserved keys are dropped after transport-key normalization. Focused tests pass (15 core and 10 Jira).",
+      "timestamp": "2026-08-17T15:54:17Z"
     }
   ],
   "priority": 1,
   "status": "in_progress",
   "title": "Address PR 56 review findings",
   "type": "task",
-  "updated_at": "2026-08-17T15:49:47Z"
+  "updated_at": "2026-08-17T15:54:17Z"
 }
