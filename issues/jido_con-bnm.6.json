@@ -11,9 +11,15 @@
   "id": "jido_con-bnm.6",
   "labels": [],
   "parent": "jido_con-bnm",
+  "comments": [
+    {
+      "text": "Exposed separate guarded Trash and restore actions. Trash is a destructive core action and also requires cumulative provider high-risk and destructive gates. Restore is normal risk. Invalid transitions and unsafe targets fail before POST. Direct delete and tombstone writes remain outside the serializer. Package quality passed with 62 tests and 81.02% coverage. Root quality and demo checks passed.",
+      "timestamp": "2026-08-17T18:55:02Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Add guarded Things Trash and restore actions",
   "type": "task",
-  "updated_at": "2026-08-17T18:53:14Z"
+  "updated_at": "2026-08-17T18:55:02Z"
 }
