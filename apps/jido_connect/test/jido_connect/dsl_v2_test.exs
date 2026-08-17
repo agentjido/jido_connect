@@ -71,7 +71,7 @@ defmodule Jido.Connect.DslV2Test do
         label "List items"
         tags [:inventory, :read_model]
         handler Handler
-        effect :read
+        effect :read, provider_idempotency?: true
         input_schema :item
         output_schema :item
 
@@ -227,7 +227,8 @@ defmodule Jido.Connect.DslV2Test do
               resource: :item,
               verb: :list,
               tags: [:inventory, :read_model],
-              scopes: ["items:read"]
+              scopes: ["items:read"],
+              provider_idempotency?: true
             } = action} = Connect.action(spec, "v2.item.list")
 
     assert Enum.map(action.input, & &1.name) == [:id, :name]

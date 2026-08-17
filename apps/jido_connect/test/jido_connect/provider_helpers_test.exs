@@ -72,7 +72,9 @@ defmodule Jido.Connect.ProviderHelpersTest do
       )
 
     assert response.retry_after == 30
+    assert response.delivery == :rejected
     assert ProviderResponse.retryable?(response)
+    assert ProviderResponse.retry_guidance(response) == :safe_to_retry
 
     assert ProviderResponse.to_public_map(response).body_summary == %{
              "type" => "map",
@@ -81,6 +83,35 @@ defmodule Jido.Connect.ProviderHelpersTest do
            }
 
     refute inspect(response) =~ "secret"
+
+    uncertain_write =
+      ProviderResponse.from_result!(:demo, {:error, :timeout},
+        action_risk: :external_write,
+        mutation?: true
+      )
+
+    assert uncertain_write.delivery == :sent_outcome_unknown
+    refute ProviderResponse.retryable?(uncertain_write)
+    assert ProviderResponse.retry_guidance(uncertain_write) == :do_not_retry
+
+    idempotent_write =
+      ProviderResponse.from_result!(:demo, {:error, :timeout},
+        action_risk: :write,
+        mutation?: true,
+        provider_idempotency?: true
+      )
+
+    assert ProviderResponse.retryable?(idempotent_write)
+    assert ProviderResponse.retry_guidance(idempotent_write) == :retry_with_idempotency
+
+    not_sent =
+      ProviderResponse.from_result!(:demo, {:error, :econnrefused},
+        action_risk: :write,
+        mutation?: true
+      )
+
+    assert not_sent.delivery == :not_sent
+    assert ProviderResponse.retryable?(not_sent)
   end
 
   test "webhook helpers verify HMACs and decode JSON" do

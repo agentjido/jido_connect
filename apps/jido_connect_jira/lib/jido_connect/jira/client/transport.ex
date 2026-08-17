@@ -45,6 +45,7 @@ defmodule Jido.Connect.Jira.Client.Transport do
        provider: :jira,
        reason: Keyword.get(opts, :reason, :http_error),
        status: status,
+       delivery: :rejected,
        details: %{message: jira_error_message(body), body: body}
      )}
   end
@@ -61,6 +62,7 @@ defmodule Jido.Connect.Jira.Client.Transport do
      Error.provider(message,
        provider: :jira,
        reason: :invalid_response,
+       delivery: :response_received,
        details: %{body: body}
      )}
   end

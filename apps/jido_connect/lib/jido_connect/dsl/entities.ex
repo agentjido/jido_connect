@@ -111,7 +111,8 @@ defmodule Jido.Connect.Dsl.Effect do
     :__spark_metadata__,
     :risk,
     :confirmation,
-    mutation?: nil
+    mutation?: nil,
+    provider_idempotency?: false
   ]
 end
 
@@ -154,6 +155,7 @@ defmodule Jido.Connect.Dsl.Action do
     output: [],
     policies: [],
     mutation?: false,
+    provider_idempotency?: false,
     risk: :read,
     confirmation: :none,
     metadata: %{}

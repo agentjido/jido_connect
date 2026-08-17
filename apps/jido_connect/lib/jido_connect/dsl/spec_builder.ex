@@ -204,7 +204,7 @@ defmodule Jido.Connect.Dsl.SpecBuilder do
     {auth_profile, auth_profiles} = auth_profiles(access_auth(action), default_auth_profile)
     requirements = requirements(action.requirements, action.access)
     policies = access_policies(action)
-    {mutation?, risk, confirmation} = effect(action)
+    {mutation?, risk, confirmation, provider_idempotency?} = effect(action)
 
     ActionSpec.new!(%{
       id: action.id || "#{integration_id}.#{action.name}",
@@ -226,6 +226,7 @@ defmodule Jido.Connect.Dsl.SpecBuilder do
       scopes: requirements.scopes,
       scope_resolver: requirements.dynamic_scopes,
       mutation?: mutation?,
+      provider_idempotency?: provider_idempotency?,
       risk: risk,
       confirmation: confirmation,
       metadata: action.metadata
@@ -316,10 +317,12 @@ defmodule Jido.Connect.Dsl.SpecBuilder do
     mutation? = if is_nil(effect.mutation?), do: mutating_risk?(risk), else: effect.mutation?
     confirmation = effect.confirmation || if(mutation?, do: :required_for_ai, else: :none)
 
-    {mutation?, risk, confirmation}
+    {mutation?, risk, confirmation, effect.provider_idempotency? || false}
   end
 
-  defp effect(%Dsl.Action{} = action), do: {action.mutation?, action.risk, action.confirmation}
+  defp effect(%Dsl.Action{} = action) do
+    {action.mutation?, action.risk, action.confirmation, action.provider_idempotency?}
+  end
 
   defp mutating_risk?(risk), do: risk not in [:read, :metadata]
 

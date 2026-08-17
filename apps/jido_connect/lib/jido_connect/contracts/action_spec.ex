@@ -25,6 +25,7 @@ defmodule Jido.Connect.ActionSpec do
               scopes: Zoi.list(Zoi.string()) |> Zoi.default([]),
               scope_resolver: Zoi.module() |> Zoi.nullish() |> Zoi.optional(),
               mutation?: Zoi.boolean() |> Zoi.default(false),
+              provider_idempotency?: Zoi.boolean() |> Zoi.default(false),
               risk: Zoi.atom() |> Zoi.default(:read),
               confirmation: Zoi.atom() |> Zoi.default(:none),
               metadata: Zoi.map() |> Zoi.default(%{})

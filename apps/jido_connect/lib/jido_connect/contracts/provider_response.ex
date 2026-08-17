@@ -18,6 +18,12 @@ defmodule Jido.Connect.ProviderResponse do
               reason: Zoi.any() |> Zoi.nullish() |> Zoi.optional(),
               request_id: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               retry_after: Zoi.integer() |> Zoi.nullish() |> Zoi.optional(),
+              delivery:
+                Zoi.enum([:not_sent, :rejected, :response_received, :sent_outcome_unknown])
+                |> Zoi.default(:sent_outcome_unknown),
+              action_risk: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),
+              mutation?: Zoi.boolean() |> Zoi.default(false),
+              provider_idempotency?: Zoi.boolean() |> Zoi.default(false),
               headers: Zoi.map() |> Zoi.default(%{}),
               body: Zoi.any() |> Zoi.nullish() |> Zoi.optional(),
               metadata: Zoi.map() |> Zoi.default(%{})
@@ -56,9 +62,37 @@ defmodule Jido.Connect.ProviderResponse do
 
   @doc "Returns true when the response represents a retryable provider failure."
   @spec retryable?(t()) :: boolean()
+  def retryable?(%__MODULE__{
+        delivery: :sent_outcome_unknown,
+        mutation?: true,
+        provider_idempotency?: false
+      }),
+      do: false
+
+  def retryable?(%__MODULE__{delivery: :not_sent}), do: true
   def retryable?(%__MODULE__{status: status}) when status == 429 or status in 500..599, do: true
   def retryable?(%__MODULE__{reason: reason}) when reason in [:request_error, :timeout], do: true
   def retryable?(%__MODULE__{}), do: false
+
+  @doc "Returns stable retry guidance for this provider outcome."
+  @spec retry_guidance(t()) ::
+          :safe_to_retry | :retry_with_idempotency | :do_not_retry | :not_applicable
+  def retry_guidance(%__MODULE__{} = response) do
+    cond do
+      success?(response) ->
+        :not_applicable
+
+      response.delivery == :sent_outcome_unknown and response.mutation? and
+          response.provider_idempotency? ->
+        :retry_with_idempotency
+
+      retryable?(response) ->
+        :safe_to_retry
+
+      true ->
+        :do_not_retry
+    end
+  end
 
   @doc "Returns a transport-safe map with sensitive fields redacted."
   @spec to_public_map(t()) :: map()
@@ -70,7 +104,10 @@ defmodule Jido.Connect.ProviderResponse do
       reason: response.reason,
       request_id: response.request_id,
       retry_after: response.retry_after,
+      delivery: response.delivery,
+      action_risk: response.action_risk,
       retryable?: retryable?(response),
+      retry_guidance: retry_guidance(response),
       headers: Sanitizer.sanitize(response.headers, :transport),
       body_summary: Sanitizer.provider_body_summary(response.body, :transport),
       metadata: Sanitizer.sanitize(response.metadata, :transport)
@@ -87,6 +124,10 @@ defmodule Jido.Connect.ProviderResponse do
       reason: Keyword.get(opts, :reason),
       request_id: request_id(headers),
       retry_after: retry_after(headers, opts),
+      delivery: delivery_for_status(status, opts),
+      action_risk: action_risk(opts),
+      mutation?: mutation?(opts),
+      provider_idempotency?: Keyword.get(opts, :provider_idempotency?, false),
       headers: headers,
       body: Map.get(response, :body),
       metadata: Keyword.get(opts, :metadata, %{})
@@ -98,6 +139,10 @@ defmodule Jido.Connect.ProviderResponse do
       provider: provider,
       operation: operation(opts),
       reason: reason,
+      delivery: delivery_for_error(reason, opts),
+      action_risk: action_risk(opts),
+      mutation?: mutation?(opts),
+      provider_idempotency?: Keyword.get(opts, :provider_idempotency?, false),
       metadata: Keyword.get(opts, :metadata, %{})
     }
   end
@@ -107,6 +152,10 @@ defmodule Jido.Connect.ProviderResponse do
       provider: provider,
       operation: operation(opts),
       reason: Keyword.get(opts, :reason, :unexpected_response),
+      delivery: Keyword.get(opts, :delivery, :response_received),
+      action_risk: action_risk(opts),
+      mutation?: mutation?(opts),
+      provider_idempotency?: Keyword.get(opts, :provider_idempotency?, false),
       body: response,
       metadata: Keyword.get(opts, :metadata, %{})
     }
@@ -151,6 +200,36 @@ defmodule Jido.Connect.ProviderResponse do
 
   defp retry_after(headers, opts) do
     Keyword.get(opts, :retry_after) || parse_integer(Map.get(headers, "retry-after"))
+  end
+
+  defp delivery_for_status(status, opts) do
+    Keyword.get_lazy(opts, :delivery, fn ->
+      if status in 200..299, do: :response_received, else: :rejected
+    end)
+  end
+
+  defp delivery_for_error(reason, opts) do
+    Keyword.get_lazy(opts, :delivery, fn ->
+      case transport_reason(reason) do
+        value when value in [:econnrefused, :nxdomain, :enetunreach, :ehostunreach] ->
+          :not_sent
+
+        _reason ->
+          :sent_outcome_unknown
+      end
+    end)
+  end
+
+  defp transport_reason(%{reason: reason}), do: reason
+  defp transport_reason(reason), do: reason
+
+  defp action_risk(opts), do: Keyword.get(opts, :action_risk, Keyword.get(opts, :risk))
+
+  defp mutation?(opts) do
+    case Keyword.fetch(opts, :mutation?) do
+      {:ok, mutation?} -> mutation?
+      :error -> action_risk(opts) not in [nil, :read, :metadata]
+    end
   end
 
   defp parse_integer(nil), do: nil

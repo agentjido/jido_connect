@@ -24,6 +24,7 @@ defmodule Jido.Connect.ExecutionSnapshot do
       :scopes,
       :scope_resolver,
       :mutation?,
+      :provider_idempotency?,
       :risk,
       :confirmation,
       :metadata

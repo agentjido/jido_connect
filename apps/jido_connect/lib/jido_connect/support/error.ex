@@ -117,13 +117,27 @@ defmodule Jido.Connect.Error do
     @moduledoc "Provider API, OAuth, or webhook protocol error."
     use Splode.Error,
       class: :provider,
-      fields: [:message, :provider, :reason, :status, :details]
+      fields: [
+        :message,
+        :provider,
+        :reason,
+        :status,
+        :delivery,
+        :action_risk,
+        :mutation?,
+        :provider_idempotency?,
+        :details
+      ]
 
     @type t :: %__MODULE__{
             message: String.t(),
             provider: atom() | nil,
             reason: atom() | String.t() | nil,
             status: non_neg_integer() | nil,
+            delivery: :not_sent | :rejected | :response_received | :sent_outcome_unknown,
+            action_risk: atom() | nil,
+            mutation?: boolean(),
+            provider_idempotency?: boolean(),
             details: map()
           }
 
@@ -132,6 +146,9 @@ defmodule Jido.Connect.Error do
       opts
       |> Jido.Connect.Error.normalize_opts()
       |> Keyword.put_new(:message, "Provider request failed")
+      |> Keyword.put_new(:delivery, :sent_outcome_unknown)
+      |> Keyword.put_new(:mutation?, false)
+      |> Keyword.put_new(:provider_idempotency?, false)
       |> Keyword.put_new(:details, %{})
       |> super()
     end
@@ -219,6 +236,9 @@ defmodule Jido.Connect.Error do
     opts =
       opts
       |> normalize_opts()
+      |> Keyword.put_new(:delivery, infer_delivery(opts))
+      |> Keyword.put_new(:mutation?, false)
+      |> Keyword.put_new(:provider_idempotency?, false)
       |> sanitize_provider_opts()
       |> Keyword.put(:message, message)
 
@@ -349,8 +369,11 @@ defmodule Jido.Connect.Error do
       class: Map.get(error, :class),
       message: Exception.message(error),
       reason: Map.get(error, :reason),
+      delivery: Map.get(error, :delivery),
+      action_risk: Map.get(error, :action_risk),
       details: Jido.Connect.Sanitizer.sanitize(Map.get(error, :details, %{}), :transport),
-      retryable?: retryable?(error)
+      retryable?: retryable?(error),
+      retry_guidance: retry_guidance(error)
     }
   end
 
@@ -374,6 +397,15 @@ defmodule Jido.Connect.Error do
   def error?(_error), do: false
 
   @spec retryable?(term()) :: boolean()
+  def retryable?(%ProviderError{
+        delivery: :sent_outcome_unknown,
+        mutation?: true,
+        provider_idempotency?: false
+      }),
+      do: false
+
+  def retryable?(%ProviderError{delivery: :not_sent}), do: true
+
   def retryable?(%ProviderError{status: status}) when status == 429 or status in 500..599,
     do: true
 
@@ -386,9 +418,66 @@ defmodule Jido.Connect.Error do
 
   def retryable?(_error), do: false
 
+  @doc "Returns stable retry guidance for a normalized provider failure."
+  @spec retry_guidance(term()) ::
+          :safe_to_retry | :retry_with_idempotency | :do_not_retry | :not_applicable
+  def retry_guidance(%ProviderError{
+        delivery: :sent_outcome_unknown,
+        mutation?: true,
+        provider_idempotency?: true
+      }),
+      do: :retry_with_idempotency
+
+  def retry_guidance(%ProviderError{
+        delivery: :sent_outcome_unknown,
+        mutation?: true,
+        provider_idempotency?: false
+      }),
+      do: :do_not_retry
+
+  def retry_guidance(%ProviderError{} = error) do
+    if retryable?(error), do: :safe_to_retry, else: :do_not_retry
+  end
+
+  def retry_guidance(_error), do: :not_applicable
+
+  @doc false
+  @spec with_action_context(ProviderError.t(), Jido.Connect.ActionSpec.t()) :: ProviderError.t()
+  def with_action_context(%ProviderError{} = error, %Jido.Connect.ActionSpec{} = action) do
+    %{
+      error
+      | action_risk: action.risk,
+        mutation?: action.mutation?,
+        provider_idempotency?: action.provider_idempotency?
+    }
+  end
+
   @doc false
   def normalize_opts(opts) when is_map(opts), do: Map.to_list(opts)
   def normalize_opts(opts), do: opts || []
+
+  defp infer_delivery(opts) do
+    opts = normalize_opts(opts)
+
+    cond do
+      Keyword.get(opts, :delivery) in [
+        :not_sent,
+        :rejected,
+        :response_received,
+        :sent_outcome_unknown
+      ] ->
+        Keyword.fetch!(opts, :delivery)
+
+      status = Keyword.get(opts, :status) ->
+        if status in 200..299, do: :response_received, else: :rejected
+
+      Keyword.get(opts, :reason) in [:econnrefused, :nxdomain, :enetunreach, :ehostunreach] ->
+        :not_sent
+
+      true ->
+        :sent_outcome_unknown
+    end
+  end
 
   defp sanitize_provider_opts(opts) do
     Keyword.update(opts, :details, %{}, fn details ->

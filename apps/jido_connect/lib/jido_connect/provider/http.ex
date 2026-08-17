@@ -85,6 +85,10 @@ defmodule Jido.Connect.Http do
        provider: provider,
        reason: Keyword.get(opts, :reason, :http_error),
        status: status,
+       delivery: response.delivery,
+       action_risk: response.action_risk,
+       mutation?: response.mutation?,
+       provider_idempotency?: response.provider_idempotency?,
        details: %{
          message: error_message(body),
          body: body,
@@ -103,6 +107,10 @@ defmodule Jido.Connect.Http do
      Error.provider(message,
        provider: provider,
        reason: :request_error,
+       delivery: response.delivery,
+       action_risk: response.action_risk,
+       mutation?: response.mutation?,
+       provider_idempotency?: response.provider_idempotency?,
        details: %{reason: reason, response: ProviderResponse.to_public_map(response)}
      )}
   end
@@ -116,6 +124,10 @@ defmodule Jido.Connect.Http do
      Error.provider(message,
        provider: provider,
        reason: :unexpected_response,
+       delivery: response.delivery,
+       action_risk: response.action_risk,
+       mutation?: response.mutation?,
+       provider_idempotency?: response.provider_idempotency?,
        details: %{response: ProviderResponse.to_public_map(response)}
      )}
   end

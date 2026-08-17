@@ -202,7 +202,7 @@ defmodule Jido.Connect.Runtime do
              phase: :handler,
              details: %{operation_id: action.id}
            ) do
-      normalize_handler_result(result, :handler, action.id)
+      normalize_handler_result(result, :handler, action)
     end
   end
 
@@ -218,6 +218,14 @@ defmodule Jido.Connect.Runtime do
 
   defp normalize_handler_result({:ok, value}, _phase, _operation_id), do: {:ok, value}
 
+  defp normalize_handler_result(
+         {:error, %Error.ProviderError{} = error},
+         _phase,
+         %ActionSpec{} = action
+       ) do
+    {:error, Error.with_action_context(error, action)}
+  end
+
   defp normalize_handler_result({:error, %_module{} = error}, phase, operation_id) do
     if Error.error?(error) do
       {:error, error}
@@ -231,7 +239,7 @@ defmodule Jido.Connect.Runtime do
      Error.execution("Provider handler failed",
        phase: phase,
        details: %{
-         operation_id: operation_id,
+         operation_id: operation_id(operation_id),
          error: Jido.Connect.Sanitizer.sanitize(reason, :transport)
        }
      )}
@@ -242,11 +250,14 @@ defmodule Jido.Connect.Runtime do
      Error.execution("Provider handler returned an invalid result",
        phase: phase,
        details: %{
-         operation_id: operation_id,
+         operation_id: operation_id(operation_id),
          returned: Jido.Connect.Sanitizer.sanitize(result, :transport)
        }
      )}
   end
+
+  defp operation_id(%ActionSpec{id: id}), do: id
+  defp operation_id(operation_id), do: operation_id
 
   defp validate_signals(%TriggerSpec{} = trigger, signals) when is_list(signals) do
     Enum.reduce_while(signals, {:ok, []}, fn signal, {:ok, acc} ->
