@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-08-17T11:32:24Z",
+  "description": "Run quality checks and demo tests, review the diff, push the branch, and open a pull request that closes GitHub issue #54.",
+  "id": "jido_con-yoz.7",
+  "labels": [],
+  "parent": "jido_con-yoz",
+  "priority": 1,
+  "status": "open",
+  "title": "Verify and publish issue 54 pull request",
+  "type": "task",
+  "updated_at": "2026-08-17T11:32:24Z"
+}
