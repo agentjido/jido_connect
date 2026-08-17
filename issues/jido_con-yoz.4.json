@@ -4,14 +4,15 @@
   "blocks": [
     "jido_con-yoz.7"
   ],
+  "closed_at": "2026-08-17T12:01:32Z",
   "created": "2026-08-17T11:32:22Z",
   "description": "Expose strict input and output JSON Schema, a stable schema digest, and common field limits.",
   "id": "jido_con-yoz.4",
   "labels": [],
   "parent": "jido_con-yoz",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Expose catalog JSON Schemas",
   "type": "task",
-  "updated_at": "2026-08-17T11:57:36Z"
+  "updated_at": "2026-08-17T12:01:32Z"
 }
