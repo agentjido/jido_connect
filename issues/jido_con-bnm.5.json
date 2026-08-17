@@ -11,9 +11,15 @@
   "id": "jido_con-bnm.5",
   "labels": [],
   "parent": "jido_con-bnm",
+  "comments": [
+    {
+      "text": "Exposed separate guarded complete, cancel, and reopen actions. The planner enforces Task6 to-do targets, valid source-state transitions, exact stop timestamp set or clear behavior, fresh-head rechecks, and safe status previews. Added fake end-to-end completion coverage and reopen wire coverage. Package quality passed with 61 tests and 80.87% coverage. Root quality and demo checks passed.",
+      "timestamp": "2026-08-17T18:53:00Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Add guarded Things lifecycle actions",
   "type": "task",
-  "updated_at": "2026-08-17T18:51:22Z"
+  "updated_at": "2026-08-17T18:53:00Z"
 }
