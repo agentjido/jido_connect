@@ -6,7 +6,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.AssignIssueTest do
   describe "run/2" do
     test "assigns an issue with mock client" do
       input = %{issue_key: "PROJ-123", account_id: "acct-1"}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, result} = AssignIssue.run(input, runtime)
       assert result.assigned == true
@@ -14,7 +14,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.AssignIssueTest do
 
     test "returns error when account_id is missing" do
       input = %{issue_key: "PROJ-123"}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:error, error} = AssignIssue.run(input, runtime)
       assert error.reason == :invalid_assignee
@@ -22,7 +22,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.AssignIssueTest do
 
     test "returns error when account_id is empty" do
       input = %{issue_key: "PROJ-123", account_id: ""}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:error, error} = AssignIssue.run(input, runtime)
       assert error.reason == :invalid_assignee

@@ -26,6 +26,22 @@ defmodule Jido.Connect.Http do
     |> maybe_merge_req_options(Keyword.get(opts, :req_options, []))
   end
 
+  @spec basic_request(String.t(), String.t(), String.t(), keyword()) :: Req.Request.t()
+  def basic_request(base_url, username, password, opts \\ [])
+      when is_binary(base_url) and is_binary(username) and is_binary(password) do
+    encoded_credentials = Base.encode64("#{username}:#{password}")
+
+    Req.new(
+      base_url: base_url,
+      headers:
+        [
+          {"authorization", "Basic #{encoded_credentials}"},
+          {"user-agent", @user_agent}
+        ] ++ Keyword.get(opts, :headers, [])
+    )
+    |> maybe_merge_req_options(Keyword.get(opts, :req_options, []))
+  end
+
   @spec maybe_merge_req_options(Req.Request.t(), keyword()) :: Req.Request.t()
   def maybe_merge_req_options(request, []), do: request
   def maybe_merge_req_options(request, req_options), do: Req.merge(request, req_options)

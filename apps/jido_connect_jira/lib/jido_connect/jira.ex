@@ -9,9 +9,8 @@ defmodule Jido.Connect.Jira do
 
   The provider supports two authentication profiles for Atlassian Cloud:
 
-  - **API token** (`:api_token`): Jira personal access token or Atlassian
-    API token used as a Bearer token. Recommended for server-to-server
-    integrations, development, and CI.
+  - **API token** (`:api_token`): Atlassian account email and API token sent
+    with HTTP Basic authentication.
 
   - **OAuth2** (`:oauth2_user`): Standard OAuth2 authorization code flow
     with PKCE against the Atlassian authorization server. Grants scoped
@@ -66,9 +65,9 @@ defmodule Jido.Connect.Jira do
       owner(:app_user)
       subject(:user)
       label("Jira API token")
-      setup :api_key_bearer_token
-      credential_fields([:api_key])
-      lease_fields([:api_key])
+      setup :api_token_basic_auth
+      credential_fields([:email, :api_token])
+      lease_fields([:email, :api_token])
 
       scopes([
         "read:jira-work",

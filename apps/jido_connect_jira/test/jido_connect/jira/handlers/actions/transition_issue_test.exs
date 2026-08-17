@@ -6,7 +6,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.TransitionIssueTest do
   describe "run/2" do
     test "transitions an issue with mock client" do
       input = %{issue_key: "PROJ-123", transition_id: "21"}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, result} = TransitionIssue.run(input, runtime)
       assert result.transitioned == true
@@ -19,7 +19,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.TransitionIssueTest do
         fields: %{resolution: %{name: "Done"}}
       }
 
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, result} = TransitionIssue.run(input, runtime)
       assert result.transitioned == true

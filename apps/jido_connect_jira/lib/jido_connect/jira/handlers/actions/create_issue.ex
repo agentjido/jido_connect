@@ -3,12 +3,12 @@ defmodule Jido.Connect.Jira.Handlers.Actions.CreateIssue do
 
   alias Jido.Connect.Jira.Client
 
-  def run(input, %{credentials: credentials}) do
+  def run(input, runtime) do
     attrs = build_issue_fields(input)
+    client = Client.resolve(runtime)
 
-    with {:ok, client} <- fetch_client(credentials),
-         token <- Client.credential_token(credentials),
-         {:ok, issue} <- client.create_issue(attrs, token) do
+    with {:ok, request} <- Client.request_context(runtime),
+         {:ok, issue} <- client.create_issue(attrs, request) do
       {:ok, issue}
     end
   end
@@ -35,7 +35,4 @@ defmodule Jido.Connect.Jira.Handlers.Actions.CreateIssue do
 
   defp assignee_field(nil), do: nil
   defp assignee_field(account_id), do: %{accountId: account_id}
-
-  defp fetch_client(%{jira_client: client}) when is_atom(client), do: {:ok, client}
-  defp fetch_client(_credentials), do: {:ok, Client}
 end

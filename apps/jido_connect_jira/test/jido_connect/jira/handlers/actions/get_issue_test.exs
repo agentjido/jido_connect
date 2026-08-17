@@ -6,7 +6,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.GetIssueTest do
   describe "run/2" do
     test "fetches an issue by key with mock client" do
       input = %{issue_key: "PROJ-123"}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, issue} = GetIssue.run(input, runtime)
       assert issue.key == "PROJ-123"
@@ -18,7 +18,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.GetIssueTest do
 
     test "fetches an issue with field selection" do
       input = %{issue_key: "PROJ-123", fields: ["summary", "status"]}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, issue} = GetIssue.run(input, runtime)
       assert issue.key == "PROJ-123"

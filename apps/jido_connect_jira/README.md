@@ -39,9 +39,8 @@ end
 
 The provider supports two authentication profiles for Atlassian Cloud:
 
-- **API token** (`:api_token`): Jira personal access token or Atlassian
-  API token passed as a Bearer token. Recommended for server-to-server
-  integrations, development, and CI.
+- **API token** (`:api_token`): Atlassian account email and API token sent
+  with HTTP Basic authentication.
 
 - **OAuth2** (`:oauth2_user`): Standard OAuth2 authorization code flow
   with PKCE against the Atlassian authorization server. Grants scoped
@@ -153,9 +152,14 @@ Catalog.search_tools("jira",
 
 ## API Boundaries
 
-All Jira API traffic uses
-`Jido.Connect.Jira.Client.Transport.request/2`, which builds bearer
-requests against the configurable Atlassian Cloud base URL.
+All Jira API traffic uses a `Jido.Connect.Jira.Client.Request`. The request
+contains the selected `Jido.Connect.Connection`, its auth profile, its
+connection-specific endpoint, and the leased credential fields. API-token
+connections read `:site` from connection metadata. OAuth connections can use a
+`:cloud_endpoint`, such as the Atlassian API gateway URL for one cloud ID.
+
+Hosts inject a test or custom client with the runtime `:provider_client` option.
+The client module is infrastructure. Do not put it in credential fields.
 
 ## Live-Test Guidance
 
@@ -167,7 +171,8 @@ injected fake clients and does **not** call live Jira APIs.
 
 ```sh
 export JIRA_API_TOKEN="your-api-token-here"
-export JIRA_API_BASE_URL="https://your-domain.atlassian.net"
+export JIRA_EMAIL="you@example.com"
+export JIRA_SITE="https://your-domain.atlassian.net"
 # Never commit these values to version control.
 ```
 
@@ -188,8 +193,9 @@ Do not expose the webhook shared secret in logs or public payloads.
 
 ### Switching Mock / Live Clients
 
-The connector reads the token at runtime through the credential lease
-mechanism; no code changes are needed to switch between mock and live clients.
+The connector reads the selected site from connection metadata and reads the
+email and API token from the credential lease. OAuth leases use
+`:access_token`. No process-global Jira endpoint is used.
 
 ## Package Quality Gates
 

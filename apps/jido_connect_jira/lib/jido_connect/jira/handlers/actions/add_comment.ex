@@ -4,11 +4,12 @@ defmodule Jido.Connect.Jira.Handlers.Actions.AddComment do
   alias Jido.Connect.Error
   alias Jido.Connect.Jira.Client
 
-  def run(input, %{credentials: credentials}) do
+  def run(input, runtime) do
+    client = Client.resolve(runtime)
+
     with {:ok, body} <- validate_body(Map.get(input, :body)),
-         {:ok, client} <- fetch_client(credentials),
-         token <- Client.credential_token(credentials),
-         {:ok, comment} <- client.add_comment(input.issue_key, body, token) do
+         {:ok, request} <- Client.request_context(runtime),
+         {:ok, comment} <- client.add_comment(input.issue_key, body, request) do
       {:ok, comment}
     end
   end
@@ -24,7 +25,4 @@ defmodule Jido.Connect.Jira.Handlers.Actions.AddComment do
        subject: :body
      )}
   end
-
-  defp fetch_client(%{jira_client: client}) when is_atom(client), do: {:ok, client}
-  defp fetch_client(_credentials), do: {:ok, Client}
 end

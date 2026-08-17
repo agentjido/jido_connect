@@ -35,6 +35,13 @@ defmodule Jido.Connect.ProviderHelpersTest do
   test "HTTP helpers normalize provider response failures" do
     assert %Req.Request{} = Http.bearer_request("https://provider.test", "token")
 
+    basic_request =
+      Http.basic_request("https://provider.test", "user@example.com", "api-token")
+
+    assert basic_request.headers["authorization"] == [
+             "Basic " <> Base.encode64("user@example.com:api-token")
+           ]
+
     assert Http.url_with_query("/v1/resources?fixed=yes", item: "one", item: "two") ==
              "/v1/resources?fixed=yes&item=one&item=two"
 

@@ -1,9 +1,57 @@
 ExUnit.start()
 
+defmodule Jido.Connect.Jira.TestRuntime do
+  @moduledoc false
+
+  alias Jido.Connect.{Connection, Context}
+
+  def build(opts \\ []) do
+    profile = Keyword.get(opts, :profile, :api_token)
+
+    connection =
+      Connection.new!(%{
+        id: Keyword.get(opts, :connection_id, "jira_conn_1"),
+        provider: :jira,
+        profile: profile,
+        tenant_id: "tenant_1",
+        owner_type: :app_user,
+        owner_id: "user_1",
+        status: :connected,
+        scopes: ["read:jira-work", "write:jira-work", "read:jira-configuration"],
+        metadata: %{site: Keyword.get(opts, :site, "https://example.atlassian.net")}
+      })
+
+    credentials =
+      case profile do
+        :api_token ->
+          %{
+            email: Keyword.get(opts, :email, "user@example.com"),
+            api_token: Keyword.get(opts, :api_token, "token")
+          }
+
+        :oauth2_user ->
+          %{access_token: Keyword.get(opts, :access_token, "oauth-token")}
+      end
+
+    %{
+      provider_client: Keyword.get(opts, :provider_client, Jido.Connect.Jira.MockClient),
+      context:
+        Context.new!(%{
+          tenant_id: "tenant_1",
+          actor: %{id: "user_1", type: :app_user},
+          connection: connection
+        }),
+      credentials: credentials
+    }
+  end
+end
+
 defmodule Jido.Connect.Jira.MockClient do
   @moduledoc false
 
-  def get_issue("PROJ-123", "token", _opts) do
+  alias Jido.Connect.Jira.Client.Request
+
+  def get_issue("PROJ-123", %Request{}, _opts) do
     {:ok,
      %{
        key: "PROJ-123",
@@ -21,11 +69,9 @@ defmodule Jido.Connect.Jira.MockClient do
      }}
   end
 
-  def get_issue("PROJ-123", "token") do
-    get_issue("PROJ-123", "token", [])
-  end
+  def get_issue("PROJ-123", %Request{} = request), do: get_issue("PROJ-123", request, [])
 
-  def search_issues("project = PROJ ORDER BY updated DESC", "token", opts) do
+  def search_issues("project = PROJ ORDER BY updated DESC", %Request{}, opts) do
     {:ok,
      %{
        issues: [
@@ -45,11 +91,7 @@ defmodule Jido.Connect.Jira.MockClient do
      }}
   end
 
-  def search_issues(jql, token, opts) do
-    search_issues(jql, token, opts)
-  end
-
-  def list_projects("token", opts) do
+  def list_projects(%Request{}, opts) do
     {:ok,
      %{
        projects: [
@@ -63,7 +105,7 @@ defmodule Jido.Connect.Jira.MockClient do
      }}
   end
 
-  def get_project("PROJ", "token") do
+  def get_project("PROJ", %Request{}) do
     {:ok,
      %{
        key: "PROJ",
@@ -76,7 +118,7 @@ defmodule Jido.Connect.Jira.MockClient do
      }}
   end
 
-  def list_field_schemas("token", _opts) do
+  def list_field_schemas(%Request{}, _opts) do
     {:ok,
      %{
        fields: [
@@ -100,7 +142,7 @@ defmodule Jido.Connect.Jira.MockClient do
           issuetype: %{name: "Task"},
           summary: "New issue"
         },
-        "token"
+        %Request{}
       ) do
     {:ok,
      %{
@@ -117,19 +159,14 @@ defmodule Jido.Connect.Jira.MockClient do
      }}
   end
 
-  def update_issue("PROJ-123", _fields, "token") do
-    {:ok, %{updated: true}}
-  end
+  def update_issue("PROJ-123", _fields, %Request{}), do: {:ok, %{updated: true}}
 
-  def transition_issue("PROJ-123", "21", "token", _opts) do
-    {:ok, %{transitioned: true}}
-  end
+  def transition_issue("PROJ-123", "21", %Request{}, _opts),
+    do: {:ok, %{transitioned: true}}
 
-  def assign_issue("PROJ-123", "acct-1", "token") do
-    {:ok, %{assigned: true}}
-  end
+  def assign_issue("PROJ-123", "acct-1", %Request{}), do: {:ok, %{assigned: true}}
 
-  def add_comment("PROJ-123", _body_text, "token") do
+  def add_comment("PROJ-123", _body_text, %Request{}) do
     {:ok,
      %{
        id: "20010",
@@ -139,9 +176,8 @@ defmodule Jido.Connect.Jira.MockClient do
   end
 end
 
-# Ensure Req.Test.Ownership is running so that client tests using
-# `setup {Req.Test, :verify_on_exit!}` work even when the umbrella
-# cannot start the full application supervision tree.
+# Ensure Req.Test.Ownership is running so that client tests can run without the
+# full application supervision tree.
 unless Process.whereis(Req.Test.Ownership) do
   {:ok, _} = Req.Test.Ownership.start_link(name: Req.Test.Ownership)
 end

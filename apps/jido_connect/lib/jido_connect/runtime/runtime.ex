@@ -57,7 +57,8 @@ defmodule Jido.Connect.Runtime do
              action: action,
              context: context,
              credential_lease: lease,
-             credentials: lease.fields
+             credentials: lease.fields,
+             provider_client: get_option(opts, :provider_client)
            }),
          {:ok, parsed_output} <- parse_schema(action.output_schema, output, :output) do
       {:ok, parsed_output}
@@ -123,6 +124,7 @@ defmodule Jido.Connect.Runtime do
              context: context,
              credential_lease: lease,
              credentials: lease.fields,
+             provider_client: get_option(opts, :provider_client),
              execution: %{
                id: prepared.execution_id,
                prepared_action_id: prepared.id,

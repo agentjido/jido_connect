@@ -6,7 +6,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.SearchIssuesTest do
   describe "run/2" do
     test "searches issues with JQL using mock client" do
       input = %{jql: "project = PROJ ORDER BY updated DESC"}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, result} = SearchIssues.run(input, runtime)
       assert length(result.issues) == 1
@@ -25,7 +25,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.SearchIssuesTest do
         fields: ["summary", "status"]
       }
 
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, result} = SearchIssues.run(input, runtime)
       assert result.issues != []
