@@ -13,7 +13,7 @@ defmodule Jido.Connect.Things.Reader do
   def list_open_inbox(%Client{} = client, limit) when is_integer(limit) and limit in 1..100 do
     with {:ok, account, history} <- snapshot(client),
          {:ok, state} <- load_state(client, account, history),
-         :ok <- require_read_safe_fold(state) do
+         :ok <- validate_read_state(state) do
       todos =
         state
         |> State.active_tasks()
@@ -34,7 +34,7 @@ defmodule Jido.Connect.Things.Reader do
   def fetch_todo(%Client{} = client, id) when is_binary(id) do
     with {:ok, account, history} <- snapshot(client),
          {:ok, state} <- load_state(client, account, history),
-         :ok <- require_read_safe_fold(state) do
+         :ok <- validate_read_state(state) do
       case Enum.find(State.active_tasks(state), &(&1.id == id)) do
         %Todo{} = todo -> {:ok, todo, account, history}
         nil -> protocol_error(:todo_not_found, %{id: id})
@@ -115,7 +115,7 @@ defmodule Jido.Connect.Things.Reader do
     })
   end
 
-  defp require_read_safe_fold(%State{} = state) do
+  def validate_read_state(%State{} = state) do
     case task_fold_error_reason(state.issues) do
       nil -> :ok
       reason -> protocol_error(reason, %{issue_count: length(state.issues)})

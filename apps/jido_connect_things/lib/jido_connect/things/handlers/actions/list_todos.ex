@@ -5,24 +5,27 @@ defmodule Jido.Connect.Things.Handlers.Actions.ListTodos do
 
   alias Jido.Connect.Things.{
     Client,
+    Query,
     ReadAdapter,
     Reader,
     Runtime
   }
 
-  def run(%{view: "inbox", limit: limit}, %{context: context, credential_lease: lease}) do
+  def run(input, %{context: context, credential_lease: lease}) when is_map(input) do
     runtime = Runtime.runtime_context(context)
 
-    case Map.get(runtime, :read_adapter) do
-      nil ->
-        with {:ok, client} <- Client.from_runtime(context, lease, runtime) do
-          Reader.list_open_inbox(client, limit)
+    case {Map.get(runtime, :read_adapter), adapter_compatible?(input)} do
+      {adapter, true} when not is_nil(adapter) ->
+        with {:ok, result} <- ReadAdapter.list(adapter, context.connection.id, input.limit),
+             {:ok, output} <- normalize_adapter_result(result, input.limit) do
+          {:ok, output}
         end
 
-      adapter ->
-        with {:ok, result} <- ReadAdapter.list(adapter, context.connection.id, limit),
-             {:ok, output} <- normalize_adapter_result(result, limit) do
-          {:ok, output}
+      _provider_read ->
+        with {:ok, client} <- Client.from_runtime(context, lease, runtime),
+             {:ok, account, history} <- Reader.snapshot(client),
+             {:ok, state} <- Reader.load_state(client, account, history) do
+          Query.list(state, input, today: Map.get(runtime, :today, Date.utc_today()))
         end
     end
   end
@@ -32,6 +35,11 @@ defmodule Jido.Connect.Things.Handlers.Actions.ListTodos do
      Error.validation("Things list input is invalid",
        reason: :invalid_list_input
      )}
+  end
+
+  defp adapter_compatible?(input) do
+    input.view == "inbox" and input.status == "all" and input.tag_ids == [] and
+      Map.drop(input, [:view, :status, :tag_ids, :limit]) == %{}
   end
 
   defp normalize_adapter_result(result, limit) do

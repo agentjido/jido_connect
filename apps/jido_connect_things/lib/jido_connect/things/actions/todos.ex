@@ -12,8 +12,8 @@ defmodule Jido.Connect.Things.Actions.Todos do
       resource(:todo)
       verb(:list)
       data_classification(:personal_data)
-      label("List open Inbox to-dos")
-      description("List open to-dos in the selected Things Cloud Inbox.")
+      label("List Things to-dos")
+      description("List current Things to-dos with V1 section and relation filters.")
       handler(Jido.Connect.Things.Handlers.Actions.ListTodos)
       effect(:read)
       metadata(@strict)
@@ -25,9 +25,40 @@ defmodule Jido.Connect.Things.Actions.Todos do
       input do
         field(:view, :string,
           default: "inbox",
-          enum: ["inbox"],
-          description: "Task view. The first provider slice supports Inbox only."
+          enum: [
+            "all",
+            "inbox",
+            "today",
+            "evening",
+            "anytime",
+            "someday",
+            "upcoming",
+            "logbook",
+            "trash"
+          ],
+          description: "Things section to list."
         )
+
+        field(:status, :string,
+          default: "all",
+          enum: ["all", "open", "completed", "canceled"],
+          description: "Optional status filter."
+        )
+
+        field(:query, :string,
+          min_length: 1,
+          max_length: 500,
+          description: "Case-insensitive title or note text."
+        )
+
+        field(:area_id, :string, min_length: 1, max_length: 32)
+        field(:project_id, :string, min_length: 1, max_length: 32)
+        field(:heading_id, :string, min_length: 1, max_length: 32)
+        field(:tag_ids, {:array, :string}, default: [])
+        field(:deadline_from, :string, metadata: %{format: :date})
+        field(:deadline_to, :string, metadata: %{format: :date})
+        field(:scheduled_from, :string, metadata: %{format: :date})
+        field(:scheduled_to, :string, metadata: %{format: :date})
 
         field(:limit, :integer,
           default: 25,
@@ -42,6 +73,88 @@ defmodule Jido.Connect.Things.Actions.Todos do
         field(:count, :integer, required?: true)
         field(:todos, {:array, :map}, required?: true)
         field(:freshness, :map)
+      end
+    end
+
+    action :get_todo do
+      id("things.todo.get")
+      resource(:todo)
+      verb(:get)
+      data_classification(:personal_data)
+      label("Get Things task")
+      description("Get one current task or project by exact ID or unique ID prefix.")
+      handler(Jido.Connect.Things.Handlers.Actions.GetTodo)
+      effect(:read)
+      metadata(@strict)
+
+      access do
+        auth(:things_cloud_password)
+      end
+
+      input do
+        field(:id, :string, required?: true, min_length: 1, max_length: 32)
+      end
+
+      output do
+        field(:todo, :map, required?: true)
+        field(:freshness, :map, required?: true)
+      end
+    end
+
+    action :search_todos do
+      id("things.todo.search")
+      resource(:todo)
+      verb(:search)
+      data_classification(:personal_data)
+      label("Search Things to-dos")
+      description("Search current Things to-dos by title or note text.")
+      handler(Jido.Connect.Things.Handlers.Actions.SearchTodos)
+      effect(:read)
+      metadata(@strict)
+
+      access do
+        auth(:things_cloud_password)
+      end
+
+      input do
+        field(:query, :string, required?: true, min_length: 1, max_length: 500)
+
+        field(:view, :string,
+          default: "all",
+          enum: [
+            "all",
+            "inbox",
+            "today",
+            "evening",
+            "anytime",
+            "someday",
+            "upcoming",
+            "logbook",
+            "trash"
+          ]
+        )
+
+        field(:status, :string,
+          default: "all",
+          enum: ["all", "open", "completed", "canceled"]
+        )
+
+        field(:area_id, :string, min_length: 1, max_length: 32)
+        field(:project_id, :string, min_length: 1, max_length: 32)
+        field(:heading_id, :string, min_length: 1, max_length: 32)
+        field(:tag_ids, {:array, :string}, default: [])
+        field(:deadline_from, :string, metadata: %{format: :date})
+        field(:deadline_to, :string, metadata: %{format: :date})
+        field(:scheduled_from, :string, metadata: %{format: :date})
+        field(:scheduled_to, :string, metadata: %{format: :date})
+        field(:limit, :integer, default: 25, minimum: 1, maximum: 100)
+      end
+
+      output do
+        field(:view, :string, required?: true)
+        field(:count, :integer, required?: true)
+        field(:todos, {:array, :map}, required?: true)
+        field(:freshness, :map, required?: true)
       end
     end
 
