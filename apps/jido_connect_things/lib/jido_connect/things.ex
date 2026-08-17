@@ -16,6 +16,7 @@ defmodule Jido.Connect.Things do
       Jido.Connect.Things.Actions.Todos,
       Jido.Connect.Things.Actions.Organization,
       Jido.Connect.Things.Actions.Lifecycle,
+      Jido.Connect.Things.Actions.Trash,
       Jido.Connect.Things.Actions.References
     ]
 
