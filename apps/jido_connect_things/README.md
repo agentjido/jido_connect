@@ -1,12 +1,14 @@
 # Jido Connect Things
 
-`jido_connect_things` is an experimental provider for a small Things Cloud
-Inbox surface:
+`jido_connect_things` is an experimental provider for the Wayfinder Things
+Task Conformance V1 surface. It has these read groups:
 
-- `things.todo.list` lists open Inbox to-dos.
-- `things.todo.create` creates one open Inbox to-do.
-- `things.todo.update` changes only the title or notes of one open Inbox
-  to-do.
+- Task list, get, and search across Inbox, Today, Evening, Anytime, Someday,
+  Upcoming, Logbook, and Trash.
+- Project, heading, area, and tag lists.
+
+It has guarded actions for create, title or full-note update, schedule,
+deadline, tags, container move, complete, cancel, reopen, Trash, and restore.
 
 ## Unofficial protocol warning
 
@@ -14,10 +16,11 @@ Things Cloud does not publish or support the write protocol used by this
 package. The schema-301 wire format comes from observed client behavior. A
 provider change can cause data loss or corruption.
 
-The package fails closed unless it sees the reviewed endpoint, selected account,
-active account state, schema 301, and exact prepared history head. It does not
-include delete, trash, completion, scheduling, project, area, tag, recurrence,
-checklist, batch, or raw wire actions.
+The package fails closed unless it sees the reviewed endpoint, selected
+account, active account state, schema 301, complete current state, and exact
+prepared history head. It does not include recurrence, reminder, checklist,
+project, heading, area, or tag writes. It also does not include direct delete,
+tombstone, batch, raw position, raw wire, or account administration actions.
 
 ## Host-owned connection
 
@@ -78,6 +81,10 @@ Hosts still own global and provider write switches, exact action allowlists,
 one-use execution claims, audit records, durable credentials, and local
 projection refresh.
 
+A full-note replacement on a non-empty note also needs `high_risk?: true`.
+Trash needs both `high_risk?: true` and `destructive?: true`. The Trash action
+also uses the core destructive action type and always requires confirmation.
+
 ## Optional host read adapter
 
 A host can pass `:read_adapter` for list output or prepare-time update
@@ -87,10 +94,11 @@ it sends the write.
 
 ## Catalog packs
 
-- `things_inbox_reader` contains `things.todo.list` only.
-- `things_inbox_editor` adds `things.todo.create` and `things.todo.update`.
+- `things_inbox_reader` contains all V1 read actions.
+- `things_inbox_editor` adds all V1 guarded Task6 write actions.
 
-Both packs are storage-free. They do not contain raw wire or destructive tools.
+Both packs are storage-free. They do not contain raw wire, direct delete, or
+tombstone tools.
 
 ## Wayfinder action migration
 
@@ -99,6 +107,12 @@ Both packs are storage-free. They do not contain raw wire or destructive tools.
 | `tasks.item.list` | `things.todo.list` |
 | `tasks.todo.create` | `things.todo.create` |
 | `tasks.todo.update` | `things.todo.update` |
+| Task schedule intent | `things.todo.schedule` |
+| Task deadline intent | `things.todo.deadline.set` or `.clear` |
+| Task tag intent | `things.todo.tags.set` |
+| Task container intent | `things.todo.move` |
+| Task lifecycle intent | `things.todo.complete`, `.cancel`, or `.reopen` |
+| Task Trash intent | `things.todo.trash` or `.restore` |
 
-The list replacement is narrower: the first provider slice supports the Inbox
-view only.
+See [CONFORMANCE.md](CONFORMANCE.md) for the action matrix, safety boundary,
+and offline evidence.

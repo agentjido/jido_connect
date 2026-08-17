@@ -1,14 +1,14 @@
 defmodule Jido.Connect.Things do
   @moduledoc """
-  Experimental Things Cloud Inbox integration.
+  Experimental Things Cloud Task Conformance V1 integration.
 
   Things Cloud does not publish or support the write protocol used by this
   package. A protocol change can corrupt or lose data. The provider fails
   closed when the endpoint, account, schema, history head, or prepared plan
   differs from the reviewed contract.
 
-  Direct mutation is always denied. Use `prepare/3` and `commit/3` for create
-  and update actions.
+  Direct mutation is always denied. Use `prepare/3` and `commit/3` for every
+  write action.
   """
 
   use Jido.Connect,
@@ -24,7 +24,7 @@ defmodule Jido.Connect.Things do
     id :things
     name "Things Cloud"
 
-    description "Experimental Inbox task tools for the unofficial Things Cloud protocol."
+    description "Experimental V1 task tools for the unofficial Things Cloud protocol."
 
     category :task_management
     docs ["https://culturedcode.com/things/cloud/"]
