@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [
     "jido_con-bnm.2",
@@ -11,8 +11,8 @@
   "labels": [],
   "parent": "jido_con-bnm",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "Materialize Things V1 current state",
   "type": "task",
-  "updated_at": "2026-08-17T17:35:06Z"
+  "updated_at": "2026-08-17T18:12:30Z"
 }
