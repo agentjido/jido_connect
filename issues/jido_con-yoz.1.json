@@ -4,14 +4,15 @@
   "blocks": [
     "jido_con-yoz.7"
   ],
+  "closed_at": "2026-08-17T11:51:34Z",
   "created": "2026-08-17T11:32:21Z",
   "description": "Add Basic email and API-token auth, keep OAuth Bearer separate, resolve endpoint per connection, pass connection and auth profile through the client, and test two concurrent identities.",
   "id": "jido_con-yoz.1",
   "labels": [],
   "parent": "jido_con-yoz",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Make Jira requests connection-aware",
   "type": "task",
-  "updated_at": "2026-08-17T11:36:53Z"
+  "updated_at": "2026-08-17T11:51:34Z"
 }
