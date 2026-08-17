@@ -20,11 +20,15 @@
     {
       "text": "Added a packaged, excluded disposable-account live suite. The full schema-301 cycle passed through all 19 provider actions. Bounded verification polling repeats only GET requests and never repeats a write. All required package, umbrella, and demo checks pass.",
       "timestamp": "2026-08-17T19:16:41Z"
+    },
+    {
+      "text": "Merged the complete stack to main in base-to-tip order: PRs 57, 59, 58, 60, 61, 62, 63, with PR 64 already merged into PR 63. During merge, resolved review-protection findings with regression fixes for persistent recurrence/reminder markers, typed note checksum validation, target-aware read safety, whitespace-only queries, and stopped-project filtering. Final Things package quality passed with 68 tests, 1 excluded live test, and 82.17% coverage. Isolated umbrella quality, demo checks, and final main CI run 32065981820 all passed. Issue #55 is closed.",
+      "timestamp": "2026-08-17T20:32:40Z"
     }
   ],
   "priority": 1,
   "status": "closed",
   "title": "[G40] Things Task Conformance V1 action coverage",
   "type": "epic",
-  "updated_at": "2026-08-17T19:16:42Z"
+  "updated_at": "2026-08-17T20:32:40Z"
 }
