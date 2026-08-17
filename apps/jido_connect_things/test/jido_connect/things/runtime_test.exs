@@ -159,13 +159,13 @@ defmodule Jido.Connect.Things.RuntimeTest do
 
     assert prepared.action.confirmation_required?
 
-    assert prepared.action.preview == %{
-             operation: "create",
-             destination: "inbox",
-             title: "Create me",
-             notes_present: true,
-             planned_external_id: @id
-           }
+    assert prepared.action.preview.operation == "create"
+    assert prepared.action.preview.target_id == @id
+    assert prepared.action.preview.before == nil
+    assert prepared.action.preview.after.title == "Create me"
+    assert prepared.action.preview.after.schedule == "inbox"
+    assert prepared.action.preview.after.notes.length == 12
+    refute inspect(prepared.action.preview) =~ "Private note"
 
     public = PreparedWrite.to_public_map(prepared)
     serialized = inspect(public)
@@ -451,7 +451,9 @@ defmodule Jido.Connect.Things.RuntimeTest do
 
     assert prepared.action.preview == %{
              operation: "update",
-             task_id: @id,
+             target_id: @id,
+             before: %{title: "Existing task"},
+             after: %{title: "Updated title"},
              changed_fields: ["title"],
              expected_modified_at: DateTime.to_iso8601(@modified_at)
            }
@@ -494,21 +496,71 @@ defmodule Jido.Connect.Things.RuntimeTest do
     refute_received {:request, :post, _url, _opts}
   end
 
-  test "rejects completed, canceled, deleted, trash, structural, and non-Inbox targets" do
+  test "requires the high-risk gate for a non-empty note replacement" do
+    parent = self()
+    transport = successful_update_transport(parent, @modified_at, @modified_at)
     {context, lease} = runtime_contract("connection-A", "user@example.com")
 
-    variants = [
-      %{"ss" => 3},
-      %{"ss" => 2},
-      %{"tr" => true},
-      %{"tp" => 1},
-      %{"st" => 1}
-    ]
+    input = %{
+      id: @id,
+      expected_modified_at: DateTime.to_iso8601(@modified_at),
+      notes: "Replacement"
+    }
 
-    for patch <- variants do
+    assert {:ok, prepared} =
+             Jido.Connect.Things.prepare("things.todo.update", input,
+               context: context,
+               credential_lease: lease,
+               transport: transport,
+               now: @now,
+               lock: &direct_lock/2
+             )
+
+    assert prepared.provider_plan.risk == :high
+    flush_requests()
+
+    assert {:error, %Error.AuthError{reason: :high_risk_confirmation_required}} =
+             Jido.Connect.Things.commit(prepared, input,
+               context: context,
+               credential_lease: lease,
+               transport: transport,
+               commit?: true,
+               now: @now,
+               lock: &direct_lock/2,
+               execution_authorization: %{plan_id: prepared.action.id},
+               authorization_validator: &authorize/4
+             )
+
+    refute_received {:request, :post, _url, _opts}
+  end
+
+  test "allows non-Inbox task updates and rejects trash, structural, and deleted targets" do
+    {context, lease} = runtime_contract("connection-A", "user@example.com")
+
+    for patch <- [%{"ss" => 3}, %{"ss" => 2}, %{"st" => 1}] do
+      assert {:ok, _prepared} =
+               Jido.Connect.Things.prepare(
+                 "things.todo.update",
+                 %{
+                   id: @id,
+                   expected_modified_at: DateTime.to_iso8601(@modified_at),
+                   title: "Updated"
+                 },
+                 context: context,
+                 credential_lease: lease,
+                 transport: update_planning_transport(patch),
+                 now: @now,
+                 lock: &direct_lock/2
+               )
+    end
+
+    for {patch, reason} <- [
+          {%{"tr" => true}, :target_in_trash},
+          {%{"tp" => 1}, :unsupported_write_target}
+        ] do
       transport = update_planning_transport(patch)
 
-      assert {:error, %Error.ProviderError{reason: :todo_not_open_inbox}} =
+      assert {:error, %Error.ProviderError{reason: ^reason}} =
                Jido.Connect.Things.prepare(
                  "things.todo.update",
                  %{
@@ -637,6 +689,8 @@ defmodule Jido.Connect.Things.RuntimeTest do
       credential_lease: lease,
       transport: transport,
       commit?: true,
+      high_risk?: true,
+      destructive?: true,
       now: @now,
       lock: &direct_lock/2,
       execution_authorization: %{plan_id: prepared.action.id},
