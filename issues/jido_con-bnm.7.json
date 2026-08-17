@@ -16,11 +16,15 @@
     {
       "text": "Added the source-baseline conformance matrix, complete 19-action coverage table, explicit V1 exclusions, safety model, offline evidence map, and external official-client acceptance boundary. Updated package guidance and public documentation to the full V1 surface. Final package quality passed with 62 tests and 81.02% coverage. Root mix quality and demo format, warnings-as-errors compile, and 21 tests passed. No live Things Cloud calls ran.",
       "timestamp": "2026-08-17T18:57:07Z"
+    },
+    {
+      "text": "Added the excluded local-only :live_smoke suite for the exact mike+things@epicfirm.com disposable account. The suite refuses CI, requires four exact acknowledgement gates, verifies active schema-301 account state, uses only public provider actions, covers every V1 read group and guarded Task6 write, reconciles prior canaries, and leaves no active canary. A live run passed in 49.7 seconds. The live run found and drove fixes for initial-create concurrency, target-scoped unknown history safety, and bounded read-only verification polling. Package quality passed with 64 tests, 1 excluded live test, and 81.37% coverage. Root mix quality and all demo checks passed.",
+      "timestamp": "2026-08-17T19:16:40Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "Verify Things V1 provider action coverage",
   "type": "task",
-  "updated_at": "2026-08-17T19:04:21Z"
+  "updated_at": "2026-08-17T19:16:40Z"
 }
