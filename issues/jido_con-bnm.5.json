@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-bnm.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-bnm.7"
+  ],
   "created": "2026-08-17T17:35:04Z",
   "description": "Add separate things.todo.complete, things.todo.cancel, and things.todo.reopen actions for current non-recurring Task6 to-dos. Enforce valid source-state transitions, set or clear the stop timestamp correctly, reject no-op transitions, and reject project, heading, deleted, trashed, legacy, recurring, or incomplete targets. Use guarded prepare and commit, safe previews, exact freshness checks, delivery certainty, and fake-based regression tests.",
   "id": "jido_con-bnm.5",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "Add guarded Things lifecycle actions",
   "type": "task",
-  "updated_at": "2026-08-17T17:35:07Z"
+  "updated_at": "2026-08-17T17:35:10Z"
 }
