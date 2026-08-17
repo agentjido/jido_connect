@@ -50,8 +50,8 @@ defmodule Jido.Connect.Things.State.TaskFold do
       |> Map.put(:deleted, if(action == 0, do: false, else: attrs.deleted))
       |> Map.put(:last_server_index, server_index)
       |> Map.put(:unknown_fields, Map.merge(attrs.unknown_fields, unknown))
-      |> Map.put(:recurrence_state_present, recurrence_state_present?(attrs, payload))
-      |> Map.put(:reminder_present, reminder_present?(attrs, payload))
+      |> put_recurrence_state(payload)
+      |> put_reminder_state(payload)
       |> Map.put(:state_complete, attrs.state_complete and issues == [])
 
     case Todo.new(attrs) do
@@ -95,16 +95,37 @@ defmodule Jido.Connect.Things.State.TaskFold do
     end
   end
 
-  defp recurrence_state_present?(attrs, payload) do
-    attrs.recurrence_rule not in [nil, %{}] or attrs.recurrence_template_ids != [] or
-      attrs.recurrence_paused or present?(payload, ["rp", "icsd", "dds"])
+  defp put_recurrence_state(attrs, payload) do
+    markers = update_markers(attrs.recurrence_marker_fields, payload, ["rp", "icsd", "dds"])
+
+    present =
+      attrs.recurrence_rule not in [nil, %{}] or attrs.recurrence_template_ids != [] or
+        attrs.recurrence_paused or map_size(markers) > 0
+
+    attrs
+    |> Map.put(:recurrence_marker_fields, markers)
+    |> Map.put(:recurrence_state_present, present)
   end
 
-  defp reminder_present?(attrs, payload) do
-    not is_nil(attrs.alarm_time_offset) or present?(payload, ["rmd", "lai", "acrd"])
+  defp put_reminder_state(attrs, payload) do
+    markers = update_markers(attrs.reminder_marker_fields, payload, ["rmd", "lai", "acrd"])
+
+    attrs
+    |> Map.put(:reminder_marker_fields, markers)
+    |> Map.put(:reminder_present, not is_nil(attrs.alarm_time_offset) or map_size(markers) > 0)
   end
 
-  defp present?(payload, keys) do
-    Enum.any?(keys, fn key -> Map.get(payload, key) not in [nil, false, [], %{}] end)
+  defp update_markers(current, payload, keys) do
+    Enum.reduce(keys, current, fn key, markers ->
+      if Map.has_key?(payload, key) do
+        if Map.get(payload, key) in [nil, false, [], %{}] do
+          Map.delete(markers, key)
+        else
+          Map.put(markers, key, true)
+        end
+      else
+        markers
+      end
+    end)
   end
 end

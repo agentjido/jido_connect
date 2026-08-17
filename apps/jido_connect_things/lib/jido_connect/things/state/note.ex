@@ -9,9 +9,6 @@ defmodule Jido.Connect.Things.State.Note do
   def apply(_current, _current_state, nil), do: {"", :complete, []}
   def apply(_current, _current_state, note) when is_binary(note), do: {note, :complete, []}
 
-  def apply(_current, _current_state, %{"v" => value}) when is_binary(value),
-    do: {value, :complete, []}
-
   def apply(_current, _current_state, %{"t" => 1, "v" => value} = note)
       when is_binary(value) do
     if valid_checksum?(note, value) do
@@ -20,6 +17,9 @@ defmodule Jido.Connect.Things.State.Note do
       {value, :incomplete, [issue(:full_note_checksum_mismatch)]}
     end
   end
+
+  def apply(_current, _current_state, %{"v" => value}) when is_binary(value),
+    do: {value, :complete, []}
 
   def apply(current, :complete, %{"t" => 2, "ps" => patches} = note)
       when is_binary(current) and is_list(patches) and length(patches) <= @maximum_patch_count do

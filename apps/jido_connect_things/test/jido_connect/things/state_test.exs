@@ -104,6 +104,24 @@ defmodule Jido.Connect.Things.StateTest do
     assert state.tags[@tag_id].parent_ids == []
   end
 
+  test "retains recurrence and reminder markers until their exact fields clear" do
+    create = single_task(%{"rp" => %{"rule" => "daily"}, "rmd" => true})
+    unrelated_patch = single_task(%{"tt" => "Changed"}, 1)
+
+    retained = replay!([create, unrelated_patch])
+    assert retained.tasks[@task_id].recurrence_marker_fields == %{"rp" => true}
+    assert retained.tasks[@task_id].reminder_marker_fields == %{"rmd" => true}
+    assert retained.tasks[@task_id].recurrence_state_present
+    assert retained.tasks[@task_id].reminder_present
+
+    clear = single_task(%{"rp" => nil, "rmd" => nil}, 1)
+    cleared = replay!([create, unrelated_patch, clear])
+    assert cleared.tasks[@task_id].recurrence_marker_fields == %{}
+    assert cleared.tasks[@task_id].reminder_marker_fields == %{}
+    refute cleared.tasks[@task_id].recurrence_state_present
+    refute cleared.tasks[@task_id].reminder_present
+  end
+
   test "applies bounded note deltas and marks an invalid delta incomplete" do
     original = "Hello world"
 
@@ -147,6 +165,20 @@ defmodule Jido.Connect.Things.StateTest do
     assert unsafe_state.tasks[@task_id].note_state == :incomplete
     refute unsafe_state.tasks[@task_id].state_complete
     refute unsafe_state.write_safe?
+  end
+
+  test "marks a typed full note with a bad checksum incomplete" do
+    state =
+      replay!([
+        single_task(%{
+          "nt" => %{"t" => 1, "v" => "Changed note", "ch" => :erlang.crc32("Other note")}
+        })
+      ])
+
+    assert state.tasks[@task_id].notes == "Changed note"
+    assert state.tasks[@task_id].note_state == :incomplete
+    refute state.tasks[@task_id].state_complete
+    refute state.write_safe?
   end
 
   test "retains unknown events and fields without unsafe interpretation" do
