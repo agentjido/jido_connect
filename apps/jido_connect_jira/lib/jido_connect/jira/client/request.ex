@@ -127,3 +127,18 @@ defmodule Jido.Connect.Jira.Client.Request do
     end
   end
 end
+
+defimpl Inspect, for: Jido.Connect.Jira.Client.Request do
+  import Inspect.Algebra
+
+  def inspect(request, opts) do
+    public = %{
+      connection_id: request.connection.id,
+      auth_profile: request.auth_profile,
+      endpoint: request.endpoint,
+      credentials: "[redacted]"
+    }
+
+    concat(["#Jido.Connect.Jira.Client.Request<", to_doc(public, opts), ">"])
+  end
+end

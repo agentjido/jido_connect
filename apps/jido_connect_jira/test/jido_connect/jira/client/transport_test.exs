@@ -18,6 +18,8 @@ defmodule Jido.Connect.Jira.Client.TransportTest do
     assert request.options.base_url == "https://a.atlassian.net"
     assert request.headers["authorization"] == [basic("a@example.com", "token-a")]
     assert request.headers["accept"] == ["application/json"]
+    refute inspect(request_context) =~ "a@example.com"
+    refute inspect(request_context) =~ "token-a"
   end
 
   test "OAuth requests use Bearer authentication and the connection cloud endpoint" do
