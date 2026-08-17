@@ -45,6 +45,15 @@ defmodule Jido.Connect.Things.ChangePlannerTest do
     assert payload["ato"] == nil
   end
 
+  test "uses the creation timestamp as the first concurrency token" do
+    created = state_fixture(task: %{created_at: @modified_at, modified_at: nil})
+
+    assert {:ok, planned} =
+             plan("things.todo.update", target_input(%{title: "First update"}), created)
+
+    assert planned.expected_modified_at == DateTime.to_iso8601(@modified_at)
+  end
+
   test "normalizes a container create or move out of Inbox to Anytime" do
     assert {:ok, create} =
              plan("things.todo.create", %{title: "Create", project_id: @project_id, tag_ids: []})
@@ -147,14 +156,19 @@ defmodule Jido.Connect.Things.ChangePlannerTest do
     end
   end
 
-  test "rejects unsafe state, recurrence, Trash misuse, bad transitions, and bad destinations" do
+  test "isolates unrelated issues and rejects unsafe targets, transitions, and destinations" do
     unsafe = %{state_fixture() | write_safe?: false}
 
+    assert {:ok, _planned} =
+             plan("things.todo.update", target_input(%{title: "New"}), unsafe)
+
+    incomplete = state_fixture(task: %{state_complete: false})
+
     assert_error(
-      :unsafe_provider_state,
+      :unsafe_task_state,
       "things.todo.update",
       target_input(%{title: "New"}),
-      unsafe
+      incomplete
     )
 
     recurring = state_fixture(task: %{recurrence_state_present: true})
