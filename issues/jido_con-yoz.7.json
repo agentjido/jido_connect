@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-yoz.1"
+  ],
   "blocks": [],
   "created": "2026-08-17T11:32:24Z",
   "description": "Run quality checks and demo tests, review the diff, push the branch, and open a pull request that closes GitHub issue #54.",
