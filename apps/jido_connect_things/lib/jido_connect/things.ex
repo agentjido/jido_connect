@@ -14,6 +14,7 @@ defmodule Jido.Connect.Things do
   use Jido.Connect,
     fragments: [
       Jido.Connect.Things.Actions.Todos,
+      Jido.Connect.Things.Actions.Organization,
       Jido.Connect.Things.Actions.References
     ]
 
