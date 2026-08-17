@@ -4,7 +4,8 @@
     "jido_con-bnm.1"
   ],
   "blocks": [
-    "jido_con-bnm.4"
+    "jido_con-bnm.4",
+    "jido_con-bnm.5"
   ],
   "created": "2026-08-17T17:35:02Z",
   "description": "Extend the private Task6 serializer and state-bound prepare and commit path for the approved V1 field set. Support non-recurring create and sparse update shapes for schedule, deadline, tag replacement, container relations, status and stop time, Trash, and restore. Validate exact current targets and destinations. Keep create UUIDs stable. Add before-and-after safe previews, risk classification, exact operation binding, stale-head rejection, one POST, no retry, exact history verification, and outcome-unknown handling. Production code must still reject recurrence, alarms, raw positions, legacy writes, checklist writes, structural writes, direct delete, tombstone, and caller-supplied raw wire data.",
