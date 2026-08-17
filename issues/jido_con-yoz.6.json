@@ -4,14 +4,16 @@
   "blocks": [
     "jido_con-yoz.7"
   ],
+  "closed_at": "2026-08-17T12:12:45Z",
+  "close_reason": "Documented portable snapshots, atomic host claims, delivery states, previews, schemas, and provider idempotency.",
   "created": "2026-08-17T11:32:23Z",
   "description": "Document host one-use claims, duplicate commit risk, uncertain writes, and provider idempotency support.",
   "id": "jido_con-yoz.6",
   "labels": [],
   "parent": "jido_con-yoz",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Document replay and idempotency",
   "type": "task",
-  "updated_at": "2026-08-17T12:10:52Z"
+  "updated_at": "2026-08-17T12:12:45Z"
 }
