@@ -62,8 +62,10 @@ defmodule Jido.Connect.Things.Todo do
   def write_safe?(%__MODULE__{} = todo) do
     todo.entity_version == "Task6" and todo.state_complete and todo.note_state == :complete and
       not todo.recurrence_state_present and not todo.reminder_present and
-      match?(%DateTime{}, todo.modified_at)
+      match?(%DateTime{}, concurrency_at(todo))
   end
+
+  def concurrency_at(%__MODULE__{} = todo), do: todo.modified_at || todo.created_at
 
   def to_public_map(%__MODULE__{} = todo) do
     %{
@@ -71,6 +73,7 @@ defmodule Jido.Connect.Things.Todo do
       title: todo.title,
       notes: todo.notes,
       modified_at: iso8601(todo.modified_at),
+      expected_modified_at: iso8601(concurrency_at(todo)),
       status: Atom.to_string(todo.status),
       schedule: Atom.to_string(todo.schedule)
     }

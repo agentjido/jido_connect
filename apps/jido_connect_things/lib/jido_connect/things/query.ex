@@ -260,6 +260,7 @@ defmodule Jido.Connect.Things.Query do
       reminder_present: todo.reminder_present,
       created_at: iso8601(todo.created_at),
       modified_at: iso8601(todo.modified_at),
+      expected_modified_at: iso8601(Todo.concurrency_at(todo)),
       stopped_at: iso8601(todo.stopped_at),
       scheduled_at: iso8601(todo.scheduled_at),
       today_reference_at: iso8601(todo.today_reference_at),

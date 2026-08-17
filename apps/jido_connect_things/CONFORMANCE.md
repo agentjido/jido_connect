@@ -27,15 +27,17 @@ implement the complete private Things Cloud API.
 | Trash | `things.todo.trash`, `.restore` | Destructive or normal |
 
 The read model retains raw history and materializes Task6, ChecklistItem3,
-Area3, Tag4, Tombstone2, and known legacy read families. Unknown data marks
-the state unsafe for writes but does not remove readable known state.
+Area3, Tag4, Tombstone2, and known legacy read families. Unknown data marks the
+affected entity unsafe for writes but does not remove readable known state.
 
 ## Safety boundary
 
 Every write uses prepare and commit. Prepare binds the account, schema,
 history head, exact target state, canonical operation, body hash, preview, and
 risk. Commit checks these values again, sends at most one POST with no retry,
-and searches history for the exact operation and payload.
+and searches history for the exact operation and payload. Optional bounded
+verification polling repeats only this safe history read. It never repeats the
+POST.
 
 Production serialization rejects recurrence, reminder, checklist, structural
 entity, direct delete, tombstone, batch, raw position, legacy entity, and raw
@@ -53,13 +55,19 @@ previews.
 - `write_wire_test.exs`: canonical schema-301 shapes, stable hashes, sparse
   changes, and serializer exclusions.
 - `runtime_test.exs`: fresh-head checks, guarded prepare and commit, one POST,
-  no retry, exact verification, risk gates, delivery certainty, and redaction.
+  no retry, exact and delayed verification, risk gates, delivery certainty,
+  and redaction.
 - `identifier_test.exs`: canonical 16-byte Base58 identifier properties.
 
-All normal tests use fake transports. They do not call Things Cloud.
+All normal tests use fake transports. They do not call Things Cloud. The
+excluded `:live_smoke` suite is the only live-test exception.
 
 ## External acceptance
 
-Official Things app acceptance and live disposable-account cycles are host
-release evidence. They are not run by this package or by CI. A host must
+The local `:live_smoke` suite runs a complete disposable-account cycle through
+public provider actions. It refuses CI and requires the exact test account and
+four acknowledgement gates. The cycle passed against Things Cloud schema 301
+on 2026-08-17. It covered all V1 read groups and all guarded Task6 writes.
+
+Official Things app acceptance is still host release evidence. A host must
 complete this evidence before it enables unofficial writes for a real account.

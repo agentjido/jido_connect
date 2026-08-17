@@ -226,8 +226,7 @@ defmodule Jido.Connect.Things.ChangePlanner do
     end
   end
 
-  defp validate_state(%State{write_safe?: true}), do: :ok
-  defp validate_state(%State{}), do: Protocol.error(:unsafe_provider_state)
+  defp validate_state(%State{}), do: :ok
 
   defp validate_trash("things.todo.restore", %Todo{in_trash: true}), do: :ok
 
@@ -238,11 +237,12 @@ defmodule Jido.Connect.Things.ChangePlanner do
   defp validate_trash(_action_id, todo), do: Protocol.error(:target_in_trash, %{id: todo.id})
 
   defp validate_expected_modified_at(todo, expected) do
-    actual = DateTime.to_iso8601(todo.modified_at)
+    concurrency_at = Todo.concurrency_at(todo)
+    actual = DateTime.to_iso8601(concurrency_at)
 
     case DateTime.from_iso8601(expected) do
       {:ok, expected_datetime, 0} ->
-        if DateTime.compare(expected_datetime, todo.modified_at) == :eq,
+        if DateTime.compare(expected_datetime, concurrency_at) == :eq,
           do: :ok,
           else:
             Protocol.error(:stale_expected_modified_at, %{

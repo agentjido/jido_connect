@@ -76,6 +76,10 @@ Commit verifies the account again, reads the provider head again, and checks an
 update target again. It sends one commit request with retry disabled. A
 transport failure after send returns `:sent_outcome_unknown`; callers must not
 retry it. A successful acknowledgement is followed by a read verification.
+For providers with delayed history reads, a host can set
+`verification_attempts` from 1 through 10 and `verification_delay_ms` from 0
+through 5000. These options repeat only the verification GET request. They do
+not repeat the write.
 
 Hosts still own global and provider write switches, exact action allowlists,
 one-use execution claims, audit records, durable credentials, and local
@@ -99,6 +103,36 @@ it sends the write.
 
 Both packs are storage-free. They do not contain raw wire, direct delete, or
 tombstone tools.
+
+## Local live conformance test
+
+The package has one live suite for the disposable
+`mike+things@epicfirm.com` account. Normal tests exclude it, and it refuses to
+run in CI. It uses only public provider actions. It moves old test canaries and
+the new canary to Trash. Things Cloud V1 does not support permanent deletion.
+
+Set these credential variables from the isolated Wayfinder test environment:
+
+```text
+WAYFINDER_THINGS_TEST_EMAIL=mike+things@epicfirm.com
+WAYFINDER_THINGS_TEST_PASSWORD=<disposable-account password>
+WAYFINDER_THINGS_TEST_EXPECTED_EMAIL=mike+things@epicfirm.com
+```
+
+Then run this command from `apps/jido_connect_things`:
+
+```sh
+export JIDO_CONNECT_THINGS_LIVE_ENABLED=I_UNDERSTAND_THIS_TEST_USES_THE_UNOFFICIAL_THINGS_CLOUD_API
+export JIDO_CONNECT_THINGS_LIVE_WRITE_ENABLED=I_UNDERSTAND_THIS_TEST_WRITES_TO_THE_DISPOSABLE_THINGS_ACCOUNT
+export JIDO_CONNECT_THINGS_LIVE_HIGH_RISK_ENABLED=I_UNDERSTAND_THIS_TEST_REPLACES_PRIVATE_NOTES
+export JIDO_CONNECT_THINGS_LIVE_DESTRUCTIVE_ENABLED=I_UNDERSTAND_THIS_TEST_MOVES_DISPOSABLE_TASKS_TO_TRASH
+export JIDO_CONNECT_THINGS_LIVE_DELAY_MS=1000
+mix test test/jido_connect/things/live_smoke_test.exs --include live_smoke --seed 0
+```
+
+The suite verifies the exact account, active status, no account issues, and
+schema 301 before it sends a write. It tests all V1 read groups and the complete
+guarded task cycle. Do not use these gates with a real account.
 
 ## Wayfinder action migration
 

@@ -127,7 +127,9 @@ defmodule Jido.Connect.Things.Runtime do
       :today,
       :lock,
       :high_risk?,
-      :destructive?
+      :destructive?,
+      :verification_attempts,
+      :verification_delay_ms
     ]
     |> Enum.reduce(%{}, fn key, runtime ->
       case option(opts, key) do

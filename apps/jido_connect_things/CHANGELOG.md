@@ -12,3 +12,6 @@
 - Add V1 task views, lookup, search, project, heading, area, and tag reads.
 - Add guarded Task6 organization, lifecycle, Trash, and restore actions with
   exact state checks and normal, high, and destructive risk gates.
+- Add bounded read-only verification polling for delayed Things Cloud history.
+- Add an excluded, local-only live conformance suite for the exact disposable
+  test account.
