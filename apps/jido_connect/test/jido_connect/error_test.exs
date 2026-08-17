@@ -2,6 +2,7 @@ defmodule Jido.Connect.ErrorTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect.Error
+  alias Jido.Connect.RuntimeFixtures
 
   test "builds structured auth errors" do
     error = Error.missing_scopes("conn_1", ["repo"])
@@ -74,5 +75,105 @@ defmodule Jido.Connect.ErrorTest do
     refute inspect(Error.to_map(error)) =~ "secret-token"
     refute inspect(Error.to_map(error)) =~ "secret-key"
     refute inspect(error.details) =~ "temporarily unavailable"
+  end
+
+  test "blocks blind retries for uncertain non-idempotent mutations" do
+    action =
+      RuntimeFixtures.spec(%{
+        action: %{
+          mutation?: true,
+          risk: :external_write,
+          confirmation: :always,
+          provider_idempotency?: false
+        }
+      }).actions
+      |> hd()
+
+    error =
+      Error.provider("Provider response was lost",
+        provider: :demo,
+        reason: :request_error
+      )
+      |> Error.with_action_context(action)
+
+    assert error.delivery == :sent_outcome_unknown
+    assert error.action_risk == :external_write
+    refute Error.retryable?(error)
+    assert Error.retry_guidance(error) == :do_not_retry
+
+    public = Error.to_map(error)
+    assert public.delivery == :sent_outcome_unknown
+    assert public.retryable? == false
+    assert public.retry_guidance == :do_not_retry
+  end
+
+  test "permits an uncertain retry when the action declares provider idempotency" do
+    action =
+      RuntimeFixtures.spec(%{
+        action: %{
+          mutation?: true,
+          risk: :write,
+          confirmation: :always,
+          provider_idempotency?: true
+        }
+      }).actions
+      |> hd()
+
+    error =
+      Error.provider("Provider response was lost",
+        provider: :demo,
+        reason: :request_error
+      )
+      |> Error.with_action_context(action)
+
+    assert Error.retryable?(error)
+    assert Error.retry_guidance(error) == :retry_with_idempotency
+  end
+
+  test "blocks a non-idempotent mutation retry after a 5xx response" do
+    action =
+      RuntimeFixtures.spec(%{
+        action: %{
+          mutation?: true,
+          risk: :write,
+          confirmation: :always,
+          provider_idempotency?: false
+        }
+      }).actions
+      |> hd()
+
+    error =
+      Error.provider("Provider failed after processing the request",
+        provider: :demo,
+        status: 503
+      )
+      |> Error.with_action_context(action)
+
+    assert error.delivery == :rejected
+    refute Error.retryable?(error)
+    assert Error.retry_guidance(error) == :do_not_retry
+  end
+
+  test "requires idempotency for a mutation retry after a 5xx response" do
+    action =
+      RuntimeFixtures.spec(%{
+        action: %{
+          mutation?: true,
+          risk: :write,
+          confirmation: :always,
+          provider_idempotency?: true
+        }
+      }).actions
+      |> hd()
+
+    error =
+      Error.provider("Provider failed after processing the request",
+        provider: :demo,
+        status: 503
+      )
+      |> Error.with_action_context(action)
+
+    assert Error.retryable?(error)
+    assert Error.retry_guidance(error) == :retry_with_idempotency
   end
 end

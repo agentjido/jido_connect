@@ -12,6 +12,40 @@ defmodule Jido.Connect.PreparedActionTest do
     end
   end
 
+  defmodule Preview do
+    @behaviour Jido.Connect.ActionPreview
+
+    @impl true
+    def preview(%{repo: repo}, %{action_id: action_id}) do
+      %{
+        repository: repo,
+        action: action_id,
+        api_token: "must-not-leak"
+      }
+    end
+  end
+
+  defmodule InvalidPreview do
+    @behaviour Jido.Connect.ActionPreview
+
+    @impl true
+    def preview(_input, _context), do: :invalid
+  end
+
+  defmodule ReservedPreview do
+    @behaviour Jido.Connect.ActionPreview
+
+    @impl true
+    def preview(_input, _context) do
+      %{
+        action_id: "provider-action",
+        connection: %{id: "provider-connection"},
+        input_fields: ["provider-field"],
+        note: "safe provider detail"
+      }
+    end
+  end
+
   setup do
     spec =
       RuntimeFixtures.spec(%{
@@ -191,6 +225,64 @@ defmodule Jido.Connect.PreparedActionTest do
     assert prepared.confirmation_required?
   end
 
+  test "provider previews are pure, useful, and sanitized", state do
+    spec =
+      RuntimeFixtures.spec(%{
+        action: %{
+          handler: Handler,
+          preview: Preview,
+          mutation?: true,
+          risk: :write,
+          confirmation: :always
+        }
+      })
+
+    assert {:ok, prepared} = prepare(%{state | spec: spec})
+
+    assert prepared.preview["repository"] == "agentjido/jido_connect"
+    assert prepared.preview["action"] == "demo.repo.show"
+    assert prepared.preview["api_token"] == "[redacted]"
+    assert prepared.preview.action_id == "demo.repo.show"
+    assert prepared.preview.connection.id == "conn_1"
+    refute_received {:handler_called, _repo}
+  end
+
+  test "provider previews cannot replace reserved metadata after JSON storage", state do
+    spec =
+      RuntimeFixtures.spec(%{
+        action: %{
+          handler: Handler,
+          preview: ReservedPreview,
+          mutation?: true,
+          risk: :write,
+          confirmation: :always
+        }
+      })
+
+    assert {:ok, prepared} = prepare(%{state | spec: spec})
+    dump = Connect.PreparedAction.dump(prepared)
+
+    assert prepared.preview.action_id == "demo.repo.show"
+    assert prepared.preview.connection.id == "conn_1"
+    assert prepared.preview.input_fields == ["repo"]
+    assert prepared.preview["note"] == "safe provider detail"
+    refute Map.has_key?(prepared.preview, "action_id")
+    refute Map.has_key?(prepared.preview, "connection")
+    refute Map.has_key?(prepared.preview, "input_fields")
+    assert dump["preview"]["action_id"] == "demo.repo.show"
+    assert dump["preview"]["connection"]["id"] == "conn_1"
+    assert dump["preview"]["input_fields"] == ["repo"]
+  end
+
+  test "prepare rejects invalid provider preview results", state do
+    spec = RuntimeFixtures.spec(%{action: %{preview: InvalidPreview}})
+
+    assert {:error, %Connect.Error.ExecutionError{phase: :preview}} =
+             prepare(%{state | spec: spec})
+
+    refute_received {:handler_called, _repo}
+  end
+
   test "the prepared value does not retain input or credential fields", state do
     secret_lease = %{state.lease | fields: %{access_token: "secret-value"}}
 
@@ -206,6 +298,62 @@ defmodule Jido.Connect.PreparedActionTest do
     refute public =~ "secret-value"
     assert prepared.preview.input_fields == ["repo"]
     assert prepared.preview.connection.id == "conn_1"
+  end
+
+  test "dump and load survive a JSON storage round trip", state do
+    stored_state = %{
+      state
+      | input: %{repo: "private/repository"},
+        lease: %{state.lease | fields: %{access_token: "secret-value"}}
+    }
+
+    assert {:ok, prepared} = prepare(stored_state)
+
+    dump = Connect.PreparedAction.dump(prepared)
+    encoded = Jason.encode!(dump)
+    decoded = Jason.decode!(encoded)
+
+    refute encoded =~ "private/repository"
+    refute encoded =~ "secret-value"
+    assert decoded["version"] == Connect.PreparedAction.format_version()
+
+    assert {:ok, loaded} = Connect.PreparedAction.load(decoded)
+    assert Connect.PreparedAction.dump(loaded) == decoded
+    assert loaded.prepared_at == prepared.prepared_at
+    assert loaded.expires_at == prepared.expires_at
+
+    assert {:ok, %{repo: "private/repository"}} =
+             commit(stored_state, loaded, %{plan_id: loaded.id})
+
+    assert_received {:handler_called, "private/repository"}
+  end
+
+  test "load restores an integration id that is not in the atom table", state do
+    assert {:ok, prepared} = prepare(state)
+    integration_id = "fresh_beam_integration_#{System.unique_integer([:positive])}"
+    dump = prepared |> Connect.PreparedAction.dump() |> Map.put("integration_id", integration_id)
+
+    refute existing_atom?(integration_id)
+    assert {:ok, loaded} = Connect.PreparedAction.load(dump)
+    assert loaded.integration_id == integration_id
+    refute existing_atom?(integration_id)
+  end
+
+  test "load rejects unknown versions and malformed dumps", state do
+    assert {:ok, prepared} = prepare(state)
+    dump = Connect.PreparedAction.dump(prepared)
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :unsupported_prepared_action_version,
+              subject: 2
+            }} = Connect.PreparedAction.load(Map.put(dump, "version", 2))
+
+    assert {:error,
+            %Connect.Error.ValidationError{
+              reason: :invalid_prepared_action_dump,
+              details: %{field: :expires_at}
+            }} = Connect.PreparedAction.load(Map.put(dump, "expires_at", "not-a-date"))
   end
 
   test "commit freezes the execution and idempotency identifiers", state do
@@ -284,5 +432,12 @@ defmodule Jido.Connect.PreparedActionTest do
               reason: :prepared_action_stale,
               details: %{changed: ^field}
             }} = result
+  end
+
+  defp existing_atom?(value) do
+    String.to_existing_atom(value)
+    true
+  rescue
+    ArgumentError -> false
   end
 end

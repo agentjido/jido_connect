@@ -50,6 +50,10 @@ defmodule Jido.Connect.Dsl.Entities.Fields do
       required?: [type: :boolean, default: false],
       default: [type: :any],
       enum: [type: {:list, :any}],
+      minimum: [type: :number],
+      maximum: [type: :number],
+      min_length: [type: :non_neg_integer],
+      max_length: [type: :non_neg_integer],
       example: [type: :any],
       description: [type: :string],
       metadata: [type: :map, default: %{}]

@@ -81,10 +81,60 @@ Jido.Connect.commit(MyConnector, prepared, input,
 )
 ```
 
+Persist a prepared action with its versioned, JSON-safe format. The format does
+not contain the action input or credential fields:
+
+```elixir
+stored =
+  prepared
+  |> Jido.Connect.PreparedAction.dump()
+  |> Jason.encode!()
+
+{:ok, restored} =
+  stored
+  |> Jason.decode!()
+  |> Jido.Connect.PreparedAction.load()
+```
+
+The format version is available from
+`Jido.Connect.PreparedAction.format_version/0`. `load/1` rejects unknown
+versions and invalid fields.
+
 Boolean confirmation is not valid evidence. The host validates its own scoped
 authorization record. Direct mutation calls are a temporary compatibility path
 and emit a warning. Set `config :jido_connect, direct_mutation_mode: :deny` in a
 strict host.
+
+### Replay And Retry Safety
+
+Prepare and commit validate that the approved request did not change. They do
+not provide a durable one-use lock. Core does not store used prepared-action
+IDs, execution IDs, or idempotency keys. If a host calls `commit/4` two times,
+the provider can receive two requests.
+
+Before commit, the host must atomically claim `prepared.id` in durable storage.
+Only the worker that gets the claim can call the provider. Keep the claim when
+the worker loses a response after it sent a mutation. A later worker must not
+repeat that mutation unless the provider supports idempotent replay.
+
+An `idempotency_key` is a bound runtime value. It does not stop duplicate calls
+in core. Commit makes it available to the handler as
+`context.execution.idempotency_key`. Set `provider_idempotency?: true` on an
+action only when its handler sends that key to an API that gives an idempotency
+guarantee.
+
+Provider results use four delivery states:
+
+- `:not_sent`: the request is known not to have left the client.
+- `:rejected`: the provider returned a non-success response.
+- `:response_received`: the client received the provider response.
+- `:sent_outcome_unknown`: the request can have reached the provider, but the
+  client did not receive the result.
+
+Use `Jido.Connect.ProviderResponse.retry_guidance/1` or
+`Jido.Connect.Error.retry_guidance/1`. `:retry_with_idempotency` requires the
+same provider idempotency key. `:do_not_retry` prevents an automatic repeat of
+an uncertain or failed 5xx non-idempotent mutation.
 
 For host UI discovery, use `Jido.Connect.spec/1`, `actions/1`, `triggers/1`,
 `auth_profiles/1`, or the richer `Jido.Connect.Catalog` APIs. `Catalog.discover/1`
@@ -181,14 +231,25 @@ Jido.Connect.Catalog.to_map(descriptor)
 #=>   provider: %{id: :github, name: "GitHub", ...},
 #=>   input: [%{name: :repo, type: :string, required?: true}, ...],
 #=>   output: [%{name: :issue, type: :map, required?: true}],
+#=>   input_json_schema: %{"type" => "object", "additionalProperties" => false, ...},
+#=>   output_json_schema: %{"type" => "object", "additionalProperties" => false, ...},
+#=>   schema_digest: "...",
+#=>   strict?: true,
 #=>   auth: [%{id: :user, kind: :oauth2, ...}],
 #=>   scopes: ["repo"],
 #=>   policies: [%{id: :issue_write, decision: :allow_if, ...}],
 #=>   risk: :write,
 #=>   confirmation: :required_for_ai,
+#=>   provider_idempotency?: false,
 #=>   source: :curated
 #=> }
 ```
+
+Catalog descriptors contain JSON-safe object schemas for action input/output
+or trigger config/signal data. The object schemas reject unknown properties.
+Field `minimum`, `maximum`, `min_length`, and `max_length` rules are in these
+schemas. `schema_digest` is a stable SHA-256 digest of the canonical schema pair
+and lets a client detect a contract change.
 
 Only action tools are executable through `call_tool/4`. Trigger tools are
 discoverable and describable, but return a structured validation error if a

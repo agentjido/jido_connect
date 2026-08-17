@@ -3,13 +3,13 @@ defmodule Jido.Connect.Jira.Handlers.Actions.TransitionIssue do
 
   alias Jido.Connect.Jira.Client
 
-  def run(input, %{credentials: credentials}) do
+  def run(input, runtime) do
     opts = build_transition_opts(input)
+    client = Client.resolve(runtime)
 
-    with {:ok, client} <- fetch_client(credentials),
-         token <- Client.credential_token(credentials),
+    with {:ok, request} <- Client.request_context(runtime),
          {:ok, result} <-
-           client.transition_issue(input.issue_key, input.transition_id, token, opts) do
+           client.transition_issue(input.issue_key, input.transition_id, request, opts) do
       {:ok, result}
     end
   end
@@ -20,7 +20,4 @@ defmodule Jido.Connect.Jira.Handlers.Actions.TransitionIssue do
       fields -> [fields: fields]
     end
   end
-
-  defp fetch_client(%{jira_client: client}) when is_atom(client), do: {:ok, client}
-  defp fetch_client(_credentials), do: {:ok, Client}
 end

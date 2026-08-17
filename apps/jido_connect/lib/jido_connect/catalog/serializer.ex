@@ -127,11 +127,18 @@ defmodule Jido.Connect.Catalog.Serializer do
       output: Enum.map(descriptor.output, &field_to_map/1),
       config: Enum.map(descriptor.config, &field_to_map/1),
       signal: Enum.map(descriptor.signal, &field_to_map/1),
+      input_json_schema: json_safe(descriptor.input_json_schema),
+      output_json_schema: json_safe(descriptor.output_json_schema),
+      config_json_schema: json_safe(descriptor.config_json_schema),
+      signal_json_schema: json_safe(descriptor.signal_json_schema),
+      schema_digest: descriptor.schema_digest,
+      strict?: descriptor.strict?,
       auth: Enum.map(descriptor.auth, &auth_profile_to_map/1),
       policies: Enum.map(descriptor.policies, &policy_to_map/1),
       scopes: descriptor.scopes,
       risk: descriptor.risk,
       confirmation: descriptor.confirmation,
+      provider_idempotency?: descriptor.provider_idempotency?,
       source: descriptor.source,
       metadata: json_safe(descriptor.metadata)
     }

@@ -6,7 +6,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.ListFieldSchemasTest do
   describe "run/2" do
     test "lists field schemas using mock client" do
       input = %{}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, result} = ListFieldSchemas.run(input, runtime)
       assert length(result.fields) == 3
@@ -16,7 +16,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.ListFieldSchemasTest do
 
     test "passes expand option" do
       input = %{expand: "schema"}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, result} = ListFieldSchemas.run(input, runtime)
       assert result.fields != []

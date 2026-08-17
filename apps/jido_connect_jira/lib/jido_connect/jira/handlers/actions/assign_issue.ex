@@ -4,11 +4,12 @@ defmodule Jido.Connect.Jira.Handlers.Actions.AssignIssue do
   alias Jido.Connect.Error
   alias Jido.Connect.Jira.Client
 
-  def run(input, %{credentials: credentials}) do
+  def run(input, runtime) do
+    client = Client.resolve(runtime)
+
     with {:ok, account_id} <- validate_account_id(Map.get(input, :account_id)),
-         {:ok, client} <- fetch_client(credentials),
-         token <- Client.credential_token(credentials),
-         {:ok, result} <- client.assign_issue(input.issue_key, account_id, token) do
+         {:ok, request} <- Client.request_context(runtime),
+         {:ok, result} <- client.assign_issue(input.issue_key, account_id, request) do
       {:ok, result}
     end
   end
@@ -25,7 +26,4 @@ defmodule Jido.Connect.Jira.Handlers.Actions.AssignIssue do
        subject: :account_id
      )}
   end
-
-  defp fetch_client(%{jira_client: client}) when is_atom(client), do: {:ok, client}
-  defp fetch_client(_credentials), do: {:ok, Client}
 end

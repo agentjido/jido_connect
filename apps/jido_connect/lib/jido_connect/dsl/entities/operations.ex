@@ -57,6 +57,7 @@ defmodule Jido.Connect.Dsl.Entities.Operations do
       schema: [
         risk: [type: :atom, required: true],
         mutation?: [type: :boolean],
+        provider_idempotency?: [type: :boolean, default: false],
         confirmation: [type: :atom]
       ]
     }
@@ -86,9 +87,11 @@ defmodule Jido.Connect.Dsl.Entities.Operations do
       input_schema: [type: :atom],
       output_schema: [type: :atom],
       mutation?: [type: :boolean, default: false],
+      provider_idempotency?: [type: :boolean, default: false],
       risk: [type: :atom, default: :read],
       confirmation: [type: :atom, default: :none],
       handler: [type: :module, required: true],
+      preview: [type: :module],
       metadata: [type: :map, default: %{}]
     ]
   end

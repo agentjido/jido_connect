@@ -204,6 +204,7 @@ defmodule Jido.Connect.Jira.Actions.Issues do
       label("Add comment")
       description("Add a comment to a Jira issue.")
       handler(Jido.Connect.Jira.Handlers.Actions.AddComment)
+      preview(Jido.Connect.Jira.Previews.AddComment)
       effect(:external_write, confirmation: :required_for_ai)
 
       access do

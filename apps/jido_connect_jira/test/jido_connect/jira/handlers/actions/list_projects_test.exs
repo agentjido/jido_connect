@@ -6,7 +6,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.ListProjectsTest do
   describe "run/2" do
     test "lists projects using mock client" do
       input = %{start_at: 0, max_results: 50}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, result} = ListProjects.run(input, runtime)
       assert length(result.projects) == 2
@@ -18,7 +18,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.ListProjectsTest do
 
     test "uses default pagination when not specified" do
       input = %{}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, result} = ListProjects.run(input, runtime)
       assert result.start_at == 0

@@ -2,30 +2,34 @@ defmodule Jido.Connect.Jira.Client.Transport do
   @moduledoc "Jira Atlassian Cloud REST transport boundary."
 
   alias Jido.Connect.{Error, Provider.Transport}
+  alias Jido.Connect.Jira.Client.Request
 
-  @doc "Builds a Jira Cloud API bearer request."
-  @spec request(String.t(), keyword()) :: Req.Request.t()
-  def request(access_token, opts \\ []) when is_binary(access_token) and is_list(opts) do
-    Transport.bearer_request(
-      Keyword.get(opts, :base_url, base_url()),
-      access_token,
-      headers: [
-        {"accept", "application/json"}
-      ],
+  @doc "Builds a Basic-auth or OAuth Bearer request for one Jira connection."
+  @spec request(Request.t(), keyword()) :: Req.Request.t()
+  def request(%Request{} = request, opts \\ []) when is_list(opts) do
+    common_opts = [
+      headers: [{"accept", "application/json"}],
       req_options:
         Application.get_env(:jido_connect_jira, :jira_req_options, [])
         |> Keyword.merge(Keyword.get(opts, :req_options, []))
-    )
-  end
+    ]
 
-  @doc "Returns the configured Jira Cloud API base URL."
-  @spec base_url() :: String.t()
-  def base_url do
-    Application.get_env(
-      :jido_connect_jira,
-      :jira_api_base_url,
-      "https://your-domain.atlassian.net"
-    )
+    case request.auth_profile do
+      :api_token ->
+        Transport.basic_request(
+          request.endpoint,
+          Request.credential(request, :email),
+          Request.credential(request, :api_token),
+          common_opts
+        )
+
+      :oauth2_user ->
+        Transport.bearer_request(
+          request.endpoint,
+          Request.credential(request, :access_token),
+          common_opts
+        )
+    end
   end
 
   @doc "Normalizes a Jira provider error response."
@@ -41,6 +45,7 @@ defmodule Jido.Connect.Jira.Client.Transport do
        provider: :jira,
        reason: Keyword.get(opts, :reason, :http_error),
        status: status,
+       delivery: :rejected,
        details: %{message: jira_error_message(body), body: body}
      )}
   end
@@ -57,22 +62,21 @@ defmodule Jido.Connect.Jira.Client.Transport do
      Error.provider(message,
        provider: :jira,
        reason: :invalid_response,
+       delivery: :response_received,
        details: %{body: body}
      )}
   end
 
   defp jira_error_message(%{"messages" => messages}) when is_list(messages) do
-    messages
-    |> Enum.map_join("; ", fn
-      msg when is_binary(msg) -> msg
-      %{"message" => m} -> m
+    Enum.map_join(messages, "; ", fn
+      message when is_binary(message) -> message
+      %{"message" => message} -> message
       other -> inspect(other)
     end)
   end
 
-  defp jira_error_message(%{"errorMessages" => messages}) when is_list(messages) do
-    Enum.join(messages, "; ")
-  end
+  defp jira_error_message(%{"errorMessages" => messages}) when is_list(messages),
+    do: Enum.join(messages, "; ")
 
   defp jira_error_message(%{"message" => message}) when is_binary(message), do: message
   defp jira_error_message(_body), do: "Jira API request failed"

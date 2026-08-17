@@ -124,3 +124,27 @@ Persona selection stays outside Jido Connect. A host resolves the persona to an
 exact connection and passes a stable `binding_ref` during both prepare and
 commit. Jido Connect hashes that binding with the action, input, connection,
 and public lease identity. Commit fails when the binding or other state changes.
+
+## Prepared-Action Storage And Execution Claims
+
+Store approved snapshots with `Jido.Connect.PreparedAction.dump/1` and restore
+them with `load/1`. The versioned map is JSON-safe and secret-free. Keep the
+original action input and encrypted credentials in separate host-owned stores.
+
+A prepared action is not a one-use token. The core runtime is storage-free, so
+it cannot know that a different process already committed the same snapshot.
+The host must use a unique prepared-action ID to make one atomic execution
+claim before it calls `commit/4`. A common state flow is `approved` to
+`executing` to `succeeded` or `failed`. Only one process can change `approved`
+to `executing`.
+
+Do not clear an execution claim only because a worker timed out. The request can
+have changed provider data before the worker lost the response. Store the
+normalized delivery state and retry guidance with the claim. For
+`:sent_outcome_unknown`, retry a mutation only when its action declares provider
+idempotency and the handler sends the same provider idempotency key.
+
+The `execution_id` and `idempotency_key` values are snapshot bindings and audit
+data. Jido Connect compares them at commit and passes them to the handler. It
+does not deduplicate them. The host owns uniqueness, claim recovery, retry
+limits, and audit history.

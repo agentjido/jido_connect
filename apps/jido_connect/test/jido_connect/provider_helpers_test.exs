@@ -35,6 +35,13 @@ defmodule Jido.Connect.ProviderHelpersTest do
   test "HTTP helpers normalize provider response failures" do
     assert %Req.Request{} = Http.bearer_request("https://provider.test", "token")
 
+    basic_request =
+      Http.basic_request("https://provider.test", "user@example.com", "api-token")
+
+    assert basic_request.headers["authorization"] == [
+             "Basic " <> Base.encode64("user@example.com:api-token")
+           ]
+
     assert Http.url_with_query("/v1/resources?fixed=yes", item: "one", item: "two") ==
              "/v1/resources?fixed=yes&item=one&item=two"
 
@@ -65,7 +72,28 @@ defmodule Jido.Connect.ProviderHelpersTest do
       )
 
     assert response.retry_after == 30
+    assert response.delivery == :rejected
     assert ProviderResponse.retryable?(response)
+    assert ProviderResponse.retry_guidance(response) == :safe_to_retry
+
+    non_idempotent_write_5xx =
+      ProviderResponse.from_result!(:demo, {:ok, %{status: 503, body: %{}}},
+        action_risk: :write,
+        mutation?: true
+      )
+
+    refute ProviderResponse.retryable?(non_idempotent_write_5xx)
+    assert ProviderResponse.retry_guidance(non_idempotent_write_5xx) == :do_not_retry
+
+    idempotent_write_5xx =
+      ProviderResponse.from_result!(:demo, {:ok, %{status: 503, body: %{}}},
+        action_risk: :write,
+        mutation?: true,
+        provider_idempotency?: true
+      )
+
+    assert ProviderResponse.retryable?(idempotent_write_5xx)
+    assert ProviderResponse.retry_guidance(idempotent_write_5xx) == :retry_with_idempotency
 
     assert ProviderResponse.to_public_map(response).body_summary == %{
              "type" => "map",
@@ -74,6 +102,55 @@ defmodule Jido.Connect.ProviderHelpersTest do
            }
 
     refute inspect(response) =~ "secret"
+
+    uncertain_write =
+      ProviderResponse.from_result!(:demo, {:error, :timeout},
+        action_risk: :external_write,
+        mutation?: true
+      )
+
+    assert uncertain_write.delivery == :sent_outcome_unknown
+    refute ProviderResponse.retryable?(uncertain_write)
+    assert ProviderResponse.retry_guidance(uncertain_write) == :do_not_retry
+
+    idempotent_write =
+      ProviderResponse.from_result!(:demo, {:error, :timeout},
+        action_risk: :write,
+        mutation?: true,
+        provider_idempotency?: true
+      )
+
+    assert ProviderResponse.retryable?(idempotent_write)
+    assert ProviderResponse.retry_guidance(idempotent_write) == :retry_with_idempotency
+
+    transport_timeout = %Req.TransportError{reason: :timeout}
+    retryable_read = ProviderResponse.from_result!(:demo, {:error, transport_timeout})
+
+    assert retryable_read.reason == :timeout
+    assert ProviderResponse.retryable?(retryable_read)
+    assert ProviderResponse.retry_guidance(retryable_read) == :safe_to_retry
+
+    idempotent_transport_write =
+      ProviderResponse.from_result!(:demo, {:error, transport_timeout},
+        action_risk: :write,
+        mutation?: true,
+        provider_idempotency?: true
+      )
+
+    assert idempotent_transport_write.reason == :timeout
+    assert ProviderResponse.retryable?(idempotent_transport_write)
+
+    assert ProviderResponse.retry_guidance(idempotent_transport_write) ==
+             :retry_with_idempotency
+
+    not_sent =
+      ProviderResponse.from_result!(:demo, {:error, :econnrefused},
+        action_risk: :write,
+        mutation?: true
+      )
+
+    assert not_sent.delivery == :not_sent
+    assert ProviderResponse.retryable?(not_sent)
   end
 
   test "webhook helpers verify HMACs and decode JSON" do

@@ -6,7 +6,7 @@ defmodule Jido.Connect.Jira.Handlers.Actions.GetProjectTest do
   describe "run/2" do
     test "fetches a project by key using mock client" do
       input = %{project_key: "PROJ"}
-      runtime = %{credentials: %{jira_client: Jido.Connect.Jira.MockClient, api_key: "token"}}
+      runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, project} = GetProject.run(input, runtime)
       assert project.key == "PROJ"

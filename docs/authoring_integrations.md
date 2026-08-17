@@ -134,6 +134,73 @@ with the canonical form in the same operation. The DSL enforces resource, verb,
 and data classification on every action and trigger so catalog search, policy
 callbacks, audit trails, and host UIs have stable metadata across providers.
 
+## Safe Write Previews And Idempotency
+
+A write action can declare a provider preview module:
+
+```elixir
+defmodule MyProvider.Previews.CreateIssue do
+  @behaviour Jido.Connect.ActionPreview
+
+  @impl true
+  def preview(input, _public_context) do
+    %{
+      repository: input.repo,
+      title: input.title,
+      body_bytes: byte_size(input.body || "")
+    }
+  end
+end
+
+actions do
+  action :create_issue do
+    id "provider.issue.create"
+    resource :issue
+    verb :create
+    data_classification :workspace_content
+    handler MyProvider.Handlers.CreateIssue
+    preview MyProvider.Previews.CreateIssue
+    effect :external_write, confirmation: :required_for_ai
+
+    input do
+      field :repo, :string, required?: true, min_length: 1, max_length: 200
+      field :title, :string, required?: true, min_length: 1, max_length: 256
+      field :body, :string, max_length: 65_536
+    end
+  end
+end
+```
+
+The preview callback gets parsed input and public action/connection metadata.
+It does not get credentials or a credential lease. It must be pure and must not
+call the provider. Core sanitizes its result before it stores the preview. Core
+also owns the `action_id`, `connection`, and `input_fields` preview keys and
+ignores provider values for these reserved keys.
+
+Use `minimum` and `maximum` for number fields. Use `min_length` and `max_length`
+for string fields. These rules apply at runtime and appear in strict catalog
+JSON schemas.
+
+Action handlers can return normalized provider maps or structs. Before output
+validation, the runtime keeps only the top-level fields in the action `output`
+declaration. Hosts receive only the declared strict output contract.
+
+Declare provider idempotency only when the provider gives this guarantee and
+the handler sends the runtime key:
+
+```elixir
+effect :external_write,
+  confirmation: :required_for_ai,
+  provider_idempotency?: true
+
+idempotency_key = get_in(context, [:execution, :idempotency_key])
+```
+
+An action declaration alone does not send a header and does not deduplicate a
+request. The handler must use the same key for every allowed retry. Provider
+clients must also preserve the delivery state in normalized errors so hosts can
+separate a request that was not sent from an uncertain write.
+
 ## Splitting Large Providers
 
 Large connectors should split declarations by resource using Spark fragments.

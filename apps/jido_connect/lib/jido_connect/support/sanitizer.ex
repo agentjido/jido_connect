@@ -10,6 +10,7 @@ defmodule Jido.Connect.Sanitizer do
   @sensitive_keys MapSet.new([
                     :access_token,
                     :api_key,
+                    :api_token,
                     :authorization,
                     :bot_token,
                     :client_secret,
@@ -32,6 +33,7 @@ defmodule Jido.Connect.Sanitizer do
                     :x_slack_signature,
                     "access_token",
                     "api_key",
+                    "api_token",
                     "authorization",
                     "bot_token",
                     "client_secret",

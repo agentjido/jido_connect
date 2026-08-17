@@ -5,12 +5,12 @@ defmodule Jido.Connect.Jira.Handlers.Actions.UpdateIssue do
 
   @updatable_fields [:summary, :description, :priority, :labels, :assignee_account_id]
 
-  def run(input, %{credentials: credentials}) do
+  def run(input, runtime) do
     attrs = build_update_fields(input)
+    client = Client.resolve(runtime)
 
-    with {:ok, client} <- fetch_client(credentials),
-         token <- Client.credential_token(credentials),
-         {:ok, result} <- client.update_issue(input.issue_key, attrs, token) do
+    with {:ok, request} <- Client.request_context(runtime),
+         {:ok, result} <- client.update_issue(input.issue_key, attrs, request) do
       {:ok, result}
     end
   end
@@ -42,7 +42,4 @@ defmodule Jido.Connect.Jira.Handlers.Actions.UpdateIssue do
       ]
     }
   end
-
-  defp fetch_client(%{jira_client: client}) when is_atom(client), do: {:ok, client}
-  defp fetch_client(_credentials), do: {:ok, Client}
 end

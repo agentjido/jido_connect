@@ -10,6 +10,7 @@ defmodule Jido.Connect.Runtime do
     Error,
     ExecutionAuthorization,
     ExecutionSnapshot,
+    Field,
     PreparedAction,
     Spec,
     Telemetry,
@@ -57,9 +58,10 @@ defmodule Jido.Connect.Runtime do
              action: action,
              context: context,
              credential_lease: lease,
-             credentials: lease.fields
+             credentials: lease.fields,
+             provider_client: get_option(opts, :provider_client)
            }),
-         {:ok, parsed_output} <- parse_schema(action.output_schema, output, :output) do
+         {:ok, parsed_output} <- parse_output_schema(action, output) do
       {:ok, parsed_output}
     end
   end
@@ -70,7 +72,8 @@ defmodule Jido.Connect.Runtime do
          {:ok, context} <- fetch_context(opts),
          {:ok, lease} <- fetch_credential_lease(opts),
          :ok <- Authorization.authorize(action, parsed_input, context, lease, auth_opts(opts)),
-         {:ok, ttl_ms} <- prepare_ttl_ms(opts) do
+         {:ok, ttl_ms} <- prepare_ttl_ms(opts),
+         {:ok, preview} <- ExecutionSnapshot.preview(action, parsed_input, context.connection) do
       now = get_option(opts, :now) || DateTime.utc_now()
       expires_at = earliest_expiry(DateTime.add(now, ttl_ms, :millisecond), lease.expires_at)
       connection = context.connection
@@ -78,7 +81,7 @@ defmodule Jido.Connect.Runtime do
       {:ok,
        %PreparedAction{
          id: prepared_id(),
-         integration_id: integration.id,
+         integration_id: to_string(integration.id),
          action_id: action.id,
          connection_id: connection.id,
          input_hash: ExecutionSnapshot.hash(parsed_input),
@@ -89,7 +92,7 @@ defmodule Jido.Connect.Runtime do
          risk: action.risk,
          confirmation: action.confirmation,
          confirmation_required?: ExecutionAuthorization.confirmation_required?(action, context),
-         preview: ExecutionSnapshot.preview(action, parsed_input, connection),
+         preview: preview,
          execution_id: get_option(opts, :execution_id),
          idempotency_key: get_option(opts, :idempotency_key),
          prepared_at: now,
@@ -123,13 +126,14 @@ defmodule Jido.Connect.Runtime do
              context: context,
              credential_lease: lease,
              credentials: lease.fields,
+             provider_client: get_option(opts, :provider_client),
              execution: %{
                id: prepared.execution_id,
                prepared_action_id: prepared.id,
                idempotency_key: prepared.idempotency_key
              }
            }),
-         {:ok, parsed_output} <- parse_schema(action.output_schema, output, :output) do
+         {:ok, parsed_output} <- parse_output_schema(action, output) do
       {:ok, parsed_output}
     end
   end
@@ -200,7 +204,7 @@ defmodule Jido.Connect.Runtime do
              phase: :handler,
              details: %{operation_id: action.id}
            ) do
-      normalize_handler_result(result, :handler, action.id)
+      normalize_handler_result(result, :handler, action)
     end
   end
 
@@ -216,6 +220,14 @@ defmodule Jido.Connect.Runtime do
 
   defp normalize_handler_result({:ok, value}, _phase, _operation_id), do: {:ok, value}
 
+  defp normalize_handler_result(
+         {:error, %Error.ProviderError{} = error},
+         _phase,
+         %ActionSpec{} = action
+       ) do
+    {:error, Error.with_action_context(error, action)}
+  end
+
   defp normalize_handler_result({:error, %_module{} = error}, phase, operation_id) do
     if Error.error?(error) do
       {:error, error}
@@ -229,7 +241,7 @@ defmodule Jido.Connect.Runtime do
      Error.execution("Provider handler failed",
        phase: phase,
        details: %{
-         operation_id: operation_id,
+         operation_id: operation_id(operation_id),
          error: Jido.Connect.Sanitizer.sanitize(reason, :transport)
        }
      )}
@@ -240,11 +252,14 @@ defmodule Jido.Connect.Runtime do
      Error.execution("Provider handler returned an invalid result",
        phase: phase,
        details: %{
-         operation_id: operation_id,
+         operation_id: operation_id(operation_id),
          returned: Jido.Connect.Sanitizer.sanitize(result, :transport)
        }
      )}
   end
+
+  defp operation_id(%ActionSpec{id: id}), do: id
+  defp operation_id(operation_id), do: operation_id
 
   defp validate_signals(%TriggerSpec{} = trigger, signals) when is_list(signals) do
     Enum.reduce_while(signals, {:ok, []}, fn signal, {:ok, acc} ->
@@ -271,6 +286,30 @@ defmodule Jido.Connect.Runtime do
     case Zoi.parse(schema, value) do
       {:ok, parsed} -> {:ok, parsed}
       {:error, errors} -> {:error, Error.zoi(reason, errors)}
+    end
+  end
+
+  defp parse_output_schema(%ActionSpec{} = action, output) do
+    action.output_schema
+    |> parse_schema(project_declared_output(output, action.output), :output)
+  end
+
+  defp project_declared_output(output, fields) when is_map(output) and is_list(fields) do
+    Enum.reduce(fields, %{}, fn %Field{} = field, projected ->
+      case fetch_output_field(output, field.name) do
+        {:ok, nil} when not field.required? -> projected
+        {:ok, value} -> Map.put(projected, field.name, value)
+        :error -> projected
+      end
+    end)
+  end
+
+  defp project_declared_output(output, _fields), do: output
+
+  defp fetch_output_field(output, name) do
+    case Map.fetch(output, name) do
+      {:ok, value} -> {:ok, value}
+      :error -> Map.fetch(output, Atom.to_string(name))
     end
   end
 
@@ -320,7 +359,7 @@ defmodule Jido.Connect.Runtime do
 
   defp require_matching_snapshot(integration, action, input, context, lease, prepared, opts) do
     current = %{
-      integration_id: integration.id,
+      integration_id: to_string(integration.id),
       action_id: action.id,
       connection_id: context.connection.id,
       input_hash: ExecutionSnapshot.hash(input),

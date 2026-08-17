@@ -107,6 +107,7 @@ Hosts own persistence and policy:
 - encrypted credential storage
 - OAuth state and callback sessions
 - webhook delivery dedupe
+- prepared-action approval storage and atomic execution claims
 - actor authorization for shared user, tenant, installation, or system grants
 - audit storage
 

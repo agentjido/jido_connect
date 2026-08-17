@@ -70,6 +70,8 @@ defmodule Jido.Connect.JiraTest do
              spec.auth_profiles
 
     assert api_token_profile.default? == true
+    assert api_token_profile.credential_fields == [:email, :api_token]
+    assert api_token_profile.lease_fields == [:email, :api_token]
     assert "read:jira-work" in api_token_profile.default_scopes
     assert "write:jira-work" in api_token_profile.scopes
 
@@ -83,6 +85,72 @@ defmodule Jido.Connect.JiraTest do
   test "declares project_access policy" do
     spec = Jira.integration()
     assert [%{id: :project_access, decision: :allow_operation}] = spec.policies
+  end
+
+  test "passes injected clients as runtime infrastructure" do
+    runtime = Jido.Connect.Jira.TestRuntime.build()
+
+    lease =
+      Connect.CredentialLease.from_connection!(
+        runtime.context.connection,
+        runtime.credentials,
+        expires_at: DateTime.add(DateTime.utc_now(), 60, :second)
+      )
+
+    assert {:ok, %{projects: [%{key: "PROJ"}, %{key: "TEAM"}]}} =
+             Connect.invoke(Jira, "jira.project.list", %{},
+               context: runtime.context,
+               credential_lease: lease,
+               provider_client: Jido.Connect.Jira.MockClient
+             )
+  end
+
+  test "validates normalized issue results against the strict declared output" do
+    runtime = Jido.Connect.Jira.TestRuntime.build()
+
+    lease =
+      Connect.CredentialLease.from_connection!(
+        runtime.context.connection,
+        runtime.credentials,
+        expires_at: DateTime.add(DateTime.utc_now(), 60, :second)
+      )
+
+    assert {:ok, issue} =
+             Connect.invoke(Jira, "jira.issue.get", %{issue_key: "PROJ-123"},
+               context: runtime.context,
+               credential_lease: lease,
+               provider_client: Jido.Connect.Jira.MockClient
+             )
+
+    assert issue.key == "PROJ-123"
+    assert issue.summary == "Test issue"
+    refute Map.has_key?(issue, :id)
+    refute Map.has_key?(issue, :url)
+    refute Map.has_key?(issue, :issue_type)
+  end
+
+  test "prepares a safe Jira comment preview without calling the provider" do
+    runtime = Jido.Connect.Jira.TestRuntime.build()
+
+    lease =
+      Connect.CredentialLease.from_connection!(
+        runtime.context.connection,
+        runtime.credentials,
+        expires_at: DateTime.add(DateTime.utc_now(), 60, :second)
+      )
+
+    assert {:ok, prepared} =
+             Connect.prepare(
+               Jira,
+               "jira.issue.comment.create",
+               %{issue_key: "PROJ-123", body: "Ready for review"},
+               context: runtime.context,
+               credential_lease: lease
+             )
+
+    assert prepared.preview["issue_key"] == "PROJ-123"
+    assert prepared.preview["comment_bytes"] == 16
+    assert prepared.preview.action_id == "jira.issue.comment.create"
   end
 
   test "catalog entry exposes auth and runtime capabilities" do

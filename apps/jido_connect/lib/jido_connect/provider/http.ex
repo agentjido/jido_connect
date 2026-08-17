@@ -26,6 +26,22 @@ defmodule Jido.Connect.Http do
     |> maybe_merge_req_options(Keyword.get(opts, :req_options, []))
   end
 
+  @spec basic_request(String.t(), String.t(), String.t(), keyword()) :: Req.Request.t()
+  def basic_request(base_url, username, password, opts \\ [])
+      when is_binary(base_url) and is_binary(username) and is_binary(password) do
+    encoded_credentials = Base.encode64("#{username}:#{password}")
+
+    Req.new(
+      base_url: base_url,
+      headers:
+        [
+          {"authorization", "Basic #{encoded_credentials}"},
+          {"user-agent", @user_agent}
+        ] ++ Keyword.get(opts, :headers, [])
+    )
+    |> maybe_merge_req_options(Keyword.get(opts, :req_options, []))
+  end
+
   @spec maybe_merge_req_options(Req.Request.t(), keyword()) :: Req.Request.t()
   def maybe_merge_req_options(request, []), do: request
   def maybe_merge_req_options(request, req_options), do: Req.merge(request, req_options)
@@ -69,6 +85,10 @@ defmodule Jido.Connect.Http do
        provider: provider,
        reason: Keyword.get(opts, :reason, :http_error),
        status: status,
+       delivery: response.delivery,
+       action_risk: response.action_risk,
+       mutation?: response.mutation?,
+       provider_idempotency?: response.provider_idempotency?,
        details: %{
          message: error_message(body),
          body: body,
@@ -87,6 +107,10 @@ defmodule Jido.Connect.Http do
      Error.provider(message,
        provider: provider,
        reason: :request_error,
+       delivery: response.delivery,
+       action_risk: response.action_risk,
+       mutation?: response.mutation?,
+       provider_idempotency?: response.provider_idempotency?,
        details: %{reason: reason, response: ProviderResponse.to_public_map(response)}
      )}
   end
@@ -100,6 +124,10 @@ defmodule Jido.Connect.Http do
      Error.provider(message,
        provider: provider,
        reason: :unexpected_response,
+       delivery: response.delivery,
+       action_risk: response.action_risk,
+       mutation?: response.mutation?,
+       provider_idempotency?: response.provider_idempotency?,
        details: %{response: ProviderResponse.to_public_map(response)}
      )}
   end

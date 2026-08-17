@@ -18,6 +18,7 @@ defmodule Jido.Connect.ActionSpec do
               auth_profiles: Zoi.list(Zoi.atom()) |> Zoi.default([]),
               policies: Zoi.list(Zoi.atom()) |> Zoi.default([]),
               handler: Zoi.module(),
+              preview: Zoi.module() |> Zoi.nullish() |> Zoi.optional(),
               input: Zoi.list(Field.schema()) |> Zoi.default([]),
               output: Zoi.list(Field.schema()) |> Zoi.default([]),
               input_schema: Zoi.any(),
@@ -25,6 +26,7 @@ defmodule Jido.Connect.ActionSpec do
               scopes: Zoi.list(Zoi.string()) |> Zoi.default([]),
               scope_resolver: Zoi.module() |> Zoi.nullish() |> Zoi.optional(),
               mutation?: Zoi.boolean() |> Zoi.default(false),
+              provider_idempotency?: Zoi.boolean() |> Zoi.default(false),
               risk: Zoi.atom() |> Zoi.default(:read),
               confirmation: Zoi.atom() |> Zoi.default(:none),
               metadata: Zoi.map() |> Zoi.default(%{})

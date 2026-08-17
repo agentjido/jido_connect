@@ -3,15 +3,13 @@ defmodule Jido.Connect.Jira.Handlers.Actions.GetIssue do
 
   alias Jido.Connect.Jira.Client
 
-  def run(input, %{credentials: credentials}) do
-    with {:ok, client} <- fetch_client(credentials),
-         token <- Client.credential_token(credentials),
+  def run(input, runtime) do
+    client = Client.resolve(runtime)
+
+    with {:ok, request} <- Client.request_context(runtime),
          {:ok, issue} <-
-           client.get_issue(input.issue_key, token, fields: Map.get(input, :fields)) do
+           client.get_issue(input.issue_key, request, fields: Map.get(input, :fields)) do
       {:ok, issue}
     end
   end
-
-  defp fetch_client(%{jira_client: client}) when is_atom(client), do: {:ok, client}
-  defp fetch_client(_credentials), do: {:ok, Client}
 end
