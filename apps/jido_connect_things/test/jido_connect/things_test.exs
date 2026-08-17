@@ -5,9 +5,19 @@ defmodule Jido.Connect.ThingsTest do
   alias Jido.Connect.Things
   alias Jido.Connect.Things.Input
 
-  @action_ids ["things.todo.list", "things.todo.create", "things.todo.update"]
+  @action_ids [
+    "things.todo.list",
+    "things.todo.get",
+    "things.todo.search",
+    "things.todo.create",
+    "things.todo.update",
+    "things.project.list",
+    "things.heading.list",
+    "things.area.list",
+    "things.tag.list"
+  ]
 
-  test "registers the experimental provider and three generated actions" do
+  test "registers the experimental provider and nine generated actions" do
     spec = Things.integration()
 
     assert spec.id == :things
@@ -22,8 +32,14 @@ defmodule Jido.Connect.ThingsTest do
 
     assert Code.ensure_loaded?(Jido.Connect.Things.Plugin)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListInboxTodos)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.GetTodo)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.SearchTodos)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.CreateInboxTodo)
     assert Code.ensure_loaded?(Jido.Connect.Things.Actions.UpdateInboxTodo)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListProjects)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListHeadings)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListAreas)
+    assert Code.ensure_loaded?(Jido.Connect.Things.Actions.ListTags)
   end
 
   test "declares host-owned credential lease fields and guarded write metadata" do
@@ -51,7 +67,7 @@ defmodule Jido.Connect.ThingsTest do
   test "uses strict input schemas with length and range contracts" do
     actions = Map.new(Things.integration().actions, &{&1.id, &1})
 
-    assert {:ok, %{view: "inbox", limit: 25}} =
+    assert {:ok, %{view: "inbox", status: "all", tag_ids: [], limit: 25}} =
              Zoi.parse(actions["things.todo.list"].input_schema, %{})
 
     assert {:error, _errors} =
@@ -88,12 +104,27 @@ defmodule Jido.Connect.ThingsTest do
     assert [reader, editor] = Things.catalog_packs()
 
     assert reader.id == :things_inbox_reader
-    assert reader.allowed_tools == ["things.todo.list"]
+
+    assert reader.allowed_tools == [
+             "things.todo.list",
+             "things.todo.get",
+             "things.todo.search",
+             "things.project.list",
+             "things.heading.list",
+             "things.area.list",
+             "things.tag.list"
+           ]
 
     assert editor.id == :things_inbox_editor
 
     assert editor.allowed_tools == [
              "things.todo.list",
+             "things.todo.get",
+             "things.todo.search",
+             "things.project.list",
+             "things.heading.list",
+             "things.area.list",
+             "things.tag.list",
              "things.todo.create",
              "things.todo.update"
            ]

@@ -11,7 +11,11 @@ defmodule Jido.Connect.Things do
   and update actions.
   """
 
-  use Jido.Connect, fragments: [Jido.Connect.Things.Actions.Todos]
+  use Jido.Connect,
+    fragments: [
+      Jido.Connect.Things.Actions.Todos,
+      Jido.Connect.Things.Actions.References
+    ]
 
   integration do
     id :things
