@@ -552,6 +552,19 @@ defmodule Jido.Connect.CatalogTest do
               provider: %{id: :catalog, package: :jido_connect_catalog, version: "1.2.3"},
               input: [%{name: :id}],
               output: [%{name: :id}],
+              input_json_schema: %{
+                "type" => "object",
+                "additionalProperties" => false,
+                "properties" => %{
+                  "id" => %{"type" => "string", "minLength" => 2, "maxLength" => 64}
+                }
+              },
+              output_json_schema: %{
+                "type" => "object",
+                "additionalProperties" => false
+              },
+              schema_digest: schema_digest,
+              strict?: true,
               auth: [%{id: :user, kind: :oauth2, credential_fields: [:access_token]}],
               policies: [%{id: :item_access}],
               scopes: ["read"],
@@ -564,6 +577,16 @@ defmodule Jido.Connect.CatalogTest do
              provider: %{id: :catalog, version: "1.2.3"},
              input: [%{name: :id}],
              output: [%{name: :id}],
+             input_json_schema: %{
+               "type" => "object",
+               "additionalProperties" => false
+             },
+             output_json_schema: %{
+               "type" => "object",
+               "additionalProperties" => false
+             },
+             schema_digest: ^schema_digest,
+             strict?: true,
              auth: [
                %{id: :user, credential_fields: [:access_token], lease_fields: [:access_token]}
              ],
@@ -571,11 +594,19 @@ defmodule Jido.Connect.CatalogTest do
              source: :curated
            } = Catalog.to_map(descriptor)
 
+    assert byte_size(schema_digest) == 64
+
+    assert {:ok, %{schema_digest: ^schema_digest}} =
+             Catalog.describe_tool("catalog.item.get", modules: modules)
+
     assert {:ok,
             %Catalog.ToolDescriptor{
               tool: %Catalog.ToolEntry{id: "catalog.item.created"},
               config: [%{name: :id}],
-              signal: [%{name: :id}]
+              signal: [%{name: :id}],
+              config_json_schema: %{"type" => "object", "additionalProperties" => false},
+              signal_json_schema: %{"type" => "object", "additionalProperties" => false},
+              strict?: true
             }} = Catalog.describe_tool("catalog.item.created", modules: modules)
   end
 

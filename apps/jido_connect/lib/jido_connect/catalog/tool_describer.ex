@@ -6,6 +6,7 @@ defmodule Jido.Connect.Catalog.ToolDescriber do
     AuthProfile,
     PolicyRequirement,
     Provider,
+    Schema,
     Spec,
     TriggerSpec
   }
@@ -36,27 +37,44 @@ defmodule Jido.Connect.Catalog.ToolDescriber do
   end
 
   defp descriptor(%Spec{} = spec, %ToolEntry{} = tool, %ActionSpec{} = action) do
+    input_json_schema = Schema.to_json_schema(action.input_schema)
+    output_json_schema = Schema.to_json_schema(action.output_schema)
+
     ToolDescriptor.new!(%{
       tool: tool,
       provider: provider_metadata(spec, tool),
       input: action.input,
       output: action.output,
+      input_json_schema: input_json_schema,
+      output_json_schema: output_json_schema,
+      schema_digest: schema_digest(input_json_schema, output_json_schema),
+      strict?: strict?(input_json_schema, output_json_schema),
       auth: auth_profiles(spec, action),
       policies: policies(spec, action.policies),
       scopes: action.scopes,
       risk: action.risk,
       confirmation: action.confirmation,
+      provider_idempotency?: action.provider_idempotency?,
       source: tool.source,
       metadata: Map.merge(spec.metadata, action.metadata)
     })
   end
 
   defp descriptor(%Spec{} = spec, %ToolEntry{} = tool, %TriggerSpec{} = trigger) do
+    config_json_schema = Schema.to_json_schema(trigger.config_schema)
+    signal_json_schema = Schema.to_json_schema(trigger.signal_schema)
+
     ToolDescriptor.new!(%{
       tool: tool,
       provider: provider_metadata(spec, tool),
       config: trigger.config,
       signal: trigger.signal,
+      input_json_schema: config_json_schema,
+      output_json_schema: signal_json_schema,
+      config_json_schema: config_json_schema,
+      signal_json_schema: signal_json_schema,
+      schema_digest: schema_digest(config_json_schema, signal_json_schema),
+      strict?: strict?(config_json_schema, signal_json_schema),
       auth: auth_profiles(spec, trigger),
       policies: policies(spec, trigger.policies),
       scopes: trigger.scopes,
@@ -65,6 +83,17 @@ defmodule Jido.Connect.Catalog.ToolDescriber do
       source: tool.source,
       metadata: Map.merge(spec.metadata, trigger.metadata)
     })
+  end
+
+  defp schema_digest(input_json_schema, output_json_schema) do
+    Schema.digest(%{
+      "input" => input_json_schema,
+      "output" => output_json_schema
+    })
+  end
+
+  defp strict?(input_json_schema, output_json_schema) do
+    Schema.strict_object?(input_json_schema) and Schema.strict_object?(output_json_schema)
   end
 
   defp provider_metadata(%Spec{} = spec, %ToolEntry{} = tool) do

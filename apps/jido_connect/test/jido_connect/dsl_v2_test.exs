@@ -34,7 +34,7 @@ defmodule Jido.Connect.DslV2Test do
     schemas do
       schema :item do
         label "Item"
-        field :id, :string, required?: true
+        field :id, :string, required?: true, min_length: 2, max_length: 64
         field :name, :string
       end
     end
@@ -233,6 +233,7 @@ defmodule Jido.Connect.DslV2Test do
 
     assert Enum.map(action.input, & &1.name) == [:id, :name]
     assert Enum.map(action.output, & &1.name) == [:id, :name]
+    assert [%{name: :id, min_length: 2, max_length: 64}, %{name: :name}] = action.input
 
     assert {:ok,
             %{

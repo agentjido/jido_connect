@@ -11,6 +11,10 @@ defmodule Jido.Connect.Field do
               example: Zoi.any() |> Zoi.optional(),
               default: Zoi.any() |> Zoi.optional(),
               enum: Zoi.list(Zoi.any()) |> Zoi.nullish() |> Zoi.optional(),
+              minimum: Zoi.number() |> Zoi.nullish() |> Zoi.optional(),
+              maximum: Zoi.number() |> Zoi.nullish() |> Zoi.optional(),
+              min_length: Zoi.integer() |> Zoi.min(0) |> Zoi.nullish() |> Zoi.optional(),
+              max_length: Zoi.integer() |> Zoi.min(0) |> Zoi.nullish() |> Zoi.optional(),
               required?: Zoi.boolean() |> Zoi.default(false),
               metadata: Zoi.map() |> Zoi.default(%{})
             },

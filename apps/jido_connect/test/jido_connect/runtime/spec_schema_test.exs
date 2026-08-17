@@ -72,4 +72,57 @@ defmodule Jido.Connect.Runtime.SpecSchemaTest do
                labels: ["bug"]
              })
   end
+
+  test "field schemas enforce common limits and emit strict JSON Schema" do
+    schema =
+      Connect.zoi_schema_from_fields([
+        Connect.Field.new!(%{
+          name: :title,
+          type: :string,
+          required?: true,
+          min_length: 3,
+          max_length: 20
+        }),
+        Connect.Field.new!(%{
+          name: :count,
+          type: :integer,
+          minimum: 1,
+          maximum: 10
+        }),
+        Connect.Field.new!(%{
+          name: :tags,
+          type: {:array, :string},
+          min_length: 1,
+          max_length: 2
+        })
+      ])
+
+    assert {:ok, %{title: "Valid", count: 5, tags: ["one"]}} =
+             Zoi.parse(schema, %{title: "Valid", count: 5, tags: ["one"]})
+
+    assert {:error, _errors} = Zoi.parse(schema, %{title: "No", count: 11, tags: []})
+
+    json_schema = Connect.Schema.to_json_schema(schema)
+
+    assert %{
+             "type" => "object",
+             "additionalProperties" => false,
+             "properties" => %{
+               "title" => %{"minLength" => 3, "maxLength" => 20},
+               "count" => %{"minimum" => 1, "maximum" => 10},
+               "tags" => %{"minItems" => 1, "maxItems" => 2}
+             }
+           } = json_schema
+
+    assert Connect.Schema.strict_object?(json_schema)
+    assert byte_size(Connect.Schema.digest(json_schema)) == 64
+  end
+
+  test "field constraints reject incompatible types" do
+    assert_raise Connect.Error.ValidationError, ~r/Field constraint/, fn ->
+      Connect.zoi_schema_from_fields([
+        Connect.Field.new!(%{name: :bad, type: :boolean, min_length: 1})
+      ])
+    end
+  end
 end

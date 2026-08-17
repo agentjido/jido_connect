@@ -6,7 +6,14 @@ defmodule Jido.Connect.CatalogFixtures do
     def poll(_config, _context), do: {:ok, %{signals: [], checkpoint: nil}}
 
     def integration do
-      field = Connect.Field.new!(%{name: :id, type: :string, required?: true})
+      field =
+        Connect.Field.new!(%{
+          name: :id,
+          type: :string,
+          required?: true,
+          min_length: 2,
+          max_length: 64
+        })
 
       auth =
         Connect.AuthProfile.new!(%{
@@ -36,8 +43,8 @@ defmodule Jido.Connect.CatalogFixtures do
           handler: __MODULE__,
           input: [field],
           output: [field],
-          input_schema: Zoi.object(%{id: Zoi.string()}),
-          output_schema: Zoi.object(%{id: Zoi.string()}),
+          input_schema: Connect.zoi_schema_from_fields([field]),
+          output_schema: Connect.zoi_schema_from_fields([field]),
           scopes: ["read"]
         })
 
@@ -56,8 +63,8 @@ defmodule Jido.Connect.CatalogFixtures do
           handler: __MODULE__,
           config: [field],
           signal: [field],
-          config_schema: Zoi.object(%{id: Zoi.string()}),
-          signal_schema: Zoi.object(%{id: Zoi.string()}),
+          config_schema: Connect.zoi_schema_from_fields([field]),
+          signal_schema: Connect.zoi_schema_from_fields([field]),
           scopes: ["read"],
           interval_ms: 1_000,
           checkpoint: :updated_at,
