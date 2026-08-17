@@ -13,9 +13,15 @@
   "id": "jido_con-bnm.3",
   "labels": [],
   "parent": "jido_con-bnm",
+  "comments": [
+    {
+      "text": "Implemented the V1 Task6 planner and serializer boundary for create, sparse field updates, schedules, deadlines, tags, atomic relations, lifecycle state, Trash, and restore. Added safe before/after previews, normal/high/destructive risk classes and gates, exact state and destination checks, stable create UUID binding, exact commit reconstruction, and offline rejection tests. Package quality passed with 59 tests and 80.33% coverage. Root quality and demo checks passed.",
+      "timestamp": "2026-08-17T18:48:26Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Extend guarded Task6 planning and wire contracts",
   "type": "task",
-  "updated_at": "2026-08-17T18:35:09Z"
+  "updated_at": "2026-08-17T18:48:26Z"
 }
