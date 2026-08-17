@@ -500,6 +500,47 @@ defmodule Jido.Connect.Things.RuntimeTest do
     refute_received {:request, :post, _url, _opts}
   end
 
+  test "requires destructive authorization before one exact Trash commit" do
+    parent = self()
+    transport = successful_update_transport(parent, @modified_at, @modified_at)
+    {context, lease} = runtime_contract("connection-A", "user@example.com")
+    input = %{id: @id, expected_modified_at: DateTime.to_iso8601(@modified_at)}
+
+    assert {:ok, prepared} =
+             Jido.Connect.Things.prepare("things.todo.trash", input,
+               context: context,
+               credential_lease: lease,
+               transport: transport,
+               now: @now,
+               lock: &direct_lock/2
+             )
+
+    assert prepared.provider_plan.risk == :destructive
+    assert prepared.action.preview.before.in_trash == false
+    assert prepared.action.preview.after.in_trash
+    flush_requests()
+
+    assert {:error, %Error.AuthError{reason: :destructive_confirmation_required}} =
+             Jido.Connect.Things.commit(prepared, input,
+               context: context,
+               credential_lease: lease,
+               transport: transport,
+               commit?: true,
+               now: @now,
+               lock: &direct_lock/2,
+               execution_authorization: %{plan_id: prepared.action.id},
+               authorization_validator: &authorize/4
+             )
+
+    refute_received {:request, :post, _url, _opts}
+
+    assert {:ok, %{receipt: %{action_id: "things.todo.trash", delivery: "confirmed"}}} =
+             commit(prepared, input, context, lease, transport)
+
+    assert_received {:request, :post, _url, _opts}
+    refute_received {:request, :post, _url, _opts}
+  end
+
   test "rejects stale expected_modified_at again immediately before commit" do
     parent = self()
     changed = DateTime.add(@modified_at, 60, :second)

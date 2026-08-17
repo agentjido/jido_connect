@@ -23,7 +23,9 @@ defmodule Jido.Connect.Things.CatalogPacks do
                     "things.todo.move",
                     "things.todo.complete",
                     "things.todo.cancel",
-                    "things.todo.reopen"
+                    "things.todo.reopen",
+                    "things.todo.trash",
+                    "things.todo.restore"
                   ]
 
   def all, do: [reader(), editor()]
