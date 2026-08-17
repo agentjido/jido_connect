@@ -474,6 +474,32 @@ defmodule Jido.Connect.Things.RuntimeTest do
     refute_received {:request, :post, _url, _opts}
   end
 
+  test "prepares and commits an exact lifecycle transition" do
+    parent = self()
+    transport = successful_update_transport(parent, @modified_at, @modified_at)
+    {context, lease} = runtime_contract("connection-A", "user@example.com")
+    input = %{id: @id, expected_modified_at: DateTime.to_iso8601(@modified_at)}
+
+    assert {:ok, prepared} =
+             Jido.Connect.Things.prepare("things.todo.complete", input,
+               context: context,
+               credential_lease: lease,
+               transport: transport,
+               now: @now,
+               lock: &direct_lock/2
+             )
+
+    assert prepared.action.preview.before.status == "open"
+    assert prepared.action.preview.after.status == "completed"
+    flush_requests()
+
+    assert {:ok, %{receipt: %{action_id: "things.todo.complete", delivery: "confirmed"}}} =
+             commit(prepared, input, context, lease, transport)
+
+    assert_received {:request, :post, _url, _opts}
+    refute_received {:request, :post, _url, _opts}
+  end
+
   test "rejects stale expected_modified_at again immediately before commit" do
     parent = self()
     changed = DateTime.add(@modified_at, 60, :second)
