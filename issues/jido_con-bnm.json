@@ -6,9 +6,15 @@
   "description": "Port the burned-in Wayfinder Things Task Conformance V1 goal line into jido_connect_things. The read-only source is /Users/mhostetler/Source/Wayfinder/wayfinder/integrate_todo/wayfinder_v1/apps/wayfinder/lib/wayfinder/things/CONFORMANCE.md, especially Sections 7 through 23. Deliver broad current-state reads and guarded non-recurring Task6 actions. Include query and lookup, schedule, deadline, tags, container moves, lifecycle transitions, Trash, and restore. Retain exact endpoint, account, schema, history-head, body-hash, authorization, one-POST, no-retry, and delivery-certainty controls. Exclude recurrence writes, checklist writes, project or heading writes, area or tag administration, public batches, direct delete, and tombstone purge. Do not modify Wayfinder or its Settings worktree.",
   "id": "jido_con-bnm",
   "labels": [],
+  "comments": [
+    {
+      "text": "Goal-line mapping: Wayfinder CONFORMANCE.md V1 Sections 7-23. Jido uses explicit provider actions instead of the four generic MCP tools. The first ready task is the read-state foundation. Each implementation task must use its own branch and worktree. Wayfinder and Settings remain read-only.",
+      "timestamp": "2026-08-17T17:35:11Z"
+    }
+  ],
   "priority": 1,
   "status": "open",
   "title": "[G40] Things Task Conformance V1 action coverage",
   "type": "epic",
-  "updated_at": "2026-08-17T17:35:01Z"
+  "updated_at": "2026-08-17T17:35:11Z"
 }
