@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-bnm.3"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-bnm.7"
+  ],
   "created": "2026-08-17T17:35:04Z",
   "description": "Add separate things.todo.trash and things.todo.restore actions for current non-recurring Task6 to-dos. Classify Trash as destructive and require explicit destructive authorization and confirmation. Classify restore as normal. Reject invalid transitions and unsafe targets. Do not add direct delete or Tombstone2 purge. Preserve the one-POST, no-retry, exact verification, and outcome-unknown contracts. Add fake-based safety tests.",
   "id": "jido_con-bnm.6",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "Add guarded Things Trash and restore actions",
   "type": "task",
-  "updated_at": "2026-08-17T17:35:08Z"
+  "updated_at": "2026-08-17T17:35:10Z"
 }
