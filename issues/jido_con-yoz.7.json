@@ -1,7 +1,8 @@
 {
   "assignee": "",
   "blocked_by": [
-    "jido_con-yoz.1"
+    "jido_con-yoz.1",
+    "jido_con-yoz.2"
   ],
   "blocks": [],
   "created": "2026-08-17T11:32:24Z",
@@ -13,5 +14,5 @@
   "status": "open",
   "title": "Verify and publish issue 54 pull request",
   "type": "task",
-  "updated_at": "2026-08-17T11:32:24Z"
+  "updated_at": "2026-08-17T11:32:25Z"
 }
