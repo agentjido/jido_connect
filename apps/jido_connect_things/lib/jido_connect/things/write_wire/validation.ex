@@ -5,7 +5,7 @@ defmodule Jido.Connect.Things.WriteWire.Validation do
   alias Jido.Connect.Things.Identifier
 
   def title(value), do: text(value, :title, 1, 2_000, false)
-  def notes(value), do: text(value, :notes, 0, 100_000, true)
+  def notes(value), do: text(value, :notes, 0, 10_000, true)
 
   def identifier(value) do
     case Identifier.validate(value) do
@@ -29,9 +29,55 @@ defmodule Jido.Connect.Things.WriteWire.Validation do
 
   def timestamp(_value), do: validation_error(:timestamp, :invalid_timestamp)
 
+  def nullable_date(nil), do: {:ok, nil}
+
+  def nullable_date(%Date{} = value), do: day_timestamp(value)
+
+  def nullable_date(value) when is_binary(value) do
+    case Date.from_iso8601(value) do
+      {:ok, date} -> day_timestamp(date)
+      {:error, _reason} -> validation_error(:date, :invalid_date)
+    end
+  end
+
+  def nullable_date(_value), do: validation_error(:date, :invalid_date)
+
+  def identifiers(values, field, maximum \\ 100)
+
+  def identifiers(values, field, maximum)
+      when is_list(values) and length(values) <= maximum do
+    if Enum.uniq(values) == values do
+      Enum.reduce_while(values, {:ok, []}, fn value, {:ok, ids} ->
+        case identifier(value) do
+          {:ok, id} -> {:cont, {:ok, ids ++ [id]}}
+          {:error, _error} -> {:halt, validation_error(field, :unsafe_identifier)}
+        end
+      end)
+    else
+      validation_error(field, :duplicate_identifier)
+    end
+  end
+
+  def identifiers(values, field, maximum) when is_list(values),
+    do: validation_error(field, :too_many, %{maximum: maximum})
+
+  def identifiers(_values, field, _maximum), do: validation_error(field, :must_be_list)
+
   def changes(input) when is_map(input) do
     attrs =
-      [:title, :notes]
+      [
+        :title,
+        :notes,
+        :schedule,
+        :deadline,
+        :tag_ids,
+        :area_ids,
+        :project_ids,
+        :heading_ids,
+        :status,
+        :stopped_at,
+        :in_trash
+      ]
       |> Enum.reduce([], fn key, acc ->
         if Map.has_key?(input, key), do: [{key, Map.get(input, key)} | acc], else: acc
       end)
@@ -41,6 +87,13 @@ defmodule Jido.Connect.Things.WriteWire.Validation do
       validation_error(:changes, :no_changes)
     else
       {:ok, attrs}
+    end
+  end
+
+  defp day_timestamp(date) do
+    case DateTime.new(date, ~T[00:00:00], "Etc/UTC") do
+      {:ok, datetime} -> timestamp(datetime)
+      {:error, _reason} -> validation_error(:date, :invalid_date)
     end
   end
 

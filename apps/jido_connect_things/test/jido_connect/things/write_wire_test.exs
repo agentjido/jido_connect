@@ -91,4 +91,24 @@ defmodule Jido.Connect.Things.WriteWireTest do
     assert {:error, %Error.ValidationError{reason: :must_be_string}} =
              WriteWire.create(@id, "Title", false, @timestamp)
   end
+
+  test "rejects every field outside the V1 Task6 boundary" do
+    for attrs <- [
+          %{recurrence: %{}},
+          %{alarm_time_offset: 60},
+          %{position: 1},
+          %{today_position: 1},
+          %{entity: "Task7"},
+          %{raw: %{"p" => %{}}}
+        ] do
+      assert {:error, %Error.ValidationError{reason: :no_changes}} =
+               WriteWire.update(@id, attrs, @timestamp)
+    end
+
+    assert {:error, %Error.ValidationError{reason: :must_change_together}} =
+             WriteWire.update(@id, %{area_ids: []}, @timestamp)
+
+    assert {:error, %Error.ValidationError{reason: :duplicate_identifier}} =
+             WriteWire.update(@id, %{tag_ids: [@id, @id]}, @timestamp)
+  end
 end

@@ -182,9 +182,21 @@ defmodule Jido.Connect.Things.Actions.Todos do
         )
 
         field(:notes, :string,
-          max_length: 100_000,
+          max_length: 10_000,
           description: "Optional to-do notes."
         )
+
+        field(:schedule, :string,
+          min_length: 1,
+          max_length: 32,
+          description: "Inbox, Today, Evening, Anytime, Someday, or an ISO date."
+        )
+
+        field(:deadline, :string, min_length: 10, max_length: 10)
+        field(:tag_ids, {:array, :string}, default: [])
+        field(:area_id, :string, min_length: 1, max_length: 32)
+        field(:project_id, :string, min_length: 1, max_length: 32)
+        field(:heading_id, :string, min_length: 1, max_length: 32)
       end
 
       output do
@@ -234,7 +246,7 @@ defmodule Jido.Connect.Things.Actions.Todos do
         )
 
         field(:notes, :string,
-          max_length: 100_000,
+          max_length: 10_000,
           description: "Replacement notes."
         )
       end
