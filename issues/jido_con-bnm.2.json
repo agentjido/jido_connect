@@ -11,9 +11,15 @@
   "id": "jido_con-bnm.2",
   "labels": [],
   "parent": "jido_con-bnm",
+  "comments": [
+    {
+      "text": "Implemented V1 read coverage: list views and filters, exact/prefix get, text search, project/heading/area/tag lists, checklist details, freshness metadata, and strict schemas. Package quality passed with 49 tests and 81.42% coverage. Root mix quality and all demo checks passed.",
+      "timestamp": "2026-08-17T18:34:21Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Add Things V1 query and lookup actions",
   "type": "task",
-  "updated_at": "2026-08-17T18:25:42Z"
+  "updated_at": "2026-08-17T18:34:21Z"
 }
