@@ -1,9 +1,17 @@
 defmodule Jido.Connect.Things.CatalogPacks do
-  @moduledoc "Curated, storage-free catalog packs for the Things Cloud Inbox surface."
+  @moduledoc "Curated, storage-free catalog packs for the Things Cloud V1 surface."
 
   alias Jido.Connect.Catalog.Pack
 
-  @reader_tools ["things.todo.list"]
+  @reader_tools [
+    "things.todo.list",
+    "things.todo.get",
+    "things.todo.search",
+    "things.project.list",
+    "things.heading.list",
+    "things.area.list",
+    "things.tag.list"
+  ]
   @editor_tools @reader_tools ++ ["things.todo.create", "things.todo.update"]
 
   def all, do: [reader(), editor()]

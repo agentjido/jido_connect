@@ -106,7 +106,7 @@ defmodule Jido.Connect.Things.Runtime do
   end
 
   defp runtime_options(opts) do
-    [:transport, :read_adapter, :id_generator, :now, :lock]
+    [:transport, :read_adapter, :id_generator, :now, :today, :lock]
     |> Enum.reduce(%{}, fn key, runtime ->
       case option(opts, key) do
         nil -> runtime

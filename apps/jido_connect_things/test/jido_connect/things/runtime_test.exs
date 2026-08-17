@@ -49,10 +49,50 @@ defmodule Jido.Connect.Things.RuntimeTest do
     assert todo.title == "Existing task"
     assert todo.status == "open"
     assert todo.schedule == "inbox"
-    assert result.freshness == %{source: "provider", provider_head: 1}
+
+    assert result.freshness == %{
+             source: "provider",
+             provider_head: 1,
+             state_complete: true,
+             issue_count: 0
+           }
 
     assert_received {:request, :get, _url, _opts}
     refute_received {:request, :post, _url, _opts}
+  end
+
+  test "gets, searches, and lists references through fresh provider state" do
+    transport = history_event_transport(task_event(@id, @modified_at))
+    {context, lease} = runtime_contract("connection-A", "user@example.com")
+
+    options = [
+      context: context,
+      credential_lease: lease,
+      transport: transport,
+      today: ~D[2026-08-17]
+    ]
+
+    assert {:ok, %{todo: %{id: @id}}} =
+             Jido.Connect.Things.invoke("things.todo.get", %{id: @id}, options)
+
+    assert {:ok, %{count: 1, todos: [%{id: @id}]}} =
+             Jido.Connect.Things.invoke(
+               "things.todo.search",
+               %{query: "existing", limit: 10},
+               options
+             )
+
+    for {action_id, key} <- [
+          {"things.project.list", :projects},
+          {"things.heading.list", :headings},
+          {"things.area.list", :areas},
+          {"things.tag.list", :tags}
+        ] do
+      assert {:ok, %{count: 0} = result} =
+               Jido.Connect.Things.invoke(action_id, %{}, options)
+
+      assert Map.fetch!(result, key) == []
+    end
   end
 
   test "fails closed when provider history stops before its declared head" do
@@ -274,7 +314,7 @@ defmodule Jido.Connect.Things.RuntimeTest do
     refute_received {:request, _method, _url, _opts}
   end
 
-  test "fails closed on new or malformed task events" do
+  test "reports incomplete state for new or malformed task events" do
     {context, lease} = runtime_contract("connection-A", "user@example.com")
 
     variants = [
@@ -285,20 +325,26 @@ defmodule Jido.Connect.Things.RuntimeTest do
     for {id, event} <- variants do
       transport = history_event_transport(%{id => event})
 
-      assert {:error, %Error.ProviderError{reason: :unsupported_task_event}} =
+      assert {:ok, %{count: 0, freshness: freshness}} =
                Jido.Connect.Things.invoke("things.todo.list", %{},
                  context: context,
                  credential_lease: lease,
                  transport: transport
                )
+
+      refute freshness.state_complete
+      assert freshness.issue_count == 1
     end
 
-    assert {:error, %Error.ProviderError{reason: :unsupported_task_entity}} =
+    assert {:ok, %{count: 0, freshness: freshness}} =
              Jido.Connect.Things.invoke("things.todo.list", %{},
                context: context,
                credential_lease: lease,
                transport: history_event_transport(%{@id => %{"e" => "Task7", "t" => 0}})
              )
+
+    refute freshness.state_complete
+    assert freshness.issue_count == 1
   end
 
   test "rejects a stale provider head before the commit send" do
