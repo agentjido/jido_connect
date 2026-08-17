@@ -55,6 +55,38 @@ defmodule Jido.Connect.Things.RuntimeTest do
     refute_received {:request, :post, _url, _opts}
   end
 
+  test "lists readable tasks when unrelated provider history is unknown" do
+    transport = fn _method, url, _opts ->
+      cond do
+        String.contains?(url, "/account/") ->
+          account_response("user@example.com", "history-A")
+
+        String.ends_with?(url, "/history/history-A") ->
+          history_response(1)
+
+        String.ends_with?(url, "/history/history-A/items") ->
+          item =
+            task_event(@id, @modified_at)
+            |> Map.put("unknown-reference", %{
+              "e" => "FutureEntity9",
+              "t" => 0,
+              "p" => %{"future" => true}
+            })
+
+          page_response([item])
+      end
+    end
+
+    {context, lease} = runtime_contract("connection-A", "user@example.com")
+
+    assert {:ok, %{count: 1, todos: [%{id: @id}]}} =
+             Jido.Connect.Things.invoke("things.todo.list", %{},
+               context: context,
+               credential_lease: lease,
+               transport: transport
+             )
+  end
+
   test "fails closed when provider history stops before its declared head" do
     transport = fn _method, url, _opts ->
       cond do
