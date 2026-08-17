@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-08-17T11:32:08Z",
+  "description": "Address GitHub issue #54 from the Wayfinder Jira live-write integration. Deliver all six acceptance areas and one verified pull request.\\n\\n```mermaid\\ngraph LR\\n  A[Jira connection-aware auth] --\u003e G[Verify and open PR]\\n  B[Mutation outcome certainty] --\u003e G\\n  C[Prepared action storage] --\u003e G\\n  D[Catalog JSON Schema] --\u003e G\\n  E[Provider safe previews] --\u003e G\\n  F[Replay and retry docs] --\u003e G\\n```",
+  "id": "jido_con-yoz",
+  "labels": [],
+  "priority": 1,
+  "status": "open",
+  "title": "Harden live-write provider integration",
+  "type": "epic",
+  "updated_at": "2026-08-17T11:32:08Z"
+}
