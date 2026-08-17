@@ -1,5 +1,5 @@
 {
-  "assignee": "Mike Hostetler",
+  "assignee": "",
   "blocked_by": [
     "jido_con-bnm.2",
     "jido_con-bnm.4",
@@ -7,7 +7,6 @@
     "jido_con-bnm.6"
   ],
   "blocks": [],
-  "closed_at": "2026-08-17T18:57:08Z",
   "created": "2026-08-17T17:35:05Z",
   "description": "Complete the next-batch evidence after all read and write actions land. Port only source-linked fixtures and burned-in expectations from the Wayfinder conformance work. Do not call Things Cloud in tests. Add canonical wire fixtures for every supported shape, fold and null-clear tests, identifier and sparse-patch properties, planner rejection tests, transport and delivery tests, pack and documentation updates, and a provider coverage matrix. Run package mix quality, umbrella mix quality, and all demo checks.",
   "id": "jido_con-bnm.7",
@@ -20,8 +19,8 @@
     }
   ],
   "priority": 1,
-  "status": "closed",
+  "status": "open",
   "title": "Verify Things V1 provider action coverage",
   "type": "task",
-  "updated_at": "2026-08-17T18:57:08Z"
+  "updated_at": "2026-08-17T19:04:21Z"
 }
