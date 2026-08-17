@@ -12,9 +12,15 @@
   "id": "jido_con-bnm.7",
   "labels": [],
   "parent": "jido_con-bnm",
+  "comments": [
+    {
+      "text": "Added the source-baseline conformance matrix, complete 19-action coverage table, explicit V1 exclusions, safety model, offline evidence map, and external official-client acceptance boundary. Updated package guidance and public documentation to the full V1 surface. Final package quality passed with 62 tests and 81.02% coverage. Root mix quality and demo format, warnings-as-errors compile, and 21 tests passed. No live Things Cloud calls ran.",
+      "timestamp": "2026-08-17T18:57:07Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Verify Things V1 provider action coverage",
   "type": "task",
-  "updated_at": "2026-08-17T18:55:15Z"
+  "updated_at": "2026-08-17T18:57:07Z"
 }
