@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-08-17T11:32:23Z",
+  "description": "Add an optional pure action preview callback and sanitize its public map.",
+  "id": "jido_con-yoz.5",
+  "labels": [],
+  "parent": "jido_con-yoz",
+  "priority": 1,
+  "status": "open",
+  "title": "Add provider safe previews",
+  "type": "task",
+  "updated_at": "2026-08-17T11:32:23Z"
+}
