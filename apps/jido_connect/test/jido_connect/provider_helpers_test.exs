@@ -123,6 +123,26 @@ defmodule Jido.Connect.ProviderHelpersTest do
     assert ProviderResponse.retryable?(idempotent_write)
     assert ProviderResponse.retry_guidance(idempotent_write) == :retry_with_idempotency
 
+    transport_timeout = %Req.TransportError{reason: :timeout}
+    retryable_read = ProviderResponse.from_result!(:demo, {:error, transport_timeout})
+
+    assert retryable_read.reason == :timeout
+    assert ProviderResponse.retryable?(retryable_read)
+    assert ProviderResponse.retry_guidance(retryable_read) == :safe_to_retry
+
+    idempotent_transport_write =
+      ProviderResponse.from_result!(:demo, {:error, transport_timeout},
+        action_risk: :write,
+        mutation?: true,
+        provider_idempotency?: true
+      )
+
+    assert idempotent_transport_write.reason == :timeout
+    assert ProviderResponse.retryable?(idempotent_transport_write)
+
+    assert ProviderResponse.retry_guidance(idempotent_transport_write) ==
+             :retry_with_idempotency
+
     not_sent =
       ProviderResponse.from_result!(:demo, {:error, :econnrefused},
         action_risk: :write,

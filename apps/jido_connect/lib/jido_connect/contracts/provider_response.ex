@@ -149,7 +149,7 @@ defmodule Jido.Connect.ProviderResponse do
     %{
       provider: provider,
       operation: operation(opts),
-      reason: reason,
+      reason: transport_reason(reason),
       delivery: delivery_for_error(reason, opts),
       action_risk: action_risk(opts),
       mutation?: mutation?(opts),
