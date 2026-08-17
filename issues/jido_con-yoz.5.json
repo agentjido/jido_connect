@@ -4,14 +4,16 @@
   "blocks": [
     "jido_con-yoz.7"
   ],
+  "closed_at": "2026-08-17T12:10:52Z",
+  "close_reason": "Added pure sanitized preview callbacks and Jira comment preview coverage.",
   "created": "2026-08-17T11:32:23Z",
   "description": "Add an optional pure action preview callback and sanitize its public map.",
   "id": "jido_con-yoz.5",
   "labels": [],
   "parent": "jido_con-yoz",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Add provider safe previews",
   "type": "task",
-  "updated_at": "2026-08-17T12:01:57Z"
+  "updated_at": "2026-08-17T12:10:52Z"
 }
