@@ -19,11 +19,15 @@
     {
       "text": "Rebased onto origin/main at 26f30fbb, resolved the shared schema conflict by using main's strict first-class field constraints, reran package/umbrella/demo checks, force-pushed verified commit 09bc4578, and confirmed GitHub CI Quality passed for PR #57.",
       "timestamp": "2026-08-17T16:20:57Z"
+    },
+    {
+      "text": "Addressed both automated P1 review findings in amended commit 9f60c818: endpoint validation no longer trusts transport injection, and unknown or malformed task events fail closed. Added regression tests. Final verification passed: package quality (36 tests, 81.40% coverage), umbrella quality, demo 21 tests, and GitHub CI Quality (3m48s).",
+      "timestamp": "2026-08-17T16:28:03Z"
     }
   ],
   "priority": 1,
   "status": "closed",
   "title": "Add guarded Things Cloud Inbox provider",
   "type": "task",
-  "updated_at": "2026-08-17T16:20:57Z"
+  "updated_at": "2026-08-17T16:28:03Z"
 }
