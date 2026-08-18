@@ -27,6 +27,13 @@ defmodule Jido.Connect.Slack.ScopeResolver do
     "mpim" => "mpim:write"
   }
 
+  @conversation_mark_scopes %{
+    "public_channel" => "channels:write",
+    "private_channel" => "groups:write",
+    "im" => "im:write",
+    "mpim" => "mpim:write"
+  }
+
   @channel_create_scopes %{
     false => "channels:manage",
     true => "groups:write"
@@ -158,6 +165,36 @@ defmodule Jido.Connect.Slack.ScopeResolver do
 
   def required_scopes(%{action_id: "slack.thread.replies"}, input, connection) do
     required_scopes(%{id: "slack.thread.replies"}, input, connection)
+  end
+
+  def required_scopes(%{id: "slack.message.unread.list"}, input, _connection) do
+    if Map.get(input, :channel, Map.get(input, "channel")) do
+      type = requested_conversation_type(input)
+
+      [
+        conversation_read_scope(type),
+        Map.get(@conversation_history_scopes, type, "channels:history")
+      ]
+    else
+      Map.values(@conversation_type_scopes) ++ Map.values(@conversation_history_scopes)
+    end
+    |> Enum.uniq()
+    |> Enum.sort()
+  end
+
+  def required_scopes(%{action_id: "slack.message.unread.list"}, input, connection) do
+    required_scopes(%{id: "slack.message.unread.list"}, input, connection)
+  end
+
+  def required_scopes(%{id: "slack.conversation.mark_read"}, input, _connection) do
+    input
+    |> requested_conversation_type()
+    |> then(&Map.get(@conversation_mark_scopes, &1, "channels:write"))
+    |> List.wrap()
+  end
+
+  def required_scopes(%{action_id: "slack.conversation.mark_read"}, input, connection) do
+    required_scopes(%{id: "slack.conversation.mark_read"}, input, connection)
   end
 
   def required_scopes(operation, _input, _connection), do: Map.get(operation, :scopes, [])

@@ -45,7 +45,7 @@ defmodule Jido.Connect.Slack.Actions.Conversations do
       effect :read
 
       access do
-        auth :bot
+        auth [:bot, :user], default: :bot
         policies [:workspace_access]
         scopes ["channels:history"], resolver: Jido.Connect.Slack.ScopeResolver
       end

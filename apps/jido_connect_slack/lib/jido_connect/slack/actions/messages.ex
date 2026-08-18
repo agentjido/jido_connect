@@ -15,7 +15,7 @@ defmodule Jido.Connect.Slack.Actions.Messages do
       effect :write, confirmation: :required_for_ai
 
       access do
-        auth :bot
+        auth [:bot, :user], default: :bot
         policies [:workspace_access]
         scopes ["chat:write"]
       end

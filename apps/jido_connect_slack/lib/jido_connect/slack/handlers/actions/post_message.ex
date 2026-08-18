@@ -1,10 +1,10 @@
 defmodule Jido.Connect.Slack.Handlers.Actions.PostMessage do
   @moduledoc false
 
-  alias Jido.Connect.Error
+  alias Jido.Connect.Slack.Handlers.ClientResolver
 
-  def run(input, %{credentials: credentials}) do
-    with {:ok, client} <- fetch_client(credentials),
+  def run(input, %{credentials: credentials} = context) do
+    with {:ok, client} <- ClientResolver.fetch(context, credentials),
          {:ok, message} <-
            client.post_message(
              input
@@ -19,11 +19,5 @@ defmodule Jido.Connect.Slack.Handlers.Actions.PostMessage do
          message: Map.get(message, :message, %{})
        }}
     end
-  end
-
-  defp fetch_client(%{slack_client: client}) when is_atom(client), do: {:ok, client}
-
-  defp fetch_client(_credentials) do
-    {:error, Error.config("Slack client module is required", key: :slack_client)}
   end
 end
