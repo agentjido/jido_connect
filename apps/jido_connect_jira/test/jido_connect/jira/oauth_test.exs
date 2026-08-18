@@ -29,7 +29,9 @@ defmodule Jido.Connect.Jira.OAuthTest do
           client_id: "client",
           redirect_uri: "https://demo.test/integrations/jira/oauth/callback",
           scope: ["read:jira-work", "write:jira-work"],
-          state: "state"
+          state: "state",
+          code_challenge: "challenge",
+          code_challenge_method: "S256"
         )
 
       uri = URI.parse(url)
@@ -45,6 +47,8 @@ defmodule Jido.Connect.Jira.OAuthTest do
       assert params["state"] == "state"
       assert params["response_type"] == "code"
       assert params["prompt"] == "consent"
+      assert params["code_challenge"] == "challenge"
+      assert params["code_challenge_method"] == "S256"
     end
   end
 
@@ -57,6 +61,7 @@ defmodule Jido.Connect.Jira.OAuthTest do
         assert body["grant_type"] == "authorization_code"
         assert body["client_id"] == "client"
         assert body["client_secret"] == "secret"
+        assert body["code_verifier"] == "verifier"
         assert body["code"] == "code"
         assert body["redirect_uri"] == "https://demo.test/callback"
 
@@ -74,6 +79,7 @@ defmodule Jido.Connect.Jira.OAuthTest do
                  client_id: "client",
                  client_secret: "secret",
                  redirect_uri: "https://demo.test/callback",
+                 code_verifier: "verifier",
                  token_url: "https://auth.test"
                )
 
