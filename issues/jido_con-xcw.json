@@ -2,13 +2,14 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-08-18T04:15:59Z",
   "created": "2026-08-18T03:50:04Z",
   "description": "Add reusable jido_connect_slack operations for Slack read state, unread messages, availability, custom status, and emoji. Include strict schemas, normalized results, fake transport tests, and support Wayfinder wf-roadmap.3.6.",
   "id": "jido_con-xcw",
   "labels": [],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Add former Ando Slack action pack",
   "type": "task",
-  "updated_at": "2026-08-18T03:50:09Z"
+  "updated_at": "2026-08-18T04:15:59Z"
 }
