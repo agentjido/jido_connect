@@ -1,0 +1,34 @@
+{
+  "id": "page-1",
+  "title": "Runbook",
+  "status": "current",
+  "spaceId": "space-1",
+  "parentId": "parent-1",
+  "createdAt": "2026-08-18T10:00:00Z",
+  "version": {"number": 4},
+  "body": {
+    "atlas_doc_format": {
+      "representation": "atlas_doc_format",
+      "value": {
+        "version": 1,
+        "type": "doc",
+        "content": [
+          {
+            "type": "heading",
+            "attrs": {"level": 1},
+            "content": [{"type": "text", "text": "Runbook"}]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {"type": "text", "text": "First line"},
+              {"type": "hardBreak"},
+              {"type": "text", "text": "Second line"}
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "_links": {"webui": "/spaces/OPS/pages/page-1/Runbook"}
+}

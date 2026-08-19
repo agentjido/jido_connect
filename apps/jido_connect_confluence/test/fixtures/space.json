@@ -1,0 +1,14 @@
+{
+  "results": [
+    {
+      "id": "space-1",
+      "key": "OPS",
+      "name": "Operations",
+      "type": "global",
+      "status": "current",
+      "homepageId": "home-1",
+      "_links": {"webui": "/spaces/OPS"}
+    }
+  ],
+  "_links": {"base": "https://example.atlassian.net/wiki"}
+}
