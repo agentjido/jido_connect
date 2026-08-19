@@ -7,14 +7,15 @@
   "blocks": [
     "jido_con-keu.7"
   ],
+  "closed_at": "2026-08-19T22:25:03Z",
   "created": "2026-08-19T21:36:34Z",
   "description": "Add list-item delta support, catalog packs, privacy tests, README, change log, and env-gated read-only live smoke hooks.",
   "id": "jido_con-keu.6",
   "labels": [],
   "parent": "jido_con-keu",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G40-S06] Add SharePoint delta catalog docs and smoke hooks",
   "type": "task",
-  "updated_at": "2026-08-19T22:16:49Z"
+  "updated_at": "2026-08-19T22:25:03Z"
 }
