@@ -2,13 +2,14 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-08-19T22:58:24Z",
   "created": "2026-08-19T21:36:31Z",
   "description": "Build a SharePoint Online connector on Microsoft Graph. Reuse the Microsoft foundation and OneDrive file runtime. Include delegated and application auth support, sites, lists, list items, document libraries, delta change tracking, catalog packs, tests, docs, and read-only live smoke coverage.",
   "id": "jido_con-keu",
   "labels": [],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "[G40] Microsoft SharePoint Connector",
   "type": "epic",
-  "updated_at": "2026-08-19T21:36:31Z"
+  "updated_at": "2026-08-19T22:58:24Z"
 }
