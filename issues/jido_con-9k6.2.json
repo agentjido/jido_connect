@@ -11,9 +11,15 @@
   "id": "jido_con-9k6.2",
   "labels": [],
   "parent": "jido_con-9k6",
+  "comments": [
+    {
+      "text": "Implemented all 19 selected Jira actions while preserving the existing 10. Added focused board, filter, issue lifecycle, and plan clients; bounded schemas; reviewed packs; safe previews; admin/destructive policy gates; no-retry mutation handling; docs; and tests. Verification: mix quality passed with 140 tests and 82.70% coverage; git diff --check passed.",
+      "timestamp": "2026-08-19T21:37:48Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Extend Jira reviewed actions",
   "type": "task",
-  "updated_at": "2026-08-19T21:03:52Z"
+  "updated_at": "2026-08-19T21:37:48Z"
 }
