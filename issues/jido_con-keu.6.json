@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-keu.4",
     "jido_con-keu.5"
@@ -13,8 +13,8 @@
   "labels": [],
   "parent": "jido_con-keu",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G40-S06] Add SharePoint delta catalog docs and smoke hooks",
   "type": "task",
-  "updated_at": "2026-08-19T21:36:39Z"
+  "updated_at": "2026-08-19T22:16:49Z"
 }
