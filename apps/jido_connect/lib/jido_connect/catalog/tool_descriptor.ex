@@ -26,6 +26,8 @@ defmodule Jido.Connect.Catalog.ToolDescriptor do
               confirmation: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),
               provider_idempotency?: Zoi.boolean() |> Zoi.default(false),
               source: Zoi.atom() |> Zoi.default(:curated),
+              pack: Zoi.map() |> Zoi.nullish() |> Zoi.optional(),
+              reviewed_fingerprint: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               metadata: Zoi.map() |> Zoi.default(%{})
             },
             coerce: true

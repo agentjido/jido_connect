@@ -44,6 +44,77 @@ defmodule Jido.Connect.Catalog.Pack do
   @doc "Builds a catalog pack or raises on invalid data."
   def new!(attrs), do: Zoi.parse!(@schema, attrs)
 
+  @doc "Resolves one supplied reviewed pack without pack discovery."
+  @spec resolve_exact(t() | map()) :: {:ok, t()} | {:error, Error.error()}
+  def resolve_exact(%__MODULE__{} = pack), do: {:ok, normalize_pack(pack)}
+
+  def resolve_exact(%{} = attrs) do
+    attrs
+    |> new()
+    |> case do
+      {:ok, pack} -> {:ok, normalize_pack(pack)}
+      {:error, errors} -> invalid_pack(attrs, errors)
+    end
+  end
+
+  def resolve_exact(pack_ref) do
+    {:error,
+     Error.validation("Reviewed catalog requires one supplied pack",
+       reason: :invalid_reviewed_pack,
+       subject: pack_ref
+     )}
+  end
+
+  @doc "Returns the public, policy-relevant provenance for a reviewed pack."
+  @spec reviewed_provenance(t()) :: map()
+  def reviewed_provenance(%__MODULE__{} = pack) do
+    %{
+      id: pack.id,
+      label: pack.label,
+      description: pack.description,
+      filters: reviewed_filters(pack.filters),
+      allowed_tools: pack.allowed_tools
+    }
+  end
+
+  @doc false
+  @spec validate_reviewed_tools(t(), [ToolEntry.t()]) :: :ok | {:error, Error.error()}
+  def validate_reviewed_tools(%__MODULE__{} = pack, tools) do
+    Enum.reduce_while(pack.allowed_tools, :ok, fn tool_ref, :ok ->
+      case ToolLookup.lookup(tools, tool_ref) do
+        {:ok, %ToolEntry{type: :action}} ->
+          {:cont, :ok}
+
+        {:ok, %ToolEntry{type: :trigger}} ->
+          {:halt,
+           {:error,
+            Error.validation("Reviewed catalog packs cannot select triggers",
+              reason: :trigger_not_executable,
+              subject: tool_ref,
+              details: %{pack: pack.id}
+            )}}
+
+        {:error, %Error.ValidationError{reason: :ambiguous_tool}} ->
+          {:halt,
+           {:error,
+            Error.validation("Reviewed pack action must identify one exact action",
+              reason: :ambiguous_pack_action,
+              subject: tool_ref,
+              details: %{pack: pack.id}
+            )}}
+
+        {:error, _error} ->
+          {:halt,
+           {:error,
+            Error.validation("Reviewed pack action is missing from the supplied integrations",
+              reason: :pack_action_missing,
+              subject: tool_ref,
+              details: %{pack: pack.id}
+            )}}
+      end
+    end)
+  end
+
   @doc false
   def resolve(nil, _opts), do: {:ok, nil}
   def resolve("", _opts), do: {:ok, nil}
@@ -222,6 +293,15 @@ defmodule Jido.Connect.Catalog.Pack do
       _other -> :unknown_filter
     end
   end
+
+  defp reviewed_filters(filters) when is_map(filters) or is_list(filters) do
+    filters
+    |> normalize_filter_opts()
+    |> Enum.reject(&(elem(&1, 0) == :unknown_filter))
+    |> Map.new()
+  end
+
+  defp reviewed_filters(_filters), do: %{}
 
   defp allowed_tool_ref({provider, tool_id}),
     do: "#{ToolLookup.provider_key(provider)}.#{ToolLookup.tool_id_key(tool_id)}"
