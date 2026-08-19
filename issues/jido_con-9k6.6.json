@@ -6,6 +6,7 @@
   "blocks": [
     "jido_con-9k6.7"
   ],
+  "closed_at": "2026-08-19T23:32:31Z",
   "created": "2026-08-19T20:59:09Z",
   "description": "Add the three reviewed X account, bookmark, and post actions and tests.",
   "id": "jido_con-9k6.6",
@@ -18,7 +19,7 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Add X reviewed actions",
   "type": "task",
   "updated_at": "2026-08-19T23:32:31Z"
