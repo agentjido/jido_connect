@@ -1,0 +1,13 @@
+{
+  "id": "42",
+  "name": "42_.000",
+  "webUrl": "https://contoso.sharepoint.com/sites/operations/Lists/Requests/DispForm.aspx?ID=42",
+  "eTag": "\"42,3\"",
+  "createdDateTime": "2026-08-01T10:00:00Z",
+  "lastModifiedDateTime": "2026-08-01T12:00:00Z",
+  "createdBy": {"user": {"id": "user-1", "displayName": "Adele Vance", "email": "adele@contoso.com"}},
+  "lastModifiedBy": {"user": {"id": "user-2", "displayName": "Alex Wilber", "email": "alex@contoso.com"}},
+  "contentType": {"id": "0x0100", "name": "Item"},
+  "fields": {"Title": "Replace printer", "Status": "Open", "Priority": 2},
+  "sharepointIds": {"listId": "list-123", "listItemId": "42", "webId": "web-id"}
+}

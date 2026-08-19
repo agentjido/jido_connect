@@ -1,0 +1,12 @@
+{
+  "id": "column-123",
+  "name": "Status",
+  "displayName": "Status",
+  "description": "Request state",
+  "required": true,
+  "readOnly": false,
+  "hidden": false,
+  "indexed": true,
+  "enforceUniqueValues": false,
+  "choice": {"allowTextEntry": false, "choices": ["Open", "Closed"], "displayAs": "dropDownMenu"}
+}

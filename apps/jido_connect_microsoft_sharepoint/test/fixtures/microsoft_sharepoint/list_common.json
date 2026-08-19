@@ -1,0 +1,11 @@
+{
+  "id": "list-123",
+  "name": "Requests",
+  "displayName": "Requests",
+  "description": "Operations requests",
+  "webUrl": "https://contoso.sharepoint.com/sites/operations/Lists/Requests",
+  "createdDateTime": "2026-01-02T10:00:00Z",
+  "lastModifiedDateTime": "2026-08-01T12:00:00Z",
+  "list": {"contentTypesEnabled": true, "hidden": false, "template": "genericList"},
+  "sharepointIds": {"listId": "list-123", "webId": "web-id"}
+}
