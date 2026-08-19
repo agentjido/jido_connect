@@ -6,14 +6,21 @@
   "blocks": [
     "jido_con-9k6.7"
   ],
+  "closed_at": "2026-08-19T22:12:22Z",
   "created": "2026-08-19T20:59:08Z",
   "description": "Add the six reviewed Confluence page and space actions and tests.",
   "id": "jido_con-9k6.4",
   "labels": [],
   "parent": "jido_con-9k6",
+  "comments": [
+    {
+      "text": "Implemented six reviewed Confluence actions with a distinct provider identity, Atlassian Cloud tenant credential fencing, strict/bounded ADF conversion, optimistic page update checks, no-retry mutation semantics, secret-safe errors, reader/editor/destructive packs, docs, and fixtures. Parent simplification added shared handler/preview support, map-based client boundaries, and a metadata-only update GET. Verification: package mix quality passed with 21 tests and 80.96% coverage; git diff --check passed.",
+      "timestamp": "2026-08-19T22:12:21Z"
+    }
+  ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "Add Confluence page actions",
   "type": "task",
-  "updated_at": "2026-08-19T20:59:15Z"
+  "updated_at": "2026-08-19T22:12:22Z"
 }
