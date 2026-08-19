@@ -6,7 +6,8 @@ defmodule Jido.Connect.MicrosoftSharepoint do
       Jido.Connect.MicrosoftSharepoint.Actions.Sites,
       Jido.Connect.MicrosoftSharepoint.Actions.Lists,
       Jido.Connect.MicrosoftSharepoint.Actions.ListItems,
-      Jido.Connect.MicrosoftSharepoint.Actions.ListItemWrites
+      Jido.Connect.MicrosoftSharepoint.Actions.ListItemWrites,
+      Jido.Connect.MicrosoftSharepoint.Actions.DocumentLibraries
     ]
 
   alias Jido.Connect.Microsoft.Scopes
@@ -75,6 +76,18 @@ defmodule Jido.Connect.MicrosoftSharepoint do
       )
 
       subject({:input, :site_id})
+      owner({:connection, :owner})
+      decision(:allow_operation)
+    end
+
+    policy :sharepoint_drive_access do
+      label("SharePoint document library access")
+
+      description(
+        "Host verifies that the actor and connection can access the requested SharePoint drive."
+      )
+
+      subject({:input, :drive_id})
       owner({:connection, :owner})
       decision(:allow_operation)
     end

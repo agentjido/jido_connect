@@ -15,14 +15,25 @@ defmodule Jido.Connect.MicrosoftSharepointTest do
     Jido.Connect.MicrosoftSharepoint.Actions.GetListItem,
     Jido.Connect.MicrosoftSharepoint.Actions.CreateListItem,
     Jido.Connect.MicrosoftSharepoint.Actions.UpdateListItem,
-    Jido.Connect.MicrosoftSharepoint.Actions.DeleteListItem
+    Jido.Connect.MicrosoftSharepoint.Actions.DeleteListItem,
+    Jido.Connect.MicrosoftSharepoint.Actions.ListLibraries,
+    Jido.Connect.MicrosoftSharepoint.Actions.ListLibraryItems,
+    Jido.Connect.MicrosoftSharepoint.Actions.GetLibraryItem,
+    Jido.Connect.MicrosoftSharepoint.Actions.SearchLibraryItems,
+    Jido.Connect.MicrosoftSharepoint.Actions.DownloadLibraryItem,
+    Jido.Connect.MicrosoftSharepoint.Actions.DeltaLibraryItems,
+    Jido.Connect.MicrosoftSharepoint.Actions.CreateLibraryFolder,
+    Jido.Connect.MicrosoftSharepoint.Actions.UploadLibraryItem,
+    Jido.Connect.MicrosoftSharepoint.Actions.UpdateLibraryItem,
+    Jido.Connect.MicrosoftSharepoint.Actions.DeleteLibraryItem
   ]
 
   @fragments [
     Jido.Connect.MicrosoftSharepoint.Actions.Sites,
     Jido.Connect.MicrosoftSharepoint.Actions.Lists,
     Jido.Connect.MicrosoftSharepoint.Actions.ListItems,
-    Jido.Connect.MicrosoftSharepoint.Actions.ListItemWrites
+    Jido.Connect.MicrosoftSharepoint.Actions.ListItemWrites,
+    Jido.Connect.MicrosoftSharepoint.Actions.DocumentLibraries
   ]
 
   test "declares SharePoint provider metadata and auth profiles" do
@@ -45,7 +56,17 @@ defmodule Jido.Connect.MicrosoftSharepointTest do
              "microsoft.sharepoint.list.item.get",
              "microsoft.sharepoint.list.item.create",
              "microsoft.sharepoint.list.item.update",
-             "microsoft.sharepoint.list.item.delete"
+             "microsoft.sharepoint.list.item.delete",
+             "microsoft.sharepoint.libraries.list",
+             "microsoft.sharepoint.library.items.list",
+             "microsoft.sharepoint.library.item.get",
+             "microsoft.sharepoint.library.items.search",
+             "microsoft.sharepoint.library.item.download",
+             "microsoft.sharepoint.library.items.delta",
+             "microsoft.sharepoint.library.folder.create",
+             "microsoft.sharepoint.library.item.upload",
+             "microsoft.sharepoint.library.item.update",
+             "microsoft.sharepoint.library.item.delete"
            ]
 
     assert spec.triggers == []
@@ -128,5 +149,36 @@ defmodule Jido.Connect.MicrosoftSharepointTest do
     assert resolver.required_scopes(create, %{}, %{
              scopes: ["Lists.SelectedOperations.Selected"]
            }) == ["Lists.SelectedOperations.Selected"]
+  end
+
+  test "declares guarded library writes and resolves file scopes" do
+    actions = MicrosoftSharepoint.integration().actions
+
+    create = Enum.find(actions, &(&1.id == "microsoft.sharepoint.library.folder.create"))
+    upload = Enum.find(actions, &(&1.id == "microsoft.sharepoint.library.item.upload"))
+    update = Enum.find(actions, &(&1.id == "microsoft.sharepoint.library.item.update"))
+    delete = Enum.find(actions, &(&1.id == "microsoft.sharepoint.library.item.delete"))
+
+    assert create.confirmation == :required_for_ai
+    assert upload.risk == :external_write
+    assert update.confirmation == :required_for_ai
+    assert delete.risk == :destructive
+    assert delete.confirmation == :always
+
+    resolver = Jido.Connect.MicrosoftSharepoint.ScopeResolver
+
+    assert resolver.required_scopes(
+             %{id: "microsoft.sharepoint.library.item.get"},
+             %{},
+             %{scopes: ["Files.SelectedOperations.Selected"]}
+           ) == ["Files.SelectedOperations.Selected"]
+
+    assert resolver.required_scopes(upload, %{}, %{scopes: ["Sites.Selected"]}) == [
+             "Sites.Selected"
+           ]
+
+    assert resolver.required_scopes(upload, %{}, %{scopes: ["Files.Read.All"]}) == [
+             "Files.ReadWrite.All"
+           ]
   end
 end
