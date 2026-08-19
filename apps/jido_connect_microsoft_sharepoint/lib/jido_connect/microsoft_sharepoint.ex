@@ -1,7 +1,12 @@
 defmodule Jido.Connect.MicrosoftSharepoint do
   @moduledoc "Microsoft SharePoint Online integration for Jido Connect."
 
-  use Jido.Connect
+  use Jido.Connect,
+    fragments: [
+      Jido.Connect.MicrosoftSharepoint.Actions.Sites,
+      Jido.Connect.MicrosoftSharepoint.Actions.Lists,
+      Jido.Connect.MicrosoftSharepoint.Actions.ListItems
+    ]
 
   alias Jido.Connect.Microsoft.Scopes
 
@@ -57,6 +62,20 @@ defmodule Jido.Connect.MicrosoftSharepoint do
         token_scope: "https://graph.microsoft.com/.default",
         tenant_specific_token_url: true
       })
+    end
+  end
+
+  policies do
+    policy :sharepoint_resource_access do
+      label("SharePoint resource access")
+
+      description(
+        "Host verifies that the actor and connection can access the requested SharePoint site."
+      )
+
+      subject({:input, :site_id})
+      owner({:connection, :owner})
+      decision(:allow_operation)
     end
   end
 end

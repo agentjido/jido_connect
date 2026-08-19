@@ -45,7 +45,28 @@ defmodule Jido.Connect.MicrosoftSharepoint.FixtureTest do
 
     assert next_link =~ "/next"
     assert {:error, :invalid_site_payload} = Normalizer.site(nil)
+    assert {:error, :invalid_list_payload} = Normalizer.site_list(nil)
+    assert {:error, :invalid_column_payload} = Normalizer.column(nil)
+    assert {:error, :invalid_list_item_payload} = Normalizer.list_item(nil)
+    assert {:error, :invalid_page_envelope} = Normalizer.page(nil, &Normalizer.site/1)
     assert {:error, :invalid_list_payloads} = Normalizer.normalize_list(:bad, &Normalizer.site/1)
+  end
+
+  test "normalized structs expose schemas and constructors" do
+    assert Site.schema()
+    assert SiteList.schema()
+    assert Column.schema()
+    assert ListItem.schema()
+
+    assert %Site{site_id: "site"} = Site.new!(%{site_id: "site"})
+    assert %SiteList{list_id: "list"} = SiteList.new!(%{list_id: "list"})
+    assert %Column{column_id: "column"} = Column.new!(%{column_id: "column"})
+    assert %ListItem{item_id: "item"} = ListItem.new!(%{item_id: "item"})
+
+    assert {:error, _error} = Site.new(%{})
+    assert {:error, _error} = SiteList.new(%{})
+    assert {:error, _error} = Column.new(%{})
+    assert {:error, _error} = ListItem.new(%{})
   end
 
   defp fixture!(name) do
