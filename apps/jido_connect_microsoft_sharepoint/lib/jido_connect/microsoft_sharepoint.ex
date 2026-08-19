@@ -92,4 +92,14 @@ defmodule Jido.Connect.MicrosoftSharepoint do
       decision(:allow_operation)
     end
   end
+
+  defdelegate catalog_packs, to: Jido.Connect.MicrosoftSharepoint.CatalogPacks, as: :all
+  defdelegate metadata_pack, to: Jido.Connect.MicrosoftSharepoint.CatalogPacks, as: :metadata
+  defdelegate read_pack, to: Jido.Connect.MicrosoftSharepoint.CatalogPacks, as: :read
+  defdelegate sync_pack, to: Jido.Connect.MicrosoftSharepoint.CatalogPacks, as: :sync
+  defdelegate write_pack, to: Jido.Connect.MicrosoftSharepoint.CatalogPacks, as: :write
+
+  defdelegate destructive_pack,
+    to: Jido.Connect.MicrosoftSharepoint.CatalogPacks,
+    as: :destructive
 end

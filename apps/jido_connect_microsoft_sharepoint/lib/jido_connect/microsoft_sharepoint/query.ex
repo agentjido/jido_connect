@@ -29,6 +29,21 @@ defmodule Jido.Connect.MicrosoftSharepoint.Query do
     end
   end
 
+  @spec delta_params(map()) :: {:ok, map()} | {:error, Error.ConfigError.t()}
+  def delta_params(input) do
+    with {:ok, expand} <- fields_expand(Map.get(input, :fields)),
+         {:ok, token} <- delta_token(Map.get(input, :token)) do
+      params =
+        input
+        |> page()
+        |> Map.drop([:"$skip"])
+        |> Map.put(:"$expand", expand)
+        |> maybe_put(:token, token)
+
+      {:ok, params}
+    end
+  end
+
   @spec write_fields(term()) :: {:ok, map()} | {:error, Error.ConfigError.t()}
   def write_fields(fields)
       when is_map(fields) and map_size(fields) > 0 and map_size(fields) <= 200 do
@@ -55,6 +70,19 @@ defmodule Jido.Connect.MicrosoftSharepoint.Query do
   end
 
   def etag(_value), do: {:error, Error.config("SharePoint item ETag is required", key: :etag)}
+
+  defp delta_token(nil), do: {:ok, nil}
+
+  defp delta_token(token) when is_binary(token) and byte_size(token) <= 4096 do
+    if String.trim(token) == "" do
+      {:error, Error.config("SharePoint delta token is invalid", key: :token)}
+    else
+      {:ok, token}
+    end
+  end
+
+  defp delta_token(_token),
+    do: {:error, Error.config("SharePoint delta token is invalid", key: :token)}
 
   defp fields_expand(nil), do: {:ok, "fields"}
   defp fields_expand([]), do: {:ok, "fields"}

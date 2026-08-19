@@ -23,6 +23,7 @@ defmodule Jido.Connect.MicrosoftSharepoint.ScopeResolver do
     "microsoft.sharepoint.list.items.list"
   ]
   @item_actions ["microsoft.sharepoint.list.item.get"]
+  @delta_actions ["microsoft.sharepoint.list.items.delta"]
 
   @library_site_actions ["microsoft.sharepoint.libraries.list"]
   @library_read_actions [
@@ -49,6 +50,7 @@ defmodule Jido.Connect.MicrosoftSharepoint.ScopeResolver do
       operation_id in @library_read_actions -> library_read_scope(scopes)
       operation_id in @library_site_actions -> library_site_scope(scopes)
       operation_id in @write_actions -> write_scope(operation_id, scopes)
+      operation_id in @delta_actions -> tenant_read_scope(scopes)
       operation_id in @search_actions -> tenant_read_scope(scopes)
       operation_id in @item_actions -> item_read_scope(scopes)
       operation_id in @list_actions -> list_read_scope(scopes)
