@@ -491,6 +491,9 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
           credential_version < barrier.credential_version ->
             {:error, stale_fence_error()}
 
+          pending_fence?(target, barrier) ->
+            {:ok, state}
+
           not newer_ownership?(target, barrier) ->
             {:error, stale_fence_error()}
 
@@ -535,6 +538,12 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   defp newer_ownership?(ownership, barrier) do
     ownership.connection_revision > barrier.connection_revision or
       ownership.credential_version > barrier.credential_version
+  end
+
+  defp pending_fence?(ownership, barrier) do
+    ownership.connection_revision == barrier.connection_revision and
+      ownership.credential_version == barrier.credential_version and
+      is_nil(barrier.endpoint_fingerprint) and not barrier.tombstone?
   end
 
   defp stale_ownership, do: {:error, stale_fence_error()}

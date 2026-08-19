@@ -160,6 +160,25 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
     :ok = EndpointLeaseManager.release(replacement)
   end
 
+  test "a pending mutation fence is idempotent for a database retry", %{connection: connection} do
+    assert {:ok, old} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one"),
+               endpoint("secret-one")
+             )
+
+    ownership = [connection_revision: 8, credential_version: 2]
+
+    assert :ok = EndpointLeaseManager.fence(connection, ownership)
+    assert :ok = EndpointLeaseManager.fence(connection, ownership)
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_revoked}} =
+             EndpointLeaseManager.ensure_dispatchable(old)
+
+    :ok = EndpointLeaseManager.release(old)
+  end
+
   test "revocation leaves a tombstone for the revoked ownership", %{connection: connection} do
     assert {:ok, token} =
              EndpointLeaseManager.acquire(
