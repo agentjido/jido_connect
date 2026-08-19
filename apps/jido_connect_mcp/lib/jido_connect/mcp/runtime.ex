@@ -27,11 +27,20 @@ defmodule Jido.Connect.MCP.Runtime do
   end
 
   def call_tool(input, opts) do
+    call_typed_tool(input, opts, mutation?: true)
+  end
+
+  @doc false
+  @spec call_typed_tool(map(), keyword() | map(), mutation?: boolean()) ::
+          {:ok, map()} | {:error, Error.error()}
+  def call_typed_tool(input, opts, execution_opts) do
+    mutation? = Keyword.fetch!(execution_opts, :mutation?)
+
     with {:ok, token} <- EndpointResolver.resolve_lease(input.endpoint_id, opts) do
       try do
         with :ok <- ensure_dispatchable(token),
              :ok <- verify_schema(input, opts, token.endpoint_id),
-             {:ok, data} <- call_write(token, opts, input) do
+             {:ok, data} <- call_typed(token, opts, input, mutation?) do
           result =
             input.endpoint_id
             |> ToolResult.from_mcp(input.tool_name, data)
@@ -43,6 +52,19 @@ defmodule Jido.Connect.MCP.Runtime do
         release(token)
       end
     end
+  end
+
+  defp call_typed(token, opts, input, true), do: call_write(token, opts, input)
+
+  defp call_typed(token, opts, input, false) do
+    dispatch(token, fn ->
+      call_mcp(
+        opts,
+        :call_tool,
+        [token.endpoint_id, input.tool_name, input.arguments],
+        timeout(input)
+      )
+    end)
   end
 
   defp call_write(%{legacy?: true} = token, opts, input) do

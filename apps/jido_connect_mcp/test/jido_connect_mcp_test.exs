@@ -253,6 +253,39 @@ defmodule Jido.Connect.MCPTest do
              )
   end
 
+  test "typed read calls retain lease fences without mutation uncertainty" do
+    {context, lease} =
+      context_and_lease(
+        scopes: [
+          "mcp:tools:call",
+          "mcp:endpoint:filesystem",
+          "mcp:tool:fail"
+        ]
+      )
+
+    assert {:error,
+            %Connect.Error.ProviderError{
+              provider: :mcp,
+              reason: :transport,
+              mutation?: false
+            }} =
+             Jido.Connect.MCP.Runtime.call_typed_tool(
+               %{
+                 endpoint_id: "filesystem",
+                 tool_name: "fail",
+                 arguments: %{},
+                 expected_schema_hash: nil,
+                 timeout: 1_000
+               },
+               %{
+                 context: context,
+                 credential_lease: lease,
+                 credentials: lease.fields
+               },
+               mutation?: false
+             )
+  end
+
   test "MCP invalid client responses normalize to provider errors" do
     {context, lease} = context_and_lease(mcp_client: BadMCPClient)
 
