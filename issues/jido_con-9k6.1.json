@@ -1,0 +1,28 @@
+{
+  "assignee": "Mike Hostetler",
+  "blocked_by": [],
+  "blocks": [
+    "jido_con-9k6.2",
+    "jido_con-9k6.3",
+    "jido_con-9k6.4",
+    "jido_con-9k6.5",
+    "jido_con-9k6.6"
+  ],
+  "closed_at": "2026-08-19T21:03:41Z",
+  "created": "2026-08-19T20:59:07Z",
+  "description": "Record exact request, response, auth, endpoint, risk, and paging contracts for all 52 selected actions.",
+  "id": "jido_con-9k6.1",
+  "labels": [],
+  "parent": "jido_con-9k6",
+  "comments": [
+    {
+      "text": "Audited all 52 deferred actions against the archived Ando schemas, provider routes, and normalizers. Selected provider-prefixed canonical IDs. Jira, Confluence, and Bitbucket use official REST APIs. Trello uses the hosted Trello MCP endpoint. X uses official local XMCP. Exact mappings and risk boundaries are in docs/atlassian_trello_x_action_contracts.md.",
+      "timestamp": "2026-08-19T21:03:40Z"
+    }
+  ],
+  "priority": 2,
+  "status": "closed",
+  "title": "Audit selected Ando action contracts",
+  "type": "task",
+  "updated_at": "2026-08-19T21:03:41Z"
+}

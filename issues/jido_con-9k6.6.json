@@ -1,0 +1,19 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-9k6.1"
+  ],
+  "blocks": [
+    "jido_con-9k6.7"
+  ],
+  "created": "2026-08-19T20:59:09Z",
+  "description": "Add the three reviewed X account, bookmark, and post actions and tests.",
+  "id": "jido_con-9k6.6",
+  "labels": [],
+  "parent": "jido_con-9k6",
+  "priority": 2,
+  "status": "open",
+  "title": "Add X reviewed actions",
+  "type": "task",
+  "updated_at": "2026-08-19T20:59:16Z"
+}

@@ -1,0 +1,23 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-9k6.2",
+    "jido_con-9k6.3",
+    "jido_con-9k6.4",
+    "jido_con-9k6.5",
+    "jido_con-9k6.6"
+  ],
+  "blocks": [
+    "jido_con-9k6.8"
+  ],
+  "created": "2026-08-19T20:59:10Z",
+  "description": "Add reviewed provider definitions, execution, grants, endpoint contracts, tests, and documentation in Wayfinder.",
+  "id": "jido_con-9k6.7",
+  "labels": [],
+  "parent": "jido_con-9k6",
+  "priority": 2,
+  "status": "open",
+  "title": "Publish connectors in Wayfinder",
+  "type": "task",
+  "updated_at": "2026-08-19T20:59:16Z"
+}

@@ -1,0 +1,17 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-9k6.7"
+  ],
+  "blocks": [],
+  "created": "2026-08-19T20:59:10Z",
+  "description": "Run repository quality gates, review, correct findings, publish immutable pins, and land both repositories in dependency order.",
+  "id": "jido_con-9k6.8",
+  "labels": [],
+  "parent": "jido_con-9k6",
+  "priority": 2,
+  "status": "open",
+  "title": "Verify and land connector integration",
+  "type": "task",
+  "updated_at": "2026-08-19T20:59:16Z"
+}

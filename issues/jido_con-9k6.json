@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-08-19T20:59:06Z",
+  "description": "Port the 52 deferred former Ando actions for Jira, Bitbucket, Confluence, Trello, and X into reusable Jido Connect integrations and reviewed Wayfinder publication.\n\n```mermaid\ngraph LR\n  audit --\u003e jira\n  audit --\u003e bitbucket\n  audit --\u003e confluence\n  audit --\u003e trello\n  audit --\u003e x\n  jira --\u003e wayfinder\n  bitbucket --\u003e wayfinder\n  confluence --\u003e wayfinder\n  trello --\u003e wayfinder\n  x --\u003e wayfinder\n  wayfinder --\u003e verify\n```",
+  "id": "jido_con-9k6",
+  "labels": [],
+  "priority": 1,
+  "status": "open",
+  "title": "Port Atlassian Trello and X actions",
+  "type": "epic",
+  "updated_at": "2026-08-19T20:59:06Z"
+}

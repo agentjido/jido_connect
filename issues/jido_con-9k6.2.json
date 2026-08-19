@@ -1,0 +1,19 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-9k6.1"
+  ],
+  "blocks": [
+    "jido_con-9k6.7"
+  ],
+  "created": "2026-08-19T20:59:07Z",
+  "description": "Add the 19 deferred Jira actions with focused clients, schemas, packs, and tests.",
+  "id": "jido_con-9k6.2",
+  "labels": [],
+  "parent": "jido_con-9k6",
+  "priority": 2,
+  "status": "open",
+  "title": "Extend Jira reviewed actions",
+  "type": "task",
+  "updated_at": "2026-08-19T20:59:14Z"
+}

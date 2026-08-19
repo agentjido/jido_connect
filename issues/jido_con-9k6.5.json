@@ -1,0 +1,19 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-9k6.1"
+  ],
+  "blocks": [
+    "jido_con-9k6.7"
+  ],
+  "created": "2026-08-19T20:59:09Z",
+  "description": "Add the 23 reviewed Trello board, card, checklist, label, and list actions and tests.",
+  "id": "jido_con-9k6.5",
+  "labels": [],
+  "parent": "jido_con-9k6",
+  "priority": 2,
+  "status": "open",
+  "title": "Add Trello reviewed actions",
+  "type": "task",
+  "updated_at": "2026-08-19T20:59:15Z"
+}
