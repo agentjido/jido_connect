@@ -6,14 +6,21 @@
   "blocks": [
     "jido_con-9k6.7"
   ],
+  "closed_at": "2026-08-19T23:16:11Z",
   "created": "2026-08-19T20:59:09Z",
   "description": "Add the 23 reviewed Trello board, card, checklist, label, and list actions and tests.",
   "id": "jido_con-9k6.5",
   "labels": [],
   "parent": "jido_con-9k6",
+  "comments": [
+    {
+      "text": "Implemented 23 reviewed typed Trello actions over the fixed official hosted MCP endpoint. Added strict board/workspace identity, caller override rejection, typed schemas and schema hashes, result-family normalizers, safe previews, reader/editor/destructive packs, and a narrow MCP typed-call seam that preserves leases, schema checks, generation/final fences, cleanup, and uncertain-write no-retry handling. Parent simplification applied shared validation/page search, early scope exit, compile-time schema hashes, central mutation classification, fixed error atoms, and capability preview files. Verification: Trello 29 tests at 85.47%; MCP 46 tests at 82.93%; strict compile/format and git diff checks passed.",
+      "timestamp": "2026-08-19T23:16:10Z"
+    }
+  ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "Add Trello reviewed actions",
   "type": "task",
-  "updated_at": "2026-08-19T20:59:15Z"
+  "updated_at": "2026-08-19T23:16:11Z"
 }
