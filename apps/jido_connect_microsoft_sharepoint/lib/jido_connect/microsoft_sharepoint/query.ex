@@ -29,6 +29,33 @@ defmodule Jido.Connect.MicrosoftSharepoint.Query do
     end
   end
 
+  @spec write_fields(term()) :: {:ok, map()} | {:error, Error.ConfigError.t()}
+  def write_fields(fields)
+      when is_map(fields) and map_size(fields) > 0 and map_size(fields) <= 200 do
+    normalized = Map.new(fields, fn {key, value} -> {to_string(key), value} end)
+
+    if Enum.all?(Map.keys(normalized), &valid_field?/1) do
+      {:ok, normalized}
+    else
+      {:error,
+       Error.config("SharePoint field values contain an invalid field name", key: :fields)}
+    end
+  end
+
+  def write_fields(_fields),
+    do: {:error, Error.config("SharePoint field values are required", key: :fields)}
+
+  @spec etag(term()) :: {:ok, String.t()} | {:error, Error.ConfigError.t()}
+  def etag(value) when is_binary(value) and byte_size(value) <= 512 do
+    if String.trim(value) == "" do
+      {:error, Error.config("SharePoint item ETag is required", key: :etag)}
+    else
+      {:ok, value}
+    end
+  end
+
+  def etag(_value), do: {:error, Error.config("SharePoint item ETag is required", key: :etag)}
+
   defp fields_expand(nil), do: {:ok, "fields"}
   defp fields_expand([]), do: {:ok, "fields"}
 

@@ -6,12 +6,16 @@ defmodule Jido.Connect.MicrosoftSharepoint.Client.Response do
 
   @spec single(term(), (map() -> {:ok, struct()} | {:error, term()}), atom(), String.t()) ::
           {:ok, map()} | {:error, term()}
-  def single(result, normalizer, output_key, message) do
+  def single(result, normalizer, output_key, message, success_statuses \\ [200]) do
     case result do
-      {:ok, %{status: 200, body: body}} when is_map(body) ->
-        case normalizer.(body) do
-          {:ok, resource} -> {:ok, %{output_key => resource}}
-          {:error, _reason} -> Transport.invalid_success_response(message, body)
+      {:ok, %{status: status, body: body} = response} when is_map(body) ->
+        if status in success_statuses do
+          case normalizer.(body) do
+            {:ok, resource} -> {:ok, %{output_key => resource}}
+            {:error, _reason} -> Transport.invalid_success_response(message, body)
+          end
+        else
+          Transport.handle_error_response({:ok, response}, message: message)
         end
 
       {:ok, response} ->

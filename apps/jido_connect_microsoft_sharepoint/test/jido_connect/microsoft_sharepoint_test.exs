@@ -12,13 +12,17 @@ defmodule Jido.Connect.MicrosoftSharepointTest do
     Jido.Connect.MicrosoftSharepoint.Actions.GetList,
     Jido.Connect.MicrosoftSharepoint.Actions.ListColumns,
     Jido.Connect.MicrosoftSharepoint.Actions.ListListItems,
-    Jido.Connect.MicrosoftSharepoint.Actions.GetListItem
+    Jido.Connect.MicrosoftSharepoint.Actions.GetListItem,
+    Jido.Connect.MicrosoftSharepoint.Actions.CreateListItem,
+    Jido.Connect.MicrosoftSharepoint.Actions.UpdateListItem,
+    Jido.Connect.MicrosoftSharepoint.Actions.DeleteListItem
   ]
 
   @fragments [
     Jido.Connect.MicrosoftSharepoint.Actions.Sites,
     Jido.Connect.MicrosoftSharepoint.Actions.Lists,
-    Jido.Connect.MicrosoftSharepoint.Actions.ListItems
+    Jido.Connect.MicrosoftSharepoint.Actions.ListItems,
+    Jido.Connect.MicrosoftSharepoint.Actions.ListItemWrites
   ]
 
   test "declares SharePoint provider metadata and auth profiles" do
@@ -38,7 +42,10 @@ defmodule Jido.Connect.MicrosoftSharepointTest do
              "microsoft.sharepoint.list.get",
              "microsoft.sharepoint.list.columns.list",
              "microsoft.sharepoint.list.items.list",
-             "microsoft.sharepoint.list.item.get"
+             "microsoft.sharepoint.list.item.get",
+             "microsoft.sharepoint.list.item.create",
+             "microsoft.sharepoint.list.item.update",
+             "microsoft.sharepoint.list.item.delete"
            ]
 
     assert spec.triggers == []
@@ -92,5 +99,34 @@ defmodule Jido.Connect.MicrosoftSharepointTest do
              %{},
              %{scopes: ["Sites.Selected"]}
            ) == ["Sites.Read.All"]
+  end
+
+  test "declares guarded list item writes and resolves write scopes" do
+    actions = MicrosoftSharepoint.integration().actions
+
+    create = Enum.find(actions, &(&1.id == "microsoft.sharepoint.list.item.create"))
+    update = Enum.find(actions, &(&1.id == "microsoft.sharepoint.list.item.update"))
+    delete = Enum.find(actions, &(&1.id == "microsoft.sharepoint.list.item.delete"))
+
+    assert create.risk == :external_write
+    assert create.confirmation == :required_for_ai
+    assert update.risk == :write
+    assert update.confirmation == :required_for_ai
+    assert delete.risk == :destructive
+    assert delete.confirmation == :always
+
+    resolver = Jido.Connect.MicrosoftSharepoint.ScopeResolver
+
+    assert resolver.required_scopes(create, %{}, %{scopes: ["Sites.Read.All"]}) == [
+             "Sites.ReadWrite.All"
+           ]
+
+    assert resolver.required_scopes(update, %{}, %{
+             scopes: ["ListItems.SelectedOperations.Selected"]
+           }) == ["ListItems.SelectedOperations.Selected"]
+
+    assert resolver.required_scopes(create, %{}, %{
+             scopes: ["Lists.SelectedOperations.Selected"]
+           }) == ["Lists.SelectedOperations.Selected"]
   end
 end

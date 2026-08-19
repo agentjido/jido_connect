@@ -7,6 +7,12 @@ defmodule Jido.Connect.MicrosoftSharepoint.ScopeResolver do
   @lists_selected "Lists.SelectedOperations.Selected"
   @list_items_selected "ListItems.SelectedOperations.Selected"
 
+  @write_actions [
+    "microsoft.sharepoint.list.item.create",
+    "microsoft.sharepoint.list.item.update",
+    "microsoft.sharepoint.list.item.delete"
+  ]
+
   @search_actions ["microsoft.sharepoint.sites.search"]
   @list_actions [
     "microsoft.sharepoint.list.get",
@@ -21,10 +27,31 @@ defmodule Jido.Connect.MicrosoftSharepoint.ScopeResolver do
     scopes = Map.get(connection, :scopes, [])
 
     cond do
+      operation_id in @write_actions -> write_scope(operation_id, scopes)
       operation_id in @search_actions -> tenant_read_scope(scopes)
       operation_id in @item_actions -> item_read_scope(scopes)
       operation_id in @list_actions -> list_read_scope(scopes)
       true -> site_read_scope(scopes)
+    end
+  end
+
+  defp write_scope(operation_id, scopes) do
+    cond do
+      operation_id != "microsoft.sharepoint.list.item.create" and
+          @list_items_selected in scopes ->
+        [@list_items_selected]
+
+      @lists_selected in scopes ->
+        [@lists_selected]
+
+      @sites_selected in scopes ->
+        [@sites_selected]
+
+      @sites_write in scopes ->
+        [@sites_write]
+
+      true ->
+        [@sites_write]
     end
   end
 

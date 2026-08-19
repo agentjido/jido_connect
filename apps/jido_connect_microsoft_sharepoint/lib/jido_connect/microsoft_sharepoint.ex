@@ -5,7 +5,8 @@ defmodule Jido.Connect.MicrosoftSharepoint do
     fragments: [
       Jido.Connect.MicrosoftSharepoint.Actions.Sites,
       Jido.Connect.MicrosoftSharepoint.Actions.Lists,
-      Jido.Connect.MicrosoftSharepoint.Actions.ListItems
+      Jido.Connect.MicrosoftSharepoint.Actions.ListItems,
+      Jido.Connect.MicrosoftSharepoint.Actions.ListItemWrites
     ]
 
   alias Jido.Connect.Microsoft.Scopes
