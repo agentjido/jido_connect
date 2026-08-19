@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-keu.3"
   ],
@@ -12,8 +12,8 @@
   "labels": [],
   "parent": "jido_con-keu",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "[G40-S04] Implement safe SharePoint list item writes",
   "type": "task",
-  "updated_at": "2026-08-19T21:36:38Z"
+  "updated_at": "2026-08-19T22:01:25Z"
 }
