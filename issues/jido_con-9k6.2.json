@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-9k6.1"
   ],
@@ -12,8 +12,8 @@
   "labels": [],
   "parent": "jido_con-9k6",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "Extend Jira reviewed actions",
   "type": "task",
-  "updated_at": "2026-08-19T20:59:14Z"
+  "updated_at": "2026-08-19T21:03:52Z"
 }
