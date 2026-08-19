@@ -2,7 +2,7 @@ defmodule Jido.Connect.MCP.EndpointResolver do
   @moduledoc false
 
   alias Jido.Connect.{Context, CredentialLease, Error}
-  alias Jido.Connect.MCP.HostEndpoint
+  alias Jido.Connect.MCP.{EndpointLeaseManager, HostEndpoint}
 
   @doc """
   Resolves an MCP endpoint identifier to a confirmed Jido MCP endpoint.
@@ -17,7 +17,14 @@ defmodule Jido.Connect.MCP.EndpointResolver do
     do: resolve(Atom.to_string(endpoint_id), opts)
 
   def resolve(endpoint_id, opts) when is_binary(endpoint_id) do
-    case do_resolve(endpoint_id, opts) do
+    case resolve_lease(endpoint_id, opts) do
+      {:ok, %{endpoint_id: resolved, legacy?: true}} ->
+        {:ok, resolved}
+
+      {:ok, %{endpoint_id: resolved} = token} ->
+        :ok = EndpointLeaseManager.release(token)
+        {:ok, resolved}
+
       {:ok, resolved} ->
         {:ok, resolved}
 
@@ -43,18 +50,56 @@ defmodule Jido.Connect.MCP.EndpointResolver do
      )}
   end
 
+  @doc false
+  @spec resolve_lease(atom() | String.t(), keyword() | map()) ::
+          {:ok, EndpointLeaseManager.token() | %{endpoint_id: atom() | String.t(), legacy?: true}}
+          | {:error, Error.error()}
+  def resolve_lease(endpoint_id, opts \\ [])
+
+  def resolve_lease(endpoint_id, opts) when is_atom(endpoint_id),
+    do: resolve_lease(Atom.to_string(endpoint_id), opts)
+
+  def resolve_lease(endpoint_id, opts) when is_binary(endpoint_id) do
+    case do_resolve_lease(endpoint_id, opts) do
+      {:ok, resolved} ->
+        {:ok, resolved}
+
+      {:error, %_module{} = error} ->
+        {:error, error}
+
+      {:error, reason} ->
+        {:error,
+         Error.validation("Unknown MCP endpoint",
+           reason: :unknown_mcp_endpoint,
+           subject: endpoint_id,
+           details: %{mcp_reason: reason}
+         )}
+    end
+  end
+
+  def resolve_lease(endpoint_id, _opts) do
+    {:error,
+     Error.validation("Unknown MCP endpoint",
+       reason: :unknown_mcp_endpoint,
+       subject: endpoint_id,
+       details: %{mcp_reason: :invalid_endpoint_id}
+     )}
+  end
+
   # -- private ----------------------------------------------------------------
 
-  defp do_resolve(endpoint_id, opts) do
+  defp do_resolve_lease(endpoint_id, opts) do
     case host_context(opts) do
       {:ok, context, lease} ->
-        with {:ok, _public_id, internal_id} <-
-               HostEndpoint.resolve(endpoint_id, context.connection, lease) do
-          {:ok, internal_id}
+        with {:ok, _public_id, endpoint} <-
+               HostEndpoint.endpoint(endpoint_id, context.connection, lease) do
+          EndpointLeaseManager.acquire(context.connection, lease, endpoint)
         end
 
       :legacy ->
-        resolve_registered(endpoint_id)
+        with {:ok, endpoint_id} <- resolve_registered(endpoint_id) do
+          {:ok, %{endpoint_id: endpoint_id, legacy?: true}}
+        end
     end
   end
 

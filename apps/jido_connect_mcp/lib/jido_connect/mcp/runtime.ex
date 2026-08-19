@@ -2,37 +2,82 @@ defmodule Jido.Connect.MCP.Runtime do
   @moduledoc false
 
   alias Jido.Connect.Error
-  alias Jido.Connect.MCP.{EndpointResolver, Tool, ToolResult}
+  alias Jido.Connect.MCP.{EndpointLeaseManager, EndpointResolver, Tool, ToolResult}
 
   def list_tools(input, opts) do
-    with {:ok, endpoint_id} <- EndpointResolver.resolve(input.endpoint_id, opts),
-         {:ok, data} <- call_mcp(opts, :list_tools, [endpoint_id], timeout(input)) do
-      tools =
-        data
-        |> Map.get("tools", [])
-        |> Enum.map(&Tool.from_mcp/1)
-        |> Enum.map(&Tool.to_map/1)
+    with {:ok, token} <- EndpointResolver.resolve_lease(input.endpoint_id, opts) do
+      try do
+        with :ok <- ensure_dispatchable(token),
+             {:ok, data} <-
+               dispatch(token, fn ->
+                 call_mcp(opts, :list_tools, [token.endpoint_id], timeout(input))
+               end) do
+          tools =
+            data
+            |> Map.get("tools", [])
+            |> Enum.map(&Tool.from_mcp/1)
+            |> Enum.map(&Tool.to_map/1)
 
-      {:ok, %{endpoint_id: input.endpoint_id, tools: tools}}
+          {:ok, %{endpoint_id: input.endpoint_id, tools: tools}}
+        end
+      after
+        release(token)
+      end
     end
   end
 
   def call_tool(input, opts) do
-    with {:ok, endpoint_id} <- EndpointResolver.resolve(input.endpoint_id, opts),
-         :ok <- verify_schema(input, opts, endpoint_id),
-         {:ok, data} <-
+    with {:ok, token} <- EndpointResolver.resolve_lease(input.endpoint_id, opts) do
+      try do
+        with :ok <- ensure_dispatchable(token),
+             :ok <- verify_schema(input, opts, token.endpoint_id),
+             {:ok, data} <- call_write(token, opts, input) do
+          result =
+            input.endpoint_id
+            |> ToolResult.from_mcp(input.tool_name, data)
+            |> ToolResult.to_map()
+
+          {:ok, %{result: result}}
+        end
+      after
+        release(token)
+      end
+    end
+  end
+
+  defp call_write(%{legacy?: true} = token, opts, input) do
+    call_mcp(
+      opts,
+      :call_tool,
+      [token.endpoint_id, input.tool_name, input.arguments],
+      timeout(input)
+    )
+  end
+
+  defp call_write(token, opts, input) do
+    case EndpointLeaseManager.dispatch(token, fn ->
            call_mcp(
              opts,
              :call_tool,
-             [endpoint_id, input.tool_name, input.arguments],
+             [token.endpoint_id, input.tool_name, input.arguments],
              timeout(input)
-           ) do
-      result =
-        input.endpoint_id
-        |> ToolResult.from_mcp(input.tool_name, data)
-        |> ToolResult.to_map()
+           )
+         end) do
+      {:ok, {:error, _error}, true} ->
+        {:error,
+         Error.provider("MCP write outcome is uncertain",
+           provider: :mcp,
+           reason: :mcp_write_uncertain,
+           delivery: :sent_outcome_unknown,
+           mutation?: true,
+           details: %{endpoint_generation: token.generation}
+         )}
 
-      {:ok, %{result: result}}
+      {:ok, result, _revoked?} ->
+        result
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 
@@ -162,4 +207,19 @@ defmodule Jido.Connect.MCP.Runtime do
       details: %{response: Jido.Connect.Sanitizer.sanitize(response, :transport)}
     )
   end
+
+  defp ensure_dispatchable(%{legacy?: true}), do: :ok
+  defp ensure_dispatchable(token), do: EndpointLeaseManager.ensure_dispatchable(token)
+
+  defp dispatch(%{legacy?: true}, fun), do: fun.()
+
+  defp dispatch(token, fun) do
+    case EndpointLeaseManager.dispatch(token, fun) do
+      {:ok, result, _revoked?} -> result
+      {:error, error} -> {:error, error}
+    end
+  end
+
+  defp release(%{legacy?: true}), do: :ok
+  defp release(token), do: EndpointLeaseManager.release(token)
 end

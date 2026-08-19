@@ -1,20 +1,30 @@
 defmodule Jido.Connect.MCP.HostEndpoint do
   @moduledoc false
 
-  alias Jido.Connect.{Connection, CredentialLease, Data, Error, Sanitizer}
-  alias Jido.MCP.{ClientPool, Endpoint}
+  alias Jido.Connect.{Connection, CredentialLease, Data, Error}
+  alias Jido.Connect.MCP.EndpointLeaseManager
+  alias Jido.MCP.Endpoint
 
   @id_prefix "jido-connect:"
 
   @spec resolve(atom() | String.t(), Connection.t(), CredentialLease.t()) ::
           {:ok, String.t(), String.t()} | {:error, Error.error()}
   def resolve(requested_id, %Connection{} = connection, %CredentialLease{} = lease) do
+    with {:ok, public_id, endpoint} <- endpoint(requested_id, connection, lease),
+         {:ok, token} <- EndpointLeaseManager.acquire(connection, lease, endpoint) do
+      :ok = EndpointLeaseManager.release(token)
+      {:ok, public_id, token.endpoint_id}
+    end
+  end
+
+  @doc false
+  @spec endpoint(atom() | String.t(), Connection.t(), CredentialLease.t()) ::
+          {:ok, String.t(), Endpoint.t()} | {:error, Error.error()}
+  def endpoint(requested_id, %Connection{} = connection, %CredentialLease{} = lease) do
     with {:ok, public_id} <- require_public_id(requested_id, connection),
          {:ok, endpoint_source} <- fetch_endpoint_source(lease),
-         internal_id = internal_id(connection),
-         {:ok, endpoint} <- build_endpoint(internal_id, endpoint_source),
-         :ok <- reconcile_endpoint(internal_id, endpoint) do
-      {:ok, public_id, internal_id}
+         {:ok, endpoint} <- build_endpoint(internal_id(connection), endpoint_source) do
+      {:ok, public_id, endpoint}
     end
   end
 
@@ -90,55 +100,6 @@ defmodule Jido.Connect.MCP.HostEndpoint do
     {:error,
      Error.config("MCP endpoint lease field is invalid",
        key: :mcp_endpoint,
-       details: %{reason: safe_reason(reason)}
-     )}
-  end
-
-  defp reconcile_endpoint(internal_id, endpoint) do
-    case :global.trans({__MODULE__, internal_id}, fn -> do_reconcile(internal_id, endpoint) end) do
-      :ok ->
-        :ok
-
-      {:error, %_module{} = error} ->
-        {:error, error}
-
-      {:aborted, reason} ->
-        {:error,
-         Error.execution("MCP endpoint registration lock failed",
-           phase: :endpoint_registration,
-           details: %{reason: Sanitizer.sanitize(reason, :transport)}
-         )}
-    end
-  end
-
-  defp do_reconcile(internal_id, endpoint) do
-    case ClientPool.fetch_endpoint(internal_id) do
-      {:ok, ^endpoint} ->
-        :ok
-
-      {:ok, _existing} ->
-        with {:ok, _removed} <- Jido.MCP.unregister_endpoint(internal_id),
-             {:ok, _registered} <- Jido.MCP.register_endpoint(endpoint) do
-          :ok
-        else
-          {:error, reason} -> registration_error(reason)
-        end
-
-      {:error, :unknown_endpoint} ->
-        case Jido.MCP.register_endpoint(endpoint) do
-          {:ok, _registered} -> :ok
-          {:error, reason} -> registration_error(reason)
-        end
-
-      {:error, reason} ->
-        registration_error(reason)
-    end
-  end
-
-  defp registration_error(reason) do
-    {:error,
-     Error.execution("MCP endpoint registration failed",
-       phase: :endpoint_registration,
        details: %{reason: safe_reason(reason)}
      )}
   end
