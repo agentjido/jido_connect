@@ -6,14 +6,21 @@
   "blocks": [
     "jido_con-9k6.7"
   ],
+  "closed_at": "2026-08-19T21:49:45Z",
   "created": "2026-08-19T20:59:08Z",
   "description": "Add the reviewed Bitbucket pull-request list integration and tests.",
   "id": "jido_con-9k6.3",
   "labels": [],
   "parent": "jido_con-9k6",
+  "comments": [
+    {
+      "text": "Implemented the distinct Bitbucket provider and bitbucket.pull_request.list with strict schemas, official-host credential fencing, exact REST v2 request mapping, normalized secret-safe results/errors, a reviewed reader pack, generated-action coverage, and docs. Simplification review applied 2 quality/security changes, found no reuse changes, and skipped 2 low-value efficiency changes. Verification: package mix quality passed with 11 tests and 80.45% coverage after review; focused format/compile/test passed; git diff --check passed.",
+      "timestamp": "2026-08-19T21:49:45Z"
+    }
+  ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "Add Bitbucket pull request action",
   "type": "task",
-  "updated_at": "2026-08-19T20:59:14Z"
+  "updated_at": "2026-08-19T21:49:45Z"
 }
