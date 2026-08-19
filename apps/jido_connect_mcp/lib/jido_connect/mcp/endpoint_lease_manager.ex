@@ -37,6 +37,23 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   @spec release(token()) :: :ok
   def release(token) when is_map(token), do: call({:release, token})
 
+  @doc """
+  Retires the current endpoint and sets the minimum durable ownership versions
+  that a replacement endpoint can use.
+
+  The fence is monotonic. A caller cannot lower either version or clear a
+  revocation tombstone without advancing at least one version.
+  """
+  @spec fence(Connection.t() | String.t(), keyword()) :: :ok | {:error, Error.error()}
+  def fence(%Connection{id: connection_id}, opts), do: fence(connection_id, opts)
+
+  def fence(connection_id, opts) when is_binary(connection_id) and is_list(opts) do
+    with {:ok, connection_revision} <- fence_version(opts, :connection_revision),
+         {:ok, credential_version} <- fence_version(opts, :credential_version) do
+      call({:fence, connection_id, connection_revision, credential_version})
+    end
+  end
+
   @spec ensure_dispatchable(token()) :: :ok | {:error, Error.error()}
   def ensure_dispatchable(token) when is_map(token),
     do: call({:ensure_dispatchable, token})
@@ -99,6 +116,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
        records: %{},
        current: %{},
        generations: %{},
+       ownership_barriers: %{},
        drain_timeout_ms: Keyword.get(opts, :drain_timeout_ms, @default_drain_timeout_ms)
      }}
   end
@@ -141,7 +159,22 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   end
 
   def handle_call({:revoke, connection_id}, _from, state) do
+    state = tombstone_ownership(connection_id, state)
     {:reply, :ok, retire_connection(connection_id, state, :revoked)}
+  end
+
+  def handle_call(
+        {:fence, connection_id, connection_revision, credential_version},
+        _from,
+        state
+      ) do
+    case advance_fence(connection_id, connection_revision, credential_version, state) do
+      {:ok, state} ->
+        {:reply, :ok, retire_connection(connection_id, state, :revoked)}
+
+      {:error, error} ->
+        {:reply, {:error, error}, state}
+    end
   end
 
   def handle_call({:expire, connection_id}, _from, state) do
@@ -185,19 +218,23 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   end
 
   defp acquire_record(ownership, endpoint, state) do
-    current_key = Map.get(state.current, ownership.connection_id)
+    with :ok <- validate_ownership_barrier(ownership, state) do
+      current_key = Map.get(state.current, ownership.connection_id)
 
-    case Map.get(state.records, current_key) do
-      record when is_map(record) ->
-        if same_ownership?(record, ownership) do
-          record = increment_active(record)
-          {:ok, record, put_in(state.records[record.key], record)}
-        else
-          register_new_generation(ownership, endpoint, record, state)
-        end
+      case Map.get(state.records, current_key) do
+        record when is_map(record) ->
+          if same_ownership?(record, ownership) do
+            record = increment_active(record)
+            {:ok, record, put_in(state.records[record.key], record)}
+          else
+            register_new_generation(ownership, endpoint, record, state)
+          end
 
-      nil ->
-        register_new_generation(ownership, endpoint, nil, state)
+        nil ->
+          register_new_generation(ownership, endpoint, nil, state)
+      end
+    else
+      {:error, error} -> {:error, error, state}
     end
   end
 
@@ -219,6 +256,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
         state = put_in(state.records[record.key], record)
         state = put_in(state.current[ownership.connection_id], record.key)
         state = put_in(state.generations[ownership.connection_id], generation)
+        state = accept_ownership(ownership, state)
         schedule_expiry(record)
         state = if old_record, do: retire_record(old_record, state, :draining), else: state
         {:ok, record, state}
@@ -403,6 +441,113 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
       Enum.all?([:endpoint_fingerprint, :connection_revision, :credential_version], fn key ->
         Map.fetch!(record, key) == Map.fetch!(ownership, key)
       end)
+  end
+
+  defp validate_ownership_barrier(ownership, state) do
+    case Map.get(state.ownership_barriers, ownership.connection_id) do
+      nil ->
+        :ok
+
+      barrier ->
+        cond do
+          ownership.connection_revision < barrier.connection_revision -> stale_ownership()
+          ownership.credential_version < barrier.credential_version -> stale_ownership()
+          newer_ownership?(ownership, barrier) -> :ok
+          barrier.tombstone? -> stale_ownership()
+          is_nil(barrier.endpoint_fingerprint) -> :ok
+          ownership.endpoint_fingerprint == barrier.endpoint_fingerprint -> :ok
+          true -> stale_ownership()
+        end
+    end
+  end
+
+  defp accept_ownership(ownership, state) do
+    barrier = %{
+      connection_revision: ownership.connection_revision,
+      credential_version: ownership.credential_version,
+      endpoint_fingerprint: ownership.endpoint_fingerprint,
+      tombstone?: false
+    }
+
+    put_in(state.ownership_barriers[ownership.connection_id], barrier)
+  end
+
+  defp advance_fence(connection_id, connection_revision, credential_version, state) do
+    case Map.get(state.ownership_barriers, connection_id) do
+      nil ->
+        {:ok,
+         put_ownership_barrier(state, connection_id, connection_revision, credential_version)}
+
+      barrier ->
+        target = %{
+          connection_revision: connection_revision,
+          credential_version: credential_version
+        }
+
+        cond do
+          connection_revision < barrier.connection_revision ->
+            {:error, stale_fence_error()}
+
+          credential_version < barrier.credential_version ->
+            {:error, stale_fence_error()}
+
+          not newer_ownership?(target, barrier) ->
+            {:error, stale_fence_error()}
+
+          true ->
+            {:ok,
+             put_ownership_barrier(state, connection_id, connection_revision, credential_version)}
+        end
+    end
+  end
+
+  defp put_ownership_barrier(state, connection_id, connection_revision, credential_version) do
+    barrier = %{
+      connection_revision: connection_revision,
+      credential_version: credential_version,
+      endpoint_fingerprint: nil,
+      tombstone?: false
+    }
+
+    put_in(state.ownership_barriers[connection_id], barrier)
+  end
+
+  defp tombstone_ownership(connection_id, state) do
+    Map.update(
+      state,
+      :ownership_barriers,
+      %{},
+      &Map.update(&1, connection_id, empty_tombstone(), fn barrier ->
+        %{barrier | tombstone?: true}
+      end)
+    )
+  end
+
+  defp empty_tombstone do
+    %{
+      connection_revision: 0,
+      credential_version: 0,
+      endpoint_fingerprint: nil,
+      tombstone?: true
+    }
+  end
+
+  defp newer_ownership?(ownership, barrier) do
+    ownership.connection_revision > barrier.connection_revision or
+      ownership.credential_version > barrier.credential_version
+  end
+
+  defp stale_ownership, do: {:error, stale_fence_error()}
+
+  defp stale_fence_error do
+    Error.auth("MCP endpoint ownership is stale", reason: :mcp_endpoint_lease_stale)
+  end
+
+  defp fence_version(opts, key) do
+    case Keyword.get(opts, key) do
+      version when is_integer(version) and version >= 0 -> {:ok, version}
+      _other -> {:error, stale_fence_error()}
+    end
   end
 
   defp token(record),

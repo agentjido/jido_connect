@@ -5,7 +5,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
   alias Jido.Connect.MCP.EndpointLeaseManager
 
   setup do
-    connection = connection("lease-manager")
+    connection = connection("lease-manager-#{System.unique_integer([:positive])}")
     on_exit(fn -> EndpointLeaseManager.force_stop(connection) end)
     %{connection: connection}
   end
@@ -55,6 +55,128 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
     assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(old.endpoint_id)
     assert :ok = EndpointLeaseManager.ensure_dispatchable(replacement)
     :ok = EndpointLeaseManager.release(replacement)
+  end
+
+  test "an older ownership cannot return after a newer generation", %{
+    connection: connection
+  } do
+    assert {:ok, old} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one"),
+               endpoint("secret-one")
+             )
+
+    current_connection = put_in(connection.metadata[:connection_revision], 8)
+
+    assert {:ok, current} =
+             EndpointLeaseManager.acquire(
+               current_connection,
+               lease(current_connection, 2, "secret-two"),
+               endpoint("secret-two")
+             )
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_stale}} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one"),
+               endpoint("secret-one")
+             )
+
+    :ok = EndpointLeaseManager.release(old)
+    :ok = EndpointLeaseManager.release(current)
+  end
+
+  test "connection and credential versions are monotonic independently", %{
+    connection: connection
+  } do
+    current_connection = put_in(connection.metadata[:connection_revision], 8)
+
+    assert {:ok, current} =
+             EndpointLeaseManager.acquire(
+               current_connection,
+               lease(current_connection, 2, "secret-two"),
+               endpoint("secret-two")
+             )
+
+    older_connection = put_in(connection.metadata[:connection_revision], 7)
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_stale}} =
+             EndpointLeaseManager.acquire(
+               older_connection,
+               lease(older_connection, 3, "secret-three"),
+               endpoint("secret-three")
+             )
+
+    newer_connection = put_in(connection.metadata[:connection_revision], 9)
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_stale}} =
+             EndpointLeaseManager.acquire(
+               newer_connection,
+               lease(newer_connection, 1, "secret-one"),
+               endpoint("secret-one")
+             )
+
+    :ok = EndpointLeaseManager.release(current)
+  end
+
+  test "a mutation fence rejects late old ownership before the replacement arrives", %{
+    connection: connection
+  } do
+    assert {:ok, old} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one"),
+               endpoint("secret-one")
+             )
+
+    assert :ok =
+             EndpointLeaseManager.fence(connection,
+               connection_revision: 8,
+               credential_version: 2
+             )
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_revoked}} =
+             EndpointLeaseManager.ensure_dispatchable(old)
+
+    :ok = EndpointLeaseManager.release(old)
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_stale}} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one"),
+               endpoint("secret-one")
+             )
+
+    current_connection = put_in(connection.metadata[:connection_revision], 8)
+
+    assert {:ok, replacement} =
+             EndpointLeaseManager.acquire(
+               current_connection,
+               lease(current_connection, 2, "secret-two"),
+               endpoint("secret-two")
+             )
+
+    :ok = EndpointLeaseManager.release(replacement)
+  end
+
+  test "revocation leaves a tombstone for the revoked ownership", %{connection: connection} do
+    assert {:ok, token} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one"),
+               endpoint("secret-one")
+             )
+
+    assert :ok = EndpointLeaseManager.revoke(connection)
+    :ok = EndpointLeaseManager.release(token)
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_stale}} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one"),
+               endpoint("secret-one")
+             )
   end
 
   test "revocation during a possible send has one uncertain attempt and no retry", %{
