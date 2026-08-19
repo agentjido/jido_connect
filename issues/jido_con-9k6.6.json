@@ -11,9 +11,15 @@
   "id": "jido_con-9k6.6",
   "labels": [],
   "parent": "jido_con-9k6",
+  "comments": [
+    {
+      "text": "Implemented three reviewed typed X read actions over the exact official local XMCP endpoint. Added strict loopback and expected-username identity fencing, account-first ID injection, fixed tools/schemas, strict result normalization, caller override rejection, secret-safe errors, reader-only pack, and runtime rotation/revoke/cleanup tests. Parent simplification removed a false router dependency, derived the pack from the contract, and added standard formatter config. Verification: 22 tests, 82.96% coverage, warnings-as-errors compile, format, existing MCP 46 tests, and diff check passed.",
+      "timestamp": "2026-08-19T23:32:31Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Add X reviewed actions",
   "type": "task",
-  "updated_at": "2026-08-19T23:16:26Z"
+  "updated_at": "2026-08-19T23:32:31Z"
 }
