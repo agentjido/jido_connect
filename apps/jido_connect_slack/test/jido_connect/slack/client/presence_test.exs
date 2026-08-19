@@ -17,7 +17,12 @@ defmodule Jido.Connect.Slack.Client.PresenceTest do
   test "gets current availability and custom status" do
     Req.Test.stub(__MODULE__, fn conn ->
       case conn.request_path do
+        "/api/auth.test" ->
+          Req.Test.json(conn, %{ok: true, user_id: "U123"})
+
         "/api/users.getPresence" ->
+          assert %{"user" => "U123"} = URI.decode_query(conn.query_string)
+
           Req.Test.json(conn, %{
             ok: true,
             presence: "away",
@@ -120,6 +125,9 @@ defmodule Jido.Connect.Slack.Client.PresenceTest do
   test "rejects invalid optional presence fields" do
     Req.Test.stub(__MODULE__, fn conn ->
       case conn.request_path do
+        "/api/auth.test" ->
+          Req.Test.json(conn, %{ok: true, user_id: "U123"})
+
         "/api/users.getPresence" ->
           Req.Test.json(conn, %{ok: true, presence: "away", manual_away: "yes"})
 

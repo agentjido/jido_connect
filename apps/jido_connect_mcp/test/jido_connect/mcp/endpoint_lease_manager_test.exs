@@ -25,6 +25,46 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
     :ok = EndpointLeaseManager.release(second)
   end
 
+  test "reused ownership refreshes expiry and ignores the stale timer", %{
+    connection: connection
+  } do
+    first_expiry = DateTime.add(DateTime.utc_now(), 60, :second)
+    renewed_expiry = DateTime.add(first_expiry, 60, :second)
+
+    assert {:ok, first} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one", first_expiry),
+               endpoint("secret-one")
+             )
+
+    first_record =
+      EndpointLeaseManager
+      |> :sys.get_state()
+      |> Map.fetch!(:records)
+      |> Map.fetch!({connection.id, first.generation})
+
+    assert {:ok, renewed} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one", renewed_expiry),
+               endpoint("secret-one")
+             )
+
+    assert renewed.endpoint_id == first.endpoint_id
+    assert [%{expires_at: ^renewed_expiry}] = EndpointLeaseManager.ownership(connection)
+
+    send(
+      EndpointLeaseManager,
+      {:expire, {connection.id, renewed.generation}, first_record.expiry_token}
+    )
+
+    assert :ok = EndpointLeaseManager.ensure_dispatchable(renewed)
+
+    :ok = EndpointLeaseManager.release(first)
+    :ok = EndpointLeaseManager.release(renewed)
+  end
+
   test "rotation fences the old generation before its client is removed", %{
     connection: connection
   } do
@@ -415,10 +455,14 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
   end
 
   defp lease(connection, version, secret) do
+    lease(connection, version, secret, DateTime.add(DateTime.utc_now(), 300, :second))
+  end
+
+  defp lease(connection, version, secret, expires_at) do
     Connect.CredentialLease.from_connection!(
       connection,
       %{mcp_endpoint: endpoint_source(secret)},
-      expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
+      expires_at: expires_at,
       metadata: %{credential_version: version}
     )
   end

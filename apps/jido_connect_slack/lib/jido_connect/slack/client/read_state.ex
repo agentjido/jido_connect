@@ -202,7 +202,7 @@ defmodule Jido.Connect.Slack.Client.ReadState do
   end
 
   defp unread_count(conversation) do
-    case Data.get(conversation, "unread_count_display", Data.get(conversation, "unread_count")) do
+    case Data.get(conversation, "unread_count", Data.get(conversation, "unread_count_display")) do
       value when is_integer(value) and value >= 0 -> value
       _value -> nil
     end

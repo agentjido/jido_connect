@@ -91,6 +91,41 @@ defmodule Jido.Connect.Slack.Client.ReadStateTest do
              )
   end
 
+  test "uses total unread count when display count is zero" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      case conn.request_path do
+        "/api/users.conversations" ->
+          Req.Test.json(conn, %{
+            ok: true,
+            channels: [
+              %{
+                id: "C123",
+                name: "muted",
+                is_channel: true,
+                unread_count: 1,
+                unread_count_display: 0
+              }
+            ],
+            response_metadata: %{next_cursor: ""}
+          })
+
+        "/api/conversations.history" ->
+          Req.Test.json(conn, %{
+            ok: true,
+            messages: [%{ts: "1700000001.000100", user: "U1", text: "Unread"}],
+            has_more: false
+          })
+      end
+    end)
+
+    assert {:ok,
+            %{
+              count: 1,
+              conversations: [%{id: "C123", unread_count: 1}],
+              coverage: %{complete: true}
+            }} = Client.list_unread_messages(%{limit: 5}, "token")
+  end
+
   test "rejects an invalid successful history response" do
     Req.Test.stub(__MODULE__, fn conn ->
       case conn.request_path do

@@ -2,10 +2,11 @@ defmodule Jido.Connect.Slack.Client.Presence do
   @moduledoc "Slack presence, profile-status, and custom-emoji API boundary."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Slack.Client.{Response, Transport}
+  alias Jido.Connect.Slack.Client.{Identity, Response, Transport}
 
   def get_presence(access_token) when is_binary(access_token) do
-    with {:ok, presence} <- get("/users.getPresence", %{}, access_token),
+    with {:ok, user_id} <- current_user_id(access_token),
+         {:ok, presence} <- get("/users.getPresence", %{user: user_id}, access_token),
          {:ok, profile_response} <- get("/users.profile.get", %{}, access_token),
          {:ok, availability} <- normalize_availability(presence),
          {:ok, status} <- profile_response |> Data.get("profile") |> normalize_status() do
@@ -41,6 +42,16 @@ defmodule Jido.Connect.Slack.Client.Presence do
     with {:ok, response} <- post("/users.profile.set", attrs, access_token),
          {:ok, status} <- response |> Data.get("profile") |> normalize_status() do
       {:ok, %{status: status}}
+    end
+  end
+
+  defp current_user_id(access_token) do
+    with {:ok, response} <- Identity.auth_test(access_token),
+         user_id when is_binary(user_id) and user_id != "" <- Data.get(response, "user_id") do
+      {:ok, user_id}
+    else
+      {:error, _error} = error -> error
+      _other -> Transport.invalid_success_response("Slack auth response was invalid", %{})
     end
   end
 

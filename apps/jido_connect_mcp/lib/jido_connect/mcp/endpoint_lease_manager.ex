@@ -210,10 +210,18 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
     end
   end
 
-  def handle_info({:expire, key}, state) do
+  def handle_info({:expire, key, expiry_token}, state) do
     case Map.fetch(state.records, key) do
-      {:ok, record} -> {:noreply, retire_record(record, state, :expired)}
-      :error -> {:noreply, state}
+      {:ok, %{expiry_token: ^expiry_token} = record} ->
+        if DateTime.compare(record.expires_at, DateTime.utc_now()) == :gt do
+          record = schedule_expiry(record)
+          {:noreply, put_in(state.records[key], record)}
+        else
+          {:noreply, retire_record(record, state, :expired)}
+        end
+
+      _stale_or_missing ->
+        {:noreply, state}
     end
   end
 
@@ -224,7 +232,12 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
       case Map.get(state.records, current_key) do
         record when is_map(record) ->
           if same_ownership?(record, ownership) do
-            record = increment_active(record)
+            record =
+              record
+              |> refresh_expiry(ownership.expires_at)
+              |> increment_active()
+              |> schedule_expiry()
+
             {:ok, record, put_in(state.records[record.key], record)}
           else
             register_new_generation(ownership, endpoint, record, state)
@@ -253,11 +266,11 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
             status: :active
           })
 
+        record = schedule_expiry(record)
         state = put_in(state.records[record.key], record)
         state = put_in(state.current[ownership.connection_id], record.key)
         state = put_in(state.generations[ownership.connection_id], generation)
         state = accept_ownership(ownership, state)
-        schedule_expiry(record)
         state = if old_record, do: retire_record(old_record, state, :draining), else: state
         {:ok, record, state}
 
@@ -574,6 +587,12 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   defp increment_active(record), do: %{record | active: record.active + 1}
   defp decrement_active(record), do: %{record | active: max(record.active - 1, 0)}
 
+  defp refresh_expiry(record, expires_at) do
+    if DateTime.compare(expires_at, record.expires_at) == :gt,
+      do: %{record | expires_at: expires_at},
+      else: record
+  end
+
   defp public_record(record) do
     record
     |> Map.take([
@@ -595,7 +614,9 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
 
   defp schedule_expiry(record) do
     timeout = max(DateTime.diff(record.expires_at, DateTime.utc_now(), :millisecond), 1)
-    Process.send_after(self(), {:expire, record.key}, timeout)
+    expiry_token = make_ref()
+    Process.send_after(self(), {:expire, record.key, expiry_token}, timeout)
+    Map.put(record, :expiry_token, expiry_token)
   end
 
   defp call(message, timeout \\ 5_000) do
