@@ -11,6 +11,8 @@ defmodule Jido.Connect.Microsoft.OAuth do
 
   @authorize_url "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
   @token_url "https://login.microsoftonline.com/common/oauth2/v2.0/token"
+  @token_url_template "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token"
+  @graph_default_scope "https://graph.microsoft.com/.default"
   @default_scope ["openid", "email", "profile", "offline_access"]
 
   @doc "Builds a Microsoft OAuth authorization URL."
@@ -75,6 +77,29 @@ defmodule Jido.Connect.Microsoft.OAuth do
     |> handle_token_response("Microsoft OAuth token refresh failed")
   end
 
+  @doc "Gets an application access token with the Microsoft client credentials flow."
+  @spec client_credentials(keyword()) :: {:ok, map()} | {:error, Error.error()}
+  def client_credentials(opts \\ []) when is_list(opts) do
+    client_id = OAuth.fetch_required!(opts, :client_id, "MICROSOFT_CLIENT_ID")
+    client_secret = OAuth.fetch_required!(opts, :client_secret, "MICROSOFT_CLIENT_SECRET")
+    tenant_id = OAuth.fetch_required!(opts, :tenant_id, "MICROSOFT_TENANT_ID")
+
+    with {:ok, token_url} <- application_token_url(tenant_id, opts) do
+      opts
+      |> Keyword.put(:token_url, token_url)
+      |> token_request()
+      |> Req.post(
+        form: %{
+          client_id: client_id,
+          client_secret: client_secret,
+          grant_type: "client_credentials",
+          scope: Keyword.get(opts, :scope, @graph_default_scope) |> maybe_encode_scope()
+        }
+      )
+      |> handle_token_response("Microsoft OAuth client credentials exchange failed")
+    end
+  end
+
   @doc "Builds a short-lived credential lease from a Microsoft token response."
   @spec credential_lease(Connection.t(), map(), keyword()) ::
           {:ok, CredentialLease.t()} | {:error, term()}
@@ -116,6 +141,26 @@ defmodule Jido.Connect.Microsoft.OAuth do
       headers: [{"content-type", "application/x-www-form-urlencoded"}]
     )
     |> Req.merge(Application.get_env(:jido_connect_microsoft, :microsoft_oauth_req_options, []))
+  end
+
+  defp application_token_url(tenant_id, opts) do
+    case Keyword.get(opts, :token_url) do
+      token_url when is_binary(token_url) and token_url != "" ->
+        {:ok, token_url}
+
+      _missing ->
+        tenant = to_string(tenant_id)
+
+        if Regex.match?(~r/\A[A-Za-z0-9._-]+\z/, tenant) do
+          {:ok, String.replace(@token_url_template, "{tenant}", tenant)}
+        else
+          {:error,
+           Error.config("Microsoft tenant_id is invalid",
+             key: :tenant_id,
+             details: %{source: :microsoft_oauth}
+           )}
+        end
+    end
   end
 
   defp handle_token_response({:ok, %{status: status, body: body}}, message)
