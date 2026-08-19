@@ -173,6 +173,60 @@ defmodule Jido.Connect.Jira.Actions.Issues do
       end
     end
 
+    action :list_issue_transitions do
+      id("jira.issue.transition.list")
+      resource(:transition)
+      verb(:list)
+      data_classification(:workspace_metadata)
+      label("List issue transitions")
+      description("List the workflow transitions available for one Jira issue.")
+      handler(Jido.Connect.Jira.Handlers.Actions.ListIssueTransitions)
+      effect(:read)
+
+      access do
+        auth([:api_token, :oauth2_user], default: :api_token)
+        policies([:project_access])
+        scopes(["read:jira-work"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:issue_key, :string, required?: true, min_length: 1, max_length: 255)
+      end
+
+      output do
+        field(:issue_key, :string)
+        field(:transitions, {:array, :map})
+        field(:count, :integer)
+      end
+    end
+
+    action :delete_issue do
+      id("jira.issue.delete")
+      resource(:issue)
+      verb(:delete)
+      data_classification(:workspace_content)
+      label("Delete issue")
+      description("Permanently delete one Jira issue.")
+      handler(Jido.Connect.Jira.Handlers.Actions.DeleteIssue)
+      preview(Jido.Connect.Jira.Previews.DeleteIssue)
+      effect(:destructive, confirmation: :always)
+
+      access do
+        auth([:api_token, :oauth2_user], default: :api_token)
+        policies([:project_access])
+        scopes(["write:jira-work"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:issue_key, :string, required?: true, min_length: 1, max_length: 255)
+      end
+
+      output do
+        field(:issue_key, :string)
+        field(:deleted, :boolean)
+      end
+    end
+
     action :assign_issue do
       id("jira.issue.assign")
       resource(:issue)

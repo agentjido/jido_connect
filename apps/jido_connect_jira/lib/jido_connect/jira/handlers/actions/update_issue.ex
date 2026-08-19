@@ -1,18 +1,13 @@
 defmodule Jido.Connect.Jira.Handlers.Actions.UpdateIssue do
   @moduledoc false
 
-  alias Jido.Connect.Jira.Client
+  alias Jido.Connect.Jira.Handlers.Actions.Support
 
   @updatable_fields [:summary, :description, :priority, :labels, :assignee_account_id]
 
   def run(input, runtime) do
     attrs = build_update_fields(input)
-    client = Client.resolve(runtime)
-
-    with {:ok, request} <- Client.request_context(runtime),
-         {:ok, result} <- client.update_issue(input.issue_key, attrs, request) do
-      {:ok, result}
-    end
+    Support.call(runtime, & &1.update_issue(input.issue_key, attrs, &2))
   end
 
   defp build_update_fields(input) do
