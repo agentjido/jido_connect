@@ -6,14 +6,15 @@
   "blocks": [
     "jido_con-keu.6"
   ],
+  "closed_at": "2026-08-19T22:07:15Z",
   "created": "2026-08-19T21:36:33Z",
   "description": "Implement list-item create, update, and delete actions with previews, confirmation policy, ETag support, normalized errors, and tests.",
   "id": "jido_con-keu.4",
   "labels": [],
   "parent": "jido_con-keu",
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "[G40-S04] Implement safe SharePoint list item writes",
   "type": "task",
-  "updated_at": "2026-08-19T22:01:25Z"
+  "updated_at": "2026-08-19T22:07:15Z"
 }
