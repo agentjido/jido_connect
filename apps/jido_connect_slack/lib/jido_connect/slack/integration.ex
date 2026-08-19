@@ -13,6 +13,8 @@ defmodule Jido.Connect.Slack do
       Jido.Connect.Slack.Actions.Identity,
       Jido.Connect.Slack.Actions.Messages,
       Jido.Connect.Slack.Actions.Pins,
+      Jido.Connect.Slack.Actions.Presence,
+      Jido.Connect.Slack.Actions.ReadState,
       Jido.Connect.Slack.Actions.Reactions,
       Jido.Connect.Slack.Actions.Users,
       Jido.Connect.Slack.Triggers.Events.Messages,
@@ -124,11 +126,49 @@ defmodule Jido.Connect.Slack do
       lease_fields [:access_token]
 
       scopes [
+        "channels:history",
+        "channels:read",
+        "channels:write",
         "chat:write",
-        "search:read"
+        "emoji:read",
+        "groups:history",
+        "groups:read",
+        "groups:write",
+        "im:history",
+        "im:read",
+        "im:write",
+        "mpim:history",
+        "mpim:read",
+        "mpim:write",
+        "search:read",
+        "users:read",
+        "users.profile:read",
+        "users.profile:write",
+        "users:write"
       ]
 
-      default_scopes ["chat:write", "search:read"]
+      default_scopes [
+        "channels:history",
+        "channels:read",
+        "channels:write",
+        "chat:write",
+        "emoji:read",
+        "groups:history",
+        "groups:read",
+        "groups:write",
+        "im:history",
+        "im:read",
+        "im:write",
+        "mpim:history",
+        "mpim:read",
+        "mpim:write",
+        "search:read",
+        "users:read",
+        "users.profile:read",
+        "users.profile:write",
+        "users:write"
+      ]
+
       pkce? false
       refresh? false
       revoke? false

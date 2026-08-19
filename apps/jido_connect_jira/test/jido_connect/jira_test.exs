@@ -4,6 +4,18 @@ defmodule Jido.Connect.JiraTest do
   alias Jido.Connect
   alias Jido.Connect.Jira
 
+  defmodule PreviewWriteClient do
+    def create_issue(_attrs, _request), do: unexpected_write()
+    def update_issue(_issue_key, _attrs, _request), do: unexpected_write()
+    def transition_issue(_issue_key, _transition_id, _request, _opts), do: unexpected_write()
+    def assign_issue(_issue_key, _account_id, _request), do: unexpected_write()
+
+    defp unexpected_write do
+      send(self(), :jira_preview_called_provider)
+      {:error, :unexpected_write}
+    end
+  end
+
   @jira_actions_fragment Jido.Connect.Jira.Actions.Issues
   @jira_projects_fragment Jido.Connect.Jira.Actions.Projects
   @jira_metadata_fragment Jido.Connect.Jira.Actions.Metadata
@@ -151,6 +163,87 @@ defmodule Jido.Connect.JiraTest do
     assert prepared.preview["issue_key"] == "PROJ-123"
     assert prepared.preview["comment_bytes"] == 16
     assert prepared.preview.action_id == "jira.issue.comment.create"
+  end
+
+  test "prepares safe issue write previews without calling the provider" do
+    runtime = Jido.Connect.Jira.TestRuntime.build()
+
+    lease =
+      Connect.CredentialLease.from_connection!(
+        runtime.context.connection,
+        runtime.credentials,
+        expires_at: DateTime.add(DateTime.utc_now(), 60, :second)
+      )
+
+    cases = [
+      {
+        "jira.issue.create",
+        %{
+          project_key: "PROJ",
+          issue_type: "Task",
+          summary: "Review the action plane",
+          description: "Private text",
+          labels: ["review"]
+        },
+        %{
+          "operation" => "create",
+          "project_key" => "PROJ",
+          "issue_type" => "Task",
+          "summary" => "Review the action plane",
+          "description_bytes" => 12,
+          "label_count" => 1
+        }
+      },
+      {
+        "jira.issue.update",
+        %{issue_key: "PROJ-123", summary: "Updated summary", description: "Private text"},
+        %{
+          "operation" => "update",
+          "issue_key" => "PROJ-123",
+          "changed_fields" => ["description", "summary"],
+          "summary" => "Updated summary",
+          "description_bytes" => 12
+        }
+      },
+      {
+        "jira.issue.transition",
+        %{
+          issue_key: "PROJ-123",
+          transition_id: "21",
+          fields: %{"resolution" => "Done"}
+        },
+        %{
+          "operation" => "transition",
+          "issue_key" => "PROJ-123",
+          "transition_id" => "21",
+          "field_names" => ["resolution"]
+        }
+      },
+      {
+        "jira.issue.assign",
+        %{issue_key: "PROJ-123", account_id: "account-42"},
+        %{
+          "operation" => "assign",
+          "issue_key" => "PROJ-123",
+          "account_id" => "account-42"
+        }
+      }
+    ]
+
+    for {action_id, input, expected} <- cases do
+      assert {:ok, prepared} =
+               Connect.prepare(Jira, action_id, input,
+                 context: runtime.context,
+                 credential_lease: lease,
+                 provider_client: PreviewWriteClient
+               )
+
+      assert Map.take(prepared.preview, Map.keys(expected)) == expected
+      assert prepared.preview.action_id == action_id
+      refute inspect(prepared.preview) =~ "Private text"
+    end
+
+    refute_received :jira_preview_called_provider
   end
 
   test "catalog entry exposes auth and runtime capabilities" do

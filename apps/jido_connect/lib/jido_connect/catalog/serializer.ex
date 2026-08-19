@@ -140,6 +140,8 @@ defmodule Jido.Connect.Catalog.Serializer do
       confirmation: descriptor.confirmation,
       provider_idempotency?: descriptor.provider_idempotency?,
       source: descriptor.source,
+      pack: json_safe(descriptor.pack),
+      reviewed_fingerprint: descriptor.reviewed_fingerprint,
       metadata: json_safe(descriptor.metadata)
     }
   end

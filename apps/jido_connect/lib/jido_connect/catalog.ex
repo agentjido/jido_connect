@@ -24,6 +24,7 @@ defmodule Jido.Connect.Catalog do
     Manifest,
     Pack,
     Ranker,
+    ReviewedDescriptor,
     Search,
     Serializer,
     ToolDescriber,
@@ -34,6 +35,7 @@ defmodule Jido.Connect.Catalog do
   }
 
   alias Jido.Connect.{Authorization, Connection, Context, Error}
+  alias Jido.Connect.Provider
   alias Jido.Connect.Jido.ToolAvailability
 
   @spec entry(module(), keyword()) :: Entry.t()
@@ -45,6 +47,50 @@ defmodule Jido.Connect.Catalog do
   @spec entries([module()], keyword()) :: [Entry.t()]
   def entries(integration_modules, opts \\ []) when is_list(integration_modules) do
     Enum.map(integration_modules, &entry(&1, opts))
+  end
+
+  @doc """
+  Returns reviewed executable descriptors for exact integration modules and one supplied pack.
+
+  This API never uses configured or installed connector discovery. A reviewed
+  pack must name only actions from the supplied modules. Triggers and the
+  generic MCP bridge actions are not executable reviewed descriptors.
+  """
+  @spec reviewed_descriptors(module() | [module()], Pack.t() | map()) ::
+          {:ok, [ToolDescriptor.t()]} | {:error, Error.error()}
+  def reviewed_descriptors(integration_module, pack) when is_atom(integration_module) do
+    reviewed_descriptors([integration_module], pack)
+  end
+
+  def reviewed_descriptors(integration_modules, pack) when is_list(integration_modules) do
+    with :ok <- require_exact_modules(integration_modules),
+         {:ok, pack} <- Pack.resolve_exact(pack),
+         {:ok, tools} <- exact_tool_entries(integration_modules),
+         :ok <- Pack.validate_reviewed_tools(pack, tools),
+         {:ok, tools} <- select_reviewed_actions(tools, pack) do
+      tools
+      |> Enum.reduce_while({:ok, []}, fn tool, {:ok, descriptors} ->
+        case ToolDescriber.describe(tool) do
+          {:ok, descriptor} ->
+            {:cont, {:ok, [ReviewedDescriptor.project(descriptor, pack) | descriptors]}}
+
+          {:error, _error} = error ->
+            {:halt, error}
+        end
+      end)
+      |> then(fn
+        {:ok, descriptors} -> {:ok, Enum.reverse(descriptors)}
+        {:error, _error} = error -> error
+      end)
+    end
+  end
+
+  def reviewed_descriptors(integration_modules, _pack) do
+    {:error,
+     Error.validation("Reviewed catalog requires a list of exact integration modules",
+       reason: :invalid_reviewed_modules,
+       subject: integration_modules
+     )}
   end
 
   @spec configured_modules() :: [module()]
@@ -213,6 +259,81 @@ defmodule Jido.Connect.Catalog do
     |> discover()
     |> Enum.flat_map(&Builder.tool_entries/1)
     |> Filter.tool_entries(opts)
+  end
+
+  defp require_exact_modules([]) do
+    {:error,
+     Error.validation("Reviewed catalog requires at least one integration module",
+       reason: :missing_reviewed_modules
+     )}
+  end
+
+  defp require_exact_modules(integration_modules) do
+    if Enum.all?(integration_modules, &is_atom/1) do
+      :ok
+    else
+      {:error,
+       Error.validation("Reviewed catalog modules must be integration modules",
+         reason: :invalid_reviewed_modules,
+         subject: integration_modules
+       )}
+    end
+  end
+
+  defp exact_tool_entries(integration_modules) do
+    integration_modules
+    |> Enum.uniq()
+    |> Enum.reduce_while({:ok, []}, fn integration_module, {:ok, tools} ->
+      with {:ok, spec} <- Provider.spec(integration_module) do
+        entry = Builder.entry_from_spec(spec, integration_module, nil)
+        {:cont, {:ok, tools ++ Builder.tool_entries(entry)}}
+      else
+        {:error, _error} = error -> {:halt, error}
+      end
+    end)
+  end
+
+  defp select_reviewed_actions(tools, pack) do
+    selected = Pack.filter_tools(tools, pack)
+
+    with :ok <- reject_selected_triggers(selected, pack),
+         :ok <- reject_generic_mcp_actions(selected, pack) do
+      {:ok, Enum.filter(selected, &(&1.type == :action))}
+    end
+  end
+
+  defp reject_selected_triggers(tools, pack) do
+    case Enum.find(tools, &(&1.type == :trigger)) do
+      nil ->
+        :ok
+
+      trigger ->
+        {:error,
+         Error.validation("Reviewed catalog packs cannot project triggers as executable actions",
+           reason: :trigger_not_executable,
+           subject: trigger.id,
+           details: %{provider: trigger.provider, pack: pack.id}
+         )}
+    end
+  end
+
+  defp reject_generic_mcp_actions(tools, pack) do
+    case Enum.find(tools, &generic_mcp_bridge_action?/1) do
+      nil ->
+        :ok
+
+      tool ->
+        {:error,
+         Error.validation("Generic MCP bridge actions cannot enter a reviewed catalog",
+           reason: :generic_mcp_action_not_reviewable,
+           subject: tool.id,
+           details: %{provider: tool.provider, pack: pack.id}
+         )}
+    end
+  end
+
+  defp generic_mcp_bridge_action?(%ToolEntry{id: id}) do
+    id in ["mcp.tools.list", "mcp.tools.call", "mcp.tool.call"]
   end
 
   defp require_callable(%ToolEntry{type: :action}), do: :ok

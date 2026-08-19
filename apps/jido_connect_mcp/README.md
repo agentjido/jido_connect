@@ -12,10 +12,19 @@ persistent host can instead put one `%Jido.MCP.Endpoint{}` or endpoint attribute
 map in the short-lived lease field `:mcp_endpoint`.
 
 The host connection metadata can set `:mcp_endpoint_id` to the public endpoint
-name. The bridge derives a separate internal Jido MCP string ID from the
-connection ID. Thus, two connections can both expose `"slack"` without sharing
-a client or credential. Credential rotation replaces the endpoint under the
-same internal ID.
+name. The bridge derives an opaque internal Jido MCP ID from the connection ID.
+Thus, two connections can both expose `"slack"` without sharing a client or
+credential.
+
+Host-managed endpoints use `EndpointLeaseManager`. A lease binds a non-secret
+endpoint fingerprint, Connection revision, credential version, and monotonic
+generation. A rotation, expiry, revoke, or connection removal first fences the
+old generation. New calls cannot use it. The manager then unregisters its Jido
+MCP client after active work drains, or at its bounded forced-stop deadline.
+When a write can already have crossed the send boundary, the bridge returns an
+uncertain result and does not retry it or move it to a replacement client.
+Credential values are only supplied in the short-lived lease endpoint field;
+they do not appear in lease-manager ownership data.
 
 Tool discovery returns `schema_hash` for each remote input schema. A typed
 connector can pass this value as `expected_schema_hash` to `mcp.tool.call`.

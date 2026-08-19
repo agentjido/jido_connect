@@ -88,6 +88,7 @@ defmodule Jido.Connect.Jira.Actions.Issues do
       label("Create issue")
       description("Create a new Jira issue.")
       handler(Jido.Connect.Jira.Handlers.Actions.CreateIssue)
+      preview(Jido.Connect.Jira.Previews.CreateIssue)
       effect(:write, confirmation: :required_for_ai)
 
       access do
@@ -121,6 +122,7 @@ defmodule Jido.Connect.Jira.Actions.Issues do
       label("Update issue")
       description("Update fields on an existing Jira issue.")
       handler(Jido.Connect.Jira.Handlers.Actions.UpdateIssue)
+      preview(Jido.Connect.Jira.Previews.UpdateIssue)
       effect(:write, confirmation: :required_for_ai)
 
       access do
@@ -151,6 +153,7 @@ defmodule Jido.Connect.Jira.Actions.Issues do
       label("Transition issue")
       description("Transition a Jira issue to a new workflow status.")
       handler(Jido.Connect.Jira.Handlers.Actions.TransitionIssue)
+      preview(Jido.Connect.Jira.Previews.TransitionIssue)
       effect(:write, confirmation: :required_for_ai)
 
       access do
@@ -178,6 +181,7 @@ defmodule Jido.Connect.Jira.Actions.Issues do
       label("Assign issue")
       description("Assign a Jira issue to a user by account ID.")
       handler(Jido.Connect.Jira.Handlers.Actions.AssignIssue)
+      preview(Jido.Connect.Jira.Previews.AssignIssue)
       effect(:write, confirmation: :required_for_ai)
 
       access do

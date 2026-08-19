@@ -734,6 +734,8 @@ defmodule Jido.Connect.SlackTest do
               verb: :read,
               policies: [:workspace_access],
               scopes: ["channels:history"],
+              auth_profile: :bot,
+              auth_profiles: [:bot, :user],
               mutation?: false
             }} =
              Connect.action(spec, "slack.thread.replies")
@@ -845,7 +847,14 @@ defmodule Jido.Connect.SlackTest do
             }} =
              Connect.action(spec, "slack.conversation.members")
 
-    assert {:ok, %{id: "slack.message.post", mutation?: true, confirmation: :required_for_ai}} =
+    assert {:ok,
+            %{
+              id: "slack.message.post",
+              auth_profile: :bot,
+              auth_profiles: [:bot, :user],
+              mutation?: true,
+              confirmation: :required_for_ai
+            }} =
              Connect.action(spec, "slack.message.post")
 
     assert {:ok,
@@ -1005,6 +1014,8 @@ defmodule Jido.Connect.SlackTest do
               resource: :auth,
               verb: :read,
               policies: [:workspace_access],
+              auth_profile: :bot,
+              auth_profiles: [:bot, :user],
               mutation?: false
             }} =
              Connect.action(spec, "slack.auth.test")
@@ -1434,6 +1445,13 @@ defmodule Jido.Connect.SlackTest do
              Jido.Connect.Slack.Actions.ListPins,
              Jido.Connect.Slack.Actions.AddPin,
              Jido.Connect.Slack.Actions.RemovePin,
+             Jido.Connect.Slack.Actions.GetPresence,
+             Jido.Connect.Slack.Actions.SetPresence,
+             Jido.Connect.Slack.Actions.SetStatus,
+             Jido.Connect.Slack.Actions.ClearStatus,
+             Jido.Connect.Slack.Actions.ListEmoji,
+             Jido.Connect.Slack.Actions.ListUnreadMessages,
+             Jido.Connect.Slack.Actions.MarkConversationRead,
              Jido.Connect.Slack.Actions.ListReactions,
              Jido.Connect.Slack.Actions.AddReaction,
              Jido.Connect.Slack.Actions.RemoveReaction,
@@ -1502,6 +1520,13 @@ defmodule Jido.Connect.SlackTest do
                  Jido.Connect.Slack.Actions.ListPins,
                  Jido.Connect.Slack.Actions.AddPin,
                  Jido.Connect.Slack.Actions.RemovePin,
+                 Jido.Connect.Slack.Actions.GetPresence,
+                 Jido.Connect.Slack.Actions.SetPresence,
+                 Jido.Connect.Slack.Actions.SetStatus,
+                 Jido.Connect.Slack.Actions.ClearStatus,
+                 Jido.Connect.Slack.Actions.ListEmoji,
+                 Jido.Connect.Slack.Actions.ListUnreadMessages,
+                 Jido.Connect.Slack.Actions.MarkConversationRead,
                  Jido.Connect.Slack.Actions.ListReactions,
                  Jido.Connect.Slack.Actions.AddReaction,
                  Jido.Connect.Slack.Actions.RemoveReaction,
@@ -3833,6 +3858,13 @@ defmodule Jido.Connect.SlackTest do
              Jido.Connect.Slack.Actions.ListPins,
              Jido.Connect.Slack.Actions.AddPin,
              Jido.Connect.Slack.Actions.RemovePin,
+             Jido.Connect.Slack.Actions.GetPresence,
+             Jido.Connect.Slack.Actions.SetPresence,
+             Jido.Connect.Slack.Actions.SetStatus,
+             Jido.Connect.Slack.Actions.ClearStatus,
+             Jido.Connect.Slack.Actions.ListEmoji,
+             Jido.Connect.Slack.Actions.ListUnreadMessages,
+             Jido.Connect.Slack.Actions.MarkConversationRead,
              Jido.Connect.Slack.Actions.ListReactions,
              Jido.Connect.Slack.Actions.AddReaction,
              Jido.Connect.Slack.Actions.RemoveReaction,

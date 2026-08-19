@@ -1,10 +1,11 @@
 defmodule Jido.Connect.Slack.Handlers.Actions.GetThreadReplies do
   @moduledoc false
 
-  alias Jido.Connect.{Data, Error}
+  alias Jido.Connect.Data
+  alias Jido.Connect.Slack.Handlers.ClientResolver
 
-  def run(input, %{credentials: credentials}) do
-    with {:ok, client} <- fetch_client(credentials),
+  def run(input, %{credentials: credentials} = context) do
+    with {:ok, client} <- ClientResolver.fetch(context, credentials),
          {:ok, result} <-
            client.get_thread_replies(
              Map.take(input, [:channel, :ts, :limit, :cursor, :oldest, :latest, :inclusive]),
@@ -24,12 +25,6 @@ defmodule Jido.Connect.Slack.Handlers.Actions.GetThreadReplies do
        }
        |> Data.compact()}
     end
-  end
-
-  defp fetch_client(%{slack_client: client}) when is_atom(client), do: {:ok, client}
-
-  defp fetch_client(_credentials) do
-    {:error, Error.config("Slack client module is required", key: :slack_client)}
   end
 
   defp normalize_message(message) when is_map(message) do

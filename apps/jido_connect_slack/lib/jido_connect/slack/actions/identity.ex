@@ -15,7 +15,7 @@ defmodule Jido.Connect.Slack.Actions.Identity do
       effect :read
 
       access do
-        auth :bot
+        auth [:bot, :user], default: :bot
         policies [:workspace_access]
       end
 

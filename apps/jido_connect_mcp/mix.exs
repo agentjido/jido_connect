@@ -23,6 +23,7 @@ defmodule JidoConnectMCP.MixProject do
 
   def application do
     [
+      mod: {Jido.Connect.MCP.Application, []},
       extra_applications: [:logger],
       env: [
         jido_connect_providers: [Jido.Connect.MCP]

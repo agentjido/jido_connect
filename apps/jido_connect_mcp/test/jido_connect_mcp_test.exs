@@ -323,7 +323,7 @@ defmodule Jido.Connect.MCPTest do
         owner_id: "tenant_1",
         status: :connected,
         scopes: scopes,
-        metadata: %{mcp_endpoint_id: "slack"}
+        metadata: %{mcp_endpoint_id: "slack", connection_revision: 1}
       })
 
     context =
@@ -532,7 +532,7 @@ defmodule Jido.Connect.MCPTest do
         owner_id: "tenant_1",
         status: :connected,
         scopes: scopes,
-        metadata: %{mcp_endpoint_id: "slack"}
+        metadata: %{mcp_endpoint_id: "slack", connection_revision: 1}
       })
 
     context =

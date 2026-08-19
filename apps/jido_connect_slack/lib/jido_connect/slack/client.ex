@@ -28,6 +28,15 @@ defmodule Jido.Connect.Slack.Client do
   defdelegate get_thread_replies(params, access_token), to: Client.Messages
   defdelegate search_messages(params, access_token), to: Client.Messages
 
+  defdelegate list_unread_messages(params, access_token), to: Client.ReadState
+  defdelegate mark_conversation_read(attrs, access_token), to: Client.ReadState
+
+  defdelegate get_presence(access_token), to: Client.Presence
+  defdelegate set_presence(attrs, access_token), to: Client.Presence
+  defdelegate set_status(attrs, access_token), to: Client.Presence
+  defdelegate clear_status(attrs, access_token), to: Client.Presence
+  defdelegate list_emoji(access_token), to: Client.Presence
+
   defdelegate search_files(params, access_token), to: Client.Files
   defdelegate upload_file(attrs, access_token), to: Client.Files
   defdelegate share_file(attrs, access_token), to: Client.Files

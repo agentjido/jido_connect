@@ -26,7 +26,9 @@ defmodule Jido.Connect.Jira.OAuth do
       redirect_uri: redirect_uri,
       state: state,
       response_type: "code",
-      prompt: "consent"
+      prompt: "consent",
+      code_challenge: Keyword.get(opts, :code_challenge),
+      code_challenge_method: Keyword.get(opts, :code_challenge_method)
     }
 
     CoreOAuth.authorize_url(@authorize_url, params)
@@ -38,20 +40,22 @@ defmodule Jido.Connect.Jira.OAuth do
     client_secret = CoreOAuth.fetch_required!(opts, :client_secret, "JIRA_CLIENT_SECRET")
     redirect_uri = Keyword.fetch!(opts, :redirect_uri)
 
-    CoreOAuth.req(
-      base_url: Keyword.get(opts, :token_url, @token_url),
-      headers: [{"accept", "application/json"}]
-    )
-    |> Req.merge(Application.get_env(:jido_connect_jira, :jira_oauth_req_options, []))
-    |> Req.post(
-      json: %{
+    body =
+      %{
         grant_type: "authorization_code",
         client_id: client_id,
         client_secret: client_secret,
         code: code,
         redirect_uri: redirect_uri
       }
+      |> maybe_put(:code_verifier, Keyword.get(opts, :code_verifier))
+
+    CoreOAuth.req(
+      base_url: Keyword.get(opts, :token_url, @token_url),
+      headers: [{"accept", "application/json"}]
     )
+    |> Req.merge(Application.get_env(:jido_connect_jira, :jira_oauth_req_options, []))
+    |> Req.post(json: body)
     |> handle_token_response()
   end
 
@@ -134,4 +138,7 @@ defmodule Jido.Connect.Jira.OAuth do
        details: %{body: body}
      )}
   end
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
 end

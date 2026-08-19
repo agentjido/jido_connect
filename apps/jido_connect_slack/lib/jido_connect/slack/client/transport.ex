@@ -6,10 +6,15 @@ defmodule Jido.Connect.Slack.Client.Transport do
 
   @spec request(String.t()) :: Req.Request.t()
   def request(access_token) when is_binary(access_token) do
+    req_options =
+      :jido_connect_slack
+      |> Application.get_env(:slack_req_options, [])
+      |> Keyword.put(:retry, false)
+
     Transport.bearer_request(
       base_url(),
       access_token,
-      req_options: Application.get_env(:jido_connect_slack, :slack_req_options, [])
+      req_options: req_options
     )
   end
 

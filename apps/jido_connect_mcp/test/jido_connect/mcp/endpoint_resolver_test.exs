@@ -2,7 +2,7 @@ defmodule Jido.Connect.MCP.EndpointResolverTest do
   use ExUnit.Case
 
   alias Jido.Connect
-  alias Jido.Connect.MCP.{EndpointResolver, HostEndpoint}
+  alias Jido.Connect.MCP.{EndpointLeaseManager, EndpointResolver, HostEndpoint}
 
   describe "resolve/1 with registered endpoints" do
     setup do
@@ -97,27 +97,28 @@ defmodule Jido.Connect.MCP.EndpointResolverTest do
     end
 
     test "replaces one connection endpoint when its credential material changes" do
-      {context, lease_a} = host_context("slack-rotate", "token-a")
-      {_context, lease_b} = host_context("slack-rotate", "token-b")
+      {context, lease_a} = host_context("slack-rotate", "token-a", credential_version: 1)
+      {_context, lease_b} = host_context("slack-rotate", "token-b", credential_version: 2)
       internal_id = HostEndpoint.internal_id(context.connection)
-      on_exit(fn -> unregister_endpoint(internal_id) end)
 
-      assert {:ok, ^internal_id} =
+      assert {:ok, old_endpoint_id} =
                EndpointResolver.resolve("slack", %{
                  context: context,
                  credential_lease: lease_a
                })
 
-      assert {:ok, endpoint_a} = Jido.MCP.ClientPool.fetch_endpoint(internal_id)
+      assert old_endpoint_id == internal_id
 
-      assert {:ok, ^internal_id} =
+      assert {:ok, new_endpoint_id} =
                EndpointResolver.resolve("slack", %{
                  context: context,
                  credential_lease: lease_b
                })
 
-      assert {:ok, endpoint_b} = Jido.MCP.ClientPool.fetch_endpoint(internal_id)
-      refute endpoint_a == endpoint_b
+      refute old_endpoint_id == new_endpoint_id
+      assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(old_endpoint_id)
+      assert {:ok, _endpoint} = Jido.MCP.ClientPool.fetch_endpoint(new_endpoint_id)
+      on_exit(fn -> EndpointLeaseManager.force_stop(context.connection) end)
     end
 
     test "rejects an endpoint id outside the selected connection" do
@@ -151,7 +152,7 @@ defmodule Jido.Connect.MCP.EndpointResolverTest do
     end
   end
 
-  defp host_context(connection_id, token) do
+  defp host_context(connection_id, token, opts \\ []) do
     scopes = ["mcp:tools:list", "mcp:tools:call", "mcp:endpoint:slack", "mcp:tool:post_message"]
 
     connection =
@@ -164,7 +165,7 @@ defmodule Jido.Connect.MCP.EndpointResolverTest do
         owner_id: "tenant_1",
         status: :connected,
         scopes: scopes,
-        metadata: %{mcp_endpoint_id: "slack"}
+        metadata: %{mcp_endpoint_id: "slack", connection_revision: 1}
       })
 
     context =
@@ -185,7 +186,8 @@ defmodule Jido.Connect.MCP.EndpointResolverTest do
             client_info: %{name: "jido-connect-test"}
           }
         },
-        expires_at: DateTime.add(DateTime.utc_now(), 300, :second)
+        expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
+        metadata: %{credential_version: Keyword.get(opts, :credential_version, 1)}
       )
 
     {context, lease}
