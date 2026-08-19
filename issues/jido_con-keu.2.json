@@ -1,0 +1,19 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-keu.1"
+  ],
+  "blocks": [
+    "jido_con-keu.3"
+  ],
+  "created": "2026-08-19T21:36:32Z",
+  "description": "Create jido_connect_microsoft_sharepoint with Spark DSL integration metadata, auth declarations, site/list/list-item/column structs, fixtures, normalizer, and base tests.",
+  "id": "jido_con-keu.2",
+  "labels": [],
+  "parent": "jido_con-keu",
+  "priority": 1,
+  "status": "open",
+  "title": "[G40-S02] Scaffold SharePoint package and normalized structs",
+  "type": "task",
+  "updated_at": "2026-08-19T21:36:36Z"
+}

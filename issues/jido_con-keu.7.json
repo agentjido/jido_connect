@@ -1,0 +1,17 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-keu.6"
+  ],
+  "blocks": [],
+  "created": "2026-08-19T21:36:35Z",
+  "description": "Run package, umbrella, and demo quality checks. Fix all failures, push the integration branch, and open a conventional non-draft pull request.",
+  "id": "jido_con-keu.7",
+  "labels": [],
+  "parent": "jido_con-keu",
+  "priority": 1,
+  "status": "open",
+  "title": "[G40-S07] Verify SharePoint connector and open PR",
+  "type": "task",
+  "updated_at": "2026-08-19T21:36:39Z"
+}

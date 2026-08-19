@@ -1,0 +1,18 @@
+{
+  "assignee": "Mike Hostetler",
+  "blocked_by": [],
+  "blocks": [
+    "jido_con-keu.2"
+  ],
+  "closed_at": "2026-08-19T21:48:15Z",
+  "created": "2026-08-19T21:36:31Z",
+  "description": "Extend the shared Microsoft package with SharePoint scope metadata, tenant client-credentials token support, application connections, and credential leases.",
+  "id": "jido_con-keu.1",
+  "labels": [],
+  "parent": "jido_con-keu",
+  "priority": 1,
+  "status": "closed",
+  "title": "[G40-S01] Add SharePoint scopes and Microsoft application auth",
+  "type": "task",
+  "updated_at": "2026-08-19T21:48:15Z"
+}

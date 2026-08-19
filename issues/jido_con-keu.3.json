@@ -1,0 +1,20 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-keu.2"
+  ],
+  "blocks": [
+    "jido_con-keu.4",
+    "jido_con-keu.5"
+  ],
+  "created": "2026-08-19T21:36:33Z",
+  "description": "Implement site resolve/get/search, list/list-column/list-item reads, paging, validated OData queries, scope resolution, and handler tests.",
+  "id": "jido_con-keu.3",
+  "labels": [],
+  "parent": "jido_con-keu",
+  "priority": 1,
+  "status": "open",
+  "title": "[G40-S03] Implement SharePoint site and list read actions",
+  "type": "task",
+  "updated_at": "2026-08-19T21:36:37Z"
+}

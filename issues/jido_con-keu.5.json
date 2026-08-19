@@ -1,0 +1,19 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-keu.3"
+  ],
+  "blocks": [
+    "jido_con-keu.6"
+  ],
+  "created": "2026-08-19T21:36:34Z",
+  "description": "Add reusable drive targeting to the OneDrive runtime and expose SharePoint document-library list, item, upload, download, update, delete, search, and delta actions without duplicate Graph logic.",
+  "id": "jido_con-keu.5",
+  "labels": [],
+  "parent": "jido_con-keu",
+  "priority": 1,
+  "status": "open",
+  "title": "[G40-S05] Add SharePoint document library actions",
+  "type": "task",
+  "updated_at": "2026-08-19T21:36:38Z"
+}
