@@ -4,14 +4,16 @@
     "jido_con-9k6.7"
   ],
   "blocks": [],
+  "closed_at": "2026-08-20T12:36:50Z",
+  "close_reason": "Jido Connect PRs #67 and #68 and Wayfinder PR #2 are merged. Repository quality gates passed and immutable pins were verified.",
   "created": "2026-08-19T20:59:10Z",
   "description": "Run repository quality gates, review, correct findings, publish immutable pins, and land both repositories in dependency order.",
   "id": "jido_con-9k6.8",
   "labels": [],
   "parent": "jido_con-9k6",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Verify and land connector integration",
   "type": "task",
-  "updated_at": "2026-08-20T12:36:45Z"
+  "updated_at": "2026-08-20T12:36:50Z"
 }
