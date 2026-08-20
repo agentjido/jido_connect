@@ -1,6 +1,8 @@
 defmodule Jido.Connect.Runtime do
   @moduledoc false
 
+  @max_request_timeout_ms 120_000
+
   alias Jido.Connect.{
     ActionSpec,
     Authorization,
@@ -50,6 +52,7 @@ defmodule Jido.Connect.Runtime do
          {:ok, parsed_input} <- parse_schema(action.input_schema, input, :input),
          {:ok, context} <- fetch_context(opts),
          {:ok, lease} <- fetch_credential_lease(opts),
+         {:ok, request_timeout_ms} <- request_timeout_ms(opts),
          :ok <- ExecutionAuthorization.require_direct_allowed(action, context, opts),
          :ok <- Authorization.authorize(action, parsed_input, context, lease, auth_opts(opts)),
          {:ok, output} <-
@@ -59,7 +62,8 @@ defmodule Jido.Connect.Runtime do
              context: context,
              credential_lease: lease,
              credentials: lease.fields,
-             provider_client: get_option(opts, :provider_client)
+             provider_client: get_option(opts, :provider_client),
+             request_timeout_ms: request_timeout_ms
            }),
          {:ok, parsed_output} <- parse_output_schema(action, output) do
       {:ok, parsed_output}
@@ -107,6 +111,7 @@ defmodule Jido.Connect.Runtime do
          {:ok, parsed_input} <- parse_schema(action.input_schema, input, :input),
          {:ok, context} <- fetch_context(opts),
          {:ok, lease} <- fetch_credential_lease(opts),
+         {:ok, request_timeout_ms} <- request_timeout_ms(opts),
          :ok <- Authorization.authorize(action, parsed_input, context, lease, auth_opts(opts)),
          :ok <-
            require_matching_snapshot(
@@ -127,6 +132,7 @@ defmodule Jido.Connect.Runtime do
              credential_lease: lease,
              credentials: lease.fields,
              provider_client: get_option(opts, :provider_client),
+             request_timeout_ms: request_timeout_ms,
              execution: %{
                id: prepared.execution_id,
                prepared_action_id: prepared.id,
@@ -327,6 +333,23 @@ defmodule Jido.Connect.Runtime do
          reason: :invalid_prepare_ttl,
          subject: value
        )}
+    end
+  end
+
+  defp request_timeout_ms(opts) do
+    case get_option(opts, :request_timeout_ms) do
+      nil ->
+        {:ok, nil}
+
+      value when is_integer(value) and value > 0 and value <= @max_request_timeout_ms ->
+        {:ok, value}
+
+      value ->
+        {:error,
+         Error.validation("Request timeout must be a positive integer of at most two minutes",
+           reason: :invalid_request_timeout,
+           subject: value
+         )}
     end
   end
 

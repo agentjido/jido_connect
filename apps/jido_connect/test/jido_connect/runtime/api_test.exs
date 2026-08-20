@@ -111,6 +111,29 @@ defmodule Jido.Connect.Runtime.ApiTest do
     assert {:error, %Connect.Error.AuthError{reason: :credential_lease_required}} =
              Connect.invoke(spec, "demo.repo.show", %{repo: "org/repo"}, context: context)
 
+    assert {:error, %Connect.Error.ValidationError{reason: :invalid_request_timeout}} =
+             Connect.invoke(spec, "demo.repo.show", %{repo: "org/repo"},
+               context: context,
+               credential_lease: lease,
+               request_timeout_ms: 0
+             )
+
+    assert {:ok, %{repo: "org/repo"}} =
+             Connect.invoke(spec, "demo.repo.show", %{repo: "org/repo"},
+               context: context,
+               credential_lease: lease,
+               request_timeout_ms: 120_000
+             )
+
+    for invalid <- [-1, 120_001, "5_000"] do
+      assert {:error, %Connect.Error.ValidationError{reason: :invalid_request_timeout}} =
+               Connect.invoke(spec, "demo.repo.show", %{repo: "org/repo"},
+                 context: context,
+                 credential_lease: lease,
+                 request_timeout_ms: invalid
+               )
+    end
+
     disconnected = %{context | connection: %{context.connection | status: :needs_credentials}}
 
     assert {:error, %Connect.Error.AuthError{reason: :connection_required}} =

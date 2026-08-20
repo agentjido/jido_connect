@@ -54,6 +54,10 @@ Jido.Connect.invoke(Jido.Connect.GitHub, "github.issue.list", %{repo: "org/repo"
 )
 ```
 
+MCP-backed providers also accept `request_timeout_ms` from the host. The value
+must be a positive integer of at most 120,000 milliseconds. The provider keeps
+its documented default when the option is absent.
+
 Use `prepare/4` and `commit/4` for mutations that need confirmation. Prepare
 does not call the provider. It returns an expiring, secret-free snapshot with a
 safe preview. Commit requires the input and current runtime state again. It
