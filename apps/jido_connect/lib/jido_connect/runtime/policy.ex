@@ -26,7 +26,13 @@ defmodule Jido.Connect.Policy do
   @doc "Applies a host-owned policy callback to a resolved connection."
   @spec authorize(policy(), operation(), map(), Context.t() | nil, Connection.t(), map()) ::
           :ok | {:error, Error.error()}
-  def authorize(nil, _operation, _input, _context, %Connection{}, _policy_context), do: :ok
+  def authorize(nil, operation, _input, _context, %Connection{} = connection, _policy_context) do
+    if Map.get(operation, :host_policy_required?, false) do
+      deny(:policy_required, operation, connection)
+    else
+      :ok
+    end
+  end
 
   def authorize(_policy, _operation, _input, nil, %Connection{}, _policy_context),
     do: {:error, Error.context_required()}

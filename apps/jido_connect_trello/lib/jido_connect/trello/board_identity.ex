@@ -189,8 +189,8 @@ defmodule Jido.Connect.Trello.BoardIdentity do
   defp exact_source_endpoint(_source), do: :ok
 
   defp exact_endpoint(%Endpoint{transport: {:streamable_http, opts}}) do
-    if Keyword.get(opts, :base_url) == "https://mcp.trello.com" and
-         Keyword.get(opts, :mcp_path) == "/v1" do
+    if Keyword.get(opts, :base_url) == Contract.base_url() and
+         Keyword.get(opts, :mcp_path) == Contract.mcp_path() do
       :ok
     else
       auth_error(:trello_mcp_endpoint_mismatch)

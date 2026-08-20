@@ -46,7 +46,7 @@ defmodule Jido.Connect.Trello.OAuth.DefaultFlow do
 
     response = %{
       "code" => code,
-      "state" => value(transaction, :state_param),
+      "state" => value(callback, :state),
       "iss" => value(callback, :iss)
     }
 

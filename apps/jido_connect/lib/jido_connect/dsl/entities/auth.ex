@@ -24,6 +24,7 @@ defmodule Jido.Connect.Dsl.Entities.Auth do
         scopes: [access_scopes()]
       ],
       schema: [
+        host_policy_required?: [type: :boolean, default: false],
         policies: [type: {:list, :atom}, default: []]
       ],
       singleton_entity_keys: [:auth, :scopes]

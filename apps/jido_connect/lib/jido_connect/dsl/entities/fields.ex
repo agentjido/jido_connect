@@ -54,6 +54,7 @@ defmodule Jido.Connect.Dsl.Entities.Fields do
       maximum: [type: :number],
       min_length: [type: :non_neg_integer],
       max_length: [type: :non_neg_integer],
+      json_schema: [type: :any],
       example: [type: :any],
       description: [type: :string],
       metadata: [type: :map, default: %{}]

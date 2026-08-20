@@ -10,8 +10,6 @@ defmodule Jido.Connect.Trello.OAuth do
   alias Jido.Connect.Error
   alias Jido.Connect.Trello.Contract
 
-  @scopes ~w(trello:read trello:write trello:search)
-
   @spec begin(keyword()) :: {:ok, map()} | {:error, Error.error()}
   def begin(opts) when is_list(opts) do
     with {:ok, result} <- flow().begin(Contract.endpoint(), opts),
@@ -79,7 +77,7 @@ defmodule Jido.Connect.Trello.OAuth do
          mcp_endpoint: endpoint(access_token),
          refresh_token: refresh_token,
          oauth_client: oauth_client,
-         scope: value(tokens, :scope) || @scopes,
+         scope: value(tokens, :scope) || Contract.default_scopes(),
          expires_in: value(tokens, :expires_in)
        }}
     else
@@ -118,8 +116,8 @@ defmodule Jido.Connect.Trello.OAuth do
       transport:
         {:streamable_http,
          [
-           base_url: "https://mcp.trello.com",
-           mcp_path: "/v1",
+           base_url: Contract.base_url(),
+           mcp_path: Contract.mcp_path(),
            headers: [{"authorization", "Bearer #{access_token}"}]
          ]},
       client_info: %{name: "jido-connect-trello", version: "0.8.0"},

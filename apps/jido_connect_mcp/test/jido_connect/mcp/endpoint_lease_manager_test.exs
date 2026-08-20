@@ -25,6 +25,35 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
     :ok = EndpointLeaseManager.release(second)
   end
 
+  test "binds one live tool schema hash to each endpoint generation", %{connection: connection} do
+    assert {:ok, first} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one"),
+               endpoint("secret-one")
+             )
+
+    assert :ok = EndpointLeaseManager.bind_schema(first, "trelloReadBoard", "hash-one")
+    assert :ok = EndpointLeaseManager.bind_schema(first, "trelloReadBoard", "hash-one")
+
+    assert {:error, %Connect.Error.ValidationError{reason: :mcp_tool_schema_changed}} =
+             EndpointLeaseManager.bind_schema(first, "trelloReadBoard", "hash-two")
+
+    rotated = put_in(connection.metadata[:connection_revision], 8)
+
+    assert {:ok, second} =
+             EndpointLeaseManager.acquire(
+               rotated,
+               lease(rotated, 2, "secret-two"),
+               endpoint("secret-two")
+             )
+
+    assert :ok = EndpointLeaseManager.bind_schema(second, "trelloReadBoard", "hash-two")
+
+    :ok = EndpointLeaseManager.release(first)
+    :ok = EndpointLeaseManager.release(second)
+  end
+
   test "reused ownership refreshes expiry and ignores the stale timer", %{
     connection: connection
   } do

@@ -86,7 +86,10 @@ defmodule Jido.Connect.Trello.OAuthTest do
 
     def validate_callback(response, transaction) do
       send(self(), {:callback_validated, response, transaction})
-      {:ok, response["code"]}
+
+      if response["state"] == transaction.state_param,
+        do: {:ok, response["code"]},
+        else: {:error, :state_mismatch}
     end
 
     def exchange_code(params) do
@@ -143,11 +146,16 @@ defmodule Jido.Connect.Trello.OAuthTest do
 
     assert {:ok, tokens} =
              DefaultFlow.exchange_code("code", started.transaction,
-               callback_params: %{"iss" => "https://auth.example"}
+               callback_params: %{
+                 "state" => started.state,
+                 "iss" => "https://auth.example"
+               }
              )
 
     assert tokens.oauth_client["client_id"] == "dynamic-client"
-    assert_received {:callback_validated, %{"iss" => "https://auth.example"}, _transaction}
+
+    assert_received {:callback_validated, %{"state" => @state, "iss" => "https://auth.example"},
+                     _transaction}
 
     assert {:ok, refreshed} =
              DefaultFlow.refresh_token("refresh", tokens.oauth_client, scope: ["trello:read"])
@@ -181,7 +189,10 @@ defmodule Jido.Connect.Trello.OAuthTest do
                %{
                  "redirect_uri" => "https://wayfinder.example/integrations/trello/oauth/callback"
                },
-               callback_params: %{"iss" => "https://auth.example"}
+               callback_params: %{
+                 "state" => @state,
+                 "iss" => "https://auth.example"
+               }
              )
 
     assert tokens.refresh_token == "trello-refresh-token"
@@ -200,6 +211,24 @@ defmodule Jido.Connect.Trello.OAuthTest do
     assert bearer(refreshed.mcp_endpoint) == "Bearer trello-refreshed-token"
     assert_received {:oauth_exchange, _transaction, _opts}
     assert_received {:oauth_refresh, _client, _opts}
+  end
+
+  test "rejects a missing or changed callback state" do
+    transaction = %{
+      "state_param" => @state,
+      "issuer" => "https://auth.example",
+      "require_issuer" => true,
+      "redirect_uri" => "https://wayfinder.example/integrations/trello/oauth/callback",
+      "code_verifier" => String.duplicate("a", 64),
+      "client_id" => "dynamic-client",
+      "token_endpoint" => "https://auth.example/token",
+      "resource" => "https://mcp.trello.com/v1"
+    }
+
+    for callback <- [%{"iss" => "https://auth.example"}, %{"state" => "changed"}] do
+      assert {:error, :state_mismatch} =
+               DefaultFlow.exchange_code("code", transaction, callback_params: callback)
+    end
   end
 
   defp bearer(%{transport: {:streamable_http, opts}}) do

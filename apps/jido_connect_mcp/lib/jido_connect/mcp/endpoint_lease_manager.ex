@@ -58,6 +58,13 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   def ensure_dispatchable(token) when is_map(token),
     do: call({:ensure_dispatchable, token})
 
+  @doc false
+  @spec bind_schema(token(), String.t(), String.t()) :: :ok | {:error, Error.error()}
+  def bind_schema(token, tool_name, schema_hash)
+      when is_map(token) and is_binary(tool_name) and is_binary(schema_hash) do
+    call({:bind_schema, token, tool_name, schema_hash})
+  end
+
   @doc """
   Runs one operation after the final generation fence.
 
@@ -144,6 +151,13 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
 
   def handle_call({:ensure_dispatchable, token}, _from, state) do
     {:reply, dispatchable?(token, state), state}
+  end
+
+  def handle_call({:bind_schema, token, tool_name, schema_hash}, _from, state) do
+    case bind_record_schema(token, tool_name, schema_hash, state) do
+      {:ok, state} -> {:reply, :ok, state}
+      {:error, error} -> {:reply, {:error, error}, state}
+    end
   end
 
   def handle_call({:begin_dispatch, token}, _from, state) do
@@ -263,6 +277,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
             generation: generation,
             endpoint_id: endpoint_id,
             active: 1,
+            schema_hashes: %{},
             status: :active
           })
 
@@ -338,6 +353,38 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
 
       :error ->
         {true, state}
+    end
+  end
+
+  defp bind_record_schema(token, tool_name, schema_hash, state) do
+    with :ok <- dispatchable?(token, state),
+         {:ok, record} <- Map.fetch(state.records, record_key(token)) do
+      case Map.fetch(record.schema_hashes, tool_name) do
+        :error ->
+          record = put_in(record.schema_hashes[tool_name], schema_hash)
+          {:ok, put_in(state.records[record.key], record)}
+
+        {:ok, ^schema_hash} ->
+          {:ok, state}
+
+        {:ok, expected_hash} ->
+          {:error,
+           Error.validation("MCP tool schema changed before execution",
+             reason: :mcp_tool_schema_changed,
+             subject: tool_name,
+             details: %{
+               expected_schema_hash: expected_hash,
+               actual_schema_hash: schema_hash
+             }
+           )}
+      end
+    else
+      {:error, %_{} = error} ->
+        {:error, error}
+
+      :error ->
+        {:error,
+         Error.auth("MCP endpoint lease is no longer active", reason: :mcp_endpoint_lease_revoked)}
     end
   end
 

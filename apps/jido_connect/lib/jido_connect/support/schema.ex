@@ -98,6 +98,42 @@ defmodule Jido.Connect.Schema do
   end
 
   @doc false
+  @spec to_json_schema(Zoi.schema(), [Field.t()], map()) :: map()
+  def to_json_schema(schema, fields, root_overlay \\ %{})
+      when is_list(fields) and is_map(root_overlay) do
+    schema
+    |> to_json_schema()
+    |> apply_field_schemas(fields)
+    |> Map.merge(json_safe(root_overlay))
+  end
+
+  defp apply_field_schemas(schema, fields) do
+    properties = Map.get(schema, "properties", %{})
+
+    properties =
+      Enum.reduce(fields, properties, fn
+        %Field{name: name, json_schema: json_schema}, acc when is_map(json_schema) ->
+          Map.put(acc, Atom.to_string(name), json_safe(json_schema))
+
+        %Field{}, acc ->
+          acc
+      end)
+
+    Map.put(schema, "properties", properties)
+  end
+
+  @doc false
+  @spec at_least_one_of([atom() | String.t()]) :: map()
+  def at_least_one_of(fields) when is_list(fields) and fields != [] do
+    %{
+      "anyOf" =>
+        Enum.map(fields, fn field ->
+          %{"required" => [to_string(field)]}
+        end)
+    }
+  end
+
+  @doc false
   @spec strict_object?(map()) :: boolean()
   def strict_object?(json_schema) when is_map(json_schema) do
     Map.get(json_schema, "type") == "object" and

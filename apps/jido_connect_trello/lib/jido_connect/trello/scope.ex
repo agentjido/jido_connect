@@ -46,6 +46,9 @@ defmodule Jido.Connect.Trello.Scope do
         "trello.card.list" ->
           if input.list_id, do: assert_list(input.list_id, identity, call), else: :ok
 
+        "trello.card.get" ->
+          assert_card(input.id, identity, call)
+
         "trello.card.create" ->
           assert_list(input.list_id, identity, call)
 
@@ -100,11 +103,22 @@ defmodule Jido.Connect.Trello.Scope do
   end
 
   defp assert_card(card_id, identity, call) do
-    with {:ok, raw} <-
-           call.("trelloReadCard", %{action: "get", cardIdOrUrl: card_id}, false),
-         {:ok, %{card: card}} <- Normalizer.normalize("trello.card.get", %{id: card_id}, raw) do
-      card_board(card, identity)
-    end
+    search_pages(
+      card_id,
+      :trello_card_board_mismatch,
+      call,
+      %{
+        tool: "trelloReadCard",
+        arguments: %{
+          action: "list_by_board",
+          boardIdOrUrl: identity.board_ari,
+          filter: "all",
+          limit: 50
+        },
+        action: "trello.card.list",
+        input: %{state: "all", limit: 50}
+      }
+    )
   end
 
   defp assert_list(list_id, identity, call) do
@@ -162,7 +176,7 @@ defmodule Jido.Connect.Trello.Scope do
          {:ok, %{items: items, pageInfo: page}} <-
            Normalizer.normalize(source.action, Map.put(source.input, :cursor, cursor), raw) do
       cond do
-        Enum.any?(items, &(&1.id == target_id)) ->
+        Enum.any?(items, &matches_target?(&1, target_id)) ->
           :ok
 
         page.hasNextPage ->
@@ -258,6 +272,10 @@ defmodule Jido.Connect.Trello.Scope do
 
   defp maybe_cursor(arguments, nil), do: arguments
   defp maybe_cursor(arguments, cursor), do: Map.put(arguments, :cursor, cursor)
+
+  defp matches_target?(item, target_id) when is_map(item) do
+    Enum.any?([:id, :objectId, :url], fn key -> Map.get(item, key) == target_id end)
+  end
 
   defp scope_error(reason) do
     {:error,

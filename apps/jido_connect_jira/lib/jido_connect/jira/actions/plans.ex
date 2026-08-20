@@ -3,6 +3,8 @@ defmodule Jido.Connect.Jira.Actions.Plans do
 
   use Spark.Dsl.Fragment, of: Jido.Connect
 
+  alias Jido.Connect.Jira.PlanSchemas
+
   @scope_resolver Jido.Connect.Jira.ScopeResolver
   @max_id 2_147_483_647
 
@@ -19,6 +21,7 @@ defmodule Jido.Connect.Jira.Actions.Plans do
 
       access do
         auth([:api_token, :oauth2_user], default: :api_token)
+        host_policy_required?(true)
         policies([:jira_admin_access])
         scopes(["read:jira-work"], resolver: @scope_resolver)
       end
@@ -51,6 +54,7 @@ defmodule Jido.Connect.Jira.Actions.Plans do
 
       access do
         auth([:api_token, :oauth2_user], default: :api_token)
+        host_policy_required?(true)
         policies([:jira_admin_access])
         scopes(["read:jira-work"], resolver: @scope_resolver)
       end
@@ -88,6 +92,7 @@ defmodule Jido.Connect.Jira.Actions.Plans do
 
       access do
         auth([:api_token, :oauth2_user], default: :api_token)
+        host_policy_required?(true)
         policies([:jira_admin_access])
         scopes(["write:jira-work"], resolver: @scope_resolver)
       end
@@ -95,12 +100,35 @@ defmodule Jido.Connect.Jira.Actions.Plans do
       input do
         field(:name, :string, required?: true, min_length: 1, max_length: 255)
         field(:lead_account_id, :string, min_length: 1, max_length: 255)
-        field(:issue_sources, {:array, :map}, required?: true, min_length: 1, max_length: 100)
-        field(:scheduling, :map, required?: true)
-        field(:exclusion_rules, :map)
-        field(:cross_project_releases, {:array, :map}, max_length: 100)
-        field(:custom_fields, {:array, :map}, max_length: 100)
-        field(:permissions, {:array, :map}, max_length: 100)
+
+        field(:issue_sources, {:array, :map},
+          required?: true,
+          min_length: 1,
+          max_length: 100,
+          json_schema: PlanSchemas.issue_sources()
+        )
+
+        field(:scheduling, :map,
+          required?: true,
+          json_schema: PlanSchemas.scheduling(true)
+        )
+
+        field(:exclusion_rules, :map, json_schema: PlanSchemas.exclusion_rules(false))
+
+        field(:cross_project_releases, {:array, :map},
+          max_length: 100,
+          json_schema: PlanSchemas.cross_project_releases()
+        )
+
+        field(:custom_fields, {:array, :map},
+          max_length: 100,
+          json_schema: PlanSchemas.custom_fields()
+        )
+
+        field(:permissions, {:array, :map},
+          max_length: 100,
+          json_schema: PlanSchemas.permissions()
+        )
       end
 
       output do
@@ -121,8 +149,22 @@ defmodule Jido.Connect.Jira.Actions.Plans do
       preview(Jido.Connect.Jira.Previews.UpdatePlan)
       effect(:write, confirmation: :required_for_ai)
 
+      input_json_schema_overlay(
+        Jido.Connect.Schema.at_least_one_of([
+          :name,
+          :lead_account_id,
+          :issue_sources,
+          :scheduling,
+          :exclusion_rules,
+          :cross_project_releases,
+          :custom_fields,
+          :permissions
+        ])
+      )
+
       access do
         auth([:api_token, :oauth2_user], default: :api_token)
+        host_policy_required?(true)
         policies([:jira_admin_access])
         scopes(["write:jira-work"], resolver: @scope_resolver)
       end
@@ -131,12 +173,31 @@ defmodule Jido.Connect.Jira.Actions.Plans do
         field(:id, :integer, required?: true, minimum: 1, maximum: @max_id)
         field(:name, :string, min_length: 1, max_length: 255)
         field(:lead_account_id, :string, min_length: 1, max_length: 255)
-        field(:issue_sources, {:array, :map}, min_length: 1, max_length: 100)
-        field(:scheduling, :map)
-        field(:exclusion_rules, :map)
-        field(:cross_project_releases, {:array, :map}, max_length: 100)
-        field(:custom_fields, {:array, :map}, max_length: 100)
-        field(:permissions, {:array, :map}, max_length: 100)
+
+        field(:issue_sources, {:array, :map},
+          min_length: 1,
+          max_length: 100,
+          json_schema: PlanSchemas.issue_sources()
+        )
+
+        field(:scheduling, :map, json_schema: PlanSchemas.scheduling(false))
+
+        field(:exclusion_rules, :map, json_schema: PlanSchemas.exclusion_rules(true))
+
+        field(:cross_project_releases, {:array, :map},
+          max_length: 100,
+          json_schema: PlanSchemas.cross_project_releases()
+        )
+
+        field(:custom_fields, {:array, :map},
+          max_length: 100,
+          json_schema: PlanSchemas.custom_fields()
+        )
+
+        field(:permissions, {:array, :map},
+          max_length: 100,
+          json_schema: PlanSchemas.permissions()
+        )
       end
 
       output do
@@ -159,6 +220,7 @@ defmodule Jido.Connect.Jira.Actions.Plans do
 
       access do
         auth([:api_token, :oauth2_user], default: :api_token)
+        host_policy_required?(true)
         policies([:jira_admin_access])
         scopes(["write:jira-work"], resolver: @scope_resolver)
       end
@@ -189,6 +251,7 @@ defmodule Jido.Connect.Jira.Actions.Plans do
 
       access do
         auth([:api_token, :oauth2_user], default: :api_token)
+        host_policy_required?(true)
         policies([:jira_admin_access])
         scopes(["write:jira-work"], resolver: @scope_resolver)
       end
@@ -216,6 +279,7 @@ defmodule Jido.Connect.Jira.Actions.Plans do
 
       access do
         auth([:api_token, :oauth2_user], default: :api_token)
+        host_policy_required?(true)
         policies([:jira_admin_access])
         scopes(["write:jira-work"], resolver: @scope_resolver)
       end

@@ -1,8 +1,6 @@
 defmodule Jido.Connect.X.Contract do
   @moduledoc false
 
-  alias Jido.Connect.MCP.Tool
-
   @base_url "http://127.0.0.1:8000"
   @mcp_path "/mcp"
   @endpoint @base_url <> @mcp_path
@@ -44,10 +42,6 @@ defmodule Jido.Connect.X.Contract do
     }
   }
 
-  @tool_schema_hashes Map.new(@tool_schemas, fn {tool, schema} ->
-                        {tool, Tool.schema_hash(schema)}
-                      end)
-
   def endpoint, do: @endpoint
   def base_url, do: @base_url
   def mcp_path, do: @mcp_path
@@ -55,6 +49,6 @@ defmodule Jido.Connect.X.Contract do
   def pagination_token_max, do: @pagination_token_max
   def actions, do: @actions
   def tool_schemas, do: @tool_schemas
+  def tool_schema(tool), do: Map.fetch!(@tool_schemas, tool)
   def fetch_action!(id), do: Enum.find(@actions, &(&1.id == id)) || raise(ArgumentError, id)
-  def schema_hash(tool), do: Map.fetch!(@tool_schema_hashes, tool)
 end

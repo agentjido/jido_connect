@@ -167,7 +167,8 @@ defmodule Jido.Connect.Jira.Client.ExpandedActionsTest do
     Req.Test.expect(__MODULE__, fn conn ->
       send(test_pid, {:share_call, conn.method, conn.request_path})
       assert conn.method == "GET"
-      Req.Test.json(conn, [%{id: 7, type: "global"}])
+      assert conn.request_path == "/rest/api/3/filter/10000"
+      Req.Test.json(conn, Map.put(filter(), :sharePermissions, [%{id: 7, type: "global"}]))
     end)
 
     Req.Test.expect(__MODULE__, fn conn ->
@@ -178,29 +179,23 @@ defmodule Jido.Connect.Jira.Client.ExpandedActionsTest do
 
     Req.Test.expect(__MODULE__, fn conn ->
       send(test_pid, {:share_call, conn.method, conn.request_path})
-      assert conn.method == "DELETE"
-      Plug.Conn.send_resp(conn, 204, "")
-    end)
+      assert conn.method == "PUT"
+      assert conn.request_path == "/rest/api/3/filter/10000"
 
-    Req.Test.expect(__MODULE__, fn conn ->
-      send(test_pid, {:share_call, conn.method, conn.request_path})
-      assert conn.method == "POST"
-      assert json_body(conn) == %{projectId: "10010", rights: 1, type: "project"}
+      assert json_body(conn) == %{
+               description: "Docs",
+               favourite: false,
+               jql: "project = DOC",
+               name: "Docket",
+               sharePermissions: [%{projectId: "10010", rights: 1, type: "project"}]
+             }
 
-      Req.Test.json(conn, %{
-        id: 8,
-        type: "project",
-        project: %{id: "10010", key: "DOC", name: "Docs"}
-      })
-    end)
-
-    Req.Test.expect(__MODULE__, fn conn ->
-      send(test_pid, {:share_call, conn.method, conn.request_path})
-      assert conn.method == "GET"
-
-      Req.Test.json(conn, [
-        %{id: 8, type: "project", project: %{id: "10010", key: "DOC", name: "Docs"}}
-      ])
+      Req.Test.json(
+        conn,
+        Map.put(filter(), :sharePermissions, [
+          %{id: 8, type: "project", project: %{id: "10010", key: "DOC", name: "Docs"}}
+        ])
+      )
     end)
 
     assert {:ok, %{updated: true, scope: "projects", permissions: [%{id: "8"}]}} =
@@ -210,23 +205,53 @@ defmodule Jido.Connect.Jira.Client.ExpandedActionsTest do
                request
              )
 
-    assert_receive {:share_call, "GET", "/rest/api/3/filter/10000/permission"}
+    assert_receive {:share_call, "GET", "/rest/api/3/filter/10000"}
     assert_receive {:share_call, "GET", "/rest/api/3/project/DOC"}
-    assert_receive {:share_call, "DELETE", "/rest/api/3/filter/10000/permission/7"}
-    assert_receive {:share_call, "POST", "/rest/api/3/filter/10000/permission"}
-    assert_receive {:share_call, "GET", "/rest/api/3/filter/10000/permission"}
+    assert_receive {:share_call, "PUT", "/rest/api/3/filter/10000"}
     assert Transport.request(request, req_options: [retry: false]).options.retry == false
+  end
+
+  test "a filter column verification failure keeps the completed write uncertain", %{
+    request: request
+  } do
+    test_pid = self()
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.method == "PUT"
+      send(test_pid, :column_update_attempt)
+      Req.Test.json(conn, %{})
+    end)
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      send(test_pid, :column_verification_attempt)
+      Plug.Conn.send_resp(conn, 503, "unavailable")
+    end)
+
+    assert {:error,
+            %Error.ProviderError{
+              reason: :write_verification_failed,
+              delivery: :sent_outcome_unknown,
+              mutation?: true,
+              provider_idempotency?: false
+            } = error} = Client.update_filter_columns(10_000, ["issuekey"], request)
+
+    assert Error.retry_guidance(error) == :do_not_retry
+    assert_receive :column_update_attempt
+    assert_receive :column_verification_attempt
+    refute_receive :column_update_attempt, 50
   end
 
   test "filter share transport uncertainty stops without an automatic retry", %{request: request} do
     test_pid = self()
 
     Req.Test.expect(__MODULE__, fn conn ->
-      Req.Test.json(conn, [%{id: 7, type: "global"}])
+      Req.Test.json(conn, Map.put(filter(), :sharePermissions, [%{id: 7, type: "global"}]))
     end)
 
     Req.Test.expect(__MODULE__, fn conn ->
-      send(test_pid, :delete_attempt)
+      assert conn.method == "PUT"
+      send(test_pid, :share_update_attempt)
       Req.Test.transport_error(conn, :timeout)
     end)
 
@@ -239,8 +264,8 @@ defmodule Jido.Connect.Jira.Client.ExpandedActionsTest do
              Client.replace_filter_shares(10_000, %{scope: "private"}, request)
 
     assert Error.retry_guidance(error) == :do_not_retry
-    assert_receive :delete_attempt
-    refute_receive :delete_attempt, 50
+    assert_receive :share_update_attempt
+    refute_receive :share_update_attempt, 50
   end
 
   test "lists transitions and deletes one issue", %{request: request} do

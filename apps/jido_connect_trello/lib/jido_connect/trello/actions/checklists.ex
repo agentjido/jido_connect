@@ -62,7 +62,7 @@ defmodule Jido.Connect.Trello.Actions.Checklists do
         )
 
         field(:name, :string, required?: true, min_length: 1, max_length: Contract.name_max())
-        field(:position, :any)
+        field(:position, :any, json_schema: Contract.position_schema())
       end
 
       output do
@@ -83,6 +83,8 @@ defmodule Jido.Connect.Trello.Actions.Checklists do
       preview(Jido.Connect.Trello.Previews.ChecklistUpdate)
       effect(:write, confirmation: :required_for_ai)
 
+      input_json_schema_overlay(Jido.Connect.Schema.at_least_one_of([:name, :position]))
+
       access do
         auth([:oauth_user], default: :oauth_user)
         scopes(["trello:write"])
@@ -102,7 +104,7 @@ defmodule Jido.Connect.Trello.Actions.Checklists do
         )
 
         field(:name, :string, min_length: 1, max_length: Contract.name_max())
-        field(:position, :any)
+        field(:position, :any, json_schema: Contract.position_schema())
       end
 
       output do
@@ -147,7 +149,7 @@ defmodule Jido.Connect.Trello.Actions.Checklists do
           max_length: Contract.checklist_text_max()
         )
 
-        field(:position, :any)
+        field(:position, :any, json_schema: Contract.position_schema())
       end
 
       output do
@@ -167,6 +169,8 @@ defmodule Jido.Connect.Trello.Actions.Checklists do
       handler(Jido.Connect.Trello.Handlers.Action)
       preview(Jido.Connect.Trello.Previews.ChecklistItemUpdate)
       effect(:write, confirmation: :required_for_ai)
+
+      input_json_schema_overlay(Jido.Connect.Schema.at_least_one_of([:text, :checked, :position]))
 
       access do
         auth([:oauth_user], default: :oauth_user)
@@ -194,7 +198,7 @@ defmodule Jido.Connect.Trello.Actions.Checklists do
 
         field(:text, :string, min_length: 1, max_length: Contract.checklist_text_max())
         field(:checked, :boolean)
-        field(:position, :any)
+        field(:position, :any, json_schema: Contract.position_schema())
       end
 
       output do

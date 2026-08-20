@@ -23,16 +23,26 @@ defmodule Jido.Connect.Trello.TestMCPClient do
   @card_ari "ari:cloud:trello::card/workspace/#{@workspace_id}/6a6105ed8ec975fc53dd6721"
 
   def list_tools(endpoint_id, opts) do
-    unless is_list(opts), do: raise("expected MCP options")
+    unless opts == [timeout: 30_000], do: raise("expected bounded MCP timeout")
     RuntimeState.record({:list_tools, endpoint_id})
 
     tools =
       Enum.map(Contract.tool_schemas(), fn {name, schema} ->
         schema =
-          if RuntimeState.mode() == :schema_drift and name == "trelloWriteCard" do
-            put_in(schema, ["properties", "cardId", "type"], "integer")
-          else
-            schema
+          case {RuntimeState.mode(), name} do
+            {:schema_drift, "trelloWriteCard"} ->
+              put_in(schema, ["properties", "cardId", "type"], "integer")
+
+            {:compatible_schema, _name} ->
+              schema
+              |> Map.put("title", "Captured Trello #{name} input")
+              |> put_in(
+                ["properties", "compatibleOptionalField"],
+                %{"type" => "string", "description" => "A provider-owned optional field."}
+              )
+
+            _other ->
+              schema
           end
 
         %{"name" => name, "inputSchema" => schema}
@@ -42,7 +52,7 @@ defmodule Jido.Connect.Trello.TestMCPClient do
   end
 
   def call_tool(endpoint_id, tool, arguments, opts) do
-    unless is_list(opts), do: raise("expected MCP options")
+    unless opts == [timeout: 30_000], do: raise("expected bounded MCP timeout")
     RuntimeState.record({:call_tool, endpoint_id, tool, arguments})
 
     case {RuntimeState.mode(), tool, arguments.action} do
@@ -139,6 +149,7 @@ defmodule Jido.Connect.Trello.RuntimeTest do
   @board_object_id "6a61045166570c8531dc86a7"
   @board_ari "ari:cloud:trello::board/workspace/#{@workspace_id}/#{@board_object_id}"
   @list_ari "ari:cloud:trello::list/workspace/#{@workspace_id}/6a6105e754955319253c46ef"
+  @off_board_card_ari "ari:cloud:trello::card/workspace/#{@workspace_id}/aaaaaaaaaaaaaaaaaaaaaaaa"
 
   setup do
     {:ok, _state} = start_supervised(RuntimeState)
@@ -250,6 +261,34 @@ defmodule Jido.Connect.Trello.RuntimeTest do
            end)
   end
 
+  test "card get proves board membership before the direct lookup", context do
+    assert {:error, %Connect.Error.AuthError{reason: :trello_card_board_mismatch}} =
+             Connect.invoke(
+               Trello,
+               "trello.card.get",
+               %{id: @off_board_card_ari},
+               runtime_opts(context)
+             )
+
+    assert Enum.any?(RuntimeState.calls(), fn
+             {:call_tool, _endpoint, "trelloReadCard",
+              %{action: "list_by_board", boardIdOrUrl: @board_ari}} ->
+               true
+
+             _other ->
+               false
+           end)
+
+    refute Enum.any?(RuntimeState.calls(), fn
+             {:call_tool, _endpoint, "trelloReadCard",
+              %{action: "get", cardIdOrUrl: @off_board_card_ari}} ->
+               true
+
+             _other ->
+               false
+           end)
+  end
+
   test "provider errors are Trello-owned and secret-safe", context do
     RuntimeState.mode(:transport_error)
 
@@ -258,6 +297,19 @@ defmodule Jido.Connect.Trello.RuntimeTest do
 
     rendered = inspect(error) <> inspect(Connect.Error.to_map(error))
     refute rendered =~ "secret-token"
+  end
+
+  test "compatible live schema extensions are accepted and pinned to the endpoint generation",
+       context do
+    RuntimeState.mode(:compatible_schema)
+
+    assert {:ok, %{kind: "workBoard"}} =
+             Connect.invoke(Trello, "trello.board.get", %{}, runtime_opts(context))
+
+    RuntimeState.mode(:normal)
+
+    assert {:error, %Connect.Error.ProviderError{reason: :mcp_tool_schema_changed}} =
+             Connect.invoke(Trello, "trello.board.get", %{}, runtime_opts(context))
   end
 
   test "credential rotation creates a new endpoint generation", context do

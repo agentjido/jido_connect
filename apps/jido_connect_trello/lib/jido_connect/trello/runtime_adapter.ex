@@ -52,7 +52,7 @@ defmodule Jido.Connect.Trello.RuntimeAdapter do
         endpoint_id: Contract.endpoint_id(),
         tool_name: tool,
         arguments: arguments,
-        expected_schema_hash: Contract.schema_hash(tool),
+        required_schema: Contract.tool_schema(tool),
         timeout: @timeout
       }
 

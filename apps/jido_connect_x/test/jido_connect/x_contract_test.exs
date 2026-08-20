@@ -2,7 +2,6 @@ defmodule Jido.Connect.XContractTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect
-  alias Jido.Connect.MCP.Tool
   alias Jido.Connect.X
 
   @action_contract %{
@@ -32,7 +31,7 @@ defmodule Jido.Connect.XContractTest do
     assert profile.lease_fields == [:mcp_endpoint]
   end
 
-  test "owns exact endpoint, tool bindings, and expected schema hashes" do
+  test "owns exact endpoint, tool bindings, and required tool schemas" do
     expected = %{
       "x.account.get" => "get_users_me",
       "x.bookmark.list" => "get_users_bookmarks",
@@ -46,8 +45,7 @@ defmodule Jido.Connect.XContractTest do
 
     for {tool, schema} <- X.Contract.tool_schemas() do
       assert schema["type"] == "object"
-      assert X.Contract.schema_hash(tool) == Tool.schema_hash(schema)
-      assert byte_size(X.Contract.schema_hash(tool)) == 64
+      assert X.Contract.tool_schema(tool) == schema
     end
   end
 

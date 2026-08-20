@@ -135,6 +135,7 @@ defmodule Jido.Connect.Catalog.Serializer do
       strict?: descriptor.strict?,
       auth: Enum.map(descriptor.auth, &auth_profile_to_map/1),
       policies: Enum.map(descriptor.policies, &policy_to_map/1),
+      host_policy_required?: descriptor.host_policy_required?,
       scopes: descriptor.scopes,
       risk: descriptor.risk,
       confirmation: descriptor.confirmation,

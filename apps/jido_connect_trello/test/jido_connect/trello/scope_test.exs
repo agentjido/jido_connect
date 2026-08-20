@@ -73,6 +73,9 @@ defmodule Jido.Connect.Trello.ScopeTest do
 
   test "checks card, label, and checklist membership" do
     call = fn
+      "trelloReadCard", %{action: "list_by_board"}, false ->
+        {:ok, structured(cards_page([card()], false, nil))}
+
       "trelloReadCard", %{action: "get", cardIdOrUrl: @card_ari}, false ->
         {:ok, structured(card())}
 
@@ -185,6 +188,14 @@ defmodule Jido.Connect.Trello.ScopeTest do
     %{
       "lists" => lists,
       "pageInfo" => %{"hasNextPage" => has_next, "endCursor" => cursor}
+    }
+  end
+
+  defp cards_page(cards, has_next, cursor) do
+    %{
+      "lists" => [%{"id" => @list_ari, "name" => "Doing", "cards" => cards}],
+      "hasNextPage" => has_next,
+      "nextCursor" => cursor
     }
   end
 

@@ -7,6 +7,8 @@ defmodule Jido.Connect.Trello do
   these transport or identity values.
   """
 
+  alias Jido.Connect.Trello.Contract
+
   use Jido.Connect,
     fragments: [
       Jido.Connect.Trello.Actions.Boards,
@@ -53,8 +55,8 @@ defmodule Jido.Connect.Trello do
       refresh_token_field(:refresh_token)
       credential_fields([:mcp_endpoint, :refresh_token, :oauth_client])
       lease_fields([:mcp_endpoint])
-      scopes(["trello:read", "trello:write", "trello:search"])
-      default_scopes(["trello:read", "trello:write", "trello:search"])
+      scopes(Contract.default_scopes())
+      default_scopes(Contract.default_scopes())
       pkce?(true)
       refresh?(true)
       revoke?(true)

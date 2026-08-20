@@ -66,6 +66,32 @@ defmodule Jido.Connect.AuthorizationTest do
              Authorization.authorize(operation(), %{}, context, lease, policy: RaisingPolicy)
   end
 
+  test "a declared policy fails closed when the host policy is absent" do
+    connection = connection()
+    context = context(connection)
+
+    lease =
+      CredentialLease.from_connection!(
+        connection,
+        %{access_token: "secret"},
+        expires_at: DateTime.add(DateTime.utc_now(), 60, :second)
+      )
+
+    required = operation(policies: [:admin_access], host_policy_required?: true)
+
+    assert {:error,
+            %Error.AuthError{
+              reason: :policy_denied,
+              details: %{operation_id: "github.issue.list", reason: "policy_required"}
+            }} = Authorization.authorize(required, %{}, context, lease)
+
+    assert :ok =
+             Authorization.authorize(required, %{}, context, lease,
+               policy: AllowPolicy,
+               policy_context: %{allow?: true}
+             )
+  end
+
   test "lease scopes narrow durable connection scopes" do
     connection = connection(scopes: ["repo", "admin:org"])
     context = context(connection)
@@ -140,6 +166,8 @@ defmodule Jido.Connect.AuthorizationTest do
       auth_profile: Keyword.get(attrs, :auth_profile, :user),
       auth_profiles: Keyword.get(attrs, :auth_profiles, [:user]),
       scopes: Keyword.get(attrs, :scopes, ["repo"]),
+      policies: Keyword.get(attrs, :policies, []),
+      host_policy_required?: Keyword.get(attrs, :host_policy_required?, false),
       scope_resolver: Keyword.get(attrs, :scope_resolver)
     }
   end

@@ -2,7 +2,6 @@ defmodule Jido.Connect.TrelloContractTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect
-  alias Jido.Connect.MCP.Tool
   alias Jido.Connect.Trello
 
   @action_contract %{
@@ -114,8 +113,7 @@ defmodule Jido.Connect.TrelloContractTest do
     for {tool, schema} <- Trello.Contract.tool_schemas() do
       assert schema["type"] == "object"
       assert schema["additionalProperties"] == false
-      assert Trello.Contract.schema_hash(tool) == Tool.schema_hash(schema)
-      assert byte_size(Trello.Contract.schema_hash(tool)) == 64
+      assert Trello.Contract.tool_schema(tool) == schema
     end
 
     assert Enum.all?(Trello.Contract.actions(), fn descriptor ->
@@ -160,6 +158,39 @@ defmodule Jido.Connect.TrelloContractTest do
                Map.has_key?(fields(action), :tool_name) or
                Map.has_key?(fields(action), :action)
            end)
+  end
+
+  test "publishes typed positions and at-least-one update requirements" do
+    position_actions = [
+      "trello.list.create",
+      "trello.list.move",
+      "trello.card.create",
+      "trello.card.move",
+      "trello.checklist.create",
+      "trello.checklist.update",
+      "trello.checklist.item.create",
+      "trello.checklist.item.update"
+    ]
+
+    for action_id <- position_actions do
+      assert {:ok, %{input_json_schema: schema}} =
+               Jido.Connect.Catalog.describe_tool(action_id, modules: [Trello])
+
+      assert get_in(schema, ["properties", "position", "anyOf"]) ==
+               Trello.Contract.position_schema()["anyOf"]
+    end
+
+    for {action_id, fields} <- [
+          {"trello.card.update", ~w(name description due)},
+          {"trello.checklist.update", ~w(name position)},
+          {"trello.checklist.item.update", ~w(text checked position)}
+        ] do
+      assert {:ok, %{input_json_schema: schema}} =
+               Jido.Connect.Catalog.describe_tool(action_id, modules: [Trello])
+
+      assert schema["anyOf"] |> Enum.map(&List.first(&1["required"])) |> Enum.sort() ==
+               Enum.sort(fields)
+    end
   end
 
   test "registers generated modules and package discovery" do

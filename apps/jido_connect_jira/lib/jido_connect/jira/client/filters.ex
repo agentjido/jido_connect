@@ -1,6 +1,7 @@
 defmodule Jido.Connect.Jira.Client.Filters do
   @moduledoc "Jira saved-filter, column, and share-permission REST operations."
 
+  alias Jido.Connect.{Data, Error}
   alias Jido.Connect.Jira.Client.{Normalizer.Filter, Request, Transport}
   alias Jido.Connect.Provider.Transport, as: ProviderTransport
 
@@ -66,28 +67,45 @@ defmodule Jido.Connect.Jira.Client.Filters do
       when is_integer(id) and is_list(columns) do
     path = "/rest/api/3/filter/#{id}/columns"
 
-    with {:ok, _body} <- write(request, :put, path, %{columns: columns}, mutation?: true),
-         response <- get(request, path, %{}),
-         {:ok, result} <-
-           normalize(response, &Filter.columns(&1, id), "Jira filter column response was invalid",
-             mutation?: true
+    with {:ok, _body} <- write(request, :put, path, %{columns: columns}, mutation?: true) do
+      case normalize(
+             get(request, path, %{}),
+             &Filter.columns(&1, id),
+             "Jira filter column response was invalid"
            ) do
-      {:ok, Map.put(result, :updated, true)}
+        {:ok, result} ->
+          {:ok, Map.put(result, :updated, true)}
+
+        {:error, error} ->
+          {:error,
+           Error.provider("Jira filter column update outcome could not be verified",
+             provider: :jira,
+             reason: :write_verification_failed,
+             delivery: :sent_outcome_unknown,
+             mutation?: true,
+             provider_idempotency?: false,
+             details: %{filter_id: Integer.to_string(id), verification_error: Error.type(error)}
+           )}
+      end
     end
   end
 
   def replace_shares(id, attrs, %Request{} = request)
       when is_integer(id) and is_map(attrs) do
-    path = "/rest/api/3/filter/#{id}/permission"
+    path = "/rest/api/3/filter/#{id}"
     scope = Map.fetch!(attrs, :scope)
 
-    with {:ok, current} <- read_body(request, path),
-         {:ok, permission_ids} <- normalize_permission_ids(current),
+    with {:ok, current} <- read_filter(request, path),
          {:ok, desired} <- desired_permissions(attrs, request),
-         :ok <- remove_permissions(permission_ids, path, request),
-         :ok <- add_permissions(desired, path, request),
-         {:ok, final} <- read_body(request, path, mutation?: true),
-         {:ok, result} <- normalize_permissions(final, id, scope, mutation?: true) do
+         {:ok, update_body} <- share_update_body(current, desired),
+         {:ok, updated} <- write(request, :put, path, update_body, mutation?: true),
+         {:ok, result} <-
+           normalize_permissions(
+             Data.get(updated, :sharePermissions),
+             id,
+             scope,
+             mutation?: true
+           ) do
       {:ok, result}
     end
   end
@@ -126,28 +144,18 @@ defmodule Jido.Connect.Jira.Client.Filters do
     end
   end
 
-  defp remove_permissions(ids, path, request) do
-    Enum.reduce_while(ids, :ok, fn id, :ok ->
-      case write(request, :delete, "#{path}/#{id}", nil, mutation?: true) do
-        {:ok, _body} -> {:cont, :ok}
-        {:error, _error} = error -> {:halt, error}
-      end
-    end)
-  end
+  defp share_update_body(current, desired) do
+    name = Data.get(current, :name)
+    query = Data.get(current, :jql)
 
-  defp add_permissions(permissions, path, request) do
-    Enum.reduce_while(permissions, :ok, fn permission, :ok ->
-      case write(request, :post, path, permission, mutation?: true) do
-        {:ok, _body} -> {:cont, :ok}
-        {:error, _error} = error -> {:halt, error}
-      end
-    end)
-  end
-
-  defp normalize_permission_ids(body) do
-    case Filter.permission_ids(body) do
-      {:ok, ids} -> {:ok, ids}
-      :error -> Transport.invalid_success_response("Jira filter share response was invalid", body)
+    if is_binary(name) and String.trim(name) != "" and is_binary(query) and
+         String.trim(query) != "" do
+      body = %{name: name, jql: query, sharePermissions: desired}
+      body = maybe_put(body, :description, Data.get(current, :description))
+      body = maybe_put(body, :favourite, Data.get(current, :favourite))
+      {:ok, body}
+    else
+      Transport.invalid_success_response("Jira filter response was invalid", current)
     end
   end
 
@@ -165,6 +173,12 @@ defmodule Jido.Connect.Jira.Client.Filters do
     request
     |> get(path, %{})
     |> success_body(Keyword.put_new(opts, :message, "Jira filter share request failed"))
+  end
+
+  defp read_filter(request, path) do
+    request
+    |> get(path, %{expand: @expand})
+    |> success_body(message: "Jira filter request failed")
   end
 
   defp get(request, path, params) do

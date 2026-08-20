@@ -75,7 +75,7 @@ defmodule Jido.Connect.Trello.Actions.Lists do
 
       input do
         field(:name, :string, required?: true, min_length: 1, max_length: Contract.name_max())
-        field(:position, :any)
+        field(:position, :any, json_schema: Contract.position_schema())
       end
 
       output do
@@ -131,7 +131,11 @@ defmodule Jido.Connect.Trello.Actions.Lists do
 
       input do
         field(:id, :string, required?: true, min_length: 1, max_length: Contract.ari_max())
-        field(:position, :any, required?: true)
+
+        field(:position, :any,
+          required?: true,
+          json_schema: Contract.position_schema()
+        )
       end
 
       output do

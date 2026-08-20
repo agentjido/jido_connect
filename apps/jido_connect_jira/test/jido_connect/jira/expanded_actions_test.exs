@@ -6,6 +6,7 @@ defmodule Jido.Connect.Jira.ExpandedActionsTest do
   alias Jido.Connect.Jira
 
   defmodule NoCallClient do
+    def get_plan(id, _request), do: {:ok, %{id: Integer.to_string(id)}}
   end
 
   @new_actions %{
@@ -38,6 +39,10 @@ defmodule Jido.Connect.Jira.ExpandedActionsTest do
     for {id, {risk, confirmation, required_policies}} <- @new_actions do
       assert %{risk: ^risk, confirmation: ^confirmation} = action = Map.fetch!(actions, id)
       assert Enum.all?(required_policies, &(&1 in action.policies))
+
+      if :jira_admin_access in required_policies do
+        assert action.host_policy_required?
+      end
 
       if risk in [:write, :external_write, :destructive] do
         assert is_atom(action.preview)
@@ -77,6 +82,59 @@ defmodule Jido.Connect.Jira.ExpandedActionsTest do
     assert issue_delete.issue_key.required?
     assert issue_delete.issue_key.min_length == 1
     assert issue_delete.issue_key.max_length == 255
+  end
+
+  test "publishes typed plan configuration and update requirements" do
+    assert {:ok, %{input_json_schema: create_schema}} =
+             Jido.Connect.Catalog.describe_tool("jira.plan.create", modules: [Jira])
+
+    assert {:ok, %{host_policy_required?: true}} =
+             Jido.Connect.Catalog.describe_tool("jira.plan.get", modules: [Jira])
+
+    assert %{
+             "type" => "array",
+             "minItems" => 1,
+             "items" => %{
+               "additionalProperties" => false,
+               "required" => ["type", "value"],
+               "properties" => %{
+                 "type" => %{"enum" => ["Board", "Project", "Filter"]},
+                 "value" => %{"type" => "integer", "minimum" => 1}
+               }
+             }
+           } = get_in(create_schema, ["properties", "issue_sources"])
+
+    assert %{
+             "additionalProperties" => false,
+             "required" => ["estimation"],
+             "properties" => %{
+               "estimation" => %{"enum" => ["StoryPoints", "Days", "Hours"]},
+               "startDate" => %{"oneOf" => [_custom_date, _standard_dates]}
+             }
+           } = get_in(create_schema, ["properties", "scheduling"])
+
+    assert {:ok, %{input_json_schema: update_schema}} =
+             Jido.Connect.Catalog.describe_tool("jira.plan.update", modules: [Jira])
+
+    required_alternatives =
+      update_schema["anyOf"]
+      |> Enum.map(&List.first(&1["required"]))
+      |> Enum.sort()
+
+    assert required_alternatives ==
+             ~w(
+               cross_project_releases
+               custom_fields
+               exclusion_rules
+               issue_sources
+               lead_account_id
+               name
+               permissions
+               scheduling
+             )
+
+    assert get_in(update_schema, ["properties", "scheduling", "minProperties"]) == 1
+    assert get_in(update_schema, ["properties", "exclusion_rules", "minProperties"]) == 1
   end
 
   test "keeps destructive actions out of ordinary editor packs" do
@@ -121,9 +179,24 @@ defmodule Jido.Connect.Jira.ExpandedActionsTest do
     end
   end
 
+  test "plan actions require an explicit host policy" do
+    runtime = Jido.Connect.Jira.TestRuntime.build(provider_client: NoCallClient)
+
+    assert {:error, %Error.AuthError{reason: :policy_denied}} =
+             Connect.invoke(
+               Jira,
+               "jira.plan.get",
+               %{id: 1237},
+               runtime_opts(runtime, policy?: false)
+             )
+
+    assert {:ok, %{id: "1237"}} =
+             Connect.invoke(Jira, "jira.plan.get", %{id: 1237}, runtime_opts(runtime))
+  end
+
   defp fields(action), do: Map.new(action.input, &{&1.name, &1})
 
-  defp runtime_opts(runtime) do
+  defp runtime_opts(runtime, opts \\ []) do
     lease =
       Connect.CredentialLease.from_connection!(
         runtime.context.connection,
@@ -131,10 +204,16 @@ defmodule Jido.Connect.Jira.ExpandedActionsTest do
         expires_at: DateTime.add(DateTime.utc_now(), 60, :second)
       )
 
-    [
+    base = [
       context: runtime.context,
       credential_lease: lease,
       provider_client: runtime.provider_client
     ]
+
+    if Keyword.get(opts, :policy?, true) do
+      Keyword.put(base, :policy, fn _operation, _input, _context, _connection -> :ok end)
+    else
+      base
+    end
   end
 end

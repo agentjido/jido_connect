@@ -119,7 +119,7 @@ defmodule Jido.Connect.Trello.Actions.Cards do
         field(:name, :string, required?: true, min_length: 1, max_length: Contract.name_max())
         field(:description, :string, min_length: 0, max_length: Contract.description_max())
         field(:due, :string, min_length: 1, max_length: 64)
-        field(:position, :any)
+        field(:position, :any, json_schema: Contract.position_schema())
       end
 
       output do
@@ -139,6 +139,7 @@ defmodule Jido.Connect.Trello.Actions.Cards do
       handler(Jido.Connect.Trello.Handlers.Action)
       preview(Jido.Connect.Trello.Previews.CardUpdate)
       effect(:write, confirmation: :required_for_ai)
+      input_json_schema_overlay(Jido.Connect.Schema.at_least_one_of([:name, :description, :due]))
 
       access do
         auth([:oauth_user], default: :oauth_user)
@@ -193,7 +194,7 @@ defmodule Jido.Connect.Trello.Actions.Cards do
           max_length: Contract.ari_max()
         )
 
-        field(:position, :any)
+        field(:position, :any, json_schema: Contract.position_schema())
       end
 
       output do

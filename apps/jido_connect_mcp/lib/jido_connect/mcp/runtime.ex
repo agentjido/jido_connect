@@ -2,7 +2,14 @@ defmodule Jido.Connect.MCP.Runtime do
   @moduledoc false
 
   alias Jido.Connect.Error
-  alias Jido.Connect.MCP.{EndpointLeaseManager, EndpointResolver, Tool, ToolResult}
+
+  alias Jido.Connect.MCP.{
+    EndpointLeaseManager,
+    EndpointResolver,
+    SchemaCompatibility,
+    Tool,
+    ToolResult
+  }
 
   def list_tools(input, opts) do
     with {:ok, token} <- EndpointResolver.resolve_lease(input.endpoint_id, opts) do
@@ -31,7 +38,7 @@ defmodule Jido.Connect.MCP.Runtime do
   end
 
   @doc false
-  @spec call_typed_tool(map(), keyword() | map(), mutation?: boolean()) ::
+  @spec call_typed_tool(map(), map(), keyword()) ::
           {:ok, map()} | {:error, Error.error()}
   def call_typed_tool(input, opts, execution_opts) do
     mutation? = Keyword.fetch!(execution_opts, :mutation?)
@@ -39,7 +46,7 @@ defmodule Jido.Connect.MCP.Runtime do
     with {:ok, token} <- EndpointResolver.resolve_lease(input.endpoint_id, opts) do
       try do
         with :ok <- ensure_dispatchable(token),
-             :ok <- verify_schema(input, opts, token.endpoint_id),
+             :ok <- verify_schema(input, opts, token),
              {:ok, data} <- call_typed(token, opts, input, mutation?) do
           result =
             input.endpoint_id
@@ -103,18 +110,27 @@ defmodule Jido.Connect.MCP.Runtime do
     end
   end
 
-  defp verify_schema(%{expected_schema_hash: nil}, _opts, _endpoint_id), do: :ok
+  defp verify_schema(input, opts, token) do
+    expected_hash = Map.get(input, :expected_schema_hash)
+    required_schema = Map.get(input, :required_schema)
 
-  defp verify_schema(%{expected_schema_hash: expected_hash} = input, opts, endpoint_id) do
-    with {:ok, data} <- call_mcp(opts, :list_tools, [endpoint_id], timeout(input)),
-         {:ok, tool} <- find_tool(data, input.tool_name),
-         actual_hash = tool |> Tool.from_mcp() |> Map.fetch!(:schema_hash),
-         :ok <- require_schema_hash(input.tool_name, expected_hash, actual_hash) do
+    if is_nil(expected_hash) and is_nil(required_schema) do
       :ok
+    else
+      verify_live_schema(input, opts, token, expected_hash, required_schema)
     end
   end
 
-  defp verify_schema(_input, _opts, _endpoint_id), do: :ok
+  defp verify_live_schema(input, opts, token, expected_hash, required_schema) do
+    with {:ok, data} <- call_mcp(opts, :list_tools, [token.endpoint_id], timeout(input)),
+         {:ok, tool} <- find_tool(data, input.tool_name),
+         observed = Tool.from_mcp(tool),
+         :ok <- require_schema_hash(input.tool_name, expected_hash, observed.schema_hash),
+         :ok <- require_compatible_schema(input.tool_name, required_schema, observed.input_schema),
+         :ok <- bind_schema(token, input.tool_name, observed.schema_hash) do
+      :ok
+    end
+  end
 
   defp find_tool(data, tool_name) do
     tool =
@@ -135,6 +151,7 @@ defmodule Jido.Connect.MCP.Runtime do
     end
   end
 
+  defp require_schema_hash(_tool_name, nil, _actual_hash), do: :ok
   defp require_schema_hash(_tool_name, hash, hash), do: :ok
 
   defp require_schema_hash(tool_name, expected_hash, actual_hash) do
@@ -145,6 +162,29 @@ defmodule Jido.Connect.MCP.Runtime do
        details: %{expected_schema_hash: expected_hash, actual_schema_hash: actual_hash}
      )}
   end
+
+  defp require_compatible_schema(_tool_name, nil, _actual_schema), do: :ok
+
+  defp require_compatible_schema(tool_name, required_schema, actual_schema) do
+    if SchemaCompatibility.compatible?(required_schema, actual_schema) do
+      :ok
+    else
+      {:error,
+       Error.validation("MCP tool schema changed before execution",
+         reason: :mcp_tool_schema_changed,
+         subject: tool_name,
+         details: %{
+           required_schema_hash: Tool.schema_hash(required_schema),
+           actual_schema_hash: Tool.schema_hash(actual_schema)
+         }
+       )}
+    end
+  end
+
+  defp bind_schema(%{legacy?: true}, _tool_name, _schema_hash), do: :ok
+
+  defp bind_schema(token, tool_name, schema_hash),
+    do: EndpointLeaseManager.bind_schema(token, tool_name, schema_hash)
 
   defp call_mcp(opts, function, args, nil) do
     client = mcp_client(opts)

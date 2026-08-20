@@ -1,10 +1,11 @@
 defmodule Jido.Connect.Trello.Contract do
   @moduledoc false
 
-  alias Jido.Connect.MCP.Tool
-
-  @endpoint "https://mcp.trello.com/v1"
+  @base_url "https://mcp.trello.com"
+  @mcp_path "/v1"
+  @endpoint @base_url <> @mcp_path
   @endpoint_id "trello"
+  @default_scopes ~w(trello:read trello:write trello:search)
   @cursor_max 2_048
   @ari_max 128
   @name_max 512
@@ -254,15 +255,17 @@ defmodule Jido.Connect.Trello.Contract do
                   }
                 )
 
-  @tool_schema_hashes Map.new(@tool_schemas, fn {tool, schema} ->
-                        {tool, Tool.schema_hash(schema)}
-                      end)
   @action_mutations Map.new(@actions, &{&1.id, &1.mutation?})
 
   def endpoint, do: @endpoint
+  def base_url, do: @base_url
+  def mcp_path, do: @mcp_path
   def endpoint_id, do: @endpoint_id
+  def default_scopes, do: @default_scopes
   def actions, do: @actions
   def tool_schemas, do: @tool_schemas
+  def tool_schema(tool), do: Map.fetch!(@tool_schemas, tool)
+  def position_schema, do: @position
   def cursor_max, do: @cursor_max
   def ari_max, do: @ari_max
   def name_max, do: @name_max
@@ -271,6 +274,5 @@ defmodule Jido.Connect.Trello.Contract do
   def checklist_text_max, do: @checklist_text_max
 
   def fetch_action!(id), do: Enum.find(@actions, &(&1.id == id)) || raise(ArgumentError, id)
-  def schema_hash(tool), do: Map.fetch!(@tool_schema_hashes, tool)
   def mutation?(action), do: Map.get(@action_mutations, action, true)
 end

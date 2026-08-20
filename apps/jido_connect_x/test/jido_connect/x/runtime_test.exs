@@ -16,16 +16,26 @@ defmodule Jido.Connect.X.TestMCPClient do
   alias Jido.Connect.X.{Contract, RuntimeState}
 
   def list_tools(endpoint_id, opts) do
-    unless is_list(opts), do: raise("expected MCP options")
+    unless opts == [timeout: 30_000], do: raise("expected bounded MCP timeout")
     RuntimeState.record({:list_tools, endpoint_id})
 
     tools =
       Enum.map(Contract.tool_schemas(), fn {name, schema} ->
         schema =
-          if RuntimeState.mode() == :schema_drift and name == "get_users_bookmarks" do
-            put_in(schema, ["properties", "id", "type"], "integer")
-          else
-            schema
+          case {RuntimeState.mode(), name} do
+            {:schema_drift, "get_users_bookmarks"} ->
+              put_in(schema, ["properties", "id", "type"], "integer")
+
+            {:compatible_schema, _name} ->
+              schema
+              |> Map.put("description", "Captured X #{name} input")
+              |> put_in(
+                ["properties", "provider_optional_field"],
+                %{"type" => "string", "description" => "Provider-owned optional input."}
+              )
+
+            _other ->
+              schema
           end
 
         %{"name" => name, "inputSchema" => schema}
@@ -35,7 +45,7 @@ defmodule Jido.Connect.X.TestMCPClient do
   end
 
   def call_tool(endpoint_id, tool, arguments, opts) do
-    unless is_list(opts), do: raise("expected MCP options")
+    unless opts == [timeout: 30_000], do: raise("expected bounded MCP timeout")
     RuntimeState.record({:call_tool, endpoint_id, tool, arguments})
 
     case {RuntimeState.mode(), tool} do
@@ -188,6 +198,19 @@ defmodule Jido.Connect.X.RuntimeTest do
              {:call_tool, _, "get_users_bookmarks", _} -> true
              _other -> false
            end)
+  end
+
+  test "compatible live schema extensions are accepted and pinned to the endpoint generation",
+       context do
+    RuntimeState.mode(:compatible_schema)
+
+    assert {:ok, %{kind: "social_account"}} =
+             Connect.invoke(X, "x.account.get", %{}, runtime_opts(context))
+
+    RuntimeState.mode(:normal)
+
+    assert {:error, %Connect.Error.ProviderError{reason: :mcp_tool_schema_changed}} =
+             Connect.invoke(X, "x.account.get", %{}, runtime_opts(context))
   end
 
   test "provider errors are X-owned and secret-safe", context do

@@ -4,6 +4,10 @@ defmodule Jido.Connect.JiraTest do
   alias Jido.Connect
   alias Jido.Connect.Jira
 
+  defmodule AllowPolicy do
+    def authorize(_operation, _input, _context, _connection), do: :ok
+  end
+
   defmodule PreviewWriteClient do
     def create_issue(_attrs, _request), do: unexpected_write()
     def update_issue(_issue_key, _attrs, _request), do: unexpected_write()
@@ -161,6 +165,7 @@ defmodule Jido.Connect.JiraTest do
              Connect.invoke(Jira, "jira.project.list", %{},
                context: runtime.context,
                credential_lease: lease,
+               policy: AllowPolicy,
                provider_client: Jido.Connect.Jira.MockClient
              )
   end
@@ -179,6 +184,7 @@ defmodule Jido.Connect.JiraTest do
              Connect.invoke(Jira, "jira.issue.get", %{issue_key: "PROJ-123"},
                context: runtime.context,
                credential_lease: lease,
+               policy: AllowPolicy,
                provider_client: Jido.Connect.Jira.MockClient
              )
 
@@ -205,7 +211,8 @@ defmodule Jido.Connect.JiraTest do
                "jira.issue.comment.create",
                %{issue_key: "PROJ-123", body: "Ready for review"},
                context: runtime.context,
-               credential_lease: lease
+               credential_lease: lease,
+               policy: AllowPolicy
              )
 
     assert prepared.preview["issue_key"] == "PROJ-123"
@@ -283,6 +290,7 @@ defmodule Jido.Connect.JiraTest do
                Connect.prepare(Jira, action_id, input,
                  context: runtime.context,
                  credential_lease: lease,
+                 policy: AllowPolicy,
                  provider_client: PreviewWriteClient
                )
 
@@ -543,7 +551,11 @@ defmodule Jido.Connect.JiraTest do
         })
 
       available =
-        plugin_module.tool_availability(%{connection: connection})
+        plugin_module.tool_availability(%{
+          connection: connection,
+          integration_context: policy_context(connection),
+          policy: AllowPolicy
+        })
         |> Map.new(&{&1.tool, &1})
 
       tool_ids = Enum.map(spec.actions ++ spec.triggers, & &1.id)
@@ -579,7 +591,11 @@ defmodule Jido.Connect.JiraTest do
         })
 
       availability =
-        plugin_module.tool_availability(%{connection: connection})
+        plugin_module.tool_availability(%{
+          connection: connection,
+          integration_context: policy_context(connection),
+          policy: AllowPolicy
+        })
         |> Map.new(&{&1.tool, &1})
 
       # Read actions should be available
@@ -614,5 +630,13 @@ defmodule Jido.Connect.JiraTest do
     |> Enum.concat(profile.scopes)
     |> Enum.concat(operation_scopes)
     |> Enum.uniq()
+  end
+
+  defp policy_context(connection) do
+    Connect.Context.new!(%{
+      tenant_id: connection.tenant_id,
+      actor: %{id: connection.owner_id, type: connection.owner_type},
+      connection: connection
+    })
   end
 end

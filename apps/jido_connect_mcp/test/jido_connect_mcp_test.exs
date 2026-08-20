@@ -3,6 +3,10 @@ defmodule Jido.Connect.MCPTest do
 
   alias Jido.Connect
 
+  defmodule AllowPolicy do
+    def authorize(_operation, _input, _context, _connection), do: :ok
+  end
+
   defmodule FakeMCPClient do
     def list_tools(:filesystem) do
       {:ok,
@@ -182,7 +186,7 @@ defmodule Jido.Connect.MCPTest do
     assert {:ok, %{endpoint_id: "filesystem", tools: [tool]}} =
              Jido.Connect.MCP.Actions.ListTools.run(
                %{endpoint_id: "filesystem", timeout: 1_000},
-               %{integration_context: context, credential_lease: lease}
+               action_context(context, lease)
              )
 
     assert tool.name == "read_text_file"
@@ -197,7 +201,7 @@ defmodule Jido.Connect.MCPTest do
     assert {:ok, %{tools: [tool]}} =
              Jido.Connect.MCP.Actions.ListTools.run(
                %{endpoint_id: "filesystem"},
-               %{integration_context: context, credential_lease: lease}
+               action_context(context, lease)
              )
 
     assert tool.description == "Read a text file without a timeout"
@@ -222,7 +226,7 @@ defmodule Jido.Connect.MCPTest do
                  arguments: %{"path" => "/tmp/readme.md"},
                  timeout: 1_000
                },
-               %{integration_context: context, credential_lease: lease}
+               action_context(context, lease)
              )
   end
 
@@ -249,7 +253,7 @@ defmodule Jido.Connect.MCPTest do
                  arguments: %{},
                  timeout: 1_000
                },
-               %{integration_context: context, credential_lease: lease}
+               action_context(context, lease)
              )
   end
 
@@ -297,7 +301,7 @@ defmodule Jido.Connect.MCPTest do
             }} =
              Jido.Connect.MCP.Actions.ListTools.run(
                %{endpoint_id: "filesystem", timeout: 1_000},
-               %{integration_context: context, credential_lease: lease}
+               action_context(context, lease)
              )
   end
 
@@ -312,7 +316,7 @@ defmodule Jido.Connect.MCPTest do
             }} =
              Jido.Connect.MCP.Actions.ListTools.run(
                %{endpoint_id: "filesystem", timeout: 1_000},
-               %{integration_context: context, credential_lease: lease}
+               action_context(context, lease)
              )
   end
 
@@ -332,7 +336,7 @@ defmodule Jido.Connect.MCPTest do
             }} =
              Jido.Connect.MCP.Actions.ListTools.run(
                %{endpoint_id: "missing"},
-               %{integration_context: context, credential_lease: lease}
+               action_context(context, lease)
              )
   end
 
@@ -396,6 +400,7 @@ defmodule Jido.Connect.MCPTest do
              Connect.prepare(Jido.Connect.MCP, "mcp.tool.call", input,
                context: context,
                credential_lease: lease,
+               policy: AllowPolicy,
                binding_ref: "persona-binding-a"
              )
 
@@ -415,6 +420,7 @@ defmodule Jido.Connect.MCPTest do
              Connect.commit(Jido.Connect.MCP, prepared, input,
                context: context,
                credential_lease: lease,
+               policy: AllowPolicy,
                binding_ref: "persona-binding-a",
                execution_authorization: authorization,
                authorization_validator: fn evidence, plan, commit_context ->
@@ -444,6 +450,7 @@ defmodule Jido.Connect.MCPTest do
              Connect.prepare(Jido.Connect.MCP, "mcp.tool.call", input,
                context: context,
                credential_lease: lease,
+               policy: AllowPolicy,
                binding_ref: "persona-binding-drift"
              )
 
@@ -451,6 +458,7 @@ defmodule Jido.Connect.MCPTest do
              Connect.commit(Jido.Connect.MCP, prepared, input,
                context: context,
                credential_lease: lease,
+               policy: AllowPolicy,
                binding_ref: "persona-binding-drift",
                execution_authorization: %{plan_id: prepared.id},
                authorization_validator: fn evidence, plan, _context ->
@@ -479,7 +487,7 @@ defmodule Jido.Connect.MCPTest do
                  arguments: %{},
                  timeout: 1_000
                },
-               %{integration_context: context, credential_lease: lease}
+               action_context(context, lease)
              )
   end
 
@@ -498,16 +506,22 @@ defmodule Jido.Connect.MCPTest do
 
     assert filtered.actions == [Jido.Connect.MCP.Actions.ListTools]
 
+    {context, _lease} = context_and_lease()
+
     [available | _] =
       Jido.Connect.MCP.Plugin.tool_availability(%{
-        connection: elem(context_and_lease(), 0).connection
+        connection: context.connection,
+        integration_context: context,
+        policy: AllowPolicy
       })
 
     assert available.state == :available
 
     [missing_scopes | _] =
       Jido.Connect.MCP.Plugin.tool_availability(%{
-        connection: %{elem(context_and_lease(), 0).connection | scopes: []}
+        connection: %{context.connection | scopes: []},
+        integration_context: context,
+        policy: AllowPolicy
       })
 
     assert missing_scopes.state == :missing_scopes
@@ -550,6 +564,10 @@ defmodule Jido.Connect.MCPTest do
       })
 
     {context, lease}
+  end
+
+  defp action_context(context, lease) do
+    %{integration_context: context, credential_lease: lease, policy: AllowPolicy}
   end
 
   defp host_context_and_lease(connection_id) do
