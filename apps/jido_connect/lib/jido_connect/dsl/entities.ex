@@ -100,6 +100,7 @@ defmodule Jido.Connect.Dsl.Access do
     :__spark_metadata__,
     :auth,
     :scopes,
+    host_policy_required?: false,
     policies: []
   ]
 end
@@ -150,6 +151,7 @@ defmodule Jido.Connect.Dsl.Action do
     :effect,
     :requirements,
     :input_schema,
+    :input_json_schema_overlay,
     :output_schema,
     tags: [],
     input: [],

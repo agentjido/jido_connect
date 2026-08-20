@@ -4,6 +4,10 @@ defmodule Jido.Connect.JiraTest do
   alias Jido.Connect
   alias Jido.Connect.Jira
 
+  defmodule AllowPolicy do
+    def authorize(_operation, _input, _context, _connection), do: :ok
+  end
+
   defmodule PreviewWriteClient do
     def create_issue(_attrs, _request), do: unexpected_write()
     def update_issue(_issue_key, _attrs, _request), do: unexpected_write()
@@ -19,6 +23,9 @@ defmodule Jido.Connect.JiraTest do
   @jira_actions_fragment Jido.Connect.Jira.Actions.Issues
   @jira_projects_fragment Jido.Connect.Jira.Actions.Projects
   @jira_metadata_fragment Jido.Connect.Jira.Actions.Metadata
+  @jira_boards_fragment Jido.Connect.Jira.Actions.Boards
+  @jira_filters_fragment Jido.Connect.Jira.Actions.Filters
+  @jira_plans_fragment Jido.Connect.Jira.Actions.Plans
 
   @jira_action_modules [
     Jido.Connect.Jira.Actions.GetIssue,
@@ -26,11 +33,30 @@ defmodule Jido.Connect.JiraTest do
     Jido.Connect.Jira.Actions.CreateIssue,
     Jido.Connect.Jira.Actions.UpdateIssue,
     Jido.Connect.Jira.Actions.TransitionIssue,
+    Jido.Connect.Jira.Actions.ListIssueTransitions,
+    Jido.Connect.Jira.Actions.DeleteIssue,
     Jido.Connect.Jira.Actions.AssignIssue,
     Jido.Connect.Jira.Actions.AddComment,
     Jido.Connect.Jira.Actions.ListProjects,
     Jido.Connect.Jira.Actions.GetProject,
-    Jido.Connect.Jira.Actions.ListFieldSchemas
+    Jido.Connect.Jira.Actions.ListFieldSchemas,
+    Jido.Connect.Jira.Actions.ListBoards,
+    Jido.Connect.Jira.Actions.GetBoard,
+    Jido.Connect.Jira.Actions.CreateBoard,
+    Jido.Connect.Jira.Actions.ListFilters,
+    Jido.Connect.Jira.Actions.GetFilter,
+    Jido.Connect.Jira.Actions.CreateFilter,
+    Jido.Connect.Jira.Actions.UpdateFilter,
+    Jido.Connect.Jira.Actions.GetFilterColumns,
+    Jido.Connect.Jira.Actions.UpdateFilterColumns,
+    Jido.Connect.Jira.Actions.UpdateFilterShare,
+    Jido.Connect.Jira.Actions.ListPlans,
+    Jido.Connect.Jira.Actions.GetPlan,
+    Jido.Connect.Jira.Actions.CreatePlan,
+    Jido.Connect.Jira.Actions.UpdatePlan,
+    Jido.Connect.Jira.Actions.DuplicatePlan,
+    Jido.Connect.Jira.Actions.ArchivePlan,
+    Jido.Connect.Jira.Actions.TrashPlan
   ]
 
   @jira_sensor_modules [
@@ -44,6 +70,9 @@ defmodule Jido.Connect.JiraTest do
     @jira_actions_fragment,
     @jira_projects_fragment,
     @jira_metadata_fragment,
+    @jira_boards_fragment,
+    @jira_filters_fragment,
+    @jira_plans_fragment,
     @jira_triggers_fragment
   ]
 
@@ -63,11 +92,30 @@ defmodule Jido.Connect.JiraTest do
              "jira.issue.create",
              "jira.issue.update",
              "jira.issue.transition",
+             "jira.issue.transition.list",
+             "jira.issue.delete",
              "jira.issue.assign",
              "jira.issue.comment.create",
              "jira.project.list",
              "jira.project.get",
-             "jira.field_schema.list"
+             "jira.field_schema.list",
+             "jira.board.list",
+             "jira.board.get",
+             "jira.board.create",
+             "jira.filter.list",
+             "jira.filter.get",
+             "jira.filter.create",
+             "jira.filter.update",
+             "jira.filter.columns.get",
+             "jira.filter.columns.update",
+             "jira.filter.share.update",
+             "jira.plan.list",
+             "jira.plan.get",
+             "jira.plan.create",
+             "jira.plan.update",
+             "jira.plan.duplicate",
+             "jira.plan.archive",
+             "jira.plan.trash"
            ]
 
     assert Enum.map(spec.triggers, & &1.id) == [
@@ -94,9 +142,13 @@ defmodule Jido.Connect.JiraTest do
     assert "write:jira-work" in oauth_profile.optional_scopes
   end
 
-  test "declares project_access policy" do
+  test "declares project and Jira administration policies" do
     spec = Jira.integration()
-    assert [%{id: :project_access, decision: :allow_operation}] = spec.policies
+
+    assert [
+             %{id: :project_access, decision: :allow_operation},
+             %{id: :jira_admin_access, decision: :allow_operation}
+           ] = spec.policies
   end
 
   test "passes injected clients as runtime infrastructure" do
@@ -113,6 +165,7 @@ defmodule Jido.Connect.JiraTest do
              Connect.invoke(Jira, "jira.project.list", %{},
                context: runtime.context,
                credential_lease: lease,
+               policy: AllowPolicy,
                provider_client: Jido.Connect.Jira.MockClient
              )
   end
@@ -131,6 +184,7 @@ defmodule Jido.Connect.JiraTest do
              Connect.invoke(Jira, "jira.issue.get", %{issue_key: "PROJ-123"},
                context: runtime.context,
                credential_lease: lease,
+               policy: AllowPolicy,
                provider_client: Jido.Connect.Jira.MockClient
              )
 
@@ -157,7 +211,8 @@ defmodule Jido.Connect.JiraTest do
                "jira.issue.comment.create",
                %{issue_key: "PROJ-123", body: "Ready for review"},
                context: runtime.context,
-               credential_lease: lease
+               credential_lease: lease,
+               policy: AllowPolicy
              )
 
     assert prepared.preview["issue_key"] == "PROJ-123"
@@ -235,6 +290,7 @@ defmodule Jido.Connect.JiraTest do
                Connect.prepare(Jira, action_id, input,
                  context: runtime.context,
                  credential_lease: lease,
+                 policy: AllowPolicy,
                  provider_client: PreviewWriteClient
                )
 
@@ -252,7 +308,7 @@ defmodule Jido.Connect.JiraTest do
 
     assert entry.package == :jido_connect_jira
     assert entry.tags == [:project_management, :issues, :work_management]
-    assert [%{id: :project_access}] = entry.policies
+    assert [%{id: :project_access}, %{id: :jira_admin_access}] = entry.policies
     assert MapSet.subset?(MapSet.new([:api_key, :oauth2]), features)
     assert MapSet.member?(features, :generated_jido_actions)
     assert MapSet.member?(features, :webhook_verification)
@@ -418,6 +474,10 @@ defmodule Jido.Connect.JiraTest do
     for module <- @jira_action_modules do
       assert {:module, ^module} = Code.ensure_loaded(module)
       assert function_exported?(module, :run, 2)
+      assert module.operation_id() == module.jido_connect_projection().action_id
+
+      assert {:error, %Connect.Error.AuthError{reason: :context_required}} =
+               module.run(%{}, %{})
     end
 
     assert {:module, Jido.Connect.Jira.Plugin} = Code.ensure_loaded(Jido.Connect.Jira.Plugin)
@@ -491,7 +551,11 @@ defmodule Jido.Connect.JiraTest do
         })
 
       available =
-        plugin_module.tool_availability(%{connection: connection})
+        plugin_module.tool_availability(%{
+          connection: connection,
+          integration_context: policy_context(connection),
+          policy: AllowPolicy
+        })
         |> Map.new(&{&1.tool, &1})
 
       tool_ids = Enum.map(spec.actions ++ spec.triggers, & &1.id)
@@ -527,7 +591,11 @@ defmodule Jido.Connect.JiraTest do
         })
 
       availability =
-        plugin_module.tool_availability(%{connection: connection})
+        plugin_module.tool_availability(%{
+          connection: connection,
+          integration_context: policy_context(connection),
+          policy: AllowPolicy
+        })
         |> Map.new(&{&1.tool, &1})
 
       # Read actions should be available
@@ -538,7 +606,8 @@ defmodule Jido.Connect.JiraTest do
       end
 
       # Write actions should report missing scopes
-      write_actions = Enum.filter(spec.actions, &(&1.risk in [:write, :external_write]))
+      write_actions =
+        Enum.filter(spec.actions, &(&1.risk in [:write, :external_write, :destructive]))
 
       for action <- write_actions do
         assert availability[action.id].state == :missing_scopes
@@ -561,5 +630,13 @@ defmodule Jido.Connect.JiraTest do
     |> Enum.concat(profile.scopes)
     |> Enum.concat(operation_scopes)
     |> Enum.uniq()
+  end
+
+  defp policy_context(connection) do
+    Connect.Context.new!(%{
+      tenant_id: connection.tenant_id,
+      actor: %{id: connection.owner_id, type: connection.owner_type},
+      connection: connection
+    })
   end
 end

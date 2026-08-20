@@ -29,6 +29,9 @@ defmodule Jido.Connect.Jira do
       Jido.Connect.Jira.Actions.Issues,
       Jido.Connect.Jira.Actions.Projects,
       Jido.Connect.Jira.Actions.Metadata,
+      Jido.Connect.Jira.Actions.Boards,
+      Jido.Connect.Jira.Actions.Filters,
+      Jido.Connect.Jira.Actions.Plans,
       Jido.Connect.Jira.Triggers.Issues
     ]
 
@@ -129,6 +132,18 @@ defmodule Jido.Connect.Jira do
       )
 
       subject({:input, :project_key})
+      owner({:connection, :owner})
+      decision(:allow_operation)
+    end
+
+    policy :jira_admin_access do
+      label("Jira administration access")
+
+      description(
+        "Host verifies that the actor can use Jira plan operations that require Administer Jira."
+      )
+
+      subject({:context, :actor})
       owner({:connection, :owner})
       decision(:allow_operation)
     end

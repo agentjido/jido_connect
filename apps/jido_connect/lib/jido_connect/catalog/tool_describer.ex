@@ -37,7 +37,13 @@ defmodule Jido.Connect.Catalog.ToolDescriber do
   end
 
   defp descriptor(%Spec{} = spec, %ToolEntry{} = tool, %ActionSpec{} = action) do
-    input_json_schema = Schema.to_json_schema(action.input_schema)
+    input_json_schema =
+      Schema.to_json_schema(
+        action.input_schema,
+        action.input,
+        action.input_json_schema_overlay
+      )
+
     output_json_schema = Schema.to_json_schema(action.output_schema)
 
     ToolDescriptor.new!(%{
@@ -51,6 +57,7 @@ defmodule Jido.Connect.Catalog.ToolDescriber do
       strict?: strict?(input_json_schema, output_json_schema),
       auth: auth_profiles(spec, action),
       policies: policies(spec, action.policies),
+      host_policy_required?: action.host_policy_required?,
       scopes: action.scopes,
       risk: action.risk,
       confirmation: action.confirmation,
@@ -77,6 +84,7 @@ defmodule Jido.Connect.Catalog.ToolDescriber do
       strict?: strict?(config_json_schema, signal_json_schema),
       auth: auth_profiles(spec, trigger),
       policies: policies(spec, trigger.policies),
+      host_policy_required?: trigger.host_policy_required?,
       scopes: trigger.scopes,
       risk: tool.risk,
       confirmation: tool.confirmation,

@@ -5,11 +5,13 @@
 It includes:
 
 - `Jido.Connect.Jira`, a Spark-authored provider that compiles into Jido tools
-- Jira issue actions (get, search, create, update, transition, assign, comment)
+- Jira issue actions, including transition discovery and destructive issue deletion
 - Jira project and metadata actions (list projects, get project, list field schemas)
+- Jira Software board actions and Jira saved-filter actions
+- Privileged Jira plan administration actions
 - Webhook triggers for issue created/updated and comment created/updated events
 - Webhook verification and normalization in `Jido.Connect.Jira.Webhook`
-- Catalog packs for scoped tool discovery (`:jira_reader`, `:jira_editor`)
+- Catalog packs for ordinary, privileged, and destructive tool discovery
 - OAuth2 helpers in `Jido.Connect.Jira.OAuth`
 - REST client helpers in `Jido.Connect.Jira.Client`
 - Transport boundary in `Jido.Connect.Jira.Client.Transport`
@@ -21,9 +23,8 @@ The Spark DSL declaration lives in
 
 ## Status
 
-This is an **experimental** scaffold. Additional action fragments, trigger
-fragments, normalized structs, and webhook support will be added in subsequent
-waves.
+This package is **experimental**. Its 29 actions use fixed Jira Cloud REST
+contracts, normalized results, and bounded inputs.
 
 ## Installation
 
@@ -52,8 +53,8 @@ The provider declares Atlassian Cloud scopes for Jira:
 
 | Scope | Description |
 |---|---|
-| `read:jira-work` | Read issues, projects, and filters |
-| `write:jira-work` | Create and update issues |
+| `read:jira-work` | Read Jira work data |
+| `write:jira-work` | Change Jira work data |
 | `read:jira-users` | Read user information |
 | `read:jira-configuration` | Read project and configuration data |
 
@@ -72,6 +73,8 @@ mutation actions are needed.
 | `jira.issue.create` | create | write | Create a new issue |
 | `jira.issue.update` | update | write | Update issue fields |
 | `jira.issue.transition` | update | write | Transition issue status |
+| `jira.issue.transition.list` | list | read | List available issue transitions |
+| `jira.issue.delete` | delete | destructive | Permanently delete an issue |
 | `jira.issue.assign` | update | write | Assign issue to user |
 | `jira.issue.comment.create` | create | external_write | Add comment to issue |
 
@@ -82,6 +85,46 @@ mutation actions are needed.
 | `jira.project.list` | list | read | List visible projects |
 | `jira.project.get` | get | read | Get project by key |
 | `jira.field_schema.list` | list | read | List field schemas |
+
+### Board Actions
+
+| Action ID | Verb | Risk | Description |
+|---|---|---|---|
+| `jira.board.list` | list | read | List visible Jira Software boards |
+| `jira.board.get` | get | read | Get one board |
+| `jira.board.create` | create | write | Create a filter-backed board |
+
+### Filter Actions
+
+| Action ID | Verb | Risk | Description |
+|---|---|---|---|
+| `jira.filter.list` | list | read | List saved filters |
+| `jira.filter.get` | get | read | Get one saved filter |
+| `jira.filter.create` | create | write | Create a saved filter |
+| `jira.filter.update` | update | write | Update a saved filter |
+| `jira.filter.columns.get` | get | read | Get saved-filter columns |
+| `jira.filter.columns.update` | update | write | Replace saved-filter columns |
+| `jira.filter.share.update` | update | external_write | Replace all filter share permissions |
+
+Filter share replacement can send more than one request. The client disables
+automatic retries for the complete operation. If a write can have reached
+Jira, the returned provider error reports uncertain delivery and does not
+recommend a retry.
+
+### Plan Actions
+
+| Action ID | Verb | Risk | Description |
+|---|---|---|---|
+| `jira.plan.list` | list | read | List plans with cursor paging |
+| `jira.plan.get` | get | read | Get one plan |
+| `jira.plan.create` | create | write | Create a plan |
+| `jira.plan.update` | update | write | Update a plan with JSON Patch |
+| `jira.plan.duplicate` | create | write | Duplicate a plan |
+| `jira.plan.archive` | archive | destructive | Archive a plan |
+| `jira.plan.trash` | delete | destructive | Move a plan to trash |
+
+Every plan action requires the `:jira_admin_access` host policy. Issue delete,
+plan archive, and plan trash always require confirmation.
 
 ## Webhook Triggers
 
@@ -129,8 +172,10 @@ The provider ships with curated catalog packs for scoped tool discovery:
 
 | Pack | Tools |
 |---|---|
-| `:jira_reader` | Issue get/search, project list/get, field schema list |
-| `:jira_editor` | Reader + issue create/update/transition/assign/comment |
+| `:jira_reader` | Ordinary issue, project, board, filter, transition, and field schema reads |
+| `:jira_editor` | Reader + non-destructive issue, board, and filter writes |
+| `:jira_admin` | Non-destructive plan reads and writes; host policy is still required |
+| `:jira_destructive` | Issue delete, plan archive, and plan trash |
 
 Use packs to restrict which tools are visible to a given surface:
 
@@ -147,6 +192,13 @@ Catalog.search_tools("jira",
   modules: [Jido.Connect.Jira],
   packs: Jido.Connect.Jira.catalog_packs(),
   pack: :jira_editor
+)
+
+# Privileged plan tools
+Catalog.search_tools("jira",
+  modules: [Jido.Connect.Jira],
+  packs: Jido.Connect.Jira.catalog_packs(),
+  pack: :jira_admin
 )
 ```
 

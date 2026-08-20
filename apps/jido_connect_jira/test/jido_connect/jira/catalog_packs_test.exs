@@ -27,12 +27,25 @@ defmodule Jido.Connect.Jira.CatalogPacksTest do
       # Metadata reads
       assert "jira.field_schema.list" in ids
 
+      # Expanded reads
+      assert "jira.board.list" in ids
+      assert "jira.board.get" in ids
+      assert "jira.filter.list" in ids
+      assert "jira.filter.get" in ids
+      assert "jira.filter.columns.get" in ids
+      assert "jira.issue.transition.list" in ids
+
+      # Privileged reads excluded
+      refute "jira.plan.list" in ids
+      refute "jira.plan.get" in ids
+
       # Write tools excluded
       refute "jira.issue.create" in ids
       refute "jira.issue.update" in ids
       refute "jira.issue.transition" in ids
       refute "jira.issue.assign" in ids
       refute "jira.issue.comment.create" in ids
+      refute "jira.issue.delete" in ids
     end
 
     test "describe_tool accepts reader tools and rejects write tools" do
@@ -94,6 +107,14 @@ defmodule Jido.Connect.Jira.CatalogPacksTest do
       assert "jira.issue.transition" in ids
       assert "jira.issue.assign" in ids
       assert "jira.issue.comment.create" in ids
+      assert "jira.board.create" in ids
+      assert "jira.filter.create" in ids
+      assert "jira.filter.update" in ids
+      assert "jira.filter.columns.update" in ids
+      assert "jira.filter.share.update" in ids
+
+      refute "jira.issue.delete" in ids
+      refute "jira.plan.create" in ids
     end
 
     test "describe_tool accepts write tools" do
@@ -126,13 +147,55 @@ defmodule Jido.Connect.Jira.CatalogPacksTest do
     end
   end
 
+  describe "admin pack" do
+    test "exposes non-destructive plan tools" do
+      ids =
+        Catalog.search_tools("jira",
+          modules: [Jira],
+          packs: Jira.catalog_packs(),
+          pack: :jira_admin
+        )
+        |> Enum.map(& &1.tool.id)
+
+      assert "jira.plan.list" in ids
+      assert "jira.plan.get" in ids
+      assert "jira.plan.create" in ids
+      assert "jira.plan.update" in ids
+      assert "jira.plan.duplicate" in ids
+      refute "jira.plan.archive" in ids
+      refute "jira.plan.trash" in ids
+      refute "jira.issue.delete" in ids
+    end
+  end
+
+  describe "destructive pack" do
+    test "exposes only explicitly destructive Jira tools" do
+      ids =
+        Catalog.search_tools("jira",
+          modules: [Jira],
+          packs: Jira.catalog_packs(),
+          pack: :jira_destructive
+        )
+        |> Enum.map(& &1.tool.id)
+
+      assert MapSet.new(ids) ==
+               MapSet.new([
+                 "jira.issue.delete",
+                 "jira.plan.archive",
+                 "jira.plan.trash"
+               ])
+    end
+  end
+
   describe "pack delegates" do
-    test "catalog_packs returns reader and editor packs" do
+    test "catalog_packs returns reader, editor, admin, and destructive packs" do
       packs = Jira.catalog_packs()
       pack_ids = Enum.map(packs, & &1.id)
 
       assert :jira_reader in pack_ids
       assert :jira_editor in pack_ids
+      assert :jira_admin in pack_ids
+      assert :jira_destructive in pack_ids
     end
 
     test "all packs reference jira provider and correct package" do

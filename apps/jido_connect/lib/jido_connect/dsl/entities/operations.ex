@@ -85,6 +85,7 @@ defmodule Jido.Connect.Dsl.Entities.Operations do
       data_classification: [type: :atom],
       policies: [type: {:list, :atom}, default: []],
       input_schema: [type: :atom],
+      input_json_schema_overlay: [type: :any, default: %{}],
       output_schema: [type: :atom],
       mutation?: [type: :boolean, default: false],
       provider_idempotency?: [type: :boolean, default: false],

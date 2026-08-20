@@ -31,7 +31,8 @@ defmodule Jido.Connect.Catalog.ReviewedDescriptor do
       risk: descriptor.risk,
       confirmation: descriptor.confirmation,
       scopes: descriptor.scopes,
-      policies: Enum.map(descriptor.policies, & &1.id)
+      policies: Enum.map(descriptor.policies, & &1.id),
+      host_policy_required?: descriptor.host_policy_required?
     }
   end
 end

@@ -15,6 +15,47 @@ defmodule Jido.Connect.Jira.Client do
   def resolve(%{provider_client: client}) when is_atom(client) and not is_nil(client), do: client
   def resolve(_runtime), do: __MODULE__
 
+  defdelegate list_boards(request, opts \\ []), to: Jido.Connect.Jira.Client.Boards, as: :list
+  defdelegate get_board(id, request), to: Jido.Connect.Jira.Client.Boards, as: :get
+  defdelegate create_board(attrs, request), to: Jido.Connect.Jira.Client.Boards, as: :create
+
+  defdelegate list_filters(request, opts \\ []), to: Jido.Connect.Jira.Client.Filters, as: :list
+  defdelegate get_filter(id, request), to: Jido.Connect.Jira.Client.Filters, as: :get
+  defdelegate create_filter(attrs, request), to: Jido.Connect.Jira.Client.Filters, as: :create
+  defdelegate update_filter(id, attrs, request), to: Jido.Connect.Jira.Client.Filters, as: :update
+
+  defdelegate get_filter_columns(id, request),
+    to: Jido.Connect.Jira.Client.Filters,
+    as: :get_columns
+
+  defdelegate update_filter_columns(id, columns, request),
+    to: Jido.Connect.Jira.Client.Filters,
+    as: :update_columns
+
+  defdelegate replace_filter_shares(id, attrs, request),
+    to: Jido.Connect.Jira.Client.Filters,
+    as: :replace_shares
+
+  defdelegate list_issue_transitions(issue_key, request),
+    to: Jido.Connect.Jira.Client.IssueLifecycle,
+    as: :list_transitions
+
+  defdelegate delete_issue(issue_key, request),
+    to: Jido.Connect.Jira.Client.IssueLifecycle,
+    as: :delete
+
+  defdelegate list_plans(request, opts \\ []), to: Jido.Connect.Jira.Client.Plans, as: :list
+  defdelegate get_plan(id, request), to: Jido.Connect.Jira.Client.Plans, as: :get
+  defdelegate create_plan(attrs, request), to: Jido.Connect.Jira.Client.Plans, as: :create
+  defdelegate update_plan(id, attrs, request), to: Jido.Connect.Jira.Client.Plans, as: :update
+
+  defdelegate duplicate_plan(id, name, request),
+    to: Jido.Connect.Jira.Client.Plans,
+    as: :duplicate
+
+  defdelegate archive_plan(id, request), to: Jido.Connect.Jira.Client.Plans, as: :archive
+  defdelegate trash_plan(id, request), to: Jido.Connect.Jira.Client.Plans, as: :trash
+
   @doc "Fetches a single Jira issue by key."
   def get_issue(issue_key, %Request{} = request, opts \\ []) when is_binary(issue_key) do
     fields = Keyword.get(opts, :fields)

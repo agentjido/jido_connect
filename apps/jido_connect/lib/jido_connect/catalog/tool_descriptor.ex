@@ -21,6 +21,7 @@ defmodule Jido.Connect.Catalog.ToolDescriptor do
               strict?: Zoi.boolean() |> Zoi.default(true),
               auth: Zoi.list(AuthProfileSummary.schema()) |> Zoi.default([]),
               policies: Zoi.list(PolicyRequirement.schema()) |> Zoi.default([]),
+              host_policy_required?: Zoi.boolean() |> Zoi.default(false),
               scopes: Zoi.list(Zoi.string()) |> Zoi.default([]),
               risk: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),
               confirmation: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),

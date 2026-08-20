@@ -218,11 +218,13 @@ defmodule Jido.Connect.Dsl.SpecBuilder do
       auth_profile: auth_profile,
       auth_profiles: auth_profiles,
       policies: policies,
+      host_policy_required?: host_policy_required?(action),
       handler: action.handler,
       preview: action.preview,
       input: input,
       output: output,
       input_schema: Schema.zoi_schema_from_fields(input),
+      input_json_schema_overlay: action.input_json_schema_overlay,
       output_schema: Schema.zoi_schema_from_fields(output),
       scopes: requirements.scopes,
       scope_resolver: requirements.dynamic_scopes,
@@ -260,6 +262,7 @@ defmodule Jido.Connect.Dsl.SpecBuilder do
       auth_profile: auth_profile,
       auth_profiles: auth_profiles,
       policies: policies,
+      host_policy_required?: host_policy_required?(trigger),
       handler: trigger.handler,
       config: config,
       signal: signal,
@@ -312,6 +315,11 @@ defmodule Jido.Connect.Dsl.SpecBuilder do
     do: policies
 
   defp access_policies(%{policies: policies}), do: policies
+
+  defp host_policy_required?(%{access: %Dsl.Access{host_policy_required?: required?}}),
+    do: required?
+
+  defp host_policy_required?(_operation), do: false
 
   defp effect(%Dsl.Action{effect: %Dsl.Effect{} = effect}) do
     risk = effect.risk || :read

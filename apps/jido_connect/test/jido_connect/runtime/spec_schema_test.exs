@@ -128,4 +128,40 @@ defmodule Jido.Connect.Runtime.SpecSchemaTest do
       ])
     end
   end
+
+  test "catalog JSON Schema accepts nested field contracts and root requirements" do
+    fields = [
+      Connect.Field.new!(%{
+        name: :items,
+        type: {:array, :map},
+        required?: true,
+        json_schema: %{
+          "type" => "array",
+          "minItems" => 1,
+          "items" => %{
+            "type" => "object",
+            "additionalProperties" => false,
+            "required" => ["id"],
+            "properties" => %{"id" => %{"type" => "integer", "minimum" => 1}}
+          }
+        }
+      }),
+      Connect.Field.new!(%{name: :name, type: :string})
+    ]
+
+    schema =
+      fields
+      |> Connect.zoi_schema_from_fields()
+      |> Connect.Schema.to_json_schema(fields, Connect.Schema.at_least_one_of([:items, :name]))
+
+    assert get_in(schema, ["properties", "items", "items", "properties", "id"]) == %{
+             "type" => "integer",
+             "minimum" => 1
+           }
+
+    assert schema["anyOf"] == [
+             %{"required" => ["items"]},
+             %{"required" => ["name"]}
+           ]
+  end
 end

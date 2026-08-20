@@ -15,6 +15,7 @@ defmodule Jido.Connect.Field do
               maximum: Zoi.number() |> Zoi.nullish() |> Zoi.optional(),
               min_length: Zoi.integer() |> Zoi.min(0) |> Zoi.nullish() |> Zoi.optional(),
               max_length: Zoi.integer() |> Zoi.min(0) |> Zoi.nullish() |> Zoi.optional(),
+              json_schema: Zoi.map() |> Zoi.nullish() |> Zoi.optional(),
               required?: Zoi.boolean() |> Zoi.default(false),
               metadata: Zoi.map() |> Zoi.default(%{})
             },

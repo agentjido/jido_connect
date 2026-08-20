@@ -47,6 +47,10 @@ defmodule Jido.Connect.CatalogTest do
     def rank(_query, _candidates), do: raise("ranker exploded")
   end
 
+  defmodule AllowPolicy do
+    def authorize(_operation, _input, _context, _connection), do: :ok
+  end
+
   defmodule Handler do
     def run(input, _context), do: {:ok, input}
   end
@@ -373,7 +377,9 @@ defmodule Jido.Connect.CatalogTest do
            ] =
              Catalog.tool_availability(
                modules: [CatalogFixtures.Integration],
-               connection: context.connection
+               connection: context.connection,
+               context: context,
+               policy: AllowPolicy
              )
 
     missing_scope_connection = %{context.connection | scopes: []}
@@ -384,7 +390,9 @@ defmodule Jido.Connect.CatalogTest do
            ] =
              Catalog.tool_availability(
                modules: [CatalogFixtures.Integration],
-               connection: missing_scope_connection
+               connection: missing_scope_connection,
+               context: %{context | connection: missing_scope_connection},
+               policy: AllowPolicy
              )
   end
 
@@ -618,7 +626,8 @@ defmodule Jido.Connect.CatalogTest do
              Catalog.call_tool("catalog.item.get", %{id: "item_1"},
                modules: modules,
                context: context,
-               credential_lease: lease
+               credential_lease: lease,
+               policy: AllowPolicy
              )
 
     assert {:error, %Jido.Connect.Error.ValidationError{reason: :trigger_not_callable}} =
@@ -660,7 +669,8 @@ defmodule Jido.Connect.CatalogTest do
                pack: :items,
                packs: [pack],
                context: context,
-               credential_lease: lease
+               credential_lease: lease,
+               policy: AllowPolicy
              )
 
     assert {:error, %Jido.Connect.Error.ValidationError{reason: :unknown_tool}} =
@@ -696,7 +706,8 @@ defmodule Jido.Connect.CatalogTest do
     action_context = %{
       config: %{modules: modules, packs: [pack]},
       context: context,
-      credential_lease: lease
+      credential_lease: lease,
+      policy: AllowPolicy
     }
 
     assert {:ok, %{results: [%{tool: %{id: "catalog.item.get"}}]}} =

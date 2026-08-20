@@ -18,6 +18,7 @@ defmodule Jido.Connect.TriggerSpec do
               auth_profile: Zoi.atom(),
               auth_profiles: Zoi.list(Zoi.atom()) |> Zoi.default([]),
               policies: Zoi.list(Zoi.atom()) |> Zoi.default([]),
+              host_policy_required?: Zoi.boolean() |> Zoi.default(false),
               handler: Zoi.module(),
               config: Zoi.list(Field.schema()) |> Zoi.default([]),
               signal: Zoi.list(Field.schema()) |> Zoi.default([]),
