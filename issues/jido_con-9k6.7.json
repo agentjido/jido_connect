@@ -11,14 +11,16 @@
   "blocks": [
     "jido_con-9k6.8"
   ],
+  "closed_at": "2026-08-20T12:36:40Z",
+  "close_reason": "Wayfinder PR #2 merged at f96943d58faca5007dc33533d16e13f69f415b3f with the selected reviewed connectors and immutable upstream pins.",
   "created": "2026-08-19T20:59:10Z",
   "description": "Add reviewed provider definitions, execution, grants, endpoint contracts, tests, and documentation in Wayfinder.",
   "id": "jido_con-9k6.7",
   "labels": [],
   "parent": "jido_con-9k6",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Publish connectors in Wayfinder",
   "type": "task",
-  "updated_at": "2026-08-20T11:34:40Z"
+  "updated_at": "2026-08-20T12:36:40Z"
 }
