@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-9k6.7"
+  ],
   "created": "2026-08-20T11:34:37Z",
   "description": "Pass one validated request timeout from Jido Connect runtime options into typed Trello and X MCP calls so Wayfinder health checks can enforce their five-second deadline. Add focused runtime tests and land before the Wayfinder pin update.",
   "id": "jido_con-9k6.9",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "Honor host MCP request timeouts",
   "type": "task",
-  "updated_at": "2026-08-20T11:34:37Z"
+  "updated_at": "2026-08-20T11:34:40Z"
 }

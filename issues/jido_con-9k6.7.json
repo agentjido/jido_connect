@@ -5,7 +5,8 @@
     "jido_con-9k6.3",
     "jido_con-9k6.4",
     "jido_con-9k6.5",
-    "jido_con-9k6.6"
+    "jido_con-9k6.6",
+    "jido_con-9k6.9"
   ],
   "blocks": [
     "jido_con-9k6.8"
@@ -19,5 +20,5 @@
   "status": "in_progress",
   "title": "Publish connectors in Wayfinder",
   "type": "task",
-  "updated_at": "2026-08-19T23:36:12Z"
+  "updated_at": "2026-08-20T11:34:40Z"
 }
