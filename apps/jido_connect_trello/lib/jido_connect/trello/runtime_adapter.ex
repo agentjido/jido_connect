@@ -47,13 +47,15 @@ defmodule Jido.Connect.Trello.RuntimeAdapter do
   end
 
   defp remote_caller(runtime) do
+    timeout = Map.get(runtime, :request_timeout_ms) || @timeout
+
     fn tool, arguments, mutation? ->
       input = %{
         endpoint_id: Contract.endpoint_id(),
         tool_name: tool,
         arguments: arguments,
         required_schema: Contract.tool_schema(tool),
-        timeout: @timeout
+        timeout: timeout
       }
 
       case MCPRuntime.call_typed_tool(input, runtime, mutation?: mutation?) do

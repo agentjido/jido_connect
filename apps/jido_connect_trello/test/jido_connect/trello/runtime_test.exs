@@ -2,15 +2,19 @@ defmodule Jido.Connect.Trello.RuntimeState do
   use Agent
 
   def start_link(_opts),
-    do: Agent.start_link(fn -> %{calls: [], mode: :normal} end, name: __MODULE__)
+    do: Agent.start_link(fn -> %{calls: [], mode: :normal, timeouts: []} end, name: __MODULE__)
 
   def calls, do: Agent.get(__MODULE__, &Enum.reverse(&1.calls))
+  def timeouts, do: Agent.get(__MODULE__, &Enum.reverse(&1.timeouts))
   def mode, do: Agent.get(__MODULE__, & &1.mode)
   def mode(mode), do: Agent.update(__MODULE__, &%{&1 | mode: mode})
   def observer, do: Agent.get(__MODULE__, &Map.get(&1, :observer))
   def observer(pid), do: Agent.update(__MODULE__, &Map.put(&1, :observer, pid))
   def clear, do: Agent.update(__MODULE__, &%{&1 | calls: []})
   def record(call), do: Agent.update(__MODULE__, &%{&1 | calls: [call | &1.calls]})
+
+  def record_timeout(timeout),
+    do: Agent.update(__MODULE__, &%{&1 | timeouts: [timeout | &1.timeouts]})
 end
 
 defmodule Jido.Connect.Trello.TestMCPClient do
@@ -23,7 +27,7 @@ defmodule Jido.Connect.Trello.TestMCPClient do
   @card_ari "ari:cloud:trello::card/workspace/#{@workspace_id}/6a6105ed8ec975fc53dd6721"
 
   def list_tools(endpoint_id, opts) do
-    unless opts == [timeout: 30_000], do: raise("expected bounded MCP timeout")
+    RuntimeState.record_timeout(Keyword.fetch!(opts, :timeout))
     RuntimeState.record({:list_tools, endpoint_id})
 
     tools =
@@ -52,7 +56,7 @@ defmodule Jido.Connect.Trello.TestMCPClient do
   end
 
   def call_tool(endpoint_id, tool, arguments, opts) do
-    unless opts == [timeout: 30_000], do: raise("expected bounded MCP timeout")
+    RuntimeState.record_timeout(Keyword.fetch!(opts, :timeout))
     RuntimeState.record({:call_tool, endpoint_id, tool, arguments})
 
     case {RuntimeState.mode(), tool, arguments.action} do
@@ -158,11 +162,12 @@ defmodule Jido.Connect.Trello.RuntimeTest do
     %{context: context, lease: lease}
   end
 
-  test "generated board read uses only the fixed endpoint, tool, action, and board", context do
+  test "generated board read forwards the host timeout", context do
     assert {:ok, %{kind: "workBoard", board: %{id: @board_ari}}} =
              Jido.Connect.Trello.Actions.GetBoard.run(%{}, %{
                integration_context: context.context,
-               credential_lease: context.lease
+               credential_lease: context.lease,
+               request_timeout_ms: 5_000
              })
 
     internal = Jido.Connect.MCP.HostEndpoint.internal_id(context.context.connection)
@@ -172,6 +177,20 @@ defmodule Jido.Connect.Trello.RuntimeTest do
              {:call_tool, internal, "trelloReadBoard",
               %{action: "get", boardId: "https://trello.com/b/Z4Htjzwu/decentra-finance"}}
            ]
+
+    assert RuntimeState.timeouts() == [5_000, 5_000]
+  end
+
+  test "a host can set a shorter bounded MCP request timeout", context do
+    assert {:ok, %{kind: "workBoard"}} =
+             Connect.invoke(
+               Trello,
+               "trello.board.get",
+               %{},
+               runtime_opts(context) ++ [request_timeout_ms: 5_000]
+             )
+
+    assert RuntimeState.timeouts() == [5_000, 5_000]
   end
 
   test "confirmed card create verifies board and list, then sends one exact write", context do
@@ -196,6 +215,7 @@ defmodule Jido.Connect.Trello.RuntimeTest do
                input,
                runtime_opts(context) ++
                  [
+                   request_timeout_ms: 5_000,
                    binding_ref: "trello-binding",
                    execution_authorization: %{plan_id: prepared.id},
                    authorization_validator: fn evidence, plan, _context ->
@@ -219,6 +239,9 @@ defmodule Jido.Connect.Trello.RuntimeTest do
              name: "Review access policy",
              pos: "bottom"
            }
+
+    assert RuntimeState.timeouts() != []
+    assert Enum.uniq(RuntimeState.timeouts()) == [5_000]
   end
 
   test "board mismatch and schema drift fail before the remote write", context do

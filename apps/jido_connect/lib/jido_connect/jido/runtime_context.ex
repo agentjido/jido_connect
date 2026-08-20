@@ -83,7 +83,8 @@ defmodule Jido.Connect.Jido.RuntimeContext do
       context: integration_context,
       credential_lease: lease,
       policy: Map.get(runtime_context, :policy),
-      policy_context: Map.get(runtime_context, :policy_context, %{})
+      policy_context: Map.get(runtime_context, :policy_context, %{}),
+      request_timeout_ms: Map.get(runtime_context, :request_timeout_ms)
     }
     |> Map.merge(extra)
   end
