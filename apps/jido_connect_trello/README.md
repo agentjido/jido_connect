@@ -40,6 +40,13 @@ Use the `:oauth_user` credential profile. The MCP runtime keeps the OAuth
 credential in its lease. Public action input and provider errors do not contain
 the credential.
 
+`Jido.Connect.Trello.OAuth` supplies a host callback boundary. It discovers the
+authorization server from the fixed MCP resource, uses PKCE, and supports a
+configured client or dynamic client registration. The host must keep returned
+OAuth state and `secret_data` encrypted and single-use. It stores
+`mcp_endpoint`, `refresh_token`, and `oauth_client` as encrypted credential
+fields. Only `mcp_endpoint` can enter a runtime lease.
+
 Each connection must contain this board identity in lease metadata:
 
 - `board_name`

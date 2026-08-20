@@ -49,8 +49,9 @@ defmodule Jido.Connect.TrelloContractTest do
 
     assert [%{id: :oauth_user, kind: :oauth2, owner: :user} = profile] = spec.auth_profiles
     assert profile.default?
-    assert profile.credential_fields == [:mcp_endpoint]
+    assert profile.credential_fields == [:mcp_endpoint, :refresh_token, :oauth_client]
     assert profile.lease_fields == [:mcp_endpoint]
+    assert profile.refresh_token_field == :refresh_token
   end
 
   test "does not publish generic MCP actions and publishes reviewed packs" do
