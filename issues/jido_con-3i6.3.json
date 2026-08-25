@@ -11,9 +11,15 @@
   "id": "jido_con-3i6.3",
   "labels": [],
   "parent": "jido_con-3i6",
+  "comments": [
+    {
+      "text": "Completed in commit cc32bfe6 on jido_con-3i6.3/catalog-item. Catalog.Item and ItemSearchResult are canonical projections built directly from validated Connect specs. Added stable provider:kind:id refs, canonical list/search/lookup/describe/call/review APIs, deterministic serialization and fingerprints, pack support, Action v2 action_catalog projection, lenient projection fencing, and narrow legacy adapters. Focused catalog/review: 30 passed. Core tests: 105 passed. Required umbrella mix quality: passed. Documentation generated; existing hidden-module warnings and a long-worktree path-length log remain. The core coverage alias ran 105 passing tests but reports the existing repository-wide 80% threshold miss at 74.76%.",
+      "timestamp": "2026-08-25T22:41:35Z"
+    }
+  ],
   "priority": 0,
   "status": "in_progress",
   "title": "Simplify Connect catalog around Catalog.Item",
   "type": "task",
-  "updated_at": "2026-08-25T22:07:21Z"
+  "updated_at": "2026-08-25T22:41:35Z"
 }
