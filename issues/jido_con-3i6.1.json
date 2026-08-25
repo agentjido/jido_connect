@@ -10,9 +10,15 @@
   "id": "jido_con-3i6.1",
   "labels": [],
   "parent": "jido_con-3i6",
+  "comments": [
+    {
+      "text": "Baseline committed at 8004daca. Remote heads: jido_connect 2a84ef88 and jido_mcp 5fc6ad5. Remote CI passed. Local Connect mix quality passed; focused catalog 27 tests; MCP bridge 50 tests; demo 21 tests. jido_mcp Credo/docs/release.check passed with 183 tests and Hex build. See docs/jido_connect_ecosystem_migration.md.",
+      "timestamp": "2026-08-25T21:57:31Z"
+    }
+  ],
   "priority": 0,
   "status": "in_progress",
   "title": "Confirm migration scope and record baselines",
   "type": "task",
-  "updated_at": "2026-08-25T21:42:42Z"
+  "updated_at": "2026-08-25T21:57:31Z"
 }
