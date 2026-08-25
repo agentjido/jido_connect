@@ -7,6 +7,7 @@
   "blocks": [
     "jido_con-3i6.5"
   ],
+  "closed_at": "2026-08-25T22:57:12Z",
   "created": "2026-08-25T21:42:24Z",
   "description": "C2 for jido_connect#71. Classify and move the existing Jido.Connect.MCP namespace from apps/jido_connect_mcp into core with behavior parity and its temporary Jido.MCP backend. Preserve only mcp.tools.list and mcp.tool.call plus all Connect safety rules.",
   "id": "jido_con-3i6.4",
@@ -19,8 +20,8 @@
     }
   ],
   "priority": 0,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Move MCP bridge into core jido_connect",
   "type": "task",
-  "updated_at": "2026-08-25T22:57:11Z"
+  "updated_at": "2026-08-25T22:57:12Z"
 }
