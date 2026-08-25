@@ -6,14 +6,16 @@
   "blocks": [
     "jido_con-3i6.7"
   ],
+  "closed_at": "2026-08-25T23:53:15Z",
+  "close_reason": "Removed the unpublished application and verified core replacement coverage in commit 3d47e5be.",
   "created": "2026-08-25T21:42:26Z",
   "description": "C4 for jido_connect#72. After replacement coverage, remove apps/jido_connect_mcp, supervision/dependencies/demo wiring/workarounds, update umbrella docs and examples, and prove Jido.Connect.MCP stays in core. Do not create or publish a compatibility package.",
   "id": "jido_con-3i6.6",
   "labels": [],
   "parent": "jido_con-3i6",
   "priority": 0,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Remove unpublished jido_connect_mcp application",
   "type": "task",
-  "updated_at": "2026-08-25T23:36:17Z"
+  "updated_at": "2026-08-25T23:53:15Z"
 }
