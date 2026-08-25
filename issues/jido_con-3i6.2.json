@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-3i6.1"
   ],
@@ -12,8 +12,8 @@
   "labels": [],
   "parent": "jido_con-3i6",
   "priority": 0,
-  "status": "open",
+  "status": "in_progress",
   "title": "Prepare jido_mcp 2.0 ExMCP maintenance release candidate",
   "type": "task",
-  "updated_at": "2026-08-25T21:42:30Z"
+  "updated_at": "2026-08-25T21:57:58Z"
 }
