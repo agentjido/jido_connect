@@ -673,7 +673,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
 
   defp ensure_started do
     if is_nil(Process.whereis(@name)) do
-      {:ok, _apps} = Application.ensure_all_started(:jido_connect_mcp)
+      {:ok, _apps} = Application.ensure_all_started(:jido_connect)
     end
 
     :ok

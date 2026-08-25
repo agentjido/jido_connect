@@ -1,11 +1,11 @@
 # Jido Connect MCP
 
-`jido_connect_mcp` is a bridge package that exposes configured MCP servers as
-Jido Connect tools. It delegates transport and protocol work to `jido_mcp` and
-keeps Connect responsible for policy, generated Jido modules, and credential
-boundaries.
+The MCP bridge implementation now lives in core `jido_connect` under the same
+`Jido.Connect.MCP` namespace. This unpublished umbrella application is kept
+only during the migration and will be removed after the core replacement has
+full coverage. It is not a compatibility package and must not be published.
 
-This package is intentionally conservative: tools are called through explicit
+The bridge is intentionally conservative: tools are called through explicit
 Connect actions, and endpoint and tool access is represented as scopes. Static
 MCP server credentials can stay in `jido_mcp` endpoint configuration. A
 persistent host can instead put one `%Jido.MCP.Endpoint{}` or endpoint attribute
@@ -59,5 +59,5 @@ Jido.Connect.Catalog.Plugin.plugin_spec(%{
 
 Catalog calls still need the target provider runtime context and credential
 lease. The MCP bridge endpoint credential is not reused as catalog/provider auth.
-All execution still goes through `Jido.Connect.Catalog.call_tool/4`, which
+All execution still goes through `Jido.Connect.Catalog.call_tool/3`, which
 delegates to the same runtime boundary as generated Jido actions.

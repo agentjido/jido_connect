@@ -23,7 +23,6 @@ defmodule JidoConnectMCP.MixProject do
 
   def application do
     [
-      mod: {Jido.Connect.MCP.Application, []},
       extra_applications: [:logger],
       env: [
         jido_connect_providers: [Jido.Connect.MCP]
@@ -43,7 +42,6 @@ defmodule JidoConnectMCP.MixProject do
   defp deps do
     [
       jido_connect_dep(),
-      jido_mcp_dep(),
       {:jason, "~> 1.4"},
       {:plug, "~> 1.20"},
       {:zoi, "~> 0.18"}
@@ -55,14 +53,6 @@ defmodule JidoConnectMCP.MixProject do
       {:jido_connect, "~> 0.8"}
     else
       {:jido_connect, in_umbrella: true}
-    end
-  end
-
-  defp jido_mcp_dep do
-    if hex_package_task?() do
-      {:jido_mcp, "~> 1.1"}
-    else
-      {:jido_mcp, github: "agentjido/jido_mcp", branch: "main"}
     end
   end
 

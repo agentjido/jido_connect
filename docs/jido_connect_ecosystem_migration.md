@@ -137,6 +137,27 @@ removed.
 The bridge does not need MCP resources, prompts, server publication, dynamic
 proxy Actions, or a copied endpoint pool.
 
+## MCP Bridge Move Result
+
+The bridge namespace and its tests now live in core `jido_connect`. This unit
+keeps the existing Jido MCP backend so that the code move and the protocol
+backend change remain separate.
+
+| Previous module | Move decision |
+| --- | --- |
+| `Jido.Connect.MCP` | Move to core as the provider with only `mcp.tools.list` and `mcp.tool.call` |
+| `EndpointLeaseManager` | Move to core and supervise from `Jido.Connect.Application` |
+| `EndpointResolver` and `HostEndpoint` | Move to core; keep the temporary Jido MCP endpoint adapter |
+| `Runtime` | Move to core; keep one-list and one-call behavior without a backend change |
+| `SchemaCompatibility`, `ScopeResolver`, `Tool`, and `ToolResult` | Move to core |
+| `Handlers.Actions.ListTools` and `CallTool` | Move to core as the two generated Action v2 handlers |
+| `Jido.Connect.MCP.Application` | Merge into the core application supervisor |
+
+All 50 bridge tests move with the code. The `jido_connect_mcp` application has
+no implementation after this unit. It remains temporarily in the umbrella so
+the later removal is a separate verified change. It was never published, must
+not be published now, and does not become a compatibility package.
+
 ## Jido MCP Compatibility Baseline
 
 The final active release freezes the present documented surface.

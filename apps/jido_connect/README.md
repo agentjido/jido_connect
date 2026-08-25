@@ -37,6 +37,59 @@ def deps do
 end
 ```
 
+## MCP Tool Bridge
+
+Core `jido_connect` includes a narrow MCP client bridge with two operations:
+
+- `mcp.tools.list`
+- `mcp.tool.call`
+
+The bridge does not publish an MCP server, create dynamic proxy Actions, expose
+resources or prompts, or manage a general endpoint pool. It keeps Connect
+responsible for endpoint and tool allowlists, connection and credential-lease
+checks, scopes, policy, confirmation, schema drift, and uncertain write
+classification.
+
+For a host-owned endpoint, put the public endpoint ID in connection metadata
+and put the endpoint definition in the short-lived credential lease:
+
+```elixir
+connection =
+  Jido.Connect.Connection.new!(%{
+    id: "mcp-slack-tenant-1",
+    provider: :mcp,
+    profile: :endpoint,
+    tenant_id: "tenant_1",
+    owner_type: :tenant,
+    owner_id: "tenant_1",
+    status: :connected,
+    scopes: ["mcp:tools:list", "mcp:tools:call", "mcp:endpoint:slack"],
+    metadata: %{mcp_endpoint_id: "slack", connection_revision: 1}
+  })
+
+lease =
+  Jido.Connect.CredentialLease.from_connection!(
+    connection,
+    %{mcp_endpoint: endpoint_definition},
+    expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
+    metadata: %{credential_version: 1}
+  )
+```
+
+Each connection gets an opaque internal endpoint ID. Rotation, expiry,
+revocation, or connection removal fences the old generation before it stops
+the client. A remote write is sent at most one time. If its result becomes
+unknown after the send boundary, Connect returns an uncertain provider error
+and does not repeat the call.
+
+Tool discovery returns `schema_hash`. A typed caller can give that value as
+`expected_schema_hash` to `mcp.tool.call`. Connect lists the tool again and
+rejects schema drift before the remote call.
+
+The moved bridge temporarily uses the frozen Jido MCP client API. The next
+migration step replaces this internal backend with ExMCP without changing the
+two Connect operations or their safety rules.
+
 ## Host Boundary
 
 A host app creates a durable `Jido.Connect.Connection`, mints a short-lived

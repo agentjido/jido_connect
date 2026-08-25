@@ -110,7 +110,7 @@ defmodule Jido.Connect.MCPTest do
     spec = Jido.Connect.MCP.integration()
 
     assert spec.id == :mcp
-    assert spec.package == :jido_connect_mcp
+    assert spec.package == :jido_connect
     assert spec.status == :experimental
     assert spec.metadata.bridge?
     assert [%{id: :endpoint_access}] = spec.policies
@@ -139,7 +139,7 @@ defmodule Jido.Connect.MCPTest do
     entry = Connect.Catalog.entry(Jido.Connect.MCP)
     features = entry.capabilities |> Enum.map(& &1.feature) |> MapSet.new()
 
-    assert entry.package == :jido_connect_mcp
+    assert entry.package == :jido_connect
     assert entry.status == :experimental
     assert MapSet.member?(features, :api_key)
     assert MapSet.member?(features, :generated_jido_actions)
@@ -147,7 +147,7 @@ defmodule Jido.Connect.MCPTest do
   end
 
   test "MCP integration compiles generated Jido modules" do
-    assert Application.get_env(:jido_connect_mcp, :jido_connect_providers) == [
+    assert Application.get_env(:jido_connect, :jido_connect_providers) == [
              Jido.Connect.MCP
            ]
 
@@ -161,7 +161,7 @@ defmodule Jido.Connect.MCPTest do
 
     assert %Connect.Catalog.Manifest{
              id: :mcp,
-             package: :jido_connect_mcp,
+             package: :jido_connect,
              generated_modules: %{
                actions: [
                  Jido.Connect.MCP.Actions.ListTools,

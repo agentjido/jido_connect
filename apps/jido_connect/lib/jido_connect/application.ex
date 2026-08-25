@@ -1,4 +1,4 @@
-defmodule Jido.Connect.MCP.Application do
+defmodule Jido.Connect.Application do
   @moduledoc false
 
   use Application
@@ -8,7 +8,7 @@ defmodule Jido.Connect.MCP.Application do
     Supervisor.start_link(
       [Jido.Connect.MCP.EndpointLeaseManager],
       strategy: :one_for_one,
-      name: Jido.Connect.MCP.Supervisor
+      name: Jido.Connect.Supervisor
     )
   end
 end
