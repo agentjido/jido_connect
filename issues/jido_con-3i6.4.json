@@ -12,9 +12,15 @@
   "id": "jido_con-3i6.4",
   "labels": [],
   "parent": "jido_con-3i6",
+  "comments": [
+    {
+      "text": "Completed in commit 943070c8 on jido_con-3i6.4/move-mcp-bridge. Moved the full Jido.Connect.MCP namespace and all 50 tests into core, merged supervision into Jido.Connect.Application, registered the provider from :jido_connect, changed catalog package ownership to :jido_connect, and left the existing Jido.MCP backend unchanged. The unpublished jido_connect_mcp app is now an empty temporary application. Focused bridge: 50 passed. Full core: 155 passed. Umbrella mix quality: passed.",
+      "timestamp": "2026-08-25T22:57:11Z"
+    }
+  ],
   "priority": 0,
   "status": "in_progress",
   "title": "Move MCP bridge into core jido_connect",
   "type": "task",
-  "updated_at": "2026-08-25T22:41:57Z"
+  "updated_at": "2026-08-25T22:57:11Z"
 }
