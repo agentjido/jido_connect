@@ -5,10 +5,13 @@ defmodule Jido.Connect.Catalog.Builder do
     ActionSpec,
     AuthProfile,
     ConnectorCapability,
+    PolicyRequirement,
+    Schema,
+    Spec,
     TriggerSpec
   }
 
-  alias Jido.Connect.Catalog.{AuthProfileSummary, Entry, Manifest, Tool, ToolEntry}
+  alias Jido.Connect.Catalog.{AuthProfileSummary, Entry, Item, Manifest, Tool, ToolEntry}
 
   @spec entry(module(), keyword()) :: Entry.t()
   def entry(integration_module, opts \\ []) when is_atom(integration_module) do
@@ -109,6 +112,189 @@ defmodule Jido.Connect.Catalog.Builder do
   @spec tool_entries(Entry.t()) :: [ToolEntry.t()]
   def tool_entries(%Entry{} = entry) do
     Enum.map(entry.actions ++ entry.triggers, &tool_entry(entry, &1))
+  end
+
+  @doc false
+  @spec items(module(), keyword()) :: [Item.t()]
+  def items(integration_module, opts \\ []) when is_atom(integration_module) do
+    spec = integration_module.integration()
+    items_from_spec(spec, integration_module, projection(integration_module), opts)
+  end
+
+  @doc false
+  @spec items_from_spec(Spec.t(), module(), term(), keyword()) :: [Item.t()]
+  def items_from_spec(%Spec{} = spec, integration_module, projection, opts \\ []) do
+    package = spec_package(spec)
+    version = spec_version(spec, package, opts)
+
+    status =
+      Keyword.get(
+        opts,
+        :status,
+        spec.status || metadata_value(spec.metadata, :status) || :available
+      )
+
+    provider = provider_metadata(spec, integration_module, package, version, status)
+    source = item_source(spec, package)
+
+    Enum.map(spec.actions, fn action ->
+      action_item(spec, action, integration_module, projection, provider, source)
+    end) ++
+      Enum.map(spec.triggers, fn trigger ->
+        trigger_item(spec, trigger, integration_module, projection, provider, source)
+      end)
+  end
+
+  defp action_item(
+         %Spec{} = spec,
+         %ActionSpec{} = action,
+         integration_module,
+         projection,
+         provider,
+         source
+       ) do
+    input_json_schema =
+      Schema.to_json_schema(
+        action.input_schema,
+        action.input,
+        action.input_json_schema_overlay
+      )
+
+    output_json_schema = Schema.to_json_schema(action.output_schema)
+    auth = operation_auth_summaries(spec, action)
+
+    Item.new!(%{
+      ref: Item.ref(spec.id, :action, action.id),
+      provider: spec.id,
+      provider_name: spec.name,
+      provider_metadata: provider,
+      category: spec.category,
+      package: provider.package,
+      package_version: provider.version,
+      integration_module: integration_module,
+      type: :action,
+      id: action.id,
+      name: action.name,
+      label: action.label,
+      description: action.description,
+      tags: action.tags,
+      module: projection_module(projection, :actions, action.id),
+      resource: action.resource,
+      verb: action.verb,
+      data_classification: action.data_classification,
+      effect: action.risk,
+      availability: provider.status,
+      auth_profile: action.auth_profile,
+      auth_profiles: operation_auth_profiles(action),
+      auth_kinds: Enum.map(auth, & &1.kind) |> Enum.uniq(),
+      auth: auth,
+      policies: operation_policies(spec, action.policies),
+      host_policy_required?: action.host_policy_required?,
+      scopes: action.scopes,
+      risk: action.risk,
+      confirmation: action.confirmation,
+      input: action.input,
+      output: action.output,
+      input_json_schema: input_json_schema,
+      output_json_schema: output_json_schema,
+      schema_digest: schema_digest(input_json_schema, output_json_schema),
+      strict?: strict?(input_json_schema, output_json_schema),
+      provider_idempotency?: action.provider_idempotency?,
+      source: source,
+      metadata: Map.merge(spec.metadata, action.metadata)
+    })
+  end
+
+  defp trigger_item(
+         %Spec{} = spec,
+         %TriggerSpec{} = trigger,
+         integration_module,
+         projection,
+         provider,
+         source
+       ) do
+    config_json_schema = Schema.to_json_schema(trigger.config_schema)
+    signal_json_schema = Schema.to_json_schema(trigger.signal_schema)
+    auth = operation_auth_summaries(spec, trigger)
+
+    Item.new!(%{
+      ref: Item.ref(spec.id, :trigger, trigger.id),
+      provider: spec.id,
+      provider_name: spec.name,
+      provider_metadata: provider,
+      category: spec.category,
+      package: provider.package,
+      package_version: provider.version,
+      integration_module: integration_module,
+      type: :trigger,
+      id: trigger.id,
+      name: trigger.name,
+      label: trigger.label,
+      description: trigger.description,
+      tags: trigger.tags,
+      module: projection_module(projection, :sensors, trigger.id),
+      resource: trigger.resource,
+      verb: trigger.verb,
+      data_classification: trigger.data_classification,
+      availability: provider.status,
+      auth_profile: trigger.auth_profile,
+      auth_profiles: operation_auth_profiles(trigger),
+      auth_kinds: Enum.map(auth, & &1.kind) |> Enum.uniq(),
+      auth: auth,
+      policies: operation_policies(spec, trigger.policies),
+      host_policy_required?: trigger.host_policy_required?,
+      scopes: trigger.scopes,
+      trigger_kind: trigger.kind,
+      config: trigger.config,
+      signal: trigger.signal,
+      input_json_schema: config_json_schema,
+      output_json_schema: signal_json_schema,
+      config_json_schema: config_json_schema,
+      signal_json_schema: signal_json_schema,
+      schema_digest: schema_digest(config_json_schema, signal_json_schema),
+      strict?: strict?(config_json_schema, signal_json_schema),
+      source: source,
+      metadata: Map.merge(spec.metadata, trigger.metadata)
+    })
+  end
+
+  defp operation_auth_summaries(%Spec{} = spec, operation) do
+    allowed_profiles = operation_auth_profiles(operation)
+
+    spec.auth_profiles
+    |> Enum.filter(&(&1.id in allowed_profiles))
+    |> Enum.map(&auth_summary/1)
+  end
+
+  defp operation_policies(%Spec{} = spec, policy_ids) do
+    Enum.filter(spec.policies, fn
+      %PolicyRequirement{id: id} -> id in policy_ids
+      _other -> false
+    end)
+  end
+
+  defp schema_digest(input_json_schema, output_json_schema) do
+    Schema.digest(%{"input" => input_json_schema, "output" => output_json_schema})
+  end
+
+  defp strict?(input_json_schema, output_json_schema) do
+    Schema.strict_object?(input_json_schema) and Schema.strict_object?(output_json_schema)
+  end
+
+  defp provider_metadata(spec, integration_module, package, version, status) do
+    %{
+      id: spec.id,
+      name: spec.name,
+      description: spec.description,
+      category: spec.category,
+      package: package,
+      module: inspect(integration_module),
+      status: status,
+      tags: spec.tags,
+      visibility: spec.visibility,
+      docs: spec.docs,
+      version: version
+    }
   end
 
   defp auth_summary(%AuthProfile{} = auth_profile) do
@@ -251,6 +437,29 @@ defmodule Jido.Connect.Catalog.Builder do
        bridge_source(entry) ||
        :curated)
     |> normalize_source()
+  end
+
+  defp item_source(%Spec{} = spec, package) do
+    (metadata_value(spec.metadata, :source) ||
+       item_bridge_source(spec, package) ||
+       :curated)
+    |> normalize_source()
+  end
+
+  defp item_bridge_source(%Spec{} = spec, package) do
+    cond do
+      package == :jido_connect_mcp ->
+        :mcp
+
+      :mcp in spec.tags ->
+        :mcp
+
+      metadata_value(spec.metadata, :bridge?) ->
+        metadata_value(spec.metadata, :bridge_kind) || :mcp
+
+      true ->
+        nil
+    end
   end
 
   defp bridge_source(%Entry{} = entry) do

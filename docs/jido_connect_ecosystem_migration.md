@@ -92,6 +92,34 @@ one stable item reference, call one action item, and select items through a
 pack. It does not need a second execution model. `Spec`, `ActionSpec`, and
 `TriggerSpec` remain canonical.
 
+## Connect Catalog Migration Result
+
+`Jido.Connect.Catalog.Item` is now the canonical, read-only public operation
+projection. The builder creates it directly from `Spec`, `ActionSpec`, and
+`TriggerSpec`. Its stable reference is `provider:kind:operation-id`, for
+example `github:action:github.issue.create`.
+
+| Canonical path | Return shape |
+| --- | --- |
+| `items/1` | `Catalog.Item` values |
+| `search_items/2` | `Catalog.ItemSearchResult` values that contain `Catalog.Item` |
+| `lookup_item/2` and `describe_item/2` | One schema-rich `Catalog.Item` |
+| `call_item/3` | Core Connect invocation result for an action item |
+| `reviewed_items/2` | Fingerprinted `Catalog.Item` values selected by one exact pack |
+| `to_map/1` | Deterministic item or item-search-result maps |
+
+The stable reference, a unique operation ID, the old `provider.operation-id`
+reference, `{provider, id}`, and `{provider, kind, id}` are accepted during the
+migration. Packs accept the same references. Canonical references remove an
+ambiguity when one provider uses the same ID for an action and a trigger.
+
+The old `tools`, `search_tools`, `lookup_tool`, `describe_tool`, `call_tool`,
+and `reviewed_descriptors` paths keep their prior structs and error reasons as
+compatibility adapters. `Catalog.Plugin` keeps its three Action v2 operations.
+`action_catalog/1` also stays as an Action v2 adapter. Internal search,
+filtering, pack selection, review, lookup, describe, call, availability, and
+Action catalog projection use `Catalog.Item`.
+
 ## MCP Bridge Compatibility Baseline
 
 The `jido_connect_mcp` application provides the `Jido.Connect.MCP` namespace,

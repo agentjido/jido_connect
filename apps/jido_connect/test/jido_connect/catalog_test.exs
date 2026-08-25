@@ -749,6 +749,74 @@ defmodule Jido.Connect.CatalogTest do
            ]
   end
 
+  test "canonical items include stable refs and complete operation metadata" do
+    modules = [CatalogFixtures.Integration]
+
+    assert [
+             %Catalog.Item{
+               ref: "catalog:action:catalog.item.get",
+               provider: :catalog,
+               type: :action,
+               id: "catalog.item.get",
+               input: [%Jido.Connect.Field{name: :id}],
+               policies: [%Jido.Connect.PolicyRequirement{id: :item_access}],
+               auth: [%Catalog.AuthProfileSummary{id: :user, kind: :oauth2}],
+               schema_digest: digest,
+               strict?: true
+             }
+           ] = Catalog.items(modules: modules, type: :action)
+
+    assert is_binary(digest)
+
+    assert %{
+             ref: "catalog:action:catalog.item.get",
+             provider: :catalog,
+             type: :action,
+             id: "catalog.item.get",
+             policies: [%{id: :item_access}],
+             input_json_schema: %{"type" => "object"}
+           } =
+             Catalog.items(modules: modules, type: :action)
+             |> hd()
+             |> Catalog.to_map()
+  end
+
+  test "canonical item lookup, search, describe, and call use one projection" do
+    modules = [CatalogFixtures.Integration]
+    ref = "catalog:action:catalog.item.get"
+    {context, lease} = CatalogFixtures.context_and_lease()
+
+    assert {:ok, %Catalog.Item{ref: ^ref} = by_ref} = Catalog.lookup_item(ref, modules: modules)
+
+    assert {:ok, %Catalog.Item{ref: ^ref}} =
+             Catalog.lookup_item({:catalog, :action, "catalog.item.get"}, modules: modules)
+
+    assert {:ok, %Catalog.Item{ref: ^ref}} =
+             Catalog.lookup_item("catalog.catalog.item.get", modules: modules)
+
+    assert {:ok, ^by_ref} = Catalog.describe_item(ref, modules: modules)
+
+    assert [
+             %Catalog.ItemSearchResult{
+               item: %Catalog.Item{ref: ^ref},
+               matched_fields: matched_fields
+             }
+           ] = Catalog.search_items(ref, modules: modules)
+
+    assert :ref in matched_fields
+
+    assert {:ok, %{id: "item_1"}} =
+             Catalog.call_item(ref, %{id: "item_1"},
+               modules: modules,
+               context: context,
+               credential_lease: lease,
+               policy: AllowPolicy
+             )
+
+    assert {:ok, %Catalog.ToolEntry{id: "catalog.item.get"}} =
+             Catalog.lookup_tool(by_ref |> Catalog.ToolEntry.from_item(), modules: modules)
+  end
+
   test "ranker extension reorders valid candidates and receives sanitized metadata only" do
     modules = [CatalogFixtures.Integration]
 

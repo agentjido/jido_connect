@@ -105,6 +105,28 @@ defmodule Jido.Connect.ReviewedCatalogTest do
     refute inspect(Catalog.to_map(descriptor)) =~ "not-public"
   end
 
+  test "projects reviewed items as the canonical fingerprinted form" do
+    pack =
+      Catalog.Pack.new!(%{
+        id: :catalog_reader,
+        allowed_tools: ["catalog:action:catalog.item.get"]
+      })
+
+    assert {:ok,
+            [
+              %Catalog.Item{
+                ref: "catalog:action:catalog.item.get",
+                pack: %{id: "catalog_reader"},
+                reviewed_fingerprint: fingerprint
+              }
+            ]} = Catalog.reviewed_items(CatalogFixtures.Integration, pack)
+
+    assert String.starts_with?(
+             fingerprint,
+             "jido_connect.catalog.fingerprint.v1:reviewed_descriptor:"
+           )
+  end
+
   test "rejects a reviewed pack action that is missing from the exact modules" do
     pack = Catalog.Pack.new!(%{id: :missing, allowed_tools: ["missing.action"]})
 

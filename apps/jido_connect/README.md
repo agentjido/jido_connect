@@ -142,16 +142,61 @@ an uncertain or failed 5xx non-idempotent mutation.
 
 For host UI discovery, use `Jido.Connect.spec/1`, `actions/1`, `triggers/1`,
 `auth_profiles/1`, or the richer `Jido.Connect.Catalog` APIs. `Catalog.discover/1`
-returns provider entries; `Catalog.tools/1` returns a flattened action/trigger
-catalog for search and tool pickers, including filters such as `:tag`,
+returns provider entries; `Catalog.items/1` returns canonical action and trigger
+items for search and operation pickers, including filters such as `:tag`,
 `:resource`, `:verb`, `:auth_kind`, `:auth_profile`, and `:scope`.
+
+## Canonical Catalog Items
+
+`Jido.Connect.Catalog.Item` is the public read-only projection of one Connect
+operation. The Connect specifications remain the execution definitions. An
+item includes its provider identity, operation kind and ID, JSON schemas,
+effect, confirmation, availability, auth profiles, scopes, policies, and
+source metadata.
+
+The stable item reference has the form `provider:kind:operation-id`:
+
+```elixir
+[
+  %Jido.Connect.Catalog.Item{
+    ref: "github:action:github.issue.create",
+    provider: :github,
+    type: :action,
+    id: "github.issue.create"
+  }
+] =
+  Jido.Connect.Catalog.items(
+    modules: [Jido.Connect.GitHub],
+    type: :action,
+    tool: "github.issue.create"
+  )
+
+{:ok, item} =
+  Jido.Connect.Catalog.describe_item("github:action:github.issue.create",
+    modules: [Jido.Connect.GitHub]
+  )
+```
+
+Use `items/1`, `search_items/2`, `lookup_item/2`, `describe_item/2`,
+`call_item/3`, and `reviewed_items/2` for new code. A unique operation ID, the
+old `provider.operation-id` form, and provider tuples still work during the
+migration. Packs can use the canonical item reference and remain selection and
+review data only.
+
+The old `tools/1`, `search_tools/2`, `lookup_tool/2`, `describe_tool/2`,
+`call_tool/3`, and `reviewed_descriptors/2` functions keep their prior return
+types. They are narrow adapters over `Catalog.Item`. The catalog plugin also
+keeps its current Action v2 search, describe, and call contract.
+
+`action_catalog/1` remains an adapter that registers generated Action v2
+modules in `Jido.Action.Catalog`. It is not the canonical Connect catalog.
 
 ## Catalog Plugin, Search, And Tool Calling
 
 `Jido.Connect.Catalog` is the host-facing lookup layer for installed connector
 tools. `Jido.Connect.Catalog.Plugin` is the canonical Jido plugin surface for
 agents and hosts that want catalog lookup as actions. Both surfaces use the
-same storage-free catalog data and the same `call_tool/4` execution boundary.
+same storage-free item data and the same core Connect execution boundary.
 
 Search is deterministic in core. Exact ids and names rank first, then
 resource/verb/label matches, then description, provider, tags, scopes, policies,
