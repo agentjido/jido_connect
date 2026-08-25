@@ -11,9 +11,15 @@
   "id": "jido_con-3i6.2",
   "labels": [],
   "parent": "jido_con-3i6",
+  "comments": [
+    {
+      "text": "Release candidate committed at jido_mcp ca5e03d and opened as agentjido/jido_mcp#53. Stable ExMCP 1.0.0. Focused 85 tests; full 183 tests; Credo, docs, hex.audit review, and release.check passed. No release or deprecation action was performed.",
+      "timestamp": "2026-08-25T22:06:59Z"
+    }
+  ],
   "priority": 0,
   "status": "in_progress",
   "title": "Prepare jido_mcp 2.0 ExMCP maintenance release candidate",
   "type": "task",
-  "updated_at": "2026-08-25T21:57:58Z"
+  "updated_at": "2026-08-25T22:06:59Z"
 }
