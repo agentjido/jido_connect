@@ -24,7 +24,8 @@ defmodule Jido.Connect.MCP do
 
     metadata %{
       bridge?: true,
-      bridge_package: :jido_mcp
+      bridge_package: :jido_connect,
+      protocol_package: :ex_mcp
     }
 
     capability :bridge do

@@ -46,30 +46,15 @@ defmodule JidoConnectCore.MixProject do
       {:jido, "~> 2.3"},
       {:jido_action, "~> 2.3"},
       {:jido_signal, "~> 2.2"},
-      jido_mcp_dep(),
+      {:ex_mcp, "~> 1.0"},
       {:jason, "~> 1.4"},
       {:req, "~> 0.6"},
-      {:plug, "~> 1.20"},
       {:sourceror, "~> 1.12", only: [:dev, :test], runtime: false},
       {:splode, "~> 0.3.0"},
       {:spark, "~> 2.7"},
       {:telemetry, "~> 1.3"},
       {:zoi, "~> 0.18"}
     ]
-  end
-
-  # This dependency is temporary while the moved bridge keeps its existing
-  # backend. The next migration unit replaces it with ExMCP.
-  defp jido_mcp_dep do
-    if hex_package_task?() do
-      {:jido_mcp, "~> 1.1"}
-    else
-      {:jido_mcp, github: "agentjido/jido_mcp", branch: "main"}
-    end
-  end
-
-  defp hex_package_task? do
-    Enum.any?(System.argv(), &(&1 in ["hex.build", "hex.publish"]))
   end
 
   defp aliases do

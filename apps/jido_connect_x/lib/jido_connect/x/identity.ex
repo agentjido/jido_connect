@@ -2,8 +2,8 @@ defmodule Jido.Connect.X.Identity do
   @moduledoc false
 
   alias Jido.Connect.{Context, CredentialLease, Data, Error}
+  alias Jido.Connect.MCP.Endpoint
   alias Jido.Connect.X.Contract
-  alias Jido.MCP.Endpoint
 
   @username ~r/^[A-Za-z0-9_]{1,15}$/
 

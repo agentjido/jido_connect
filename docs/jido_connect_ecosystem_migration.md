@@ -146,7 +146,7 @@ backend change remain separate.
 | Previous module | Move decision |
 | --- | --- |
 | `Jido.Connect.MCP` | Move to core as the provider with only `mcp.tools.list` and `mcp.tool.call` |
-| `EndpointLeaseManager` | Move to core and supervise from `Jido.Connect.Application` |
+| `EndpointLeaseManager` | Move to core and supervise from the core application supervisor |
 | `EndpointResolver` and `HostEndpoint` | Move to core; keep the temporary Jido MCP endpoint adapter |
 | `Runtime` | Move to core; keep one-list and one-call behavior without a backend change |
 | `SchemaCompatibility`, `ScopeResolver`, `Tool`, and `ToolResult` | Move to core |
@@ -157,6 +157,39 @@ All 50 bridge tests move with the code. The `jido_connect_mcp` application has
 no implementation after this unit. It remains temporarily in the umbrella so
 the later removal is a separate verified change. It was never published, must
 not be published now, and does not become a compatibility package.
+
+## MCP Backend Replacement Result
+
+Core `jido_connect` now depends on stable ExMCP `1.x` and has no `jido_mcp`
+dependency. The bridge has one internal client contract with only tool listing
+and tool calls. The default adapter calls `ExMCP.Client` and returns safe,
+string-keyed MCP maps.
+
+Hosts can pass a supervised ExMCP client reference in a credential lease. A
+static public endpoint ID can also map to a host-supervised reference in
+`config :jido_connect, :mcp_clients`. Connect does not stop either host-owned
+reference. If a lease contains only an endpoint definition, Connect starts one
+client for that connection generation under a dynamic supervisor and stops it
+after the generation drains. This is scoped lifecycle management, not a
+general endpoint pool.
+
+Public endpoint IDs remain separate from client references. Credential lease
+expiry, connection and credential versions, generation fences, schema hash
+binding, compatible-schema checks, and one-send writes still apply. Tool calls
+disable generic retries and use ExMCP safe-only response-stream handling. An
+unknown result becomes `:mcp_write_uncertain` and is not sent again.
+
+The bridge did not add resources, prompts, server publication, dynamic proxy
+Actions, or endpoint-pool APIs. X and Trello endpoint validation now uses the
+Connect endpoint type, so no Connect application needs a Jido MCP module.
+
+Verification on 2026-08-25 passed 54 focused bridge tests, 162 core tests, the
+full umbrella quality command, and an unpacked Hex package build. The core-only
+coverage report is 74.21%, below its existing 80% package threshold. The full
+umbrella quality gate passes. The documentation build completes with existing
+umbrella hidden-reference warnings and a long-path loader error from the docs
+build directory. The dependency audit reports the recorded Cowlib advisories
+from ExMCP and the recorded Bandit advisories from the demo application.
 
 ## Jido MCP Compatibility Baseline
 

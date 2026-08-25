@@ -50,8 +50,9 @@ responsible for endpoint and tool allowlists, connection and credential-lease
 checks, scopes, policy, confirmation, schema drift, and uncertain write
 classification.
 
-For a host-owned endpoint, put the public endpoint ID in connection metadata
-and put the endpoint definition in the short-lived credential lease:
+For a host-owned ExMCP client, put the public endpoint ID in connection
+metadata. Put the supervised client name or process reference in the
+short-lived credential lease:
 
 ```elixir
 connection =
@@ -70,25 +71,46 @@ connection =
 lease =
   Jido.Connect.CredentialLease.from_connection!(
     connection,
-    %{mcp_endpoint: endpoint_definition},
+    %{mcp_client_ref: MyApp.SupervisedMCPClient},
     expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
     metadata: %{credential_version: 1}
   )
 ```
 
-Each connection gets an opaque internal endpoint ID. Rotation, expiry,
-revocation, or connection removal fences the old generation before it stops
-the client. A remote write is sent at most one time. If its result becomes
-unknown after the send boundary, Connect returns an uncertain provider error
-and does not repeat the call.
+The host must start and supervise this ExMCP client. Connect does not stop a
+host-owned client. The client reference must be secret-free. Keep credentials
+in the supervised client process or in a connection-scoped endpoint definition.
+A custom internal adapter can use `mcp_client_module`, but the default adapter
+calls `ExMCP.Client` directly.
+
+If a host cannot keep a shared supervised reference, the lease can contain an
+`mcp_endpoint` definition instead. Connect then starts one ExMCP client for the
+connection generation and stops only that client after the generation drains.
+The endpoint definition supports ExMCP stdio, streamable HTTP, and BEAM-local
+transports.
+
+An application can also map a public endpoint ID to a host-supervised client:
+
+```elixir
+config :jido_connect,
+  mcp_clients: %{
+    filesystem: %{client_ref: MyApp.FilesystemMCPClient}
+  }
+```
+
+Public endpoint IDs never act as ExMCP process references. Each lease-backed
+connection also gets an opaque internal endpoint ID. Rotation, expiry,
+revocation, or connection removal fences the old generation before Connect
+stops a connection-scoped client. A remote write is sent at most one time. If
+its result becomes unknown after the send boundary, Connect returns an
+uncertain provider error and does not repeat the call.
 
 Tool discovery returns `schema_hash`. A typed caller can give that value as
 `expected_schema_hash` to `mcp.tool.call`. Connect lists the tool again and
 rejects schema drift before the remote call.
 
-The moved bridge temporarily uses the frozen Jido MCP client API. The next
-migration step replaces this internal backend with ExMCP without changing the
-two Connect operations or their safety rules.
+The bridge uses stable ExMCP `1.x` through an internal tool-list and tool-call
+contract. It does not depend on `jido_mcp`.
 
 ## Host Boundary
 

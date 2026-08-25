@@ -2,7 +2,14 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
   use ExUnit.Case, async: false
 
   alias Jido.Connect
-  alias Jido.Connect.MCP.EndpointLeaseManager
+  alias Jido.Connect.MCP.{ClientSource, Endpoint, EndpointLeaseManager}
+
+  defmodule LeaseClient do
+    @behaviour Jido.Connect.MCP.Client
+
+    def list_tools(_client, _opts), do: {:ok, %{"tools" => []}}
+    def call_tool(_client, _name, _arguments, _opts), do: {:ok, %{"content" => []}}
+  end
 
   setup do
     connection = connection("lease-manager-#{System.unique_integer([:positive])}")
@@ -117,11 +124,13 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
     assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_revoked}} =
              EndpointLeaseManager.ensure_dispatchable(old)
 
-    assert {:ok, _endpoint} = Jido.MCP.ClientPool.fetch_endpoint(old.endpoint_id)
-    assert {:ok, _endpoint} = Jido.MCP.ClientPool.fetch_endpoint(replacement.endpoint_id)
+    assert [old_record, replacement_record] = EndpointLeaseManager.ownership(connection)
+    assert old_record.status == :draining
+    assert replacement_record.status == :active
 
     :ok = EndpointLeaseManager.release(old)
-    assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(old.endpoint_id)
+    assert [%{endpoint_id: replacement_id}] = EndpointLeaseManager.ownership(connection)
+    assert replacement_id == replacement.endpoint_id
     assert :ok = EndpointLeaseManager.ensure_dispatchable(replacement)
     :ok = EndpointLeaseManager.release(replacement)
   end
@@ -295,7 +304,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
     send(task.pid, :finish_send)
     assert {:ok, {:error, :connection_lost}, true} = Task.await(task)
     :ok = EndpointLeaseManager.release(token)
-    assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(token.endpoint_id)
+    assert [] = EndpointLeaseManager.ownership(connection)
   end
 
   test "ownership evidence contains no endpoint credential", %{connection: connection} do
@@ -369,7 +378,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
              EndpointLeaseManager.ensure_dispatchable(token)
 
     :ok = EndpointLeaseManager.release(token)
-    assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(token.endpoint_id)
+    assert [] = EndpointLeaseManager.ownership(connection)
   end
 
   test "expiry fences a generation before it unregisters the client", %{connection: connection} do
@@ -386,7 +395,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
              EndpointLeaseManager.ensure_dispatchable(token)
 
     :ok = EndpointLeaseManager.release(token)
-    assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(token.endpoint_id)
+    assert [] = EndpointLeaseManager.ownership(connection)
   end
 
   test "an expired lease is rejected before endpoint registration", %{connection: connection} do
@@ -427,7 +436,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
 
     assert_receive :send_started
     assert :ok = EndpointLeaseManager.force_stop(connection)
-    assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(token.endpoint_id)
+    assert [] = EndpointLeaseManager.ownership(connection)
     send(task.pid, :finish_send)
     assert {:ok, {:error, :connection_lost}, true} = Task.await(task)
   end
@@ -447,7 +456,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
     assert [%{active: 1}] = EndpointLeaseManager.ownership(connection)
     assert :ok = EndpointLeaseManager.revoke(connection)
     assert :ok = EndpointLeaseManager.release(token)
-    assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(token.endpoint_id)
+    assert [] = EndpointLeaseManager.ownership(connection)
   end
 
   test "generation does not reset after an endpoint is removed", %{connection: connection} do
@@ -468,6 +477,22 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
              )
 
     assert second.generation == first.generation + 1
+  end
+
+  test "does not stop a host-owned client reference", %{connection: connection} do
+    client = start_supervised!({Agent, fn -> :ready end})
+    source = %{endpoint("secret-one") | ref: client}
+
+    assert {:ok, token} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one"),
+               source
+             )
+
+    assert token.client_ref == client
+    assert :ok = EndpointLeaseManager.force_stop(connection)
+    assert Process.alive?(client)
   end
 
   defp connection(id) do
@@ -497,8 +522,14 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
   end
 
   defp endpoint(secret) do
-    {:ok, endpoint} = Jido.MCP.Endpoint.new("temporary", endpoint_source(secret))
-    endpoint
+    {:ok, endpoint} = Endpoint.new("temporary", endpoint_source(secret))
+
+    %ClientSource{
+      module: LeaseClient,
+      ref: :lease_test_client,
+      endpoint: endpoint,
+      ownership: :host
+    }
   end
 
   defp endpoint_source(secret) do

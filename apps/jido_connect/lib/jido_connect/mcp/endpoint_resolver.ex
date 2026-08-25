@@ -2,14 +2,14 @@ defmodule Jido.Connect.MCP.EndpointResolver do
   @moduledoc false
 
   alias Jido.Connect.{Context, CredentialLease, Error}
-  alias Jido.Connect.MCP.{EndpointLeaseManager, HostEndpoint}
+  alias Jido.Connect.MCP.{ClientSource, EndpointLeaseManager, HostEndpoint}
 
   @doc """
-  Resolves an MCP endpoint identifier to a confirmed Jido MCP endpoint.
+  Resolves an MCP endpoint identifier to a confirmed client reference.
 
   A host-owned connection can carry endpoint data in the credential lease.
-  This path registers a connection-specific string ID. Static configurations
-  continue to resolve through `Jido.MCP.ClientPool` or application config.
+  Static configurations can name host-supervised clients. Connect does not
+  keep a general endpoint pool.
   """
   def resolve(endpoint_id, opts \\ [])
 
@@ -97,20 +97,15 @@ defmodule Jido.Connect.MCP.EndpointResolver do
         end
 
       :legacy ->
-        with {:ok, endpoint_id} <- resolve_registered(endpoint_id) do
-          {:ok, %{endpoint_id: endpoint_id, legacy?: true}}
+        with {:ok, resolved, source} <- resolve_static(endpoint_id) do
+          {:ok,
+           %{
+             endpoint_id: resolved,
+             client_module: source.module,
+             client_ref: source.ref,
+             legacy?: true
+           }}
         end
-    end
-  end
-
-  defp resolve_registered(endpoint_id) do
-    client_pool = Module.concat(Jido.MCP, ClientPool)
-
-    if Code.ensure_loaded?(client_pool) and
-         function_exported?(client_pool, :resolve_endpoint_id, 1) do
-      apply(client_pool, :resolve_endpoint_id, [endpoint_id])
-    else
-      resolve_from_config(endpoint_id)
     end
   end
 
@@ -118,17 +113,14 @@ defmodule Jido.Connect.MCP.EndpointResolver do
          context: %Context{} = context,
          credential_lease: %CredentialLease{} = lease
        }) do
-    case {context.connection, CredentialLease.fetch_field(lease, :mcp_endpoint)} do
-      {connection, {:ok, _endpoint}} when not is_nil(connection) -> {:ok, context, lease}
-      _other -> :legacy
-    end
+    if context.connection && client_source?(lease), do: {:ok, context, lease}, else: :legacy
   end
 
   defp host_context(opts) when is_list(opts), do: opts |> Map.new() |> host_context()
 
   defp host_context(_opts), do: :legacy
 
-  defp resolve_from_config(endpoint_id) do
+  defp resolve_static(endpoint_id) do
     trimmed = String.trim(endpoint_id)
 
     cond do
@@ -136,19 +128,30 @@ defmodule Jido.Connect.MCP.EndpointResolver do
         {:error, :invalid_endpoint_id}
 
       true ->
-        endpoints = raw_endpoints()
+        clients = static_clients()
 
-        case Enum.find(Map.keys(endpoints), &(endpoint_key(&1) == trimmed)) do
-          nil -> {:error, :unknown_endpoint}
-          id -> {:ok, id}
+        case Enum.find(Map.keys(clients), &(endpoint_key(&1) == trimmed)) do
+          nil ->
+            {:error, :unknown_endpoint}
+
+          id ->
+            with {:ok, source} <- ClientSource.static(Map.fetch!(clients, id), trimmed) do
+              {:ok, id, source}
+            end
         end
     end
   end
 
-  defp raw_endpoints do
-    :jido_mcp
-    |> Application.get_env(:endpoints, %{})
+  defp static_clients do
+    :jido_connect
+    |> Application.get_env(:mcp_clients, %{})
     |> to_map()
+  end
+
+  defp client_source?(lease) do
+    Enum.any?([:mcp_endpoint, :mcp_client_ref], fn key ->
+      match?({:ok, _value}, CredentialLease.fetch_field(lease, key))
+    end)
   end
 
   defp to_map(endpoints) when is_map(endpoints), do: endpoints

@@ -8,18 +8,18 @@ defmodule Jido.Connect.MCPTest do
   end
 
   defmodule FakeMCPClient do
-    def list_tools(:filesystem) do
+    @behaviour Jido.Connect.MCP.Client
+
+    def list_tools(:filesystem, []) do
       {:ok,
        %{
-         data: %{
-           "tools" => [
-             %{
-               name: "read_text_file",
-               description: "Read a text file without a timeout",
-               inputSchema: %{"type" => "object"}
-             }
-           ]
-         }
+         "tools" => [
+           %{
+             name: "read_text_file",
+             description: "Read a text file without a timeout",
+             inputSchema: %{"type" => "object"}
+           }
+         ]
        }}
     end
 
@@ -28,17 +28,14 @@ defmodule Jido.Connect.MCPTest do
 
       {:ok,
        %{
-         status: :ok,
-         data: %{
-           "tools" => [
-             %{
-               "name" => "read_text_file",
-               "description" => "Read a text file",
-               "inputSchema" => %{"type" => "object"},
-               "annotations" => %{"readOnlyHint" => true}
-             }
-           ]
-         }
+         "tools" => [
+           %{
+             "name" => "read_text_file",
+             "description" => "Read a text file",
+             "inputSchema" => %{"type" => "object"},
+             "annotations" => %{"readOnlyHint" => true}
+           }
+         ]
        }}
     end
 
@@ -47,61 +44,80 @@ defmodule Jido.Connect.MCPTest do
 
       {:ok,
        %{
-         status: :ok,
-         data: %{
-           "content" => [%{"type" => "text", "text" => "hello"}]
-         }
+         "content" => [%{"type" => "text", "text" => "hello"}]
        }}
     end
 
     def call_tool(:filesystem, "fail", %{}, opts) do
       assert opts[:timeout] == 1_000
-      {:error, %{type: :transport, message: "transport failed"}}
+      {:error, %{reason: :transport}}
     end
   end
 
   defmodule BadMCPClient do
+    @behaviour Jido.Connect.MCP.Client
+
     def list_tools(:filesystem, _opts), do: :bad_response
+    def call_tool(_client, _name, _arguments, _opts), do: {:ok, %{}}
   end
 
   defmodule RaisingMCPClient do
+    @behaviour Jido.Connect.MCP.Client
+
     def list_tools(:filesystem, _opts), do: raise("mcp exploded")
+    def call_tool(_client, _name, _arguments, _opts), do: {:ok, %{}}
   end
 
   defmodule HostMCPClient do
-    def list_tools(endpoint_id, opts) do
-      send(self(), {:host_mcp_discovered, endpoint_id, opts})
+    @behaviour Jido.Connect.MCP.Client
+
+    def list_tools(client_ref, opts) do
+      send(self(), {:host_mcp_discovered, client_ref, opts})
 
       {:ok,
        %{
-         status: :ok,
-         data: %{
-           "tools" => [
-             %{
-               "name" => "post_message",
-               "inputSchema" => %{
-                 "type" => "object",
-                 "properties" => %{"text" => %{"type" => "string"}}
-               }
+         "tools" => [
+           %{
+             "name" => "post_message",
+             "inputSchema" => %{
+               "type" => "object",
+               "properties" => %{"text" => %{"type" => "string"}}
              }
-           ]
-         }
+           }
+         ]
        }}
     end
 
-    def call_tool(endpoint_id, "post_message", %{"text" => text}, opts) do
-      send(self(), {:host_mcp_called, endpoint_id, text, opts})
+    def call_tool(client_ref, "post_message", %{"text" => text}, opts) do
+      send(self(), {:host_mcp_called, client_ref, text, opts})
 
       {:ok,
        %{
-         status: :ok,
-         data: %{"content" => [%{"type" => "text", "text" => "sent"}]}
+         "content" => [%{"type" => "text", "text" => "sent"}]
        }}
+    end
+  end
+
+  defmodule UnknownOutcomeClient do
+    @behaviour Jido.Connect.MCP.Client
+
+    def list_tools(_client_ref, _opts), do: {:ok, %{"tools" => []}}
+
+    def call_tool(observer, "write", %{}, opts) do
+      send(observer, {:unknown_outcome_attempt, opts})
+      {:error, %{reason: :outcome_unknown, details: %{delivery: :unknown}}}
     end
   end
 
   setup do
-    register_endpoint!(:filesystem)
+    previous = Application.get_env(:jido_connect, :mcp_clients)
+    register_client!(:filesystem, FakeMCPClient)
+
+    on_exit(fn ->
+      if is_nil(previous),
+        do: Application.delete_env(:jido_connect, :mcp_clients),
+        else: Application.put_env(:jido_connect, :mcp_clients, previous)
+    end)
 
     :ok
   end
@@ -180,7 +196,7 @@ defmodule Jido.Connect.MCPTest do
     assert function_exported?(Jido.Connect.MCP.Plugin, :plugin_spec, 1)
   end
 
-  test "generated list tools action delegates through Jido MCP" do
+  test "generated list tools action delegates through the client contract" do
     {context, lease} = context_and_lease()
 
     assert {:ok, %{endpoint_id: "filesystem", tools: [tool]}} =
@@ -207,7 +223,7 @@ defmodule Jido.Connect.MCPTest do
     assert tool.description == "Read a text file without a timeout"
   end
 
-  test "generated call tool action delegates through Jido MCP" do
+  test "generated call tool action delegates through the client contract" do
     {context, lease} = context_and_lease()
 
     assert {:ok,
@@ -255,6 +271,53 @@ defmodule Jido.Connect.MCPTest do
                },
                action_context(context, lease)
              )
+  end
+
+  test "an ExMCP unknown outcome becomes one uncertain write" do
+    scopes = ["mcp:tools:call", "mcp:endpoint:remote", "mcp:tool:write"]
+
+    connection =
+      Connect.Connection.new!(%{
+        id: "unknown-outcome",
+        provider: :mcp,
+        profile: :endpoint,
+        tenant_id: "tenant_1",
+        owner_type: :tenant,
+        owner_id: "tenant_1",
+        status: :connected,
+        scopes: scopes,
+        metadata: %{mcp_endpoint_id: "remote", connection_revision: 1}
+      })
+
+    context =
+      Connect.Context.new!(%{
+        tenant_id: "tenant_1",
+        actor: %{id: "user_1", type: :user},
+        connection: connection
+      })
+
+    lease =
+      Connect.CredentialLease.from_connection!(
+        connection,
+        %{mcp_client_module: UnknownOutcomeClient, mcp_client_ref: self()},
+        expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
+        metadata: %{credential_version: 1}
+      )
+
+    assert {:error,
+            %Connect.Error.ProviderError{
+              reason: :mcp_write_uncertain,
+              delivery: :sent_outcome_unknown,
+              mutation?: true
+            }} =
+             Jido.Connect.MCP.Actions.CallTool.run(
+               %{endpoint_id: "remote", tool_name: "write", arguments: %{}, timeout: 1_000},
+               action_context(context, lease)
+             )
+
+    assert_received {:unknown_outcome_attempt, [timeout: 1_000]}
+    refute_received {:unknown_outcome_attempt, _opts}
+    assert :ok = Jido.Connect.MCP.EndpointLeaseManager.force_stop(connection)
   end
 
   test "typed read calls retain lease fences without mutation uncertainty" do
@@ -312,7 +375,7 @@ defmodule Jido.Connect.MCPTest do
             %Connect.Error.ProviderError{
               provider: :mcp,
               reason: :client_exception,
-              details: %{message: "mcp exploded"}
+              details: %{module: RaisingMCPClient, function: :list_tools}
             }} =
              Jido.Connect.MCP.Actions.ListTools.run(
                %{endpoint_id: "filesystem", timeout: 1_000},
@@ -340,14 +403,14 @@ defmodule Jido.Connect.MCPTest do
              )
   end
 
-  test "runtime registered MCP endpoints resolve through the bridge" do
-    register_endpoint!(:runtime_registered)
+  test "static host clients resolve through the bridge" do
+    register_client!(:runtime_registered, FakeMCPClient)
 
     assert {:ok, :runtime_registered} =
              Jido.Connect.MCP.EndpointResolver.resolve("runtime_registered")
   end
 
-  test "prepared commit routes a host-owned endpoint through Jido MCP" do
+  test "prepared commit routes a host-owned client reference through Connect" do
     scopes = ["mcp:tools:call", "mcp:endpoint:slack", "mcp:tool:post_message"]
 
     connection =
@@ -374,7 +437,8 @@ defmodule Jido.Connect.MCPTest do
       Connect.CredentialLease.from_connection!(
         connection,
         %{
-          mcp_client: HostMCPClient,
+          mcp_client_module: HostMCPClient,
+          mcp_client_ref: Jido.Connect.MCP.HostEndpoint.internal_id(connection),
           mcp_endpoint: %{
             transport: {:stdio, [command: "echo"]},
             client_info: %{name: "wayfinder-connect-test"}
@@ -431,8 +495,7 @@ defmodule Jido.Connect.MCPTest do
     internal_id = Jido.Connect.MCP.HostEndpoint.internal_id(connection)
     assert_received {:host_mcp_discovered, ^internal_id, [timeout: 1_000]}
     assert_received {:host_mcp_called, ^internal_id, "hello", [timeout: 1_000]}
-    assert {:ok, _endpoint} = Jido.MCP.ClientPool.fetch_endpoint(internal_id)
-    assert {:ok, _endpoint} = Jido.MCP.unregister_endpoint(internal_id)
+    assert :ok = Jido.Connect.MCP.EndpointLeaseManager.force_stop(connection)
   end
 
   test "prepared commit rejects MCP tool schema drift before calling the tool" do
@@ -469,7 +532,7 @@ defmodule Jido.Connect.MCPTest do
     internal_id = Jido.Connect.MCP.HostEndpoint.internal_id(context.connection)
     assert_received {:host_mcp_discovered, ^internal_id, [timeout: 1_000]}
     refute_received {:host_mcp_called, ^internal_id, _text, _opts}
-    assert {:ok, _endpoint} = Jido.MCP.unregister_endpoint(internal_id)
+    assert :ok = Jido.Connect.MCP.EndpointLeaseManager.force_stop(context.connection)
   end
 
   test "scope resolver rejects ungranted tools before handler execution" do
@@ -529,6 +592,8 @@ defmodule Jido.Connect.MCPTest do
   end
 
   defp context_and_lease(opts \\ []) do
+    register_client!(:filesystem, Keyword.get(opts, :mcp_client, FakeMCPClient))
+
     scopes =
       Keyword.get(opts, :scopes, [
         "mcp:tools:list",
@@ -560,7 +625,7 @@ defmodule Jido.Connect.MCPTest do
       Connect.CredentialLease.new!(%{
         connection_id: "mcp-filesystem",
         expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
-        fields: %{mcp_client: Keyword.get(opts, :mcp_client, FakeMCPClient)}
+        fields: %{}
       })
 
     {context, lease}
@@ -597,7 +662,8 @@ defmodule Jido.Connect.MCPTest do
       Connect.CredentialLease.from_connection!(
         connection,
         %{
-          mcp_client: HostMCPClient,
+          mcp_client_module: HostMCPClient,
+          mcp_client_ref: Jido.Connect.MCP.HostEndpoint.internal_id(connection),
           mcp_endpoint: %{
             transport: {:stdio, [command: "echo"]},
             client_info: %{name: "wayfinder-connect-test"}
@@ -610,16 +676,13 @@ defmodule Jido.Connect.MCPTest do
     {context, lease}
   end
 
-  defp register_endpoint!(endpoint_id) do
-    {:ok, endpoint} =
-      Jido.MCP.Endpoint.new(endpoint_id, %{
-        transport: {:stdio, [command: "echo"]},
-        client_info: %{name: "jido-connect-mcp-test"}
-      })
+  defp register_client!(endpoint_id, module) do
+    clients = Application.get_env(:jido_connect, :mcp_clients, %{})
 
-    case Jido.MCP.register_endpoint(endpoint) do
-      {:ok, _endpoint} -> :ok
-      {:error, {:endpoint_already_registered, ^endpoint_id}} -> :ok
-    end
+    Application.put_env(
+      :jido_connect,
+      :mcp_clients,
+      Map.put(clients, endpoint_id, {module, endpoint_id})
+    )
   end
 end
