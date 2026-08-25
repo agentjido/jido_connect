@@ -1,0 +1,19 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-3i6.4"
+  ],
+  "blocks": [
+    "jido_con-3i6.6"
+  ],
+  "created": "2026-08-25T21:42:25Z",
+  "description": "C3 for jido_connect#71. Add a narrow internal client contract and ExMCP 1.x implementation, prefer host-owned client references, preserve fences, leases, schema drift, one-send write behavior, and sanitized Jido.Connect.Error normalization. Remove jido_mcp dependency. Do not add pools, server publication, proxy Actions, resources, or prompts.",
+  "id": "jido_con-3i6.5",
+  "labels": [],
+  "parent": "jido_con-3i6",
+  "priority": 0,
+  "status": "open",
+  "title": "Replace Connect MCP backend with ExMCP",
+  "type": "task",
+  "updated_at": "2026-08-25T21:42:33Z"
+}

@@ -1,0 +1,18 @@
+{
+  "assignee": "Mike Hostetler",
+  "blocked_by": [],
+  "blocks": [
+    "jido_con-3i6.2",
+    "jido_con-3i6.3"
+  ],
+  "created": "2026-08-25T21:42:21Z",
+  "description": "M0 for jido_connect#69. Update owning issues to match JIDO_CONNECT_MIGRATION.md. Record remote heads, versions, public APIs, focused/full tests, and compatibility boundaries. Repository ownership: jido_connect coordination plus read-only jido_mcp inventory.",
+  "id": "jido_con-3i6.1",
+  "labels": [],
+  "parent": "jido_con-3i6",
+  "priority": 0,
+  "status": "in_progress",
+  "title": "Confirm migration scope and record baselines",
+  "type": "task",
+  "updated_at": "2026-08-25T21:42:42Z"
+}

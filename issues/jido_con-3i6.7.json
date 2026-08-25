@@ -1,0 +1,19 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-3i6.6"
+  ],
+  "blocks": [
+    "jido_con-3i6.8"
+  ],
+  "created": "2026-08-25T21:42:27Z",
+  "description": "C5 for jido_connect#69-72. Document discovery, tool listing/calls, policies, scopes, confirmation, schema drift, uncertain writes, supported jido_mcp migration paths, and excluded features. Complete package and documentation release checks. Do not publish without explicit approval.",
+  "id": "jido_con-3i6.7",
+  "labels": [],
+  "parent": "jido_con-3i6",
+  "priority": 0,
+  "status": "open",
+  "title": "Prepare Jido Connect MCP replacement release",
+  "type": "task",
+  "updated_at": "2026-08-25T21:42:34Z"
+}

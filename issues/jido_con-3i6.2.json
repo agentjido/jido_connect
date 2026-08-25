@@ -1,0 +1,19 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-3i6.1"
+  ],
+  "blocks": [
+    "jido_con-3i6.4"
+  ],
+  "created": "2026-08-25T21:42:22Z",
+  "description": "M1/M2 for jido_mcp#52. Freeze the Action v2 public surface, use stable ExMCP ~\u003e 1.0, verify normalization/server/Plug behavior and security exceptions, update versions and migration/maintenance documentation, and complete all release checks. Do not publish or retire.",
+  "id": "jido_con-3i6.2",
+  "labels": [],
+  "parent": "jido_con-3i6",
+  "priority": 0,
+  "status": "open",
+  "title": "Prepare jido_mcp 2.0 ExMCP maintenance release candidate",
+  "type": "task",
+  "updated_at": "2026-08-25T21:42:30Z"
+}

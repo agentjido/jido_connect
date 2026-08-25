@@ -1,0 +1,20 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-3i6.2",
+    "jido_con-3i6.3"
+  ],
+  "blocks": [
+    "jido_con-3i6.5"
+  ],
+  "created": "2026-08-25T21:42:24Z",
+  "description": "C2 for jido_connect#71. Classify and move the existing Jido.Connect.MCP namespace from apps/jido_connect_mcp into core with behavior parity and its temporary Jido.MCP backend. Preserve only mcp.tools.list and mcp.tool.call plus all Connect safety rules.",
+  "id": "jido_con-3i6.4",
+  "labels": [],
+  "parent": "jido_con-3i6",
+  "priority": 0,
+  "status": "open",
+  "title": "Move MCP bridge into core jido_connect",
+  "type": "task",
+  "updated_at": "2026-08-25T21:42:32Z"
+}

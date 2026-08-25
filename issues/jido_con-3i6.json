@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-08-25T21:42:20Z",
+  "description": "Owns jido_connect#69-72 and jido_mcp#52. Complete the non-Harness migration through tested, documented release candidates. Use Jido Action v2. Do not change Ando, ExMCP, or jido_harness. Do not publish or retire packages without explicit approval. Sequence: M0 -\u003e (M1, C1) -\u003e C2 -\u003e C3 -\u003e C4 -\u003e C5 -\u003e M3.",
+  "id": "jido_con-3i6",
+  "labels": [],
+  "priority": 0,
+  "status": "open",
+  "title": "Jido Connect ecosystem non-Harness migration",
+  "type": "epic",
+  "updated_at": "2026-08-25T21:42:20Z"
+}

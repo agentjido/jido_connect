@@ -1,0 +1,19 @@
+{
+  "assignee": "",
+  "blocked_by": [
+    "jido_con-3i6.1"
+  ],
+  "blocks": [
+    "jido_con-3i6.4"
+  ],
+  "created": "2026-08-25T21:42:23Z",
+  "description": "C1 for jido_connect#70. Make Jido.Connect.Catalog.Item the canonical projection from Spec, ActionSpec, and TriggerSpec. Preserve search, describe, call, packs, serialization, plugin behavior, and action_catalog/1 as the Action v2 adapter. Add migration notes and tests.",
+  "id": "jido_con-3i6.3",
+  "labels": [],
+  "parent": "jido_con-3i6",
+  "priority": 0,
+  "status": "open",
+  "title": "Simplify Connect catalog around Catalog.Item",
+  "type": "task",
+  "updated_at": "2026-08-25T21:42:31Z"
+}
