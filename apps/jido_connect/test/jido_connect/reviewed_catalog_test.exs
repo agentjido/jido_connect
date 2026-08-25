@@ -42,8 +42,9 @@ defmodule Jido.Connect.ReviewedCatalogTest do
       %{
         spec
         | id: :mcp_bridge_fixture,
-          package: :jido_connect_mcp,
-          metadata: %{package: :jido_connect_mcp, version: "test"},
+          package: :jido_connect,
+          tags: [:mcp, :tool_bridge],
+          metadata: %{package: :jido_connect, version: "test"},
           actions: [%{action | id: "mcp.tools.list", name: :tools_list, label: "List MCP tools"}]
       }
     end

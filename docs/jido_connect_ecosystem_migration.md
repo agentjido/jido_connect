@@ -19,9 +19,9 @@ non-Harness migration. The owning issues are
 - `jido_mcp` gets one final ExMCP-based major release candidate. It then enters
   maintenance mode. Formal deprecation can start only after the Connect
   replacement is public and proven.
-- The unpublished `jido_connect_mcp` umbrella application is removed after its
-  supported behavior is in core `jido_connect`. No compatibility package is
-  required.
+- The unpublished `jido_connect_mcp` umbrella application was removed after its
+  supported behavior moved into core `jido_connect`. No compatibility package
+  is required.
 
 This work does not move Jido MCP server publication, dynamic Jido AI proxy
 Actions, or a general endpoint pool into Connect. It does not change Ando,
@@ -190,6 +190,25 @@ umbrella quality gate passes. The documentation build completes with existing
 umbrella hidden-reference warnings and a long-path loader error from the docs
 build directory. The dependency audit reports the recorded Cowlib advisories
 from ExMCP and the recorded Bandit advisories from the demo application.
+
+## MCP Application Removal Result
+
+The unpublished `jido_connect_mcp` Mix application is no longer in the
+umbrella. Core `jido_connect` owns the `Jido.Connect.MCP` integration, generated
+Action v2 modules, client lifecycle, and replacement tests. X, Trello, and the
+demo now get this namespace only from their normal core dependency. The removal
+also deletes the old package-specific catalog inference. MCP catalog items use
+the core package plus explicit MCP tags and bridge metadata.
+
+There is no compatibility application, Hex package, release, or retirement
+action. Historical references in this document and the May 2026 readiness
+record describe the former baseline only.
+
+Removal verification on 2026-08-25 passed 65 focused core bridge and catalog
+tests, all 37 Trello tests, all 24 X tests, the full 40-application umbrella
+quality gate, and all 21 demo tests. Hex package builds for core, Trello, and X
+contain no `jido_connect_mcp` dependency. The live application and demo trees
+contain no reference to the removed package.
 
 ## Jido MCP Compatibility Baseline
 

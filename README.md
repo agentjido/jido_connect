@@ -58,24 +58,23 @@ For more detail, see [Architecture](docs/architecture.md),
 
 ## Packages
 
-The umbrella contains 37 Mix projects. All projects use the same `0.8.0`
+The umbrella contains 40 Mix projects. All projects use the same `0.8.0`
 release version.
 
 ### Core and shared foundations
 
 | Package | Purpose |
 | --- | --- |
-| `jido_connect` | Spark DSL, runtime contracts, authorization, catalog, generated modules, telemetry, sanitization, and normalized errors |
+| `jido_connect` | Spark DSL, runtime contracts, authorization, catalog, generated modules, the narrow MCP bridge, telemetry, sanitization, and normalized errors |
 | `jido_connect_google` | Shared Google OAuth, service-account, scope, transport, pagination, and checkpoint support |
 | `jido_connect_microsoft` | Shared Microsoft identity and Graph transport support |
 | `jido_connect_webhook` | Generic inbound webhook verification and normalization primitives |
-| `jido_connect_mcp` | MCP server bridge and MCP catalog tools |
 
 ### Service connectors
 
 | Product area | Packages |
 | --- | --- |
-| Collaboration and development | `jido_connect_github`, `jido_connect_gitlab`, `jido_connect_jira`, `jido_connect_linear`, `jido_connect_slack` |
+| Collaboration and development | `jido_connect_bitbucket`, `jido_connect_confluence`, `jido_connect_github`, `jido_connect_gitlab`, `jido_connect_jira`, `jido_connect_linear`, `jido_connect_slack`, `jido_connect_trello`, `jido_connect_x` |
 | CRM and customer service | `jido_connect_hubspot`, `jido_connect_intercom`, `jido_connect_salesforce`, `jido_connect_zendesk` |
 | Work and data | `jido_connect_airtable`, `jido_connect_asana`, `jido_connect_nextcloud`, `jido_connect_notion`, `jido_connect_posthog`, `jido_connect_things` |
 | Scheduling | `jido_connect_calcom`, `jido_connect_calendly` |

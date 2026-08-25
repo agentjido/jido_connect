@@ -446,11 +446,8 @@ defmodule Jido.Connect.Catalog.Builder do
     |> normalize_source()
   end
 
-  defp item_bridge_source(%Spec{} = spec, package) do
+  defp item_bridge_source(%Spec{} = spec, _package) do
     cond do
-      package == :jido_connect_mcp ->
-        :mcp
-
       :mcp in spec.tags ->
         :mcp
 
@@ -464,7 +461,6 @@ defmodule Jido.Connect.Catalog.Builder do
 
   defp bridge_source(%Entry{} = entry) do
     cond do
-      entry.package == :jido_connect_mcp -> :mcp
       :mcp in entry.tags -> :mcp
       Map.get(entry.metadata, :bridge?) -> Map.get(entry.metadata, :bridge_kind, :mcp)
       true -> nil

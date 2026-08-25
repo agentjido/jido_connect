@@ -33,7 +33,6 @@ defmodule JidoConnectTrello.MixProject do
   defp deps do
     [
       jido_connect_dep(),
-      jido_connect_mcp_dep(),
       {:ex_mcp, "~> 1.0"},
       {:jason, "~> 1.4"}
     ]
@@ -43,12 +42,6 @@ defmodule JidoConnectTrello.MixProject do
     if hex_package_task?(),
       do: {:jido_connect, "~> 0.8"},
       else: {:jido_connect, in_umbrella: true}
-  end
-
-  defp jido_connect_mcp_dep do
-    if hex_package_task?(),
-      do: {:jido_connect_mcp, "~> 0.8"},
-      else: {:jido_connect_mcp, in_umbrella: true}
   end
 
   defp hex_package_task?,
