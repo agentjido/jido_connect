@@ -9,11 +9,11 @@ details into those contracts.
 The umbrella has three layers:
 
 - `jido_connect` owns the Spark DSL, Zoi-backed contract structs, generated Jido
-  adapters, authorization checks, catalog discovery, telemetry, and normalized
-  runtime envelopes.
+  adapters, authorization checks, catalog discovery, the narrow MCP tool
+  bridge, telemetry, and normalized runtime envelopes.
 - Provider packages such as `jido_connect_github`, `jido_connect_slack`, and
-  `jido_connect_mcp` own provider auth helpers, REST or bridge clients, webhook
-  verification, scope resolvers, and handlers.
+  `jido_connect_trello` own provider auth helpers, REST or bridge clients,
+  webhook verification, scope resolvers, and handlers.
 - `dev/demo` is a local host harness. It owns local callbacks, in-memory
   connections, credential lookup, webhook consoles, and action runners. It is
   not part of the published packages.

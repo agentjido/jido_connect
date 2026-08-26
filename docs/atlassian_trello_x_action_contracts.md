@@ -20,7 +20,7 @@ use provider IDs and do not keep the former IDs as aliases.
 
 Jira, Confluence, and Bitbucket have separate provider identities even when a
 host uses related Atlassian credentials. Trello and X use typed provider
-actions over `jido_connect_mcp`; their public packs never include
+actions over the MCP bridge in core `jido_connect`; their public packs never include
 `mcp.tools.list`, `mcp.tools.call`, or `mcp.tool.call`.
 
 ## Jira

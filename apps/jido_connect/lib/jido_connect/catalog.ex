@@ -2,8 +2,9 @@ defmodule Jido.Connect.Catalog do
   @moduledoc """
   Host-facing connector catalog metadata derived from integration specs.
 
-  This gives demo apps and host UIs a stable, storage-free way to render
-  available providers, auth modes, generated tools, and maturity metadata.
+  `Catalog.Item` is the canonical read-only operation projection. This gives
+  demo apps and host UIs a stable, storage-free way to render available
+  providers, auth modes, generated operations, and maturity metadata.
 
   Provider packages self-register their provider module with application env
   `:jido_connect_providers`. Host apps can install only the provider packages
@@ -21,20 +22,21 @@ defmodule Jido.Connect.Catalog do
     DiscoveryResult,
     Entry,
     Filter,
+    Item,
+    ItemLookup,
+    ItemSearchResult,
     Manifest,
     Pack,
     Ranker,
     ReviewedDescriptor,
     Search,
     Serializer,
-    ToolDescriber,
     ToolEntry,
-    ToolLookup,
     ToolDescriptor,
     ToolSearchResult
   }
 
-  alias Jido.Connect.{Authorization, Connection, Context, Error}
+  alias Jido.Connect.{Authorization, Callback, Connection, Context, Error}
   alias Jido.Connect.Provider
   alias Jido.Connect.Jido.ToolAvailability
 
@@ -63,34 +65,35 @@ defmodule Jido.Connect.Catalog do
   end
 
   def reviewed_descriptors(integration_modules, pack) when is_list(integration_modules) do
-    with :ok <- require_exact_modules(integration_modules),
-         {:ok, pack} <- Pack.resolve_exact(pack),
-         {:ok, tools} <- exact_tool_entries(integration_modules),
-         :ok <- Pack.validate_reviewed_tools(pack, tools),
-         {:ok, tools} <- select_reviewed_actions(tools, pack) do
-      tools
-      |> Enum.reduce_while({:ok, []}, fn tool, {:ok, descriptors} ->
-        case ToolDescriber.describe(tool) do
-          {:ok, descriptor} ->
-            {:cont, {:ok, [ReviewedDescriptor.project(descriptor, pack) | descriptors]}}
-
-          {:error, _error} = error ->
-            {:halt, error}
-        end
-      end)
-      |> then(fn
-        {:ok, descriptors} -> {:ok, Enum.reverse(descriptors)}
-        {:error, _error} = error -> error
-      end)
+    case reviewed_items(integration_modules, pack) do
+      {:ok, items} -> {:ok, Enum.map(items, &ToolDescriptor.from_item/1)}
+      {:error, _error} = error -> error
     end
   end
 
   def reviewed_descriptors(integration_modules, _pack) do
-    {:error,
-     Error.validation("Reviewed catalog requires a list of exact integration modules",
-       reason: :invalid_reviewed_modules,
-       subject: integration_modules
-     )}
+    invalid_reviewed_modules(integration_modules)
+  end
+
+  @doc "Returns canonical reviewed action items for exact modules and one supplied pack."
+  @spec reviewed_items(module() | [module()], Pack.t() | map()) ::
+          {:ok, [Item.t()]} | {:error, Error.error()}
+  def reviewed_items(integration_module, pack) when is_atom(integration_module) do
+    reviewed_items([integration_module], pack)
+  end
+
+  def reviewed_items(integration_modules, pack) when is_list(integration_modules) do
+    with :ok <- require_exact_modules(integration_modules),
+         {:ok, pack} <- Pack.resolve_exact(pack),
+         {:ok, items} <- exact_items(integration_modules),
+         :ok <- Pack.validate_reviewed_items(pack, items),
+         {:ok, items} <- select_reviewed_actions(items, pack) do
+      {:ok, Enum.map(items, &ReviewedDescriptor.project_item(&1, pack))}
+    end
+  end
+
+  def reviewed_items(integration_modules, _pack) do
+    invalid_reviewed_modules(integration_modules)
   end
 
   @spec configured_modules() :: [module()]
@@ -111,22 +114,30 @@ defmodule Jido.Connect.Catalog do
   @spec filter([Entry.t()], keyword()) :: [Entry.t()]
   defdelegate filter(entries, opts), to: Filter, as: :entries
 
-  @doc "Returns a flattened catalog of actions and triggers across discovered providers."
-  @spec tools(keyword()) :: [ToolEntry.t()]
-  def tools(opts \\ []) do
+  @doc "Returns canonical catalog items across discovered providers."
+  @spec items(keyword() | map()) :: [Item.t()]
+  def items(opts \\ []) do
     opts = normalize_opts(opts)
 
     case Pack.resolve(Keyword.get(opts, :pack), opts) do
       {:ok, pack} ->
         opts
         |> Pack.apply_filters(pack)
-        |> tool_entries()
-        |> Pack.filter_tools(pack)
-        |> Search.tools(Keyword.get(opts, :query, Keyword.get(opts, :q)))
+        |> item_entries()
+        |> Pack.filter_items(pack)
+        |> Search.items(Keyword.get(opts, :query, Keyword.get(opts, :q)))
 
       {:error, _error} ->
         []
     end
+  end
+
+  @doc "Returns legacy tool entries adapted from canonical catalog items."
+  @spec tools(keyword()) :: [ToolEntry.t()]
+  def tools(opts \\ []) do
+    opts
+    |> items()
+    |> Enum.map(&ToolEntry.from_item/1)
   end
 
   @doc """
@@ -144,91 +155,114 @@ defmodule Jido.Connect.Catalog do
     connection = connection_from_opts(opts)
 
     opts
-    |> tools()
-    |> Enum.map(fn tool ->
-      catalog_tool_availability(tool, opts, connection, allowed_actions, allowed_triggers)
+    |> items()
+    |> Enum.map(fn item ->
+      catalog_tool_availability(item, opts, connection, allowed_actions, allowed_triggers)
     end)
   end
 
-  @doc """
-  Projects generated connector action modules into `Jido.Action.Catalog`.
-
-  `Jido.Action.Catalog` landed after the currently published `jido_action`
-  2.2.1. Until a Hex release includes it, this returns a config error instead
-  of requiring a git dependency.
-  """
-  @spec action_catalog(keyword() | map()) :: {:ok, struct()} | {:error, Error.error()}
-  def action_catalog(opts \\ []) do
-    opts = normalize_opts(opts)
-    catalog_module = Jido.Action.Catalog
-
-    case Code.ensure_loaded(catalog_module) do
-      {:module, module} ->
-        build_action_catalog(module, opts)
-
-      {:error, reason} ->
-        {:error,
-         Error.config("Jido.Action.Catalog is not available",
-           key: :jido_action_catalog,
-           details: %{dependency: :jido_action, reason: reason}
-         )}
-    end
-  end
-
-  @doc "Returns ranked tool search results across discovered providers."
-  @spec search_tools(String.t() | nil, keyword() | map()) ::
-          [ToolSearchResult.t()] | {:error, Jido.Connect.Error.error()}
-  def search_tools(query, opts \\ []) do
+  @doc "Returns ranked canonical item search results across discovered providers."
+  @spec search_items(String.t() | nil, keyword() | map()) ::
+          [ItemSearchResult.t()] | {:error, Error.error()}
+  def search_items(query, opts \\ []) do
     opts = normalize_opts(opts)
 
     with {:ok, pack} <- Pack.resolve(Keyword.get(opts, :pack), opts) do
       opts
       |> Keyword.drop([:query, :q, :ranker])
       |> Pack.apply_filters(pack)
-      |> tool_entries()
-      |> Pack.filter_tools(pack)
-      |> Search.ranked_tools(query)
+      |> item_entries()
+      |> Pack.filter_items(pack)
+      |> Search.ranked_items(query)
       |> Ranker.apply(query, Keyword.get(opts, :ranker))
       |> Pack.filter_search_results(pack)
     end
   end
 
-  @doc "Looks up one catalog tool by id, `{provider, id}`, or `%ToolEntry{}`."
-  @spec lookup_tool(term(), keyword() | map()) ::
-          {:ok, ToolEntry.t()} | {:error, Jido.Connect.Error.error()}
-  def lookup_tool(tool_ref, opts \\ []) do
+  @doc "Returns legacy ranked tool results adapted from canonical item results."
+  @spec search_tools(String.t() | nil, keyword() | map()) ::
+          [ToolSearchResult.t()] | {:error, Jido.Connect.Error.error()}
+  def search_tools(query, opts \\ []) do
+    case search_items(query, opts) do
+      results when is_list(results) ->
+        Enum.map(results, &ToolSearchResult.from_item_search_result/1)
+
+      {:error, _error} = error ->
+        compatibility_tool_error(error)
+    end
+  end
+
+  @doc "Looks up one canonical item by ref, id, provider tuple, or `%Item{}`."
+  @spec lookup_item(term(), keyword() | map()) :: {:ok, Item.t()} | {:error, Error.error()}
+  def lookup_item(item_ref, opts \\ []) do
     opts = normalize_opts(opts)
 
     with {:ok, pack} <- Pack.resolve(Keyword.get(opts, :pack), opts),
-         {:ok, tool} <-
+         {:ok, item} <-
            opts
            |> Keyword.drop([:query, :q, :ranker])
            |> Pack.apply_filters(pack)
-           |> tool_entries()
-           |> ToolLookup.lookup(tool_ref),
-         :ok <- Pack.require_tool_allowed(pack, tool) do
-      {:ok, tool}
+           |> item_entries()
+           |> ItemLookup.lookup(item_ref),
+         :ok <- Pack.require_item_allowed(pack, item) do
+      {:ok, item}
     end
   end
 
-  @doc "Returns a schema-rich description for one catalog tool."
+  @doc "Looks up one legacy tool entry through the canonical item catalog."
+  @spec lookup_tool(term(), keyword() | map()) ::
+          {:ok, ToolEntry.t()} | {:error, Jido.Connect.Error.error()}
+  def lookup_tool(tool_ref, opts \\ []) do
+    case lookup_item(compatibility_item_ref(tool_ref), opts) do
+      {:ok, item} -> {:ok, ToolEntry.from_item(item)}
+      {:error, _error} = error -> compatibility_tool_error(error)
+    end
+  end
+
+  @doc "Returns the schema-rich canonical item for one operation."
+  @spec describe_item(term(), keyword() | map()) :: {:ok, Item.t()} | {:error, Error.error()}
+  def describe_item(item_ref, opts \\ []), do: lookup_item(item_ref, opts)
+
+  @doc "Returns a legacy tool descriptor adapted from a canonical item."
   @spec describe_tool(term(), keyword() | map()) ::
           {:ok, ToolDescriptor.t()} | {:error, Jido.Connect.Error.error()}
   def describe_tool(tool_ref, opts \\ []) do
-    with {:ok, tool} <- lookup_tool(tool_ref, opts) do
-      ToolDescriber.describe(tool)
+    case describe_item(tool_ref, opts) do
+      {:ok, item} -> {:ok, ToolDescriptor.from_item(item)}
+      {:error, _error} = error -> compatibility_tool_error(error)
     end
   end
 
-  @doc "Invokes an action catalog tool through the core runtime boundary."
+  @doc "Invokes a canonical action item through the core runtime boundary."
+  @spec call_item(term(), map(), keyword() | map()) ::
+          {:ok, map()} | {:error, Error.error()}
+  def call_item(item_ref, input, opts \\ [])
+
+  def call_item(item_ref, input, opts) when is_map(input) do
+    with {:ok, item} <- lookup_item(item_ref, call_lookup_opts(opts)),
+         :ok <- require_callable(item, :item) do
+      Jido.Connect.invoke(item.integration_module, item.id, input, opts)
+    end
+  end
+
+  def call_item(item_ref, input, _opts) do
+    {:error,
+     Error.validation("Invalid catalog item invocation",
+       reason: :invalid_item_invocation,
+       subject: item_ref,
+       details: %{input_type: type_name(input)}
+     )}
+  end
+
+  @doc "Invokes a legacy tool through the canonical item catalog."
   @spec call_tool(term(), map(), keyword() | map()) ::
           {:ok, map()} | {:error, Jido.Connect.Error.error()}
   def call_tool(tool_ref, input, opts \\ [])
 
   def call_tool(tool_ref, input, opts) when is_map(input) do
-    with {:ok, tool} <- lookup_tool(tool_ref, call_lookup_opts(opts)),
-         :ok <- require_callable(tool) do
-      Jido.Connect.invoke(tool.integration_module, tool.id, input, opts)
+    case call_item(tool_ref, input, opts) do
+      {:error, _error} = error -> compatibility_tool_error(error)
+      result -> result
     end
   end
 
@@ -243,6 +277,8 @@ defmodule Jido.Connect.Catalog do
 
   @spec to_map(
           Entry.t()
+          | Item.t()
+          | ItemSearchResult.t()
           | Manifest.t()
           | Pack.t()
           | ToolEntry.t()
@@ -252,13 +288,32 @@ defmodule Jido.Connect.Catalog do
           map()
   defdelegate to_map(entry_or_tool), to: Serializer
 
-  defp tool_entries(opts) do
+  defp item_entries(opts) do
     provider_opts = Keyword.drop(opts, [:query, :q, :type, :risk, :confirmation, :pack, :packs])
 
     provider_opts
     |> discover()
-    |> Enum.flat_map(&Builder.tool_entries/1)
-    |> Filter.tool_entries(opts)
+    |> Enum.flat_map(&items_for_entry/1)
+    |> Filter.items(opts)
+  end
+
+  defp items_for_entry(%Entry{} = entry) do
+    with {:ok, spec} <- Provider.spec(entry.module),
+         {:ok, items} <-
+           Callback.run(
+             fn ->
+               Builder.items_from_spec(spec, entry.module, projection(entry.module),
+                 status: entry.status,
+                 version: entry.version
+               )
+             end,
+             phase: :catalog_item_projection,
+             details: %{module: entry.module}
+           ) do
+      items
+    else
+      _error -> []
+    end
   end
 
   defp require_exact_modules([]) do
@@ -280,21 +335,28 @@ defmodule Jido.Connect.Catalog do
     end
   end
 
-  defp exact_tool_entries(integration_modules) do
+  defp exact_items(integration_modules) do
     integration_modules
     |> Enum.uniq()
-    |> Enum.reduce_while({:ok, []}, fn integration_module, {:ok, tools} ->
-      with {:ok, spec} <- Provider.spec(integration_module) do
-        entry = Builder.entry_from_spec(spec, integration_module, nil)
-        {:cont, {:ok, tools ++ Builder.tool_entries(entry)}}
+    |> Enum.reduce_while({:ok, []}, fn integration_module, {:ok, items} ->
+      with {:ok, spec} <- Provider.spec(integration_module),
+           {:ok, projected} <-
+             Callback.run(
+               fn ->
+                 Builder.items_from_spec(spec, integration_module, projection(integration_module))
+               end,
+               phase: :reviewed_catalog_item_projection,
+               details: %{module: integration_module}
+             ) do
+        {:cont, {:ok, items ++ projected}}
       else
         {:error, _error} = error -> {:halt, error}
       end
     end)
   end
 
-  defp select_reviewed_actions(tools, pack) do
-    selected = Pack.filter_tools(tools, pack)
+  defp select_reviewed_actions(items, pack) do
+    selected = Pack.filter_items(items, pack)
 
     with :ok <- reject_selected_triggers(selected, pack),
          :ok <- reject_generic_mcp_actions(selected, pack) do
@@ -332,18 +394,18 @@ defmodule Jido.Connect.Catalog do
     end
   end
 
-  defp generic_mcp_bridge_action?(%ToolEntry{id: id}) do
+  defp generic_mcp_bridge_action?(%Item{id: id}) do
     id in ["mcp.tools.list", "mcp.tools.call", "mcp.tool.call"]
   end
 
-  defp require_callable(%ToolEntry{type: :action}), do: :ok
+  defp require_callable(%Item{type: :action}, :item), do: :ok
 
-  defp require_callable(%ToolEntry{} = tool) do
+  defp require_callable(%Item{} = item, :item) do
     {:error,
-     Jido.Connect.Error.validation("Catalog tool is not callable through call_tool/4",
+     Error.validation("Catalog item is not callable through call_item/4",
        reason: :trigger_not_callable,
-       subject: tool.id,
-       details: %{provider: tool.provider, type: tool.type}
+       subject: item.ref,
+       details: %{provider: item.provider, type: item.type, id: item.id}
      )}
   end
 
@@ -352,7 +414,7 @@ defmodule Jido.Connect.Catalog do
   defp call_lookup_opts(_opts), do: []
 
   defp catalog_tool_availability(
-         %ToolEntry{} = tool,
+         %Item{} = tool,
          opts,
          connection,
          allowed_actions,
@@ -416,7 +478,7 @@ defmodule Jido.Connect.Catalog do
     end
   end
 
-  defp operation_for_tool(%ToolEntry{
+  defp operation_for_tool(%Item{
          integration_module: integration_module,
          type: :action,
          id: id
@@ -435,7 +497,7 @@ defmodule Jido.Connect.Catalog do
     end
   end
 
-  defp operation_for_tool(%ToolEntry{
+  defp operation_for_tool(%Item{
          integration_module: integration_module,
          type: :trigger,
          id: id
@@ -466,7 +528,7 @@ defmodule Jido.Connect.Catalog do
     |> ToolAvailability.new!()
   end
 
-  defp input_for_tool(%ToolEntry{} = tool, opts) do
+  defp input_for_tool(%Item{} = tool, opts) do
     inputs = Keyword.get(opts, :inputs, %{})
 
     Map.get(inputs, tool.id) ||
@@ -483,14 +545,14 @@ defmodule Jido.Connect.Catalog do
   defp context_connection(_context), do: nil
 
   defp disabled_by_allowed_set?(
-         %ToolEntry{type: :action, id: id},
+         %Item{type: :action, id: id},
          allowed_actions,
          _allowed_triggers
        ),
        do: allowed_actions && not MapSet.member?(allowed_actions, id)
 
   defp disabled_by_allowed_set?(
-         %ToolEntry{type: :trigger, id: id},
+         %Item{type: :trigger, id: id},
          _allowed_actions,
          allowed_triggers
        ),
@@ -504,91 +566,50 @@ defmodule Jido.Connect.Catalog do
     end
   end
 
-  defp build_action_catalog(catalog_module, opts) do
-    attrs = %{
-      id: Keyword.get(opts, :id, "jido-connect-actions"),
-      name: Keyword.get(opts, :name, "Jido Connect Actions"),
-      description:
-        Keyword.get(
-          opts,
-          :description,
-          "Generated Jido actions exposed by installed Jido Connect providers."
-        ),
-      metadata: Keyword.get(opts, :metadata, %{})
-    }
+  defp invalid_reviewed_modules(integration_modules) do
+    {:error,
+     Error.validation("Reviewed catalog requires a list of exact integration modules",
+       reason: :invalid_reviewed_modules,
+       subject: integration_modules
+     )}
+  end
 
-    with {:ok, catalog} <- apply(catalog_module, :new, [attrs]) do
-      opts
-      |> Keyword.put(:type, :action)
-      |> tools()
-      |> Enum.filter(&generated_action_module?/1)
-      |> Enum.reduce_while({:ok, catalog}, fn tool, {:ok, acc} ->
-        case apply(catalog_module, :register, [acc, tool.module, action_catalog_overrides(tool)]) do
-          {:ok, updated} -> {:cont, {:ok, updated}}
-          {:error, _error} = error -> {:halt, error}
-        end
-      end)
+  defp projection(integration_module) do
+    if function_exported?(integration_module, :jido_projection, 0) do
+      integration_module.jido_projection()
     end
   end
 
-  defp generated_action_module?(%ToolEntry{module: module}),
-    do: is_atom(module) and not is_nil(module)
+  defp compatibility_item_ref(%ToolEntry{} = tool),
+    do: {tool.provider, tool.type, tool.id}
 
-  defp action_catalog_overrides(%ToolEntry{} = tool) do
-    %{
-      id: tool.id,
-      title: tool.label,
-      description: tool.description || tool.label,
-      summary: tool.description || tool.label,
-      namespace: to_string(tool.provider),
-      package: maybe_to_string(tool.package),
-      category: maybe_to_string(tool.category),
-      tags: action_catalog_tags(tool),
-      capabilities: action_catalog_capabilities(tool),
-      visibility: :public,
-      risk: action_catalog_risk(tool.risk),
-      read_only?: tool.risk in [:read, :metadata],
-      requires_confirmation?: tool.confirmation not in [nil, :none],
-      scopes: tool.scopes,
-      metadata: %{
-        provider: tool.provider,
-        provider_name: tool.provider_name,
-        package_version: tool.package_version,
-        integration_module: inspect(tool.integration_module),
-        resource: tool.resource,
-        verb: tool.verb,
-        data_classification: tool.data_classification,
-        tags: tool.tags,
-        auth_profile: tool.auth_profile,
-        auth_profiles: tool.auth_profiles,
-        auth_kinds: tool.auth_kinds,
-        policies: tool.policies,
-        jido_connect_risk: tool.risk,
-        confirmation: tool.confirmation
-      }
-    }
+  defp compatibility_item_ref(tool_ref), do: tool_ref
+
+  defp compatibility_tool_error({:error, %Error.ValidationError{} = error}) do
+    reason =
+      case error.reason do
+        :invalid_item_ref -> :invalid_tool_ref
+        :unknown_item -> :unknown_tool
+        :ambiguous_item -> :ambiguous_tool
+        :item_not_in_pack -> :tool_not_in_pack
+        :invalid_item_invocation -> :invalid_tool_invocation
+        reason -> reason
+      end
+
+    message =
+      case reason do
+        :invalid_tool_ref -> "Invalid catalog tool reference"
+        :unknown_tool -> "Unknown catalog tool"
+        :ambiguous_tool -> "Catalog tool reference is ambiguous"
+        :tool_not_in_pack -> "Catalog tool is not allowed by pack"
+        :invalid_tool_invocation -> "Invalid catalog tool invocation"
+        _other -> error.message
+      end
+
+    {:error, %{error | reason: reason, message: message}}
   end
 
-  defp action_catalog_tags(%ToolEntry{} = tool) do
-    [tool.provider, tool.category, tool.resource, tool.verb | tool.tags]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.map(&to_string/1)
-    |> Enum.uniq()
-  end
-
-  defp action_catalog_capabilities(%ToolEntry{} = tool) do
-    [tool.resource, tool.verb, tool.data_classification]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.map(&to_string/1)
-  end
-
-  defp action_catalog_risk(risk) when risk in [:read, :metadata], do: :low
-  defp action_catalog_risk(risk) when risk in [:write, :external_write], do: :medium
-  defp action_catalog_risk(:destructive), do: :high
-  defp action_catalog_risk(_risk), do: :medium
-
-  defp maybe_to_string(nil), do: nil
-  defp maybe_to_string(value), do: to_string(value)
+  defp compatibility_tool_error(error), do: error
 
   defp normalize_opts(opts) when is_list(opts), do: opts
   defp normalize_opts(opts) when is_map(opts), do: Map.to_list(opts)

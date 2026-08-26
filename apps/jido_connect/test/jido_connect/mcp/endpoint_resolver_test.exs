@@ -4,10 +4,28 @@ defmodule Jido.Connect.MCP.EndpointResolverTest do
   alias Jido.Connect
   alias Jido.Connect.MCP.{EndpointLeaseManager, EndpointResolver, HostEndpoint}
 
-  describe "resolve/1 with registered endpoints" do
+  defmodule StaticClient do
+    @behaviour Jido.Connect.MCP.Client
+
+    def list_tools(_client, _opts), do: {:ok, %{"tools" => []}}
+    def call_tool(_client, _name, _arguments, _opts), do: {:ok, %{"content" => []}}
+  end
+
+  setup do
+    previous = Application.get_env(:jido_connect, :mcp_clients)
+
+    on_exit(fn ->
+      if is_nil(previous),
+        do: Application.delete_env(:jido_connect, :mcp_clients),
+        else: Application.put_env(:jido_connect, :mcp_clients, previous)
+    end)
+
+    :ok
+  end
+
+  describe "resolve/1 with static host clients" do
     setup do
-      register_endpoint!(:weather)
-      on_exit(fn -> unregister_endpoint(:weather) end)
+      register_client!(:weather)
 
       :ok
     end
@@ -47,17 +65,14 @@ defmodule Jido.Connect.MCP.EndpointResolverTest do
 
   describe "resolve/1 with an unknown endpoint" do
     test "any endpoint returns unknown error" do
-      unregister_endpoint(:anything)
-
       assert {:error, %Jido.Connect.Error.ValidationError{reason: :unknown_mcp_endpoint}} =
                EndpointResolver.resolve("anything")
     end
   end
 
-  describe "resolve/1 with another registered endpoint" do
+  describe "resolve/1 with another static host client" do
     setup do
-      register_endpoint!(:fs)
-      on_exit(fn -> unregister_endpoint(:fs) end)
+      register_client!(:fs)
 
       :ok
     end
@@ -74,26 +89,28 @@ defmodule Jido.Connect.MCP.EndpointResolverTest do
 
       internal_a = HostEndpoint.internal_id(context_a.connection)
       internal_b = HostEndpoint.internal_id(context_b.connection)
-      on_exit(fn -> unregister_endpoint(internal_a) end)
-      on_exit(fn -> unregister_endpoint(internal_b) end)
+      on_exit(fn -> EndpointLeaseManager.force_stop(context_a.connection) end)
+      on_exit(fn -> EndpointLeaseManager.force_stop(context_b.connection) end)
 
-      assert {:ok, ^internal_a} =
-               EndpointResolver.resolve("slack", %{
+      assert {:ok, token_a} =
+               EndpointResolver.resolve_lease("slack", %{
                  context: context_a,
                  credential_lease: lease_a
                })
 
-      assert {:ok, ^internal_b} =
-               EndpointResolver.resolve("slack", %{
+      assert {:ok, token_b} =
+               EndpointResolver.resolve_lease("slack", %{
                  context: context_b,
                  credential_lease: lease_b
                })
 
+      assert token_a.endpoint_id == internal_a
+      assert token_b.endpoint_id == internal_b
+      assert token_a.client_ref == {:test_client, "slack-a", 1}
+      assert token_b.client_ref == {:test_client, "slack-b", 1}
       refute internal_a == internal_b
-
-      assert {:ok, endpoint_a} = Jido.MCP.ClientPool.fetch_endpoint(internal_a)
-      assert {:ok, endpoint_b} = Jido.MCP.ClientPool.fetch_endpoint(internal_b)
-      assert endpoint_a.transport != endpoint_b.transport
+      :ok = EndpointLeaseManager.release(token_a)
+      :ok = EndpointLeaseManager.release(token_b)
     end
 
     test "replaces one connection endpoint when its credential material changes" do
@@ -116,8 +133,10 @@ defmodule Jido.Connect.MCP.EndpointResolverTest do
                })
 
       refute old_endpoint_id == new_endpoint_id
-      assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(old_endpoint_id)
-      assert {:ok, _endpoint} = Jido.MCP.ClientPool.fetch_endpoint(new_endpoint_id)
+
+      assert [%{endpoint_id: ^new_endpoint_id, generation: 2, active: 0}] =
+               EndpointLeaseManager.ownership(context.connection)
+
       on_exit(fn -> EndpointLeaseManager.force_stop(context.connection) end)
     end
 
@@ -130,26 +149,27 @@ defmodule Jido.Connect.MCP.EndpointResolverTest do
                  credential_lease: lease
                })
     end
-  end
 
-  defp register_endpoint!(endpoint_id) do
-    {:ok, endpoint} =
-      Jido.MCP.Endpoint.new(endpoint_id, %{
-        transport: {:stdio, [command: "echo"]},
-        client_info: %{name: "jido-connect-mcp-test"}
-      })
+    test "rejects an invalid supplied endpoint with a host-owned client reference" do
+      {context, lease} = host_context("slack-invalid", "token")
+      lease = put_in(lease.fields[:mcp_endpoint][:transport], {:sse, []})
 
-    case Jido.MCP.register_endpoint(endpoint) do
-      {:ok, _endpoint} -> :ok
-      {:error, {:endpoint_already_registered, ^endpoint_id}} -> :ok
+      assert {:error, %Connect.Error.ConfigError{key: :mcp_endpoint}} =
+               EndpointResolver.resolve_lease("slack", %{
+                 context: context,
+                 credential_lease: lease
+               })
     end
   end
 
-  defp unregister_endpoint(endpoint_id) do
-    case Jido.MCP.unregister_endpoint(endpoint_id) do
-      {:ok, _endpoint} -> :ok
-      {:error, :unknown_endpoint} -> :ok
-    end
+  defp register_client!(endpoint_id) do
+    clients = Application.get_env(:jido_connect, :mcp_clients, %{})
+
+    Application.put_env(
+      :jido_connect,
+      :mcp_clients,
+      Map.put(clients, endpoint_id, {StaticClient, endpoint_id})
+    )
   end
 
   defp host_context(connection_id, token, opts \\ []) do
@@ -179,6 +199,9 @@ defmodule Jido.Connect.MCP.EndpointResolverTest do
       Connect.CredentialLease.from_connection!(
         connection,
         %{
+          mcp_client_module: StaticClient,
+          mcp_client_ref:
+            {:test_client, connection_id, Keyword.get(opts, :credential_version, 1)},
           mcp_endpoint: %{
             transport:
               {:streamable_http,

@@ -4,23 +4,18 @@ defmodule Jido.Connect.Catalog.Actions.CallTool do
   use Jido.Action,
     name: "connect_catalog_call",
     description: "Call one Jido Connect catalog action",
-    category: "catalog",
-    tags: ["jido_connect", "catalog", "call"],
-    schema: %{
-      "type" => "object",
-      "required" => ["tool_id", "input"],
-      "properties" => %{
-        "tool_id" => %{"type" => "string"},
-        "provider" => %{"type" => "string"},
-        "input" => %{"type" => "object"},
-        "filters" => %{"type" => "object"},
-        "pack" => %{}
-      }
-    },
-    output_schema: %{
-      "type" => "object",
-      "properties" => %{"result" => %{}}
-    }
+    schema:
+      Zoi.object(
+        %{
+          tool_id: Zoi.string(),
+          provider: Zoi.string() |> Zoi.optional(),
+          input: Zoi.map(),
+          filters: Zoi.map() |> Zoi.optional(),
+          pack: Zoi.any() |> Zoi.optional()
+        },
+        coerce: true
+      ),
+    output_schema: Zoi.object(%{result: Zoi.any()})
 
   alias Jido.Connect.Catalog
   alias Jido.Connect.Catalog.Input

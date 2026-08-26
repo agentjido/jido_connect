@@ -1,12 +1,12 @@
-defmodule Jido.Connect.Catalog.ToolSearchResult do
-  @moduledoc "Ranked catalog tool search result."
+defmodule Jido.Connect.Catalog.ItemSearchResult do
+  @moduledoc "Ranked search result for one canonical catalog item."
 
-  alias Jido.Connect.Catalog.{ItemSearchResult, ToolEntry}
+  alias Jido.Connect.Catalog.Item
 
   @schema Zoi.struct(
             __MODULE__,
             %{
-              tool: ToolEntry.schema(),
+              item: Item.schema(),
               score: Zoi.integer() |> Zoi.default(0),
               matched_fields: Zoi.list(Zoi.atom()) |> Zoi.default([]),
               metadata: Zoi.map() |> Zoi.default(%{})
@@ -21,15 +21,4 @@ defmodule Jido.Connect.Catalog.ToolSearchResult do
   def schema, do: @schema
   def new!(attrs), do: Zoi.parse!(@schema, attrs)
   def new(attrs), do: Zoi.parse(@schema, attrs)
-
-  @doc false
-  @spec from_item_search_result(ItemSearchResult.t()) :: t()
-  def from_item_search_result(%ItemSearchResult{} = result) do
-    new!(%{
-      tool: ToolEntry.from_item(result.item),
-      score: result.score,
-      matched_fields: result.matched_fields,
-      metadata: result.metadata
-    })
-  end
 end

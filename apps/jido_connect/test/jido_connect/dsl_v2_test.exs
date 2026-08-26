@@ -262,8 +262,6 @@ defmodule Jido.Connect.DslV2Test do
     assert [%{id: "v2.item.list", tags: [:inventory, :read_model]}] =
              Integration.jido_connect_manifest().actions
 
-    assert Integration.Actions.ListItems.tags() == ["inventory", "read_model"]
-
     assert Integration.jido_connect_modules() == %{
              actions: [Jido.Connect.DslV2Test.Integration.Actions.ListItems],
              sensors: [Jido.Connect.DslV2Test.Integration.Sensors.ItemCreated],

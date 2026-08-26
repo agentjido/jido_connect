@@ -1,7 +1,22 @@
 # Changelog
 
+## Unreleased
+
 - Add the experimental `jido_connect_things` package for guarded Things Cloud
   Inbox list, create, and update actions.
+
+## 0.9.0 - 2026-08-25
+
+- Make `Jido.Connect.Catalog.Item` the canonical catalog projection and keep
+  the previous catalog paths as compatibility adapters.
+- Move the narrow MCP tool bridge into core `jido_connect` and replace its
+  `jido_mcp` backend with stable ExMCP `1.x`.
+- Preserve connection, lease, scope, policy, confirmation, schema-drift, and
+  uncertain-write controls for MCP operations.
+- Remove the unpublished `jido_connect_mcp` application without a compatibility
+  package.
+- Prepare core `jido_connect` `0.9.0` as a release candidate. Connector package
+  versions remain `0.8.0` until their separate releases.
 
 ## 0.8.0 - 2026-07-21
 

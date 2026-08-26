@@ -4,7 +4,7 @@ defmodule JidoConnectCore.MixProject do
   def project do
     [
       app: :jido_connect,
-      version: "0.8.0",
+      version: "0.9.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -15,6 +15,17 @@ defmodule JidoConnectCore.MixProject do
       package: package(),
       docs: docs(),
       source_url: "https://github.com/agentjido/jido_connect",
+      # ExMCP brings the newest compatible Cowlib release. This package uses
+      # only the ExMCP client and does not publish an MCP or Cowboy server.
+      # Security tests lock the affected call paths. Review these exceptions
+      # by 2026-09-12 or when a fixed Cowlib release is available.
+      hex: [
+        ignore_advisories: [
+          "EEF-CVE-2026-43966",
+          "EEF-CVE-2026-43969",
+          "EEF-CVE-2026-43971"
+        ]
+      ],
       test_coverage: test_coverage(),
       test_ignore_filters: [~r/test\/support\//],
       deps: deps(),
@@ -25,7 +36,9 @@ defmodule JidoConnectCore.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      mod: {Jido.Connect.Application, []},
+      extra_applications: [:logger],
+      env: [jido_connect_providers: [Jido.Connect.MCP]]
     ]
   end
 
@@ -41,12 +54,16 @@ defmodule JidoConnectCore.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jido, "~> 2.3"},
-      {:jido_action, "~> 2.3"},
+      {:jido, github: "agentjido/jido", ref: "9f2aaf874ec2320ef55fd5c18359a6c275dc44b4"},
+      {:jido_action,
+       github: "agentjido/jido_action",
+       ref: "82f3feb8b30c32b17b8f5287cfacde3a76cc07ee",
+       override: true},
       {:jido_signal, "~> 2.2"},
+      {:ex_mcp, "~> 1.0"},
+      {:ex_doc, "~> 0.40", only: :docs, runtime: false},
       {:jason, "~> 1.4"},
       {:req, "~> 0.6"},
-      {:plug, "~> 1.20", only: :test},
       {:sourceror, "~> 1.12", only: [:dev, :test], runtime: false},
       {:splode, "~> 0.3.0"},
       {:spark, "~> 2.7"},
@@ -84,8 +101,13 @@ defmodule JidoConnectCore.MixProject do
   defp docs do
     [
       main: "readme",
-      extras: ["README.md", "CHANGELOG.md", "guides/authoring_connector.md"],
-      source_ref: "v0.8.0"
+      extras: [
+        "README.md",
+        "guides/mcp_bridge.md",
+        "guides/authoring_connector.md",
+        "CHANGELOG.md"
+      ],
+      source_ref: "v0.9.0"
     ]
   end
 

@@ -6,6 +6,8 @@ defmodule Jido.Connect.Catalog.Serializer do
   alias Jido.Connect.Catalog.{
     AuthProfileSummary,
     Entry,
+    Item,
+    ItemSearchResult,
     Manifest,
     Pack,
     Tool,
@@ -16,6 +18,8 @@ defmodule Jido.Connect.Catalog.Serializer do
 
   @spec to_map(
           Entry.t()
+          | Item.t()
+          | ItemSearchResult.t()
           | Manifest.t()
           | Pack.t()
           | ToolEntry.t()
@@ -77,6 +81,65 @@ defmodule Jido.Connect.Catalog.Serializer do
       filters: json_safe(pack.filters),
       allowed_tools: pack.allowed_tools,
       metadata: json_safe(pack.metadata)
+    }
+  end
+
+  def to_map(%Item{} = item) do
+    %{
+      ref: item.ref,
+      provider: item.provider,
+      provider_name: item.provider_name,
+      provider_metadata: json_safe(item.provider_metadata),
+      category: item.category,
+      package: item.package,
+      package_version: item.package_version,
+      integration_module: inspect(item.integration_module),
+      type: item.type,
+      id: item.id,
+      name: item.name,
+      label: item.label,
+      description: item.description,
+      tags: item.tags,
+      module: module_name(item.module),
+      resource: item.resource,
+      verb: item.verb,
+      data_classification: item.data_classification,
+      effect: item.effect,
+      availability: item.availability,
+      auth_profile: item.auth_profile,
+      auth_profiles: item.auth_profiles,
+      auth_kinds: item.auth_kinds,
+      auth: Enum.map(item.auth, &auth_profile_to_map/1),
+      policies: Enum.map(item.policies, &policy_to_map/1),
+      host_policy_required?: item.host_policy_required?,
+      scopes: item.scopes,
+      risk: item.risk,
+      confirmation: item.confirmation,
+      trigger_kind: item.trigger_kind,
+      input: Enum.map(item.input, &field_to_map/1),
+      output: Enum.map(item.output, &field_to_map/1),
+      config: Enum.map(item.config, &field_to_map/1),
+      signal: Enum.map(item.signal, &field_to_map/1),
+      input_json_schema: json_safe(item.input_json_schema),
+      output_json_schema: json_safe(item.output_json_schema),
+      config_json_schema: json_safe(item.config_json_schema),
+      signal_json_schema: json_safe(item.signal_json_schema),
+      schema_digest: item.schema_digest,
+      strict?: item.strict?,
+      provider_idempotency?: item.provider_idempotency?,
+      source: item.source,
+      pack: json_safe(item.pack),
+      reviewed_fingerprint: item.reviewed_fingerprint,
+      metadata: json_safe(item.metadata)
+    }
+  end
+
+  def to_map(%ItemSearchResult{} = result) do
+    %{
+      item: to_map(result.item),
+      score: result.score,
+      matched_fields: result.matched_fields,
+      metadata: json_safe(result.metadata)
     }
   end
 

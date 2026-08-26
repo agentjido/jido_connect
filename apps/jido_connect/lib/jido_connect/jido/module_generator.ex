@@ -19,7 +19,6 @@ defmodule Jido.Connect.Jido.ModuleGenerator do
         use Jido.Action,
           name: unquote(projection.name),
           description: unquote(projection.description),
-          tags: unquote(Macro.escape(Enum.map(projection.tags, &to_string/1))),
           schema: unquote(Macro.escape(projection.input_schema)),
           output_schema: unquote(Macro.escape(projection.output_schema))
 

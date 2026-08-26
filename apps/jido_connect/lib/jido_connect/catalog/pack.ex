@@ -8,7 +8,15 @@ defmodule Jido.Connect.Catalog.Pack do
   """
 
   alias Jido.Connect.{Data, Error, Sanitizer}
-  alias Jido.Connect.Catalog.{ToolEntry, ToolLookup}
+
+  alias Jido.Connect.Catalog.{
+    Item,
+    ItemLookup,
+    ItemSearchResult,
+    ToolEntry,
+    ToolLookup,
+    ToolSearchResult
+  }
 
   @schema Zoi.struct(
             __MODULE__,
@@ -116,6 +124,44 @@ defmodule Jido.Connect.Catalog.Pack do
   end
 
   @doc false
+  @spec validate_reviewed_items(t(), [Item.t()]) :: :ok | {:error, Error.error()}
+  def validate_reviewed_items(%__MODULE__{} = pack, items) do
+    Enum.reduce_while(pack.allowed_tools, :ok, fn item_ref, :ok ->
+      case ItemLookup.lookup(items, item_ref) do
+        {:ok, %Item{type: :action}} ->
+          {:cont, :ok}
+
+        {:ok, %Item{type: :trigger}} ->
+          {:halt,
+           {:error,
+            Error.validation("Reviewed catalog packs cannot select triggers",
+              reason: :trigger_not_executable,
+              subject: item_ref,
+              details: %{pack: pack.id}
+            )}}
+
+        {:error, %Error.ValidationError{reason: :ambiguous_item}} ->
+          {:halt,
+           {:error,
+            Error.validation("Reviewed pack action must identify one exact action",
+              reason: :ambiguous_pack_action,
+              subject: item_ref,
+              details: %{pack: pack.id}
+            )}}
+
+        {:error, _error} ->
+          {:halt,
+           {:error,
+            Error.validation("Reviewed pack action is missing from the supplied integrations",
+              reason: :pack_action_missing,
+              subject: item_ref,
+              details: %{pack: pack.id}
+            )}}
+      end
+    end)
+  end
+
+  @doc false
   def resolve(nil, _opts), do: {:ok, nil}
   def resolve("", _opts), do: {:ok, nil}
   def resolve(%__MODULE__{} = pack, _opts), do: {:ok, normalize_pack(pack)}
@@ -171,10 +217,17 @@ defmodule Jido.Connect.Catalog.Pack do
   end
 
   @doc false
+  def filter_items(items, nil), do: items
+
+  def filter_items(items, %__MODULE__{} = pack) do
+    Enum.filter(items, &item_allowed?(pack, &1))
+  end
+
+  @doc false
   def filter_search_results(results, nil), do: results
 
   def filter_search_results(results, %__MODULE__{} = pack) do
-    Enum.filter(results, &tool_allowed?(pack, &1.tool))
+    Enum.filter(results, &search_result_allowed?(pack, &1))
   end
 
   @doc false
@@ -189,6 +242,22 @@ defmodule Jido.Connect.Catalog.Pack do
          reason: :tool_not_in_pack,
          subject: tool.id,
          details: %{provider: tool.provider, pack: pack.id}
+       )}
+    end
+  end
+
+  @doc false
+  def require_item_allowed(nil, %Item{}), do: :ok
+
+  def require_item_allowed(%__MODULE__{} = pack, %Item{} = item) do
+    if item_allowed?(pack, item) do
+      :ok
+    else
+      {:error,
+       Error.validation("Catalog item is not allowed by pack",
+         reason: :item_not_in_pack,
+         subject: item.ref,
+         details: %{provider: item.provider, type: item.type, id: item.id, pack: pack.id}
        )}
     end
   end
@@ -268,6 +337,22 @@ defmodule Jido.Connect.Catalog.Pack do
       MapSet.member?(allowed, "#{ToolLookup.provider_key(tool.provider)}.#{tool.id}")
   end
 
+  defp item_allowed?(%__MODULE__{allowed_tools: []}, %Item{}), do: true
+
+  defp item_allowed?(%__MODULE__{} = pack, %Item{} = item) do
+    allowed = MapSet.new(pack.allowed_tools)
+
+    MapSet.member?(allowed, ItemLookup.item_id_key(item.id)) or
+      MapSet.member?(allowed, Item.legacy_ref(item)) or
+      MapSet.member?(allowed, item.ref)
+  end
+
+  defp search_result_allowed?(pack, %ItemSearchResult{item: item}),
+    do: item_allowed?(pack, item)
+
+  defp search_result_allowed?(pack, %ToolSearchResult{tool: tool}),
+    do: tool_allowed?(pack, tool)
+
   defp normalize_filter_opts(filters) when is_map(filters) or is_list(filters) do
     Enum.map(filters, fn {key, value} -> {normalize_filter_key(key), value} end)
   end
@@ -305,6 +390,11 @@ defmodule Jido.Connect.Catalog.Pack do
 
   defp allowed_tool_ref({provider, tool_id}),
     do: "#{ToolLookup.provider_key(provider)}.#{ToolLookup.tool_id_key(tool_id)}"
+
+  defp allowed_tool_ref({provider, type, item_id}) when type in [:action, :trigger],
+    do: Item.ref(ItemLookup.provider_key(provider), type, ItemLookup.item_id_key(item_id))
+
+  defp allowed_tool_ref(%Item{} = item), do: item.ref
 
   defp allowed_tool_ref(%ToolEntry{} = tool),
     do: "#{ToolLookup.provider_key(tool.provider)}.#{tool.id}"
