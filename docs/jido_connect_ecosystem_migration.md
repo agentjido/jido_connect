@@ -210,6 +210,39 @@ quality gate, and all 21 demo tests. Hex package builds for core, Trello, and X
 contain no `jido_connect_mcp` dependency. The live application and demo trees
 contain no reference to the removed package.
 
+## Connect Replacement Release Candidate
+
+Core `jido_connect` `0.9.0` is the replacement release candidate. The other 39
+package projects remain at `0.8.0`; X and Trello require core
+`jido_connect` `0.9.x` because they use the new bridge and endpoint type.
+
+The [MCP bridge guide](../apps/jido_connect/guides/mcp_bridge.md) documents
+catalog discovery, tool listing and calls, host policies, scopes, approval,
+schema drift, uncertain writes, endpoint ownership, supported `jido_mcp`
+migration paths, and excluded features. Core package documentation includes
+this guide.
+
+The release dependency audit temporarily accepts Cowlib `2.19.0` advisories
+`EEF-CVE-2026-43966`, `EEF-CVE-2026-43969`, and `EEF-CVE-2026-43971`. ExMCP
+uses the newest compatible Cowlib release. Connect uses the MCP client path and
+does not publish an MCP or Cowboy server. Regression tests confirm that Plug
+rejects the affected header bytes and that Connect and ExMCP do not import the
+two affected Cowlib encoders. Review the exceptions by 2026-09-12 or when a
+fixed Cowlib release is available.
+
+The local demo host uses fixed Bandit `1.12.5`. The demo is not part of the
+core Hex package.
+
+Final candidate checks on 2026-08-25 pass 88 focused catalog, MCP, and security
+tests; 171 core tests with 80.38% coverage; the full 40-application umbrella
+quality gate; 37 Trello tests; 24 X tests; and 21 demo tests. Core documentation
+and the `jido_connect` `0.9.0` Hex package build also pass. The dependency audit
+passes with only the three explained Cowlib exceptions. All direct dependencies
+are current.
+
+The candidate does not publish a package, create a tag, or retire a package.
+Those actions require explicit user approval.
+
 ## Jido MCP Compatibility Baseline
 
 The final active release freezes the present documented surface.

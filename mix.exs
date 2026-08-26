@@ -4,10 +4,21 @@ defmodule JidoConnect.MixProject do
   def project do
     [
       apps_path: "apps",
-      version: "0.8.0",
+      version: "0.9.0",
       start_permanent: Mix.env() == :prod,
       name: "Jido Connect",
       source_url: "https://github.com/agentjido/jido_connect",
+      # ExMCP brings the newest compatible Cowlib release. Core Connect uses
+      # only the ExMCP client and does not publish an MCP or Cowboy server.
+      # Security tests lock the affected call paths. Review these exceptions
+      # by 2026-09-12 or when a fixed Cowlib release is available.
+      hex: [
+        ignore_advisories: [
+          "EEF-CVE-2026-43966",
+          "EEF-CVE-2026-43969",
+          "EEF-CVE-2026-43971"
+        ]
+      ],
       docs: docs(),
       deps: deps(),
       aliases: aliases()
@@ -55,6 +66,7 @@ defmodule JidoConnect.MixProject do
         "LICENSE",
         "usage-rules.md",
         "apps/jido_connect/guides/authoring_connector.md",
+        "apps/jido_connect/guides/mcp_bridge.md",
         "docs/architecture.md",
         "docs/authoring_integrations.md",
         "docs/generated_jido_modules.md",

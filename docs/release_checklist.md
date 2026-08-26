@@ -19,8 +19,8 @@ part of this repository.
    git diff --stat origin/main...
    ```
 
-3. Create and push an annotated safeguard tag before a large branch
-   consolidation.
+3. Confirm that the existing `v0.8.0` safeguard tag is present. Do not create a
+   `v0.9.0` tag until the user approves the release.
 
 ## Package Verification
 
@@ -45,6 +45,29 @@ MIX_ENV=docs mix docs
 mix hex.outdated
 mix hex.audit
 ```
+
+Verify the core MCP replacement and its security regression tests:
+
+```sh
+mix test \
+  apps/jido_connect/test/jido_connect/catalog_test.exs \
+  apps/jido_connect/test/jido_connect/mcp_test.exs \
+  apps/jido_connect/test/jido_connect/mcp
+
+cd apps/jido_connect
+mix quality
+MIX_ENV=docs mix docs
+mix hex.build
+```
+
+Verify that the two MCP-backed connectors use the core bridge:
+
+```sh
+mix test apps/jido_connect_x/test apps/jido_connect_trello/test
+rg 'jido_connect_mcp|Jido\.MCP' apps/*/mix.exs apps/*/lib dev/demo/lib
+```
+
+The final command must return no results.
 
 Each package exposes a local quality alias when you must isolate one app. For
 example:
@@ -90,7 +113,8 @@ The umbrella contains 40 package projects:
   GitHub, GitLab, HubSpot, Intercom, Jira, Linear, Nextcloud, Notion, PostHog,
   Salesforce, Slack, Things, Trello, X, and Zendesk
 
-Confirm that every package has the intended version before release:
+Confirm that core `jido_connect` is `0.9.0`. Connector packages remain at
+`0.8.0` until their separate releases:
 
 ```sh
 rg 'version: "' apps/*/mix.exs
@@ -101,9 +125,11 @@ included in Hex packages.
 
 ## Publishing Notes
 
-Hex publishing is deferred. When publishing starts, publish `jido_connect`
-first. Then publish the shared service packages and provider packages that use
-it. Create the release tag only from the verified commit on `main`.
+Hex publishing is deferred. Do not publish a package or create the `v0.9.0`
+tag without explicit user approval. When publishing starts, publish
+`jido_connect` first. Then publish the shared service packages and provider
+packages that use it. Create the release tag only from the verified commit on
+`main`.
 
 Dependabot must remain enabled for vulnerability alerts, security updates, and
 the update groups in `.github/dependabot.yml`.

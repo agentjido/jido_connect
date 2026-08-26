@@ -40,7 +40,7 @@ defmodule JidoConnectTrello.MixProject do
 
   defp jido_connect_dep do
     if hex_package_task?(),
-      do: {:jido_connect, "~> 0.8"},
+      do: {:jido_connect, "~> 0.9"},
       else: {:jido_connect, in_umbrella: true}
   end
 

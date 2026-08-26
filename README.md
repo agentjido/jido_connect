@@ -7,10 +7,10 @@ The repository is an Elixir umbrella. It contains a small core runtime, shared
 provider foundations, and independent connector packages. A host application
 can install only the connectors that it needs.
 
-> **Release status:** All packages in this repository use version `0.8.0`.
-> The packages are not yet published on Hex. Use local path dependencies for
-> development and evaluation. Release and Hex publishing automation are not yet
-> part of this repository.
+> **Release status:** Core `jido_connect` is a `0.9.0` release candidate. The
+> connector packages remain at `0.8.0`. The packages are not yet published on
+> Hex. Use local path dependencies for development and evaluation. Release and
+> Hex publishing need explicit approval.
 
 ## What Jido Connect Provides
 
@@ -53,13 +53,14 @@ Every connector uses the same main flow:
 6. The connector returns normalized data or a `Jido.Connect.Error`.
 
 For more detail, see [Architecture](docs/architecture.md),
-[Connector Authoring](docs/authoring_integrations.md), and
-[Generated Modules](docs/generated_jido_modules.md).
+[Connector Authoring](docs/authoring_integrations.md),
+[Generated Modules](docs/generated_jido_modules.md), and the
+[MCP Bridge Guide](apps/jido_connect/guides/mcp_bridge.md).
 
 ## Packages
 
-The umbrella contains 40 Mix projects. All projects use the same `0.8.0`
-release version.
+The umbrella contains 40 Mix projects. Core `jido_connect` is at `0.9.0`. The
+connector packages remain at `0.8.0`.
 
 ### Core and shared foundations
 

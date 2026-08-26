@@ -32,7 +32,7 @@ with the canonical form. Every action and trigger must declare `resource`,
 ```elixir
 def deps do
   [
-    {:jido_connect, "~> 0.8"}
+    {:jido_connect, "~> 0.9"}
   ]
 end
 ```
@@ -482,7 +482,7 @@ Jido.Connect.Catalog.search_tools("open issue",
 
 AI-assisted lookup belongs in an optional package, not core. A future
 `jido_connect_ai` package can use `req_llm` to suggest ranked candidate ids and
-reasons, but execution should still go through `Jido.Connect.Catalog.call_tool/4`
+reasons, but execution should still go through `Jido.Connect.Catalog.call_tool/3`
 and the same runtime safety checks.
 
 Host apps can install only the provider packages they need. For example, a

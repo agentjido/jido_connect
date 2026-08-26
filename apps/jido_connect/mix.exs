@@ -4,7 +4,7 @@ defmodule JidoConnectCore.MixProject do
   def project do
     [
       app: :jido_connect,
-      version: "0.8.0",
+      version: "0.9.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
@@ -15,6 +15,17 @@ defmodule JidoConnectCore.MixProject do
       package: package(),
       docs: docs(),
       source_url: "https://github.com/agentjido/jido_connect",
+      # ExMCP brings the newest compatible Cowlib release. This package uses
+      # only the ExMCP client and does not publish an MCP or Cowboy server.
+      # Security tests lock the affected call paths. Review these exceptions
+      # by 2026-09-12 or when a fixed Cowlib release is available.
+      hex: [
+        ignore_advisories: [
+          "EEF-CVE-2026-43966",
+          "EEF-CVE-2026-43969",
+          "EEF-CVE-2026-43971"
+        ]
+      ],
       test_coverage: test_coverage(),
       test_ignore_filters: [~r/test\/support\//],
       deps: deps(),
@@ -47,6 +58,7 @@ defmodule JidoConnectCore.MixProject do
       {:jido_action, "~> 2.3"},
       {:jido_signal, "~> 2.2"},
       {:ex_mcp, "~> 1.0"},
+      {:ex_doc, "~> 0.40", only: :docs, runtime: false},
       {:jason, "~> 1.4"},
       {:req, "~> 0.6"},
       {:sourceror, "~> 1.12", only: [:dev, :test], runtime: false},
@@ -86,8 +98,13 @@ defmodule JidoConnectCore.MixProject do
   defp docs do
     [
       main: "readme",
-      extras: ["README.md", "CHANGELOG.md", "guides/authoring_connector.md"],
-      source_ref: "v0.8.0"
+      extras: [
+        "README.md",
+        "guides/mcp_bridge.md",
+        "guides/authoring_connector.md",
+        "CHANGELOG.md"
+      ],
+      source_ref: "v0.9.0"
     ]
   end
 
