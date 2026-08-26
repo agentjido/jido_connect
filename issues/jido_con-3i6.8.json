@@ -4,14 +4,16 @@
     "jido_con-3i6.7"
   ],
   "blocks": [],
+  "closed_at": "2026-08-26T00:49:44Z",
+  "close_reason": "Prepared the inactive jido_mcp deprecation plan and explicit replacement map, added guard tests, restored the generated changelog policy, updated direct development dependencies, and passed local and PR checks at a9cf7bc. No deprecation, retirement, release, or publication action was taken.",
   "created": "2026-08-25T21:42:28Z",
   "description": "M3 preparation for jido_mcp#52. Prepare formal deprecation documentation and explicit replacements, support-window inputs, repository retention and maintenance policy. Do not publish metadata, deprecate, retire, or set dates that require user approval before the Connect replacement is public.",
   "id": "jido_con-3i6.8",
   "labels": [],
   "parent": "jido_con-3i6",
   "priority": 0,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Prepare later jido_mcp deprecation",
   "type": "task",
-  "updated_at": "2026-08-26T00:31:55Z"
+  "updated_at": "2026-08-26T00:49:44Z"
 }
