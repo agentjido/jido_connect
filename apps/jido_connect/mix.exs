@@ -54,8 +54,11 @@ defmodule JidoConnectCore.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jido, "~> 2.3"},
-      {:jido_action, "~> 2.3"},
+      {:jido, github: "agentjido/jido", ref: "9f2aaf874ec2320ef55fd5c18359a6c275dc44b4"},
+      {:jido_action,
+       github: "agentjido/jido_action",
+       ref: "82f3feb8b30c32b17b8f5287cfacde3a76cc07ee",
+       override: true},
       {:jido_signal, "~> 2.2"},
       {:ex_mcp, "~> 1.0"},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false},

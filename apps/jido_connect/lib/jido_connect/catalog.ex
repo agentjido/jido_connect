@@ -161,31 +161,6 @@ defmodule Jido.Connect.Catalog do
     end)
   end
 
-  @doc """
-  Projects generated connector Action v2 modules into `Jido.Action.Catalog`.
-
-  This is a compatibility adapter. `Catalog.Item` remains the canonical
-  Connect projection. If `Jido.Action.Catalog` is not available, this returns
-  a config error.
-  """
-  @spec action_catalog(keyword() | map()) :: {:ok, struct()} | {:error, Error.error()}
-  def action_catalog(opts \\ []) do
-    opts = normalize_opts(opts)
-    catalog_module = Jido.Action.Catalog
-
-    case Code.ensure_loaded(catalog_module) do
-      {:module, module} ->
-        build_action_catalog(module, opts)
-
-      {:error, reason} ->
-        {:error,
-         Error.config("Jido.Action.Catalog is not available",
-           key: :jido_action_catalog,
-           details: %{dependency: :jido_action, reason: reason}
-         )}
-    end
-  end
-
   @doc "Returns ranked canonical item search results across discovered providers."
   @spec search_items(String.t() | nil, keyword() | map()) ::
           [ItemSearchResult.t()] | {:error, Error.error()}
@@ -590,92 +565,6 @@ defmodule Jido.Connect.Catalog do
       value -> MapSet.new([value])
     end
   end
-
-  defp build_action_catalog(catalog_module, opts) do
-    attrs = %{
-      id: Keyword.get(opts, :id, "jido-connect-actions"),
-      name: Keyword.get(opts, :name, "Jido Connect Actions"),
-      description:
-        Keyword.get(
-          opts,
-          :description,
-          "Generated Jido actions exposed by installed Jido Connect providers."
-        ),
-      metadata: Keyword.get(opts, :metadata, %{})
-    }
-
-    with {:ok, catalog} <- apply(catalog_module, :new, [attrs]) do
-      opts
-      |> Keyword.put(:type, :action)
-      |> items()
-      |> Enum.filter(&generated_action_module?/1)
-      |> Enum.reduce_while({:ok, catalog}, fn tool, {:ok, acc} ->
-        case apply(catalog_module, :register, [acc, tool.module, action_catalog_overrides(tool)]) do
-          {:ok, updated} -> {:cont, {:ok, updated}}
-          {:error, _error} = error -> {:halt, error}
-        end
-      end)
-    end
-  end
-
-  defp generated_action_module?(%Item{module: module}),
-    do: is_atom(module) and not is_nil(module)
-
-  defp action_catalog_overrides(%Item{} = tool) do
-    %{
-      id: tool.id,
-      title: tool.label,
-      description: tool.description || tool.label,
-      summary: tool.description || tool.label,
-      namespace: to_string(tool.provider),
-      package: maybe_to_string(tool.package),
-      category: maybe_to_string(tool.category),
-      tags: action_catalog_tags(tool),
-      capabilities: action_catalog_capabilities(tool),
-      visibility: :public,
-      risk: action_catalog_risk(tool.risk),
-      read_only?: tool.risk in [:read, :metadata],
-      requires_confirmation?: tool.confirmation not in [nil, :none],
-      scopes: tool.scopes,
-      metadata: %{
-        provider: tool.provider,
-        provider_name: tool.provider_name,
-        package_version: tool.package_version,
-        integration_module: inspect(tool.integration_module),
-        resource: tool.resource,
-        verb: tool.verb,
-        data_classification: tool.data_classification,
-        tags: tool.tags,
-        auth_profile: tool.auth_profile,
-        auth_profiles: tool.auth_profiles,
-        auth_kinds: tool.auth_kinds,
-        policies: Enum.map(tool.policies, & &1.id),
-        jido_connect_risk: tool.risk,
-        confirmation: tool.confirmation
-      }
-    }
-  end
-
-  defp action_catalog_tags(%Item{} = tool) do
-    [tool.provider, tool.category, tool.resource, tool.verb | tool.tags]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.map(&to_string/1)
-    |> Enum.uniq()
-  end
-
-  defp action_catalog_capabilities(%Item{} = tool) do
-    [tool.resource, tool.verb, tool.data_classification]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.map(&to_string/1)
-  end
-
-  defp action_catalog_risk(risk) when risk in [:read, :metadata], do: :low
-  defp action_catalog_risk(risk) when risk in [:write, :external_write], do: :medium
-  defp action_catalog_risk(:destructive), do: :high
-  defp action_catalog_risk(_risk), do: :medium
-
-  defp maybe_to_string(nil), do: nil
-  defp maybe_to_string(value), do: to_string(value)
 
   defp invalid_reviewed_modules(integration_modules) do
     {:error,

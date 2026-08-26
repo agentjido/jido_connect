@@ -8,7 +8,11 @@
   internal client contract, host-owned client references, and scoped client
   ownership without an endpoint pool.
 - Make `Jido.Connect.Catalog.Item` the canonical catalog projection while the
-  old tool paths and `action_catalog/1` remain Action v2 adapters.
+  old tool paths remain narrow compatibility adapters.
+- Upgrade generated Actions and catalog Actions to `jido_action`
+  v3, remove the v2-only Action catalog projection, and use temporary exact
+  Jido Action and Jido compatibility commits until their upstream releases
+  land.
 - Remove the unused internal legacy descriptor builder and add direct coverage
   for the supported legacy lookup, search, and pack adapters.
 - Remove the unpublished `jido_connect_mcp` application after its replacement

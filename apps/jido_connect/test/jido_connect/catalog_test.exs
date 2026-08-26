@@ -1,29 +1,3 @@
-unless Code.ensure_loaded?(Jido.Action.Catalog) do
-  defmodule Jido.Action.Catalog do
-    defstruct id: nil, name: nil, description: "", entries: %{}, metadata: %{}
-
-    def new(attrs) when is_map(attrs) do
-      {:ok,
-       %__MODULE__{
-         id: Map.fetch!(attrs, :id),
-         name: Map.get(attrs, :name),
-         description: Map.get(attrs, :description, ""),
-         entries: %{},
-         metadata: Map.get(attrs, :metadata, %{})
-       }}
-    end
-
-    def register(%__MODULE__{} = _catalog, nil, _overrides) do
-      {:error, :invalid_module}
-    end
-
-    def register(%__MODULE__{} = catalog, module, overrides) do
-      entry = Map.merge(%{module: module}, overrides)
-      {:ok, %{catalog | entries: Map.put(catalog.entries, entry.id, entry)}}
-    end
-  end
-end
-
 defmodule Jido.Connect.CatalogTest do
   use ExUnit.Case, async: false
 
@@ -443,24 +417,6 @@ defmodule Jido.Connect.CatalogTest do
              )
   end
 
-  test "action catalog bridge projects generated action modules" do
-    assert {:ok, catalog} = Catalog.action_catalog(modules: [GeneratedIntegration])
-    assert %{entries: %{"generated.item.get" => entry}} = catalog
-    assert entry.module == GeneratedIntegration.Actions.GetItem
-    assert entry.title == "Get generated item"
-    assert entry.namespace == "generated_catalog"
-    assert entry.scopes == ["read"]
-    assert entry.read_only? == true
-    assert entry.metadata.provider == :generated_catalog
-    assert "read_model" in entry.tags
-    assert entry.metadata.package_version == "1.2.3"
-  end
-
-  test "action catalog bridge skips non-generated catalog tools" do
-    assert {:ok, catalog} = Catalog.action_catalog(modules: [CatalogFixtures.Integration])
-    assert catalog.entries == %{}
-  end
-
   test "ranked tool search prefers exact matches and combines with filters" do
     modules = [CatalogFixtures.Integration, CatalogFixtures.OtherIntegration]
 
@@ -735,6 +691,27 @@ defmodule Jido.Connect.CatalogTest do
 
     assert {:error, %Jido.Connect.Error.ValidationError{reason: :invalid_filters}} =
              SearchTools.run(%{"query" => "item", "filters" => "bad"}, action_context)
+  end
+
+  test "catalog actions validate and execute through Jido Action v3" do
+    modules = [CatalogFixtures.Integration]
+
+    action_context = %{
+      config: %{modules: modules},
+      policy: AllowPolicy
+    }
+
+    assert Jido.Agent.Instruction.jido_action_version() == 3
+
+    assert {:ok, %{limit: 1, query: "catalog.item.get"}} =
+             SearchTools.validate_params(%{"query" => "catalog.item.get", "limit" => 1})
+
+    assert {:ok, %{results: [%{tool: %{id: "catalog.item.get"}} | _rest]}} =
+             Jido.Exec.run(
+               SearchTools,
+               %{"query" => "catalog.item.get", "limit" => 1},
+               action_context
+             )
   end
 
   test "catalog plugin exposes exactly search, describe, and call actions" do

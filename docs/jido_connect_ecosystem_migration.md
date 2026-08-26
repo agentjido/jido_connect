@@ -10,7 +10,11 @@ non-Harness migration. The owning issues are
 
 ## Fixed Boundaries
 
-- Jido Action v2 is the current Action contract.
+- Jido Action v3 is the current Connect Action contract. Core Connect
+  temporarily pins the v3 release branch fix for Elixir 1.18 support and the
+  exact Jido compatibility commit from
+  [`jido#324`](https://github.com/agentjido/jido/pull/324). Replace both pins
+  after their upstream releases land.
 - ExMCP owns MCP protocol behavior.
 - Jido Connect owns connector specifications, prepared operations, its
   catalog, connector safety rules, and a narrow MCP bridge.
@@ -25,7 +29,8 @@ non-Harness migration. The owning issues are
 
 This work does not move Jido MCP server publication, dynamic Jido AI proxy
 Actions, or a general endpoint pool into Connect. It does not change Ando,
-ExMCP, or Jido Harness. It does not use Jido Action v3.
+ExMCP, or Jido Harness. Jido Flow remains a consumer-owned composition layer;
+it does not move into Connect.
 
 ## Remote Baseline
 
@@ -85,7 +90,7 @@ narrow adapter or document the changed return shape.
 | Packs | `Catalog.Pack` stores filters and stable provider-qualified tool references |
 | Serialization | `to_map/1` supports entries, manifests, packs, tool entries, search results, and descriptors |
 | Jido runtime | `Catalog.Plugin` publishes search, describe, and call signals |
-| Action v2 adapter | `action_catalog/1` projects generated Action modules into `Jido.Action.Catalog` |
+| Removed Action v2 adapter | The baseline `action_catalog/1` projected generated Action modules into `Jido.Action.Catalog`; Action v3 removes both APIs |
 
 The CLI catalog use case needs four operations: list or search items, describe
 one stable item reference, call one action item, and select items through a
@@ -115,10 +120,10 @@ ambiguity when one provider uses the same ID for an action and a trigger.
 
 The old `tools`, `search_tools`, `lookup_tool`, `describe_tool`, `call_tool`,
 and `reviewed_descriptors` paths keep their prior structs and error reasons as
-compatibility adapters. `Catalog.Plugin` keeps its three Action v2 operations.
-`action_catalog/1` also stays as an Action v2 adapter. Internal search,
-filtering, pack selection, review, lookup, describe, call, availability, and
-Action catalog projection use `Catalog.Item`.
+compatibility adapters. `Catalog.Plugin` keeps its three Action v3 operations.
+The v2-only `action_catalog/1` adapter is removed because Action v3 no longer
+provides `Jido.Action.Catalog`. Internal search, filtering, pack selection,
+review, lookup, describe, call, and availability use `Catalog.Item`.
 
 ## MCP Bridge Compatibility Baseline
 
@@ -150,7 +155,7 @@ backend change remain separate.
 | `EndpointResolver` and `HostEndpoint` | Move to core; keep the temporary Jido MCP endpoint adapter |
 | `Runtime` | Move to core; keep one-list and one-call behavior without a backend change |
 | `SchemaCompatibility`, `ScopeResolver`, `Tool`, and `ToolResult` | Move to core |
-| `Handlers.Actions.ListTools` and `CallTool` | Move to core as the two generated Action v2 handlers |
+| `Handlers.Actions.ListTools` and `CallTool` | Move to core as the two generated Jido Action handlers |
 | `Jido.Connect.MCP.Application` | Merge into the core application supervisor |
 
 All 50 bridge tests move with the code. The `jido_connect_mcp` application has
@@ -195,7 +200,7 @@ from ExMCP and the recorded Bandit advisories from the demo application.
 
 The unpublished `jido_connect_mcp` Mix application is no longer in the
 umbrella. Core `jido_connect` owns the `Jido.Connect.MCP` integration, generated
-Action v2 modules, client lifecycle, and replacement tests. X, Trello, and the
+Action v3 modules, client lifecycle, and replacement tests. X, Trello, and the
 demo now get this namespace only from their normal core dependency. The removal
 also deletes the old package-specific catalog inference. MCP catalog items use
 the core package plus explicit MCP tags and bridge metadata.

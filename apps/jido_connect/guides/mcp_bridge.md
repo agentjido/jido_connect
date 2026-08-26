@@ -1,7 +1,7 @@
 # MCP Tool Bridge
 
 Core `jido_connect` has a narrow MCP client bridge. It uses ExMCP `1.x` for
-protocol behavior. It exposes only these Connect Action v2 operations:
+protocol behavior. It exposes only these Connect Action v3 operations:
 
 - `mcp.tools.list`
 - `mcp.tool.call`
@@ -37,8 +37,9 @@ approval records, and audit records.
   )
 ```
 
-The old tool catalog functions and `action_catalog/1` remain Action v2
-adapters. New code must use catalog items.
+The old tool catalog functions remain narrow compatibility adapters. The
+v2-only `action_catalog/1` adapter was removed. New code must use catalog
+items.
 
 ## Configure a Client
 
@@ -179,7 +180,7 @@ Use this migration map:
 | --- | --- |
 | List tools or call a reviewed tool | Core `Jido.Connect.MCP` |
 | Register an endpoint in a shared pool | A host-supervised client reference or a connection-scoped lease endpoint |
-| Use the two reviewed Jido Actions | Generated Connect Action v2 modules for the two bridge operations |
+| Use the two reviewed Jido Actions | Generated Connect Action v3 modules for the two bridge operations |
 | Use runtime dynamic proxy Actions | Reviewed `Catalog.Item` values, packs, and `call_item/3`; there is no runtime proxy replacement |
 | Use MCP resources, prompts, servers, or direct protocol transports | ExMCP |
 | Run coding-agent process lifecycles | Jido Harness |

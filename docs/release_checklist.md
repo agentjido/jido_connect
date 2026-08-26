@@ -131,5 +131,9 @@ tag without explicit user approval. When publishing starts, publish
 packages that use it. Create the release tag only from the verified commit on
 `main`.
 
+The Action v3 beta branch temporarily uses an overridden Jido Action Git
+dependency and an exact Jido Git commit. Skip the Hex package and publish steps
+until upstream releases replace both pins.
+
 Dependabot must remain enabled for vulnerability alerts, security updates, and
 the update groups in `.github/dependabot.yml`.

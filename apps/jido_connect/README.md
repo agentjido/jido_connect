@@ -37,6 +37,11 @@ def deps do
 end
 ```
 
+The current PR branch keeps the Elixir 1.19 requirement. It temporarily pins
+the Jido Action v3 release branch because `3.0.0-beta.1` has an incorrect
+Elixir 1.20 requirement. It also pins the Jido compatibility changes from PR
+#324. Replace both pins after the next upstream releases include these fixes.
+
 ## MCP Tool Bridge
 
 Core `jido_connect` includes a narrow MCP client bridge with two operations:
@@ -261,10 +266,10 @@ review data only.
 The old `tools/1`, `search_tools/2`, `lookup_tool/2`, `describe_tool/2`,
 `call_tool/3`, and `reviewed_descriptors/2` functions keep their prior return
 types. They are narrow adapters over `Catalog.Item`. The catalog plugin also
-keeps its current Action v2 search, describe, and call contract.
+keeps its search, describe, and call contract as Jido Action v3 modules.
 
-`action_catalog/1` remains an adapter that registers generated Action v2
-modules in `Jido.Action.Catalog`. It is not the canonical Connect catalog.
+The v2-only `action_catalog/1` adapter was removed. Use `items/1`,
+`search_items/2`, and `reviewed_items/2` for Action discovery and selection.
 
 ## Catalog Plugin, Search, And Tool Calling
 

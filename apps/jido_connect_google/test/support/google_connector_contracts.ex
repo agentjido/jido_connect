@@ -50,13 +50,10 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
       assert function_exported?(module, :run, 2)
 
       projection = module.jido_connect_projection()
-      tool = module.to_tool()
-
       assert projection.module == module
       assert projection.action_id in action_ids
       assert module.operation_id() == projection.action_id
       assert module.name() == projection.name
-      assert tool.name == projection.name
     end
 
     for %{module: module, name: name, trigger_id: trigger_id, signal_type: signal_type} <-
