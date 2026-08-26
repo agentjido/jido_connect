@@ -6,6 +6,12 @@
   "description": "Update PR #75 to use jido_action 3.0.0-beta.1 with the temporary Jido compatibility PR pin. Migrate Connect-owned Action definitions and tests, remove the obsolete Jido.Action.Catalog adapter, verify the umbrella, commit, and push. Do not publish packages.",
   "id": "jido_con-f13",
   "labels": [],
+  "comments": [
+    {
+      "text": "Probe evidence: Jido PR #324 at 9f2aaf874ec2320ef55fd5c18359a6c275dc44b4 compiles with jido_action 3.0.0-beta.1. Required Connect changes are Zoi catalog Action schemas, removal of Action metadata options, removal of v2 Action Catalog compatibility, and v2-only test assertions.",
+      "timestamp": "2026-08-26T02:16:47Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Upgrade Jido Connect PR to jido_action v3 beta",
