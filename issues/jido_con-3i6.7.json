@@ -11,9 +11,15 @@
   "id": "jido_con-3i6.7",
   "labels": [],
   "parent": "jido_con-3i6",
+  "comments": [
+    {
+      "text": "Prepared and pushed core jido_connect 0.9.0 replacement candidate at cd4819e6. Added the MCP migration guide, version and release notes, exact temporary Cowlib audit exceptions with 2026-09-12 review date, security regression tests, and Bandit 1.12.5. Removed unused internal ToolDescriber and added direct legacy adapter and ExMCP option-safety coverage. Passed 88 focused tests, 171 core tests at 80.38% coverage, full 40-app mix quality, Trello 37, X 24, demo 21, core docs, Hex build, hex.audit, and hex.outdated. No tag, package, or release was created.",
+      "timestamp": "2026-08-26T00:31:16Z"
+    }
+  ],
   "priority": 0,
   "status": "in_progress",
   "title": "Prepare Jido Connect MCP replacement release",
   "type": "task",
-  "updated_at": "2026-08-25T23:53:30Z"
+  "updated_at": "2026-08-26T00:31:16Z"
 }
