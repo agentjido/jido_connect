@@ -2,6 +2,7 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-08-26T02:34:36Z",
   "created": "2026-08-26T02:16:42Z",
   "description": "Update PR #75 to use jido_action 3.0.0-beta.1 with the temporary Jido compatibility PR pin. Migrate Connect-owned Action definitions and tests, remove the obsolete Jido.Action.Catalog adapter, verify the umbrella, commit, and push. Do not publish packages.",
   "id": "jido_con-f13",
@@ -17,8 +18,8 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Upgrade Jido Connect PR to jido_action v3 beta",
   "type": "task",
-  "updated_at": "2026-08-26T02:34:29Z"
+  "updated_at": "2026-08-26T02:34:36Z"
 }
