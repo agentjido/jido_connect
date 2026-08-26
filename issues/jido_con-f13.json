@@ -10,11 +10,15 @@
     {
       "text": "Probe evidence: Jido PR #324 at 9f2aaf874ec2320ef55fd5c18359a6c275dc44b4 compiles with jido_action 3.0.0-beta.1. Required Connect changes are Zoi catalog Action schemas, removal of Action metadata options, removal of v2 Action Catalog compatibility, and v2-only test assertions.",
       "timestamp": "2026-08-26T02:16:47Z"
+    },
+    {
+      "text": "Implemented Action v3 migration on PR #75. Temporarily pinned jido_action 82f3feb8b30c32b17b8f5287cfacde3a76cc07ee (includes the Elixir ~\u003e 1.18 metadata fix after beta.1) and Jido 9f2aaf874ec2320ef55fd5c18359a6c275dc44b4. Removed the v2 Action catalog adapter and v2 metadata assumptions, converted catalog schemas to Zoi, and added Jido.Exec v3 coverage. Verified mix quality and dev/demo format, compile, and tests on Elixir 1.19.5 / OTP 28.3.",
+      "timestamp": "2026-08-26T02:34:29Z"
     }
   ],
   "priority": 2,
   "status": "in_progress",
   "title": "Upgrade Jido Connect PR to jido_action v3 beta",
   "type": "task",
-  "updated_at": "2026-08-26T02:16:47Z"
+  "updated_at": "2026-08-26T02:34:29Z"
 }
