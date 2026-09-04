@@ -3,7 +3,7 @@ defmodule Jido.Connect.Microsoft.AvailabilityTest do
 
   alias Jido.Connect.Microsoft.Availability
 
-  @expected_areas [:mail, :calendar, :files, :contacts, :tasks, :teams]
+  @expected_areas [:mail, :calendar, :files, :sharepoint, :contacts, :tasks, :teams]
 
   test "exposes all supported Microsoft product areas" do
     assert Availability.ids() == @expected_areas
@@ -62,7 +62,7 @@ defmodule Jido.Connect.Microsoft.AvailabilityTest do
 
   test "fetch returns :error for unknown product areas" do
     assert :error = Availability.fetch(:unknown)
-    assert :error = Availability.fetch(:sharepoint)
+    assert {:ok, %Availability{id: :sharepoint}} = Availability.fetch(:sharepoint)
   end
 
   test "fetch! raises for unknown product areas" do

@@ -56,6 +56,8 @@ defmodule Jido.Connect.MicrosoftOnedrive.Normalizer do
          {:ok, thumbnails} <- normalize_embedded_thumbnails(Data.get(payload, "thumbnails")) do
       %{
         item_id: Data.get(payload, "id"),
+        etag: Data.get(payload, "eTag"),
+        ctag: Data.get(payload, "cTag"),
         name: Data.get(payload, "name"),
         size: normalize_integer(Data.get(payload, "size")),
         web_url: Data.get(payload, "webUrl"),

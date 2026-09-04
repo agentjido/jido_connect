@@ -43,6 +43,47 @@ defmodule Jido.Connect.Microsoft.Connections do
     |> Connection.new()
   end
 
+  @doc "Builds a tenant-owned Microsoft application connection."
+  @spec application_connection(map() | keyword(), keyword()) ::
+          {:ok, Connection.t()} | {:error, term()}
+  def application_connection(opts) when is_list(opts), do: application_connection(%{}, opts)
+
+  def application_connection(attrs, opts) when is_map(attrs) and is_list(opts) do
+    tenant_id = fetch_required!(opts, :tenant_id)
+
+    application_id =
+      Data.get(
+        attrs,
+        "application_id",
+        Data.get(attrs, "client_id", Keyword.get(opts, :application_id))
+      ) ||
+        raise ArgumentError, "Microsoft application connection requires :application_id"
+
+    owner_id = Keyword.get(opts, :owner_id, tenant_id)
+
+    %{
+      id:
+        Keyword.get(
+          opts,
+          :id,
+          "microsoft-application-#{tenant_id}-#{application_id}"
+        ),
+      provider: :microsoft,
+      profile: :application,
+      tenant_id: tenant_id,
+      owner_type: Keyword.get(opts, :owner_type, :tenant),
+      owner_id: to_string(owner_id),
+      subject:
+        %{microsoft_application_id: to_string(application_id)}
+        |> Map.merge(Keyword.get(opts, :subject, %{})),
+      status: Keyword.get(opts, :status, :connected),
+      credential_ref: Keyword.get(opts, :credential_ref),
+      scopes: scopes(attrs, opts, AuthProfiles.fetch!(:application).default_scopes),
+      metadata: metadata(attrs, opts, %{mode: :microsoft_client_credentials})
+    }
+    |> Connection.new()
+  end
+
   defp scopes(attrs, opts, default) do
     attrs
     |> Data.get("scopes", Data.get(attrs, "scope", Keyword.get(opts, :scopes, default)))

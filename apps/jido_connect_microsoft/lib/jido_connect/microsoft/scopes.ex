@@ -26,6 +26,14 @@ defmodule Jido.Connect.Microsoft.Scopes do
       "Files.ReadWrite",
       "Files.ReadWrite.All"
     ],
+    sharepoint: [
+      "Sites.Read.All",
+      "Sites.ReadWrite.All",
+      "Sites.Selected",
+      "Lists.SelectedOperations.Selected",
+      "ListItems.SelectedOperations.Selected",
+      "Files.SelectedOperations.Selected"
+    ],
     contacts: [
       "Contacts.Read",
       "Contacts.ReadWrite"
