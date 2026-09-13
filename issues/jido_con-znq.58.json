@@ -5,11 +5,13 @@
   "created": "2026-09-13T20:05:42Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2d23-7271-a03d-67000b3c156d\n\n7. **P2 — The ngrok task can announce an unrelated tunnel.**  \n   [jido.connect.ngrok.ex:147](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/mix/tasks/jido.connect.ngrok.ex:147) accepts the first HTTPS tunnel from the API. Its fallback can run before the new process logs its own URL. A local test with `--port 4001` announced the tunnel for port 3000; the correct process URL arrived later. [Dev.Ngrok:20](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/dev/ngrok.ex:20) makes the same selection, which affects manifest and demo callers.  \n   **Correction:** Select the requested local target, and reject ambiguous results. The fixed `4040` address alone is a configuration limit; the confirmed defect is accepting an unrelated tunnel.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.58",
-  "labels": [],
+  "labels": [
+    "v3-follow-up"
+  ],
   "parent": "jido_con-znq",
   "priority": 2,
   "status": "open",
   "title": "The ngrok task can announce an unrelated tunnel",
   "type": "bug",
-  "updated_at": "2026-09-13T20:05:42Z"
+  "updated_at": "2026-09-13T21:59:40Z"
 }
