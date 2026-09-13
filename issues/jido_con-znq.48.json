@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
   "created": "2026-09-13T20:05:35Z",
@@ -8,8 +8,8 @@
   "labels": [],
   "parent": "jido_con-znq",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "Tuples and keyword lists bypass key redaction",
   "type": "bug",
-  "updated_at": "2026-09-13T20:05:35Z"
+  "updated_at": "2026-09-13T21:27:49Z"
 }
