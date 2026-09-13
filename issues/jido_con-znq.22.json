@@ -5,11 +5,13 @@
   "created": "2026-09-13T20:05:18Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-210c-79f0-9e9f-669bbeed6dfc\n\n6. **P2 — Pack serialization fails for supported tuple references.**  \n   [serializer.ex:82](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/catalog/serializer.ex:82) copies `allowed_tools` without normalization. A valid pack built with `[{:catalog, \"catalog.item.get\"}]` raises `Protocol.UndefinedError` when `Catalog.to_map/1` output is passed to Jason. Normalize references to stable strings before serialization. Converting tuples to JSON arrays alone would not preserve the accepted reference format.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.22",
-  "labels": [],
+  "labels": [
+    "v3-follow-up"
+  ],
   "parent": "jido_con-znq",
   "priority": 2,
   "status": "open",
   "title": "Pack serialization fails for supported tuple references",
   "type": "bug",
-  "updated_at": "2026-09-13T20:05:18Z"
+  "updated_at": "2026-09-13T21:59:27Z"
 }
