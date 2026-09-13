@@ -5,11 +5,13 @@
   "created": "2026-09-13T20:05:24Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: design improvement.\n\nSource task: 01a09c57-236c-7ba3-a07a-8bbe84647d97\n\n- **P3 — State the credential revision requirement clearly.** The [lease hash](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/runtime/execution_snapshot.ex:45) includes public identity but excludes credential values. Document that a credential change must also change a bound public revision. Keep secrets outside the snapshot.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.31",
-  "labels": [],
+  "labels": [
+    "v3-follow-up"
+  ],
   "parent": "jido_con-znq",
   "priority": 3,
   "status": "open",
   "title": "State the credential revision requirement clearly",
   "type": "task",
-  "updated_at": "2026-09-13T20:05:24Z"
+  "updated_at": "2026-09-13T21:59:47Z"
 }
