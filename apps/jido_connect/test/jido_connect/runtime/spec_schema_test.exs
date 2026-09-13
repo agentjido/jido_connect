@@ -300,6 +300,49 @@ defmodule Jido.Connect.Runtime.SpecSchemaTest do
     end
   end
 
+  test "numeric enum limits and JSON Schema types agree" do
+    fields = [
+      Connect.Field.new!(%{
+        name: :count,
+        type: :integer,
+        minimum: 2,
+        maximum: 3,
+        enum: [2, 3]
+      }),
+      Connect.Field.new!(%{
+        name: :ratio,
+        type: :number,
+        minimum: 1.0,
+        maximum: 3.0,
+        enum: [1.5, 2.5]
+      })
+    ]
+
+    schema = Connect.zoi_schema_from_fields(fields)
+
+    assert {:ok, %{count: 2, ratio: 1.5}} = Zoi.parse(schema, %{count: 2, ratio: 1.5})
+    assert {:error, _} = Zoi.parse(schema, %{count: 1, ratio: 1.5})
+    assert {:error, _} = Zoi.parse(schema, %{count: 2, ratio: 1.0})
+    assert {:error, _} = Zoi.parse(schema, %{count: "2", ratio: 1.5})
+
+    assert %{
+             "properties" => %{
+               "count" => %{
+                 "type" => "integer",
+                 "enum" => [2, 3],
+                 "minimum" => 2,
+                 "maximum" => 3
+               },
+               "ratio" => %{
+                 "type" => "number",
+                 "enum" => [1.5, 2.5],
+                 "minimum" => 1.0,
+                 "maximum" => 3.0
+               }
+             }
+           } = Connect.Schema.to_json_schema(schema)
+  end
+
   test "field schemas enforce common limits and emit strict JSON Schema" do
     schema =
       Connect.zoi_schema_from_fields([

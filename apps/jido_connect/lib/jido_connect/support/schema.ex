@@ -7,6 +7,8 @@ defmodule Jido.Connect.Schema do
   def zoi_schema_from_fields(fields) when is_list(fields) do
     validate_unique_fields!(fields)
 
+    # Keep enum values for JSON Schema. Zoi.one_of/2 enforces the base type but
+    # does not export its allowed values.
     enum_values =
       fields
       |> Enum.filter(&is_list(&1.enum))
@@ -113,6 +115,7 @@ defmodule Jido.Connect.Schema do
 
   defp maybe_enum(schema, %Field{type: {:array, _}}), do: schema
   defp maybe_enum(schema, %Field{enum: nil}), do: schema
+  # Zoi.enum/1 can ignore base limits and export numeric values as strings.
   defp maybe_enum(schema, %Field{enum: values}), do: Zoi.one_of(schema, values)
 
   defp maybe_minimum(schema, %Field{minimum: nil}), do: schema
