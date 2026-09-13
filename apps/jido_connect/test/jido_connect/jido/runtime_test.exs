@@ -172,9 +172,19 @@ defmodule Jido.Connect.Jido.RuntimeTest do
               phase: :webhook_runtime,
               details: %{
                 trigger_id: "demo.repo.changed",
-                runtime_mode: :metadata_only
+                runtime_mode: :metadata_only,
+                event_type: :atom
               }
             }} = Connect.JidoSensorRuntime.handle_event(webhook, :anything, :state)
+
+    secret_event = %{access_token: "REVIEW_SENTINEL", payload: %{value: 1}}
+
+    assert {:error, %Connect.Error.ExecutionError{details: details} = error} =
+             Connect.JidoSensorRuntime.handle_event(webhook, secret_event, :state)
+
+    assert details.event_type == :map
+    refute Map.has_key?(details, :event)
+    refute inspect(error) =~ "REVIEW_SENTINEL"
   end
 
   test "plugin runtime filters subscriptions and availability" do

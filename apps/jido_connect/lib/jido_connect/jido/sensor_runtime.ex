@@ -60,7 +60,7 @@ defmodule Jido.Connect.JidoSensorRuntime do
          trigger_id: projection.trigger_id,
          kind: projection.kind,
          runtime_mode: projection.runtime_mode,
-         event: inspect(event)
+         event_type: event_type(event)
        }
      )}
   end
@@ -77,4 +77,13 @@ defmodule Jido.Connect.JidoSensorRuntime do
 
   defp context_value(context, key) when is_map(context), do: Map.get(context, key)
   defp context_value(_context, _key), do: nil
+
+  defp event_type(event) when is_struct(event), do: :struct
+  defp event_type(event) when is_map(event), do: :map
+  defp event_type(event) when is_tuple(event), do: :tuple
+  defp event_type(event) when is_list(event), do: :list
+  defp event_type(event) when is_atom(event), do: :atom
+  defp event_type(event) when is_binary(event), do: :binary
+  defp event_type(event) when is_number(event), do: :number
+  defp event_type(_event), do: :other
 end
