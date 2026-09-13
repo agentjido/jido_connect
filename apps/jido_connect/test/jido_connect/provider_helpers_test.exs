@@ -199,6 +199,26 @@ defmodule Jido.Connect.ProviderHelpersTest do
     end
   end
 
+  test "HTTP error messages do not copy response content" do
+    for body <- [
+          %{"content" => "private-body-marker"},
+          %{"message" => %{"content" => "private-body-marker"}}
+        ] do
+      assert {:error, error} =
+               Http.provider_error({:ok, %{status: 400, body: body}}, provider: :demo)
+
+      assert error.details.message == "provider returned an error response"
+      refute inspect(Connect.Error.to_map(error)) =~ "private-body-marker"
+    end
+
+    assert {:error, error} =
+             Http.provider_error({:ok, %{status: 400, body: %{"message" => "bad request"}}},
+               provider: :demo
+             )
+
+    assert error.details.message == "bad request"
+  end
+
   test "webhook helpers verify HMACs and decode JSON" do
     body = ~s({"ok":true})
     signature = "sha256=" <> Connect.Security.hmac_sha256_hex("secret", body)
