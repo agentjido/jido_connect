@@ -336,6 +336,30 @@ defmodule Jido.Connect.MCPTest do
     assert :ok = Jido.Connect.MCP.EndpointLeaseManager.force_stop(connection)
   end
 
+  test "a static MCP client reports one uncertain write with the same classification" do
+    clients = Application.get_env(:jido_connect, :mcp_clients, %{})
+
+    Application.put_env(
+      :jido_connect,
+      :mcp_clients,
+      Map.put(clients, :static_write, {UnknownOutcomeClient, self()})
+    )
+
+    assert {:error,
+            %Connect.Error.ProviderError{
+              reason: :mcp_write_uncertain,
+              delivery: :sent_outcome_unknown,
+              mutation?: true
+            }} =
+             Jido.Connect.MCP.Runtime.call_tool(
+               %{endpoint_id: "static_write", tool_name: "write", arguments: %{}, timeout: 1_000},
+               %{}
+             )
+
+    assert_received {:unknown_outcome_attempt, [timeout: 1_000]}
+    refute_received {:unknown_outcome_attempt, _opts}
+  end
+
   test "typed read calls retain lease fences without mutation uncertainty" do
     {context, lease} =
       context_and_lease(

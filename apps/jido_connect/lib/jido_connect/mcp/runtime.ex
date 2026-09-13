@@ -115,6 +115,7 @@ defmodule Jido.Connect.MCP.Runtime do
       [input.tool_name, input.arguments],
       timeout(input)
     )
+    |> classify_write_result(token, false)
   end
 
   defp call_write(token, input) do
@@ -126,18 +127,21 @@ defmodule Jido.Connect.MCP.Runtime do
              timeout(input)
            )
          end) do
-      {:ok, {:error, error}, revoked?} ->
-        if revoked? or uncertain_outcome?(error),
-          do: uncertain_write(token),
-          else: {:error, error}
-
-      {:ok, result, _revoked?} ->
-        result
+      {:ok, result, revoked?} ->
+        classify_write_result(result, token, revoked?)
 
       {:error, error} ->
         {:error, error}
     end
   end
+
+  defp classify_write_result({:error, error}, token, revoked?) do
+    if revoked? or uncertain_outcome?(error),
+      do: uncertain_write(token),
+      else: {:error, error}
+  end
+
+  defp classify_write_result(result, _token, _revoked?), do: result
 
   defp verify_schema(input, opts, token) do
     expected_hash = Map.get(input, :expected_schema_hash)
@@ -359,7 +363,7 @@ defmodule Jido.Connect.MCP.Runtime do
        reason: :mcp_write_uncertain,
        delivery: :sent_outcome_unknown,
        mutation?: true,
-       details: %{endpoint_generation: token.generation}
+       details: maybe_put(%{}, :endpoint_generation, Map.get(token, :generation))
      )}
   end
 
