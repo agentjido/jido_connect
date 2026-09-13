@@ -22,6 +22,18 @@ selected Jido source. Jido v3 is not yet on Hex. Replace its Git reference when
 a suitable package is available; do not return to the abandoned Jido v2/v3
 compatibility PR #324.
 
+## Client release scope
+
+The v3 line includes SharePoint and the full selected MCP client surface:
+tools, resources, templates, prompts, completion, notifications, and connection
+lifecycle. See the [MCP client guide](../apps/jido_connect/guides/mcp_bridge.md).
+ExMCP owns protocol and transports. No `jido_mcp` files were changed.
+
+Managed notifications use MCP 2026-07-28. Legacy notification delivery needs an
+upstream public client API and is tracked in [#81](https://github.com/agentjido/jido_connect/issues/81).
+Legacy tool, resource, and prompt requests remain supported. Host callbacks own
+roots, sampling, elicitation, progress, and log policy.
+
 ## Changes from the old candidate
 
 - Preserve the catalog and MCP migration from PR #75 and current main changes.
@@ -55,8 +67,8 @@ exceptions after each ExMCP or HTTP-stack update and before publication.
 
 Checked locally on Elixir 1.20.3 and OTP 29.0.5:
 
-- Umbrella `mix quality`: passed, 4,072 tests across 40 packages; 36 live tests excluded.
-- Core `mix quality`: passed, 172 tests and 80.37% coverage. The 80% threshold is unchanged.
+- Umbrella `mix quality`: passed, 4,137 tests across 41 packages; 39 live tests excluded.
+- Core `mix quality`: passed, 181 tests and 80.55% coverage. The 80% threshold is unchanged.
 - Demo formatting, compilation with warnings as errors, and tests: passed, 21 tests.
 - `mix hex.audit`: succeeds with the three existing Cowlib exceptions listed above.
 - `git diff --check`: passed.
@@ -71,12 +83,13 @@ OTP 28.3 environment when these commits are pushed.
 
 ## Work after this change
 
-- Verify SharePoint PR #66 against the selected compatibility line.
+- SharePoint PR #66 is integrated on v3 at `74f41c69`.
 - Follow upstream Jido v3 changes with explicit dependency updates and tests.
 - Replace the Jido Git reference when its v3 package is on Hex.
 - Clear the remaining Cowlib findings in #79.
 - Prepare package versions and release notes only when publication is wanted.
-- Keep Jido MCP's v2 maintenance candidate and later deprecation separate.
+- Track legacy notification support in #81.
+- Keep all Jido MCP work separate.
 
 The release branches do not publish packages. The old migration record keeps
 historical evidence; this file records the current v3 dependency set.

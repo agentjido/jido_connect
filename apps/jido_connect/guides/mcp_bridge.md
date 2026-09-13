@@ -254,6 +254,7 @@ alone is insufficient; pass the client reference through a credential lease.
 # Receive {:jido_connect_mcp, session, method, sanitized_params}.
 # After ExMCP reconnects and reads fresh state, receive
 # {:jido_connect_mcp, session, :resync, sanitized_snapshot}.
+# Reconnect status arrives as {:jido_connect_mcp, session, :status, phase}.
 Jido.Connect.MCP.Session.status(session)
 Jido.Connect.MCP.Session.close(session)
 ```
@@ -268,12 +269,15 @@ Sessions use MCP 2026-07-28 notification streams through `ExMCP.Client.listen/3`
 Configure that protocol on the host client or endpoint. Ordinary tools,
 resources, and prompts also work with legacy peers. ExMCP 1.3 does not expose
 legacy uncorrelated list-change/resource-update events through this subscription
-API. Connect does not claim legacy notification delivery.
+API. Connect does not claim legacy notification delivery. Track this gap in
+[#81](https://github.com/agentjido/jido_connect/issues/81).
 
 A session stops when its subscriber or subscription stops, or when its lease
 expires or is revoked. Lease checks run before event delivery and at 100 ms
 intervals. Hosts must fence connections when credentials, scopes, or policy
-change. Monitor the session process to detect closure. Connect releases the
+change. Status reports `:active` or `:reconnecting`. A failed resynchronization open
+sends the safe `:failed` status and closes the session. Monitor the session
+process to detect closure. Connect releases the
 lease and cancels the stream; it does not stop a host-owned client.
 
 ## Connection and Host Callback Contract

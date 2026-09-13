@@ -65,10 +65,9 @@ flowchart LR
     D --> E[Review release readiness]
 ```
 
-PR #75 supplies the initial catalog and MCP migration. Its last commit also
-adopts an early Action v3 API. The v3 line must replace its temporary dependency
-pins and update the generated adapters before it is ready. SharePoint PR #66
-needs verification against the selected line before it lands.
+The v3 line includes the catalog and MCP migration from PR #75, current
+Action v3 adapters, and SharePoint from PR #66. Both PRs are closed. The
+[release plan](v3_release_plan.md) records the current client work and checks.
 
 The old migration plan and PR descriptions that require Action v2 apply to the
 historical implementation. This branch policy governs new v3 work. Jido MCP's

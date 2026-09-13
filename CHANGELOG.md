@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add MCP client resources, templates, prompts, completion, ping, and status.
+- Add authorized modern notification sessions with lease checks, subscriber
+  monitoring, stream cleanup, and sanitized events.
+- Preserve list cursors and search later tool pages during schema checks.
+- Integrate SharePoint on the Action v3 compatibility line.
+
 - Add the experimental `jido_connect_things` package for guarded Things Cloud
   Inbox list, create, and update actions.
 
