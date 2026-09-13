@@ -153,6 +153,35 @@ defmodule Jido.Connect.ProviderHelpersTest do
     assert ProviderResponse.retryable?(not_sent)
   end
 
+  test "HTTP provider errors keep nested retry guidance in sync with action context" do
+    for {mutation?, provider_idempotency?, expected} <- [
+          {false, false, :safe_to_retry},
+          {true, false, :do_not_retry},
+          {true, true, :retry_with_idempotency}
+        ] do
+      action =
+        Jido.Connect.RuntimeFixtures.spec(%{
+          action: %{
+            mutation?: mutation?,
+            risk: if(mutation?, do: :write, else: :read),
+            confirmation: if(mutation?, do: :always, else: :none),
+            provider_idempotency?: provider_idempotency?
+          }
+        }).actions
+        |> hd()
+
+      assert {:error, provider_error} = Http.provider_error({:error, :timeout}, provider: :demo)
+      error = Connect.Error.with_action_context(provider_error, action)
+      public = Connect.Error.to_map(error)
+
+      assert public.retry_guidance == expected
+      assert error.details.response.retry_guidance == expected
+      assert error.details.response.retryable? == public.retryable?
+      assert error.details.response.action_risk == action.risk
+      assert public.details["response"]["retry_guidance"] == Atom.to_string(expected)
+    end
+  end
+
   test "webhook helpers verify HMACs and decode JSON" do
     body = ~s({"ok":true})
     signature = "sha256=" <> Connect.Security.hmac_sha256_hex("secret", body)

@@ -453,12 +453,31 @@ defmodule Jido.Connect.Error do
   @doc false
   @spec with_action_context(ProviderError.t(), Jido.Connect.ActionSpec.t()) :: ProviderError.t()
   def with_action_context(%ProviderError{} = error, %Jido.Connect.ActionSpec{} = action) do
-    %{
+    error = %{
       error
       | action_risk: action.risk,
         mutation?: action.mutation?,
         provider_idempotency?: action.provider_idempotency?
     }
+
+    details =
+      case error.details do
+        %{response: %{} = response} = details ->
+          Map.put(
+            details,
+            :response,
+            Map.merge(response, %{
+              action_risk: action.risk,
+              retryable?: retryable?(error),
+              retry_guidance: retry_guidance(error)
+            })
+          )
+
+        details ->
+          details
+      end
+
+    %{error | details: details}
   end
 
   @doc false
