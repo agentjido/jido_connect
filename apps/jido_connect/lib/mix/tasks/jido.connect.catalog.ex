@@ -43,6 +43,10 @@ defmodule Mix.Tasks.Jido.Connect.Catalog do
         ]
       )
 
+    if Keyword.has_key?(opts, :resource) or Keyword.has_key?(opts, :verb) do
+      Mix.raise("--resource and --verb do not filter provider entries; use Catalog.items/1")
+    end
+
     entries =
       Catalog.discover(
         modules: Keyword.get_values(opts, :module) |> default_modules(),
