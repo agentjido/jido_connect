@@ -989,6 +989,23 @@ defmodule Jido.Connect.CatalogTest do
              )
   end
 
+  test "ranker receives every candidate as a map beyond the sanitizer list limit" do
+    [first | _] = Catalog.search_tools("item", modules: [CatalogFixtures.Integration])
+    results = List.duplicate(first, 60)
+    observer = self()
+
+    ranker = fn _query, candidates ->
+      send(observer, {:ranker_candidates, candidates})
+      []
+    end
+
+    assert length(Catalog.Ranker.apply(results, "item", ranker)) == 60
+    assert_receive {:ranker_candidates, candidates}
+    assert length(candidates) == 60
+    assert Enum.all?(candidates, &is_map/1)
+    assert Enum.all?(candidates, &is_map(&1["tool"]))
+  end
+
   test "ranker failures fall back to deterministic results with diagnostic metadata" do
     modules = [CatalogFixtures.Integration]
 

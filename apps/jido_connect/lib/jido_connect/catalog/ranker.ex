@@ -30,7 +30,7 @@ defmodule Jido.Connect.Catalog.Ranker do
   end
 
   defp call_ranker(ranker, query, candidates) do
-    sanitized_candidates = Sanitizer.sanitize(candidates, :transport)
+    sanitized_candidates = Enum.map(candidates, &Sanitizer.sanitize(&1, :transport))
 
     with {:ok, result} <-
            Callback.run(fn -> invoke_ranker(ranker, query, sanitized_candidates) end,
