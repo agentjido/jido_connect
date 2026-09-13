@@ -2,8 +2,9 @@ defmodule Jido.Connect.PreparedAction do
   @moduledoc """
   A secret-free snapshot of one authorized action before provider execution.
 
-  The host must supply the input, context, credential lease, and binding again
-  during commit. Jido Connect rejects the commit if one of their hashes changes.
+  The host must supply the input, actor context, credential lease, and binding
+  again during commit. Jido Connect rejects the commit if one of their hashes
+  changes. Version 1 dumps lack actor binding and must be prepared again.
   """
 
   @enforce_keys [
@@ -16,6 +17,7 @@ defmodule Jido.Connect.PreparedAction do
     :connection_hash,
     :lease_hash,
     :binding_hash,
+    :actor_hash,
     :risk,
     :confirmation,
     :confirmation_required?,
@@ -30,7 +32,7 @@ defmodule Jido.Connect.PreparedAction do
 
   alias Jido.Connect.{Data, Error}
 
-  @format_version 1
+  @format_version 2
 
   @type t :: %__MODULE__{
           id: String.t(),
@@ -42,6 +44,7 @@ defmodule Jido.Connect.PreparedAction do
           connection_hash: String.t(),
           lease_hash: String.t(),
           binding_hash: String.t(),
+          actor_hash: String.t(),
           risk: atom(),
           confirmation: atom(),
           confirmation_required?: boolean(),
@@ -81,6 +84,7 @@ defmodule Jido.Connect.PreparedAction do
       "connection_hash" => prepared.connection_hash,
       "lease_hash" => prepared.lease_hash,
       "binding_hash" => prepared.binding_hash,
+      "actor_hash" => prepared.actor_hash,
       "risk" => Atom.to_string(prepared.risk),
       "confirmation" => Atom.to_string(prepared.confirmation),
       "confirmation_required" => prepared.confirmation_required?,
@@ -161,7 +165,8 @@ defmodule Jido.Connect.PreparedAction do
       :action_hash,
       :connection_hash,
       :lease_hash,
-      :binding_hash
+      :binding_hash,
+      :actor_hash
     ]
 
     optional = [:execution_id, :idempotency_key]

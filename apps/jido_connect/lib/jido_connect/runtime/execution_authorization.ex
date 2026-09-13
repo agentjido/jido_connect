@@ -51,11 +51,17 @@ defmodule Jido.Connect.ExecutionAuthorization do
     end
   end
 
-  @spec validate(PreparedAction.t(), Context.t(), keyword() | map()) ::
+  @spec validate(PreparedAction.t(), ActionSpec.t(), Context.t(), keyword() | map()) ::
           :ok | {:error, Error.error()}
-  def validate(%PreparedAction{confirmation_required?: false}, %Context{}, _opts), do: :ok
+  def validate(%PreparedAction{} = prepared, %ActionSpec{} = action, %Context{} = context, opts) do
+    if confirmation_required?(action, context) do
+      validate_required(prepared, context, opts)
+    else
+      :ok
+    end
+  end
 
-  def validate(%PreparedAction{} = prepared, %Context{} = context, opts) do
+  defp validate_required(%PreparedAction{} = prepared, %Context{} = context, opts) do
     authorization = option(opts, :execution_authorization)
     validator = option(opts, :authorization_validator)
     validator_context = option(opts, :authorization_context) || %{}

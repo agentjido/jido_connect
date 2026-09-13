@@ -2,6 +2,22 @@ defmodule Jido.Connect.Runtime do
   @moduledoc false
 
   @max_request_timeout_ms 120_000
+  @snapshot_fields [
+    :integration_id,
+    :action_id,
+    :connection_id,
+    :actor_hash,
+    :input_hash,
+    :action_hash,
+    :connection_hash,
+    :lease_hash,
+    :binding_hash,
+    :risk,
+    :confirmation,
+    :confirmation_required?,
+    :execution_id,
+    :idempotency_key
+  ]
 
   alias Jido.Connect.{
     ActionSpec,
@@ -93,6 +109,7 @@ defmodule Jido.Connect.Runtime do
          connection_hash: ExecutionSnapshot.connection_hash(connection),
          lease_hash: ExecutionSnapshot.lease_hash(lease),
          binding_hash: ExecutionSnapshot.hash(get_option(opts, :binding_ref)),
+         actor_hash: ExecutionSnapshot.hash(context.actor),
          risk: action.risk,
          confirmation: action.confirmation,
          confirmation_required?: ExecutionAuthorization.confirmation_required?(action, context),
@@ -123,7 +140,7 @@ defmodule Jido.Connect.Runtime do
              prepared,
              opts
            ),
-         :ok <- ExecutionAuthorization.validate(prepared, context, opts),
+         :ok <- ExecutionAuthorization.validate(prepared, action, context, opts),
          {:ok, output} <-
            run_action_handler(action, parsed_input, %{
              integration: integration,
@@ -390,12 +407,16 @@ defmodule Jido.Connect.Runtime do
       connection_hash: ExecutionSnapshot.connection_hash(context.connection),
       lease_hash: ExecutionSnapshot.lease_hash(lease),
       binding_hash: ExecutionSnapshot.hash(get_option(opts, :binding_ref)),
+      actor_hash: ExecutionSnapshot.hash(context.actor),
+      risk: action.risk,
+      confirmation: action.confirmation,
+      confirmation_required?: ExecutionAuthorization.confirmation_required?(action, context),
       execution_id: get_option(opts, :execution_id),
       idempotency_key: get_option(opts, :idempotency_key)
     }
 
     changed =
-      Enum.find(Map.keys(current), fn field ->
+      Enum.find(@snapshot_fields, fn field ->
         Map.fetch!(current, field) != Map.fetch!(prepared, field)
       end)
 

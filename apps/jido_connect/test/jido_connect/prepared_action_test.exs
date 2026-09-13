@@ -213,6 +213,62 @@ defmodule Jido.Connect.PreparedActionTest do
     assert ai_prepared.confirmation_required?
   end
 
+  test "commit rejects a changed actor before a required-for-AI action runs", state do
+    ai_spec =
+      RuntimeFixtures.spec(%{
+        action: %{
+          handler: Handler,
+          mutation?: true,
+          risk: :write,
+          confirmation: :required_for_ai
+        }
+      })
+
+    assert {:ok, prepared} =
+             Connect.prepare(ai_spec, "demo.repo.show", state.input,
+               context: state.context,
+               credential_lease: state.lease
+             )
+
+    refute prepared.confirmation_required?
+
+    for actor <- [%{id: "persona_1", type: :agent}, %{id: "user_2", type: :user}] do
+      changed_context = %{state.context | actor: actor}
+
+      assert_stale(
+        Connect.commit(ai_spec, prepared, state.input,
+          context: changed_context,
+          credential_lease: state.lease
+        ),
+        :actor_hash
+      )
+    end
+
+    refute_received {:handler_called, _repo}
+
+    assert {:ok, %{repo: "agentjido/jido_connect"}} =
+             Connect.commit(ai_spec, prepared, state.input,
+               context: state.context,
+               credential_lease: state.lease
+             )
+  end
+
+  test "commit rejects a stored confirmation flag that disagrees with the action", state do
+    assert {:ok, prepared} = prepare(state)
+    tampered = %{prepared | confirmation_required?: false}
+
+    assert_stale(
+      Connect.commit(state.spec, tampered, state.input,
+        context: state.context,
+        credential_lease: state.lease,
+        binding_ref: "binding_1"
+      ),
+      :confirmation_required?
+    )
+
+    refute_received {:handler_called, _repo}
+  end
+
   test "destructive risk always requires confirmation", state do
     destructive_spec = RuntimeFixtures.spec(%{action: %{risk: :destructive}})
 
@@ -316,6 +372,7 @@ defmodule Jido.Connect.PreparedActionTest do
     refute encoded =~ "private/repository"
     refute encoded =~ "secret-value"
     assert decoded["version"] == Connect.PreparedAction.format_version()
+    assert decoded["actor_hash"] == prepared.actor_hash
 
     assert {:ok, loaded} = Connect.PreparedAction.load(decoded)
     assert Connect.PreparedAction.dump(loaded) == decoded
@@ -343,11 +400,13 @@ defmodule Jido.Connect.PreparedActionTest do
     assert {:ok, prepared} = prepare(state)
     dump = Connect.PreparedAction.dump(prepared)
 
-    assert {:error,
-            %Connect.Error.ValidationError{
-              reason: :unsupported_prepared_action_version,
-              subject: 2
-            }} = Connect.PreparedAction.load(Map.put(dump, "version", 2))
+    for unsupported_version <- [1, 3] do
+      assert {:error,
+              %Connect.Error.ValidationError{
+                reason: :unsupported_prepared_action_version,
+                subject: ^unsupported_version
+              }} = Connect.PreparedAction.load(Map.put(dump, "version", unsupported_version))
+    end
 
     assert {:error,
             %Connect.Error.ValidationError{
