@@ -7,9 +7,15 @@
   "id": "jido_con-znq.26",
   "labels": [],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed on release/3.0 in ee789674. The baseline test proved that connection wildcards allowed a tool call with no matching effective lease grant. The resolver now returns the wildcard as a requirement; tests cover denied and granted leases plus resource, prompt, and completion targets. MCP suite 18 passed; fresh v3 mix quality and demo format/compile/21 tests passed. Guide updated. No jido_mcp changes.",
+      "timestamp": "2026-09-13T20:56:51Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "MCP wildcard scopes bypass lease scope limits",
   "type": "bug",
-  "updated_at": "2026-09-13T20:49:31Z"
+  "updated_at": "2026-09-13T20:56:51Z"
 }
