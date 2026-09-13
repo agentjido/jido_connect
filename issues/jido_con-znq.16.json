@@ -5,11 +5,13 @@
   "created": "2026-09-13T20:05:14Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: design improvement.\n\nSource task: 01a09c57-1efd-7e03-b335-4810b34600d9\n\n- **P3 — Define how a host supplies fresh poll context.**  \n  [sensor_runtime.ex:13](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/jido/sensor_runtime.ex:13) stores the initial context; each tick reuses it. Hosts must refresh short-lived leases, but the public callback guide gives no update operation. Document a supported context replacement step, or add a small helper that preserves the checkpoint. Scheduling and credential renewal should remain host responsibilities.\n\n**Known upstream limits**\n\nThe catalog Plugin uses the correct pinned v3 `prepare/2` contract. Provider `.Plugin` modules are intentionally discovery modules. Generated sensors are intentionally process-free adapters. These distinctions are not defects. [Pinned Plugin contract](https://github.com/agentjido/jido/blob/b02052402a6f1c4be10098c2d560831f14daec58/lib/jido/plugin.ex#L52-L102)\n\nThe exact Git dependency for Jido remains the recorded publication constraint. I found no new upstream defect in this scope.\n\n**Cleanup order:** Fix filter authority and error redaction first. Then restore metadata and option propagation. Finish the packaged host examples.\n\n**Coverage:** Generated actions, projections, sensor callbacks, discovery filtering and availability, catalog Plugin, runtime context, and relevant callers/tests.\n\n**Verification limits:** Local dependency folders and build files contain v2 versions. I downloaded the pinned v3 sources separately; Action and Signal archive checksums match the lockfile. I ran isolated option-merging and sanitizer checks. I did not run the full suite or validate the recorded quality results again.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.16",
-  "labels": [],
+  "labels": [
+    "v3-follow-up"
+  ],
   "parent": "jido_con-znq",
   "priority": 3,
   "status": "open",
   "title": "Define how a host supplies fresh poll context",
   "type": "task",
-  "updated_at": "2026-09-13T20:05:14Z"
+  "updated_at": "2026-09-13T21:59:45Z"
 }
