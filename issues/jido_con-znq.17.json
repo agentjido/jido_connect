@@ -7,9 +7,15 @@
   "id": "jido_con-znq.17",
   "labels": [],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed on release/3.0 in da5f897a. The new test failed on the original reviewed selection and passes after applying pack filters before action selection. Fresh v3 mix quality passed; demo format, warnings-as-errors compile, and 21 tests passed. No jido_mcp changes.",
+      "timestamp": "2026-09-13T20:37:02Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Reviewed packs ignore their filters",
   "type": "bug",
-  "updated_at": "2026-09-13T20:27:04Z"
+  "updated_at": "2026-09-13T20:37:02Z"
 }
