@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:05:18Z",
+  "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: design improvement.\n\nSource task: 01a09c57-210c-79f0-9e9f-669bbeed6dfc\n\n- **P2 — Expose item projection errors through diagnostics.**  \n  [catalog.ex:300](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/catalog.ex:300) reads each provider spec again after discovery. At line 315, it converts every item projection error to `[]`. Provider diagnostics cannot report these later failures. Preserve the error in an item diagnostic result. Reuse the first spec where practical. Keep the existing lenient list API.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
+  "id": "jido_con-znq.23",
+  "labels": [],
+  "parent": "jido_con-znq",
+  "priority": 2,
+  "status": "open",
+  "title": "Expose item projection errors through diagnostics",
+  "type": "task",
+  "updated_at": "2026-09-13T20:05:18Z"
+}
