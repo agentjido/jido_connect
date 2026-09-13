@@ -187,6 +187,28 @@ input = %{
 Connect lists the tool again before the call. It rejects the call if
 `expected_schema_hash` does not match the current input schema.
 
+Connect also binds the first observed schema hash for each tool to the current
+connection generation. Later calls in that generation reject a different hash,
+even if a caller updates `expected_schema_hash`. A new review does not change
+an existing generation. After the host reviews a changed schema, it must
+advance the durable `connection_revision` or lease `credential_version`, call
+`Jido.Connect.MCP.EndpointLeaseManager.fence/2` with both new version values,
+and use the updated connection and a fresh lease for the next call. For example,
+if the current values are both `1`, the host can set `connection_revision: 2`,
+keep `credential_version: 1`, and call:
+
+```elixir
+:ok =
+  Jido.Connect.MCP.EndpointLeaseManager.fence(connection,
+    connection_revision: 2,
+    credential_version: 1
+  )
+```
+
+The next acquisition starts a new generation with empty schema bindings. The
+host must review the new hash and prepare a new approval. Old prepared calls
+and leases must not be reused.
+
 The host must not retry a tool call after an unknown send result. Connect
 returns a `Jido.Connect.Error.ProviderError` with reason
 `:mcp_write_uncertain` and delivery state `:sent_outcome_unknown`. The host
