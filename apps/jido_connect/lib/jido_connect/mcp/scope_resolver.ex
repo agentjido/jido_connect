@@ -82,7 +82,7 @@ defmodule Jido.Connect.MCP.ScopeResolver do
     wildcard = "#{prefix}:*"
     scoped = "#{prefix}:#{value}"
 
-    if wildcard in granted_scopes, do: [], else: [scoped]
+    if wildcard in granted_scopes, do: [wildcard], else: [scoped]
   end
 
   defp tool_scope("mcp.tool.call", tool_name, granted_scopes) do

@@ -234,6 +234,8 @@ In addition to the capability scope, grant `mcp:endpoint:<id>` and
 with `name`, or a `ref/resource` reference with `uri`; the same target scope
 applies. The `argument` map has string `name` and `value` fields. Remote
 resource text and prompt messages are content, not host instructions.
+The effective credential lease must also grant each required wildcard. A
+wildcard on the durable connection does not extend a narrower lease.
 
 ## Notification Sessions
 

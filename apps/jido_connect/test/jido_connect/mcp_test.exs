@@ -570,6 +570,55 @@ defmodule Jido.Connect.MCPTest do
              )
   end
 
+  test "MCP wildcard scopes still require an effective lease grant" do
+    scopes = [
+      "mcp:tools:call",
+      "mcp:endpoint:*",
+      "mcp:tool:*",
+      "mcp:resource:*",
+      "mcp:prompt:*"
+    ]
+
+    {context, lease} = context_and_lease(scopes: scopes)
+    lease = %{lease | scopes: ["mcp:tools:call"]}
+    {:ok, action} = Connect.action(Jido.Connect.MCP, "mcp.tool.call")
+    input = %{endpoint_id: "filesystem", tool_name: "read_text_file"}
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: ["mcp:endpoint:*", "mcp:tool:*"]
+            }} =
+             Connect.Authorization.authorize(action, input, context, lease, policy: AllowPolicy)
+
+    assert :ok =
+             Connect.Authorization.authorize(action, input, context, %{lease | scopes: scopes},
+               policy: AllowPolicy
+             )
+
+    for {action_id, target_input, wildcard} <- [
+          {"mcp.resource.read", %{uri: "file:///tmp/readme.md"}, "mcp:resource:*"},
+          {"mcp.prompt.get", %{prompt_name: "summary"}, "mcp:prompt:*"},
+          {"mcp.completion.complete",
+           %{
+             ref: %{"type" => "ref/prompt", "name" => "summary"},
+             argument: %{"name" => "topic", "value" => "test"}
+           }, "mcp:prompt:*"}
+        ] do
+      {:ok, operation} = Connect.action(Jido.Connect.MCP, action_id)
+
+      assert {:ok, required} =
+               Connect.MCP.ScopeResolver.required_scopes(
+                 operation,
+                 Map.put(target_input, :endpoint_id, "filesystem"),
+                 context.connection
+               )
+
+      assert "mcp:endpoint:*" in required
+      assert wildcard in required
+    end
+  end
+
   test "generated plugin filters actions and reports availability" do
     spec = Jido.Connect.MCP.Plugin.plugin_spec(%{})
 
