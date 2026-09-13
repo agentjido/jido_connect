@@ -1,18 +1,38 @@
-# MCP Tool Bridge
+# MCP Client Bridge
 
-Core `jido_connect` has a narrow MCP client bridge. It uses ExMCP `1.x` for
-protocol behavior. It exposes only these Connect Action v3 operations:
+Core `jido_connect` uses ExMCP 1.3 for MCP client protocol and transports.
+The `release/3.0` branch is for maintainer development with Action v3.
 
-- `mcp.tools.list`
-- `mcp.tool.call`
+| Generated action | Required capability scope | Extra input |
+| --- | --- | --- |
+| `mcp.tools.list` | `mcp:tools:list` | Optional `cursor` |
+| `mcp.tool.call` | `mcp:tools:call` | `tool_name`, `arguments` |
+| `mcp.resources.list` | `mcp:resources:list` | Optional `cursor` |
+| `mcp.resource_templates.list` | `mcp:resources:list` | Optional `cursor` |
+| `mcp.resource.read` | `mcp:resources:read` | `uri` |
+| `mcp.prompts.list` | `mcp:prompts:list` | Optional `cursor` |
+| `mcp.prompt.get` | `mcp:prompts:get` | `prompt_name`, optional `arguments` |
+| `mcp.completion.complete` | `mcp:completion:complete` | `ref`, `argument` |
+| `mcp.endpoint.ping` | `mcp:endpoint:inspect` | None |
+| `mcp.endpoint.status` | `mcp:endpoint:inspect` | None |
 
-The bridge does not publish an MCP server. It does not expose MCP resources or
-prompts. It does not make dynamic proxy Actions. It does not own a general
-endpoint pool.
+All actions require `endpoint_id` and the `endpoint_access` policy. They accept
+an optional `timeout` in milliseconds, from 1 to 120,000. Tool calls retain the
+Connect approval flow. Resources, prompts, completion, ping, and status return
+`%{endpoint_id: id, result: mcp_result}`. MCP result keys remain strings.
+List results retain `nextCursor`; pass it as `cursor` to get the next page.
+Tool lists return normalized `tools` and optional `next_cursor` instead.
+Schema checks for typed tool calls search up to 101 pages and reject cursor loops.
+
+Connect does not publish an MCP server or own a general endpoint pool.
+The host owns client callbacks, durable connections, credentials, policy,
+approval records, and audit records.
 
 ## Install
 
-Add core Connect to the host application:
+For this development candidate, use a checkout of `release/3.0`. The branch
+number is the Jido compatibility line; it is not a published Connect version.
+After a package release, the normal core dependency has this form:
 
 ```elixir
 def deps do
@@ -105,7 +125,7 @@ The bridge checks these scopes:
 - `mcp:endpoint:<endpoint-id>`
 - `mcp:tool:<tool-name>` for a tool call
 
-Both operations require the `:endpoint_access` policy. Pass a host policy with
+All operations require the `:endpoint_access` policy. Pass a host policy with
 `policy:` when you invoke, prepare, or commit an operation. The callback gets
 the operation, input, actor context, connection, and policy data. It returns
 `:ok` to allow access or an error to deny access.
@@ -180,11 +200,93 @@ Use this migration map:
 | --- | --- |
 | List tools or call a reviewed tool | Core `Jido.Connect.MCP` |
 | Register an endpoint in a shared pool | A host-supervised client reference or a connection-scoped lease endpoint |
-| Use the two reviewed Jido Actions | Generated Connect Action v3 modules for the two bridge operations |
+| Use reviewed Jido Actions | Generated Connect Action v3 modules |
 | Use runtime dynamic proxy Actions | Reviewed `Catalog.Item` values, packs, and `call_item/3`; there is no runtime proxy replacement |
-| Use MCP resources, prompts, servers, or direct protocol transports | ExMCP |
+| Use MCP resources or prompts | Core Connect actions with endpoint and target scopes |
+| Receive modern list-change or resource notifications | `Jido.Connect.MCP.Session` |
+| Publish MCP servers or use direct protocol transports | ExMCP |
 | Run coding-agent process lifecycles | Jido Harness |
 
-Core Connect is not a drop-in replacement for all `jido_mcp` features. It
-replaces only the reviewed tool-list and tool-call path. Direct MCP protocol
-work belongs in ExMCP.
+Core Connect provides the client operations and managed notification sessions
+listed above. Direct MCP protocol work and server publication belong in ExMCP.
+No change to the `jido_mcp` package is required for this release candidate.
+
+
+## Read Resources and Prompts
+
+Use generated Actions with the same host context as tool calls:
+
+```elixir
+Jido.Connect.MCP.Actions.ReadResource.run(
+  %{endpoint_id: "files", uri: "file:///report.txt"},
+  %{integration_context: context, credential_lease: lease, policy: MyApp.MCPPolicy}
+)
+
+Jido.Connect.MCP.Actions.GetPrompt.run(
+  %{endpoint_id: "files", prompt_name: "review", arguments: %{"text" => "Draft"}},
+  %{integration_context: context, credential_lease: lease, policy: MyApp.MCPPolicy}
+)
+```
+
+In addition to the capability scope, grant `mcp:endpoint:<id>` and
+`mcp:resource:<uri>` or `mcp:prompt:<name>`. Wildcards are `mcp:endpoint:*`,
+`mcp:resource:*`, and `mcp:prompt:*`. Completion requires a `ref/prompt` reference
+with `name`, or a `ref/resource` reference with `uri`; the same target scope
+applies. The `argument` map has string `name` and `value` fields. Remote
+resource text and prompt messages are content, not host instructions.
+
+## Notification Sessions
+
+Use `Jido.Connect.MCP.Session` under the host supervisor. Each session has an
+immutable filter and a managed endpoint lease. Static client configuration
+alone is insufficient; pass the client reference through a credential lease.
+
+```elixir
+{:ok, session} = Jido.Connect.MCP.Session.start_link(
+  "files",
+  %{"resourcesListChanged" => true, "resourceSubscriptions" => ["file:///report.txt"]},
+  context: context,
+  credential_lease: lease,
+  policy: MyApp.MCPPolicy,
+  subscriber: self()
+)
+
+# Receive {:jido_connect_mcp, session, method, sanitized_params}.
+# After ExMCP reconnects and reads fresh state, receive
+# {:jido_connect_mcp, session, :resync, sanitized_snapshot}.
+Jido.Connect.MCP.Session.status(session)
+Jido.Connect.MCP.Session.close(session)
+```
+
+Filters also support `toolsListChanged` and `promptsListChanged`. A session
+requires `mcp:notifications:listen`, endpoint access, and the matching list or
+resource-read scopes. This also authorizes the reads ExMCP makes during
+resynchronization. Filters accept at most 100 resource URIs. Start a new
+session to change its filter.
+
+Sessions use MCP 2026-07-28 notification streams through `ExMCP.Client.listen/3`.
+Configure that protocol on the host client or endpoint. Ordinary tools,
+resources, and prompts also work with legacy peers. ExMCP 1.3 does not expose
+legacy uncorrelated list-change/resource-update events through this subscription
+API. Connect does not claim legacy notification delivery.
+
+A session stops when its subscriber or subscription stops, or when its lease
+expires or is revoked. Lease checks run before event delivery and at 100 ms
+intervals. Hosts must fence connections when credentials, scopes, or policy
+change. Monitor the session process to detect closure. Connect releases the
+lease and cancels the stream; it does not stop a host-owned client.
+
+## Connection and Host Callback Contract
+
+`EndpointLeaseManager` owns Connect leases and generation changes. ExMCP owns
+handshake, capability negotiation, protocol errors, transports, and subscription
+state. Connect-owned clients use bounded requests with automatic reconnect and
+request retry disabled. Reopen them with a new connection generation. A host
+that needs reconnect can supervise and configure its own ExMCP client.
+
+Use ExMCP's public `Client.Handler` callbacks for roots, sampling, elicitation,
+request progress, and log messages. Set the handler in the host client or in
+trusted endpoint `client_options`; declare only supported capabilities. The
+host applies its own approval and data policy to these server-initiated
+requests. Connect never supplies an automatic sampling or elicitation approval.
+Server publication and task-extension workflows are outside this client scope.

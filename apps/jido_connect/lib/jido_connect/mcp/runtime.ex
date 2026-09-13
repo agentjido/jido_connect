@@ -17,7 +17,7 @@ defmodule Jido.Connect.MCP.Runtime do
         with :ok <- ensure_dispatchable(token),
              {:ok, data} <-
                dispatch(token, fn ->
-                 call_mcp(token, :list_tools, [], timeout(input))
+                 call_mcp(token, :list_tools, [], request_options(input))
                end) do
           tools =
             data
@@ -25,13 +25,47 @@ defmodule Jido.Connect.MCP.Runtime do
             |> Enum.map(&Tool.from_mcp/1)
             |> Enum.map(&Tool.to_map/1)
 
-          {:ok, %{endpoint_id: input.endpoint_id, tools: tools}}
+          {:ok,
+           %{endpoint_id: input.endpoint_id, tools: tools}
+           |> maybe_put(:next_cursor, Jido.Connect.Data.get(data, :nextCursor))}
         end
       after
         release(token)
       end
     end
   end
+
+  # Operations that cannot initiate a remote tool write share the same lease fence.
+  def read_operation(operation, input, opts) do
+    with {:ok, token} <- EndpointResolver.resolve_lease(input.endpoint_id, opts) do
+      try do
+        with :ok <- ensure_dispatchable(token),
+             {:ok, result} <-
+               dispatch(token, fn ->
+                 call_mcp(
+                   token,
+                   operation,
+                   operation_args(operation, input),
+                   request_options(input)
+                 )
+               end) do
+          {:ok, %{endpoint_id: input.endpoint_id, result: result}}
+        end
+      after
+        release(token)
+      end
+    end
+  end
+
+  defp operation_args(:read_resource, input), do: [input.uri]
+
+  defp operation_args(:get_prompt, input),
+    do: [input.prompt_name, Map.get(input, :arguments, %{})]
+
+  defp operation_args(:complete, input), do: [input.ref, input.argument]
+  defp operation_args(_operation, _input), do: []
+
+  defp request_options(input), do: input |> Map.take([:timeout, :cursor]) |> Map.to_list()
 
   def call_tool(input, opts) do
     call_typed_tool(input, opts, mutation?: true)
@@ -117,13 +151,39 @@ defmodule Jido.Connect.MCP.Runtime do
   end
 
   defp verify_live_schema(input, _opts, token, expected_hash, required_schema) do
-    with {:ok, data} <- call_mcp(token, :list_tools, [], timeout(input)),
-         {:ok, tool} <- find_tool(data, input.tool_name),
+    with {:ok, tool} <- find_live_tool(token, input, nil, MapSet.new()),
          observed = Tool.from_mcp(tool),
          :ok <- require_schema_hash(input.tool_name, expected_hash, observed.schema_hash),
          :ok <- require_compatible_schema(input.tool_name, required_schema, observed.input_schema),
          :ok <- bind_schema(token, input.tool_name, observed.schema_hash) do
       :ok
+    end
+  end
+
+  defp find_live_tool(token, input, cursor, seen) do
+    opts = request_options(input) |> Keyword.delete(:cursor)
+    opts = if cursor, do: Keyword.put(opts, :cursor, cursor), else: opts
+
+    with :ok <- ensure_dispatchable(token),
+         {:ok, data} <- call_mcp(token, :list_tools, [], opts) do
+      case find_tool(data, input.tool_name) do
+        {:ok, tool} ->
+          {:ok, tool}
+
+        error ->
+          next = Jido.Connect.Data.get(data, :nextCursor)
+
+          cond do
+            is_nil(next) ->
+              error
+
+            not is_binary(next) or MapSet.member?(seen, next) or MapSet.size(seen) >= 100 ->
+              {:error, invalid_response(data)}
+
+            true ->
+              find_live_tool(token, input, next, MapSet.put(seen, next))
+          end
+      end
     end
   end
 
@@ -181,11 +241,19 @@ defmodule Jido.Connect.MCP.Runtime do
   defp bind_schema(token, tool_name, schema_hash),
     do: EndpointLeaseManager.bind_schema(token, tool_name, schema_hash)
 
+  defp call_mcp(token, function, args, opts) when is_list(opts) do
+    call_args = [token.client_ref | args] ++ [opts]
+
+    with {:ok, response} <- call_client(token.client_module, function, call_args) do
+      normalize_response(response, function)
+    end
+  end
+
   defp call_mcp(token, function, args, nil) do
     call_args = [token.client_ref | args] ++ [[]]
 
     with {:ok, response} <- call_client(token.client_module, function, call_args) do
-      normalize_response(response)
+      normalize_response(response, function)
     end
   end
 
@@ -193,7 +261,7 @@ defmodule Jido.Connect.MCP.Runtime do
     call_args = [token.client_ref | args] ++ [[timeout: timeout]]
 
     with {:ok, response} <- call_client(token.client_module, function, call_args) do
-      normalize_response(response)
+      normalize_response(response, function)
     end
   end
 
@@ -223,9 +291,31 @@ defmodule Jido.Connect.MCP.Runtime do
        )}
   end
 
-  defp normalize_response(response) do
+  defp normalize_response({:ok, data}, operation) when is_map(data) do
+    key =
+      case operation do
+        :list_tools -> :tools
+        :list_resources -> :resources
+        :list_resource_templates -> :resourceTemplates
+        :read_resource -> :contents
+        :list_prompts -> :prompts
+        :get_prompt -> :messages
+        _ -> nil
+      end
+
+    entries = if key, do: Jido.Connect.Data.get(data, key), else: []
+    cursor = Jido.Connect.Data.get(data, :nextCursor)
+
+    if is_list(entries) and Enum.all?(entries, &is_map/1) and
+         (is_nil(cursor) or is_binary(cursor)) do
+      {:ok, data}
+    else
+      {:error, invalid_response(data)}
+    end
+  end
+
+  defp normalize_response(response, _operation) do
     case response do
-      {:ok, data} when is_map(data) -> {:ok, data}
       {:error, error} -> {:error, normalize_error(error)}
       response -> {:error, invalid_response(response)}
     end

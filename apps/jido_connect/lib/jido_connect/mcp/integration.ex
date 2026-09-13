@@ -2,12 +2,17 @@ defmodule Jido.Connect.MCP do
   @moduledoc """
   MCP bridge integration authored with the `Jido.Connect` Spark DSL.
 
-  Core Connect treats MCP as a narrow bridge: remote server credentials and
+  Core Connect supplies an MCP client bridge: remote server credentials and
   transport config stay in host-owned endpoint configuration, while Connect
   models endpoint and tool policy and exposes generated Jido actions.
   """
 
-  use Jido.Connect
+  use Jido.Connect,
+    fragments: [
+      Jido.Connect.MCP.Actions.Resources,
+      Jido.Connect.MCP.Actions.Prompts,
+      Jido.Connect.MCP.Actions.Lifecycle
+    ]
 
   integration do
     id :mcp
@@ -46,7 +51,22 @@ defmodule Jido.Connect.MCP do
       setup :host_configured_endpoint
       credential_fields []
       lease_fields []
-      scopes ["mcp:tools:list", "mcp:tools:call", "mcp:endpoint:*", "mcp:tool:*"]
+
+      scopes [
+        "mcp:tools:list",
+        "mcp:tools:call",
+        "mcp:endpoint:*",
+        "mcp:tool:*",
+        "mcp:resources:list",
+        "mcp:resources:read",
+        "mcp:resource:*",
+        "mcp:prompts:list",
+        "mcp:prompts:get",
+        "mcp:prompt:*",
+        "mcp:completion:complete",
+        "mcp:endpoint:inspect",
+        "mcp:notifications:listen"
+      ]
     end
   end
 
@@ -69,7 +89,7 @@ defmodule Jido.Connect.MCP do
       verb :list
       data_classification :tool_metadata
       label "List MCP tools"
-      description "List tools from a configured MCP endpoint."
+      description "List one page of tools from a configured MCP endpoint."
       handler Jido.Connect.MCP.Handlers.Actions.ListTools
       effect :read
 
@@ -81,12 +101,14 @@ defmodule Jido.Connect.MCP do
 
       input do
         field :endpoint_id, :string, required?: true, example: "filesystem"
-        field :timeout, :integer
+        field :cursor, :string, max_length: 4096
+        field :timeout, :integer, minimum: 1, maximum: 120_000
       end
 
       output do
         field :endpoint_id, :string
         field :tools, {:array, :map}
+        field :next_cursor, :string
       end
     end
 
@@ -111,7 +133,7 @@ defmodule Jido.Connect.MCP do
         field :tool_name, :string, required?: true, example: "read_text_file"
         field :arguments, :map, default: %{}
         field :expected_schema_hash, :string
-        field :timeout, :integer
+        field :timeout, :integer, minimum: 1, maximum: 120_000
       end
 
       output do

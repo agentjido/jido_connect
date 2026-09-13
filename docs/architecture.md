@@ -9,7 +9,7 @@ details into those contracts.
 The umbrella has three layers:
 
 - `jido_connect` owns the Spark DSL, Zoi-backed contract structs, generated Jido
-  adapters, authorization checks, catalog discovery, the narrow MCP tool
+  adapters, authorization checks, catalog discovery, the MCP client
   bridge, telemetry, and normalized runtime envelopes.
 - Provider packages such as `jido_connect_github`, `jido_connect_slack`, and
   `jido_connect_trello` own provider auth helpers, REST or bridge clients,

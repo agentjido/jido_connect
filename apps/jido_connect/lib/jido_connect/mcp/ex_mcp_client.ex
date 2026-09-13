@@ -101,6 +101,129 @@ defmodule Jido.Connect.MCP.ExMCPClient do
     end)
   end
 
+  @impl true
+  def list_resources(client, opts) do
+    request(fn ->
+      with {:ok, request_opts} <- request_opts(opts, false) do
+        ExMCP.Client.list_resources(client, request_opts)
+      end
+    end)
+  end
+
+  @impl true
+  def list_resource_templates(client, opts) do
+    request(fn ->
+      with {:ok, request_opts} <- request_opts(opts, false) do
+        ExMCP.Client.list_resource_templates(client, request_opts)
+      end
+    end)
+  end
+
+  @impl true
+  def read_resource(client, uri, opts) do
+    request(fn ->
+      with {:ok, request_opts} <- request_opts(opts, false) do
+        ExMCP.Client.read_resource(client, uri, request_opts)
+      end
+    end)
+  end
+
+  @impl true
+  def list_prompts(client, opts) do
+    request(fn ->
+      with {:ok, request_opts} <- request_opts(opts, false) do
+        ExMCP.Client.list_prompts(client, request_opts)
+      end
+    end)
+  end
+
+  @impl true
+  def get_prompt(client, name, arguments, opts) do
+    request(fn ->
+      with {:ok, request_opts} <- request_opts(opts, false) do
+        ExMCP.Client.get_prompt(client, name, arguments, request_opts)
+      end
+    end)
+  end
+
+  @impl true
+  def complete(client, ref, argument, opts) do
+    request(fn ->
+      with {:ok, request_opts} <- request_opts(opts, false) do
+        ExMCP.Client.complete(client, ref, argument, request_opts)
+      end
+    end)
+  end
+
+  @impl true
+  def ping(client, opts) do
+    request(fn ->
+      with {:ok, request_opts} <- request_opts(opts, false) do
+        ExMCP.Client.ping(client, request_opts)
+      end
+    end)
+  end
+
+  def listen(client, filter, opts) do
+    try do
+      case ExMCP.Client.listen(client, filter, opts) do
+        {:ok, subscription} ->
+          {:ok, subscription}
+
+        _ ->
+          {:error,
+           Jido.Connect.Error.provider("MCP subscription failed",
+             provider: :mcp,
+             reason: :subscription_failed
+           )}
+      end
+    rescue
+      _ ->
+        {:error,
+         Jido.Connect.Error.provider("MCP subscription failed",
+           provider: :mcp,
+           reason: :subscription_failed
+         )}
+    catch
+      _, _ ->
+        {:error,
+         Jido.Connect.Error.provider("MCP subscription failed",
+           provider: :mcp,
+           reason: :subscription_failed
+         )}
+    end
+  end
+
+  def close_subscription(subscription), do: ExMCP.Client.Subscription.cancel(subscription)
+
+  @impl true
+  def status(client, _opts) do
+    request(fn ->
+      case ExMCP.Client.get_status(client) do
+        %{} = status ->
+          {:ok,
+           Map.take(status, [
+             :connection_status,
+             :protocol_version,
+             :server_info,
+             :server_capabilities
+           ])}
+
+        {:ok, %{} = status} ->
+          {:ok,
+           Map.take(status, [
+             :connection_status,
+             :protocol_version,
+             :server_info,
+             :server_capabilities
+           ])}
+
+        error ->
+          error
+      end
+    end)
+  end
+
   @doc false
   @spec client_options(Endpoint.t()) :: {:ok, keyword()} | {:error, term()}
   def client_options(%Endpoint{} = endpoint) do
@@ -191,10 +314,11 @@ defmodule Jido.Connect.MCP.ExMCPClient do
     do: {:error, {:unsupported_transport, transport, :ex_mcp}}
 
   defp request_opts(opts, tool?) when is_list(opts) do
-    if Keyword.keyword?(opts) and valid_timeout?(Keyword.get(opts, :timeout)) do
+    if Keyword.keyword?(opts) and valid_timeout?(Keyword.get(opts, :timeout)) and
+         valid_cursor?(Keyword.get(opts, :cursor)) do
       request_opts =
         opts
-        |> Keyword.take([:timeout])
+        |> Keyword.take([:timeout, :cursor])
         |> Keyword.put(:format, :map)
         |> Keyword.put(:retry_policy, false)
         |> Keyword.put(:http_stream_retry, :safe_only)
@@ -381,6 +505,8 @@ defmodule Jido.Connect.MCP.ExMCPClient do
 
   defp protocol_mode("2026-" <> _rest), do: :modern_only
   defp protocol_mode(_version), do: :legacy_only
+  defp valid_cursor?(nil), do: true
+  defp valid_cursor?(cursor), do: is_binary(cursor) and byte_size(cursor) <= 4096
   defp valid_timeout?(nil), do: true
   defp valid_timeout?(timeout), do: positive_integer?(timeout)
   defp positive_integer?(value), do: is_integer(value) and value > 0

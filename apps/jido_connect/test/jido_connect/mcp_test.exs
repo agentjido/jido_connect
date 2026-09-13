@@ -169,7 +169,15 @@ defmodule Jido.Connect.MCPTest do
 
     assert Jido.Connect.MCP.jido_action_modules() == [
              Jido.Connect.MCP.Actions.ListTools,
-             Jido.Connect.MCP.Actions.CallTool
+             Jido.Connect.MCP.Actions.CallTool,
+             Jido.Connect.MCP.Actions.ListResources,
+             Jido.Connect.MCP.Actions.ListResourceTemplates,
+             Jido.Connect.MCP.Actions.ReadResource,
+             Jido.Connect.MCP.Actions.ListPrompts,
+             Jido.Connect.MCP.Actions.GetPrompt,
+             Jido.Connect.MCP.Actions.Complete,
+             Jido.Connect.MCP.Actions.Ping,
+             Jido.Connect.MCP.Actions.Status
            ]
 
     assert Jido.Connect.MCP.jido_sensor_modules() == []
@@ -181,7 +189,15 @@ defmodule Jido.Connect.MCPTest do
              generated_modules: %{
                actions: [
                  Jido.Connect.MCP.Actions.ListTools,
-                 Jido.Connect.MCP.Actions.CallTool
+                 Jido.Connect.MCP.Actions.CallTool,
+                 Jido.Connect.MCP.Actions.ListResources,
+                 Jido.Connect.MCP.Actions.ListResourceTemplates,
+                 Jido.Connect.MCP.Actions.ReadResource,
+                 Jido.Connect.MCP.Actions.ListPrompts,
+                 Jido.Connect.MCP.Actions.GetPrompt,
+                 Jido.Connect.MCP.Actions.Complete,
+                 Jido.Connect.MCP.Actions.Ping,
+                 Jido.Connect.MCP.Actions.Status
                ],
                sensors: [],
                plugin: Jido.Connect.MCP.Plugin
@@ -559,7 +575,15 @@ defmodule Jido.Connect.MCPTest do
 
     assert spec.actions == [
              Jido.Connect.MCP.Actions.ListTools,
-             Jido.Connect.MCP.Actions.CallTool
+             Jido.Connect.MCP.Actions.CallTool,
+             Jido.Connect.MCP.Actions.ListResources,
+             Jido.Connect.MCP.Actions.ListResourceTemplates,
+             Jido.Connect.MCP.Actions.ReadResource,
+             Jido.Connect.MCP.Actions.ListPrompts,
+             Jido.Connect.MCP.Actions.GetPrompt,
+             Jido.Connect.MCP.Actions.Complete,
+             Jido.Connect.MCP.Actions.Ping,
+             Jido.Connect.MCP.Actions.Status
            ]
 
     filtered =
@@ -571,14 +595,14 @@ defmodule Jido.Connect.MCPTest do
 
     {context, _lease} = context_and_lease()
 
-    [available | _] =
+    available_actions =
       Jido.Connect.MCP.Plugin.tool_availability(%{
         connection: context.connection,
         integration_context: context,
         policy: AllowPolicy
       })
 
-    assert available.state == :available
+    assert Enum.any?(available_actions, &(&1.state == :available))
 
     [missing_scopes | _] =
       Jido.Connect.MCP.Plugin.tool_availability(%{

@@ -20,8 +20,57 @@ defmodule Jido.Connect.MCP.ScopeResolver do
     endpoint_scope = resource_scope("mcp:endpoint", input[:endpoint_id], granted_scopes)
     tool_scope = tool_scope(operation_id(operation), input[:tool_name], granted_scopes)
 
-    {:ok, Enum.uniq(static ++ endpoint_scope ++ tool_scope)}
+    with :ok <- validate_completion(operation_id(operation), input) do
+      {:ok,
+       Enum.uniq(static ++ endpoint_scope ++ tool_scope ++ content_scopes(input, granted_scopes))}
+    end
   end
+
+  defp validate_completion("mcp.completion.complete", %{ref: ref, argument: argument})
+       when is_map(ref) and is_map(argument) do
+    target =
+      case Jido.Connect.Data.get(ref, :type) do
+        "ref/prompt" -> Jido.Connect.Data.get(ref, :name)
+        "ref/resource" -> Jido.Connect.Data.get(ref, :uri)
+        _ -> nil
+      end
+
+    if is_binary(target) and byte_size(target) in 1..4096 and
+         is_binary(Jido.Connect.Data.get(argument, :name)) and
+         is_binary(Jido.Connect.Data.get(argument, :value)) do
+      :ok
+    else
+      {:error,
+       Jido.Connect.Error.validation("Invalid MCP completion reference or argument",
+         reason: :invalid_mcp_completion
+       )}
+    end
+  end
+
+  defp validate_completion("mcp.completion.complete", _),
+    do:
+      {:error,
+       Jido.Connect.Error.validation("Invalid MCP completion input",
+         reason: :invalid_mcp_completion
+       )}
+
+  defp validate_completion(_, _), do: :ok
+
+  defp content_scopes(input, granted) do
+    resource_scope("mcp:resource", input[:uri], granted) ++
+      resource_scope("mcp:prompt", input[:prompt_name], granted) ++
+      completion_scopes(input[:ref], granted)
+  end
+
+  defp completion_scopes(ref, granted) when is_map(ref) do
+    case Jido.Connect.Data.get(ref, :type) do
+      "ref/prompt" -> resource_scope("mcp:prompt", Jido.Connect.Data.get(ref, :name), granted)
+      "ref/resource" -> resource_scope("mcp:resource", Jido.Connect.Data.get(ref, :uri), granted)
+      _ -> []
+    end
+  end
+
+  defp completion_scopes(_, _), do: []
 
   defp operation_id(operation) do
     Map.get(operation, :id) || Map.get(operation, :action_id) || Map.get(operation, :trigger_id)

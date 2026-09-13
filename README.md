@@ -72,7 +72,7 @@ connector packages remain at `0.8.0`.
 
 | Package | Purpose |
 | --- | --- |
-| `jido_connect` | Spark DSL, runtime contracts, authorization, catalog, generated modules, the narrow MCP bridge, telemetry, sanitization, and normalized errors |
+| `jido_connect` | Spark DSL, runtime contracts, authorization, catalog, generated modules, the MCP client bridge, telemetry, sanitization, and normalized errors |
 | `jido_connect_google` | Shared Google OAuth, service-account, scope, transport, pagination, and checkpoint support |
 | `jido_connect_microsoft` | Shared Microsoft identity and Graph transport support |
 | `jido_connect_webhook` | Generic inbound webhook verification and normalization primitives |
