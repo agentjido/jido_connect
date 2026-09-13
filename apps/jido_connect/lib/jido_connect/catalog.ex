@@ -227,7 +227,7 @@ defmodule Jido.Connect.Catalog do
   @spec describe_tool(term(), keyword() | map()) ::
           {:ok, ToolDescriptor.t()} | {:error, Jido.Connect.Error.error()}
   def describe_tool(tool_ref, opts \\ []) do
-    case describe_item(tool_ref, opts) do
+    case describe_item(compatibility_item_ref(tool_ref), opts) do
       {:ok, item} -> {:ok, ToolDescriptor.from_item(item)}
       {:error, _error} = error -> compatibility_tool_error(error)
     end
@@ -260,7 +260,7 @@ defmodule Jido.Connect.Catalog do
   def call_tool(tool_ref, input, opts \\ [])
 
   def call_tool(tool_ref, input, opts) when is_map(input) do
-    case call_item(tool_ref, input, opts) do
+    case call_item(compatibility_item_ref(tool_ref), input, opts) do
       {:error, _error} = error -> compatibility_tool_error(error)
       result -> result
     end

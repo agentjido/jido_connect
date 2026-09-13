@@ -912,6 +912,19 @@ defmodule Jido.Connect.CatalogTest do
 
     assert {:ok, %Catalog.ToolEntry{id: "catalog.item.get"}} =
              Catalog.lookup_tool(by_ref |> Catalog.ToolEntry.from_item(), modules: modules)
+
+    legacy_ref = Catalog.ToolEntry.from_item(by_ref)
+
+    assert {:ok, %Catalog.ToolDescriptor{tool: %Catalog.ToolEntry{id: "catalog.item.get"}}} =
+             Catalog.describe_tool(legacy_ref, modules: modules)
+
+    assert {:ok, %{id: "item_1"}} =
+             Catalog.call_tool(legacy_ref, %{id: "item_1"},
+               modules: modules,
+               context: context,
+               credential_lease: lease,
+               policy: AllowPolicy
+             )
   end
 
   test "ranker extension reorders valid candidates and receives sanitized metadata only" do
