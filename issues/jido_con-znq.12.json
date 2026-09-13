@@ -9,9 +9,15 @@
     "v3-release-blocker"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Resolved in dc6b0e72: secret-free sensor errors. Focused tests passed. Full umbrella mix quality and demo format, warnings-as-errors compile, and 21 demo tests passed for this batch.",
+      "timestamp": "2026-09-13T22:37:31Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Webhook sensor errors can expose secrets",
   "type": "bug",
-  "updated_at": "2026-09-13T22:19:51Z"
+  "updated_at": "2026-09-13T22:37:31Z"
 }
