@@ -64,6 +64,7 @@ defmodule Jido.Connect.MCP.Session do
           {:ok,
            %{
              endpoint_id: endpoint_id,
+             status: :active,
              token: token,
              subscription: subscription,
              owner: owner,
@@ -82,7 +83,7 @@ defmodule Jido.Connect.MCP.Session do
 
   @impl true
   def handle_call(:status, _from, state) do
-    {:reply, %{endpoint_id: state.endpoint_id, status: :active}, state}
+    {:reply, %{endpoint_id: state.endpoint_id, status: state.status}, state}
   end
 
   @impl true
@@ -105,11 +106,37 @@ defmodule Jido.Connect.MCP.Session do
     if same_subscription?(subscription, state.subscription) do
       case dispatchable(state.token) do
         :ok ->
-          send(state.owner, {:jido_connect_mcp, self(), :resync, Sanitizer.sanitize(snapshot)})
-          {:noreply, state}
+          send(
+            state.owner,
+            {:jido_connect_mcp, self(), :resync, Sanitizer.sanitize(public_snapshot(snapshot))}
+          )
+
+          {:noreply, %{state | status: :active}}
 
         {:error, _} ->
           {:stop, :normal, state}
+      end
+    else
+      {:noreply, state}
+    end
+  end
+
+  def handle_info({:ex_mcp_subscription_resync, subscription, phase}, state) do
+    if same_subscription?(subscription, state.subscription) do
+      case {dispatchable(state.token), phase} do
+        {:ok, :started} ->
+          send(state.owner, {:jido_connect_mcp, self(), :status, :reconnecting})
+          {:noreply, %{state | status: :reconnecting}}
+
+        {:ok, {:failed, _reason}} ->
+          send(state.owner, {:jido_connect_mcp, self(), :status, :failed})
+          {:stop, :normal, state}
+
+        {{:error, _}, _} ->
+          {:stop, :normal, state}
+
+        _ ->
+          {:noreply, state}
       end
     else
       {:noreply, state}
@@ -239,6 +266,16 @@ defmodule Jido.Connect.MCP.Session do
   defp dispatchable(token), do: EndpointLeaseManager.ensure_dispatchable(token)
   defp release(%{legacy?: true}), do: :ok
   defp release(token), do: EndpointLeaseManager.release(token)
+  defp public_snapshot({:error, _reason}), do: {:error, :request_failed}
+  defp public_snapshot({:ok, result}), do: {:ok, public_snapshot(result)}
+
+  defp public_snapshot(value) when is_map(value),
+    do: Map.new(value, fn {key, item} -> {key, public_snapshot(item)} end)
+
+  defp public_snapshot(value) when is_list(value), do: Enum.map(value, &public_snapshot/1)
+  defp public_snapshot(value), do: value
+
+  defp same_subscription?(pid, %{pid: pid}) when is_pid(pid), do: true
   defp same_subscription?(%{pid: pid}, %{pid: pid}), do: true
   defp same_subscription?(_, _), do: false
 end

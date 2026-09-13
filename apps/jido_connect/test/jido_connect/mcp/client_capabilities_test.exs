@@ -256,6 +256,9 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
   test "public events redact secret fields and ignore other subscriptions", state do
     {:ok, session} = Session.start_link("test", %{"toolsListChanged" => true}, state.opts)
     subscription = :sys.get_state(session).subscription
+    send(session, {:ex_mcp_subscription_resync, subscription.pid, :started})
+    assert_receive {:jido_connect_mcp, ^session, :status, :reconnecting}
+    assert %{status: :reconnecting} = Session.status(session)
     send(session, {:ex_mcp_subscription, %{pid: self()}, "ignored", %{}})
     refute_receive {:jido_connect_mcp, ^session, "ignored", _}
 
@@ -271,12 +274,16 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
     send(
       session,
       {:ex_mcp_subscription_resync, subscription,
-       {:complete, %{"access_token" => "secret-value"}}}
+       {:complete, %{"access_token" => "secret-value", "resources" => {:error, "secret-value"}}}}
     )
 
     assert_receive {:jido_connect_mcp, ^session, :resync, snapshot}
     refute inspect(snapshot) =~ "secret-value"
-    Session.close(session)
+    assert %{status: :active} = Session.status(session)
+    monitor = Process.monitor(session)
+    send(session, {:ex_mcp_subscription_resync, subscription.pid, {:failed, "secret-value"}})
+    assert_receive {:jido_connect_mcp, ^session, :status, :failed}
+    assert_receive {:DOWN, ^monitor, :process, ^session, :normal}
   end
 
   test "schema validation finds tools on later pages and rejects malformed lists", state do
