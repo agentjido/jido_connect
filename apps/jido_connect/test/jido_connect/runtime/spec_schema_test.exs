@@ -42,6 +42,29 @@ defmodule Jido.Connect.Runtime.SpecSchemaTest do
     assert length(Enum.uniq_by(projection.actions, & &1.module)) == 2
   end
 
+  test "webhook verification requires a real kind even with other keys" do
+    for verification <- [%{kind: :none, header: "x-signature"}, %{header: "x-signature"}] do
+      trigger =
+        RuntimeFixtures.trigger_attrs()
+        |> Map.merge(%{kind: :webhook, verification: verification})
+
+      assert_raise Connect.Error.ValidationError,
+                   ~r/Webhook trigger must declare verification/,
+                   fn ->
+                     RuntimeFixtures.build_spec(actions: [], triggers: [trigger])
+                   end
+    end
+
+    trigger =
+      RuntimeFixtures.trigger_attrs()
+      |> Map.merge(%{
+        kind: :webhook,
+        verification: %{kind: :hmac_sha256, header: "x-signature"}
+      })
+
+    assert %Connect.Spec{} = RuntimeFixtures.build_spec(actions: [], triggers: [trigger])
+  end
+
   test "spec validation errors use the package taxonomy" do
     assert_raise Connect.Error.ValidationError, ~r/Unknown auth profile/, fn ->
       RuntimeFixtures.spec(%{action: %{auth_profile: :missing}})

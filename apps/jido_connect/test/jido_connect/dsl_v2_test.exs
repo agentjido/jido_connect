@@ -585,6 +585,31 @@ defmodule Jido.Connect.DslV2Test do
     end
   end
 
+  test "DSL rejects webhook verification with kind none and other keys" do
+    assert_raise Spark.Error.DslError, ~r/Webhook trigger must declare verification/, fn ->
+      compile_bad!(
+        quote do
+          triggers do
+            webhook :unverified do
+              id "bad.item.created"
+              resource :item
+              verb :watch
+              data_classification :workspace_metadata
+              label "Unverified webhook"
+              handler Jido.Connect.DslV2Test.Handler
+              verification %{kind: :none, header: "x-signature"}
+
+              access do
+                auth :tenant
+                policies [:tenant_access]
+              end
+            end
+          end
+        end
+      )
+    end
+  end
+
   defp compile_bad!(body, opts \\ []) do
     module = Module.concat(__MODULE__, "BadDsl#{System.unique_integer([:positive])}")
 

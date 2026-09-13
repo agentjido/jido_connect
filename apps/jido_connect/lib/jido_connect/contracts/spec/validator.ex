@@ -83,7 +83,8 @@ defmodule Jido.Connect.Spec.Validator do
             )
     end
 
-    if trigger.kind == :webhook and trigger.verification in [nil, %{kind: :none}] do
+    if trigger.kind == :webhook and
+         not Jido.Connect.WebhookVerification.declared?(trigger.verification) do
       raise Error.validation("Webhook trigger must declare verification",
               reason: :missing_webhook_verification,
               subject: trigger.id

@@ -195,7 +195,7 @@ defmodule Jido.Connect.Dsl.OperationRules do
   end
 
   defp trigger_shape_violations(module, %Dsl.Trigger{kind: :webhook} = trigger) do
-    if trigger.verification in [nil, %{kind: :none}] do
+    unless Jido.Connect.WebhookVerification.declared?(trigger.verification) do
       [
         violation(
           module,
