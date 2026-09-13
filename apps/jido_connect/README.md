@@ -136,9 +136,16 @@ Jido.Connect.invoke(Jido.Connect.GitHub, "github.issue.list", %{repo: "org/repo"
 )
 ```
 
-MCP-backed providers also accept `request_timeout_ms` from the host. The value
+X and Trello adapters also accept `request_timeout_ms` from the host. The value
 must be a positive integer of at most 120,000 milliseconds. The provider keeps
-its documented default when the option is absent.
+its documented default when the option is absent. Core validates this option
+for `invoke/4` and `commit/4` and passes it to the action handler. It does not
+set a deadline for the whole runtime call. X and Trello use the value for their
+remote request. The core MCP bridge uses its action input `timeout` and its
+endpoint default. Other provider REST helpers do not currently use
+`request_timeout_ms`; their own client timeouts apply.
+`prepare/4` does not send a remote request, and polling does not use this
+option.
 
 Use `prepare/4` and `commit/4` for mutations that need confirmation. Prepare
 does not call the provider. It returns an expiring, secret-free snapshot with a
