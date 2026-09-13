@@ -169,16 +169,14 @@ defmodule Jido.Connect.Sanitizer do
   defp do_sanitize_value(value, :transport, opts, depth) when is_tuple(value) do
     %{
       "__type__" => "tuple",
-      "items" =>
-        value
-        |> Tuple.to_list()
-        |> Enum.take(opts[:max_collection])
-        |> Enum.map(&do_sanitize(&1, :transport, opts, depth + 1))
+      "items" => sanitize_tuple_items(value, :transport, opts, depth)
     }
   end
 
-  defp do_sanitize_value(value, :telemetry, opts, _depth) when is_tuple(value) do
+  defp do_sanitize_value(value, :telemetry, opts, depth) when is_tuple(value) do
     value
+    |> sanitize_tuple_items(:telemetry, opts, depth)
+    |> List.to_tuple()
     |> inspect(limit: opts[:max_collection], printable_limit: opts[:max_binary])
     |> truncate_binary(opts[:max_binary])
   end
@@ -187,6 +185,23 @@ defmodule Jido.Connect.Sanitizer do
     value
     |> inspect(limit: opts[:max_collection], printable_limit: opts[:max_binary])
     |> truncate_binary(opts[:max_binary])
+  end
+
+  defp sanitize_tuple_items(value, profile, opts, depth) do
+    items = value |> Tuple.to_list() |> Enum.take(opts[:max_collection])
+
+    case items do
+      [key, item] when is_atom(key) or is_binary(key) ->
+        sanitized_item =
+          if sensitive_key?(key),
+            do: "[redacted]",
+            else: do_sanitize(item, profile, opts, depth + 1)
+
+        [do_sanitize(key, profile, opts, depth + 1), sanitized_item]
+
+      _other ->
+        Enum.map(items, &do_sanitize(&1, profile, opts, depth + 1))
+    end
   end
 
   defp sanitize_key(key, :telemetry), do: key

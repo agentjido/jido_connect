@@ -29,6 +29,35 @@ defmodule Jido.Connect.SanitizerTest do
            } = Sanitizer.sanitize(value, :transport)
   end
 
+  test "redacts keyword and header pairs in both profiles" do
+    value = [access_token: "secret-token", safe: "visible"]
+    headers = [{"authorization", "Bearer secret-header"}]
+
+    assert [%{"__type__" => "tuple", "items" => ["access_token", "[redacted]"]}, _] =
+             Sanitizer.sanitize(value, :transport)
+
+    for profile <- [:telemetry, :transport] do
+      sanitized = Sanitizer.sanitize(%{options: value, headers: headers}, profile)
+
+      refute inspect(sanitized) =~ "secret-token"
+      refute inspect(sanitized) =~ "secret-header"
+      assert inspect(sanitized) =~ "visible"
+      assert inspect(sanitized) =~ "[redacted]"
+    end
+  end
+
+  test "recursively redacts maps inside tuples" do
+    value = {:transport_error, %{access_token: "secret-token", safe: "visible"}}
+
+    for profile <- [:telemetry, :transport] do
+      sanitized = Sanitizer.sanitize(value, profile)
+
+      refute inspect(sanitized) =~ "secret-token"
+      assert inspect(sanitized) =~ "visible"
+      assert inspect(sanitized) =~ "[redacted]"
+    end
+  end
+
   test "bounds large values and converts transport payloads to public-safe shapes" do
     sanitized =
       Sanitizer.sanitize(

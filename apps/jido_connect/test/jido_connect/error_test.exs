@@ -77,6 +77,17 @@ defmodule Jido.Connect.ErrorTest do
     refute inspect(error.details) =~ "temporarily unavailable"
   end
 
+  test "provider error details redact secrets nested in transport tuples" do
+    error =
+      Error.provider("Request failed",
+        provider: :demo,
+        details: %{reason: {:invalid_header, %{access_token: "secret-token"}}}
+      )
+
+    refute inspect(error) =~ "secret-token"
+    refute inspect(Error.to_map(error)) =~ "secret-token"
+  end
+
   test "blocks blind retries for uncertain non-idempotent mutations" do
     action =
       RuntimeFixtures.spec(%{
