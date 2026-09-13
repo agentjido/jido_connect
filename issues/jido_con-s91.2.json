@@ -5,7 +5,7 @@
     "jido_con-s91.3"
   ],
   "created": "2026-09-13T19:17:39Z",
-  "description": "Confirm requested MCP scope, inventory ExMCP APIs, implement Connect operations and host boundaries, test real protocol behavior and safety. Do not modify jido_mcp or ExMCP source.",
+  "description": "Confirmed user scope: full MCP client support for tools, resources, prompts, notifications, and connection lifecycle. ExMCP owns protocol and transports. Add paginated discovery, resource reads/templates, prompt retrieval/completion, endpoint ping/status, and a host-owned notification session with lease fencing and cleanup. Preserve safe tool writes and host callback ownership. No MCP server publication. Do not modify jido_mcp or ExMCP.",
   "id": "jido_con-s91.2",
   "labels": [],
   "parent": "jido_con-s91",
@@ -13,5 +13,5 @@
   "status": "open",
   "title": "Complete Connect MCP capability coverage with ExMCP",
   "type": "task",
-  "updated_at": "2026-09-13T19:17:47Z"
+  "updated_at": "2026-09-13T19:19:28Z"
 }
