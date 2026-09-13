@@ -88,6 +88,22 @@ defmodule Jido.Connect.ErrorTest do
     refute inspect(Error.to_map(error)) =~ "secret-token"
   end
 
+  test "provider error reasons use codes without raw transport values" do
+    raw_reason = {:invalid_header_value, "authorization", "secret-token"}
+
+    error =
+      Error.provider("Request failed",
+        provider: :demo,
+        reason: raw_reason,
+        details: %{reason: raw_reason}
+      )
+
+    assert error.reason == :invalid_header_value
+    assert error.details.reason == :invalid_header_value
+    refute inspect(error) =~ "secret-token"
+    refute inspect(Error.to_map(error)) =~ "secret-token"
+  end
+
   test "blocks blind retries for uncertain non-idempotent mutations" do
     action =
       RuntimeFixtures.spec(%{

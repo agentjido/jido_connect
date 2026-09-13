@@ -4,7 +4,9 @@ defmodule Jido.Connect.ProviderResponse do
 
   This struct is for observability, error reporting, retries, and host UIs. It
   is not a provider domain object. Provider clients still own success payload
-  normalization into action outputs or trigger signals.
+  normalization into action outputs or trigger signals. `reason` is a stable
+  atom code. `reason_details` contains value-free diagnostic shape data. Raw
+  transport reasons are not retained.
   """
 
   alias Jido.Connect.Sanitizer
@@ -15,7 +17,8 @@ defmodule Jido.Connect.ProviderResponse do
               provider: Zoi.atom(),
               operation: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               status: Zoi.integer() |> Zoi.nullish() |> Zoi.optional(),
-              reason: Zoi.any() |> Zoi.nullish() |> Zoi.optional(),
+              reason: Zoi.atom() |> Zoi.nullish() |> Zoi.optional(),
+              reason_details: Zoi.map() |> Zoi.default(%{}),
               request_id: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               retry_after: Zoi.integer() |> Zoi.nullish() |> Zoi.optional(),
               delivery:
@@ -36,8 +39,8 @@ defmodule Jido.Connect.ProviderResponse do
   defstruct Zoi.Struct.struct_fields(@schema)
 
   def schema, do: @schema
-  def new!(attrs), do: Zoi.parse!(@schema, attrs)
-  def new(attrs), do: Zoi.parse(@schema, attrs)
+  def new!(attrs), do: Zoi.parse!(@schema, normalize_reason_attrs(attrs))
+  def new(attrs), do: Zoi.parse(@schema, normalize_reason_attrs(attrs))
 
   @doc "Normalizes a Req-style response or transport error."
   @spec from_result(atom(), term(), keyword()) :: {:ok, t()} | {:error, term()}
@@ -112,7 +115,12 @@ defmodule Jido.Connect.ProviderResponse do
       provider: response.provider,
       operation: response.operation,
       status: response.status,
-      reason: response.reason,
+      reason: reason_code(response.reason),
+      reason_details:
+        response.reason
+        |> reason_details()
+        |> Map.merge(safe_reason_details(response.reason_details))
+        |> Sanitizer.sanitize(:transport),
       request_id: response.request_id,
       retry_after: response.retry_after,
       delivery: response.delivery,
@@ -149,7 +157,7 @@ defmodule Jido.Connect.ProviderResponse do
     %{
       provider: provider,
       operation: operation(opts),
-      reason: transport_reason(reason),
+      reason: reason,
       delivery: delivery_for_error(reason, opts),
       action_risk: action_risk(opts),
       mutation?: mutation?(opts),
@@ -221,7 +229,7 @@ defmodule Jido.Connect.ProviderResponse do
 
   defp delivery_for_error(reason, opts) do
     Keyword.get_lazy(opts, :delivery, fn ->
-      case transport_reason(reason) do
+      case reason_code(reason) do
         value when value in [:econnrefused, :nxdomain, :enetunreach, :ehostunreach] ->
           :not_sent
 
@@ -231,8 +239,63 @@ defmodule Jido.Connect.ProviderResponse do
     end)
   end
 
-  defp transport_reason(%{reason: reason}), do: reason
-  defp transport_reason(reason), do: reason
+  defp normalize_reason_attrs(attrs) when is_map(attrs) do
+    raw_reason = Map.get(attrs, :reason, Map.get(attrs, "reason"))
+    existing_details = Map.get(attrs, :reason_details, Map.get(attrs, "reason_details", %{}))
+    generated_details = reason_details(raw_reason)
+
+    details =
+      if generated_details == %{},
+        do: safe_reason_details(existing_details),
+        else: generated_details
+
+    attrs
+    |> Map.delete("reason")
+    |> Map.delete("reason_details")
+    |> Map.put(:reason, reason_code(raw_reason))
+    |> Map.put(:reason_details, details)
+  end
+
+  defp normalize_reason_attrs(attrs), do: attrs
+
+  @doc false
+  @spec reason_code(term()) :: atom() | nil
+  def reason_code(%{reason: reason}), do: reason_code(reason)
+  def reason_code(nil), do: nil
+  def reason_code(reason) when is_atom(reason) and reason not in [true, false], do: reason
+
+  def reason_code(reason) when is_tuple(reason) and tuple_size(reason) > 0 do
+    case elem(reason, 0) do
+      code when is_atom(code) and code not in [nil, true, false] -> code
+      _other -> :transport_error
+    end
+  end
+
+  def reason_code(_reason), do: :transport_error
+
+  defp reason_details(%_module{}), do: %{source: :exception}
+
+  defp reason_details(reason) when is_tuple(reason),
+    do: %{source: :tuple, arity: tuple_size(reason)}
+
+  defp reason_details(reason) when is_binary(reason),
+    do: %{source: :text, bytes: byte_size(reason)}
+
+  defp reason_details(reason) when is_map(reason), do: %{source: :map}
+  defp reason_details(_reason), do: %{}
+
+  defp safe_reason_details(%{source: :tuple, arity: arity})
+       when is_integer(arity) and arity >= 0,
+       do: %{source: :tuple, arity: arity}
+
+  defp safe_reason_details(%{source: :text, bytes: bytes})
+       when is_integer(bytes) and bytes >= 0,
+       do: %{source: :text, bytes: bytes}
+
+  defp safe_reason_details(%{source: source}) when source in [:exception, :map],
+    do: %{source: source}
+
+  defp safe_reason_details(_details), do: %{}
 
   defp action_risk(opts), do: Keyword.get(opts, :action_risk, Keyword.get(opts, :risk))
 

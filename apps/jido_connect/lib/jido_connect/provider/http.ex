@@ -83,7 +83,7 @@ defmodule Jido.Connect.Http do
     {:error,
      Error.provider(message,
        provider: provider,
-       reason: Keyword.get(opts, :reason, :http_error),
+       reason: response.reason || :http_error,
        status: status,
        delivery: response.delivery,
        action_risk: response.action_risk,
@@ -111,7 +111,11 @@ defmodule Jido.Connect.Http do
        action_risk: response.action_risk,
        mutation?: response.mutation?,
        provider_idempotency?: response.provider_idempotency?,
-       details: %{reason: reason, response: ProviderResponse.to_public_map(response)}
+       details: %{
+         reason: response.reason,
+         reason_details: response.reason_details,
+         response: ProviderResponse.to_public_map(response)
+       }
      )}
   end
 

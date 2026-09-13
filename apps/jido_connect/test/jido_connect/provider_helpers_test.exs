@@ -199,6 +199,42 @@ defmodule Jido.Connect.ProviderHelpersTest do
     refute inspect(delivery) =~ "secret"
   end
 
+  test "transport reasons are stable, public, and safe to encode" do
+    secret = "provider-secret-#{System.unique_integer([:positive])}"
+    raw_reason = {:invalid_header_value, "authorization", secret}
+    response = ProviderResponse.from_result!(:demo, {:error, raw_reason})
+
+    assert response.reason == :invalid_header_value
+    assert response.reason_details == %{source: :tuple, arity: 3}
+
+    public = ProviderResponse.to_public_map(response)
+    assert public.reason == :invalid_header_value
+    assert public.reason_details == %{"source" => "tuple", "arity" => 3}
+    assert is_binary(Jason.encode!(public))
+    refute inspect(response) =~ secret
+
+    assert {:error, error} = Http.provider_error({:error, raw_reason}, provider: :demo)
+    refute inspect(error) =~ secret
+    refute inspect(Connect.Error.to_map(error)) =~ secret
+
+    assert {:error, status_error} =
+             Http.provider_error({:ok, %{status: 400, body: %{}}},
+               provider: :demo,
+               reason: raw_reason
+             )
+
+    refute inspect(status_error) =~ secret
+    refute inspect(Connect.Error.to_map(status_error)) =~ secret
+
+    direct = ProviderResponse.new!(%{provider: :demo, reason: raw_reason})
+    assert direct.reason == :invalid_header_value
+    refute inspect(direct) =~ secret
+
+    literal = %{response | reason: raw_reason, reason_details: %{raw: secret}}
+    assert ProviderResponse.to_public_map(literal).reason == :invalid_header_value
+    refute inspect(literal) =~ secret
+  end
+
   test "polling helpers manage checkpoint params" do
     assert Polling.put_checkpoint_param([state: "all"], :since, nil) == [state: "all"]
 

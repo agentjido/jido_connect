@@ -236,6 +236,10 @@ defmodule Jido.Connect.Error do
     opts =
       opts
       |> normalize_opts()
+      |> Keyword.update(:reason, nil, &normalize_transport_tuple_reason/1)
+
+    opts =
+      opts
       |> Keyword.put_new(:delivery, infer_delivery(opts))
       |> Keyword.put_new(:mutation?, false)
       |> Keyword.put_new(:provider_idempotency?, false)
@@ -486,6 +490,8 @@ defmodule Jido.Connect.Error do
 
   defp sanitize_provider_opts(opts) do
     Keyword.update(opts, :details, %{}, fn details ->
+      details = normalize_provider_detail_reason(details)
+
       Jido.Connect.Sanitizer.sanitize_provider_details(details, :telemetry,
         max_depth: 6,
         max_binary: 256,
@@ -493,4 +499,17 @@ defmodule Jido.Connect.Error do
       )
     end)
   end
+
+  defp normalize_provider_detail_reason(%{reason: raw_reason} = details),
+    do: %{details | reason: normalize_transport_tuple_reason(raw_reason)}
+
+  defp normalize_provider_detail_reason(%{"reason" => raw_reason} = details),
+    do: Map.put(details, "reason", normalize_transport_tuple_reason(raw_reason))
+
+  defp normalize_provider_detail_reason(details), do: details
+
+  defp normalize_transport_tuple_reason(reason) when is_tuple(reason),
+    do: Jido.Connect.ProviderResponse.reason_code(reason)
+
+  defp normalize_transport_tuple_reason(reason), do: reason
 end
