@@ -300,6 +300,61 @@ defmodule Jido.Connect.Runtime.SpecSchemaTest do
     end
   end
 
+  test "exported field schemas keep descriptions and examples" do
+    fields = [
+      Connect.Field.new!(%{
+        name: :title,
+        type: :string,
+        required?: true,
+        description: "Title to show",
+        example: "Example title"
+      }),
+      Connect.Field.new!(%{
+        name: :count,
+        type: :integer,
+        description: "Number of items",
+        example: 0
+      }),
+      Connect.Field.new!(%{
+        name: :roles,
+        type: {:array, :string},
+        enum: ["reader", "writer"],
+        description: "Allowed roles",
+        example: ["reader"]
+      })
+    ]
+
+    schema = Connect.zoi_schema_from_fields(fields) |> Connect.Schema.to_json_schema()
+
+    assert schema["properties"]["title"]["description"] == "Title to show"
+    assert schema["properties"]["title"]["example"] == "Example title"
+    assert schema["properties"]["count"]["description"] == "Number of items"
+    assert schema["properties"]["count"]["example"] == 0
+    assert schema["properties"]["roles"]["description"] == "Allowed roles"
+    assert schema["properties"]["roles"]["example"] == ["reader"]
+
+    overlay_field =
+      Connect.Field.new!(%{
+        name: :external,
+        type: :string,
+        description: "External ID",
+        example: "ext-1",
+        json_schema: %{"type" => "string", "pattern" => "^ext-"}
+      })
+
+    overlay_schema =
+      [overlay_field]
+      |> Connect.zoi_schema_from_fields()
+      |> Connect.Schema.to_json_schema([overlay_field])
+
+    assert overlay_schema["properties"]["external"] == %{
+             "type" => "string",
+             "pattern" => "^ext-",
+             "description" => "External ID",
+             "example" => "ext-1"
+           }
+  end
+
   test "numeric enum limits and JSON Schema types agree" do
     fields = [
       Connect.Field.new!(%{

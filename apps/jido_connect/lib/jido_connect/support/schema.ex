@@ -63,10 +63,19 @@ defmodule Jido.Connect.Schema do
        when is_list(values) do
     element_schema = zoi_type(element_type)
     Enum.each(values, &validate_field_value!(element_schema, &1, field, :enum))
-    Zoi.list(Zoi.one_of(element_schema, values))
+    Zoi.list(Zoi.one_of(element_schema, values), field_guidance(field))
   end
 
-  defp base_field_type(%Field{type: type}), do: zoi_type(type)
+  defp base_field_type(%Field{type: type} = field), do: zoi_type(type, field_guidance(field))
+
+  defp field_guidance(%Field{} = field) do
+    []
+    |> maybe_guidance(:description, field.description)
+    |> maybe_guidance(:example, field.example)
+  end
+
+  defp maybe_guidance(opts, _key, nil), do: opts
+  defp maybe_guidance(opts, key, value), do: Keyword.put(opts, key, value)
 
   defp validate_enum_and_default!(base_schema, %Field{} = field) do
     unless match?({:array, _}, field.type) do
@@ -98,15 +107,17 @@ defmodule Jido.Connect.Schema do
           )
   end
 
-  defp zoi_type(:string), do: Zoi.string()
-  defp zoi_type(:integer), do: Zoi.integer()
-  defp zoi_type(:number), do: Zoi.number()
-  defp zoi_type(:boolean), do: Zoi.boolean()
-  defp zoi_type(:map), do: Zoi.map()
-  defp zoi_type(:any), do: Zoi.any()
-  defp zoi_type({:array, type}), do: Zoi.list(zoi_type(type))
+  defp zoi_type(type, opts \\ [])
 
-  defp zoi_type(type) do
+  defp zoi_type(:string, opts), do: Zoi.string(opts)
+  defp zoi_type(:integer, opts), do: Zoi.integer(opts)
+  defp zoi_type(:number, opts), do: Zoi.number(opts)
+  defp zoi_type(:boolean, opts), do: Zoi.boolean(opts)
+  defp zoi_type(:map, opts), do: Zoi.map(opts)
+  defp zoi_type(:any, opts), do: Zoi.any(opts)
+  defp zoi_type({:array, type}, opts), do: Zoi.list(zoi_type(type), opts)
+
+  defp zoi_type(type, _opts) do
     raise Error.validation("Unsupported integration field type",
             reason: :unsupported_field_type,
             subject: type
@@ -195,8 +206,14 @@ defmodule Jido.Connect.Schema do
 
     properties =
       Enum.reduce(fields, properties, fn
-        %Field{name: name, json_schema: json_schema}, acc when is_map(json_schema) ->
-          Map.put(acc, Atom.to_string(name), json_safe(json_schema))
+        %Field{name: name, json_schema: json_schema} = field, acc when is_map(json_schema) ->
+          overlay =
+            json_schema
+            |> json_safe()
+            |> maybe_schema_guidance("description", field.description)
+            |> maybe_schema_guidance("example", field.example)
+
+          Map.put(acc, Atom.to_string(name), overlay)
 
         %Field{}, acc ->
           acc
@@ -204,6 +221,9 @@ defmodule Jido.Connect.Schema do
 
     Map.put(schema, "properties", properties)
   end
+
+  defp maybe_schema_guidance(schema, _key, nil), do: schema
+  defp maybe_schema_guidance(schema, key, value), do: Map.put_new(schema, key, json_safe(value))
 
   @doc false
   @spec at_least_one_of([atom() | String.t()]) :: map()
