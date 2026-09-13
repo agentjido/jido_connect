@@ -17,6 +17,38 @@ defmodule Jido.Connect.Jido.RuntimeTest do
     def resolve(_selector), do: raise("tuple resolver exploded")
   end
 
+  defmodule CaptureOptionsHandler do
+    def run(input, %{context: %{metadata: %{test_pid: test_pid}}} = runtime) do
+      send(test_pid, {:runtime_controls, runtime.provider_client, runtime.request_timeout_ms})
+      {:ok, input}
+    end
+  end
+
+  defmodule CaptureOptionsIntegration do
+    def integration do
+      Jido.Connect.RuntimeFixtures.spec(%{
+        action: %{handler: Jido.Connect.Jido.RuntimeTest.CaptureOptionsHandler}
+      })
+    end
+  end
+
+  test "generated actions forward trusted provider client and timeout controls" do
+    spec = CaptureOptionsIntegration.integration()
+    projection = ProjectionBuilder.build(CaptureOptionsIntegration, spec)
+    {context, lease} = RuntimeFixtures.context_and_lease()
+    context = %{context | metadata: %{test_pid: self()}}
+
+    assert {:ok, %{repo: "org/repo"}} =
+             Connect.JidoActionRuntime.run(hd(projection.actions), %{repo: "org/repo"}, %{
+               integration_context: context,
+               credential_lease: lease,
+               provider_client: CaptureOptionsHandler,
+               request_timeout_ms: 5_432
+             })
+
+    assert_received {:runtime_controls, CaptureOptionsHandler, 5_432}
+  end
+
   test "generated availability keeps host policy requirements" do
     spec =
       RuntimeFixtures.spec(%{

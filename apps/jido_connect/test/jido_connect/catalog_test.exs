@@ -711,6 +711,35 @@ defmodule Jido.Connect.CatalogTest do
     assert Keyword.fetch!(opts, :type) == :action
   end
 
+  test "catalog actions forward trusted provider client and timeout controls" do
+    alias Jido.Connect.Catalog.Input
+
+    action_context = %{
+      config: %{modules: [CatalogFixtures.Integration]},
+      provider_client: __MODULE__,
+      request_timeout_ms: 5_432
+    }
+
+    assert {:ok, "catalog.item.get", %{id: "item_1"}, opts} =
+             Input.call_params(
+               %{tool_id: "catalog.item.get", input: %{id: "item_1"}},
+               action_context
+             )
+
+    assert Keyword.fetch!(opts, :provider_client) == __MODULE__
+    assert Keyword.fetch!(opts, :request_timeout_ms) == 5_432
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :invalid_filters}} =
+             Input.call_params(
+               %{
+                 tool_id: "catalog.item.get",
+                 input: %{id: "item_1"},
+                 filters: %{provider_client: __MODULE__}
+               },
+               action_context
+             )
+  end
+
   test "catalog actions validate and execute through Jido Action v3" do
     modules = [CatalogFixtures.Integration]
 

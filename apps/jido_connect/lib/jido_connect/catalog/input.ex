@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Catalog.Input do
   @moduledoc false
 
-  alias Jido.Connect.{Data, Error}
+  alias Jido.Connect.{Data, Error, RuntimeControls}
 
   @runtime_keys [
     :modules,
@@ -12,9 +12,7 @@ defmodule Jido.Connect.Catalog.Input do
     :connection,
     :connection_id,
     :connection_resolver,
-    :connection_selector,
-    :policy,
-    :policy_context
+    :connection_selector
   ]
 
   @filter_keys [
@@ -88,7 +86,7 @@ defmodule Jido.Connect.Catalog.Input do
   defp context_opts(action_context) when is_map(action_context) do
     action_context
     |> normalize_opts()
-    |> Keyword.take(@runtime_keys)
+    |> Keyword.take(@runtime_keys ++ RuntimeControls.keys())
   end
 
   defp context_opts(_action_context), do: []
