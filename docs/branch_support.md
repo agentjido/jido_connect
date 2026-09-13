@@ -24,7 +24,7 @@ ready for external adoption and has no cross-prerelease compatibility promise.
 
 Alpha and beta Hex dependencies are allowed. Prefer an exact prerelease
 requirement during development so that an upstream update is deliberate.
-Commit lockfiles for both the umbrella and the demo. An upstream package that
+Commit the shared lockfile used by the umbrella and the demo. An upstream package that
 is not yet on Hex can use an exact Git commit. Do not use floating branches or
 machine-specific paths as the normal dependency contract.
 
