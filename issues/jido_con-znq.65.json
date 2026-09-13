@@ -9,9 +9,15 @@
     "v3-release-blocker"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Resolved in 6162a54e: numeric enum and JSON Schema guard. Focused tests passed. Full umbrella mix quality and demo format, warnings-as-errors compile, and 21 demo tests passed for this batch.",
+      "timestamp": "2026-09-13T22:37:37Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Guard upstream Zoi enum constraint and JSON type mismatches",
   "type": "task",
-  "updated_at": "2026-09-13T22:32:54Z"
+  "updated_at": "2026-09-13T22:37:37Z"
 }
