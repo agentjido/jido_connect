@@ -47,6 +47,26 @@ defmodule Jido.Connect.Microsoft.ConnectionsTest do
     assert connection.metadata == %{mode: :microsoft_oauth, source: :test}
   end
 
+  test "keeps two accounts for one owner distinct with explicit IDs" do
+    opts = [tenant_id: "tenant_1", owner_id: "user_1"]
+
+    assert {:ok, first} =
+             Connections.user_connection(
+               %{"id" => "account-1"},
+               opts ++ [id: "microsoft:user_1:account-1"]
+             )
+
+    assert {:ok, second} =
+             Connections.user_connection(
+               %{"id" => "account-2"},
+               opts ++ [id: "microsoft:user_1:account-2"]
+             )
+
+    assert first.owner_id == second.owner_id
+    assert first.id != second.id
+    assert first.subject.microsoft_account_id != second.subject.microsoft_account_id
+  end
+
   test "builds tenant-owned Microsoft application connections" do
     assert {:ok, %Connection{} = connection} =
              Connections.application_connection(

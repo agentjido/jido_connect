@@ -47,6 +47,33 @@ leases. The connector DSL can declare policy requirements such as
 requirements to host UIs, but the actual decision about whether an actor may use
 a shared credential belongs to the host app.
 
+Google and Microsoft user connection helpers derive their default ID from the
+application `owner_id`. If one user links two accounts from the same provider,
+the host must pass a different `id:` for each account and keep that ID stable
+when it renews the connection. For example:
+
+```elixir
+{:ok, first} =
+  Jido.Connect.Google.Connections.user_connection(
+    %{"sub" => "google-account-1"},
+    tenant_id: "tenant_1",
+    owner_id: "user_1",
+    id: "google:user_1:google-account-1"
+  )
+
+{:ok, second} =
+  Jido.Connect.Google.Connections.user_connection(
+    %{"sub" => "google-account-2"},
+    tenant_id: "tenant_1",
+    owner_id: "user_1",
+    id: "google:user_1:google-account-2"
+  )
+```
+
+The same rule applies to `Jido.Connect.Microsoft.Connections.user_connection/2`.
+Use its account ID in the host-selected connection ID. Do not use an access
+token or other secret as an ID.
+
 ## Host Policy
 
 Pass a policy callback when actor-level authorization matters:

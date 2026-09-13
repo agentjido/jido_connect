@@ -45,6 +45,26 @@ defmodule Jido.Connect.Google.ConnectionsTest do
     assert connection.metadata.mode == :google_service_account
   end
 
+  test "keeps two accounts for one owner distinct with explicit IDs" do
+    opts = [tenant_id: "tenant_1", owner_id: "user_1"]
+
+    assert {:ok, first} =
+             Connections.user_connection(
+               %{"sub" => "account-1"},
+               opts ++ [id: "google:user_1:account-1"]
+             )
+
+    assert {:ok, second} =
+             Connections.user_connection(
+               %{"sub" => "account-2"},
+               opts ++ [id: "google:user_1:account-2"]
+             )
+
+    assert first.owner_id == second.owner_id
+    assert first.id != second.id
+    assert first.subject.google_account_id != second.subject.google_account_id
+  end
+
   test "builds domain delegated service account connection metadata" do
     assert {:ok, %Connection{} = connection} =
              Connections.domain_delegated_service_account_connection(

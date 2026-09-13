@@ -10,7 +10,12 @@ defmodule Jido.Connect.Google.Connections do
   alias Jido.Connect.{Connection, Data}
   alias Jido.Connect.Google.{Account, AuthProfiles, Scopes}
 
-  @doc "Builds a user-level Google OAuth connection."
+  @doc """
+  Builds a user-level Google OAuth connection.
+
+  The default ID uses only `owner_id`. Pass a distinct `:id` for each Google
+  account when one application user connects more than one account.
+  """
   @spec user_connection(map() | keyword(), keyword()) :: {:ok, Connection.t()} | {:error, term()}
   def user_connection(opts) when is_list(opts), do: user_connection(%{}, opts)
 
