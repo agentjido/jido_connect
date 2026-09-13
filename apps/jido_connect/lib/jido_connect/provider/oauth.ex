@@ -8,18 +8,17 @@ defmodule Jido.Connect.OAuth do
   basic Req client defaults.
   """
 
-  alias Jido.Connect.Error
+  alias Jido.Connect.{Error, Http}
 
   @user_agent "jido-connect"
 
   @spec authorize_url(String.t(), map() | keyword()) :: String.t()
   def authorize_url(endpoint, params) when is_binary(endpoint) do
-    query =
+    params =
       params
       |> Enum.reject(fn {_key, value} -> is_nil(value) or value == "" end)
-      |> URI.encode_query()
 
-    endpoint <> "?" <> query
+    Http.url_with_query(endpoint, params)
   end
 
   @spec fetch_required!(keyword(), atom(), String.t()) :: term()

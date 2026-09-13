@@ -22,6 +22,23 @@ defmodule Jido.Connect.ProviderHelpersTest do
              "scope" => "read write"
            }
 
+    configured_url =
+      OAuth.authorize_url("https://provider.test/oauth/authorize?tenant=one",
+        client_id: "client",
+        state: "state",
+        empty: "",
+        missing: nil
+      )
+
+    assert configured_url |> URI.parse() |> Map.fetch!(:query) |> URI.decode_query() == %{
+             "tenant" => "one",
+             "client_id" => "client",
+             "state" => "state"
+           }
+
+    assert OAuth.authorize_url("https://provider.test/oauth/authorize?tenant=one", empty: "") ==
+             "https://provider.test/oauth/authorize?tenant=one"
+
     System.put_env("JIDO_CONNECT_TEST_SECRET", "secret")
 
     on_exit(fn ->
