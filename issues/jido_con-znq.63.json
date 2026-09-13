@@ -5,11 +5,13 @@
   "created": "2026-09-13T20:05:46Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: design improvement.\n\nSource task: 01a09c57-2f9c-7a11-b8d1-4c833aa020b2\n\n- **P2, before optional package publication — tighten the minimum core requirement.** [SharePoint’s manifest](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_microsoft_sharepoint/mix.exs:47) permits core `0.8.0`, but its [declarations](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_microsoft_sharepoint/lib/jido_connect/microsoft_sharepoint/actions/document_libraries.ex:29) use field constraints absent from the `v0.8.0` core source. Set the minimum to the core version that supplies these contracts. Verify the package in a separate consumer project. This is a publication preparation gap; no failed Hex installation is claimed.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.63",
-  "labels": [],
+  "labels": [
+    "v3-follow-up"
+  ],
   "parent": "jido_con-znq",
   "priority": 2,
   "status": "open",
   "title": "tighten the minimum core requirement",
   "type": "task",
-  "updated_at": "2026-09-13T20:05:46Z"
+  "updated_at": "2026-09-13T21:59:42Z"
 }
