@@ -5,6 +5,9 @@ defmodule Jido.Connect.Catalog.Pack do
   Packs are data/configuration only. Hosts can keep them in app config,
   database rows, feature flags, or any other storage layer and pass them into
   catalog calls when they want to expose a restricted subset of tools.
+
+  Pack filters accept the supported provider and item keys. Unknown keys are
+  errors. A pack has the same restrictions before and after JSON storage.
   """
 
   alias Jido.Connect.{Data, Error, Sanitizer}
@@ -17,6 +20,26 @@ defmodule Jido.Connect.Catalog.Pack do
     ToolLookup,
     ToolSearchResult
   }
+
+  @filter_keys [
+    :status,
+    :category,
+    :visibility,
+    :package,
+    :tag,
+    :provider,
+    :type,
+    :resource,
+    :verb,
+    :data_classification,
+    :risk,
+    :confirmation,
+    :auth_kind,
+    :auth_profile,
+    :scope,
+    :tool_tag,
+    :tool
+  ]
 
   @schema Zoi.struct(
             __MODULE__,
@@ -47,14 +70,25 @@ defmodule Jido.Connect.Catalog.Pack do
   def schema, do: @schema
 
   @doc "Builds a catalog pack or returns a validation error."
-  def new(attrs), do: Zoi.parse(@schema, attrs)
+  def new(attrs) do
+    with {:ok, pack} <- Zoi.parse(@schema, attrs),
+         :ok <- validate_filter_keys(pack.filters) do
+      {:ok, pack}
+    end
+  end
 
   @doc "Builds a catalog pack or raises on invalid data."
-  def new!(attrs), do: Zoi.parse!(@schema, attrs)
+  def new!(attrs) do
+    pack = Zoi.parse!(@schema, attrs)
+    validate_filter_keys!(pack.filters)
+    pack
+  end
 
   @doc "Resolves one supplied reviewed pack without pack discovery."
   @spec resolve_exact(t() | map()) :: {:ok, t()} | {:error, Error.error()}
-  def resolve_exact(%__MODULE__{} = pack), do: {:ok, normalize_pack(pack)}
+  def resolve_exact(%__MODULE__{} = pack) do
+    with :ok <- validate_filter_keys(pack.filters), do: {:ok, normalize_pack(pack)}
+  end
 
   def resolve_exact(%{} = attrs) do
     attrs
@@ -164,7 +198,10 @@ defmodule Jido.Connect.Catalog.Pack do
   @doc false
   def resolve(nil, _opts), do: {:ok, nil}
   def resolve("", _opts), do: {:ok, nil}
-  def resolve(%__MODULE__{} = pack, _opts), do: {:ok, normalize_pack(pack)}
+
+  def resolve(%__MODULE__{} = pack, _opts) do
+    with :ok <- validate_filter_keys(pack.filters), do: {:ok, normalize_pack(pack)}
+  end
 
   def resolve(%{} = attrs, _opts) do
     attrs
@@ -292,7 +329,9 @@ defmodule Jido.Connect.Catalog.Pack do
     end
   end
 
-  defp normalize_one_pack(%__MODULE__{} = pack), do: {:ok, normalize_pack(pack)}
+  defp normalize_one_pack(%__MODULE__{} = pack) do
+    with :ok <- validate_filter_keys(pack.filters), do: {:ok, normalize_pack(pack)}
+  end
 
   defp normalize_one_pack(%{} = attrs) do
     attrs
@@ -354,35 +393,65 @@ defmodule Jido.Connect.Catalog.Pack do
     do: tool_allowed?(pack, tool)
 
   defp normalize_filter_opts(filters) when is_map(filters) or is_list(filters) do
-    Enum.map(filters, fn {key, value} -> {normalize_filter_key(key), value} end)
+    Enum.map(filters, fn {key, value} ->
+      case normalize_filter_key(key) do
+        {:ok, normalized_key} ->
+          {normalized_key, value}
+
+        :error ->
+          {:error, error} = unsupported_filter(key)
+          raise error
+      end
+    end)
   end
 
   defp normalize_filter_opts(_filters), do: []
 
-  defp normalize_filter_key(key) when is_atom(key), do: key
+  defp normalize_filter_key(key) when is_atom(key) do
+    if key in @filter_keys, do: {:ok, key}, else: :error
+  end
 
   defp normalize_filter_key(key) when is_binary(key) do
-    case key do
-      "provider" -> :provider
-      "type" -> :type
-      "resource" -> :resource
-      "verb" -> :verb
-      "data_classification" -> :data_classification
-      "risk" -> :risk
-      "confirmation" -> :confirmation
-      "auth_kind" -> :auth_kind
-      "auth_profile" -> :auth_profile
-      "scope" -> :scope
-      "tool_tag" -> :tool_tag
-      "tool" -> :tool
-      _other -> :unknown_filter
+    Enum.find_value(@filter_keys, :error, fn allowed ->
+      if Atom.to_string(allowed) == key, do: {:ok, allowed}
+    end)
+  end
+
+  defp normalize_filter_key(_key), do: :error
+
+  defp validate_filter_keys(filters) when is_map(filters) or is_list(filters) do
+    Enum.reduce_while(filters, :ok, fn
+      {key, _value}, :ok ->
+        case normalize_filter_key(key) do
+          {:ok, _normalized_key} -> {:cont, :ok}
+          :error -> {:halt, unsupported_filter(key)}
+        end
+
+      key, :ok ->
+        {:halt, unsupported_filter(key)}
+    end)
+  end
+
+  defp validate_filter_keys(_filters), do: unsupported_filter(:filters)
+
+  defp validate_filter_keys!(filters) do
+    case validate_filter_keys(filters) do
+      :ok -> :ok
+      {:error, error} -> raise error
     end
+  end
+
+  defp unsupported_filter(key) do
+    {:error,
+     Error.validation("Unsupported catalog pack filter",
+       reason: :unsupported_pack_filter,
+       subject: key
+     )}
   end
 
   defp reviewed_filters(filters) when is_map(filters) or is_list(filters) do
     filters
     |> normalize_filter_opts()
-    |> Enum.reject(&(elem(&1, 0) == :unknown_filter))
     |> Map.new()
   end
 

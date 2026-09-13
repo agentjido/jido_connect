@@ -39,6 +39,11 @@ defmodule Jido.Connect.Catalog.Filter do
   @spec items([Jido.Connect.Catalog.Item.t()], keyword()) :: [Jido.Connect.Catalog.Item.t()]
   def items(items, opts) do
     items
+    |> filter_provider_equal(:status, Keyword.get(opts, :status))
+    |> filter_tool_equal(:category, Keyword.get(opts, :category))
+    |> filter_provider_equal(:visibility, Keyword.get(opts, :visibility))
+    |> filter_tool_equal(:package, Keyword.get(opts, :package))
+    |> filter_provider_tag(Keyword.get(opts, :tag))
     |> filter_tool_equal(:provider, Keyword.get(opts, :provider))
     |> filter_tool_equal(:type, Keyword.get(opts, :type))
     |> filter_tool_equal(:resource, Keyword.get(opts, :resource))
@@ -51,6 +56,20 @@ defmodule Jido.Connect.Catalog.Filter do
     |> filter_tool_auth_profile(Keyword.get(opts, :auth_profile))
     |> filter_tool_scope(Keyword.get(opts, :scope))
     |> filter_tool_id(Keyword.get(opts, :tool))
+  end
+
+  defp filter_provider_equal(items, _field, value) when value in [nil, ""], do: items
+
+  defp filter_provider_equal(items, field, value) do
+    value = normalize_filter_value(value)
+    Enum.filter(items, &(Map.get(&1.provider_metadata, field) == value))
+  end
+
+  defp filter_provider_tag(items, tag) when tag in [nil, ""], do: items
+
+  defp filter_provider_tag(items, tag) do
+    tag = normalize_filter_value(tag)
+    Enum.filter(items, &(tag in Map.get(&1.provider_metadata, :tags, [])))
   end
 
   defp filter_equal(entries, _field, value) when value in [nil, ""], do: entries

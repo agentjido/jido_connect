@@ -148,6 +148,52 @@ defmodule Jido.Connect.ReviewedCatalogTest do
              Catalog.reviewed_items(modules, actions)
   end
 
+  test "provider pack filters survive JSON storage and apply to reviewed actions" do
+    modules = [CatalogFixtures.Integration]
+
+    for {key, value} <- [
+          status: :unavailable,
+          category: :productivity,
+          visibility: :private,
+          package: :elsewhere,
+          tag: :not_present
+        ] do
+      pack = Catalog.Pack.new!(%{id: :restricted, filters: %{key => value}})
+
+      encoded = pack |> Map.from_struct() |> Jason.encode!() |> Jason.decode!()
+      assert {:ok, stored_pack} = Catalog.Pack.resolve_exact(encoded)
+
+      assert [] == Catalog.items(modules: modules, pack: pack)
+      assert [] == Catalog.items(modules: modules, pack: stored_pack)
+      assert {:ok, []} = Catalog.reviewed_items(modules, pack)
+      assert {:ok, []} = Catalog.reviewed_items(modules, stored_pack)
+    end
+  end
+
+  test "pack filters reject unsupported atom and string keys" do
+    for filters <- [%{unsupported: true}, %{"unsupported" => true}] do
+      assert {:error, %Jido.Connect.Error.ValidationError{reason: :unsupported_pack_filter}} =
+               Catalog.Pack.new(%{id: :invalid, filters: filters})
+
+      assert {:error, %Jido.Connect.Error.ValidationError{}} =
+               Catalog.Pack.resolve_exact(%{id: :invalid, filters: filters})
+
+      assert_raise Jido.Connect.Error.ValidationError, ~r/Unsupported catalog pack filter/, fn ->
+        Catalog.Pack.new!(%{id: :invalid, filters: filters})
+      end
+
+      %Catalog.Pack{} = base_pack = Catalog.Pack.new!(%{id: :invalid})
+      manual_pack = %{base_pack | filters: filters}
+
+      assert {:error, %Jido.Connect.Error.ValidationError{reason: :unsupported_pack_filter}} =
+               Catalog.Pack.resolve_exact(manual_pack)
+
+      assert_raise Jido.Connect.Error.ValidationError, ~r/Unsupported catalog pack filter/, fn ->
+        Catalog.Pack.apply_filters([], manual_pack)
+      end
+    end
+  end
+
   test "rejects a reviewed pack action that is missing from the exact modules" do
     pack = Catalog.Pack.new!(%{id: :missing, allowed_tools: ["missing.action"]})
 

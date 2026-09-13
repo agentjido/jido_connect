@@ -1030,7 +1030,7 @@ defmodule Jido.Connect.CatalogTest do
     {:ok, action_pack} =
       Pack.resolve_exact(%{
         id: :actions,
-        filters: %{"type" => :action, "unknown" => "ignored"},
+        filters: %{"type" => :action},
         allowed_tools: [{:catalog, "catalog.item.get"}],
         metadata: %{owner: "test"}
       })
@@ -1091,8 +1091,7 @@ defmodule Jido.Connect.CatalogTest do
              Pack.resolve(:bad, packs: [:bad])
 
     assert Pack.apply_filters([pack: :actions, packs: []], action_pack) == [
-             type: :action,
-             unknown_filter: "ignored"
+             type: :action
            ]
 
     assert Pack.apply_filters([provider: :catalog], nil) == [provider: :catalog]
