@@ -1,19 +1,17 @@
 {
-  "assignee": "Mike Hostetler",
+  "assignee": "",
   "blocked_by": [],
   "blocks": [
     "jido_con-s91.3"
   ],
-  "closed_at": "2026-09-13T19:31:26Z",
-  "close_reason": "Client actions, pagination, managed notification sessions, and guide implemented at 996b5c32; 181 core tests pass at 80.56% coverage; 4137 umbrella tests pass",
   "created": "2026-09-13T19:17:39Z",
   "description": "Confirmed user scope: full MCP client support for tools, resources, prompts, notifications, and connection lifecycle. ExMCP owns protocol and transports. Add paginated discovery, resource reads/templates, prompt retrieval/completion, endpoint ping/status, and a host-owned notification session with lease fencing and cleanup. Preserve safe tool writes and host callback ownership. No MCP server publication. Do not modify jido_mcp or ExMCP.",
   "id": "jido_con-s91.2",
   "labels": [],
   "parent": "jido_con-s91",
   "priority": 2,
-  "status": "closed",
+  "status": "open",
   "title": "Complete Connect MCP capability coverage with ExMCP",
   "type": "task",
-  "updated_at": "2026-09-13T19:31:26Z"
+  "updated_at": "2026-09-13T19:33:02Z"
 }
