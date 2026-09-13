@@ -58,11 +58,15 @@
     {
       "text": "Intake complete: all nine source review tasks were archived after exact issue/report verification and successful bw sync. The recurring collection monitor is paused. Implementation issues remain open; no source fixes or publication occurred.",
       "timestamp": "2026-09-13T20:07:08Z"
+    },
+    {
+      "text": "Legacy notification follow-up now has upstream API request https://github.com/azmaveth/ex_mcp/issues/44 linked from existing Connect https://github.com/agentjido/jido_connect/issues/81 . No duplicate Connect issue created. Status-timeout request is ExMCP #43 and Connect #83, tracked in jido_con-znq.37. These remain separate from filter expansion ExMCP #42 / Connect #82.",
+      "timestamp": "2026-09-13T20:14:34Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "Refine Jido Connect v3 from nine independent code reviews",
   "type": "epic",
-  "updated_at": "2026-09-13T20:07:08Z"
+  "updated_at": "2026-09-13T20:14:34Z"
 }
