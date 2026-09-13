@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:05:44Z",
+  "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2f9c-7a11-b8d1-4c833aa020b2\n\n1. **P2 — Linear uses the wrong authorization format for API keys.**  \n   [Transport line 11](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_linear/lib/jido_connect/linear/client/transport.ex:11) always builds a bearer request. [Credential extraction](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_linear/lib/jido_connect/linear/client.ex:253) removes the distinction between API keys and OAuth tokens. The default API-key profile therefore sends `Authorization: Bearer \u003ckey\u003e`. Linear documents a bare API key for this profile and a bearer token for OAuth. [Linear authentication contract](https://linear.app/developers/graphql#authentication)\n\n   A local check confirmed both profiles produce bearer headers. The transport test also expects this format. **Smallest correction:** carry the authentication kind into request construction. Test both header forms and correct the API-key setup metadata.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
+  "id": "jido_con-znq.61",
+  "labels": [],
+  "parent": "jido_con-znq",
+  "priority": 2,
+  "status": "open",
+  "title": "Linear uses the wrong authorization format for API keys",
+  "type": "bug",
+  "updated_at": "2026-09-13T20:05:44Z"
+}
