@@ -87,7 +87,12 @@ defmodule Jido.Connect.Dev.ProviderScaffold do
         ]
       end
 
-      def application, do: [extra_applications: [:logger]]
+      def application do
+        [
+          extra_applications: [:logger],
+          env: [jido_connect_providers: [Jido.Connect.#{module}]]
+        ]
+      end
 
       defp deps do
         [

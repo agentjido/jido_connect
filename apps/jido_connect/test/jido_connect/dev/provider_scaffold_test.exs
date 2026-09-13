@@ -27,6 +27,46 @@ defmodule Jido.Connect.Dev.ProviderScaffoldTest do
     assert action_file.contents =~ "data_classification :workspace_metadata"
   end
 
+  test "generated package metadata registers its provider for catalog discovery" do
+    mix_file =
+      ProviderScaffold.files("acme_generated")
+      |> Enum.find(&String.ends_with?(&1.path, "/mix.exs"))
+
+    {_, application_bodies} =
+      mix_file.contents
+      |> Code.string_to_quoted!()
+      |> Macro.prewalk([], fn
+        {:def, _, [{:application, _, _}, [do: body]]} = node, found ->
+          {node, [body | found]}
+
+        node, found ->
+          {node, found}
+      end)
+
+    [body] = application_bodies
+    {application_config, _bindings} = Code.eval_quoted(body)
+    provider = Jido.Connect.AcmeGenerated
+    assert application_config[:env] == [jido_connect_providers: [provider]]
+
+    app = :jido_connect_acme_generated_scaffold_test
+
+    assert :ok =
+             :application.load(
+               {:application, app,
+                [
+                  description: ~c"Scaffold registration test",
+                  vsn: ~c"0.0.0",
+                  modules: [],
+                  registered: [],
+                  applications: [:kernel, :stdlib],
+                  env: application_config[:env]
+                ]}
+             )
+
+    on_exit(fn -> :application.unload(app) end)
+    assert provider in Jido.Connect.Catalog.registered_modules()
+  end
+
   test "a conflict on the last path prevents every scaffold write" do
     root = temp_root()
     files = ProviderScaffold.files("acme")
