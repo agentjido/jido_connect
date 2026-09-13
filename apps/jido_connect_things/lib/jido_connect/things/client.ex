@@ -132,7 +132,7 @@ defmodule Jido.Connect.Things.Client do
   defp valid_transport(transport) when is_function(transport, 3), do: :ok
 
   defp valid_transport(module) when is_atom(module) do
-    if function_exported?(module, :request, 3) do
+    if Code.ensure_loaded?(module) and function_exported?(module, :request, 3) do
       :ok
     else
       config_error(:invalid_transport)
