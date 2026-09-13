@@ -3,12 +3,12 @@
   "blocked_by": [],
   "blocks": [],
   "created": "2026-09-13T19:17:29Z",
-  "description": "User goal: tidy Connect issues and PRs, integrate SharePoint, maintain v2/v3 branch boundaries, complete agreed MCP support using ExMCP, verify and prepare a clean release candidate. Do not modify jido_mcp. No Hex publication until separately requested. Expanded MCP client versus server scope is pending user response.",
+  "description": "Confirmed scope: complete the Connect v3 development candidate with separate v2/v3 lines, SharePoint integration, and full client capabilities through ExMCP: tools, resources, prompts, notifications, and connection lifecycle. ExMCP owns protocol and transports. Do not modify jido_mcp. Candidate fb5b59bd is pushed and local checks pass; final CI is running. Modern notification streams are supported; legacy delivery is tracked in GitHub #81. Cowlib findings remain in #79. No package publication.",
   "id": "jido_con-s91",
   "labels": [],
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "Complete Connect v3 release candidate and MCP support",
   "type": "epic",
-  "updated_at": "2026-09-13T19:17:29Z"
+  "updated_at": "2026-09-13T19:35:44Z"
 }
