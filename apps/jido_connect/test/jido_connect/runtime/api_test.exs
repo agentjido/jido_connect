@@ -65,6 +65,23 @@ defmodule Jido.Connect.Runtime.ApiTest do
     end
   end
 
+  test "poll normalizes a handler result without an envelope" do
+    spec =
+      RuntimeFixtures.spec(%{trigger: %{handler: RuntimeFixtures.InvalidEnvelopePollHandler}})
+
+    {context, lease} = RuntimeFixtures.context_and_lease()
+
+    assert {:error,
+            %Connect.Error.ExecutionError{
+              phase: :handler,
+              details: %{operation_id: "demo.repo.changed", expected: :map, returned: nil}
+            }} =
+             Connect.poll(spec, "demo.repo.changed", %{repo: "org/repo"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
   test "top-level API accepts provider modules or compiled specs" do
     spec = RuntimeFixtures.spec()
     {context, lease} = RuntimeFixtures.context_and_lease()

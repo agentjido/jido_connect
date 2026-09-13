@@ -40,6 +40,10 @@ defmodule Jido.Connect.RuntimeFixtures do
     def poll(_config, _context), do: {:ok, %{signals: nil, checkpoint: nil}}
   end
 
+  defmodule InvalidEnvelopePollHandler do
+    def poll(_config, _context), do: {:ok, nil}
+  end
+
   defmodule AdvancingPollHandler do
     def poll(%{repo: repo}, %{checkpoint: checkpoint}) do
       next_checkpoint =

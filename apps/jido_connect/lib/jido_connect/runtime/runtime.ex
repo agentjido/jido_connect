@@ -192,9 +192,24 @@ defmodule Jido.Connect.Runtime do
              credentials: lease.fields,
              checkpoint: get_option(opts, :checkpoint)
            }),
+         {:ok, result} <- validate_poll_envelope(trigger, result),
          {:ok, signals} <- validate_signals(trigger, Map.get(result, :signals, [])) do
       {:ok, %{signals: signals, checkpoint: Map.get(result, :checkpoint)}}
     end
+  end
+
+  defp validate_poll_envelope(_trigger, result) when is_map(result), do: {:ok, result}
+
+  defp validate_poll_envelope(trigger, result) do
+    {:error,
+     Error.execution("Provider poll handler returned an invalid result",
+       phase: :handler,
+       details: %{
+         operation_id: trigger.id,
+         expected: :map,
+         returned: Jido.Connect.Sanitizer.sanitize(result, :transport)
+       }
+     )}
   end
 
   defp find_action(%Spec{} = integration, action_id) do
