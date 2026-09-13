@@ -146,17 +146,29 @@ defmodule Jido.Connect.Dsl.OperationRules do
   defp access_compatibility_violations(_module, _path, _operation), do: []
 
   defp effect_compatibility_violations(module, %Dsl.Action{effect: %Dsl.Effect{}} = action) do
-    if action.mutation? || action.risk != :read || action.confirmation != :none do
-      [
-        violation(
-          module,
-          [:actions, action.name],
-          action,
-          "Do not mix effect with legacy risk settings"
-        )
-      ]
-    else
-      []
+    cond do
+      action.provider_idempotency? ->
+        [
+          violation(
+            module,
+            [:actions, action.name],
+            action,
+            "Put provider_idempotency? inside effect; do not mix effect with the legacy setting"
+          )
+        ]
+
+      action.mutation? || action.risk != :read || action.confirmation != :none ->
+        [
+          violation(
+            module,
+            [:actions, action.name],
+            action,
+            "Do not mix effect with legacy risk settings"
+          )
+        ]
+
+      true ->
+        []
     end
   end
 

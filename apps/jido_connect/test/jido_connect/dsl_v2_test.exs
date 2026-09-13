@@ -415,6 +415,29 @@ defmodule Jido.Connect.DslV2Test do
     assert error.path == [:actions, :unconfirmed_write]
   end
 
+  test "effect rejects top-level provider idempotency instead of discarding it" do
+    error =
+      assert_raise Spark.Error.DslError, ~r/Put provider_idempotency\? inside effect/, fn ->
+        compile_bad!(
+          quote do
+            actions do
+              action :mixed_idempotency do
+                id "bad.item.create"
+                resource :item
+                verb :create
+                data_classification :workspace_content
+                handler Jido.Connect.DslV2Test.Handler
+                provider_idempotency?(true)
+                effect :external_write, confirmation: :required_for_ai
+              end
+            end
+          end
+        )
+      end
+
+    assert error.path == [:actions, :mixed_idempotency]
+  end
+
   test "legacy write risk cannot omit mutation and confirmation" do
     assert_raise Spark.Error.DslError, ~r/Write-risk action must declare mutation/, fn ->
       compile_bad!(
