@@ -9,9 +9,15 @@
     "v3-release-blocker"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed in 5e107d4b. Client startup no longer blocks lease controls; ownership, expiry, cancellation, and parallel-start tests pass. Full umbrella mix quality and demo format, warnings-as-errors compile, and 21 demo tests pass.",
+      "timestamp": "2026-09-13T23:11:39Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "A slow handshake blocks unrelated lease controls",
   "type": "bug",
-  "updated_at": "2026-09-13T23:01:09Z"
+  "updated_at": "2026-09-13T23:11:39Z"
 }
