@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
   "created": "2026-09-13T20:05:39Z",
@@ -8,8 +8,8 @@
   "labels": [],
   "parent": "jido_con-znq",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "Scaffold generation overwrites existing work",
   "type": "bug",
-  "updated_at": "2026-09-13T20:05:39Z"
+  "updated_at": "2026-09-13T21:50:07Z"
 }
