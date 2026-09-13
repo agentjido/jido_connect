@@ -32,6 +32,132 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
     :ok = EndpointLeaseManager.release(second)
   end
 
+  test "identical connection ids in different tenants keep separate clients and revocation", %{
+    connection: first_connection
+  } do
+    second_connection = %{
+      first_connection
+      | tenant_id: "tenant_2",
+        owner_id: "tenant_2"
+    }
+
+    on_exit(fn -> EndpointLeaseManager.force_stop(second_connection) end)
+    source = endpoint("same-secret")
+
+    assert {:ok, first} =
+             EndpointLeaseManager.acquire(
+               first_connection,
+               lease(first_connection, 1, "same-secret"),
+               source
+             )
+
+    assert {:ok, second} =
+             EndpointLeaseManager.acquire(
+               second_connection,
+               lease(second_connection, 1, "same-secret"),
+               source
+             )
+
+    refute first.endpoint_id == second.endpoint_id
+    assert first.tenant_id == "tenant_1"
+    assert second.tenant_id == "tenant_2"
+    assert [%{tenant_id: "tenant_1"}] = EndpointLeaseManager.ownership(first_connection)
+    assert [%{tenant_id: "tenant_2"}] = EndpointLeaseManager.ownership(second_connection)
+
+    assert :ok = EndpointLeaseManager.revoke(first_connection)
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_revoked}} =
+             EndpointLeaseManager.ensure_dispatchable(first)
+
+    assert :ok = EndpointLeaseManager.ensure_dispatchable(second)
+    :ok = EndpointLeaseManager.release(first)
+    assert [] = EndpointLeaseManager.ownership(first_connection)
+    assert [%{status: :active}] = EndpointLeaseManager.ownership(second_connection)
+
+    :ok = EndpointLeaseManager.release(second)
+  end
+
+  test "connection lifecycle changes stay within one tenant" do
+    for action <- [:fence, :expire, :force_stop] do
+      id = "shared-#{action}-#{System.unique_integer([:positive])}"
+      first_connection = connection(id)
+      second_connection = %{first_connection | tenant_id: "tenant_2", owner_id: "tenant_2"}
+      source = endpoint("same-secret")
+
+      assert {:ok, first} =
+               EndpointLeaseManager.acquire(
+                 first_connection,
+                 lease(first_connection, 1, "same-secret"),
+                 source
+               )
+
+      assert {:ok, second} =
+               EndpointLeaseManager.acquire(
+                 second_connection,
+                 lease(second_connection, 1, "same-secret"),
+                 source
+               )
+
+      case action do
+        :fence ->
+          assert :ok =
+                   EndpointLeaseManager.fence(first_connection,
+                     connection_revision: 8,
+                     credential_version: 2
+                   )
+
+        :expire ->
+          assert :ok = EndpointLeaseManager.expire(first_connection)
+
+        :force_stop ->
+          assert :ok = EndpointLeaseManager.force_stop(first_connection)
+      end
+
+      assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_revoked}} =
+               EndpointLeaseManager.ensure_dispatchable(first)
+
+      assert :ok = EndpointLeaseManager.ensure_dispatchable(second)
+
+      assert [%{tenant_id: "tenant_2", status: :active}] =
+               EndpointLeaseManager.ownership(second_connection)
+
+      assert :ok = EndpointLeaseManager.release(first)
+      assert :ok = EndpointLeaseManager.release(second)
+      assert :ok = EndpointLeaseManager.force_stop(first_connection)
+      assert :ok = EndpointLeaseManager.force_stop(second_connection)
+    end
+  end
+
+  test "lifecycle calls require a tenant-qualified connection", %{connection: connection} do
+    assert {:ok, token} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one"),
+               endpoint("secret-one")
+             )
+
+    for result <- [
+          EndpointLeaseManager.revoke(connection.id),
+          EndpointLeaseManager.expire(connection.id),
+          EndpointLeaseManager.force_stop(connection.id),
+          EndpointLeaseManager.ownership(connection.id),
+          EndpointLeaseManager.fence(connection.id,
+            connection_revision: 8,
+            credential_version: 2
+          )
+        ] do
+      assert {:error, %Connect.Error.ValidationError{reason: :invalid_mcp_connection_key}} =
+               result
+    end
+
+    assert :ok = EndpointLeaseManager.ensure_dispatchable(token)
+
+    assert [%{tenant_id: "tenant_1"}] =
+             EndpointLeaseManager.ownership({"tenant_1", connection.id})
+
+    assert :ok = EndpointLeaseManager.release(token)
+  end
+
   test "binds one live tool schema hash to each endpoint generation", %{connection: connection} do
     assert {:ok, first} =
              EndpointLeaseManager.acquire(
@@ -78,7 +204,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
       EndpointLeaseManager
       |> :sys.get_state()
       |> Map.fetch!(:records)
-      |> Map.fetch!({connection.id, first.generation})
+      |> Map.fetch!({connection.tenant_id, connection.id, first.generation})
 
     assert {:ok, renewed} =
              EndpointLeaseManager.acquire(
@@ -92,7 +218,8 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
 
     send(
       EndpointLeaseManager,
-      {:expire, {connection.id, renewed.generation}, first_record.expiry_token}
+      {:expire, {connection.tenant_id, connection.id, renewed.generation},
+       first_record.expiry_token}
     )
 
     assert :ok = EndpointLeaseManager.ensure_dispatchable(renewed)

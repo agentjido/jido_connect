@@ -14,7 +14,11 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   @name __MODULE__
   @default_drain_timeout_ms 5_000
 
+  @type connection_key :: {String.t(), String.t()}
+  @type connection_ref :: Connection.t() | connection_key()
+
   @type token :: %{
+          required(:tenant_id) => String.t(),
           required(:connection_id) => String.t(),
           required(:endpoint_id) => String.t(),
           required(:generation) => pos_integer(),
@@ -46,13 +50,12 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   The fence is monotonic. A caller cannot lower either version or clear a
   revocation tombstone without advancing at least one version.
   """
-  @spec fence(Connection.t() | String.t(), keyword()) :: :ok | {:error, Error.error()}
-  def fence(%Connection{id: connection_id}, opts), do: fence(connection_id, opts)
-
-  def fence(connection_id, opts) when is_binary(connection_id) and is_list(opts) do
-    with {:ok, connection_revision} <- fence_version(opts, :connection_revision),
+  @spec fence(connection_ref(), keyword()) :: :ok | {:error, Error.error()}
+  def fence(connection, opts) when is_list(opts) do
+    with {:ok, key} <- connection_key(connection),
+         {:ok, connection_revision} <- fence_version(opts, :connection_revision),
          {:ok, credential_version} <- fence_version(opts, :credential_version) do
-      call({:fence, connection_id, connection_revision, credential_version})
+      call({:fence, key, connection_revision, credential_version})
     end
   end
 
@@ -93,30 +96,28 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
     end
   end
 
-  @spec revoke(Connection.t() | String.t()) :: :ok
-  def revoke(%Connection{id: connection_id}), do: revoke(connection_id)
+  @spec revoke(connection_ref()) :: :ok | {:error, Error.error()}
+  def revoke(connection) do
+    with {:ok, key} <- connection_key(connection), do: call({:revoke, key})
+  end
 
-  def revoke(connection_id) when is_binary(connection_id),
-    do: call({:revoke, connection_id})
-
-  @spec connection_removed(Connection.t() | String.t()) :: :ok
+  @spec connection_removed(connection_ref()) :: :ok | {:error, Error.error()}
   def connection_removed(connection), do: revoke(connection)
 
-  @spec expire(Connection.t() | String.t()) :: :ok
-  def expire(%Connection{id: connection_id}), do: expire(connection_id)
-  def expire(connection_id) when is_binary(connection_id), do: call({:expire, connection_id})
+  @spec expire(connection_ref()) :: :ok | {:error, Error.error()}
+  def expire(connection) do
+    with {:ok, key} <- connection_key(connection), do: call({:expire, key})
+  end
 
-  @spec force_stop(Connection.t() | String.t()) :: :ok
-  def force_stop(%Connection{id: connection_id}), do: force_stop(connection_id)
+  @spec force_stop(connection_ref()) :: :ok | {:error, Error.error()}
+  def force_stop(connection) do
+    with {:ok, key} <- connection_key(connection), do: call({:force_stop, key})
+  end
 
-  def force_stop(connection_id) when is_binary(connection_id),
-    do: call({:force_stop, connection_id})
-
-  @spec ownership(Connection.t() | String.t()) :: [map()]
-  def ownership(%Connection{id: connection_id}), do: ownership(connection_id)
-
-  def ownership(connection_id) when is_binary(connection_id),
-    do: call({:ownership, connection_id})
+  @spec ownership(connection_ref()) :: [map()] | {:error, Error.error()}
+  def ownership(connection) do
+    with {:ok, key} <- connection_key(connection), do: call({:ownership, key})
+  end
 
   @impl true
   def init(opts) do
@@ -174,44 +175,44 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
     {:reply, revoked?, state}
   end
 
-  def handle_call({:revoke, connection_id}, _from, state) do
-    state = tombstone_ownership(connection_id, state)
-    {:reply, :ok, retire_connection(connection_id, state, :revoked)}
+  def handle_call({:revoke, key}, _from, state) do
+    state = tombstone_ownership(key, state)
+    {:reply, :ok, retire_connection(key, state, :revoked)}
   end
 
   def handle_call(
-        {:fence, connection_id, connection_revision, credential_version},
+        {:fence, key, connection_revision, credential_version},
         _from,
         state
       ) do
-    case advance_fence(connection_id, connection_revision, credential_version, state) do
+    case advance_fence(key, connection_revision, credential_version, state) do
       {:ok, state} ->
-        {:reply, :ok, retire_connection(connection_id, state, :revoked)}
+        {:reply, :ok, retire_connection(key, state, :revoked)}
 
       {:error, error} ->
         {:reply, {:error, error}, state}
     end
   end
 
-  def handle_call({:expire, connection_id}, _from, state) do
-    {:reply, :ok, retire_connection(connection_id, state, :expired)}
+  def handle_call({:expire, key}, _from, state) do
+    {:reply, :ok, retire_connection(key, state, :expired)}
   end
 
-  def handle_call({:force_stop, connection_id}, _from, state) do
+  def handle_call({:force_stop, key}, _from, state) do
     state =
       state.records
       |> Map.values()
-      |> Enum.filter(&(&1.connection_id == connection_id))
+      |> Enum.filter(&(record_connection_key(&1) == key))
       |> Enum.reduce(state, fn record, acc -> remove_record(record, acc) end)
 
-    {:reply, :ok, %{state | current: Map.delete(state.current, connection_id)}}
+    {:reply, :ok, %{state | current: Map.delete(state.current, key)}}
   end
 
-  def handle_call({:ownership, connection_id}, _from, state) do
+  def handle_call({:ownership, key}, _from, state) do
     records =
       state.records
       |> Map.values()
-      |> Enum.filter(&(&1.connection_id == connection_id))
+      |> Enum.filter(&(record_connection_key(&1) == key))
       |> Enum.map(&public_record/1)
       |> Enum.sort_by(& &1.generation)
 
@@ -243,7 +244,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
 
   defp acquire_record(ownership, source, state) do
     with :ok <- validate_ownership_barrier(ownership, state) do
-      current_key = Map.get(state.current, ownership.connection_id)
+      current_key = Map.get(state.current, record_connection_key(ownership))
 
       case Map.get(state.records, current_key) do
         record when is_map(record) ->
@@ -268,14 +269,15 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   end
 
   defp register_new_generation(ownership, source, old_record, state) do
-    generation = next_generation(ownership.connection_id, state)
+    connection_key = record_connection_key(ownership)
+    generation = next_generation(connection_key, state)
     endpoint_id = generation_endpoint_id(ownership.base_endpoint_id, generation)
 
     case ClientSource.start(source) do
       {:ok, client_module, client_ref, owned_client?} ->
         record =
           Map.merge(ownership, %{
-            key: {ownership.connection_id, generation},
+            key: {ownership.tenant_id, ownership.connection_id, generation},
             generation: generation,
             endpoint_id: endpoint_id,
             client_module: client_module,
@@ -288,8 +290,8 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
 
         record = schedule_expiry(record)
         state = put_in(state.records[record.key], record)
-        state = put_in(state.current[ownership.connection_id], record.key)
-        state = put_in(state.generations[ownership.connection_id], generation)
+        state = put_in(state.current[connection_key], record.key)
+        state = put_in(state.generations[connection_key], generation)
         state = accept_ownership(ownership, state)
         state = if old_record, do: retire_record(old_record, state, :draining), else: state
         {:ok, record, state}
@@ -303,12 +305,12 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
     end
   end
 
-  defp retire_connection(connection_id, state, status) do
-    state = %{state | current: Map.delete(state.current, connection_id)}
+  defp retire_connection(connection_key, state, status) do
+    state = %{state | current: Map.delete(state.current, connection_key)}
 
     state.records
     |> Map.values()
-    |> Enum.filter(&(&1.connection_id == connection_id))
+    |> Enum.filter(&(record_connection_key(&1) == connection_key))
     |> Enum.reduce(state, fn record, acc -> retire_record(record, acc, status) end)
   end
 
@@ -343,7 +345,8 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
     case Map.fetch(state.records, record_key(token)) do
       {:ok, record} ->
         revoked? =
-          record.status != :active or Map.get(state.current, record.connection_id) != record.key
+          record.status != :active or
+            Map.get(state.current, record_connection_key(record)) != record.key
 
         {revoked?, update_record(token, state, &decrement_active/1)}
 
@@ -388,8 +391,8 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
     :ok = ClientSource.stop(record.client_module, record.client_ref, record.owned_client?)
     state = %{state | records: Map.delete(state.records, record.key)}
 
-    if Map.get(state.current, record.connection_id) == record.key do
-      %{state | current: Map.delete(state.current, record.connection_id)}
+    if Map.get(state.current, record_connection_key(record)) == record.key do
+      %{state | current: Map.delete(state.current, record_connection_key(record))}
     else
       state
     end
@@ -398,7 +401,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   defp dispatchable?(token, state) do
     with {:ok, record} <- Map.fetch(state.records, record_key(token)),
          true <- record.status == :active,
-         true <- Map.get(state.current, record.connection_id) == record.key,
+         true <- Map.get(state.current, record_connection_key(record)) == record.key,
          true <- DateTime.compare(record.expires_at, DateTime.utc_now()) == :gt do
       :ok
     else
@@ -413,6 +416,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
          {:ok, credential_version} <- credential_version(lease) do
       {:ok,
        %{
+         tenant_id: connection.tenant_id,
          connection_id: connection.id,
          base_endpoint_id: Jido.Connect.MCP.HostEndpoint.internal_id(connection),
          endpoint_fingerprint: ClientSource.fingerprint(source),
@@ -454,8 +458,8 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
     end
   end
 
-  defp next_generation(connection_id, state) do
-    Map.get(state.generations, connection_id, 0) + 1
+  defp next_generation(connection_key, state) do
+    Map.get(state.generations, connection_key, 0) + 1
   end
 
   defp generation_endpoint_id(base_id, 1), do: base_id
@@ -465,6 +469,8 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
     record.status == :active and
       Enum.all?(
         [
+          :tenant_id,
+          :connection_id,
           :endpoint_fingerprint,
           :connection_revision,
           :credential_version,
@@ -478,7 +484,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   end
 
   defp validate_ownership_barrier(ownership, state) do
-    case Map.get(state.ownership_barriers, ownership.connection_id) do
+    case Map.get(state.ownership_barriers, record_connection_key(ownership)) do
       nil ->
         :ok
 
@@ -503,14 +509,14 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
       tombstone?: false
     }
 
-    put_in(state.ownership_barriers[ownership.connection_id], barrier)
+    put_in(state.ownership_barriers[record_connection_key(ownership)], barrier)
   end
 
-  defp advance_fence(connection_id, connection_revision, credential_version, state) do
-    case Map.get(state.ownership_barriers, connection_id) do
+  defp advance_fence(connection_key, connection_revision, credential_version, state) do
+    case Map.get(state.ownership_barriers, connection_key) do
       nil ->
         {:ok,
-         put_ownership_barrier(state, connection_id, connection_revision, credential_version)}
+         put_ownership_barrier(state, connection_key, connection_revision, credential_version)}
 
       barrier ->
         target = %{
@@ -533,12 +539,12 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
 
           true ->
             {:ok,
-             put_ownership_barrier(state, connection_id, connection_revision, credential_version)}
+             put_ownership_barrier(state, connection_key, connection_revision, credential_version)}
         end
     end
   end
 
-  defp put_ownership_barrier(state, connection_id, connection_revision, credential_version) do
+  defp put_ownership_barrier(state, connection_key, connection_revision, credential_version) do
     barrier = %{
       connection_revision: connection_revision,
       credential_version: credential_version,
@@ -546,15 +552,15 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
       tombstone?: false
     }
 
-    put_in(state.ownership_barriers[connection_id], barrier)
+    put_in(state.ownership_barriers[connection_key], barrier)
   end
 
-  defp tombstone_ownership(connection_id, state) do
+  defp tombstone_ownership(connection_key, state) do
     Map.update(
       state,
       :ownership_barriers,
       %{},
-      &Map.update(&1, connection_id, empty_tombstone(), fn barrier ->
+      &Map.update(&1, connection_key, empty_tombstone(), fn barrier ->
         %{barrier | tombstone?: true}
       end)
     )
@@ -596,6 +602,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   defp token(record),
     do:
       Map.take(record, [
+        :tenant_id,
         :connection_id,
         :endpoint_id,
         :generation,
@@ -606,7 +613,26 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
         :client_ref
       ])
 
-  defp record_key(token), do: {Map.get(token, :connection_id), Map.get(token, :generation)}
+  defp record_key(token),
+    do: {Map.get(token, :tenant_id), Map.get(token, :connection_id), Map.get(token, :generation)}
+
+  defp record_connection_key(record), do: {record.tenant_id, record.connection_id}
+
+  defp connection_key(%Connection{tenant_id: tenant_id, id: connection_id}),
+    do: connection_key({tenant_id, connection_id})
+
+  defp connection_key({tenant_id, connection_id})
+       when is_binary(tenant_id) and tenant_id != "" and is_binary(connection_id) and
+              connection_id != "",
+       do: {:ok, {tenant_id, connection_id}}
+
+  defp connection_key(_connection) do
+    {:error,
+     Error.validation("MCP connection identity requires tenant and connection ids",
+       reason: :invalid_mcp_connection_key
+     )}
+  end
+
   defp increment_active(record), do: %{record | active: record.active + 1}
   defp decrement_active(record), do: %{record | active: max(record.active - 1, 0)}
 
@@ -619,6 +645,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   defp public_record(record) do
     record
     |> Map.take([
+      :tenant_id,
       :connection_id,
       :endpoint_id,
       :generation,
