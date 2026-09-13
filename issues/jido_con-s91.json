@@ -2,13 +2,15 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-13T19:39:06Z",
+  "close_reason": "Connect v3 development candidate complete at fb5b59bd. Full selected client actions and modern notification lifecycle verified; SharePoint integrated; v2 preserved; no jido_mcp changes. CI 34778095619 passed. Publication and upstream follow-ups are documented.",
   "created": "2026-09-13T19:17:29Z",
   "description": "Confirmed scope: complete the Connect v3 development candidate with separate v2/v3 lines, SharePoint integration, and full client capabilities through ExMCP: tools, resources, prompts, notifications, and connection lifecycle. ExMCP owns protocol and transports. Do not modify jido_mcp. Candidate fb5b59bd is pushed and local checks pass; final CI is running. Modern notification streams are supported; legacy delivery is tracked in GitHub #81. Cowlib findings remain in #79. No package publication.",
   "id": "jido_con-s91",
   "labels": [],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Complete Connect v3 release candidate and MCP support",
   "type": "epic",
-  "updated_at": "2026-09-13T19:35:44Z"
+  "updated_at": "2026-09-13T19:39:06Z"
 }
