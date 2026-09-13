@@ -5,11 +5,13 @@
   "created": "2026-09-13T20:05:26Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2619-7251-b3f3-113072d196ce\n\n4. **P2 — A slow handshake blocks unrelated lease controls.**  \n   [endpoint_lease_manager.ex:274](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/mcp/endpoint_lease_manager.ex:274)\n\n   Client startup runs inside the single manager process. An 800 ms handshake delayed revocation of another connection by 671 ms. With the default 30-second handshake, unrelated controls can exceed their five-second call timeout. Session lease checks use those controls.\n\n   **Correction:** Start clients outside the manager callback. Before accepting the result, check the lease and ownership barrier again.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.34",
-  "labels": [],
+  "labels": [
+    "v3-release-blocker"
+  ],
   "parent": "jido_con-znq",
   "priority": 2,
   "status": "open",
   "title": "A slow handshake blocks unrelated lease controls",
   "type": "bug",
-  "updated_at": "2026-09-13T20:05:26Z"
+  "updated_at": "2026-09-13T21:59:31Z"
 }
