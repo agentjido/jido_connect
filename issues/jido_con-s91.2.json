@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [
     "jido_con-s91.3"
@@ -10,8 +10,8 @@
   "labels": [],
   "parent": "jido_con-s91",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "Complete Connect MCP capability coverage with ExMCP",
   "type": "task",
-  "updated_at": "2026-09-13T19:19:28Z"
+  "updated_at": "2026-09-13T19:20:18Z"
 }
