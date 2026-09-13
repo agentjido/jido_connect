@@ -25,8 +25,12 @@ A connector should stay narrow:
 Start a new package scaffold with:
 
 ```sh
-mix jido.connect.gen.provider google_sheets
+mix jido.connect.gen.provider acme
 ```
+
+The task checks all target paths before it writes files. It stops if any file
+already exists. Use `--force` only when you want to replace regular files in
+that scaffold. The generator does not replace directories or symbolic links.
 
 ## Shared Core Helpers
 

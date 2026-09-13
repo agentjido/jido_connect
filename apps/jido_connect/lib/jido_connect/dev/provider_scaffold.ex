@@ -45,14 +45,30 @@ defmodule Jido.Connect.Dev.ProviderScaffold do
     ]
   end
 
-  @spec write!(Path.t(), String.t() | atom()) :: [Path.t()]
-  def write!(root, provider) do
-    Enum.map(files(provider), fn %File{} = file ->
-      path = Path.join(root, file.path)
+  @spec write!(Path.t(), String.t() | atom(), keyword()) :: [Path.t()]
+  def write!(root, provider, opts \\ []) do
+    files = Enum.map(files(provider), fn %File{} = file -> {Path.join(root, file.path), file} end)
+    force? = Keyword.get(opts, :force, false) == true
+    conflicts = for {path, _file} <- files, conflict?(path, force?), do: path
+
+    if conflicts != [] do
+      raise ArgumentError,
+            "scaffold files cannot be written: #{Enum.join(conflicts, ", ")}. Use --force to replace regular files"
+    end
+
+    Enum.map(files, fn {path, %File{} = file} ->
       path |> Path.dirname() |> Elixir.File.mkdir_p!()
       Elixir.File.write!(path, file.contents)
       path
     end)
+  end
+
+  defp conflict?(path, force?) do
+    case Elixir.File.lstat(path) do
+      {:error, :enoent} -> false
+      {:ok, %Elixir.File.Stat{type: :regular}} when force? -> false
+      _existing_or_inaccessible -> true
+    end
   end
 
   defp file(path, contents), do: File.new!(%{path: path, contents: contents})
