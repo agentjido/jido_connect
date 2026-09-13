@@ -17,6 +17,7 @@ defmodule Mix.Tasks.Jido.Connect.Catalog do
   alias Jido.Connect.Catalog
 
   @shortdoc "Lists searchable Jido Connect catalog entries"
+  @requirements ["app.config"]
 
   @impl Mix.Task
   def run(args) do
