@@ -7,9 +7,15 @@
   "id": "jido_con-znq.47",
   "labels": [],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed in 93c94046 on release/3.0. Callback errors and exception telemetry use fixed public messages and stack frames without argument values. Exception type remains available. Baseline security regressions failed before fix; focused tests passed (18); root mix quality passed; demo format, warnings-as-errors compile, and tests passed (21).",
+      "timestamp": "2026-09-13T21:27:20Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Callback failures can expose credentials",
   "type": "bug",
-  "updated_at": "2026-09-13T21:19:29Z"
+  "updated_at": "2026-09-13T21:27:20Z"
 }
