@@ -2,6 +2,7 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-13T22:58:04Z",
   "created": "2026-09-13T20:05:21Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-236c-7ba3-a07a-8bbe84647d97\n\n3. **P2 — Approval callbacks can delay execution past expiry.**  \n   [runtime.ex:109](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/runtime/runtime.ex:109) checks snapshot expiry before policy and approval callbacks. At [runtime.ex:126](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/runtime/runtime.ex:126), execution follows approval validation without another expiry check.  \n   **Evidence:** A 300 ms validator delay let the handler run after both the snapshot and its 200 ms lease had expired.  \n   **Correction:** Check snapshot and lease expiry again after callbacks, immediately before the handler call. Apply the lease check to invoke and poll paths too.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.27",
@@ -16,7 +17,7 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Approval callbacks can delay execution past expiry",
   "type": "bug",
   "updated_at": "2026-09-13T22:58:04Z"
