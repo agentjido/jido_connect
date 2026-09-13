@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
   "created": "2026-09-13T20:05:26Z",
@@ -10,8 +10,8 @@
   ],
   "parent": "jido_con-znq",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "A slow handshake blocks unrelated lease controls",
   "type": "bug",
-  "updated_at": "2026-09-13T21:59:31Z"
+  "updated_at": "2026-09-13T23:01:09Z"
 }
