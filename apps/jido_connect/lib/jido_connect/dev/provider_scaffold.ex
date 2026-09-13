@@ -25,14 +25,14 @@ defmodule Jido.Connect.Dev.ProviderScaffold do
     def new!(attrs), do: Zoi.parse!(@schema, attrs)
   end
 
-  @spec files(String.t() | atom()) :: list()
-  def files(provider) do
+  @spec files(String.t() | atom(), keyword()) :: list()
+  def files(provider, opts \\ []) do
     provider = provider |> to_string() |> String.trim()
     app = "jido_connect_#{provider}"
     module = provider |> Macro.camelize()
 
     [
-      file("#{app}/mix.exs", mix_exs(app, module)),
+      file("#{app}/mix.exs", mix_exs(app, module, opts)),
       file("#{app}/lib/jido_connect/#{provider}/integration.ex", integration(provider, module)),
       file(
         "#{app}/lib/jido_connect/#{provider}/actions/example.ex",
@@ -47,7 +47,9 @@ defmodule Jido.Connect.Dev.ProviderScaffold do
 
   @spec write!(Path.t(), String.t() | atom(), keyword()) :: [Path.t()]
   def write!(root, provider, opts \\ []) do
-    files = Enum.map(files(provider), fn %File{} = file -> {Path.join(root, file.path), file} end)
+    files =
+      Enum.map(files(provider, opts), fn %File{} = file -> {Path.join(root, file.path), file} end)
+
     force? = Keyword.get(opts, :force, false) == true
     conflicts = for {path, _file} <- files, conflict?(path, force?), do: path
 
@@ -73,7 +75,7 @@ defmodule Jido.Connect.Dev.ProviderScaffold do
 
   defp file(path, contents), do: File.new!(%{path: path, contents: contents})
 
-  defp mix_exs(app, module) do
+  defp mix_exs(app, module, opts) do
     """
     defmodule JidoConnect#{module}.MixProject do
       use Mix.Project
@@ -96,12 +98,25 @@ defmodule Jido.Connect.Dev.ProviderScaffold do
 
       defp deps do
         [
-          {:jido_connect, path: "../jido_connect"},
+          #{core_dependency(opts)},
           {:req, "~> 0.6"}
         ]
       end
     end
     """
+  end
+
+  defp core_dependency(opts) do
+    case Keyword.get(opts, :local_core_path) do
+      nil ->
+        ~s({:jido_connect, "~> 3.0"})
+
+      path when is_binary(path) and path != "" ->
+        "{:jido_connect, path: #{inspect(path)}}"
+
+      _other ->
+        raise ArgumentError, "local_core_path must be a non-empty path"
+    end
   end
 
   defp integration(provider, module) do

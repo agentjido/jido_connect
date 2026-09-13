@@ -23,6 +23,13 @@ Start a scaffold with:
 mix jido.connect.gen.provider google_sheets
 ```
 
+The generated package depends on `{:jido_connect, "~> 3.0"}` from Hex. For
+local work in the Jido Connect source umbrella, use
+`mix jido.connect.gen.provider google_sheets --local-path ../jido_connect`.
+The path is relative to the generated provider package, not the shell's
+current directory. Replace the path dependency with the Hex dependency before
+publishing a provider package.
+
 ## Rules
 
 - Generated Jido modules must stay thin adapters.
@@ -42,4 +49,3 @@ mix jido.connect.gen.provider google_sheets
 - `Jido.Connect.Polling` handles checkpoint params and latest checkpoints.
 - `Jido.Connect.Catalog` derives host-facing catalog metadata from integration
   specs and generated projections.
-

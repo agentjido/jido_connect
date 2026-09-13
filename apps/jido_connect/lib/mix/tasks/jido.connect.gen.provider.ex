@@ -6,6 +6,8 @@ defmodule Mix.Tasks.Jido.Connect.Gen.Provider do
 
   By default files are written under `apps/`, matching the umbrella layout.
   Existing files are preserved. Pass `--force` to replace regular files.
+  The generated package depends on the v3 Hex package by default. Pass
+  `--local-path ../jido_connect` only when developing inside this umbrella.
   """
 
   use Mix.Task
@@ -16,14 +18,19 @@ defmodule Mix.Tasks.Jido.Connect.Gen.Provider do
 
   @impl Mix.Task
   def run(args) do
-    case OptionParser.parse(args, strict: [force: :boolean]) do
+    case OptionParser.parse(args, strict: [force: :boolean, local_path: :string]) do
       {opts, [provider], []} ->
-        paths = ProviderScaffold.write!("apps", provider, force: Keyword.get(opts, :force, false))
+        paths =
+          ProviderScaffold.write!("apps", provider,
+            force: Keyword.get(opts, :force, false),
+            local_core_path: Keyword.get(opts, :local_path)
+          )
+
         Enum.each(paths, &Mix.shell().info("created #{&1}"))
 
       _other ->
         Mix.raise(
-          "expected provider name, for example: mix jido.connect.gen.provider acme [--force]"
+          "expected provider name, for example: mix jido.connect.gen.provider acme [--force] [--local-path ../jido_connect]"
         )
     end
   end

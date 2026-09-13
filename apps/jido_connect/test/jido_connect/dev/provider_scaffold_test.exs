@@ -27,6 +27,22 @@ defmodule Jido.Connect.Dev.ProviderScaffoldTest do
     assert action_file.contents =~ "data_classification :workspace_metadata"
   end
 
+  test "standalone scaffolds use Hex and local development needs an explicit path" do
+    default_mix =
+      ProviderScaffold.files("acme")
+      |> Enum.find(&String.ends_with?(&1.path, "/mix.exs"))
+      |> Map.fetch!(:contents)
+
+    local_mix =
+      ProviderScaffold.files("acme", local_core_path: "../jido_connect")
+      |> Enum.find(&String.ends_with?(&1.path, "/mix.exs"))
+      |> Map.fetch!(:contents)
+
+    assert default_mix =~ ~s({:jido_connect, "~> 3.0"})
+    refute default_mix =~ "path:"
+    assert local_mix =~ ~s({:jido_connect, path: "../jido_connect"})
+  end
+
   test "generated package metadata registers its provider for catalog discovery" do
     mix_file =
       ProviderScaffold.files("acme_generated")
@@ -125,6 +141,15 @@ defmodule Jido.Connect.Dev.ProviderScaffoldTest do
       assert File.read!(target) == "hand-edited mix file"
       Mix.Tasks.Jido.Connect.Gen.Provider.run(["acme", "--force"])
       refute File.read!(target) == "hand-edited mix file"
+
+      Mix.Tasks.Jido.Connect.Gen.Provider.run([
+        "acme",
+        "--force",
+        "--local-path",
+        "../jido_connect"
+      ])
+
+      assert File.read!(target) =~ ~s({:jido_connect, path: "../jido_connect"})
     end)
   end
 
