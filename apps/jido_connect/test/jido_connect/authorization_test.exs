@@ -61,7 +61,10 @@ defmodule Jido.Connect.AuthorizationTest do
     assert {:error,
             %Error.ExecutionError{
               phase: :policy,
-              details: %{operation_id: "github.issue.list", message: "policy failed"}
+              details: %{
+                operation_id: "github.issue.list",
+                message: "Jido Connect callback raised"
+              }
             }} =
              Authorization.authorize(operation(), %{}, context, lease, policy: RaisingPolicy)
   end

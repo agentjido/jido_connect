@@ -7,7 +7,7 @@ defmodule Jido.Connect.Telemetry do
   package boundaries.
   """
 
-  alias Jido.Connect.{Error, Sanitizer}
+  alias Jido.Connect.{Error, SafeStacktrace, Sanitizer}
 
   @type operation :: :invoke | :poll | :prepare | :commit
   @type phase :: :start | :stop | :exception
@@ -75,8 +75,8 @@ defmodule Jido.Connect.Telemetry do
       error_class: :exception,
       error_reason: nil,
       retryable?: false,
-      exception: Exception.message(exception),
-      stacktrace: Exception.format_stacktrace(stacktrace)
+      exception: "Jido Connect operation raised",
+      stacktrace: SafeStacktrace.format(stacktrace)
     }
   end
 end

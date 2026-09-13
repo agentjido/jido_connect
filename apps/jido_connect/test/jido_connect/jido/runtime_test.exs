@@ -69,7 +69,7 @@ defmodule Jido.Connect.Jido.RuntimeTest do
     assert {:error,
             %Connect.Error.ExecutionError{
               phase: :connection_resolver,
-              details: %{message: "resolver exploded"}
+              details: %{message: "Jido Connect callback raised"}
             }} =
              Connect.JidoActionRuntime.run(projection, %{repo: "org/repo"}, %{
                integration_context: tenant_context,
@@ -94,7 +94,7 @@ defmodule Jido.Connect.Jido.RuntimeTest do
     assert {:error,
             %Connect.Error.ExecutionError{
               phase: :provider_integration,
-              details: %{message: "integration lookup exploded"}
+              details: %{message: "Jido Connect callback raised"}
             }} =
              Connect.JidoActionRuntime.run(raising_projection, %{repo: "org/repo"}, %{
                integration_context: context,
@@ -160,7 +160,7 @@ defmodule Jido.Connect.Jido.RuntimeTest do
     assert {:error,
             %Connect.Error.ExecutionError{
               phase: :provider_integration,
-              details: %{message: "integration lookup exploded"}
+              details: %{message: "Jido Connect callback raised"}
             }} =
              Connect.JidoSensorRuntime.handle_event(raising_sensor, :tick, raising_state)
 
@@ -336,7 +336,7 @@ defmodule Jido.Connect.Jido.RuntimeTest do
     assert {:error,
             %Connect.Error.ExecutionError{
               phase: :connection_resolver,
-              details: %{message: "tuple resolver exploded"}
+              details: %{message: "Jido Connect callback raised"}
             }} =
              Connect.ConnectionSelector.resolve("conn_1", {RaisingConnectionResolver, :resolve})
 

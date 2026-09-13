@@ -92,6 +92,26 @@ defmodule Jido.Connect.TelemetryTest do
                     }}
   end
 
+  test "exception telemetry does not expose callback arguments" do
+    attach_telemetry([:invoke])
+    secret = "telemetry-secret-#{System.unique_integer([:positive])}"
+
+    assert_raise KeyError, fn ->
+      Connect.Telemetry.span(:invoke, %{}, fn ->
+        fetch_missing(Map.new(access_token: secret))
+      end)
+    end
+
+    assert_receive {:telemetry, [:jido, :connect, :invoke, :start], _measurements, _metadata}
+    assert_receive {:telemetry, [:jido, :connect, :invoke, :exception], _measurements, metadata}
+    assert metadata.error_type == KeyError
+    assert metadata.exception == "Jido Connect operation raised"
+    assert metadata.stacktrace =~ "fetch_missing/1"
+    refute inspect(metadata) =~ secret
+  end
+
+  defp fetch_missing(credentials), do: Map.fetch!(credentials, :missing_key)
+
   defp attach_telemetry(operations) do
     handler_id = "jido-connect-telemetry-test-#{System.unique_integer([:positive])}"
 

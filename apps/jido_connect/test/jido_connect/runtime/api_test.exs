@@ -175,7 +175,7 @@ defmodule Jido.Connect.Runtime.ApiTest do
     assert {:error,
             %Connect.Error.ExecutionError{
               phase: :handler,
-              details: %{operation_id: "demo.repo.show", message: "handler exploded"}
+              details: %{operation_id: "demo.repo.show", message: "Jido Connect callback raised"}
             }} =
              RuntimeFixtures.spec(%{action: %{handler: RuntimeFixtures.ExplodingHandler}})
              |> Connect.invoke("demo.repo.show", %{repo: "org/repo"},
@@ -186,7 +186,7 @@ defmodule Jido.Connect.Runtime.ApiTest do
     assert {:error,
             %Connect.Error.ExecutionError{
               phase: :scope_resolver,
-              details: %{operation_id: "demo.repo.show", message: "scope resolver exploded"}
+              details: %{operation_id: "demo.repo.show", message: "Jido Connect callback raised"}
             }} =
              RuntimeFixtures.spec(%{
                action: %{scope_resolver: RuntimeFixtures.ExplodingScopeResolver}

@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Callback do
   @moduledoc false
 
-  alias Jido.Connect.Error
+  alias Jido.Connect.{Error, SafeStacktrace}
 
   @spec call(module(), atom(), [term()], keyword()) :: {:ok, term()} | {:error, Error.error()}
   def call(module, function, args, opts \\ [])
@@ -25,8 +25,9 @@ defmodule Jido.Connect.Callback do
        Error.execution("Jido Connect callback raised",
          phase: Keyword.get(opts, :phase, :callback),
          details:
-           exception_details(exception, __STACKTRACE__)
-           |> Map.merge(Keyword.get(opts, :details, %{}))
+           opts
+           |> Keyword.get(:details, %{})
+           |> Map.merge(exception_details(exception, __STACKTRACE__))
        )}
   catch
     kind, reason ->
@@ -45,8 +46,8 @@ defmodule Jido.Connect.Callback do
   defp exception_details(exception, stacktrace) do
     %{
       exception: exception.__struct__,
-      message: Exception.message(exception),
-      stacktrace: Exception.format_stacktrace(stacktrace)
+      message: "Jido Connect callback raised",
+      stacktrace: SafeStacktrace.format(stacktrace)
     }
   end
 end
