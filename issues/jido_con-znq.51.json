@@ -2,6 +2,7 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-13T22:58:12Z",
   "created": "2026-09-13T20:05:37Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2ac2-7981-8f33-21ede2d89ca2\n\n6. **P2 — Binary truncation can produce invalid JSON text.**  \n   [sanitizer.ex:214](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/support/sanitizer.ex:214) cuts binaries at an arbitrary byte boundary. With 511 ASCII bytes followed by `é`, the default 512-byte limit splits the UTF-8 character. `String.valid?/1` returned false and `Jason.encode/1` failed. This affects otherwise valid provider messages and webhook payloads. Existing truncation tests use ASCII text.  \n   **Correction:** Cut valid text at a UTF-8 boundary. Define a safe representation for input binaries that are already invalid UTF-8.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.51",
@@ -16,8 +17,8 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Binary truncation can produce invalid JSON text",
   "type": "bug",
-  "updated_at": "2026-09-13T22:58:11Z"
+  "updated_at": "2026-09-13T22:58:12Z"
 }
