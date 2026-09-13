@@ -146,6 +146,14 @@ safe preview. Commit requires the input and current runtime state again. It
 rejects changes to the action, input, connection, lease, host binding,
 execution ID, or idempotency key.
 
+The lease check hashes `CredentialLease.to_public_map/1`. It does not hash raw
+values in `CredentialLease.fields`. When the host rotates or replaces a
+credential, it must mint a lease with a new, non-secret revision in
+`metadata`, such as `credential_version: 2`. Pass that current lease to
+`commit/4`. A prepared action bound to the prior revision will then fail the
+stale-state check. Do not place tokens or other secrets in the revision or
+lease metadata.
+
 ```elixir
 {:ok, prepared} =
   Jido.Connect.prepare(MyConnector, "connector.item.create", input,

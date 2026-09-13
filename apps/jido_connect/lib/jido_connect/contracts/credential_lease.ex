@@ -67,6 +67,9 @@ defmodule Jido.Connect.CredentialLease do
   Returns a JSON-safe, non-secret description of the lease.
 
   Raw credential fields are intentionally represented only by key names.
+  Hosts that use prepare/commit must advance a non-secret revision in `metadata`
+  each time credential values change. The prepared-action lease hash uses this
+  public map, so changed `fields` values alone do not invalidate an approval.
   """
   @spec to_public_map(t()) :: map()
   def to_public_map(%__MODULE__{} = lease) do
