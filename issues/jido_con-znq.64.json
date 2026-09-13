@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:05:46Z",
+  "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: design improvement.\n\nSource task: 01a09c57-2f9c-7a11-b8d1-4c833aa020b2\n\n- **P3 — use one Linear response normalizer.** [Response line 260](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_linear/lib/jido_connect/linear/client/response.ex:260) duplicates [Normalizer line 22](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_linear/lib/jido_connect/linear/client/normalizer.ex:22). The production path returns `status`; the fixture path returns a `state` struct and additional fields. Source searches found the struct normalizer used by fixture tests, with no production caller. This requires separate maintenance and lets fixture checks pass without testing client output. Reuse one normalizer and project the declared action fields from its result.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
+  "id": "jido_con-znq.64",
+  "labels": [],
+  "parent": "jido_con-znq",
+  "priority": 3,
+  "status": "open",
+  "title": "use one Linear response normalizer",
+  "type": "task",
+  "updated_at": "2026-09-13T20:05:46Z"
+}
