@@ -7,9 +7,15 @@
   "id": "jido_con-znq.33",
   "labels": [],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed in 98b9c194 on release/3.0. Each acquisition now returns a token with that lease's expiry; dispatch checks both token expiry and generation state, including completion of an in-flight send. Baseline regression failed before fix. Focused lease-manager tests passed (24); root mix quality passed; demo format, warnings-as-errors compile, and tests passed (21).",
+      "timestamp": "2026-09-13T21:18:54Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Another lease can extend a session past its own expiry",
   "type": "bug",
-  "updated_at": "2026-09-13T21:11:37Z"
+  "updated_at": "2026-09-13T21:18:54Z"
 }
