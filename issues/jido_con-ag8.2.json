@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-ag8.1"
+  ],
   "blocks": [],
   "created": "2026-09-13T18:53:11Z",
   "description": "Integrate PR 75 with current main. Use Hex Action beta.10, current pinned Jido v3, compatible Signal and ExMCP. Adapt generated Actions, Plugins, Sensors and demo. Resolve conflicts, verify quality, document remaining boundaries.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "Refresh v3 dependencies and generated integrations",
   "type": "task",
-  "updated_at": "2026-09-13T18:53:11Z"
+  "updated_at": "2026-09-13T18:53:17Z"
 }
