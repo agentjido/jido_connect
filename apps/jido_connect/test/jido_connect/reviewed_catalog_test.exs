@@ -128,6 +128,26 @@ defmodule Jido.Connect.ReviewedCatalogTest do
            )
   end
 
+  test "reviewed packs apply filters before selecting executable actions" do
+    modules = [CatalogFixtures.Integration]
+
+    excluded =
+      Catalog.Pack.new!(%{
+        id: :writes_only,
+        filters: %{risk: :write},
+        allowed_tools: ["catalog.item.get"]
+      })
+
+    assert [] == Catalog.items(modules: modules, pack: excluded)
+    assert {:ok, []} = Catalog.reviewed_items(modules, excluded)
+    assert {:ok, []} = Catalog.reviewed_descriptors(modules, excluded)
+
+    actions = Catalog.Pack.new!(%{id: :actions, filters: %{type: :action}})
+
+    assert {:ok, [%Catalog.Item{id: "catalog.item.get"}]} =
+             Catalog.reviewed_items(modules, actions)
+  end
+
   test "rejects a reviewed pack action that is missing from the exact modules" do
     pack = Catalog.Pack.new!(%{id: :missing, allowed_tools: ["missing.action"]})
 

@@ -356,7 +356,10 @@ defmodule Jido.Connect.Catalog do
   end
 
   defp select_reviewed_actions(items, pack) do
-    selected = Pack.filter_items(items, pack)
+    selected =
+      items
+      |> Filter.items(Pack.apply_filters([], pack))
+      |> Pack.filter_items(pack)
 
     with :ok <- reject_selected_triggers(selected, pack),
          :ok <- reject_generic_mcp_actions(selected, pack) do
