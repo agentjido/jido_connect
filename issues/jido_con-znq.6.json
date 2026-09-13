@@ -9,9 +9,15 @@
     "v3-release-blocker"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Resolved in 07c8918b: webhook verification kind checks. Focused tests passed. Full umbrella mix quality and demo format, warnings-as-errors compile, and 21 demo tests passed for this batch.",
+      "timestamp": "2026-09-13T22:37:29Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Webhook validation accepts `kind: :none` when the map has another key",
   "type": "bug",
-  "updated_at": "2026-09-13T22:18:51Z"
+  "updated_at": "2026-09-13T22:37:29Z"
 }
