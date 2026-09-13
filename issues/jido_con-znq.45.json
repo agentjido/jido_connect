@@ -5,11 +5,13 @@
   "created": "2026-09-13T20:05:33Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: design improvement.\n\nSource task: 01a09c57-2858-7750-b28e-72cf480d2cec\n\n- **P3 — Make connection ID defaults suitable for multiple accounts.** [Google connections.ex:30](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_google/lib/jido_connect/google/connections.ex:30) and [Microsoft connections.ex:31](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_microsoft/lib/jido_connect/microsoft/connections.ex:31) derive user connection IDs only from `owner_id`. Two provider accounts for one application user receive the same default ID. Explicit host IDs already solve this. Require or clearly document them for multiple-account use; add a two-account example.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.45",
-  "labels": [],
+  "labels": [
+    "v3-follow-up"
+  ],
   "parent": "jido_con-znq",
   "priority": 3,
   "status": "open",
   "title": "Make connection ID defaults suitable for multiple accounts",
   "type": "task",
-  "updated_at": "2026-09-13T20:05:33Z"
+  "updated_at": "2026-09-13T21:59:48Z"
 }
