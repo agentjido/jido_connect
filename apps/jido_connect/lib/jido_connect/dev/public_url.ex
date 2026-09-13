@@ -7,8 +7,11 @@ defmodule Jido.Connect.Dev.PublicUrl do
   @spec resolve(keyword(), [String.t()]) :: {:ok, String.t()} | {:error, Error.error()}
   def resolve(opts \\ [], env_keys \\ []) do
     case explicit_url(opts, env_keys) do
-      nil -> Ngrok.public_url()
-      url -> {:ok, String.trim_trailing(url, "/")}
+      nil ->
+        with {:ok, url} <- Ngrok.public_url(), do: validate_url(url)
+
+      url ->
+        validate_url(url)
     end
   end
 
@@ -30,4 +33,27 @@ defmodule Jido.Connect.Dev.PublicUrl do
         end
       end)
   end
+
+  defp validate_url(url) when is_binary(url) do
+    url = String.trim(url)
+
+    case URI.parse(url) do
+      %URI{scheme: scheme, host: host, userinfo: nil, query: nil, fragment: nil}
+      when scheme in ["http", "https"] and is_binary(host) and host != "" and url != "" ->
+        if String.match?(url, ~r/\s/) do
+          invalid_url()
+        else
+          {:ok, String.trim_trailing(url, "/")}
+        end
+
+      _other ->
+        invalid_url()
+    end
+  rescue
+    ArgumentError -> invalid_url()
+  end
+
+  defp validate_url(_url), do: invalid_url()
+
+  defp invalid_url, do: {:error, Error.config("Invalid public base URL", key: :url)}
 end
