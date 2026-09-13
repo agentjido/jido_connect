@@ -2,6 +2,7 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-13T22:37:33Z",
   "created": "2026-09-13T20:05:12Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-1efd-7e03-b335-4810b34600d9\n\n3. **P2 — Generated availability loses the required-policy flag.**  \n   [projection_builder.ex:28](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/jido/projection_builder.ex:28) copies policy names but omits `host_policy_required?`. Both projection structs also omit this field.\n\n   Generated discovery passes these projections to `Authorization.connection_availability/4`. The missing flag defaults to `false`. Thus, a connected account with sufficient scopes can see `:available` when execution requires a host policy. This affects real declarations, including [Jira plan listing](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_jira/lib/jido_connect/jira/actions/plans.ex:24). Execution still rejects the request through the complete specification.\n\n   **Smallest correction:** Add the flag to action and sensor projections. Check that generated availability agrees with availability calculated from the specification.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.13",
@@ -16,8 +17,8 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Generated availability loses the required-policy flag",
   "type": "bug",
-  "updated_at": "2026-09-13T22:37:32Z"
+  "updated_at": "2026-09-13T22:37:33Z"
 }
