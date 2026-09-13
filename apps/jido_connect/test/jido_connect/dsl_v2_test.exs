@@ -441,6 +441,65 @@ defmodule Jido.Connect.DslV2Test do
     end
   end
 
+  test "an auth default cannot add an undeclared action profile" do
+    assert_raise Spark.Error.DslError,
+                 ~r/auth default :other must be in the declared profiles/,
+                 fn ->
+                   compile_bad!(
+                     quote do
+                       actions do
+                         action :invalid_auth_default do
+                           id "bad.item.list"
+                           resource :item
+                           verb :list
+                           data_classification :workspace_metadata
+                           label "Invalid auth default"
+                           handler Jido.Connect.DslV2Test.Handler
+                           effect :read
+
+                           access do
+                             auth [:tenant], default: :other
+                             policies [:tenant_access]
+                           end
+                         end
+                       end
+                     end,
+                     other_profile?: true
+                   )
+                 end
+  end
+
+  test "an auth default can select a declared action profile" do
+    compiled =
+      compile_bad!(
+        quote do
+          actions do
+            action :valid_auth_default do
+              id "good.item.list"
+              resource :item
+              verb :list
+              data_classification :workspace_metadata
+              label "Valid auth default"
+              handler Jido.Connect.DslV2Test.Handler
+              effect :read
+
+              access do
+                auth [:tenant, :other], default: :other
+                policies [:tenant_access]
+              end
+            end
+          end
+        end,
+        other_profile?: true
+      )
+
+    {module, _} =
+      Enum.find(compiled, fn {module, _} -> function_exported?(module, :integration, 0) end)
+
+    assert {:ok, %{auth_profile: :other, auth_profiles: [:other, :tenant]}} =
+             Connect.action(module, "good.item.list")
+  end
+
   test "DSL spec builder preserves structured build errors" do
     error =
       assert_raise Spark.Error.DslError,
@@ -483,8 +542,21 @@ defmodule Jido.Connect.DslV2Test do
     assert error.path == [:actions, :bad_schema_reference]
   end
 
-  defp compile_bad!(body) do
+  defp compile_bad!(body, opts \\ []) do
     module = Module.concat(__MODULE__, "BadDsl#{System.unique_integer([:positive])}")
+
+    other_profile =
+      if Keyword.get(opts, :other_profile?, false) do
+        quote do
+          api_key :other do
+            owner :tenant
+            subject :account
+            credential_fields [:api_key]
+            lease_fields [:api_key]
+            scopes ["items:read", "items:write"]
+          end
+        end
+      end
 
     Code.compile_quoted(
       quote do
@@ -505,6 +577,8 @@ defmodule Jido.Connect.DslV2Test do
               lease_fields [:api_key]
               scopes ["items:read", "items:write"]
             end
+
+            unquote(other_profile)
           end
 
           policies do

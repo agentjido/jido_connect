@@ -287,6 +287,11 @@ defmodule Jido.Connect.Dsl.SpecBuilder do
 
   defp auth_profiles(%Dsl.AuthProfiles{profiles: profiles, default: default}, fallback) do
     profiles = List.wrap(profiles || [])
+
+    if default && default not in profiles do
+      raise ArgumentError, "auth default #{inspect(default)} must be in the declared profiles"
+    end
+
     primary = default || List.first(profiles) || fallback
 
     {primary,
