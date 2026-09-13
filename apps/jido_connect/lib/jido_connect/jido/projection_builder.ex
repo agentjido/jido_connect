@@ -27,6 +27,7 @@ defmodule Jido.Connect.Jido.ProjectionBuilder do
           auth_profile: action.auth_profile,
           auth_profiles: action.auth_profiles,
           policies: action.policies,
+          host_policy_required?: action.host_policy_required?,
           scopes: action.scopes,
           scope_resolver: action.scope_resolver,
           risk: action.risk,
@@ -59,6 +60,7 @@ defmodule Jido.Connect.Jido.ProjectionBuilder do
           auth_profile: trigger.auth_profile,
           auth_profiles: trigger.auth_profiles,
           policies: trigger.policies,
+          host_policy_required?: trigger.host_policy_required?,
           scopes: trigger.scopes,
           scope_resolver: trigger.scope_resolver,
           interval_ms: trigger.interval_ms

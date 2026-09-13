@@ -2,11 +2,55 @@ defmodule Jido.Connect.Jido.RuntimeTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect
-  alias Jido.Connect.Jido.{ActionProjection, PluginProjection, SensorProjection, ToolAvailability}
+
+  alias Jido.Connect.Jido.{
+    ActionProjection,
+    PluginProjection,
+    ProjectionBuilder,
+    SensorProjection,
+    ToolAvailability
+  }
+
   alias Jido.Connect.RuntimeFixtures
 
   defmodule RaisingConnectionResolver do
     def resolve(_selector), do: raise("tuple resolver exploded")
+  end
+
+  test "generated availability keeps host policy requirements" do
+    spec =
+      RuntimeFixtures.spec(%{
+        action: %{host_policy_required?: true},
+        trigger: %{host_policy_required?: true}
+      })
+
+    projection = ProjectionBuilder.build(RuntimeFixtures.Integration, spec)
+    {context, _lease} = RuntimeFixtures.context_and_lease()
+
+    for operation <- spec.actions ++ spec.triggers do
+      assert :disabled_by_policy =
+               Connect.Authorization.connection_availability(operation, context.connection)
+    end
+
+    assert Enum.map(projection.actions ++ projection.sensors, & &1.host_policy_required?) ==
+             [true, true]
+
+    assert [
+             %ToolAvailability{state: :disabled_by_policy},
+             %ToolAvailability{state: :disabled_by_policy}
+           ] =
+             Connect.JidoPluginRuntime.tool_availability(projection, %{
+               connection: context.connection
+             })
+
+    allow_policy = fn _operation, _input, _context, _connection -> :ok end
+
+    assert [%ToolAvailability{state: :available}, %ToolAvailability{state: :available}] =
+             Connect.JidoPluginRuntime.tool_availability(projection, %{
+               connection: context.connection,
+               context: context,
+               policy: allow_policy
+             })
   end
 
   test "Jido runtimes adapt projections without provider logic" do

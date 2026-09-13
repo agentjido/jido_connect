@@ -24,6 +24,7 @@ defmodule Jido.Connect.Jido.ActionProjection do
               auth_profile: Zoi.atom(),
               auth_profiles: Zoi.list(Zoi.atom()) |> Zoi.default([]),
               policies: Zoi.list(Zoi.atom()) |> Zoi.default([]),
+              host_policy_required?: Zoi.boolean() |> Zoi.default(false),
               scopes: Zoi.list(Zoi.string()) |> Zoi.default([]),
               scope_resolver: Zoi.module() |> Zoi.nullish() |> Zoi.optional(),
               risk: Zoi.atom(),
@@ -71,6 +72,7 @@ defmodule Jido.Connect.Jido.SensorProjection do
               auth_profile: Zoi.atom(),
               auth_profiles: Zoi.list(Zoi.atom()) |> Zoi.default([]),
               policies: Zoi.list(Zoi.atom()) |> Zoi.default([]),
+              host_policy_required?: Zoi.boolean() |> Zoi.default(false),
               scopes: Zoi.list(Zoi.string()) |> Zoi.default([]),
               scope_resolver: Zoi.module() |> Zoi.nullish() |> Zoi.optional(),
               interval_ms: Zoi.integer() |> Zoi.nullish()
