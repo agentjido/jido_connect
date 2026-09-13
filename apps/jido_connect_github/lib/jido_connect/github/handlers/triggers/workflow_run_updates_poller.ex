@@ -7,10 +7,11 @@ defmodule Jido.Connect.GitHub.Handlers.Triggers.WorkflowRunUpdatesPoller do
 
   def poll(config, %{credentials: credentials, checkpoint: checkpoint}) do
     with {:ok, client} <- fetch_client(credentials),
-         {:ok, %{workflow_runs: workflow_runs}} <-
-           client.list_workflow_runs(
-             workflow_run_params(config, checkpoint),
-             Map.get(credentials, :access_token)
+         {:ok, workflow_runs} <-
+           list_all_workflow_runs(
+             client,
+             Map.get(credentials, :access_token),
+             workflow_run_params(config, checkpoint)
            ) do
       workflow_runs =
         workflow_runs
@@ -29,6 +30,39 @@ defmodule Jido.Connect.GitHub.Handlers.Triggers.WorkflowRunUpdatesPoller do
 
   defp fetch_client(_credentials) do
     {:error, Error.config("GitHub client module is required", key: :github_client)}
+  end
+
+  defp list_all_workflow_runs(client, access_token, params) do
+    fetch_page(client, access_token, params, 1, [], 0, nil)
+  end
+
+  defp fetch_page(client, access_token, params, page, pages, seen, expected_total) do
+    case client.list_workflow_runs(Map.put(params, :page, page), access_token) do
+      {:ok, %{workflow_runs: runs, total_count: total}}
+      when is_list(runs) and is_integer(total) and total >= 0 ->
+        expected_total = expected_total || total
+        seen = seen + length(runs)
+        pages = [runs | pages]
+
+        cond do
+          seen >= expected_total -> {:ok, pages |> Enum.reverse() |> List.flatten()}
+          runs == [] -> {:error, incomplete_page_error()}
+          true -> fetch_page(client, access_token, params, page + 1, pages, seen, expected_total)
+        end
+
+      {:ok, _invalid} ->
+        {:error, incomplete_page_error()}
+
+      {:error, _reason} = error ->
+        error
+    end
+  end
+
+  defp incomplete_page_error do
+    Error.provider("GitHub workflow run pagination was incomplete",
+      provider: :github,
+      reason: :incomplete_pagination
+    )
   end
 
   defp workflow_run_params(config, checkpoint) do
