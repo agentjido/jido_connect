@@ -103,7 +103,7 @@ defmodule JidoConnectCore.MixProject do
         "guides/authoring_connector.md",
         "CHANGELOG.md"
       ],
-      source_ref: "v0.9.0"
+      source_ref: "release/3.0"
     ]
   end
 

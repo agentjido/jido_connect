@@ -2,8 +2,8 @@
 
 > This is the `release/3.0` maintainer development line. It follows Jido v3
 > prereleases and is not ready for external adoption. See
-> [branch support](../../docs/branch_support.md) and
-> [the v3 dependency record](../../docs/v3_status.md).
+> [branch support](https://github.com/agentjido/jido_connect/blob/release/3.0/docs/branch_support.md)
+> and [the v3 dependency record](https://github.com/agentjido/jido_connect/blob/release/3.0/docs/v3_status.md).
 
 `jido_connect` is the core package for authoring integration providers with a
 Spark DSL and compiling them into concrete Jido actions, sensors, and plugins.
@@ -34,31 +34,29 @@ with the canonical form. Every action and trigger must declare `resource`,
 
 ## Installation
 
+This development branch has not been published to Hex. For a local checkout,
+add the core app as a path dependency:
+
 ```elixir
-def deps do
-  [
-    {:jido_connect, "~> 0.9"}
-  ]
-end
+{:jido_connect, path: "../jido_connect/apps/jido_connect"}
 ```
 
-The current PR branch keeps the Elixir 1.19 requirement. It temporarily pins
-the Jido Action v3 release branch because `3.0.0-beta.1` has an incorrect
-Elixir 1.20 requirement. It also pins the Jido compatibility changes from PR
-#324. Replace both pins after the next upstream releases include these fixes.
+The core app currently requires Elixir 1.19 or later, Jido Action
+`3.0.0-beta.10`, and Jido Signal `3.0.0-beta.4`. See the packaged `mix.exs` for
+the complete dependency set. A normal Hex dependency can replace the local
+path after the v3 package is published.
 
-## MCP Tool Bridge
+## MCP Client Bridge
 
-Core `jido_connect` includes a narrow MCP client bridge with two operations:
+Core `jido_connect` includes client actions for MCP tools, resources, resource
+templates, prompts, completion, and endpoint inspection. It also offers a
+host-supervised notification session with connection lifecycle status. See the
+[MCP bridge guide](guides/mcp_bridge.md) for the action list, scopes, and
+session contract. ExMCP owns the protocol and transports.
 
-- `mcp.tools.list`
-- `mcp.tool.call`
-
-The bridge does not publish an MCP server, create dynamic proxy Actions, expose
-resources or prompts, or manage a general endpoint pool. It keeps Connect
-responsible for endpoint and tool allowlists, connection and credential-lease
-checks, scopes, policy, confirmation, schema drift, and uncertain write
-classification.
+Connect checks endpoint and tool allowlists, connections, credential leases,
+scopes, policy, confirmation, schema drift, and uncertain write results. It
+does not publish an MCP server or create dynamic proxy Actions.
 
 For a host-owned ExMCP client, put the public endpoint ID in connection
 metadata. Put the supervised client name or process reference in the
@@ -119,8 +117,7 @@ Tool discovery returns `schema_hash`. A typed caller can give that value as
 `expected_schema_hash` to `mcp.tool.call`. Connect lists the tool again and
 rejects schema drift before the remote call.
 
-The bridge uses stable ExMCP `1.x` through an internal tool-list and tool-call
-contract. It does not depend on `jido_mcp`.
+The bridge uses ExMCP `~> 1.3`. It does not depend on `jido_mcp`.
 
 ## Host Boundary
 
@@ -307,25 +304,10 @@ Jido.Connect.Catalog.search_tools("create github issue",
 #=> ]
 ```
 
-Install the catalog plugin when an agent should search, describe, or call tools
-through stable Jido actions:
-
-```elixir
-Jido.Connect.Catalog.Plugin.plugin_spec(%{
-  modules: [Jido.Connect.GitHub],
-  packs: [
-    %Jido.Connect.Catalog.Pack{
-      id: "safe_github_issues",
-      label: "Safe GitHub issue tools",
-      filters: %{provider: :github, type: :action, resource: :issue},
-      allowed_tools: ["github.issue.list", "github.issue.create"],
-      metadata: %{}
-    }
-  ]
-})
-```
-
-The plugin exposes these routes:
+`Jido.Connect.Catalog.Plugin.plugin_spec/1` returns Connect discovery data;
+it does not install a Jido plugin. A host registers
+`Jido.Connect.Catalog.Plugin` in its Agent and declares the routes it needs.
+The plugin suggests these signal types and Action modules:
 
 ```elixir
 [
@@ -334,6 +316,61 @@ The plugin exposes these routes:
   {"connect.catalog.call", Jido.Connect.Catalog.Actions.CallTool}
 ]
 ```
+
+A routed catalog Action returns only its catalog result. Jido Action v3 uses
+that output as the next Agent state. A host with other state must wrap the
+catalog Action and return the complete next state. This example uses only the
+core package and keeps `workspace` while it searches MCP tools:
+
+```elixir
+defmodule MyApp.CatalogSearch do
+  use Jido.Action,
+    name: "host_catalog_search",
+    schema: Zoi.object(%{query: Zoi.string()}),
+    output_schema:
+      Zoi.object(%{workspace: Zoi.string(), catalog_results: Zoi.list(Zoi.any())})
+
+  def run(params, %{agent_state: state} = context) do
+    with {:ok, %{results: results}} <-
+           Jido.Connect.Catalog.Actions.SearchTools.run(params, context) do
+      {:ok, %{state | catalog_results: results}}
+    end
+  end
+end
+
+defmodule MyApp.CatalogAgent do
+  use Jido.Agent, name: "connect_catalog_host"
+
+  agent do
+    schema Zoi.object(%{
+      workspace: Zoi.string(),
+      catalog_results: Zoi.list(Zoi.any()) |> Zoi.default([])
+    })
+
+    plugin Jido.Connect.Catalog.Plugin,
+      config: %{modules: [Jido.Connect.MCP]}
+  end
+
+  routes do
+    signal_source "/host"
+    route "connect.catalog.search", MyApp.CatalogSearch
+  end
+end
+
+agent =
+  Jido.Agent.new!(MyApp.CatalogAgent,
+    state: %{workspace: "tenant-1", catalog_results: []}
+  )
+
+signal = Jido.Signal.new!("connect.catalog.search", %{query: "mcp.tools"}, source: "/host")
+{:ok, agent, []} = Jido.Agent.cmd(agent, signal)
+# agent.state.workspace remains "tenant-1".
+```
+
+The host supplies current connection, lease, policy, and request controls in
+the Action context when it calls a catalog tool. It keeps credentials out of
+Agent state and plugin configuration. The test suite runs this wrapper through
+`Jido.Agent.cmd/3`.
 
 Lookups accept a bare tool id when it is unique, a provider-qualified string, a
 `{provider, id}` tuple, or a `%Jido.Connect.Catalog.ToolEntry{}`:
@@ -525,7 +562,8 @@ path dependencies to the app folders:
 {:jido_connect_github, path: "../jido_connect/apps/jido_connect_github"}
 ```
 
-Once published, prefer the provider package directly:
+Provider packages are separate from the core Hex package. A host that uses a
+provider adds that package as a separate dependency after it is published:
 
 ```elixir
 {:jido_connect_github, "~> 0.8"}
@@ -598,9 +636,11 @@ Every `use Jido.Connect` provider compiles thin generated modules:
 Generated modules expose `jido_connect_projection/0` for stable host
 introspection and delegate execution to `Jido.Connect` runtimes.
 
-Poll sensors are operational generated modules: Jido schedules ticks, core
-delegates to `Jido.Connect.poll/4`, and the runtime emits `Jido.Signal`s while
-carrying the in-memory checkpoint forward.
+Poll sensors are operational generated modules. Their `init/2` and
+`handle_event/2` callbacks return schedule and emit instructions. The host
+applies those instructions, schedules the next tick, and persists the
+checkpoint when durability is required. Core delegates polling to
+`Jido.Connect.poll/4` and emits `Jido.Signal`s.
 
 Generated plugin subscriptions accept a shared `trigger_config` fallback or
 per-trigger configs keyed by trigger id:
@@ -624,3 +664,6 @@ the resulting `Jido.Connect.WebhookDelivery` or normalized signal into its own
 HTTP, idempotency, and persistence flow. Calling a metadata-only generated
 webhook sensor directly returns a structured execution error instead of silently
 pretending the event was handled.
+
+See the [generated-module contract](https://github.com/agentjido/jido_connect/blob/release/3.0/docs/generated_jido_modules.md)
+for the host-owned route, scheduling, and credential boundaries.

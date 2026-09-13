@@ -29,6 +29,55 @@ defmodule Jido.Connect.CatalogTest do
     def run(input, _context), do: {:ok, input}
   end
 
+  defmodule HostCatalogSearch do
+    use Jido.Action,
+      name: "host_catalog_search",
+      schema: Zoi.object(%{query: Zoi.string()}),
+      output_schema: Zoi.object(%{workspace: Zoi.string(), catalog_results: Zoi.list(Zoi.any())})
+
+    def run(params, %{agent_state: state} = context) do
+      with {:ok, %{results: results}} <-
+             Jido.Connect.Catalog.Actions.SearchTools.run(params, context) do
+        {:ok, %{state | catalog_results: results}}
+      end
+    end
+  end
+
+  defmodule CatalogHostAgent do
+    use Jido.Agent, name: "connect_catalog_host"
+
+    agent do
+      schema(
+        Zoi.object(%{
+          workspace: Zoi.string(),
+          catalog_results: Zoi.list(Zoi.any()) |> Zoi.default([])
+        })
+      )
+
+      plugin(Jido.Connect.Catalog.Plugin,
+        config: %{modules: [Jido.Connect.MCP]}
+      )
+    end
+
+    routes do
+      signal_source("/host")
+      route("connect.catalog.search", Jido.Connect.CatalogTest.HostCatalogSearch)
+    end
+  end
+
+  test "host catalog route keeps domain state through Agent.cmd" do
+    agent =
+      Jido.Agent.new!(CatalogHostAgent,
+        state: %{workspace: "tenant-1", catalog_results: []}
+      )
+
+    signal = Jido.Signal.new!("connect.catalog.search", %{query: "mcp.tools"}, source: "/host")
+
+    assert {:ok, next_agent, []} = Jido.Agent.cmd(agent, signal)
+    assert next_agent.state.workspace == "tenant-1"
+    assert Enum.any?(next_agent.state.catalog_results, &(&1.tool.id == "mcp.tools.list"))
+  end
+
   defmodule GeneratedIntegration do
     use Jido.Connect
 
