@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:05:10Z",
+  "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: design improvement.\n\nSource task: 01a09c57-1cfa-7d40-bb71-a5688aa49672\n\n- **P3 — Preserve field guidance in exported schemas.** [schema.ex:16](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/support/schema.ex:16) omits field descriptions and examples. They remain in `Field` records but disappear from generated JSON schemas. Copy this guidance into schema metadata so tool consumers can use it.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
+  "id": "jido_con-znq.10",
+  "labels": [],
+  "parent": "jido_con-znq",
+  "priority": 3,
+  "status": "open",
+  "title": "Preserve field guidance in exported schemas",
+  "type": "task",
+  "updated_at": "2026-09-13T20:05:10Z"
+}
