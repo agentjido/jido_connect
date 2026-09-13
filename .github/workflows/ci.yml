@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+      - release/2.0
+      - release/3.0
 
 jobs:
   quality:

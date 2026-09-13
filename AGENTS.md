@@ -49,3 +49,13 @@ mix test
 ```
 
 Release and Hex publishing automation are intentionally out of scope for now.
+
+## Compatibility Lines
+
+- Read `docs/branch_support.md` before dependency or API changes.
+- `release/2.0` keeps Jido and Action v2.
+- `release/3.0` follows Jido and Action v3. Prerelease Hex packages are allowed.
+- The v3 line is for maintainer development. Do not add cross-major shims.
+- Keep exact source references only where a required package is not on Hex.
+- Update the dependency record and run the quality checks after each upstream update.
+- Branch numbers identify compatibility lines, not published Connect versions.
