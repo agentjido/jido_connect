@@ -5,14 +5,16 @@
     "jido_con-s91.2"
   ],
   "blocks": [],
+  "closed_at": "2026-09-13T19:39:05Z",
+  "close_reason": "Candidate fb5b59bd is pushed, workspace is clean, docs and issue records are current. CI 34778095619 passed including umbrella, demo, and connector factory. Only upstream gaps #79 and #81 remain.",
   "created": "2026-09-13T19:17:39Z",
   "description": "Integrate verified work, clean PRs and issues, audit dependencies and package metadata, record current tests and release limitations. Maintain v2 branch boundaries. Prepare a clean v3 candidate without package publication.",
   "id": "jido_con-s91.3",
   "labels": [],
   "parent": "jido_con-s91",
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Finalize Connect release documentation and issue tracking",
   "type": "task",
-  "updated_at": "2026-09-13T19:29:52Z"
+  "updated_at": "2026-09-13T19:39:05Z"
 }
