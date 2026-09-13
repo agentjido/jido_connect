@@ -200,7 +200,7 @@ defmodule Jido.Connect.CalcomTest do
       assert module.name() == projection.name
     end
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "calcom",
              module: Jido.Connect.Calcom.Plugin,
              actions: @calcom_action_modules

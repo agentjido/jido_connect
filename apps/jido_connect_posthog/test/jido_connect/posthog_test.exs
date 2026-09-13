@@ -170,7 +170,7 @@ defmodule Jido.Connect.PostHogTest do
              }
            } = PostHog.jido_connect_manifest()
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "posthog",
              module: Jido.Connect.PostHog.Plugin,
              actions: @posthog_action_modules

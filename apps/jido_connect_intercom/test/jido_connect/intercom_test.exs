@@ -95,7 +95,7 @@ defmodule Jido.Connect.IntercomTest do
     assert length(generated.sensors) == 8
     assert generated.plugin == Jido.Connect.Intercom.Plugin
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "intercom",
              module: Jido.Connect.Intercom.Plugin,
              actions: actions

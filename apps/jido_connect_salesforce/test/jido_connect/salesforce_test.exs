@@ -100,7 +100,7 @@ defmodule Jido.Connect.SalesforceTest do
              }
            } = Salesforce.jido_connect_manifest()
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "salesforce",
              module: Jido.Connect.Salesforce.Plugin,
              actions: @salesforce_action_modules

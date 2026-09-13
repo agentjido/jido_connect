@@ -98,7 +98,7 @@ defmodule Jido.Connect.AsanaTest do
     assert length(generated.sensors) == 4
     assert generated.plugin == Jido.Connect.Asana.Plugin
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "asana",
              module: Jido.Connect.Asana.Plugin,
              actions: actions

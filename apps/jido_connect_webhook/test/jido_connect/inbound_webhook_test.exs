@@ -63,7 +63,7 @@ defmodule Jido.Connect.InboundWebhookTest do
              }
            } = InboundWebhook.jido_connect_manifest()
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "webhook",
              module: Jido.Connect.InboundWebhook.Plugin,
              actions: []

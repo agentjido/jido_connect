@@ -42,7 +42,7 @@ defmodule Jido.Connect.Jido.ActionProjection do
 end
 
 defmodule Jido.Connect.Jido.SensorProjection do
-  @moduledoc "Compile-time projection for one generated `Jido.Sensor` module."
+  @moduledoc "Compile-time projection for one generated `Jido.Connect.Sensor` adapter."
 
   alias Jido.Connect.Field
 
@@ -88,7 +88,7 @@ defmodule Jido.Connect.Jido.SensorProjection do
 end
 
 defmodule Jido.Connect.Jido.PluginProjection do
-  @moduledoc "Compile-time projection for one generated `Jido.Plugin` module."
+  @moduledoc "Compile-time projection for one generated Connect discovery module."
 
   alias Jido.Connect.Jido.{ActionProjection, SensorProjection}
 

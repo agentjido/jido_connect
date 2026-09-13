@@ -211,7 +211,7 @@ defmodule Jido.Connect.LinearTest do
              }
            } = Linear.jido_connect_manifest()
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "linear",
              module: Jido.Connect.Linear.Plugin,
              actions: @linear_action_modules

@@ -107,7 +107,7 @@ defmodule Jido.Connect.NotionTest do
     assert generated.sensors == []
     assert generated.plugin == Jido.Connect.Notion.Plugin
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "notion",
              module: Jido.Connect.Notion.Plugin,
              actions: actions

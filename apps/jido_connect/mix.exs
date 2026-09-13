@@ -15,10 +15,9 @@ defmodule JidoConnectCore.MixProject do
       package: package(),
       docs: docs(),
       source_url: "https://github.com/agentjido/jido_connect",
-      # ExMCP brings the newest compatible Cowlib release. This package uses
-      # only the ExMCP client and does not publish an MCP or Cowboy server.
-      # Security tests lock the affected call paths. Review these exceptions
-      # by 2026-09-12 or when a fixed Cowlib release is available.
+      # Cowlib 2.20.0 still has the three recorded encoder advisories.
+      # Connect uses the MCP client only. Keep the focused import/header tests.
+      # Reviewed 2026-09-13; see docs/v3_status.md. Issue #79 remains open.
       hex: [
         ignore_advisories: [
           "EEF-CVE-2026-43966",
@@ -54,13 +53,10 @@ defmodule JidoConnectCore.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jido, github: "agentjido/jido", ref: "9f2aaf874ec2320ef55fd5c18359a6c275dc44b4"},
-      {:jido_action,
-       github: "agentjido/jido_action",
-       ref: "82f3feb8b30c32b17b8f5287cfacde3a76cc07ee",
-       override: true},
-      {:jido_signal, "~> 2.2"},
-      {:ex_mcp, "~> 1.0"},
+      {:jido, github: "agentjido/jido", ref: "b02052402a6f1c4be10098c2d560831f14daec58"},
+      {:jido_action, "== 3.0.0-beta.10", override: true},
+      {:jido_signal, "== 3.0.0-beta.4"},
+      {:ex_mcp, "~> 1.3"},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false},
       {:jason, "~> 1.4"},
       {:req, "~> 0.6"},

@@ -62,7 +62,7 @@ defmodule Jido.Connect.CalendlyTest do
              generated_modules: %{plugin: Jido.Connect.Calendly.Plugin}
            } = Calendly.jido_connect_manifest()
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "calendly",
              module: Jido.Connect.Calendly.Plugin
            } = Jido.Connect.Calendly.Plugin.plugin_spec()

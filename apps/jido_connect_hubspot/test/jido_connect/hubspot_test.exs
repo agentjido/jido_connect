@@ -107,7 +107,7 @@ defmodule Jido.Connect.HubSpotTest do
              }
            } = HubSpot.jido_connect_manifest()
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "hubspot",
              module: Jido.Connect.HubSpot.Plugin,
              actions: @hubspot_action_modules

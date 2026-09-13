@@ -174,7 +174,7 @@ defmodule Jido.Connect.AirtableTest do
              }
            } = Airtable.jido_connect_manifest()
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "airtable",
              module: Jido.Connect.Airtable.Plugin,
              actions: @airtable_action_modules

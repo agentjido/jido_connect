@@ -1,5 +1,10 @@
 # Jido Connect
 
+> This is the `release/3.0` maintainer development line. It follows Jido v3
+> prereleases and is not ready for external adoption. See
+> [branch support](../../docs/branch_support.md) and
+> [the v3 dependency record](../../docs/v3_status.md).
+
 `jido_connect` is the core package for authoring integration providers with a
 Spark DSL and compiling them into concrete Jido actions, sensors, and plugins.
 

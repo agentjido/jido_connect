@@ -450,7 +450,7 @@ defmodule Jido.Connect.JiraTest do
              }
            } = Jira.jido_connect_manifest()
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "jira",
              module: Jido.Connect.Jira.Plugin,
              actions: @jira_action_modules

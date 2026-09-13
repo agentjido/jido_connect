@@ -8,10 +8,9 @@ defmodule JidoConnect.MixProject do
       start_permanent: Mix.env() == :prod,
       name: "Jido Connect",
       source_url: "https://github.com/agentjido/jido_connect",
-      # ExMCP brings the newest compatible Cowlib release. Core Connect uses
-      # only the ExMCP client and does not publish an MCP or Cowboy server.
-      # Security tests lock the affected call paths. Review these exceptions
-      # by 2026-09-12 or when a fixed Cowlib release is available.
+      # Cowlib 2.20.0 still has the three recorded encoder advisories.
+      # Connect uses the MCP client only. Keep the focused import/header tests.
+      # Reviewed 2026-09-13; see docs/v3_status.md. Issue #79 remains open.
       hex: [
         ignore_advisories: [
           "EEF-CVE-2026-43966",

@@ -54,7 +54,7 @@ defmodule Jido.Connect.Microsoft.TestSupport.ConnectorContracts do
       assert module.signal_type() == signal_type
     end
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: ^plugin_name,
              module: ^plugin_module,
              actions: ^action_modules

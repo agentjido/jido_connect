@@ -1,5 +1,10 @@
 # Jido Connect Ecosystem Migration
 
+> Historical migration record. The current branch policy is in
+> [branch support](branch_support.md). Current dependencies, checks, and gaps
+> are in [v3 status](v3_status.md). The August dependency pins and verification
+> results below are historical evidence, not the current release baseline.
+
 This document records the baseline and the fixed package boundaries for the
 non-Harness migration. The owning issues are
 [`jido_connect#69`](https://github.com/agentjido/jido_connect/issues/69),

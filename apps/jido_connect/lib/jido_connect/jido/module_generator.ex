@@ -40,10 +40,11 @@ defmodule Jido.Connect.Jido.ModuleGenerator do
       defmodule unquote(projection.module) do
         @moduledoc false
 
-        use Jido.Sensor,
-          name: unquote(projection.name),
-          description: unquote(projection.description),
-          schema: unquote(Macro.escape(projection.config_schema))
+        @behaviour Jido.Connect.Sensor
+
+        def name, do: unquote(projection.name)
+        def description, do: unquote(projection.description)
+        def schema, do: unquote(Macro.escape(projection.config_schema))
 
         @projection unquote(Macro.escape(projection))
 
@@ -53,12 +54,12 @@ defmodule Jido.Connect.Jido.ModuleGenerator do
         def signal_source, do: @projection.signal_source
         def runtime_mode, do: @projection.runtime_mode
 
-        @impl Jido.Sensor
+        @impl Jido.Connect.Sensor
         def init(config, context) do
           Jido.Connect.JidoSensorRuntime.init(@projection, config, context)
         end
 
-        @impl Jido.Sensor
+        @impl Jido.Connect.Sensor
         def handle_event(event, state) do
           Jido.Connect.JidoSensorRuntime.handle_event(@projection, event, state)
         end
@@ -67,46 +68,31 @@ defmodule Jido.Connect.Jido.ModuleGenerator do
   end
 
   defp plugin_module_ast(%PluginProjection{} = projection) do
-    action_modules = Enum.map(projection.actions, & &1.module)
-
     quote do
       defmodule unquote(projection.module) do
         @moduledoc false
 
-        use Jido.Plugin,
-          name: unquote(projection.name),
-          state_key: unquote(projection.integration_id),
-          description: unquote(projection.description),
-          actions: unquote(Macro.escape(action_modules)),
-          config_schema: Zoi.map()
-
         @projection unquote(Macro.escape(projection))
 
+        def name, do: @projection.name
+        def description, do: @projection.description
         def jido_connect_projection, do: @projection
-        defoverridable plugin_spec: 1
 
-        @impl Jido.Plugin
-        def plugin_spec(config) do
-          %Jido.Plugin.Spec{
+        # Connect discovery data. This is not a Jido.Plugin.Spec.
+        def plugin_spec(config \\ %{}) do
+          %{
             module: __MODULE__,
             name: name(),
-            state_key: state_key(),
-            description: description(),
-            category: category(),
-            vsn: vsn(),
-            schema: schema(),
-            config_schema: config_schema(),
-            config: config,
-            signal_patterns: signal_patterns(),
-            tags: tags(),
-            actions:
-              @projection
-              |> Jido.Connect.JidoPluginRuntime.filtered_actions(config)
-              |> Enum.map(& &1.module)
+            actions: __MODULE__.actions(config)
           }
         end
 
-        @impl Jido.Plugin
+        def actions(config \\ %{}) do
+          @projection
+          |> Jido.Connect.JidoPluginRuntime.filtered_actions(config)
+          |> Enum.map(& &1.module)
+        end
+
         def subscriptions(config, context) do
           Jido.Connect.JidoPluginRuntime.subscriptions(@projection, config, context)
         end

@@ -84,7 +84,7 @@ defmodule Jido.Connect.ZendeskTest do
     assert length(generated.sensors) == 2
     assert generated.plugin == Jido.Connect.Zendesk.Plugin
 
-    assert %Jido.Plugin.Spec{
+    assert %{
              name: "zendesk",
              module: Jido.Connect.Zendesk.Plugin,
              actions: actions

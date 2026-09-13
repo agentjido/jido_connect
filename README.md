@@ -1,6 +1,7 @@
 # Jido Connect
 
 > **Choose a compatibility branch before you start.**
+> **This branch is the v3 development line.**
 > `release/2.0` supports Jido v2. `release/3.0` is maintainer development for
 > Jido v3 and uses prerelease dependencies. Do not use the v3 line in a new
 > external application. See [Branch support](docs/branch_support.md).

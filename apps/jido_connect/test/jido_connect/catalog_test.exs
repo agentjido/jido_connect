@@ -701,8 +701,6 @@ defmodule Jido.Connect.CatalogTest do
       policy: AllowPolicy
     }
 
-    assert Jido.Agent.Instruction.jido_action_version() == 3
-
     assert {:ok, %{limit: 1, query: "catalog.item.get"}} =
              SearchTools.validate_params(%{"query" => "catalog.item.get", "limit" => 1})
 
@@ -724,6 +722,32 @@ defmodule Jido.Connect.CatalogTest do
              {"connect.catalog.describe", DescribeTool},
              {"connect.catalog.call", CallTool}
            ]
+  end
+
+  test "catalog plugin supplies configuration through the v3 preparation contract" do
+    assert {:ok, [%Jido.Plugin.Spec{module: Catalog.Plugin, state_key: nil}]} =
+             Jido.Plugin.normalize_all([{Catalog.Plugin, modules: [CatalogFixtures.Integration]}])
+
+    command = %Jido.Agent.Command{
+      agent: nil,
+      signal: Jido.Signal.new!("connect.catalog.search", %{}, source: "/test"),
+      context: %{request_id: "request-1"}
+    }
+
+    assert {:ok, prepared} =
+             Catalog.Plugin.prepare(command, modules: [CatalogFixtures.Integration])
+
+    assert prepared.context.request_id == "request-1"
+    assert prepared.context.catalog_config == %{modules: [CatalogFixtures.Integration]}
+
+    assert {:ok, %{results: [_ | _]}} =
+             Jido.Exec.run(SearchTools, %{}, prepared.context, timeout: 5_000)
+
+    custom = %{command | context: %{catalog_config: %{modules: []}}}
+    assert {:ok, ^custom} = Catalog.Plugin.prepare(custom, modules: [CatalogFixtures.Integration])
+
+    unrelated = %{command | signal: Jido.Signal.new!("other.event", %{}, source: "/test")}
+    assert {:ok, ^unrelated} = Catalog.Plugin.prepare(unrelated, modules: [])
   end
 
   test "canonical items include stable refs and complete operation metadata" do

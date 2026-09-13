@@ -299,6 +299,18 @@ defmodule Jido.Connect.DslV2Test do
     assert sensor_projection.policies == [:tenant_access]
   end
 
+  test "generated adapters keep discovery separate from v3 runtime plugins" do
+    assert %{actions: actions} = Integration.Plugin.plugin_spec()
+    assert actions == Integration.Plugin.actions()
+    refute function_exported?(Integration.Plugin, :__jido_plugin__, 0)
+
+    sensor = Integration.Sensors.ItemCreated
+    assert Connect.Sensor in sensor.__info__(:attributes)[:behaviour]
+    assert {:ok, state} = sensor.init(%{}, %{})
+    assert {:error, error} = sensor.handle_event(:tick, state)
+    assert error.phase == :webhook_runtime
+  end
+
   test "DSL fragments can split large provider declarations across modules" do
     assert {:ok,
             %{

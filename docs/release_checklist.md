@@ -1,7 +1,9 @@
 # Release Checklist
 
-Use this checklist before a release candidate. Hex publishing automation is not
-part of this repository.
+Use this checklist before a release candidate. Select the compatibility line
+from [branch support](branch_support.md). See [v3 status](v3_status.md) for the
+current prerelease dependencies and remaining findings. Hex publishing
+automation is not part of this repository.
 
 ## Baseline Guard
 
@@ -16,7 +18,7 @@ part of this repository.
 
    ```sh
    git diff --check
-   git diff --stat origin/main...
+   git diff --stat origin/release/3.0...
    ```
 
 3. Confirm that the existing `v0.8.0` safeguard tag is present. Do not create a
@@ -128,12 +130,14 @@ included in Hex packages.
 Hex publishing is deferred. Do not publish a package or create the `v0.9.0`
 tag without explicit user approval. When publishing starts, publish
 `jido_connect` first. Then publish the shared service packages and provider
-packages that use it. Create the release tag only from the verified commit on
-`main`.
+packages that use it. Create a release tag only from the verified commit on the selected release
+branch.
 
-The Action v3 beta branch temporarily uses an overridden Jido Action Git
-dependency and an exact Jido Git commit. Skip the Hex package and publish steps
-until upstream releases replace both pins.
+The v3 line uses Jido Action from Hex and an exact Jido Git commit. Alpha and
+beta Hex dependencies are allowed. A Hex publication still needs a package
+dependency set that Hex accepts; replace the remaining Jido Git reference
+before publication. Do not report a package build as passed if this requirement
+prevents it.
 
 Dependabot must remain enabled for vulnerability alerts, security updates, and
 the update groups in `.github/dependabot.yml`.

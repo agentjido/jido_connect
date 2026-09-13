@@ -1,10 +1,10 @@
 defmodule Jido.Connect.Catalog.Plugin do
   @moduledoc """
-  First-class Jido plugin for catalog search, describe, and call.
+  Jido v3 Plugin for catalog search, describe, and call configuration.
 
-  This is the canonical Jido runtime surface for Connect catalog operations.
-  The plugin exposes only three stable actions and routes all execution through
-  `Jido.Connect.Catalog.call_tool/3`.
+  Exposes three Action modules and route suggestions. The host declares its
+  Agent routes and passes Connect context to each invocation. Registering this
+  module as a v3 Plugin does not install routes or inject credentials.
   """
 
   alias Jido.Connect.Catalog.Actions.{CallTool, DescribeTool, SearchTools}
@@ -15,21 +15,27 @@ defmodule Jido.Connect.Catalog.Plugin do
     {"connect.catalog.call", CallTool}
   ]
 
-  use Jido.Plugin,
-    name: "jido_connect_catalog",
-    state_key: :jido_connect_catalog,
-    description: "Search, describe, and call Jido Connect catalog tools",
-    category: "catalog",
-    tags: ["jido_connect", "catalog", "tools"],
-    capabilities: [:catalog_search, :catalog_describe, :catalog_call],
-    singleton: true,
-    actions: [SearchTools, DescribeTool, CallTool],
-    signal_routes: @signal_routes,
-    config_schema: Zoi.map()
+  use Jido.Plugin
+
+  @catalog_signal_types Enum.map(@signal_routes, &elem(&1, 0))
 
   @impl Jido.Plugin
-  def signal_routes(_config), do: @signal_routes
+  def prepare(%Jido.Agent.Command{signal: %{type: type}} = command, opts)
+      when type in @catalog_signal_types do
+    context = Map.put_new(command.context, :catalog_config, Map.new(opts))
+    {:ok, %{command | context: context}}
+  end
 
-  @impl Jido.Plugin
-  def handle_signal(_signal, _context), do: {:ok, :continue}
+  def prepare(command, _opts), do: {:ok, command}
+
+  @doc "Returns the three Connect catalog Action modules."
+  def actions, do: [SearchTools, DescribeTool, CallTool]
+
+  @doc "Returns Connect discovery data, not a Jido runtime Plugin spec."
+  def plugin_spec(_config \\ %{}) do
+    %{module: __MODULE__, name: "jido_connect_catalog", actions: actions()}
+  end
+
+  @doc "Returns route suggestions. The host declares its Agent routes explicitly."
+  def signal_routes(_config \\ %{}), do: @signal_routes
 end
