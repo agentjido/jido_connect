@@ -17,6 +17,14 @@ The package contracts are `Jido.Connect.Connection`,
 `Jido.Connect.ConnectionSelector`, `Jido.Connect.CredentialLease`,
 `Jido.Connect.Run`, and `Jido.Connect.Event`.
 
+`Run` and `Event` are shape contracts, not safe public maps. Their constructors
+keep supplied `actor`, `payload`, and `metadata` values. The host must choose
+the fields it needs and remove credentials, tokens, private provider data, and
+other sensitive values before it stores, logs, or returns an audit record.
+Do not serialize these structs directly to a public API. Keep raw request and
+response data in a separate store with the host's own access rules if it is
+needed for investigation. Core does not persist or redact audit history.
+
 `CredentialLease` is the portable credential handoff between host-owned storage
 and any generated action, sensor, or bridge call. Provider packages mint leases
 from OAuth token exchanges, app installation token creation, API keys, or

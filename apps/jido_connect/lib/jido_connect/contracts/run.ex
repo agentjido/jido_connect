@@ -1,5 +1,11 @@
 defmodule Jido.Connect.Run do
-  @moduledoc "Minimal action or trigger execution record."
+  @moduledoc """
+  Minimal host-owned action or trigger execution record.
+
+  `new/1` and `new!/1` validate the shape but do not redact `actor` or
+  `metadata`. The host must remove secrets before it stores, logs, or exposes
+  a run. There is no public serialization helper for this record.
+  """
 
   @schema Zoi.struct(
             __MODULE__,

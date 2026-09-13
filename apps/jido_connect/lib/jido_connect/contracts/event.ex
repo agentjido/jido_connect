@@ -1,5 +1,11 @@
 defmodule Jido.Connect.Event do
-  @moduledoc "Minimal redacted execution event record."
+  @moduledoc """
+  Minimal host-owned execution event record.
+
+  `new/1` and `new!/1` validate the shape but do not redact `payload` or
+  `metadata`. The host must remove secrets before it stores, logs, or exposes
+  an event. There is no public serialization helper for this record.
+  """
 
   @schema Zoi.struct(
             __MODULE__,
