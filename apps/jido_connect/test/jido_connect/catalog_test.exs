@@ -1078,6 +1078,20 @@ defmodule Jido.Connect.CatalogTest do
     assert [] = Search.ranked_tools(tools, "missing terms")
   end
 
+  test "pack serialization preserves tuple tool references as stable strings" do
+    pack =
+      Catalog.Pack.new!(%{
+        id: :catalog_reader,
+        allowed_tools: [{:catalog, "catalog.item.get"}]
+      })
+
+    serialized = Catalog.to_map(pack)
+    assert serialized.allowed_tools == ["catalog.catalog.item.get"]
+    assert Jason.decode!(Jason.encode!(serialized))["allowed_tools"] == serialized.allowed_tools
+    assert {:ok, normalized} = Catalog.Pack.resolve_exact(serialized)
+    assert normalized.allowed_tools == serialized.allowed_tools
+  end
+
   test "catalog packs keep the legacy tool adapter safe and deterministic" do
     alias Catalog.{ItemSearchResult, Pack, ToolSearchResult}
 

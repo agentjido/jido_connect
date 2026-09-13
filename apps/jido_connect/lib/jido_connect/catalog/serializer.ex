@@ -74,12 +74,14 @@ defmodule Jido.Connect.Catalog.Serializer do
   end
 
   def to_map(%Pack{} = pack) do
+    {:ok, normalized} = Pack.resolve_exact(pack)
+
     %{
       id: pack.id,
       label: pack.label,
       description: pack.description,
       filters: json_safe(pack.filters),
-      allowed_tools: pack.allowed_tools,
+      allowed_tools: normalized.allowed_tools,
       metadata: json_safe(pack.metadata)
     }
   end
