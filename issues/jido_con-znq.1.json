@@ -5,11 +5,13 @@
   "created": "2026-09-13T20:05:04Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-1cfa-7d40-bb71-a5688aa49672\n\n1. **P2 — Legacy write declarations can omit confirmation.**  \n   [spec/validator.ex:57](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/contracts/spec/validator.ex:57) checks `mutation?` but does not check write risk. A declaration with only `risk :external_write` produces `mutation?: false` and `confirmation: :none`. The current authorization function then returns `:ok` for an AI actor with `direct_mutation_mode: :deny`.  \n   **Correction:** Validate risk, mutation, and confirmation together for both supported declaration forms.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.1",
-  "labels": [],
+  "labels": [
+    "v3-release-blocker"
+  ],
   "parent": "jido_con-znq",
   "priority": 2,
   "status": "open",
   "title": "Legacy write declarations can omit confirmation",
   "type": "bug",
-  "updated_at": "2026-09-13T20:05:04Z"
+  "updated_at": "2026-09-13T21:59:18Z"
 }
