@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:05:47Z",
+  "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: upstream dependency finding with Connect follow-up.\n\nSource task: 01a09c57-1cfa-7d40-bb71-a5688aa49672\n\ntwo **upstream Zoi 0.18.7 limits**. Its enum parser ignores attached minimum constraints, while its JSON output includes them. Its enum JSON encoder always emits `\"type\": \"string\"`, including for `[1, 2]`. See [enum.ex:50](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/deps/zoi/lib/zoi/types/enum.ex:50) and [enum.ex:109](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/deps/zoi/lib/zoi/types/enum.ex:109). These need an upstream correction or a narrow Connect guard.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
+  "id": "jido_con-znq.65",
+  "labels": [],
+  "parent": "jido_con-znq",
+  "priority": 2,
+  "status": "open",
+  "title": "Guard upstream Zoi enum constraint and JSON type mismatches",
+  "type": "task",
+  "updated_at": "2026-09-13T20:05:47Z"
+}
