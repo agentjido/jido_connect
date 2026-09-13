@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:05:37Z",
+  "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2ac2-7981-8f33-21ede2d89ca2\n\n4. **P2 — The HTTP error helper retains response bodies under `message`.**  \n   [http.ex:135](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/provider/http.ex:135) returns the complete body map when it has no `\"message\"` field. The helper stores that map in `details.message`. Body summarization removes `details.body`, but leaves this copy. A response with `%{\"content\" =\u003e \"private-body-marker\"}` retained the content in the public error. Multiple provider transports use this helper.  \n   **Correction:** Use a fixed fallback message. Accept an explicit message only when it has the expected scalar type. Keep other response content in the body summary.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
+  "id": "jido_con-znq.50",
+  "labels": [],
+  "parent": "jido_con-znq",
+  "priority": 2,
+  "status": "open",
+  "title": "The HTTP error helper retains response bodies under `message`",
+  "type": "bug",
+  "updated_at": "2026-09-13T20:05:37Z"
+}
