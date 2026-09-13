@@ -9,9 +9,15 @@
   "id": "jido_con-ag8.2",
   "labels": [],
   "parent": "jido_con-ag8",
+  "comments": [
+    {
+      "text": "Merged PR 75 with current remote main in c03f6e5a. Action now uses Hex beta.10, Signal beta.4, Jido v3 source b0205240, ExMCP 1.3.0, Bandit 1.12.5. Native catalog Plugin prepares catalog configuration; generated provider Plugin modules remain discovery helpers and Sensor adapters use a Connect callback contract. Demo passed 21 tests. Full final quality is running. Initial run found a Things cold-load transport bug, fixed separately in 09f3a555. Cowlib advisories remain under the existing exact exceptions; #79 must stay open.",
+      "timestamp": "2026-09-13T19:02:56Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Refresh v3 dependencies and generated integrations",
   "type": "task",
-  "updated_at": "2026-09-13T18:53:51Z"
+  "updated_at": "2026-09-13T19:02:56Z"
 }
