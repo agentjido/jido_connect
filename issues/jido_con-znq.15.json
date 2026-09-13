@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
   "created": "2026-09-13T20:05:13Z",
@@ -10,8 +10,8 @@
   ],
   "parent": "jido_con-znq",
   "priority": 2,
-  "status": "open",
+  "status": "in_progress",
   "title": "Put a complete v3 host example in the package guide",
   "type": "task",
-  "updated_at": "2026-09-13T21:59:24Z"
+  "updated_at": "2026-09-13T22:22:58Z"
 }
