@@ -9,9 +9,15 @@
     "v3-release-blocker"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed in 269cef97. Expiry is checked again after callbacks; focused runtime and Things tests pass. Full umbrella mix quality and demo format, warnings-as-errors compile, and 21 demo tests pass.",
+      "timestamp": "2026-09-13T22:58:04Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Approval callbacks can delay execution past expiry",
   "type": "bug",
-  "updated_at": "2026-09-13T22:38:09Z"
+  "updated_at": "2026-09-13T22:58:04Z"
 }
