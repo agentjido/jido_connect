@@ -5,11 +5,13 @@
   "created": "2026-09-13T20:05:06Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-1cfa-7d40-bb71-a5688aa49672\n\n5. **P2 — Different operation names can produce the same generated module.**  \n   [projection_builder.ex:11](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/jido/projection_builder.ex:11) maps both `:foo_bar` and `:foo__bar` to `Actions.FooBar`. The projection check confirmed two different operation IDs with that same module. Spark checks the original names, so it does not detect this collision. The generator emits two definitions for one module. Sensors use the same naming method.  \n   **Correction:** Check generated module names for duplicates before generating module code.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.5",
-  "labels": [],
+  "labels": [
+    "v3-release-blocker"
+  ],
   "parent": "jido_con-znq",
   "priority": 2,
   "status": "open",
   "title": "Different operation names can produce the same generated module",
   "type": "bug",
-  "updated_at": "2026-09-13T20:05:06Z"
+  "updated_at": "2026-09-13T21:59:20Z"
 }
