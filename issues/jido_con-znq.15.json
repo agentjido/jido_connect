@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:05:13Z",
+  "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: design improvement.\n\nSource task: 01a09c57-1efd-7e03-b335-4810b34600d9\n\n- **P2 — Put a complete v3 host example in the package guide.**  \n  [README.md:310](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/README.md:310) presents `plugin_spec/1` as installation, although it returns discovery data. [README.md:601](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/README.md:601) says Jido schedules generated sensors, contrary to the current host contract.\n\n  Also explain state assembly for the [suggested catalog routes](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/catalog/plugin.ex:12). Their actions return only catalog results. Pinned Jido uses that output as the complete next Agent state, so direct routing can lose other state or fail validation. Show a host wrapper that preserves domain state, and test it through `Agent.cmd/3`. [Pinned Agent execution contract](https://github.com/agentjido/jido/blob/b02052402a6f1c4be10098c2d560831f14daec58/lib/jido/agent/command/runner.ex#L120-L132)\n\n---\n\nSource task: 01a09c57-2d23-7271-a03d-67000b3c156d\n\n8. **P2 — Packaged documentation conflicts with the v3 contract.**  \n   [README.md:314](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/README.md:314) presents `plugin_spec(config)` as installation, although the current function returns discovery metadata and ignores that config. [README.md:601](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/README.md:601) assigns polling schedules to Jido, while the current Sensor contract assigns them to the host. The README also describes obsolete dependency pins and denies MCP resource/prompt support. Its branch-contract links point outside the [package file list](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/mix.exs:93).  \n   **Correction:** Update the README from the current v3 contract. Package the generated-module guide, or link to a valid repository page.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
+  "id": "jido_con-znq.15",
+  "labels": [],
+  "parent": "jido_con-znq",
+  "priority": 2,
+  "status": "open",
+  "title": "Put a complete v3 host example in the package guide",
+  "type": "task",
+  "updated_at": "2026-09-13T20:05:13Z"
+}
