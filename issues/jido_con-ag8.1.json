@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T18:53:10Z",
+  "description": "Create release/2.0 from current remote main and release/3.0 for maintainer v3 work. Add branch policy, README guidance, agent instructions and CI branch coverage. Preserve local main.",
+  "id": "jido_con-ag8.1",
+  "labels": [],
+  "parent": "jido_con-ag8",
+  "priority": 2,
+  "status": "open",
+  "title": "Document and establish compatibility branches",
+  "type": "task",
+  "updated_at": "2026-09-13T18:53:10Z"
+}
