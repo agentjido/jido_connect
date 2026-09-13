@@ -2,9 +2,19 @@ defmodule Jido.Connect.Catalog.Ranker do
   @moduledoc false
 
   alias Jido.Connect.{Callback, Error, Sanitizer}
-  alias Jido.Connect.Catalog.{Serializer, ToolLookup, ToolSearchResult}
 
-  @spec apply([ToolSearchResult.t()], String.t() | nil, term()) :: [ToolSearchResult.t()]
+  alias Jido.Connect.Catalog.{
+    Item,
+    ItemLookup,
+    ItemSearchResult,
+    Serializer,
+    ToolEntry,
+    ToolLookup,
+    ToolSearchResult
+  }
+
+  @spec apply([ToolSearchResult.t()] | [ItemSearchResult.t()], String.t() | nil, term()) ::
+          [ToolSearchResult.t()] | [ItemSearchResult.t()]
   def apply(results, _query, ranker) when ranker in [nil, false], do: results
 
   def apply(results, query, ranker) do
@@ -67,12 +77,12 @@ defmodule Jido.Connect.Catalog.Ranker do
   end
 
   defp reorder_results(results, refs) do
-    result_by_key = Map.new(results, &{ToolLookup.key(&1.tool), &1})
-    tools = Enum.map(results, & &1.tool)
+    result_by_key = Map.new(results, &{subject_key(result_subject(&1)), &1})
+    subjects = Enum.map(results, &result_subject/1)
 
     {ranked, seen} =
       refs
-      |> Enum.map(&resolve_ref(&1, tools))
+      |> Enum.map(&resolve_ref(&1, subjects))
       |> Enum.reject(&is_nil/1)
       |> Enum.reduce({[], MapSet.new()}, fn {key, reason}, {acc, seen} ->
         cond do
@@ -89,44 +99,48 @@ defmodule Jido.Connect.Catalog.Ranker do
 
     remaining =
       Enum.reject(results, fn result ->
-        MapSet.member?(seen, ToolLookup.key(result.tool))
+        MapSet.member?(seen, subject_key(result_subject(result)))
       end)
 
     Enum.reverse(ranked) ++ remaining
   end
 
-  defp resolve_ref(ref, tools) do
-    case ToolLookup.lookup(tools, ranker_tool_ref(ref)) do
-      {:ok, tool} -> {ToolLookup.key(tool), ranker_reason(ref)}
+  defp resolve_ref(ref, subjects) do
+    case subject_lookup(subjects, ranker_subject_ref(ref)) do
+      {:ok, subject} -> {subject_key(subject), ranker_reason(ref)}
       {:error, _error} -> nil
     end
   end
 
-  defp ranker_tool_ref({provider, id}), do: {provider, id}
+  defp ranker_subject_ref({provider, id}), do: {provider, id}
+  defp ranker_subject_ref({provider, type, id}), do: {provider, type, id}
 
-  defp ranker_tool_ref(%{} = ref) do
+  defp ranker_subject_ref(%{} = ref) do
+    stable_ref = Map.get(ref, :ref) || Map.get(ref, "ref")
     provider = Map.get(ref, :provider) || Map.get(ref, "provider")
+    type = Map.get(ref, :type) || Map.get(ref, "type")
 
     id =
       Map.get(ref, :id) || Map.get(ref, "id") || Map.get(ref, :tool_id) || Map.get(ref, "tool_id")
 
-    if provider && id do
-      {provider, id}
-    else
-      id
+    cond do
+      stable_ref -> stable_ref
+      provider && type && id -> {provider, normalize_type(type), id}
+      provider && id -> {provider, id}
+      true -> id
     end
   end
 
-  defp ranker_tool_ref(ref), do: ref
+  defp ranker_subject_ref(ref), do: ref
 
   defp ranker_reason(%{} = ref), do: Map.get(ref, :reason) || Map.get(ref, "reason")
   defp ranker_reason(_ref), do: nil
 
-  defp with_ranker_metadata(%ToolSearchResult{} = result, rank, nil) do
+  defp with_ranker_metadata(result, rank, nil) do
     update_ranker_metadata(result, %{rank: rank})
   end
 
-  defp with_ranker_metadata(%ToolSearchResult{} = result, rank, reason) do
+  defp with_ranker_metadata(result, rank, reason) do
     update_ranker_metadata(result, %{rank: rank, reason: reason})
   end
 
@@ -136,7 +150,7 @@ defmodule Jido.Connect.Catalog.Ranker do
     end)
   end
 
-  defp update_ranker_metadata(%ToolSearchResult{} = result, ranker_metadata) do
+  defp update_ranker_metadata(result, ranker_metadata) do
     %{
       result
       | metadata:
@@ -151,6 +165,29 @@ defmodule Jido.Connect.Catalog.Ranker do
       matched_fields: result.matched_fields
     }
   end
+
+  defp candidate_payload(%ItemSearchResult{} = result) do
+    %{
+      tool: Serializer.to_map(result.item),
+      score: result.score,
+      matched_fields: result.matched_fields
+    }
+  end
+
+  defp result_subject(%ToolSearchResult{tool: tool}), do: tool
+  defp result_subject(%ItemSearchResult{item: item}), do: item
+
+  defp subject_lookup([%Item{} | _] = items, ref), do: ItemLookup.lookup(items, ref)
+  defp subject_lookup([%ToolEntry{} | _] = tools, ref), do: ToolLookup.lookup(tools, ref)
+  defp subject_lookup([], ref), do: ItemLookup.lookup([], ref)
+
+  defp subject_key(%Item{} = item), do: ItemLookup.key(item)
+  defp subject_key(%ToolEntry{} = tool), do: ToolLookup.key(tool)
+
+  defp normalize_type(type) when type in [:action, :trigger], do: type
+  defp normalize_type("action"), do: :action
+  defp normalize_type("trigger"), do: :trigger
+  defp normalize_type(type), do: type
 
   defp ranker_details(fun) when is_function(fun), do: %{ranker: :function}
   defp ranker_details(module) when is_atom(module), do: %{ranker: module, function: :rank}

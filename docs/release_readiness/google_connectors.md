@@ -5,6 +5,11 @@
 **Epic**: G11 – Cross-Google Hardening And Demo
 **Reviewer**: Pi (automated)
 
+**2026-08-25 update**: This is a historical review. The unpublished
+`jido_connect_mcp` application and its `jido_mcp` dependency were removed after
+the bridge and its tests moved into core `jido_connect`. RISK-1 is resolved and
+does not need the recommendation below.
+
 ## Summary
 
 The Google connector family and sibling connector packages pass the quality
@@ -76,7 +81,7 @@ Zero warnings across all 26 umbrella apps.
 
 ## Risks Tracked as Follow-Up Issues
 
-### RISK-1: `jido_connect_mcp` dep resolution requires network access
+### RISK-1: `jido_connect_mcp` dep resolution requires network access (resolved)
 
 The `jido_mcp` git dependency transitively requires `anubis_mcp`, `jido`,
 and `zoi` from Hex. These packages exist in the local Hex cache and in the
@@ -84,9 +89,8 @@ umbrella `deps/` directory, but Mix's dependency checker cannot verify them
 without a successful `mix deps.get`. When network access is slow or
 unavailable, format checks and tests for `jido_connect_mcp` are blocked.
 
-**Recommendation**: Either pin `jido_mcp` as a Hex dependency (once published)
-or mirror the git dependency's transitive Hex deps explicitly in the
-`jido_connect_mcp` mix.exs so the umbrella can resolve them offline.
+**Resolution, 2026-08-25**: The unpublished application was removed. Its bridge
+and tests now live in core `jido_connect`, which uses stable ExMCP directly.
 
 ### RISK-2: `jido_connect_posthog` seed-dependent test failure
 

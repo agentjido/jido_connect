@@ -4,22 +4,17 @@ defmodule Jido.Connect.Catalog.Actions.DescribeTool do
   use Jido.Action,
     name: "connect_catalog_describe",
     description: "Describe one Jido Connect catalog tool",
-    category: "catalog",
-    tags: ["jido_connect", "catalog", "describe"],
-    schema: %{
-      "type" => "object",
-      "required" => ["tool_id"],
-      "properties" => %{
-        "tool_id" => %{"type" => "string"},
-        "provider" => %{"type" => "string"},
-        "filters" => %{"type" => "object"},
-        "pack" => %{}
-      }
-    },
-    output_schema: %{
-      "type" => "object",
-      "properties" => %{"descriptor" => %{"type" => "object"}}
-    }
+    schema:
+      Zoi.object(
+        %{
+          tool_id: Zoi.string(),
+          provider: Zoi.string() |> Zoi.optional(),
+          filters: Zoi.map() |> Zoi.optional(),
+          pack: Zoi.any() |> Zoi.optional()
+        },
+        coerce: true
+      ),
+    output_schema: Zoi.object(%{descriptor: Zoi.map()})
 
   alias Jido.Connect.Catalog
   alias Jido.Connect.Catalog.Input

@@ -17,11 +17,11 @@ defmodule Jido.Connect.MCP.Runtime do
         with :ok <- ensure_dispatchable(token),
              {:ok, data} <-
                dispatch(token, fn ->
-                 call_mcp(opts, :list_tools, [token.endpoint_id], timeout(input))
+                 call_mcp(token, :list_tools, [], timeout(input))
                end) do
           tools =
             data
-            |> Map.get("tools", [])
+            |> Map.get("tools", Map.get(data, :tools, []))
             |> Enum.map(&Tool.from_mcp/1)
             |> Enum.map(&Tool.to_map/1)
 
@@ -61,46 +61,41 @@ defmodule Jido.Connect.MCP.Runtime do
     end
   end
 
-  defp call_typed(token, opts, input, true), do: call_write(token, opts, input)
+  defp call_typed(token, _opts, input, true), do: call_write(token, input)
 
-  defp call_typed(token, opts, input, false) do
+  defp call_typed(token, _opts, input, false) do
     dispatch(token, fn ->
       call_mcp(
-        opts,
+        token,
         :call_tool,
-        [token.endpoint_id, input.tool_name, input.arguments],
+        [input.tool_name, input.arguments],
         timeout(input)
       )
     end)
   end
 
-  defp call_write(%{legacy?: true} = token, opts, input) do
+  defp call_write(%{legacy?: true} = token, input) do
     call_mcp(
-      opts,
+      token,
       :call_tool,
-      [token.endpoint_id, input.tool_name, input.arguments],
+      [input.tool_name, input.arguments],
       timeout(input)
     )
   end
 
-  defp call_write(token, opts, input) do
+  defp call_write(token, input) do
     case EndpointLeaseManager.dispatch(token, fn ->
            call_mcp(
-             opts,
+             token,
              :call_tool,
-             [token.endpoint_id, input.tool_name, input.arguments],
+             [input.tool_name, input.arguments],
              timeout(input)
            )
          end) do
-      {:ok, {:error, _error}, true} ->
-        {:error,
-         Error.provider("MCP write outcome is uncertain",
-           provider: :mcp,
-           reason: :mcp_write_uncertain,
-           delivery: :sent_outcome_unknown,
-           mutation?: true,
-           details: %{endpoint_generation: token.generation}
-         )}
+      {:ok, {:error, error}, revoked?} ->
+        if revoked? or uncertain_outcome?(error),
+          do: uncertain_write(token),
+          else: {:error, error}
 
       {:ok, result, _revoked?} ->
         result
@@ -121,8 +116,8 @@ defmodule Jido.Connect.MCP.Runtime do
     end
   end
 
-  defp verify_live_schema(input, opts, token, expected_hash, required_schema) do
-    with {:ok, data} <- call_mcp(opts, :list_tools, [token.endpoint_id], timeout(input)),
+  defp verify_live_schema(input, _opts, token, expected_hash, required_schema) do
+    with {:ok, data} <- call_mcp(token, :list_tools, [], timeout(input)),
          {:ok, tool} <- find_tool(data, input.tool_name),
          observed = Tool.from_mcp(tool),
          :ok <- require_schema_hash(input.tool_name, expected_hash, observed.schema_hash),
@@ -186,18 +181,18 @@ defmodule Jido.Connect.MCP.Runtime do
   defp bind_schema(token, tool_name, schema_hash),
     do: EndpointLeaseManager.bind_schema(token, tool_name, schema_hash)
 
-  defp call_mcp(opts, function, args, nil) do
-    client = mcp_client(opts)
+  defp call_mcp(token, function, args, nil) do
+    call_args = [token.client_ref | args] ++ [[]]
 
-    with {:ok, response} <- call_client(client, function, args) do
+    with {:ok, response} <- call_client(token.client_module, function, call_args) do
       normalize_response(response)
     end
   end
 
-  defp call_mcp(opts, function, args, timeout) do
-    client = mcp_client(opts)
+  defp call_mcp(token, function, args, timeout) do
+    call_args = [token.client_ref | args] ++ [[timeout: timeout]]
 
-    with {:ok, response} <- call_client(client, function, args ++ [[timeout: timeout]]) do
+    with {:ok, response} <- call_client(token.client_module, function, call_args) do
       normalize_response(response)
     end
   end
@@ -205,43 +200,35 @@ defmodule Jido.Connect.MCP.Runtime do
   defp call_client(client, function, args) do
     {:ok, apply(client, function, args)}
   rescue
-    exception ->
+    _exception ->
       {:error,
        Error.provider("MCP request failed",
          provider: :mcp,
          reason: :client_exception,
          details: %{
            module: client,
-           function: function,
-           message: Exception.message(exception)
+           function: function
          }
        )}
   catch
-    kind, reason ->
+    _kind, _reason ->
       {:error,
        Error.provider("MCP request failed",
          provider: :mcp,
          reason: :client_exit,
          details: %{
            module: client,
-           function: function,
-           kind: kind,
-           reason: Jido.Connect.Sanitizer.sanitize(reason, :transport)
+           function: function
          }
        )}
   end
 
   defp normalize_response(response) do
     case response do
-      {:ok, %{status: :ok, data: data}} -> {:ok, data}
-      {:ok, %{data: data}} -> {:ok, data}
+      {:ok, data} when is_map(data) -> {:ok, data}
       {:error, error} -> {:error, normalize_error(error)}
       response -> {:error, invalid_response(response)}
     end
-  end
-
-  defp mcp_client(%{credentials: credentials}) do
-    Map.get(credentials, :mcp_client) || Map.get(credentials, "mcp_client") || Jido.MCP
   end
 
   defp timeout(input), do: Map.get(input, :timeout)
@@ -249,8 +236,10 @@ defmodule Jido.Connect.MCP.Runtime do
   defp normalize_error(%{} = error) do
     Error.provider("MCP request failed",
       provider: :mcp,
-      reason: Map.get(error, :type) || Map.get(error, "type"),
-      details: error
+      reason:
+        Map.get(error, :reason) || Map.get(error, "reason") || Map.get(error, :type) ||
+          Map.get(error, "type") || :mcp_error,
+      details: safe_error_details(error)
     )
   end
 
@@ -258,7 +247,7 @@ defmodule Jido.Connect.MCP.Runtime do
     Error.provider("MCP request failed",
       provider: :mcp,
       reason: :mcp_error,
-      details: %{error: error}
+      details: %{error: safe_response_kind(error)}
     )
   end
 
@@ -266,9 +255,52 @@ defmodule Jido.Connect.MCP.Runtime do
     Error.provider("MCP request returned an invalid response",
       provider: :mcp,
       reason: :invalid_response,
-      details: %{response: Jido.Connect.Sanitizer.sanitize(response, :transport)}
+      details: %{response: safe_response_kind(response)}
     )
   end
+
+  defp uncertain_outcome?(%Error.ProviderError{reason: :outcome_unknown}), do: true
+  defp uncertain_outcome?(_error), do: false
+
+  defp uncertain_write(token) do
+    {:error,
+     Error.provider("MCP write outcome is uncertain",
+       provider: :mcp,
+       reason: :mcp_write_uncertain,
+       delivery: :sent_outcome_unknown,
+       mutation?: true,
+       details: %{endpoint_generation: token.generation}
+     )}
+  end
+
+  defp safe_error_details(error) do
+    details = Map.get(error, :details, Map.get(error, "details", %{}))
+
+    %{}
+    |> maybe_put(:code, safe_detail(details, :code))
+    |> maybe_put(:field, safe_detail(details, :field))
+    |> maybe_put(:delivery, safe_detail(details, :delivery))
+  end
+
+  defp safe_detail(details, key) when is_map(details) do
+    case Map.get(details, key, Map.get(details, Atom.to_string(key))) do
+      value when is_atom(value) or is_integer(value) -> value
+      value when is_binary(value) and byte_size(value) <= 128 -> value
+      _value -> nil
+    end
+  end
+
+  defp safe_detail(_details, _key), do: nil
+
+  defp safe_response_kind(response) when is_atom(response), do: Atom.to_string(response)
+  defp safe_response_kind(response) when is_tuple(response), do: "tuple"
+  defp safe_response_kind(response) when is_map(response), do: "map"
+  defp safe_response_kind(response) when is_list(response), do: "list"
+  defp safe_response_kind(response) when is_binary(response), do: "binary"
+  defp safe_response_kind(_response), do: "term"
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
 
   defp ensure_dispatchable(%{legacy?: true}), do: :ok
   defp ensure_dispatchable(token), do: EndpointLeaseManager.ensure_dispatchable(token)

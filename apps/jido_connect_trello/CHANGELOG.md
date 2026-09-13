@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Require core `jido_connect` `0.9.x` for the ExMCP-backed bridge and Connect
+  endpoint contract.
+
 ## 0.8.0
 
 - Add the distinct Trello provider identity.

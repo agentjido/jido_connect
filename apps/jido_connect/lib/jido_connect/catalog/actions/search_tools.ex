@@ -4,21 +4,17 @@ defmodule Jido.Connect.Catalog.Actions.SearchTools do
   use Jido.Action,
     name: "connect_catalog_search",
     description: "Search Jido Connect catalog tools",
-    category: "catalog",
-    tags: ["jido_connect", "catalog", "search"],
-    schema: %{
-      "type" => "object",
-      "properties" => %{
-        "query" => %{"type" => "string"},
-        "filters" => %{"type" => "object"},
-        "limit" => %{"type" => "integer", "minimum" => 0},
-        "pack" => %{}
-      }
-    },
-    output_schema: %{
-      "type" => "object",
-      "properties" => %{"results" => %{"type" => "array"}}
-    }
+    schema:
+      Zoi.object(
+        %{
+          query: Zoi.string() |> Zoi.optional(),
+          filters: Zoi.map() |> Zoi.optional(),
+          limit: Zoi.integer() |> Zoi.min(0) |> Zoi.optional(),
+          pack: Zoi.any() |> Zoi.optional()
+        },
+        coerce: true
+      ),
+    output_schema: Zoi.object(%{results: Zoi.list(Zoi.any())})
 
   alias Jido.Connect.Catalog
   alias Jido.Connect.Catalog.Input

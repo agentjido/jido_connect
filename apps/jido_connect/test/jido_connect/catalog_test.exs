@@ -1,29 +1,3 @@
-unless Code.ensure_loaded?(Jido.Action.Catalog) do
-  defmodule Jido.Action.Catalog do
-    defstruct id: nil, name: nil, description: "", entries: %{}, metadata: %{}
-
-    def new(attrs) when is_map(attrs) do
-      {:ok,
-       %__MODULE__{
-         id: Map.fetch!(attrs, :id),
-         name: Map.get(attrs, :name),
-         description: Map.get(attrs, :description, ""),
-         entries: %{},
-         metadata: Map.get(attrs, :metadata, %{})
-       }}
-    end
-
-    def register(%__MODULE__{} = _catalog, nil, _overrides) do
-      {:error, :invalid_module}
-    end
-
-    def register(%__MODULE__{} = catalog, module, overrides) do
-      entry = Map.merge(%{module: module}, overrides)
-      {:ok, %{catalog | entries: Map.put(catalog.entries, entry.id, entry)}}
-    end
-  end
-end
-
 defmodule Jido.Connect.CatalogTest do
   use ExUnit.Case, async: false
 
@@ -443,24 +417,6 @@ defmodule Jido.Connect.CatalogTest do
              )
   end
 
-  test "action catalog bridge projects generated action modules" do
-    assert {:ok, catalog} = Catalog.action_catalog(modules: [GeneratedIntegration])
-    assert %{entries: %{"generated.item.get" => entry}} = catalog
-    assert entry.module == GeneratedIntegration.Actions.GetItem
-    assert entry.title == "Get generated item"
-    assert entry.namespace == "generated_catalog"
-    assert entry.scopes == ["read"]
-    assert entry.read_only? == true
-    assert entry.metadata.provider == :generated_catalog
-    assert "read_model" in entry.tags
-    assert entry.metadata.package_version == "1.2.3"
-  end
-
-  test "action catalog bridge skips non-generated catalog tools" do
-    assert {:ok, catalog} = Catalog.action_catalog(modules: [CatalogFixtures.Integration])
-    assert catalog.entries == %{}
-  end
-
   test "ranked tool search prefers exact matches and combines with filters" do
     modules = [CatalogFixtures.Integration, CatalogFixtures.OtherIntegration]
 
@@ -737,6 +693,27 @@ defmodule Jido.Connect.CatalogTest do
              SearchTools.run(%{"query" => "item", "filters" => "bad"}, action_context)
   end
 
+  test "catalog actions validate and execute through Jido Action v3" do
+    modules = [CatalogFixtures.Integration]
+
+    action_context = %{
+      config: %{modules: modules},
+      policy: AllowPolicy
+    }
+
+    assert Jido.Agent.Instruction.jido_action_version() == 3
+
+    assert {:ok, %{limit: 1, query: "catalog.item.get"}} =
+             SearchTools.validate_params(%{"query" => "catalog.item.get", "limit" => 1})
+
+    assert {:ok, %{results: [%{tool: %{id: "catalog.item.get"}} | _rest]}} =
+             Jido.Exec.run(
+               SearchTools,
+               %{"query" => "catalog.item.get", "limit" => 1},
+               action_context
+             )
+  end
+
   test "catalog plugin exposes exactly search, describe, and call actions" do
     spec = Catalog.Plugin.plugin_spec(%{modules: [CatalogFixtures.Integration]})
 
@@ -747,6 +724,74 @@ defmodule Jido.Connect.CatalogTest do
              {"connect.catalog.describe", DescribeTool},
              {"connect.catalog.call", CallTool}
            ]
+  end
+
+  test "canonical items include stable refs and complete operation metadata" do
+    modules = [CatalogFixtures.Integration]
+
+    assert [
+             %Catalog.Item{
+               ref: "catalog:action:catalog.item.get",
+               provider: :catalog,
+               type: :action,
+               id: "catalog.item.get",
+               input: [%Jido.Connect.Field{name: :id}],
+               policies: [%Jido.Connect.PolicyRequirement{id: :item_access}],
+               auth: [%Catalog.AuthProfileSummary{id: :user, kind: :oauth2}],
+               schema_digest: digest,
+               strict?: true
+             }
+           ] = Catalog.items(modules: modules, type: :action)
+
+    assert is_binary(digest)
+
+    assert %{
+             ref: "catalog:action:catalog.item.get",
+             provider: :catalog,
+             type: :action,
+             id: "catalog.item.get",
+             policies: [%{id: :item_access}],
+             input_json_schema: %{"type" => "object"}
+           } =
+             Catalog.items(modules: modules, type: :action)
+             |> hd()
+             |> Catalog.to_map()
+  end
+
+  test "canonical item lookup, search, describe, and call use one projection" do
+    modules = [CatalogFixtures.Integration]
+    ref = "catalog:action:catalog.item.get"
+    {context, lease} = CatalogFixtures.context_and_lease()
+
+    assert {:ok, %Catalog.Item{ref: ^ref} = by_ref} = Catalog.lookup_item(ref, modules: modules)
+
+    assert {:ok, %Catalog.Item{ref: ^ref}} =
+             Catalog.lookup_item({:catalog, :action, "catalog.item.get"}, modules: modules)
+
+    assert {:ok, %Catalog.Item{ref: ^ref}} =
+             Catalog.lookup_item("catalog.catalog.item.get", modules: modules)
+
+    assert {:ok, ^by_ref} = Catalog.describe_item(ref, modules: modules)
+
+    assert [
+             %Catalog.ItemSearchResult{
+               item: %Catalog.Item{ref: ^ref},
+               matched_fields: matched_fields
+             }
+           ] = Catalog.search_items(ref, modules: modules)
+
+    assert :ref in matched_fields
+
+    assert {:ok, %{id: "item_1"}} =
+             Catalog.call_item(ref, %{id: "item_1"},
+               modules: modules,
+               context: context,
+               credential_lease: lease,
+               policy: AllowPolicy
+             )
+
+    assert {:ok, %Catalog.ToolEntry{id: "catalog.item.get"}} =
+             Catalog.lookup_tool(by_ref |> Catalog.ToolEntry.from_item(), modules: modules)
   end
 
   test "ranker extension reorders valid candidates and receives sanitized metadata only" do
@@ -783,6 +828,192 @@ defmodule Jido.Connect.CatalogTest do
                metadata: %{ranker: %{status: :fallback, error: %{type: :execution_error}}}
              }
            ] = Catalog.search_tools("item", modules: modules, ranker: ExplodingRanker)
+  end
+
+  test "legacy tool lookup keeps all documented reference forms and errors" do
+    alias Catalog.ToolLookup
+
+    tools =
+      Catalog.tools(modules: [CatalogFixtures.Integration, CatalogFixtures.OtherIntegration])
+
+    action = Enum.find(tools, &(&1.provider == :catalog and &1.type == :action))
+
+    assert {:ok, ^action} = ToolLookup.lookup(tools, action)
+    assert {:ok, ^action} = ToolLookup.lookup(tools, {:catalog, "catalog.item.get"})
+    assert {:ok, ^action} = ToolLookup.lookup(tools, "catalog.catalog.item.get")
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :ambiguous_tool}} =
+             ToolLookup.lookup(tools, "catalog.item.get")
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :unknown_tool}} =
+             ToolLookup.lookup(tools, "missing")
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :invalid_tool_ref}} =
+             ToolLookup.lookup(tools, %{invalid: true})
+
+    assert ToolLookup.key(action) == {"catalog", "catalog.item.get"}
+    assert ToolLookup.provider_key(" catalog ") == "catalog"
+    assert ToolLookup.tool_id_key(:item) == "item"
+  end
+
+  test "legacy tool search covers plain and ranked compatibility results" do
+    alias Catalog.Search
+
+    tools = Catalog.tools(modules: [CatalogFixtures.Integration])
+
+    assert Search.tools(tools, nil) == tools
+    assert [%Catalog.ToolEntry{type: :action}] = Search.tools(tools, "read_model")
+    assert [] = Search.tools(tools, "not present")
+
+    assert Enum.map(Search.ranked_tools(tools, nil), & &1.score) == [0, 0]
+
+    assert [
+             %Catalog.ToolSearchResult{
+               tool: %Catalog.ToolEntry{id: "catalog.item.get"},
+               matched_fields: fields
+             }
+           ] = Search.ranked_tools(tools, "catalog.item.get")
+
+    assert :id in fields
+
+    assert [
+             %Catalog.ToolSearchResult{
+               tool: %Catalog.ToolEntry{id: "catalog.item.get"},
+               matched_fields: phrase_fields
+             }
+           ] = Search.ranked_tools(tools, "get item")
+
+    assert :label in phrase_fields
+    assert [] = Search.ranked_tools(tools, "missing terms")
+  end
+
+  test "catalog packs keep the legacy tool adapter safe and deterministic" do
+    alias Catalog.{ItemSearchResult, Pack, ToolSearchResult}
+
+    modules = [CatalogFixtures.Integration]
+    tools = Catalog.tools(modules: modules)
+    items = Catalog.items(modules: modules)
+    action_tool = Enum.find(tools, &(&1.type == :action))
+    trigger_tool = Enum.find(tools, &(&1.type == :trigger))
+    action_item = Enum.find(items, &(&1.type == :action))
+    trigger_item = Enum.find(items, &(&1.type == :trigger))
+
+    assert %Zoi.Types.Struct{} = Pack.schema()
+    assert {:error, _errors} = Pack.new(%{})
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :invalid_reviewed_pack}} =
+             Pack.resolve_exact(:missing)
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :invalid_pack}} =
+             Pack.resolve_exact(%{})
+
+    {:ok, action_pack} =
+      Pack.resolve_exact(%{
+        id: :actions,
+        filters: %{"type" => :action, "unknown" => "ignored"},
+        allowed_tools: [{:catalog, "catalog.item.get"}],
+        metadata: %{owner: "test"}
+      })
+
+    assert Pack.reviewed_provenance(action_pack) == %{
+             id: "actions",
+             label: nil,
+             description: nil,
+             filters: %{type: :action},
+             allowed_tools: ["catalog.catalog.item.get"]
+           }
+
+    assert :ok = Pack.validate_reviewed_tools(action_pack, tools)
+    assert :ok = Pack.validate_reviewed_items(action_pack, items)
+
+    {:ok, trigger_pack} =
+      Pack.resolve_exact(%{id: :triggers, allowed_tools: [trigger_item.ref]})
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :trigger_not_executable}} =
+             Pack.validate_reviewed_items(trigger_pack, items)
+
+    {:ok, legacy_trigger_pack} =
+      Pack.resolve_exact(%{id: :legacy_triggers, allowed_tools: [trigger_tool]})
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :trigger_not_executable}} =
+             Pack.validate_reviewed_tools(legacy_trigger_pack, tools)
+
+    ambiguous_tools =
+      Catalog.tools(modules: [CatalogFixtures.Integration, CatalogFixtures.OtherIntegration])
+
+    {:ok, ambiguous_pack} =
+      Pack.resolve_exact(%{id: :ambiguous, allowed_tools: ["catalog.item.get"]})
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :ambiguous_pack_action}} =
+             Pack.validate_reviewed_tools(ambiguous_pack, ambiguous_tools)
+
+    {:ok, missing_pack} = Pack.resolve_exact(%{id: :missing, allowed_tools: ["missing"]})
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :pack_action_missing}} =
+             Pack.validate_reviewed_tools(missing_pack, tools)
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :pack_action_missing}} =
+             Pack.validate_reviewed_items(missing_pack, items)
+
+    assert {:ok, nil} = Pack.resolve(nil, [])
+    assert {:ok, nil} = Pack.resolve("", [])
+    assert {:ok, ^action_pack} = Pack.resolve(action_pack, [])
+    assert {:ok, %Pack{id: "inline"}} = Pack.resolve(%{id: :inline}, [])
+    assert {:ok, %Pack{id: "mapped"}} = Pack.resolve(:mapped, packs: %{mapped: []})
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :unknown_pack}} =
+             Pack.resolve(:unknown, packs: [action_pack])
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :invalid_packs}} =
+             Pack.resolve(:bad, packs: :bad)
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :invalid_pack}} =
+             Pack.resolve(:bad, packs: [:bad])
+
+    assert Pack.apply_filters([pack: :actions, packs: []], action_pack) == [
+             type: :action,
+             unknown_filter: "ignored"
+           ]
+
+    assert Pack.apply_filters([provider: :catalog], nil) == [provider: :catalog]
+    assert Pack.filter_tools(tools, nil) == tools
+    assert Pack.filter_items(items, nil) == items
+    assert Pack.filter_search_results([], nil) == []
+
+    empty_pack = Pack.new!(%{id: :all})
+    assert Pack.filter_tools(tools, empty_pack) == tools
+    assert Pack.filter_items(items, empty_pack) == items
+
+    assert Pack.filter_tools(tools, action_pack) == [action_tool]
+    assert Pack.filter_items(items, action_pack) == [action_item]
+
+    tool_results = [
+      ToolSearchResult.new!(%{tool: action_tool}),
+      ToolSearchResult.new!(%{tool: trigger_tool})
+    ]
+
+    item_results = [
+      ItemSearchResult.new!(%{item: action_item}),
+      ItemSearchResult.new!(%{item: trigger_item})
+    ]
+
+    assert [%ToolSearchResult{tool: ^action_tool}] =
+             Pack.filter_search_results(tool_results, action_pack)
+
+    assert [%ItemSearchResult{item: ^action_item}] =
+             Pack.filter_search_results(item_results, action_pack)
+
+    assert :ok = Pack.require_tool_allowed(nil, action_tool)
+    assert :ok = Pack.require_tool_allowed(action_pack, action_tool)
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Pack.require_tool_allowed(action_pack, trigger_tool)
+
+    assert :ok = Pack.require_item_allowed(nil, action_item)
+    assert :ok = Pack.require_item_allowed(action_pack, action_item)
+
+    assert {:error, %Jido.Connect.Error.ValidationError{reason: :item_not_in_pack}} =
+             Pack.require_item_allowed(action_pack, trigger_item)
   end
 
   defp restore_env(key, nil), do: Application.delete_env(:jido_connect, key)

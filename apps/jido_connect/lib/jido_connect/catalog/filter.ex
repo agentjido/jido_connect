@@ -36,6 +36,23 @@ defmodule Jido.Connect.Catalog.Filter do
     |> filter_tool_id(Keyword.get(opts, :tool))
   end
 
+  @spec items([Jido.Connect.Catalog.Item.t()], keyword()) :: [Jido.Connect.Catalog.Item.t()]
+  def items(items, opts) do
+    items
+    |> filter_tool_equal(:provider, Keyword.get(opts, :provider))
+    |> filter_tool_equal(:type, Keyword.get(opts, :type))
+    |> filter_tool_equal(:resource, Keyword.get(opts, :resource))
+    |> filter_tool_equal(:verb, Keyword.get(opts, :verb))
+    |> filter_tool_equal(:data_classification, Keyword.get(opts, :data_classification))
+    |> filter_tool_equal(:risk, Keyword.get(opts, :risk))
+    |> filter_tool_equal(:confirmation, Keyword.get(opts, :confirmation))
+    |> filter_tool_tag(Keyword.get(opts, :tool_tag))
+    |> filter_tool_auth_kind(Keyword.get(opts, :auth_kind))
+    |> filter_tool_auth_profile(Keyword.get(opts, :auth_profile))
+    |> filter_tool_scope(Keyword.get(opts, :scope))
+    |> filter_tool_id(Keyword.get(opts, :tool))
+  end
+
   defp filter_equal(entries, _field, value) when value in [nil, ""], do: entries
 
   defp filter_equal(entries, field, value) do

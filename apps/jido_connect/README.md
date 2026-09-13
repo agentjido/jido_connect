@@ -32,10 +32,90 @@ with the canonical form. Every action and trigger must declare `resource`,
 ```elixir
 def deps do
   [
-    {:jido_connect, "~> 0.8"}
+    {:jido_connect, "~> 0.9"}
   ]
 end
 ```
+
+The current PR branch keeps the Elixir 1.19 requirement. It temporarily pins
+the Jido Action v3 release branch because `3.0.0-beta.1` has an incorrect
+Elixir 1.20 requirement. It also pins the Jido compatibility changes from PR
+#324. Replace both pins after the next upstream releases include these fixes.
+
+## MCP Tool Bridge
+
+Core `jido_connect` includes a narrow MCP client bridge with two operations:
+
+- `mcp.tools.list`
+- `mcp.tool.call`
+
+The bridge does not publish an MCP server, create dynamic proxy Actions, expose
+resources or prompts, or manage a general endpoint pool. It keeps Connect
+responsible for endpoint and tool allowlists, connection and credential-lease
+checks, scopes, policy, confirmation, schema drift, and uncertain write
+classification.
+
+For a host-owned ExMCP client, put the public endpoint ID in connection
+metadata. Put the supervised client name or process reference in the
+short-lived credential lease:
+
+```elixir
+connection =
+  Jido.Connect.Connection.new!(%{
+    id: "mcp-slack-tenant-1",
+    provider: :mcp,
+    profile: :endpoint,
+    tenant_id: "tenant_1",
+    owner_type: :tenant,
+    owner_id: "tenant_1",
+    status: :connected,
+    scopes: ["mcp:tools:list", "mcp:tools:call", "mcp:endpoint:slack"],
+    metadata: %{mcp_endpoint_id: "slack", connection_revision: 1}
+  })
+
+lease =
+  Jido.Connect.CredentialLease.from_connection!(
+    connection,
+    %{mcp_client_ref: MyApp.SupervisedMCPClient},
+    expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
+    metadata: %{credential_version: 1}
+  )
+```
+
+The host must start and supervise this ExMCP client. Connect does not stop a
+host-owned client. The client reference must be secret-free. Keep credentials
+in the supervised client process or in a connection-scoped endpoint definition.
+A custom internal adapter can use `mcp_client_module`, but the default adapter
+calls `ExMCP.Client` directly.
+
+If a host cannot keep a shared supervised reference, the lease can contain an
+`mcp_endpoint` definition instead. Connect then starts one ExMCP client for the
+connection generation and stops only that client after the generation drains.
+The endpoint definition supports ExMCP stdio, streamable HTTP, and BEAM-local
+transports.
+
+An application can also map a public endpoint ID to a host-supervised client:
+
+```elixir
+config :jido_connect,
+  mcp_clients: %{
+    filesystem: %{client_ref: MyApp.FilesystemMCPClient}
+  }
+```
+
+Public endpoint IDs never act as ExMCP process references. Each lease-backed
+connection also gets an opaque internal endpoint ID. Rotation, expiry,
+revocation, or connection removal fences the old generation before Connect
+stops a connection-scoped client. A remote write is sent at most one time. If
+its result becomes unknown after the send boundary, Connect returns an
+uncertain provider error and does not repeat the call.
+
+Tool discovery returns `schema_hash`. A typed caller can give that value as
+`expected_schema_hash` to `mcp.tool.call`. Connect lists the tool again and
+rejects schema drift before the remote call.
+
+The bridge uses stable ExMCP `1.x` through an internal tool-list and tool-call
+contract. It does not depend on `jido_mcp`.
 
 ## Host Boundary
 
@@ -142,16 +222,61 @@ an uncertain or failed 5xx non-idempotent mutation.
 
 For host UI discovery, use `Jido.Connect.spec/1`, `actions/1`, `triggers/1`,
 `auth_profiles/1`, or the richer `Jido.Connect.Catalog` APIs. `Catalog.discover/1`
-returns provider entries; `Catalog.tools/1` returns a flattened action/trigger
-catalog for search and tool pickers, including filters such as `:tag`,
+returns provider entries; `Catalog.items/1` returns canonical action and trigger
+items for search and operation pickers, including filters such as `:tag`,
 `:resource`, `:verb`, `:auth_kind`, `:auth_profile`, and `:scope`.
+
+## Canonical Catalog Items
+
+`Jido.Connect.Catalog.Item` is the public read-only projection of one Connect
+operation. The Connect specifications remain the execution definitions. An
+item includes its provider identity, operation kind and ID, JSON schemas,
+effect, confirmation, availability, auth profiles, scopes, policies, and
+source metadata.
+
+The stable item reference has the form `provider:kind:operation-id`:
+
+```elixir
+[
+  %Jido.Connect.Catalog.Item{
+    ref: "github:action:github.issue.create",
+    provider: :github,
+    type: :action,
+    id: "github.issue.create"
+  }
+] =
+  Jido.Connect.Catalog.items(
+    modules: [Jido.Connect.GitHub],
+    type: :action,
+    tool: "github.issue.create"
+  )
+
+{:ok, item} =
+  Jido.Connect.Catalog.describe_item("github:action:github.issue.create",
+    modules: [Jido.Connect.GitHub]
+  )
+```
+
+Use `items/1`, `search_items/2`, `lookup_item/2`, `describe_item/2`,
+`call_item/3`, and `reviewed_items/2` for new code. A unique operation ID, the
+old `provider.operation-id` form, and provider tuples still work during the
+migration. Packs can use the canonical item reference and remain selection and
+review data only.
+
+The old `tools/1`, `search_tools/2`, `lookup_tool/2`, `describe_tool/2`,
+`call_tool/3`, and `reviewed_descriptors/2` functions keep their prior return
+types. They are narrow adapters over `Catalog.Item`. The catalog plugin also
+keeps its search, describe, and call contract as Jido Action v3 modules.
+
+The v2-only `action_catalog/1` adapter was removed. Use `items/1`,
+`search_items/2`, and `reviewed_items/2` for Action discovery and selection.
 
 ## Catalog Plugin, Search, And Tool Calling
 
 `Jido.Connect.Catalog` is the host-facing lookup layer for installed connector
 tools. `Jido.Connect.Catalog.Plugin` is the canonical Jido plugin surface for
 agents and hosts that want catalog lookup as actions. Both surfaces use the
-same storage-free catalog data and the same `call_tool/4` execution boundary.
+same storage-free item data and the same core Connect execution boundary.
 
 Search is deterministic in core. Exact ids and names rank first, then
 resource/verb/label matches, then description, provider, tags, scopes, policies,
@@ -362,7 +487,7 @@ Jido.Connect.Catalog.search_tools("open issue",
 
 AI-assisted lookup belongs in an optional package, not core. A future
 `jido_connect_ai` package can use `req_llm` to suggest ranked candidate ids and
-reasons, but execution should still go through `Jido.Connect.Catalog.call_tool/4`
+reasons, but execution should still go through `Jido.Connect.Catalog.call_tool/3`
 and the same runtime safety checks.
 
 Host apps can install only the provider packages they need. For example, a

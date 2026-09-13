@@ -2,9 +2,9 @@ defmodule Jido.Connect.MCP do
   @moduledoc """
   MCP bridge integration authored with the `Jido.Connect` Spark DSL.
 
-  This package treats MCP as a bridge: remote server credentials and transport
-  config stay in host-owned `jido_mcp` endpoint configuration, while Connect
-  models endpoint/tool policy and exposes generated Jido actions.
+  Core Connect treats MCP as a narrow bridge: remote server credentials and
+  transport config stay in host-owned endpoint configuration, while Connect
+  models endpoint and tool policy and exposes generated Jido actions.
   """
 
   use Jido.Connect
@@ -18,13 +18,14 @@ defmodule Jido.Connect.MCP do
   end
 
   catalog do
-    package :jido_connect_mcp
+    package :jido_connect
     status :experimental
     tags [:mcp, :tool_bridge, :agents]
 
     metadata %{
       bridge?: true,
-      bridge_package: :jido_mcp
+      bridge_package: :jido_connect,
+      protocol_package: :ex_mcp
     }
 
     capability :bridge do

@@ -17,6 +17,8 @@ defmodule Jido.Connect.X.RuntimeState do
 end
 
 defmodule Jido.Connect.X.TestMCPClient do
+  @behaviour Jido.Connect.MCP.Client
+
   alias Jido.Connect.X.{Contract, RuntimeState}
 
   def list_tools(endpoint_id, opts) do
@@ -45,7 +47,7 @@ defmodule Jido.Connect.X.TestMCPClient do
         %{"name" => name, "inputSchema" => schema}
       end)
 
-    {:ok, %{status: :ok, data: %{"tools" => tools}}}
+    {:ok, %{"tools" => tools}}
   end
 
   def call_tool(endpoint_id, tool, arguments, opts) do
@@ -54,16 +56,13 @@ defmodule Jido.Connect.X.TestMCPClient do
 
     case {RuntimeState.mode(), tool} do
       {:transport_error, _tool} ->
-        {:error, %{type: :transport, message: "Bearer secret-x-token failed"}}
+        {:error, %{reason: :transport}}
 
       {:remote_error, "get_users_me"} ->
         {:ok,
          %{
-           status: :ok,
-           data: %{
-             "isError" => true,
-             "content" => [%{"type" => "text", "text" => "secret remote error"}]
-           }
+           "isError" => true,
+           "content" => [%{"type" => "text", "text" => "secret remote error"}]
          }}
 
       {:wrong_username, "get_users_me"} ->
@@ -100,13 +99,12 @@ defmodule Jido.Connect.X.TestMCPClient do
     end
   end
 
-  defp ok(payload), do: {:ok, %{status: :ok, data: %{"structuredContent" => payload}}}
+  defp ok(payload), do: {:ok, %{"structuredContent" => payload}}
 
   defp text_ok(payload) do
     {:ok,
      %{
-       status: :ok,
-       data: %{"content" => [%{"type" => "text", "text" => Jason.encode!(payload)}]}
+       "content" => [%{"type" => "text", "text" => Jason.encode!(payload)}]
      }}
   end
 
@@ -305,11 +303,10 @@ defmodule Jido.Connect.X.RuntimeTest do
              Connect.invoke(X, "x.account.get", %{}, runtime_opts(context))
 
     [ownership] = EndpointLeaseManager.ownership(context.context.connection)
-    assert {:ok, _endpoint} = Jido.MCP.ClientPool.fetch_endpoint(ownership.endpoint_id)
+    assert ownership.status == :active
 
     assert :ok = EndpointLeaseManager.connection_removed(context.context.connection)
     assert EndpointLeaseManager.ownership(context.context.connection) == []
-    assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(ownership.endpoint_id)
 
     assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_stale}} =
              Connect.invoke(X, "x.account.get", %{}, runtime_opts(context))
@@ -352,7 +349,8 @@ defmodule Jido.Connect.X.RuntimeTest do
     Connect.CredentialLease.from_connection!(
       connection,
       %{
-        mcp_client: Jido.Connect.X.TestMCPClient,
+        mcp_client_module: Jido.Connect.X.TestMCPClient,
+        mcp_client_ref: Jido.Connect.MCP.HostEndpoint.internal_id(connection),
         mcp_endpoint: %{
           transport:
             {:streamable_http,

@@ -195,12 +195,9 @@ defmodule Jido.Connect.CalcomTest do
       assert function_exported?(module, :run, 2)
 
       projection = module.jido_connect_projection()
-      tool = module.to_tool()
-
       assert projection.module == module
       assert module.operation_id() == projection.action_id
       assert module.name() == projection.name
-      assert tool.name == projection.name
     end
 
     assert %Jido.Plugin.Spec{

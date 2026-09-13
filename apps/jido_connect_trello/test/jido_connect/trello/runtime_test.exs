@@ -18,6 +18,8 @@ defmodule Jido.Connect.Trello.RuntimeState do
 end
 
 defmodule Jido.Connect.Trello.TestMCPClient do
+  @behaviour Jido.Connect.MCP.Client
+
   alias Jido.Connect.Trello.{Contract, RuntimeState}
 
   @workspace_id "60eeea2273ccd82f506b3977"
@@ -52,7 +54,7 @@ defmodule Jido.Connect.Trello.TestMCPClient do
         %{"name" => name, "inputSchema" => schema}
       end)
 
-    {:ok, %{status: :ok, data: %{"tools" => tools}}}
+    {:ok, %{"tools" => tools}}
   end
 
   def call_tool(endpoint_id, tool, arguments, opts) do
@@ -61,14 +63,14 @@ defmodule Jido.Connect.Trello.TestMCPClient do
 
     case {RuntimeState.mode(), tool, arguments.action} do
       {:transport_error, _, _} ->
-        {:error, %{type: :transport, message: "Bearer secret-token failed"}}
+        {:error, %{reason: :transport}}
 
       {:block_write_error, "trelloWriteCard", "create"} ->
         send(RuntimeState.observer(), {:trello_write_started, self()})
 
         receive do
           :continue_trello_write ->
-            {:error, %{type: :transport, message: "write outcome unknown"}}
+            {:error, %{reason: :transport}}
         end
 
       {:wrong_board, "trelloReadBoard", "get"} ->
@@ -101,7 +103,7 @@ defmodule Jido.Connect.Trello.TestMCPClient do
     end
   end
 
-  defp ok(payload), do: {:ok, %{status: :ok, data: %{"structuredContent" => payload}}}
+  defp ok(payload), do: {:ok, %{"structuredContent" => payload}}
 
   defp board do
     %{
@@ -359,11 +361,10 @@ defmodule Jido.Connect.Trello.RuntimeTest do
              Connect.invoke(Trello, "trello.board.get", %{}, runtime_opts(context))
 
     [ownership] = EndpointLeaseManager.ownership(context.context.connection)
-    assert {:ok, _endpoint} = Jido.MCP.ClientPool.fetch_endpoint(ownership.endpoint_id)
+    assert ownership.status == :active
 
     assert :ok = EndpointLeaseManager.connection_removed(context.context.connection)
     assert EndpointLeaseManager.ownership(context.context.connection) == []
-    assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(ownership.endpoint_id)
 
     assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_stale}} =
              Connect.invoke(Trello, "trello.board.get", %{}, runtime_opts(context))
@@ -472,7 +473,8 @@ defmodule Jido.Connect.Trello.RuntimeTest do
     Connect.CredentialLease.from_connection!(
       connection,
       %{
-        mcp_client: Jido.Connect.Trello.TestMCPClient,
+        mcp_client_module: Jido.Connect.Trello.TestMCPClient,
+        mcp_client_ref: Jido.Connect.MCP.HostEndpoint.internal_id(connection),
         mcp_endpoint: %{
           transport:
             {:streamable_http,
