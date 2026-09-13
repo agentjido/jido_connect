@@ -102,36 +102,43 @@ defmodule Jido.Connect.Catalog.Input do
   defp filters(filters) when filters in [nil, ""], do: {:ok, []}
 
   defp filters(filters) when is_map(filters) or is_list(filters) do
-    {:ok, Enum.map(filters, fn {key, value} -> {normalize_filter_key(key), value} end)}
+    filters
+    |> Enum.reduce_while({:ok, []}, fn
+      {key, value}, {:ok, acc} ->
+        case normalize_filter_key(key) do
+          {:ok, key} -> {:cont, {:ok, [{key, value} | acc]}}
+          :error -> {:halt, :error}
+        end
+
+      _other, _acc ->
+        {:halt, :error}
+    end)
+    |> case do
+      {:ok, normalized} -> {:ok, Enum.reverse(normalized)}
+      :error -> invalid_filters()
+    end
   end
 
-  defp filters(filters) do
+  defp filters(_filters), do: invalid_filters()
+
+  defp invalid_filters do
     {:error,
      Error.validation("Invalid catalog filters",
-       reason: :invalid_filters,
-       subject: filters
+       reason: :invalid_filters
      )}
   end
 
-  defp normalize_filter_key(key) when is_atom(key), do: key
+  defp normalize_filter_key(key) when is_atom(key) do
+    if key in @filter_keys, do: {:ok, key}, else: :error
+  end
 
   defp normalize_filter_key(key) when is_binary(key) do
-    case key do
-      "provider" -> :provider
-      "type" -> :type
-      "resource" -> :resource
-      "verb" -> :verb
-      "data_classification" -> :data_classification
-      "risk" -> :risk
-      "confirmation" -> :confirmation
-      "auth_kind" -> :auth_kind
-      "auth_profile" -> :auth_profile
-      "scope" -> :scope
-      "tool_tag" -> :tool_tag
-      "tool" -> :tool
-      _other -> :unknown_filter
-    end
+    Enum.find_value(@filter_keys, :error, fn allowed ->
+      if Atom.to_string(allowed) == key, do: {:ok, allowed}
+    end)
   end
+
+  defp normalize_filter_key(_key), do: :error
 
   defp tool_ref(params) do
     provider = Data.get(params, :provider)

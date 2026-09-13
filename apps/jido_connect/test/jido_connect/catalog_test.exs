@@ -693,6 +693,24 @@ defmodule Jido.Connect.CatalogTest do
              SearchTools.run(%{"query" => "item", "filters" => "bad"}, action_context)
   end
 
+  test "catalog action filters cannot replace host runtime options" do
+    alias Jido.Connect.Catalog.Input
+
+    action_context = %{policy: AllowPolicy, config: %{modules: [CatalogFixtures.Integration]}}
+    params = %{tool_id: "catalog.item.get", input: %{id: "item_1"}}
+
+    for filters <- [%{policy: nil}, %{"policy" => nil}, [policy: nil], %{unknown: true}] do
+      assert {:error, %Jido.Connect.Error.ValidationError{reason: :invalid_filters}} =
+               Input.call_params(Map.put(params, :filters, filters), action_context)
+    end
+
+    assert {:ok, "catalog.item.get", %{id: "item_1"}, opts} =
+             Input.call_params(Map.put(params, :filters, %{"type" => :action}), action_context)
+
+    assert Keyword.fetch!(opts, :policy) == AllowPolicy
+    assert Keyword.fetch!(opts, :type) == :action
+  end
+
   test "catalog actions validate and execute through Jido Action v3" do
     modules = [CatalogFixtures.Integration]
 
