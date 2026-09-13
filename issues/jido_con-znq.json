@@ -66,11 +66,15 @@
     {
       "text": "Implementation batch 1 landed on release/3.0 and pushed to origin at ee789674. One commit each: .11 464a5ff1 (reject runtime keys in catalog action filters), .17 da5f897a (apply reviewed-pack filters), .25 0f7cc19e (actor-bound prepared action and current confirmation; storage format v2), .26 ee789674 (MCP wildcard required in effective lease). Each had a failing baseline regression, focused tests, full mix quality, and demo format/compile/21 tests before close. All four Beadwork children closed and synced. CI run 34782362408 is in progress. Next P1: .32 tenant-isolated MCP client identity, then .33 per-lease session expiry and remaining authorization/redaction findings. No jido_mcp changes.",
       "timestamp": "2026-09-13T20:58:24Z"
+    },
+    {
+      "text": "Release split after issue f670ce1c: 57 findings remain open. Tagged 25 core-package safety, MCP, API-contract, and release-documentation issues v3-release-blocker. Tagged 32 connector-only, authoring-tool, and lower-priority refinements v3-follow-up. The core Hex release gate waits for blockers and required checks, not every review finding. Follow-up issues remain in this goal and will keep one commit per issue. ExMCP notification-filter issue .38 remains an upstream-dependent blocker; GitHub workflow poller .39 is a connector follow-up. Work now proceeds in related batches of 3-5 issues, with focused tests per issue and umbrella/demo validation once per batch before close, sync, and push.",
+      "timestamp": "2026-09-13T21:59:57Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "Refine Jido Connect v3 from nine independent code reviews",
   "type": "epic",
-  "updated_at": "2026-09-13T20:58:24Z"
+  "updated_at": "2026-09-13T21:59:57Z"
 }
