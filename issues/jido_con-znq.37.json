@@ -13,11 +13,15 @@
     {
       "text": "Upstream API request: https://github.com/azmaveth/ex_mcp/issues/43 . Connect tracking: https://github.com/agentjido/jido_connect/issues/83 . Connect must pass the timeout after adopting the public API and verify generated action behavior.",
       "timestamp": "2026-09-13T20:14:33Z"
+    },
+    {
+      "text": "Prepared upstream fix in ExMCP PR https://github.com/azmaveth/ex_mcp/pull/45 . CI passed. Connect adoption remains open until a released ExMCP version provides get_status/2, or a safe local adapter enforces the timeout.",
+      "timestamp": "2026-09-13T23:23:04Z"
     }
   ],
   "priority": 2,
   "status": "open",
   "title": "Status ignores the declared timeout",
   "type": "task",
-  "updated_at": "2026-09-13T21:59:32Z"
+  "updated_at": "2026-09-13T23:23:04Z"
 }
