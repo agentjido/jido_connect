@@ -9,9 +9,15 @@
     "v3-release-blocker"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed in ee8f5686. Invalid poll envelopes return a structured ExecutionError; focused runtime tests pass. Full umbrella mix quality and demo format, warnings-as-errors compile, and 21 demo tests pass.",
+      "timestamp": "2026-09-13T22:58:12Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Invalid poll envelopes escape as raw exceptions",
   "type": "bug",
-  "updated_at": "2026-09-13T22:48:03Z"
+  "updated_at": "2026-09-13T22:58:12Z"
 }
