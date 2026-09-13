@@ -7,9 +7,15 @@
   "id": "jido_con-znq.53",
   "labels": [],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed in f670ce1c on release/3.0. Scaffold generation checks all target paths before writing, preserves existing work by default, and permits explicit --force replacement of regular files only. The guide now uses a new sample provider name. Baseline conflict regression failed before fix; focused tests passed (5); root mix quality passed; demo format, warnings-as-errors compile, and tests passed (21).",
+      "timestamp": "2026-09-13T21:57:03Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Scaffold generation overwrites existing work",
   "type": "bug",
-  "updated_at": "2026-09-13T21:50:07Z"
+  "updated_at": "2026-09-13T21:57:03Z"
 }
