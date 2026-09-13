@@ -2,6 +2,7 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-13T22:37:34Z",
   "created": "2026-09-13T20:05:12Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-1efd-7e03-b335-4810b34600d9\n\n4. **P2 — Adapter option lists discard supported runtime controls.**  \n   [runtime_context.ex:81](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/jido/runtime_context.ex:81) omits `provider_client`. [catalog/input.ex:6](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/catalog/input.ex:6) omits both `provider_client` and `request_timeout_ms`.\n\n   A host-supplied Jira client therefore reaches direct Connect calls but is lost through generated actions. Jira then selects its built-in client. Catalog calls also discard a host timeout that MCP-backed providers such as Trello use. I reproduced the catalog option loss. Existing provider tests demonstrate client injection through direct calls, but do not check adapter parity.\n\n   **Smallest correction:** Forward these supported controls from trusted action context. Keep the common option list in one place and test the generated and catalog paths.\n\n**Design improvements**\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.14",
@@ -16,8 +17,8 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Adapter option lists discard supported runtime controls",
   "type": "bug",
-  "updated_at": "2026-09-13T22:37:33Z"
+  "updated_at": "2026-09-13T22:37:34Z"
 }
