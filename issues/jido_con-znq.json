@@ -62,11 +62,15 @@
     {
       "text": "Legacy notification follow-up now has upstream API request https://github.com/azmaveth/ex_mcp/issues/44 linked from existing Connect https://github.com/agentjido/jido_connect/issues/81 . No duplicate Connect issue created. Status-timeout request is ExMCP #43 and Connect #83, tracked in jido_con-znq.37. These remain separate from filter expansion ExMCP #42 / Connect #82.",
       "timestamp": "2026-09-13T20:14:34Z"
+    },
+    {
+      "text": "Implementation batch 1 landed on release/3.0 and pushed to origin at ee789674. One commit each: .11 464a5ff1 (reject runtime keys in catalog action filters), .17 da5f897a (apply reviewed-pack filters), .25 0f7cc19e (actor-bound prepared action and current confirmation; storage format v2), .26 ee789674 (MCP wildcard required in effective lease). Each had a failing baseline regression, focused tests, full mix quality, and demo format/compile/21 tests before close. All four Beadwork children closed and synced. CI run 34782362408 is in progress. Next P1: .32 tenant-isolated MCP client identity, then .33 per-lease session expiry and remaining authorization/redaction findings. No jido_mcp changes.",
+      "timestamp": "2026-09-13T20:58:24Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "Refine Jido Connect v3 from nine independent code reviews",
   "type": "epic",
-  "updated_at": "2026-09-13T20:14:34Z"
+  "updated_at": "2026-09-13T20:58:24Z"
 }
