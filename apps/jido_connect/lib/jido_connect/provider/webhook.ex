@@ -53,17 +53,24 @@ defmodule Jido.Connect.Webhook do
   @spec decode_json(String.t(), keyword()) :: {:ok, map() | list()} | {:error, Error.error()}
   def decode_json(body, opts) when is_binary(body) do
     case Jason.decode(body) do
-      {:ok, payload} ->
+      {:ok, payload} when is_map(payload) or is_list(payload) ->
         {:ok, payload}
 
+      {:ok, _payload} ->
+        invalid_payload(opts)
+
       {:error, error} ->
-        {:error,
-         Error.provider(Keyword.get(opts, :message, "Webhook body is invalid JSON"),
-           provider: Keyword.fetch!(opts, :provider),
-           reason: Keyword.get(opts, :reason, :invalid_payload),
-           details: %{error: error}
-         )}
+        invalid_payload(opts, %{error: error})
     end
+  end
+
+  defp invalid_payload(opts, details \\ %{}) do
+    {:error,
+     Error.provider(Keyword.get(opts, :message, "Webhook body is invalid JSON"),
+       provider: Keyword.fetch!(opts, :provider),
+       reason: Keyword.get(opts, :reason, :invalid_payload),
+       details: details
+     )}
   end
 
   @spec duplicate?(term(), Enumerable.t()) :: boolean()

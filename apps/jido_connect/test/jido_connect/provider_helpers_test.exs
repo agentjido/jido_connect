@@ -223,6 +223,13 @@ defmodule Jido.Connect.ProviderHelpersTest do
     assert {:error, %Connect.Error.ProviderError{reason: :invalid_payload}} =
              Webhook.decode_json("not-json", provider: :demo)
 
+    assert {:ok, [1, 2]} = Webhook.decode_json("[1,2]", provider: :demo)
+
+    for scalar <- ["42", ~s("text"), "true", "null"] do
+      assert {:error, %Connect.Error.ProviderError{reason: :invalid_payload}} =
+               Webhook.decode_json(scalar, provider: :demo)
+    end
+
     assert Webhook.header(%{"x-demo-header" => "value"}, "X-Demo-Header") == "value"
     assert Webhook.header(%{"X-Demo-Header" => "value"}, "x-demo-header") == "value"
     assert Webhook.header(%{"x_demo_header" => "value"}, "x-demo-header") == "value"

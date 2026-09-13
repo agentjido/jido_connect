@@ -84,6 +84,20 @@ defmodule Jido.Connect.Slack.WebhookTest do
              )
   end
 
+  test "rejects signed Slack JSON that is not an object" do
+    timestamp = "1700000000"
+
+    for body <- ["42", "[1,2]"] do
+      headers = %{
+        "x-slack-signature" => slack_signature("secret", timestamp, body),
+        "x-slack-request-timestamp" => timestamp
+      }
+
+      assert {:error, %Error.ProviderError{provider: :slack, reason: :invalid_payload}} =
+               Webhook.verify_delivery(body, headers, "secret", now: 1_700_000_000)
+    end
+  end
+
   test "rejects missing secret, stale timestamp, and invalid signature" do
     body = "{}"
     headers = %{"x-slack-signature" => "v0=bad", "x-slack-request-timestamp" => "1700000000"}

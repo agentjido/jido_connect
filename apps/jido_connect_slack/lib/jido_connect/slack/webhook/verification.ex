@@ -95,10 +95,23 @@ defmodule Jido.Connect.Slack.Webhook.Verification do
   defp signature_base(body, timestamp), do: {:ok, "v0:#{timestamp}:#{body}"}
 
   defp decode_body(body) do
-    CoreWebhook.decode_json(body,
-      provider: :slack,
-      message: "Slack event payload is invalid JSON"
-    )
+    case CoreWebhook.decode_json(body,
+           provider: :slack,
+           message: "Slack event payload is invalid JSON"
+         ) do
+      {:ok, %{} = payload} ->
+        {:ok, payload}
+
+      {:ok, _payload} ->
+        {:error,
+         Error.provider("Slack event payload must be a JSON object",
+           provider: :slack,
+           reason: :invalid_payload
+         )}
+
+      error ->
+        error
+    end
   end
 
   defp header(headers, key) do
