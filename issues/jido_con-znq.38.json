@@ -13,11 +13,15 @@
     {
       "text": "Submitted upstream defect: https://github.com/azmaveth/ex_mcp/issues/42 . Connect tracking: https://github.com/agentjido/jido_connect/issues/82 . Both issues are linked. Upstream owns filter acknowledgment validation; Connect must retain authorized scope and verify the fixed dependency with integration tests. No code changes or publication.",
       "timestamp": "2026-09-13T20:12:01Z"
+    },
+    {
+      "text": "Prepared upstream fix in ExMCP PR https://github.com/azmaveth/ex_mcp/pull/46 . Connect adoption remains open until ExMCP releases the acknowledgment validation and Connect verifies that reconnect reads stay within authorized scope.",
+      "timestamp": "2026-09-13T23:23:03Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "ExMCP accepts a broader notification filter from the server",
   "type": "task",
-  "updated_at": "2026-09-13T21:59:16Z"
+  "updated_at": "2026-09-13T23:23:03Z"
 }
