@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-s91.1"
+  ],
   "blocks": [],
   "created": "2026-09-13T19:17:39Z",
   "description": "Integrate verified work, clean PRs and issues, audit dependencies and package metadata, record current tests and release limitations. Maintain v2 branch boundaries. Prepare a clean v3 candidate without package publication.",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "Finalize Connect release documentation and issue tracking",
   "type": "task",
-  "updated_at": "2026-09-13T19:17:39Z"
+  "updated_at": "2026-09-13T19:17:46Z"
 }

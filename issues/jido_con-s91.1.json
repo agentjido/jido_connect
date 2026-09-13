@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-s91.3"
+  ],
   "created": "2026-09-13T19:17:38Z",
   "description": "Merge PR 66 into current release/3.0 in an isolated worktree. Adapt v3 contracts and verify Microsoft foundation, OneDrive and SharePoint. Preserve PR history and land to v3.",
   "id": "jido_con-s91.1",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "Integrate SharePoint on the v3 release line",
   "type": "task",
-  "updated_at": "2026-09-13T19:17:38Z"
+  "updated_at": "2026-09-13T19:17:46Z"
 }
