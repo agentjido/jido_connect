@@ -43,6 +43,19 @@ defmodule Jido.Connect.Dev.ProviderScaffoldTest do
     assert local_mix =~ ~s({:jido_connect, path: "../jido_connect"})
   end
 
+  test "generated packages include an ExUnit test helper" do
+    files = ProviderScaffold.files("acme")
+
+    assert %{contents: "ExUnit.start()\n"} =
+             Enum.find(files, &String.ends_with?(&1.path, "/test/test_helper.exs"))
+
+    root = temp_root()
+    paths = ProviderScaffold.write!(root, "acme")
+    helper = Path.join(root, "jido_connect_acme/test/test_helper.exs")
+    assert helper in paths
+    assert File.read!(helper) == "ExUnit.start()\n"
+  end
+
   test "generated package metadata registers its provider for catalog discovery" do
     mix_file =
       ProviderScaffold.files("acme_generated")

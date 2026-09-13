@@ -41,6 +41,7 @@ defmodule Jido.Connect.Dev.ProviderScaffold do
       file("#{app}/lib/jido_connect/#{provider}/client.ex", client(module)),
       file("#{app}/lib/jido_connect/#{provider}/oauth.ex", oauth(module)),
       file("#{app}/lib/jido_connect/#{provider}/webhook.ex", webhook(module)),
+      file("#{app}/test/test_helper.exs", "ExUnit.start()\n"),
       file("#{app}/test/jido_connect_#{provider}_test.exs", test(provider, module))
     ]
   end
