@@ -7,6 +7,8 @@ defmodule Jido.Connect.MicrosoftOnedrive.DriveItem do
             __MODULE__,
             %{
               item_id: Zoi.string(),
+              etag: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              ctag: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               name: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               size: Zoi.integer() |> Zoi.nullish() |> Zoi.optional(),
               web_url: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),

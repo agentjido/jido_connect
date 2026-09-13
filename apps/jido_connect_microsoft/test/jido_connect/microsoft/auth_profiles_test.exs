@@ -4,7 +4,7 @@ defmodule Jido.Connect.Microsoft.AuthProfilesTest do
   alias Jido.Connect.Microsoft.{AuthProfile, AuthProfiles}
 
   test "models user auth profile" do
-    assert AuthProfiles.ids() == [:user]
+    assert AuthProfiles.ids() == [:user, :application]
     assert Enum.map(AuthProfiles.all(), & &1.id) == AuthProfiles.ids()
 
     assert %AuthProfile{
@@ -17,8 +17,22 @@ defmodule Jido.Connect.Microsoft.AuthProfilesTest do
            } = AuthProfiles.fetch!(:user)
   end
 
+  test "models application auth profile" do
+    assert %AuthProfile{
+             id: :application,
+             kind: :oauth2,
+             owner: :tenant,
+             subject: :service_principal,
+             setup: :oauth2_client_credentials,
+             credential_fields: [:client_id, :client_secret, :tenant_id],
+             lease_fields: [:access_token],
+             default?: false
+           } = AuthProfiles.fetch!(:application)
+  end
+
   test "fetches profiles safely and rejects unknown profile ids" do
     assert {:ok, %AuthProfile{id: :user}} = AuthProfiles.fetch(:user)
+    assert {:ok, %AuthProfile{id: :application}} = AuthProfiles.fetch(:application)
     assert :error = AuthProfiles.fetch(:missing)
 
     assert_raise ArgumentError, ~r/unknown Microsoft auth profile :missing/, fn ->

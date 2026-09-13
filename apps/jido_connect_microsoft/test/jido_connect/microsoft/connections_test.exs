@@ -47,6 +47,25 @@ defmodule Jido.Connect.Microsoft.ConnectionsTest do
     assert connection.metadata == %{mode: :microsoft_oauth, source: :test}
   end
 
+  test "builds tenant-owned Microsoft application connections" do
+    assert {:ok, %Connection{} = connection} =
+             Connections.application_connection(
+               tenant_id: "tenant_1",
+               application_id: "app_1",
+               credential_ref: "vault:microsoft:tenant_1:app_1",
+               scopes: ["Sites.Selected"]
+             )
+
+    assert connection.id == "microsoft-application-tenant_1-app_1"
+    assert connection.provider == :microsoft
+    assert connection.profile == :application
+    assert connection.owner_type == :tenant
+    assert connection.owner_id == "tenant_1"
+    assert connection.subject.microsoft_application_id == "app_1"
+    assert connection.scopes == ["Sites.Selected"]
+    assert connection.metadata.mode == :microsoft_client_credentials
+  end
+
   test "raises when required connection inputs are missing" do
     assert_raise ArgumentError, ~r/Microsoft connection requires :tenant_id/, fn ->
       Connections.user_connection(%{}, [])
@@ -55,5 +74,11 @@ defmodule Jido.Connect.Microsoft.ConnectionsTest do
     assert_raise ArgumentError, ~r/Microsoft user connection requires :owner_id/, fn ->
       Connections.user_connection(%{}, tenant_id: "tenant_1")
     end
+
+    assert_raise ArgumentError,
+                 ~r/Microsoft application connection requires :application_id/,
+                 fn ->
+                   Connections.application_connection(tenant_id: "tenant_1")
+                 end
   end
 end

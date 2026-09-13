@@ -76,6 +76,65 @@ defmodule Jido.Connect.Microsoft.OAuthTest do
     assert refreshed.access_token == "access"
   end
 
+  test "gets application tokens with client credentials" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      params = URI.decode_query(body)
+
+      assert conn.method == "POST"
+      assert params["client_id"] == "client"
+      assert params["client_secret"] == "secret"
+      assert params["grant_type"] == "client_credentials"
+      assert params["scope"] == "https://graph.microsoft.com/.default"
+
+      Req.Test.json(conn, %{
+        access_token: "application-access",
+        token_type: "Bearer",
+        expires_in: 3600
+      })
+    end)
+
+    assert {:ok, token} =
+             OAuth.client_credentials(
+               client_id: "client",
+               client_secret: "secret",
+               tenant_id: "tenant.example",
+               token_url: "https://oauth.test/token"
+             )
+
+    assert token.access_token == "application-access"
+    refute Map.has_key?(token, :refresh_token)
+    assert token.scope == []
+  end
+
+  test "builds tenant-specific client credentials token URLs" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.request_path == "/tenant-123/oauth2/v2.0/token"
+
+      Req.Test.json(conn, %{
+        access_token: "application-access",
+        token_type: "Bearer",
+        expires_in: 3600
+      })
+    end)
+
+    assert {:ok, _token} =
+             OAuth.client_credentials(
+               client_id: "client",
+               client_secret: "secret",
+               tenant_id: "tenant-123"
+             )
+  end
+
+  test "rejects invalid tenant identifiers for client credentials" do
+    assert {:error, %Error.ConfigError{key: :tenant_id}} =
+             OAuth.client_credentials(
+               client_id: "client",
+               client_secret: "secret",
+               tenant_id: "../common"
+             )
+  end
+
   test "returns OAuth provider errors" do
     Req.Test.stub(__MODULE__, fn conn ->
       Req.Test.json(conn, %{

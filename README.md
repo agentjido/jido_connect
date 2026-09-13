@@ -65,7 +65,7 @@ For more detail, see [Architecture](docs/architecture.md),
 
 ## Packages
 
-The umbrella contains 40 Mix projects. Core `jido_connect` is at `0.9.0`. The
+The umbrella contains 41 Mix projects. Core `jido_connect` is at `0.9.0`. The
 connector packages remain at `0.8.0`.
 
 ### Core and shared foundations
@@ -87,7 +87,7 @@ connector packages remain at `0.8.0`.
 | Scheduling | `jido_connect_calcom`, `jido_connect_calendly` |
 | Google Workspace | `jido_connect_gmail`, `jido_connect_google_calendar`, `jido_connect_google_contacts`, `jido_connect_google_docs`, `jido_connect_google_drive`, `jido_connect_google_forms`, `jido_connect_google_meet`, `jido_connect_google_sheets`, `jido_connect_google_slides`, `jido_connect_google_tasks` |
 | Google data | `jido_connect_google_analytics`, `jido_connect_google_search_console` |
-| Microsoft 365 | `jido_connect_microsoft_calendar`, `jido_connect_microsoft_onedrive`, `jido_connect_microsoft_outlook` |
+| Microsoft 365 | `jido_connect_microsoft_calendar`, `jido_connect_microsoft_onedrive`, `jido_connect_microsoft_outlook`, `jido_connect_microsoft_sharepoint` |
 
 Each connector has its own README, changelog, package metadata, source tree, and
 tests under `apps/`. Connector coverage and maturity differ. Use the connector

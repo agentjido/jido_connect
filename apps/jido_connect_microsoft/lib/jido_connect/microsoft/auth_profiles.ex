@@ -4,8 +4,8 @@ defmodule Jido.Connect.Microsoft.AuthProfiles do
   alias Jido.Connect.Microsoft.{AuthProfile, Scopes}
 
   @doc "Returns all shared Microsoft auth profile ids."
-  @spec ids() :: [:user]
-  def ids, do: [:user]
+  @spec ids() :: [:user | :application]
+  def ids, do: [:user, :application]
 
   @doc "Returns all shared Microsoft auth profiles."
   @spec all() :: [AuthProfile.t()]
@@ -13,7 +13,7 @@ defmodule Jido.Connect.Microsoft.AuthProfiles do
 
   @doc "Fetches a shared Microsoft auth profile."
   @spec fetch(atom()) :: {:ok, AuthProfile.t()} | :error
-  def fetch(profile) when profile in [:user],
+  def fetch(profile) when profile in [:user, :application],
     do: {:ok, fetch!(profile)}
 
   def fetch(_profile), do: :error
@@ -36,6 +36,23 @@ defmodule Jido.Connect.Microsoft.AuthProfiles do
       optional_scopes: Scopes.user_optional(),
       default?: true,
       metadata: %{credential_mode: :oauth2_user}
+    })
+  end
+
+  def fetch!(:application) do
+    AuthProfile.new!(%{
+      id: :application,
+      kind: :oauth2,
+      owner: :tenant,
+      subject: :service_principal,
+      label: "Microsoft Graph application",
+      setup: :oauth2_client_credentials,
+      credential_fields: [:client_id, :client_secret, :tenant_id],
+      lease_fields: [:access_token],
+      scopes: Scopes.product(:sharepoint),
+      default_scopes: [],
+      optional_scopes: Scopes.product(:sharepoint),
+      metadata: %{credential_mode: :oauth2_client_credentials}
     })
   end
 

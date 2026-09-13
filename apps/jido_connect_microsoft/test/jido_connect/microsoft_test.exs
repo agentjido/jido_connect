@@ -5,7 +5,7 @@ defmodule Jido.Connect.MicrosoftTest do
 
   test "exposes shared Microsoft provider metadata" do
     assert Microsoft.provider() == :microsoft
-    assert Microsoft.auth_profiles() == [:user]
+    assert Microsoft.auth_profiles() == [:user, :application]
   end
 
   test "exposes product-area availability ids" do
@@ -14,6 +14,7 @@ defmodule Jido.Connect.MicrosoftTest do
     assert :mail in areas
     assert :calendar in areas
     assert :files in areas
+    assert :sharepoint in areas
     assert :contacts in areas
     assert :tasks in areas
     assert :teams in areas

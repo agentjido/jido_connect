@@ -1,0 +1,12 @@
+{
+  "id": "contoso.sharepoint.com,site-collection-id,web-id",
+  "name": "operations",
+  "displayName": "Operations",
+  "description": "Operations team site",
+  "webUrl": "https://contoso.sharepoint.com/sites/operations",
+  "createdDateTime": "2026-01-02T10:00:00Z",
+  "lastModifiedDateTime": "2026-08-01T12:00:00Z",
+  "isPersonalSite": false,
+  "siteCollection": {"hostname": "contoso.sharepoint.com"},
+  "sharepointIds": {"siteId": "site-collection-id", "webId": "web-id"}
+}

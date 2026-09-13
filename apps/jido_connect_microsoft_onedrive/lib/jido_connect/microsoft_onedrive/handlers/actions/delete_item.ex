@@ -2,6 +2,7 @@ defmodule Jido.Connect.MicrosoftOnedrive.Handlers.Actions.DeleteItem do
   @moduledoc false
 
   alias Jido.Connect.Microsoft.Transport
+  alias Jido.Connect.MicrosoftOnedrive.DriveTarget
 
   @doc """
   Permanently deletes a Microsoft OneDrive drive item.
@@ -16,25 +17,33 @@ defmodule Jido.Connect.MicrosoftOnedrive.Handlers.Actions.DeleteItem do
         {:error, :item_id_required}
 
       item_id ->
-        request = Transport.request(access_token)
-        url = "/me/drive/items/#{item_id}"
+        with {:ok, url} <- DriveTarget.item(input, item_id) do
+          request = Transport.request(access_token)
 
-        case Transport.request(request, :delete, url: url) do
-          {:ok, %{status: 204}} ->
-            {:ok, %{deleted: true, item_id: item_id}}
+          case Transport.request(request, :delete, url: url, headers: etag_headers(input)) do
+            {:ok, %{status: 204}} ->
+              {:ok, %{deleted: true, item_id: item_id}}
 
-          {:ok, response} ->
-            Transport.handle_error_response({:ok, response},
-              message: "Failed to delete Microsoft OneDrive item"
-            )
+            {:ok, response} ->
+              Transport.handle_error_response({:ok, response},
+                message: "Failed to delete Microsoft OneDrive item"
+              )
 
-          {:error, _reason} = error ->
-            Transport.handle_error_response(error,
-              message: "Failed to delete Microsoft OneDrive item"
-            )
+            {:error, _reason} = error ->
+              Transport.handle_error_response(error,
+                message: "Failed to delete Microsoft OneDrive item"
+              )
+          end
         end
     end
   end
 
   def run(_input, _context), do: {:error, :missing_access_token}
+
+  defp etag_headers(input) do
+    case Map.get(input, :etag) do
+      etag when is_binary(etag) and etag != "" -> [{"if-match", etag}]
+      _other -> []
+    end
+  end
 end

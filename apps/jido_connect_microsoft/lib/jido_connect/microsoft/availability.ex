@@ -15,7 +15,7 @@ defmodule Jido.Connect.Microsoft.Availability do
 
       # List all supported product areas
       areas = Jido.Connect.Microsoft.Availability.areas()
-      #=> [:mail, :calendar, :files, :contacts, :tasks, :teams]
+      #=> [:mail, :calendar, :files, :sharepoint, :contacts, :tasks, :teams]
 
       # Check a specific product area
       {:ok, area} = Jido.Connect.Microsoft.Availability.fetch(:mail)
@@ -96,6 +96,20 @@ defmodule Jido.Connect.Microsoft.Availability do
         metadata: %{
           graph_versions: [:v1_0, :beta],
           read_only_scopes: ["Files.Read", "Files.Read.All"]
+        }
+      },
+      %__MODULE__{
+        id: :sharepoint,
+        label: "Microsoft SharePoint",
+        description:
+          "Microsoft Graph foundations for SharePoint sites, lists, list items, pages, and selected-resource access.",
+        status: :available,
+        scopes: Scopes.product(:sharepoint),
+        foundation_contracts: [:oauth, :transport, :pagination, :account, :scopes, :checkpoint],
+        product_package: :jido_connect_microsoft_sharepoint,
+        metadata: %{
+          graph_versions: [:v1_0],
+          read_only_scopes: ["Sites.Read.All", "Sites.Selected"]
         }
       },
       %__MODULE__{
