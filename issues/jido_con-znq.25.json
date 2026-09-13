@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:05:20Z",
+  "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-236c-7ba3-a07a-8bbe84647d97\n\n1. **P1 — Commit can skip required confirmation after an actor change.**  \n   [execution_authorization.ex:56](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/runtime/execution_authorization.ex:56) trusts the stored `confirmation_required?` flag. The [snapshot check](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/runtime/runtime.ex:383) does not bind the actor or check this flag again.  \n   **Evidence:** Prepare a `:required_for_ai` action as a user. Commit it as an agent with the same connection, lease, and binding. The handler runs without approval. Changing a stored `:always` action’s confirmation flag to `false` also permits execution.  \n   **Correction:** Bind the actor identity to the snapshot. Calculate confirmation requirements again from the current action and context. Reject an inconsistent stored flag.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
+  "id": "jido_con-znq.25",
+  "labels": [],
+  "parent": "jido_con-znq",
+  "priority": 1,
+  "status": "open",
+  "title": "Commit can skip required confirmation after an actor change",
+  "type": "bug",
+  "updated_at": "2026-09-13T20:05:20Z"
+}
