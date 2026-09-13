@@ -16,6 +16,18 @@ defmodule Jido.Connect.AuthorizationTest do
     def required_scopes(_operation, _input, _connection), do: :invalid
   end
 
+  defmodule NilSuccessScopeResolver do
+    def required_scopes(_operation, _input, _connection), do: {:ok, nil}
+  end
+
+  test "a successful scope result must contain a list" do
+    assert {:error, %Error.ConfigError{key: :scope_resolver}} =
+             Jido.Connect.ScopeRequirements.required_scopes(%{
+               id: "test.operation",
+               scope_resolver: NilSuccessScopeResolver
+             })
+  end
+
   test "authorizes a connected operation with a matching active lease" do
     connection = connection()
     context = context(connection)

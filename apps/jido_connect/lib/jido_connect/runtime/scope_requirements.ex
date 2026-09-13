@@ -62,7 +62,9 @@ defmodule Jido.Connect.ScopeRequirements do
     end
   end
 
-  defp normalize_result({:ok, scopes}, _resolver), do: {:ok, normalize_scopes(scopes)}
+  defp normalize_result({:ok, scopes}, _resolver) when is_list(scopes),
+    do: {:ok, normalize_scopes(scopes)}
+
   defp normalize_result({:error, %_{} = error}, _resolver), do: {:error, error}
 
   defp normalize_result(scopes, _resolver) when is_list(scopes),
