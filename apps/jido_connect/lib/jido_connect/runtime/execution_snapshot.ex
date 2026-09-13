@@ -17,21 +17,6 @@ defmodule Jido.Connect.ExecutionSnapshot do
   def action_hash(%ActionSpec{} = action) do
     action
     |> Map.from_struct()
-    |> Map.take([
-      :id,
-      :name,
-      :handler,
-      :preview,
-      :input,
-      :output,
-      :scopes,
-      :scope_resolver,
-      :mutation?,
-      :provider_idempotency?,
-      :risk,
-      :confirmation,
-      :metadata
-    ])
     |> hash()
   end
 

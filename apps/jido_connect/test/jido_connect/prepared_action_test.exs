@@ -139,6 +139,49 @@ defmodule Jido.Connect.PreparedActionTest do
     refute_received {:handler_called, _repo}
   end
 
+  test "commit rejects a changed authorization contract", state do
+    action = hd(state.spec.actions)
+    guarded_spec = %{state.spec | actions: [%{action | host_policy_required?: true}]}
+
+    assert {:ok, prepared} =
+             Connect.prepare(guarded_spec, action.id, state.input,
+               context: state.context,
+               credential_lease: state.lease,
+               binding_ref: "binding_1",
+               policy: fn _operation, _input, _context, _connection -> :ok end
+             )
+
+    assert_stale(
+      Connect.commit(
+        state.spec,
+        prepared,
+        state.input,
+        commit_opts(state, %{plan_id: prepared.id})
+      ),
+      :action_hash
+    )
+
+    refute_received {:handler_called, _repo}
+  end
+
+  test "action snapshots include policy, profile, and schema changes", state do
+    action = hd(state.spec.actions)
+    original = Connect.ExecutionSnapshot.action_hash(action)
+
+    changes = [
+      %{policies: [:reviewed]},
+      %{auth_profile: :installation},
+      %{auth_profiles: [:user, :installation]},
+      %{input_schema: Zoi.object(%{repo: Zoi.string(), note: Zoi.string() |> Zoi.optional()})},
+      %{output_schema: Zoi.object(%{repo: Zoi.string(), note: Zoi.string() |> Zoi.optional()})},
+      %{input_json_schema_overlay: %{"description" => "Revised input"}}
+    ]
+
+    for change <- changes do
+      refute Connect.ExecutionSnapshot.action_hash(struct(action, change)) == original
+    end
+  end
+
   test "commit rejects an expired prepared action", state do
     now = DateTime.utc_now()
     lease = %{state.lease | expires_at: DateTime.add(now, 60, :second)}
