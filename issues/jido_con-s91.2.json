@@ -1,7 +1,9 @@
 {
   "assignee": "",
   "blocked_by": [],
-  "blocks": [],
+  "blocks": [
+    "jido_con-s91.3"
+  ],
   "created": "2026-09-13T19:17:39Z",
   "description": "Confirm requested MCP scope, inventory ExMCP APIs, implement Connect operations and host boundaries, test real protocol behavior and safety. Do not modify jido_mcp or ExMCP source.",
   "id": "jido_con-s91.2",
@@ -11,5 +13,5 @@
   "status": "open",
   "title": "Complete Connect MCP capability coverage with ExMCP",
   "type": "task",
-  "updated_at": "2026-09-13T19:17:39Z"
+  "updated_at": "2026-09-13T19:17:47Z"
 }
