@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:05:11Z",
+  "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-1efd-7e03-b335-4810b34600d9\n\n2. **P2 — Webhook sensor errors can expose secrets.**  \n   [sensor_runtime.ex:63](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/jido/sensor_runtime.ex:63) converts the complete event to a string with `inspect/1`.\n\n   If a caller passes an event containing `access_token`, the returned error includes its value. Later error serialization cannot redact it: the sanitizer only truncates strings. An isolated check retained `REVIEW_SENTINEL` in this error shape; structured input correctly redacted it. The existing sensor test passes only an atom.\n\n   **Smallest correction:** Remove event contents from this unsupported-operation error. Keep the trigger ID, runtime mode, and event type.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
+  "id": "jido_con-znq.12",
+  "labels": [],
+  "parent": "jido_con-znq",
+  "priority": 2,
+  "status": "open",
+  "title": "Webhook sensor errors can expose secrets",
+  "type": "bug",
+  "updated_at": "2026-09-13T20:05:11Z"
+}
