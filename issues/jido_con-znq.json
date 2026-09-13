@@ -54,11 +54,15 @@
     {
       "text": "Verified intake: 67 unique issues; 12 P1, 41 P2, 14 P3. All nine complete reports are retained. Six duplicate reports of findings merged; two Zoi enum limits share one issue. Existing GitHub #79 and #81 remain separate.\n\nJido Connect v3 review: Connector DSL (01a09c57-1cfa-7d40-bb71-a5688aa49672): jido_con-znq.1, jido_con-znq.2, jido_con-znq.3, jido_con-znq.4, jido_con-znq.5, jido_con-znq.6, jido_con-znq.7, jido_con-znq.8, jido_con-znq.9, jido_con-znq.10, jido_con-znq.65\nJido Connect v3 review: Jido adapters (01a09c57-1efd-7e03-b335-4810b34600d9): jido_con-znq.11, jido_con-znq.12, jido_con-znq.13, jido_con-znq.14, jido_con-znq.15, jido_con-znq.16\nJido Connect v3 review: Catalog (01a09c57-210c-79f0-9e9f-669bbeed6dfc): jido_con-znq.17, jido_con-znq.18, jido_con-znq.19, jido_con-znq.20, jido_con-znq.21, jido_con-znq.22, jido_con-znq.23, jido_con-znq.24\nJido Connect v3 review: Execution controls (01a09c57-236c-7ba3-a07a-8bbe84647d97): jido_con-znq.25, jido_con-znq.26, jido_con-znq.27, jido_con-znq.28, jido_con-znq.29, jido_con-znq.30, jido_con-znq.31\nJido Connect v3 review: MCP client (01a09c57-2619-7251-b3f3-113072d196ce): jido_con-znq.26, jido_con-znq.32, jido_con-znq.33, jido_con-znq.34, jido_con-znq.35, jido_con-znq.36, jido_con-znq.37, jido_con-znq.38, jido_con-znq.66\nJido Connect v3 review: Provider helpers (01a09c57-2858-7750-b28e-72cf480d2cec): jido_con-znq.39, jido_con-znq.40, jido_con-znq.41, jido_con-znq.42, jido_con-znq.43, jido_con-znq.44, jido_con-znq.45, jido_con-znq.46\nJido Connect v3 review: Runtime results (01a09c57-2ac2-7981-8f33-21ede2d89ca2): jido_con-znq.40, jido_con-znq.47, jido_con-znq.48, jido_con-znq.49, jido_con-znq.50, jido_con-znq.51, jido_con-znq.52, jido_con-znq.67\nJido Connect v3 review: Authoring tools (01a09c57-2d23-7271-a03d-67000b3c156d): jido_con-znq.7, jido_con-znq.15, jido_con-znq.53, jido_con-znq.54, jido_con-znq.55, jido_con-znq.56, jido_con-znq.57, jido_con-znq.58, jido_con-znq.59, jido_con-znq.60\nJido Connect v3 review: Optional connectors (01a09c57-2f9c-7a11-b8d1-4c833aa020b2): jido_con-znq.7, jido_con-znq.43, jido_con-znq.61, jido_con-znq.62, jido_con-znq.63, jido_con-znq.64\n\n```mermaid\nflowchart LR\n A[Authorization and tenant separation] --\u003e D[Fresh v3 verification]\n B[Credential redaction] --\u003e D\n C[Runtime and schema correctness] --\u003e D\n D --\u003e E[Authoring and documentation checks]\n E --\u003e F[Independent package validation]\n```\nNo implementation started. All review findings and verification limits are saved before source tasks are archived.",
       "timestamp": "2026-09-13T20:06:58Z"
+    },
+    {
+      "text": "Intake complete: all nine source review tasks were archived after exact issue/report verification and successful bw sync. The recurring collection monitor is paused. Implementation issues remain open; no source fixes or publication occurred.",
+      "timestamp": "2026-09-13T20:07:08Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "Refine Jido Connect v3 from nine independent code reviews",
   "type": "epic",
-  "updated_at": "2026-09-13T20:06:58Z"
+  "updated_at": "2026-09-13T20:07:08Z"
 }
