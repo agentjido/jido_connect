@@ -7,9 +7,15 @@
   "id": "jido_con-znq.48",
   "labels": [],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed in 77187729 on release/3.0. Sanitizer now redacts sensitive key/value tuples and recursively sanitizes tuple contents in both telemetry and transport profiles. Baseline regressions failed before fix; focused tests passed (14); root mix quality passed; demo format, warnings-as-errors compile, and tests passed (21). The separate raw ProviderResponse.reason contract remains tracked as jido_con-znq.49.",
+      "timestamp": "2026-09-13T21:33:47Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Tuples and keyword lists bypass key redaction",
   "type": "bug",
-  "updated_at": "2026-09-13T21:27:49Z"
+  "updated_at": "2026-09-13T21:33:47Z"
 }
