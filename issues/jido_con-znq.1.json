@@ -9,9 +9,15 @@
     "v3-release-blocker"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Resolved in ef26ecda: write-risk mutation validation and fixture coverage. Focused tests passed. Full umbrella mix quality and demo format, warnings-as-errors compile, and 21 demo tests passed for this batch.",
+      "timestamp": "2026-09-13T22:17:13Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Legacy write declarations can omit confirmation",
   "type": "bug",
-  "updated_at": "2026-09-13T22:01:02Z"
+  "updated_at": "2026-09-13T22:17:13Z"
 }
