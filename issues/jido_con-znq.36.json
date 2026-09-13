@@ -9,9 +9,15 @@
     "v3-release-blocker"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed in d855a3c4. Static and managed MCP writes share uncertain-result classification; focused MCP tests pass. Full umbrella mix quality and demo format, warnings-as-errors compile, and 21 demo tests pass.",
+      "timestamp": "2026-09-13T23:11:38Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Static endpoints skip uncertain-write normalization",
   "type": "bug",
-  "updated_at": "2026-09-13T23:00:04Z"
+  "updated_at": "2026-09-13T23:11:38Z"
 }
