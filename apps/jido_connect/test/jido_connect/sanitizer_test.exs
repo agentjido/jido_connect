@@ -3,6 +3,27 @@ defmodule Jido.Connect.SanitizerTest do
 
   alias Jido.Connect.{CredentialLease, Sanitizer}
 
+  test "truncates at a UTF-8 boundary and represents invalid binary input safely" do
+    text = String.duplicate("a", 511) <> "é"
+    sanitized = Sanitizer.sanitize(text, :transport)
+
+    assert sanitized == String.duplicate("a", 511) <> "...[truncated 2 bytes]"
+    assert String.valid?(sanitized)
+    assert {:ok, ^sanitized} = sanitized |> Jason.encode!() |> Jason.decode()
+
+    invalid = <<0xFF, 0xFE>>
+    expected = "[invalid UTF-8 binary, 2 bytes]"
+
+    assert Sanitizer.sanitize(invalid, :transport) == expected
+    assert Sanitizer.sanitize(invalid, :telemetry) == expected
+
+    assert {:ok, %{^expected => ^expected}} =
+             %{invalid => invalid}
+             |> Sanitizer.sanitize(:transport)
+             |> Jason.encode!()
+             |> Jason.decode()
+  end
+
   test "redacts sensitive keys for telemetry and transport profiles" do
     value = %{
       :access_token => "secret-token",

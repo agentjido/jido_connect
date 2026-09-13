@@ -204,17 +204,19 @@ defmodule Jido.Connect.Sanitizer do
     end
   end
 
+  defp sanitize_key(key, :telemetry) when is_binary(key), do: safe_binary(key)
   defp sanitize_key(key, :telemetry), do: key
   defp sanitize_key(key, :transport) when is_atom(key), do: Atom.to_string(key)
-  defp sanitize_key(key, :transport) when is_binary(key), do: key
+  defp sanitize_key(key, :transport) when is_binary(key), do: safe_binary(key)
   defp sanitize_key(key, :transport), do: inspect(key)
 
   defp sensitive_key?(key) when is_binary(key) do
-    MapSet.member?(@sensitive_keys, key) or
-      key
-      |> String.downcase()
-      |> String.replace("-", "_")
-      |> then(&MapSet.member?(@sensitive_keys, &1))
+    String.valid?(key) and
+      (MapSet.member?(@sensitive_keys, key) or
+         key
+         |> String.downcase()
+         |> String.replace("-", "_")
+         |> then(&MapSet.member?(@sensitive_keys, &1)))
   end
 
   defp sensitive_key?(key) when is_atom(key) do
@@ -223,12 +225,34 @@ defmodule Jido.Connect.Sanitizer do
 
   defp sensitive_key?(_key), do: false
 
-  defp truncate_binary(value, max_binary) when byte_size(value) <= max_binary, do: value
-
   defp truncate_binary(value, max_binary) do
-    kept = binary_part(value, 0, max_binary)
-    "#{kept}...[truncated #{byte_size(value) - max_binary} bytes]"
+    if String.valid?(value) do
+      truncate_valid_binary(value, max_binary)
+    else
+      invalid_binary_label(value)
+    end
   end
+
+  defp truncate_valid_binary(value, max_binary) when byte_size(value) <= max_binary, do: value
+
+  defp truncate_valid_binary(value, max_binary) do
+    kept = value |> binary_part(0, max_binary) |> trim_incomplete_utf8()
+    "#{kept}...[truncated #{byte_size(value) - byte_size(kept)} bytes]"
+  end
+
+  defp trim_incomplete_utf8(value) do
+    if String.valid?(value) do
+      value
+    else
+      value |> binary_part(0, byte_size(value) - 1) |> trim_incomplete_utf8()
+    end
+  end
+
+  defp safe_binary(value) do
+    if String.valid?(value), do: value, else: invalid_binary_label(value)
+  end
+
+  defp invalid_binary_label(value), do: "[invalid UTF-8 binary, #{byte_size(value)} bytes]"
 
   defp maybe_note_truncation(map, size, max, :telemetry) when size > max,
     do: Map.put(map, :__truncated__, size - max)
