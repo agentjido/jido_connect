@@ -44,7 +44,7 @@ defmodule Jido.Connect.Catalog.Ranker do
   defp invoke_ranker(fun, query, candidates) when is_function(fun, 2), do: fun.(query, candidates)
 
   defp invoke_ranker(module, query, candidates) when is_atom(module) do
-    if function_exported?(module, :rank, 2) do
+    if Code.ensure_loaded?(module) and function_exported?(module, :rank, 2) do
       Kernel.apply(module, :rank, [query, candidates])
     else
       raise ArgumentError, "catalog ranker module must export rank/2"

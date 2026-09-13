@@ -948,6 +948,47 @@ defmodule Jido.Connect.CatalogTest do
     refute Map.has_key?(candidate, "credential_lease")
   end
 
+  test "loads a ranker module before it checks the rank callback" do
+    module = Module.concat(__MODULE__, "LazyRankerFixture")
+    dir = Path.join(System.tmp_dir!(), "jido_ranker_#{System.unique_integer([:positive])}")
+    File.mkdir_p!(dir)
+
+    {:module, ^module, beam, _} =
+      Module.create(
+        module,
+        quote do
+          def rank(_query, _candidates),
+            do: [%{provider: :catalog, id: "catalog.item.get", reason: "loaded"}]
+        end,
+        Macro.Env.location(__ENV__)
+      )
+
+    File.write!(Path.join(dir, "#{module}.beam"), beam)
+    Code.prepend_path(dir)
+    :code.purge(module)
+    :code.delete(module)
+    refute function_exported?(module, :rank, 2)
+
+    on_exit(fn ->
+      Code.delete_path(dir)
+      :code.purge(module)
+      :code.delete(module)
+      File.rm_rf!(dir)
+    end)
+
+    assert [
+             %Catalog.ToolSearchResult{
+               tool: %Catalog.ToolEntry{id: "catalog.item.get"},
+               metadata: %{ranker: %{rank: 1, reason: "loaded"}}
+             }
+             | _
+           ] =
+             Catalog.search_tools("item",
+               modules: [CatalogFixtures.Integration],
+               ranker: module
+             )
+  end
+
   test "ranker failures fall back to deterministic results with diagnostic metadata" do
     modules = [CatalogFixtures.Integration]
 
