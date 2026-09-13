@@ -163,6 +163,63 @@ defmodule Jido.Connect.PreparedActionTest do
     refute_received {:handler_called, _repo}
   end
 
+  test "commit rejects a prepared action that expires during approval", state do
+    lease = %{state.lease | expires_at: DateTime.add(DateTime.utc_now(), 500, :millisecond)}
+
+    assert {:ok, prepared} =
+             Connect.prepare(state.spec, "demo.repo.show", state.input,
+               context: state.context,
+               credential_lease: lease,
+               binding_ref: "binding_1",
+               prepare_ttl_ms: 500
+             )
+
+    opts =
+      state
+      |> Map.put(:lease, lease)
+      |> commit_opts(%{plan_id: prepared.id})
+      |> Keyword.put(:authorization_validator, fn evidence, prepared, _context ->
+        send(self(), :approval_started)
+        Process.sleep(600)
+        evidence.plan_id == prepared.id
+      end)
+
+    result = Connect.commit(state.spec, prepared, state.input, opts)
+
+    assert_received :approval_started
+    assert {:error, %Connect.Error.AuthError{reason: :prepared_action_expired}} = result
+    refute_received {:handler_called, _repo}
+  end
+
+  test "commit advances a supplied clock during approval", state do
+    now = ~U[2026-08-17 15:00:00Z]
+
+    assert {:ok, prepared} =
+             Connect.prepare(state.spec, "demo.repo.show", state.input,
+               context: state.context,
+               credential_lease: state.lease,
+               binding_ref: "binding_1",
+               prepare_ttl_ms: 500,
+               now: now
+             )
+
+    opts =
+      state
+      |> commit_opts(%{plan_id: prepared.id})
+      |> Keyword.put(:now, now)
+      |> Keyword.put(:authorization_validator, fn _evidence, _prepared, _context ->
+        send(self(), :approval_started)
+        Process.sleep(600)
+        true
+      end)
+
+    result = Connect.commit(state.spec, prepared, state.input, opts)
+
+    assert_received :approval_started
+    assert {:error, %Connect.Error.AuthError{reason: :prepared_action_expired}} = result
+    refute_received {:handler_called, _repo}
+  end
+
   test "direct mutation invocation can be denied", state do
     assert {:error, %Connect.Error.AuthError{reason: :execution_authorization_required}} =
              Connect.invoke(state.spec, "demo.repo.show", state.input,

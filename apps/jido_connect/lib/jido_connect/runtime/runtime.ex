@@ -71,6 +71,7 @@ defmodule Jido.Connect.Runtime do
          {:ok, request_timeout_ms} <- request_timeout_ms(opts),
          :ok <- ExecutionAuthorization.require_direct_allowed(action, context, opts),
          :ok <- Authorization.authorize(action, parsed_input, context, lease, auth_opts(opts)),
+         :ok <- CredentialLease.require_unexpired(lease),
          {:ok, output} <-
            run_action_handler(action, parsed_input, %{
              integration: integration,
@@ -123,6 +124,9 @@ defmodule Jido.Connect.Runtime do
   end
 
   defp do_commit(%Spec{} = integration, %PreparedAction{} = prepared, input, opts) do
+    started_at = System.monotonic_time()
+    now = get_option(opts, :now) || DateTime.utc_now()
+
     with :ok <- require_unexpired_prepared(prepared, opts),
          {:ok, action} <- find_action(integration, prepared.action_id),
          {:ok, parsed_input} <- parse_schema(action.input_schema, input, :input),
@@ -141,6 +145,8 @@ defmodule Jido.Connect.Runtime do
              opts
            ),
          :ok <- ExecutionAuthorization.validate(prepared, action, context, opts),
+         :ok <- require_unexpired_prepared(prepared, now: elapsed_now(now, started_at)),
+         :ok <- CredentialLease.require_unexpired(lease),
          {:ok, output} <-
            run_action_handler(action, parsed_input, %{
              integration: integration,
@@ -161,12 +167,22 @@ defmodule Jido.Connect.Runtime do
     end
   end
 
+  defp elapsed_now(now, started_at) do
+    elapsed_us =
+      System.monotonic_time()
+      |> Kernel.-(started_at)
+      |> System.convert_time_unit(:native, :microsecond)
+
+    DateTime.add(now, elapsed_us, :microsecond)
+  end
+
   defp do_poll(%Spec{} = integration, trigger_id, config, opts) do
     with {:ok, trigger} <- find_trigger(integration, trigger_id),
          {:ok, parsed_config} <- parse_schema(trigger.config_schema, config, :config),
          {:ok, context} <- fetch_context(opts),
          {:ok, lease} <- fetch_credential_lease(opts),
          :ok <- Authorization.authorize(trigger, parsed_config, context, lease, auth_opts(opts)),
+         :ok <- CredentialLease.require_unexpired(lease),
          {:ok, result} <-
            run_poll_handler(trigger, parsed_config, %{
              integration: integration,

@@ -4,6 +4,67 @@ defmodule Jido.Connect.Runtime.ApiTest do
   alias Jido.Connect
   alias Jido.Connect.RuntimeFixtures
 
+  defmodule DelayedPolicy do
+    def authorize(_operation, _input, %{metadata: %{test_pid: test_pid}}, _connection) do
+      send(test_pid, :policy_started)
+      Process.sleep(600)
+      :ok
+    end
+  end
+
+  defmodule ObservedActionHandler do
+    def run(_input, %{context: %{metadata: %{test_pid: test_pid}}}) do
+      send(test_pid, :action_handler_called)
+      {:ok, %{repo: "org/repo"}}
+    end
+  end
+
+  defmodule ObservedPollHandler do
+    def poll(_config, %{context: %{metadata: %{test_pid: test_pid}}}) do
+      send(test_pid, :poll_handler_called)
+      {:ok, %{signals: [], checkpoint: nil}}
+    end
+  end
+
+  test "invoke and poll reject a lease that expires during policy authorization" do
+    spec =
+      RuntimeFixtures.spec(%{
+        action: %{handler: ObservedActionHandler},
+        trigger: %{handler: ObservedPollHandler}
+      })
+
+    {context, lease} = RuntimeFixtures.context_and_lease()
+    context = %{context | metadata: %{test_pid: self()}}
+
+    for {operation, handler_message} <- [
+          {:invoke, :action_handler_called},
+          {:poll, :poll_handler_called}
+        ] do
+      short_lease = %{lease | expires_at: DateTime.add(DateTime.utc_now(), 500, :millisecond)}
+
+      result =
+        case operation do
+          :invoke ->
+            Connect.invoke(spec, "demo.repo.show", %{repo: "org/repo"},
+              context: context,
+              credential_lease: short_lease,
+              policy: DelayedPolicy
+            )
+
+          :poll ->
+            Connect.poll(spec, "demo.repo.changed", %{repo: "org/repo"},
+              context: context,
+              credential_lease: short_lease,
+              policy: DelayedPolicy
+            )
+        end
+
+      assert_received :policy_started
+      assert {:error, %Connect.Error.AuthError{reason: :credential_lease_expired}} = result
+      refute_received ^handler_message
+    end
+  end
+
   test "top-level API accepts provider modules or compiled specs" do
     spec = RuntimeFixtures.spec()
     {context, lease} = RuntimeFixtures.context_and_lease()
