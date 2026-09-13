@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:05:11Z",
+  "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-1efd-7e03-b335-4810b34600d9\n\n1. **P1 — Catalog filters can replace the host policy.**  \n   [input.ex:116](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/catalog/input.ex:116) accepts every atom key. [input.ex:71](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/catalog/input.ex:71) then merges filters after host runtime options.\n\n   An action input with `filters: %{policy: nil}` removes a supplied deny policy. I reproduced this option replacement. `Catalog.call_tool/3` passes these options to Connect, where an absent policy permits operations with `host_policy_required?: false`. Existing catalog tests cover invalid filter shapes, but not runtime keys inside filters.\n\n   **Smallest correction:** Permit only declared filter keys for both atom and string input. Reject runtime keys before the merge.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
+  "id": "jido_con-znq.11",
+  "labels": [],
+  "parent": "jido_con-znq",
+  "priority": 1,
+  "status": "open",
+  "title": "Catalog filters can replace the host policy",
+  "type": "bug",
+  "updated_at": "2026-09-13T20:05:11Z"
+}
