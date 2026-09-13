@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:04:52Z",
+  "description": "Capture and resolve the nine Astra xhigh feature reviews of release/3.0 at fb5b59bd. Findings cover conformance, security boundaries, simplification, maintainability, authoring, and independent package quality. Full review reports are preserved in comments; child issues combine duplicate findings. Existing GitHub #79 Cowlib and #81 legacy notification follow-ups remain separate, as does the Jido Git-to-Hex release prerequisite. Do not modify jido_mcp or publish packages. Review probes used current source with isolated processes; shared local build artifacts were stale v2, so final fixes require fresh matching v3 verification. Sequence: authorization and redaction defects first, then runtime/contract correctness, then authoring/docs and design improvements. No implementation is part of this intake.",
+  "id": "jido_con-znq",
+  "labels": [],
+  "priority": 1,
+  "status": "open",
+  "title": "Refine Jido Connect v3 from nine independent code reviews",
+  "type": "epic",
+  "updated_at": "2026-09-13T20:04:52Z"
+}
