@@ -5,11 +5,13 @@
   "created": "2026-09-13T20:05:41Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2d23-7271-a03d-67000b3c156d\n\n5. **P2 — Catalog inspection does not ensure that host providers are available.**  \n   [jido.connect.catalog.ex:22](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/mix/tasks/jido.connect.catalog.ex:22) has no application configuration requirement. Mix can locate this dependency task without compiling or adding the host application to the code path. A private provider configured through `catalog_modules` can therefore be omitted as an unavailable module. Installed dependency metadata can load correctly; that is a separate case.  \n   **Correction:** Require `app.config` before discovery. This makes host code available without starting its supervision tree.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.56",
-  "labels": [],
+  "labels": [
+    "v3-follow-up"
+  ],
   "parent": "jido_con-znq",
   "priority": 2,
   "status": "open",
   "title": "Catalog inspection does not ensure that host providers are available",
   "type": "bug",
-  "updated_at": "2026-09-13T20:05:41Z"
+  "updated_at": "2026-09-13T21:59:39Z"
 }
