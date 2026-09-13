@@ -228,6 +228,68 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
     :ok = EndpointLeaseManager.release(renewed)
   end
 
+  test "renewing a generation does not extend an earlier token", %{connection: connection} do
+    first_expiry = DateTime.add(DateTime.utc_now(), 2, :second)
+    renewed_expiry = DateTime.add(first_expiry, 60, :second)
+    source = endpoint("secret-one")
+
+    assert {:ok, first} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one", first_expiry),
+               source
+             )
+
+    assert {:ok, renewed} =
+             EndpointLeaseManager.acquire(
+               connection,
+               lease(connection, 1, "secret-one", renewed_expiry),
+               source
+             )
+
+    assert first.endpoint_id == renewed.endpoint_id
+    assert first.expires_at == first_expiry
+    assert renewed.expires_at == renewed_expiry
+    assert :ok = EndpointLeaseManager.ensure_dispatchable(first)
+    assert :ok = EndpointLeaseManager.ensure_dispatchable(renewed)
+
+    parent = self()
+
+    in_flight =
+      Task.async(fn ->
+        EndpointLeaseManager.dispatch(first, fn ->
+          send(parent, :send_started)
+
+          receive do
+            :finish_send -> {:error, :connection_lost}
+          end
+        end)
+      end)
+
+    assert_receive :send_started
+
+    Process.sleep(max(DateTime.diff(first_expiry, DateTime.utc_now(), :millisecond) + 30, 0))
+
+    send(in_flight.pid, :finish_send)
+    assert {:ok, {:error, :connection_lost}, true} = Task.await(in_flight)
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_revoked}} =
+             EndpointLeaseManager.ensure_dispatchable(first)
+
+    assert :ok = EndpointLeaseManager.ensure_dispatchable(renewed)
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_revoked}} =
+             EndpointLeaseManager.dispatch(first, fn ->
+               send(self(), :expired_token_dispatched)
+             end)
+
+    refute_received :expired_token_dispatched
+    assert [%{expires_at: ^renewed_expiry}] = EndpointLeaseManager.ownership(connection)
+
+    assert :ok = EndpointLeaseManager.release(first)
+    assert :ok = EndpointLeaseManager.release(renewed)
+  end
+
   test "rotation fences the old generation before its client is removed", %{
     connection: connection
   } do

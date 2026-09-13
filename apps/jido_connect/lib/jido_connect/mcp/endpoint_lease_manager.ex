@@ -25,6 +25,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
           required(:endpoint_fingerprint) => String.t(),
           required(:connection_revision) => non_neg_integer(),
           required(:credential_version) => non_neg_integer(),
+          required(:expires_at) => DateTime.t(),
           required(:client_module) => module(),
           required(:client_ref) => term()
         }
@@ -137,8 +138,11 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
          :ok <- CredentialLease.validate_connection_binding(lease, connection) do
       with {:ok, ownership} <- ownership_for(connection, lease, source) do
         case acquire_record(ownership, source, state) do
-          {:ok, record, next_state} -> {:reply, {:ok, token(record)}, next_state}
-          {:error, error, next_state} -> {:reply, {:error, error}, next_state}
+          {:ok, record, next_state} ->
+            {:reply, {:ok, token(record, lease.expires_at)}, next_state}
+
+          {:error, error, next_state} ->
+            {:reply, {:error, error}, next_state}
         end
       else
         {:error, error} -> {:reply, {:error, error}, state}
@@ -342,17 +346,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   end
 
   defp finish_dispatch(token, state) do
-    case Map.fetch(state.records, record_key(token)) do
-      {:ok, record} ->
-        revoked? =
-          record.status != :active or
-            Map.get(state.current, record_connection_key(record)) != record.key
-
-        {revoked?, update_record(token, state, &decrement_active/1)}
-
-      :error ->
-        {true, state}
-    end
+    {dispatchable?(token, state) != :ok, update_record(token, state, &decrement_active/1)}
   end
 
   defp bind_record_schema(token, tool_name, schema_hash, state) do
@@ -402,6 +396,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
     with {:ok, record} <- Map.fetch(state.records, record_key(token)),
          true <- record.status == :active,
          true <- Map.get(state.current, record_connection_key(record)) == record.key,
+         true <- unexpired?(Map.get(token, :expires_at)),
          true <- DateTime.compare(record.expires_at, DateTime.utc_now()) == :gt do
       :ok
     else
@@ -599,19 +594,26 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
     end
   end
 
-  defp token(record),
-    do:
-      Map.take(record, [
-        :tenant_id,
-        :connection_id,
-        :endpoint_id,
-        :generation,
-        :endpoint_fingerprint,
-        :connection_revision,
-        :credential_version,
-        :client_module,
-        :client_ref
-      ])
+  defp token(record, lease_expires_at) do
+    record
+    |> Map.take([
+      :tenant_id,
+      :connection_id,
+      :endpoint_id,
+      :generation,
+      :endpoint_fingerprint,
+      :connection_revision,
+      :credential_version,
+      :client_module,
+      :client_ref
+    ])
+    |> Map.put(:expires_at, lease_expires_at)
+  end
+
+  defp unexpired?(%DateTime{} = expires_at),
+    do: DateTime.compare(expires_at, DateTime.utc_now()) == :gt
+
+  defp unexpired?(_expires_at), do: false
 
   defp record_key(token),
     do: {Map.get(token, :tenant_id), Map.get(token, :connection_id), Map.get(token, :generation)}
