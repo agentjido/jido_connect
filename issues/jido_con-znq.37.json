@@ -7,9 +7,15 @@
   "id": "jido_con-znq.37",
   "labels": [],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Upstream API request: https://github.com/azmaveth/ex_mcp/issues/43 . Connect tracking: https://github.com/agentjido/jido_connect/issues/83 . Connect must pass the timeout after adopting the public API and verify generated action behavior.",
+      "timestamp": "2026-09-13T20:14:33Z"
+    }
+  ],
   "priority": 2,
   "status": "open",
   "title": "Status ignores the declared timeout",
   "type": "task",
-  "updated_at": "2026-09-13T20:05:28Z"
+  "updated_at": "2026-09-13T20:14:33Z"
 }
