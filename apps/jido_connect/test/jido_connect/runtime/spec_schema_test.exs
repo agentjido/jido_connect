@@ -146,6 +146,99 @@ defmodule Jido.Connect.Runtime.SpecSchemaTest do
              Zoi.parse(schema, %{state: "open"})
   end
 
+  test "enum values and defaults must match the field type and limits" do
+    assert_raise Connect.Error.ValidationError, ~r/Invalid field enum value/, fn ->
+      Connect.zoi_schema_from_fields([
+        Connect.Field.new!(%{name: :count, type: :integer, enum: ["wrong"]})
+      ])
+    end
+
+    assert_raise Connect.Error.ValidationError, ~r/Invalid field enum value/, fn ->
+      Connect.zoi_schema_from_fields([
+        Connect.Field.new!(%{name: :count, type: :integer, minimum: 2, enum: [1, 2]})
+      ])
+    end
+
+    assert_raise Connect.Error.ValidationError, ~r/Invalid field default/, fn ->
+      Connect.zoi_schema_from_fields([
+        Connect.Field.new!(%{name: :count, type: :integer, default: "wrong"})
+      ])
+    end
+
+    assert_raise Connect.Error.ValidationError, ~r/Invalid field default/, fn ->
+      Connect.zoi_schema_from_fields([
+        Connect.Field.new!(%{name: :count, type: :integer, maximum: 3, default: 4})
+      ])
+    end
+
+    assert_raise Connect.Error.ValidationError, ~r/Invalid field default/, fn ->
+      Connect.zoi_schema_from_fields([
+        Connect.Field.new!(%{name: :count, type: :integer, enum: [2, 3], default: 1})
+      ])
+    end
+
+    schema =
+      Connect.zoi_schema_from_fields([
+        Connect.Field.new!(%{
+          name: :count,
+          type: :integer,
+          minimum: 2,
+          maximum: 3,
+          enum: [2, 3],
+          default: 2
+        })
+      ])
+
+    assert {:ok, %{count: 2}} = Zoi.parse(schema, %{})
+    assert {:ok, %{count: 3}} = Zoi.parse(schema, %{count: 3})
+    assert {:error, _} = Zoi.parse(schema, %{count: 1})
+
+    assert %{"properties" => %{"count" => %{"type" => "integer"}}} =
+             Connect.Schema.to_json_schema(schema)
+  end
+
+  test "array enum values constrain each element" do
+    field =
+      Connect.Field.new!(%{
+        name: :roles,
+        type: {:array, :string},
+        enum: ["read", "write"],
+        default: ["read"]
+      })
+
+    schema = Connect.zoi_schema_from_fields([field])
+
+    assert {:ok, %{roles: ["read"]}} = Zoi.parse(schema, %{})
+
+    assert {:ok, %{roles: ["read", "write"]}} =
+             Zoi.parse(schema, %{roles: ["read", "write"]})
+
+    assert {:error, _} = Zoi.parse(schema, %{roles: ["admin"]})
+
+    assert %{
+             "properties" => %{
+               "roles" => %{"type" => "array", "items" => %{"enum" => ["read", "write"]}}
+             }
+           } = Connect.Schema.to_json_schema(schema)
+
+    assert_raise Connect.Error.ValidationError, ~r/Invalid field enum value/, fn ->
+      Connect.zoi_schema_from_fields([
+        Connect.Field.new!(%{name: :roles, type: {:array, :string}, enum: [3]})
+      ])
+    end
+
+    assert_raise Connect.Error.ValidationError, ~r/Invalid field default/, fn ->
+      Connect.zoi_schema_from_fields([
+        Connect.Field.new!(%{
+          name: :roles,
+          type: {:array, :string},
+          enum: ["read"],
+          default: ["admin"]
+        })
+      ])
+    end
+  end
+
   test "field schemas enforce common limits and emit strict JSON Schema" do
     schema =
       Connect.zoi_schema_from_fields([

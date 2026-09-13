@@ -7,12 +7,21 @@ defmodule Jido.Connect.Schema do
   def zoi_schema_from_fields(fields) when is_list(fields) do
     validate_unique_fields!(fields)
 
+    enum_values =
+      fields
+      |> Enum.filter(&is_list(&1.enum))
+      |> Map.new(&{&1.name, {&1.type, &1.enum}})
+
     fields
     |> Enum.map(fn %Field{} = field ->
       {field.name, zoi_field_schema(field)}
     end)
     |> Map.new()
-    |> Zoi.object(coerce: true, unrecognized_keys: :error)
+    |> Zoi.object(
+      coerce: true,
+      unrecognized_keys: :error,
+      metadata: [jido_connect_enum_values: enum_values]
+    )
   end
 
   @doc false
@@ -32,15 +41,59 @@ defmodule Jido.Connect.Schema do
   end
 
   defp zoi_field_schema(%Field{} = field) do
-    field.type
-    |> zoi_type()
-    |> maybe_enum(field.enum)
-    |> maybe_minimum(field)
-    |> maybe_maximum(field)
-    |> maybe_min_length(field)
-    |> maybe_max_length(field)
+    base_schema =
+      field
+      |> base_field_type()
+      |> maybe_minimum(field)
+      |> maybe_maximum(field)
+      |> maybe_min_length(field)
+      |> maybe_max_length(field)
+
+    validate_enum_and_default!(base_schema, field)
+
+    base_schema
+    |> maybe_enum(field)
     |> maybe_optional(field)
     |> maybe_default(field)
+  end
+
+  defp base_field_type(%Field{type: {:array, element_type}, enum: values} = field)
+       when is_list(values) do
+    element_schema = zoi_type(element_type)
+    Enum.each(values, &validate_field_value!(element_schema, &1, field, :enum))
+    Zoi.list(Zoi.one_of(element_schema, values))
+  end
+
+  defp base_field_type(%Field{type: type}), do: zoi_type(type)
+
+  defp validate_enum_and_default!(base_schema, %Field{} = field) do
+    unless match?({:array, _}, field.type) do
+      Enum.each(field.enum || [], &validate_field_value!(base_schema, &1, field, :enum))
+    end
+
+    if field.default != nil do
+      validate_field_value!(base_schema, field.default, field, :default)
+
+      if field.enum && not match?({:array, _}, field.type) &&
+           not Enum.any?(field.enum, &(&1 === field.default)) do
+        invalid_field_value!(field, :default)
+      end
+    end
+  end
+
+  defp validate_field_value!(schema, value, field, kind) do
+    case Zoi.parse(schema, value) do
+      {:ok, ^value} -> :ok
+      _ -> invalid_field_value!(field, kind)
+    end
+  end
+
+  defp invalid_field_value!(field, kind) do
+    raise Error.validation("Invalid field #{kind} value",
+            reason: :invalid_field_value,
+            subject: field.name,
+            details: %{kind: kind, type: field.type}
+          )
   end
 
   defp zoi_type(:string), do: Zoi.string()
@@ -58,8 +111,9 @@ defmodule Jido.Connect.Schema do
           )
   end
 
-  defp maybe_enum(schema, nil), do: schema
-  defp maybe_enum(_schema, values), do: Zoi.enum(values)
+  defp maybe_enum(schema, %Field{type: {:array, _}}), do: schema
+  defp maybe_enum(schema, %Field{enum: nil}), do: schema
+  defp maybe_enum(schema, %Field{enum: values}), do: Zoi.one_of(schema, values)
 
   defp maybe_minimum(schema, %Field{minimum: nil}), do: schema
 
@@ -110,9 +164,17 @@ defmodule Jido.Connect.Schema do
   @doc false
   @spec to_json_schema(Zoi.schema()) :: map()
   def to_json_schema(schema) do
-    schema
-    |> Zoi.to_json_schema()
-    |> json_safe()
+    json_schema = schema |> Zoi.to_json_schema() |> json_safe()
+    enum_values = Zoi.metadata(schema)[:jido_connect_enum_values] || %{}
+
+    Enum.reduce(enum_values, json_schema, fn {name, {type, values}}, acc ->
+      update_in(acc, ["properties", Atom.to_string(name)], fn property ->
+        case type do
+          {:array, _} -> update_in(property, ["items"], &Map.put(&1, "enum", json_safe(values)))
+          _ -> Map.put(property, "enum", json_safe(values))
+        end
+      end)
+    end)
   end
 
   @doc false
