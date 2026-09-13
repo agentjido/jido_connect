@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T18:53:02Z",
+  "description": "Create release/2.0 and release/3.0 compatibility lines. Document maintainer-only v3 development, use Action v3 from Hex, preserve the v2 line, integrate existing PR 75 work, refresh dependencies and verify. User permits prerelease Hex dependencies. No package publication. Follow-up to jido_con-3i6 and jido_con-f13.",
+  "id": "jido_con-ag8",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "Maintain Connect v2 and complete v3 integration",
+  "type": "epic",
+  "updated_at": "2026-09-13T18:53:02Z"
+}
