@@ -7,9 +7,15 @@
   "id": "jido_con-znq.32",
   "labels": [],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed in ccad6e99 on release/3.0. Endpoint records, generations, current clients, ownership barriers, tokens, and lifecycle operations now use tenant ID with connection ID. Verified baseline regression failed before fix; focused lease-manager tests passed (23); root mix quality passed; demo format, warnings-as-errors compile, and tests passed (21).",
+      "timestamp": "2026-09-13T21:10:46Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Connections can share a client across tenants",
   "type": "bug",
-  "updated_at": "2026-09-13T20:59:23Z"
+  "updated_at": "2026-09-13T21:10:46Z"
 }
