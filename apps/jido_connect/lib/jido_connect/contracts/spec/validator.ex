@@ -54,6 +54,13 @@ defmodule Jido.Connect.Spec.Validator do
   end
 
   defp validate_mutation!(action) do
+    if action.risk not in [:read, :metadata] and not action.mutation? do
+      raise Error.validation("Write-risk action must declare mutation",
+              reason: :mutation_risk_mismatch,
+              subject: action.id
+            )
+    end
+
     if action.mutation? and action.confirmation in [nil, :none] do
       raise Error.validation("Mutation action must declare confirmation policy",
               reason: :missing_confirmation_policy,

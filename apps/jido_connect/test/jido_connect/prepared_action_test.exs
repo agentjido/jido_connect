@@ -270,7 +270,10 @@ defmodule Jido.Connect.PreparedActionTest do
   end
 
   test "destructive risk always requires confirmation", state do
-    destructive_spec = RuntimeFixtures.spec(%{action: %{risk: :destructive}})
+    destructive_spec =
+      RuntimeFixtures.spec(%{
+        action: %{risk: :destructive, mutation?: true, confirmation: :required_for_ai}
+      })
 
     assert {:ok, prepared} =
              Connect.prepare(destructive_spec, "demo.repo.show", state.input,

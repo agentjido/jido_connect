@@ -415,6 +415,32 @@ defmodule Jido.Connect.DslV2Test do
     assert error.path == [:actions, :unconfirmed_write]
   end
 
+  test "legacy write risk cannot omit mutation and confirmation" do
+    assert_raise Spark.Error.DslError, ~r/Write-risk action must declare mutation/, fn ->
+      compile_bad!(
+        quote do
+          actions do
+            action :legacy_write do
+              id "bad.item.create"
+              resource :item
+              verb :create
+              data_classification :workspace_content
+              label "Legacy write"
+              handler Jido.Connect.DslV2Test.Handler
+              risk :external_write
+
+              access do
+                auth :tenant
+                policies [:tenant_access]
+                scopes ["items:write"]
+              end
+            end
+          end
+        end
+      )
+    end
+  end
+
   test "DSL spec builder preserves structured build errors" do
     error =
       assert_raise Spark.Error.DslError,

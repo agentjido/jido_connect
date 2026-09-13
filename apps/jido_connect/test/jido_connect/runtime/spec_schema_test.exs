@@ -41,6 +41,31 @@ defmodule Jido.Connect.Runtime.SpecSchemaTest do
     end
   end
 
+  test "write risk requires a mutation declaration and confirmation" do
+    assert_raise Connect.Error.ValidationError,
+                 ~r/Write-risk action must declare mutation/,
+                 fn ->
+                   RuntimeFixtures.spec(%{action: %{risk: :external_write}})
+                 end
+
+    assert_raise Connect.Error.ValidationError,
+                 ~r/Mutation action must declare confirmation policy/,
+                 fn ->
+                   RuntimeFixtures.spec(%{
+                     action: %{risk: :external_write, mutation?: true, confirmation: :none}
+                   })
+                 end
+
+    assert %Connect.Spec{} =
+             RuntimeFixtures.spec(%{
+               action: %{
+                 risk: :external_write,
+                 mutation?: true,
+                 confirmation: :required_for_ai
+               }
+             })
+  end
+
   test "field schemas support defaults, enums, optional fields, and nested lists" do
     schema =
       Connect.zoi_schema_from_fields([
