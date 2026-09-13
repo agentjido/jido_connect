@@ -3,9 +3,14 @@ defmodule Jido.Connect.MCP.SchemaCompatibility do
 
   alias Jido.Connect.Data
 
+  @simple_keywords MapSet.new(
+                     ~w($schema $id $comment title description default examples deprecated readOnly writeOnly type required const enum minimum exclusiveMinimum minLength minItems minProperties maximum exclusiveMaximum maxLength maxItems maxProperties pattern format multipleOf uniqueItems)
+                   )
+
   @spec compatible?(map(), map()) :: boolean()
   def compatible?(required, actual) when is_map(required) and is_map(actual) do
-    type_compatible?(required, actual) and
+    supported_schema?(required) and supported_schema?(actual) and
+      type_compatible?(required, actual) and
       required_fields_compatible?(required, actual) and
       additional_properties_compatible?(required, actual) and
       properties_compatible?(required, actual) and
@@ -19,6 +24,32 @@ defmodule Jido.Connect.MCP.SchemaCompatibility do
   end
 
   def compatible?(_required, _actual), do: false
+
+  defp supported_schema?(schema) when is_map(schema) do
+    Enum.all?(schema, fn {key, value} ->
+      case schema_key(key) do
+        "properties" ->
+          is_map(value) and Enum.all?(Map.values(value), &supported_schema?/1)
+
+        "items" ->
+          supported_schema?(value)
+
+        "additionalProperties" ->
+          is_boolean(value) or supported_schema?(value)
+
+        "anyOf" ->
+          is_list(value) and Enum.all?(value, &supported_schema?/1)
+
+        keyword ->
+          MapSet.member?(@simple_keywords, keyword)
+      end
+    end)
+  end
+
+  defp supported_schema?(_schema), do: false
+
+  defp schema_key(key) when is_atom(key) or is_binary(key), do: to_string(key)
+  defp schema_key(_key), do: nil
 
   defp type_compatible?(required, actual) do
     case {Data.get(required, :type), Data.get(actual, :type)} do
@@ -38,8 +69,13 @@ defmodule Jido.Connect.MCP.SchemaCompatibility do
   end
 
   defp additional_properties_compatible?(required, actual) do
-    Data.get(actual, :additionalProperties) != false or
-      Data.get(required, :additionalProperties) == false
+    case {Data.get(required, :additionalProperties, true),
+          Data.get(actual, :additionalProperties, true)} do
+      {false, _observed} -> true
+      {_expected, true} -> true
+      {%{} = expected, %{} = observed} -> compatible?(expected, observed)
+      {_expected, _observed} -> false
+    end
   end
 
   defp items_compatible?(required, actual) do

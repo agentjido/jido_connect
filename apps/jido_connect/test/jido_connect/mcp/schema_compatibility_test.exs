@@ -77,4 +77,47 @@ defmodule Jido.Connect.MCP.SchemaCompatibilityTest do
              put_in(required, ["properties", "name", "maxLength"], 10)
            )
   end
+
+  test "rejects unsupported validation keywords at every schema level" do
+    narrower =
+      put_in(@required, ["properties", "action", "allOf"], [
+        %{"enum" => ["get"]}
+      ])
+
+    refute SchemaCompatibility.compatible?(@required, narrower)
+
+    refute SchemaCompatibility.compatible?(
+             @required,
+             Map.put(@required, "not", %{"required" => ["action"]})
+           )
+
+    refute SchemaCompatibility.compatible?(
+             @required,
+             Map.put(@required, "oneOf", [%{"type" => "object"}])
+           )
+
+    refute SchemaCompatibility.compatible?(Map.put(@required, "allOf", [%{}]), @required)
+  end
+
+  test "accepts annotation-only metadata" do
+    actual =
+      @required
+      |> Map.put("$schema", "https://json-schema.org/draft/2020-12/schema")
+      |> Map.put("description", "Provider input")
+      |> put_in(["properties", "action", "default"], "get")
+
+    assert SchemaCompatibility.compatible?(@required, actual)
+  end
+
+  test "rejects narrower additional-property schemas" do
+    required = %{"type" => "object", "additionalProperties" => true}
+    restricted = %{"type" => "object", "additionalProperties" => %{"type" => "string"}}
+
+    refute SchemaCompatibility.compatible?(required, restricted)
+
+    assert SchemaCompatibility.compatible?(
+             %{required | "additionalProperties" => false},
+             restricted
+           )
+  end
 end
