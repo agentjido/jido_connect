@@ -1,7 +1,7 @@
 defmodule Jido.Connect.TriggerSpec do
   @moduledoc "Provider trigger contract for webhook and poll sources."
 
-  alias Jido.Connect.Field
+  alias Jido.Connect.{Field, Schema}
 
   @schema Zoi.struct(
             __MODULE__,
@@ -40,6 +40,17 @@ defmodule Jido.Connect.TriggerSpec do
   defstruct Zoi.Struct.struct_fields(@schema)
 
   def schema, do: @schema
-  def new!(attrs), do: Zoi.parse!(@schema, attrs)
-  def new(attrs), do: Zoi.parse(@schema, attrs)
+
+  def new!(attrs) do
+    trigger = Zoi.parse!(@schema, attrs)
+    Schema.validate_unique_fields!(trigger.config)
+    Schema.validate_unique_fields!(trigger.signal)
+    trigger
+  end
+
+  def new(attrs) do
+    {:ok, new!(attrs)}
+  rescue
+    error -> {:error, error}
+  end
 end

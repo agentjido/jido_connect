@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Spec.Validator do
   @moduledoc false
 
-  alias Jido.Connect.{Authorization, Error, Spec, Taxonomy}
+  alias Jido.Connect.{Authorization, Error, Schema, Spec, Taxonomy}
 
   @doc false
   @spec validate!(Spec.t()) :: Spec.t()
@@ -14,9 +14,13 @@ defmodule Jido.Connect.Spec.Validator do
     duplicate_ids!(spec.policies, & &1.id, "policy")
     duplicate_ids!(spec.schemas, & &1.id, "schema")
 
+    Enum.each(spec.schemas, &Schema.validate_unique_fields!(&1.fields))
+
     validate_taxonomy!(spec)
 
     Enum.each(spec.actions, fn action ->
+      Schema.validate_unique_fields!(action.input)
+      Schema.validate_unique_fields!(action.output)
       validate_operation_taxonomy!(action)
       validate_auth_profiles!(action, auth_ids)
       validate_mutation!(action)
@@ -24,6 +28,8 @@ defmodule Jido.Connect.Spec.Validator do
     end)
 
     Enum.each(spec.triggers, fn trigger ->
+      Schema.validate_unique_fields!(trigger.config)
+      Schema.validate_unique_fields!(trigger.signal)
       validate_operation_taxonomy!(trigger)
       validate_auth_profiles!(trigger, auth_ids)
       validate_trigger_contract!(trigger)

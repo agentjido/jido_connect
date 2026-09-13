@@ -5,12 +5,30 @@ defmodule Jido.Connect.Schema do
 
   @doc false
   def zoi_schema_from_fields(fields) when is_list(fields) do
+    validate_unique_fields!(fields)
+
     fields
     |> Enum.map(fn %Field{} = field ->
       {field.name, zoi_field_schema(field)}
     end)
     |> Map.new()
     |> Zoi.object(coerce: true, unrecognized_keys: :error)
+  end
+
+  @doc false
+  def validate_unique_fields!(fields) when is_list(fields) do
+    Enum.reduce(fields, MapSet.new(), fn %Field{name: name}, seen ->
+      if MapSet.member?(seen, name) do
+        raise Error.validation("Duplicate field name",
+                reason: :duplicate_field_name,
+                subject: name
+              )
+      end
+
+      MapSet.put(seen, name)
+    end)
+
+    fields
   end
 
   defp zoi_field_schema(%Field{} = field) do

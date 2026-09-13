@@ -66,6 +66,51 @@ defmodule Jido.Connect.Runtime.SpecSchemaTest do
              })
   end
 
+  test "duplicate field names cannot replace an earlier schema constraint" do
+    fields = [
+      Connect.Field.new!(%{name: :id, type: :string, required?: true}),
+      Connect.Field.new!(%{name: :id, type: :integer})
+    ]
+
+    assert_raise Connect.Error.ValidationError, ~r/Duplicate field name/, fn ->
+      Connect.zoi_schema_from_fields(fields)
+    end
+
+    assert_raise Connect.Error.ValidationError, ~r/Duplicate field name/, fn ->
+      Connect.ActionSpec.new!(%{RuntimeFixtures.action_attrs() | input: fields})
+    end
+
+    assert {:error, %Connect.Error.ValidationError{reason: :duplicate_field_name}} =
+             Connect.ActionSpec.new(%{RuntimeFixtures.action_attrs() | output: fields})
+
+    assert_raise Connect.Error.ValidationError, ~r/Duplicate field name/, fn ->
+      Connect.TriggerSpec.new!(%{RuntimeFixtures.trigger_attrs() | config: fields})
+    end
+
+    assert {:error, %Connect.Error.ValidationError{reason: :duplicate_field_name}} =
+             Connect.TriggerSpec.new(%{RuntimeFixtures.trigger_attrs() | signal: fields})
+
+    schema_attrs = %{id: :item, fields: fields, zoi_schema: Zoi.object(%{})}
+
+    assert_raise Connect.Error.ValidationError, ~r/Duplicate field name/, fn ->
+      Connect.NamedSchema.new!(schema_attrs)
+    end
+
+    assert {:error, %Connect.Error.ValidationError{reason: :duplicate_field_name}} =
+             Connect.NamedSchema.new(schema_attrs)
+
+    spec_attrs = %{
+      id: :demo,
+      name: "Demo",
+      auth_profiles: [RuntimeFixtures.auth_profile()],
+      actions: [Map.put(RuntimeFixtures.action_attrs(), :input, fields)]
+    }
+
+    assert_raise Connect.Error.ValidationError, ~r/Duplicate field name/, fn ->
+      Connect.Spec.new!(spec_attrs)
+    end
+  end
+
   test "field schemas support defaults, enums, optional fields, and nested lists" do
     schema =
       Connect.zoi_schema_from_fields([

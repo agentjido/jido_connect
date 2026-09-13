@@ -542,6 +542,49 @@ defmodule Jido.Connect.DslV2Test do
     assert error.path == [:actions, :bad_schema_reference]
   end
 
+  test "DSL rejects duplicate action and named-schema fields" do
+    assert_raise Spark.Error.DslError, ~r/Duplicate field name/, fn ->
+      compile_bad!(
+        quote do
+          actions do
+            action :duplicate_input do
+              id "bad.item.list"
+              resource :item
+              verb :list
+              data_classification :workspace_metadata
+              label "Duplicate input"
+              handler Jido.Connect.DslV2Test.Handler
+              effect :read
+
+              input do
+                field :id, :string, required?: true
+                field :id, :integer
+              end
+
+              access do
+                auth :tenant
+                policies [:tenant_access]
+              end
+            end
+          end
+        end
+      )
+    end
+
+    assert_raise Spark.Error.DslError, ~r/Duplicate field name/, fn ->
+      compile_bad!(
+        quote do
+          schemas do
+            schema :item do
+              field :id, :string, required?: true
+              field :id, :integer
+            end
+          end
+        end
+      )
+    end
+  end
+
   defp compile_bad!(body, opts \\ []) do
     module = Module.concat(__MODULE__, "BadDsl#{System.unique_integer([:positive])}")
 

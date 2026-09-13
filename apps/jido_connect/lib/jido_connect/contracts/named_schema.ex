@@ -1,7 +1,7 @@
 defmodule Jido.Connect.NamedSchema do
   @moduledoc "Reusable named schema declared by an integration."
 
-  alias Jido.Connect.Field
+  alias Jido.Connect.{Field, Schema}
 
   @schema Zoi.struct(
             __MODULE__,
@@ -21,6 +21,16 @@ defmodule Jido.Connect.NamedSchema do
   defstruct Zoi.Struct.struct_fields(@schema)
 
   def schema, do: @schema
-  def new!(attrs), do: Zoi.parse!(@schema, attrs)
-  def new(attrs), do: Zoi.parse(@schema, attrs)
+
+  def new!(attrs) do
+    schema = Zoi.parse!(@schema, attrs)
+    Schema.validate_unique_fields!(schema.fields)
+    schema
+  end
+
+  def new(attrs) do
+    {:ok, new!(attrs)}
+  rescue
+    error -> {:error, error}
+  end
 end
