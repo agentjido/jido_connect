@@ -102,6 +102,36 @@ defmodule Jido.Connect.ExecutionAuthorization do
 
   defp call_validator(module, authorization, prepared, context, validator_context)
        when is_atom(module) do
+    case Code.ensure_loaded(module) do
+      {:module, ^module} ->
+        call_loaded_validator(module, authorization, prepared, context, validator_context)
+
+      {:error, reason} ->
+        {:error,
+         Error.config("Authorization validator module could not be loaded",
+           key: :authorization_validator,
+           details: %{module: module, reason: reason}
+         )}
+    end
+  end
+
+  defp call_validator({module, function}, authorization, prepared, context, validator_context)
+       when is_atom(module) and is_atom(function) do
+    Callback.call(module, function, [authorization, prepared, context, validator_context],
+      phase: :authorization,
+      details: %{action_id: prepared.action_id, prepared_action_id: prepared.id}
+    )
+  end
+
+  defp call_validator(_validator, _authorization, prepared, _context, _validator_context) do
+    {:error,
+     Error.config("Invalid execution authorization validator",
+       key: :authorization_validator,
+       details: %{action_id: prepared.action_id}
+     )}
+  end
+
+  defp call_loaded_validator(module, authorization, prepared, context, validator_context) do
     cond do
       function_exported?(module, :validate, 4) ->
         Callback.call(
@@ -125,22 +155,6 @@ defmodule Jido.Connect.ExecutionAuthorization do
            details: %{module: module}
          )}
     end
-  end
-
-  defp call_validator({module, function}, authorization, prepared, context, validator_context)
-       when is_atom(module) and is_atom(function) do
-    Callback.call(module, function, [authorization, prepared, context, validator_context],
-      phase: :authorization,
-      details: %{action_id: prepared.action_id, prepared_action_id: prepared.id}
-    )
-  end
-
-  defp call_validator(_validator, _authorization, prepared, _context, _validator_context) do
-    {:error,
-     Error.config("Invalid execution authorization validator",
-       key: :authorization_validator,
-       details: %{action_id: prepared.action_id}
-     )}
   end
 
   defp normalize_result({:ok, result}, _prepared)

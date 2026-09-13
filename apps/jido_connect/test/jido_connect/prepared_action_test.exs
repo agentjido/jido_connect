@@ -100,6 +100,58 @@ defmodule Jido.Connect.PreparedActionTest do
     refute_received {:handler_called, _repo}
   end
 
+  test "commit loads an approval validator module from the code path", state do
+    assert {:ok, prepared} = prepare(state)
+    module = Module.concat(__MODULE__, "UnloadedApproval#{System.unique_integer([:positive])}")
+    dir = Path.join(System.tmp_dir!(), "jido_approval_#{System.unique_integer([:positive])}")
+    File.mkdir_p!(dir)
+
+    {:module, ^module, beam, _} =
+      Module.create(
+        module,
+        quote do
+          def validate(evidence, plan, _context), do: evidence.plan_id == plan.id
+        end,
+        Macro.Env.location(__ENV__)
+      )
+
+    File.write!(Path.join(dir, "#{module}.beam"), beam)
+    Code.prepend_path(dir)
+    :code.purge(module)
+    :code.delete(module)
+    refute function_exported?(module, :validate, 3)
+
+    on_exit(fn ->
+      Code.delete_path(dir)
+      :code.purge(module)
+      :code.delete(module)
+      File.rm_rf!(dir)
+    end)
+
+    assert {:ok, %{repo: "agentjido/jido_connect"}} =
+             Connect.commit(
+               state.spec,
+               prepared,
+               state.input,
+               commit_opts(state, %{plan_id: prepared.id})
+               |> Keyword.put(:authorization_validator, module)
+             )
+  end
+
+  test "commit reports a missing approval validator module", state do
+    assert {:ok, prepared} = prepare(state)
+    missing = Module.concat(__MODULE__, "MissingApprovalValidator")
+
+    assert {:error, %Connect.Error.ConfigError{key: :authorization_validator}} =
+             Connect.commit(
+               state.spec,
+               prepared,
+               state.input,
+               commit_opts(state, %{plan_id: prepared.id})
+               |> Keyword.put(:authorization_validator, missing)
+             )
+  end
+
   test "commit rejects input, binding, and credential revision changes", state do
     assert {:ok, prepared} = prepare(state)
     authorization = %{plan_id: prepared.id}
