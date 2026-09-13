@@ -49,3 +49,9 @@ Use conventional commit prefixes where practical, such as `feat:`, `fix:`,
 
 Do not commit generated `cover/`, `doc/`, `_build/`, `deps/`, `.env`, or
 `.secrets/` output.
+
+## Compatibility Branches
+
+Read [Branch support](docs/branch_support.md) before starting work. Target
+`release/2.0` for v2 fixes and `release/3.0` for v3 work. Test each backport on
+its own branch. Do not merge the v3 branch into the v2 branch.

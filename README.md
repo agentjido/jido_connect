@@ -1,5 +1,10 @@
 # Jido Connect
 
+> **Choose a compatibility branch before you start.**
+> `release/2.0` supports Jido v2. `release/3.0` is maintainer development for
+> Jido v3 and uses prerelease dependencies. Do not use the v3 line in a new
+> external application. See [Branch support](docs/branch_support.md).
+
 Jido Connect is an integration framework for Elixir and Jido. It turns service
 APIs into typed Jido actions, sensors, plugins, and catalog tools.
 
