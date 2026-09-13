@@ -128,18 +128,22 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
        current: %{},
        generations: %{},
        ownership_barriers: %{},
+       pending: %{},
        drain_timeout_ms: Keyword.get(opts, :drain_timeout_ms, @default_drain_timeout_ms)
      }}
   end
 
   @impl true
-  def handle_call({:acquire, connection, lease, source}, _from, state) do
+  def handle_call({:acquire, connection, lease, source}, from, state) do
     with :ok <- CredentialLease.require_unexpired(lease),
          :ok <- CredentialLease.validate_connection_binding(lease, connection) do
       with {:ok, ownership} <- ownership_for(connection, lease, source) do
-        case acquire_record(ownership, source, state) do
+        case acquire_record(ownership, state) do
           {:ok, record, next_state} ->
             {:reply, {:ok, token(record, lease.expires_at)}, next_state}
+
+          {:start, next_state} ->
+            start_pending(source, ownership, lease.expires_at, from, next_state)
 
           {:error, error, next_state} ->
             {:reply, {:error, error}, next_state}
@@ -149,6 +153,20 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
       end
     else
       {:error, %_{} = error} -> {:reply, {:error, error}, state}
+    end
+  end
+
+  def handle_call({:start_finished, start_ref, result}, _from, state) do
+    case Map.pop(state.pending, start_ref) do
+      {nil, _pending} ->
+        {:reply, :rejected, state}
+
+      {pending, remaining} ->
+        Process.demonitor(pending.monitor, [:flush])
+        state = %{state | pending: remaining}
+        {reply, acknowledgment, state} = finish_pending_start(result, pending, state)
+        GenServer.reply(pending.from, reply)
+        {:reply, acknowledgment, state}
     end
   end
 
@@ -180,7 +198,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   end
 
   def handle_call({:revoke, key}, _from, state) do
-    state = tombstone_ownership(key, state)
+    state = state |> cancel_pending(key) |> then(&tombstone_ownership(key, &1))
     {:reply, :ok, retire_connection(key, state, :revoked)}
   end
 
@@ -191,6 +209,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
       ) do
     case advance_fence(key, connection_revision, credential_version, state) do
       {:ok, state} ->
+        state = cancel_pending(state, key)
         {:reply, :ok, retire_connection(key, state, :revoked)}
 
       {:error, error} ->
@@ -199,6 +218,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   end
 
   def handle_call({:expire, key}, _from, state) do
+    state = cancel_pending(state, key)
     {:reply, :ok, retire_connection(key, state, :expired)}
   end
 
@@ -207,7 +227,9 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
       state.records
       |> Map.values()
       |> Enum.filter(&(record_connection_key(&1) == key))
-      |> Enum.reduce(state, fn record, acc -> remove_record(record, acc) end)
+      |> Enum.reduce(cancel_pending(state, key), fn record, acc ->
+        remove_record(record, acc)
+      end)
 
     {:reply, :ok, %{state | current: Map.delete(state.current, key)}}
   end
@@ -224,6 +246,17 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   end
 
   @impl true
+  def handle_info({:DOWN, monitor, :process, _pid, reason}, state) do
+    case Enum.find(state.pending, fn {_start_ref, pending} -> pending.monitor == monitor end) do
+      {start_ref, pending} ->
+        GenServer.reply(pending.from, {:error, client_start_error(reason)})
+        {:noreply, %{state | pending: Map.delete(state.pending, start_ref)}}
+
+      nil ->
+        {:noreply, state}
+    end
+  end
+
   def handle_info({:force_stop, key}, state) do
     case Map.fetch(state.records, key) do
       {:ok, record} -> {:noreply, remove_record(record, state)}
@@ -246,7 +279,7 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
     end
   end
 
-  defp acquire_record(ownership, source, state) do
+  defp acquire_record(ownership, state) do
     with :ok <- validate_ownership_barrier(ownership, state) do
       current_key = Map.get(state.current, record_connection_key(ownership))
 
@@ -261,52 +294,114 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
 
             {:ok, record, put_in(state.records[record.key], record)}
           else
-            register_new_generation(ownership, source, record, state)
+            {:start, state}
           end
 
         nil ->
-          register_new_generation(ownership, source, nil, state)
+          {:start, state}
       end
     else
       {:error, error} -> {:error, error, state}
     end
   end
 
-  defp register_new_generation(ownership, source, old_record, state) do
+  defp start_pending(source, ownership, lease_expires_at, from, state) do
+    manager = self()
+    start_ref = make_ref()
+
+    {_pid, monitor} =
+      spawn_monitor(fn ->
+        result = ClientSource.start(source)
+
+        accepted? =
+          try do
+            GenServer.call(manager, {:start_finished, start_ref, result}, :infinity) == :accepted
+          catch
+            :exit, _reason -> false
+          end
+
+        unless accepted?, do: stop_started_client(result)
+      end)
+
+    pending = %{
+      from: from,
+      ownership: ownership,
+      lease_expires_at: lease_expires_at,
+      cancelled?: false,
+      monitor: monitor
+    }
+
+    {:noreply, put_in(state.pending[start_ref], pending)}
+  end
+
+  defp finish_pending_start({:ok, client_module, client_ref, owned_client?}, pending, state) do
+    ownership = pending.ownership
+
+    with true <- not pending.cancelled?,
+         :ok <- require_unexpired(pending.lease_expires_at),
+         :ok <- validate_ownership_barrier(ownership, state) do
+      case acquire_record(ownership, state) do
+        {:ok, record, state} ->
+          {{:ok, token(record, pending.lease_expires_at)}, :unused, state}
+
+        {:start, state} ->
+          {record, state} =
+            register_started_generation(
+              ownership,
+              client_module,
+              client_ref,
+              owned_client?,
+              state
+            )
+
+          {{:ok, token(record, pending.lease_expires_at)}, :accepted, state}
+
+        {:error, error, state} ->
+          {{:error, error}, :rejected, state}
+      end
+    else
+      false -> {{:error, stale_fence_error()}, :rejected, state}
+      {:error, error} -> {{:error, error}, :rejected, state}
+    end
+  end
+
+  defp finish_pending_start({:error, reason}, _pending, state),
+    do: {{:error, client_start_error(reason)}, :rejected, state}
+
+  defp finish_pending_start(_result, _pending, state),
+    do: {{:error, client_start_error(:invalid_result)}, :rejected, state}
+
+  defp stop_started_client({:ok, module, ref, owned_client?}),
+    do: ClientSource.stop(module, ref, owned_client?)
+
+  defp stop_started_client(_result), do: :ok
+
+  defp register_started_generation(ownership, client_module, client_ref, owned_client?, state) do
     connection_key = record_connection_key(ownership)
+    old_record = Map.get(state.records, Map.get(state.current, connection_key))
     generation = next_generation(connection_key, state)
     endpoint_id = generation_endpoint_id(ownership.base_endpoint_id, generation)
 
-    case ClientSource.start(source) do
-      {:ok, client_module, client_ref, owned_client?} ->
-        record =
-          Map.merge(ownership, %{
-            key: {ownership.tenant_id, ownership.connection_id, generation},
-            generation: generation,
-            endpoint_id: endpoint_id,
-            client_module: client_module,
-            client_ref: client_ref,
-            owned_client?: owned_client?,
-            active: 1,
-            schema_hashes: %{},
-            status: :active
-          })
+    record =
+      Map.merge(ownership, %{
+        key: {ownership.tenant_id, ownership.connection_id, generation},
+        generation: generation,
+        endpoint_id: endpoint_id,
+        client_module: client_module,
+        client_ref: client_ref,
+        owned_client?: owned_client?,
+        active: 1,
+        schema_hashes: %{},
+        status: :active
+      })
 
-        record = schedule_expiry(record)
-        state = put_in(state.records[record.key], record)
-        state = put_in(state.current[connection_key], record.key)
-        state = put_in(state.generations[connection_key], generation)
-        state = accept_ownership(ownership, state)
-        state = if old_record, do: retire_record(old_record, state, :draining), else: state
-        {:ok, record, state}
-
-      {:error, error} ->
-        {:error,
-         Error.execution("MCP client start failed",
-           phase: :client_start,
-           details: %{reason: start_reason(error)}
-         ), state}
-    end
+    record = schedule_expiry(record)
+    state = put_in(state.records[record.key], record)
+    state = put_in(state.current[connection_key], record.key)
+    state = put_in(state.generations[connection_key], generation)
+    state = accept_ownership(ownership, state)
+    state = if old_record, do: retire_record(old_record, state, :draining), else: state
+    {record, state}
   end
 
   defp retire_connection(connection_key, state, status) do
@@ -664,6 +759,33 @@ defmodule Jido.Connect.MCP.EndpointLeaseManager do
   defp start_reason({reason, _details}) when is_atom(reason), do: reason
   defp start_reason({reason, _detail, _backend}) when is_atom(reason), do: reason
   defp start_reason(_reason), do: :client_start_failed
+
+  defp client_start_error(reason) do
+    Error.execution("MCP client start failed",
+      phase: :client_start,
+      details: %{reason: start_reason(reason)}
+    )
+  end
+
+  defp require_unexpired(expires_at) do
+    if unexpired?(expires_at),
+      do: :ok,
+      else: {:error, Error.credential_lease_expired(expires_at)}
+  end
+
+  defp cancel_pending(state, key) do
+    pending =
+      Map.new(state.pending, fn {start_ref, attempt} ->
+        attempt =
+          if record_connection_key(attempt.ownership) == key,
+            do: %{attempt | cancelled?: true},
+            else: attempt
+
+        {start_ref, attempt}
+      end)
+
+    %{state | pending: pending}
+  end
 
   defp schedule_expiry(record) do
     timeout = max(DateTime.diff(record.expires_at, DateTime.utc_now(), :millisecond), 1)

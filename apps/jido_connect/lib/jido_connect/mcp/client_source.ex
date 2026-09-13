@@ -51,16 +51,15 @@ defmodule Jido.Connect.MCP.ClientSource do
   def start(%__MODULE__{ownership: :host, module: module, ref: ref}),
     do: {:ok, module, ref, false}
 
-  def start(%__MODULE__{ownership: :connect, endpoint: endpoint}) do
-    with {:ok, ref} <- ExMCPClient.start_client(endpoint) do
-      {:ok, ExMCPClient, ref, true}
+  def start(%__MODULE__{ownership: :connect, module: module, endpoint: endpoint}) do
+    with {:ok, ref} <- module.start_client(endpoint) do
+      {:ok, module, ref, true}
     end
   end
 
   @spec stop(module(), term(), boolean()) :: :ok
   def stop(_module, _ref, false), do: :ok
-  def stop(ExMCPClient, ref, true), do: ExMCPClient.stop_client(ref)
-  def stop(_module, _ref, true), do: :ok
+  def stop(module, ref, true), do: module.stop_client(ref)
 
   @spec fingerprint(t()) :: String.t()
   def fingerprint(%__MODULE__{} = source) do

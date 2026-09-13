@@ -11,6 +11,30 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
     def call_tool(_client, _name, _arguments, _opts), do: {:ok, %{"content" => []}}
   end
 
+  defmodule SlowStartClient do
+    def start_client(endpoint) do
+      observer = Keyword.fetch!(endpoint.client_options, :observer)
+      send(observer, {:slow_start_started, self()})
+
+      receive do
+        :finish_start -> :ok
+      after
+        3_000 -> raise "slow client start was not released"
+      end
+
+      {:ok, client} = Agent.start_link(fn -> observer end)
+      send(observer, {:slow_start_finished, client})
+      {:ok, client}
+    end
+
+    def stop_client(client) do
+      observer = Agent.get(client, & &1)
+      :ok = Agent.stop(client)
+      send(observer, {:slow_client_stopped, client})
+      :ok
+    end
+  end
+
   setup do
     connection = connection("lease-manager-#{System.unique_integer([:positive])}")
     on_exit(fn -> EndpointLeaseManager.force_stop(connection) end)
@@ -30,6 +54,155 @@ defmodule Jido.Connect.MCP.EndpointLeaseManagerTest do
 
     :ok = EndpointLeaseManager.release(first)
     :ok = EndpointLeaseManager.release(second)
+  end
+
+  test "a slow start does not block revocation and cannot pass a later fence", %{
+    connection: first_connection
+  } do
+    second_connection = %{first_connection | id: first_connection.id <> "-slow"}
+    on_exit(fn -> EndpointLeaseManager.force_stop(second_connection) end)
+
+    assert {:ok, first} =
+             EndpointLeaseManager.acquire(
+               first_connection,
+               lease(first_connection, 1, "secret-one"),
+               endpoint("secret-one")
+             )
+
+    source = endpoint("secret-two")
+
+    slow_source = %{
+      source
+      | module: SlowStartClient,
+        ref: nil,
+        ownership: :connect,
+        endpoint: %{source.endpoint | client_options: [observer: self()]}
+    }
+
+    pending =
+      Task.async(fn ->
+        EndpointLeaseManager.acquire(
+          second_connection,
+          lease(second_connection, 1, "secret-two"),
+          slow_source
+        )
+      end)
+
+    assert_receive {:slow_start_started, starter}, 1_000
+    Process.send_after(starter, :finish_start, 800)
+
+    started_at = System.monotonic_time(:millisecond)
+    assert :ok = EndpointLeaseManager.revoke(first_connection)
+    assert System.monotonic_time(:millisecond) - started_at < 400
+    assert :ok = EndpointLeaseManager.revoke(second_connection)
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_stale}} =
+             Task.await(pending, 2_000)
+
+    assert_receive {:slow_start_finished, client}
+    assert_receive {:slow_client_stopped, ^client}
+    assert [] = EndpointLeaseManager.ownership(second_connection)
+    assert :ok = EndpointLeaseManager.release(first)
+  end
+
+  test "a client that starts after its lease expires is stopped", %{connection: connection} do
+    source = endpoint("short-lease-secret")
+
+    slow_source = %{
+      source
+      | module: SlowStartClient,
+        ref: nil,
+        ownership: :connect,
+        endpoint: %{source.endpoint | client_options: [observer: self()]}
+    }
+
+    expires_at = DateTime.add(DateTime.utc_now(), 1_000, :millisecond)
+
+    pending =
+      Task.async(fn ->
+        EndpointLeaseManager.acquire(
+          connection,
+          lease(connection, 1, "short-lease-secret", expires_at),
+          slow_source
+        )
+      end)
+
+    assert_receive {:slow_start_started, starter}, 1_000
+    Process.send_after(starter, :finish_start, 1_100)
+
+    assert {:error, %Connect.Error.AuthError{reason: :credential_lease_expired}} =
+             Task.await(pending, 2_000)
+
+    assert_receive {:slow_start_finished, client}
+    assert_receive {:slow_client_stopped, ^client}
+    assert [] = EndpointLeaseManager.ownership(connection)
+  end
+
+  test "parallel starts for the same ownership keep one client", %{connection: connection} do
+    source = endpoint("shared-secret")
+
+    slow_source = %{
+      source
+      | module: SlowStartClient,
+        ref: nil,
+        ownership: :connect,
+        endpoint: %{source.endpoint | client_options: [observer: self()]}
+    }
+
+    lease = lease(connection, 1, "shared-secret")
+    first = Task.async(fn -> EndpointLeaseManager.acquire(connection, lease, slow_source) end)
+    assert_receive {:slow_start_started, first_starter}, 1_000
+    second = Task.async(fn -> EndpointLeaseManager.acquire(connection, lease, slow_source) end)
+    assert_receive {:slow_start_started, second_starter}, 1_000
+
+    send(first_starter, :finish_start)
+    assert {:ok, first_token} = Task.await(first, 1_000)
+    assert_receive {:slow_start_finished, first_client}
+    assert first_token.client_ref == first_client
+
+    send(second_starter, :finish_start)
+    assert {:ok, second_token} = Task.await(second, 1_000)
+    assert_receive {:slow_start_finished, second_client}
+    assert_receive {:slow_client_stopped, ^second_client}
+    assert second_token.client_ref == first_client
+    assert second_token.generation == first_token.generation
+
+    assert :ok = EndpointLeaseManager.release(first_token)
+    assert :ok = EndpointLeaseManager.release(second_token)
+    assert :ok = EndpointLeaseManager.force_stop(connection)
+    assert_receive {:slow_client_stopped, ^first_client}
+  end
+
+  test "force stop cancels a client that has not finished starting", %{connection: connection} do
+    source = endpoint("pending-secret")
+
+    slow_source = %{
+      source
+      | module: SlowStartClient,
+        ref: nil,
+        ownership: :connect,
+        endpoint: %{source.endpoint | client_options: [observer: self()]}
+    }
+
+    pending =
+      Task.async(fn ->
+        EndpointLeaseManager.acquire(
+          connection,
+          lease(connection, 1, "pending-secret"),
+          slow_source
+        )
+      end)
+
+    assert_receive {:slow_start_started, starter}, 1_000
+    Process.send_after(starter, :finish_start, 600)
+    assert :ok = EndpointLeaseManager.force_stop(connection)
+
+    assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_stale}} =
+             Task.await(pending, 1_000)
+
+    assert_receive {:slow_start_finished, client}
+    assert_receive {:slow_client_stopped, ^client}
+    assert [] = EndpointLeaseManager.ownership(connection)
   end
 
   test "identical connection ids in different tenants keep separate clients and revocation", %{
