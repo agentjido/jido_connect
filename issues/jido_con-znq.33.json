@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T20:05:25Z",
+  "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2619-7251-b3f3-113072d196ce\n\n3. **P1 — Another lease can extend a session past its own expiry.**  \n   [endpoint_lease_manager.ex:253](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/mcp/endpoint_lease_manager.ex:253)\n\n   Acquisition extends the shared generation expiry. Tokens contain no individual expiry. A short lease’s token remained dispatchable after expiry when another acquisition supplied a longer lease. Session event delivery and its periodic checks use this shared state.\n\n   **Correction:** Put the individual lease expiry in each token. Check both token expiry and generation state. Existing renewal tests check the renewed token, but not the expired original token.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
+  "id": "jido_con-znq.33",
+  "labels": [],
+  "parent": "jido_con-znq",
+  "priority": 1,
+  "status": "open",
+  "title": "Another lease can extend a session past its own expiry",
+  "type": "bug",
+  "updated_at": "2026-09-13T20:05:25Z"
+}
