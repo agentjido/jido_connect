@@ -1,6 +1,7 @@
 defmodule Jido.Connect.Jido.ProjectionBuilder do
   @moduledoc false
 
+  alias Jido.Connect.Error
   alias Jido.Connect.Jido.{ActionProjection, PluginProjection, SensorProjection}
   alias Jido.Connect.Spec
 
@@ -64,6 +65,9 @@ defmodule Jido.Connect.Jido.ProjectionBuilder do
         })
       end)
 
+    validate_unique_modules!(action_projections, :action, :action_id)
+    validate_unique_modules!(sensor_projections, :sensor, :trigger_id)
+
     PluginProjection.new!(%{
       module: Module.concat([integration_module, Plugin]),
       integration_module: integration_module,
@@ -73,6 +77,24 @@ defmodule Jido.Connect.Jido.ProjectionBuilder do
       actions: action_projections,
       sensors: sensor_projections
     })
+  end
+
+  defp validate_unique_modules!(projections, kind, id_key) do
+    Enum.reduce(projections, %{}, fn projection, seen ->
+      case Map.fetch(seen, projection.module) do
+        {:ok, first_id} ->
+          raise Error.validation("Duplicate generated #{kind} module",
+                  reason: :duplicate_generated_module,
+                  subject: projection.module,
+                  details: %{operation_ids: [first_id, Map.fetch!(projection, id_key)]}
+                )
+
+        :error ->
+          Map.put(seen, projection.module, Map.fetch!(projection, id_key))
+      end
+    end)
+
+    :ok
   end
 
   defp jido_name(value) do

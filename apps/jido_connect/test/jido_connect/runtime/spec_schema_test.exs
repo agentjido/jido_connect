@@ -2,7 +2,45 @@ defmodule Jido.Connect.Runtime.SpecSchemaTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect
+  alias Jido.Connect.Jido.ProjectionBuilder
   alias Jido.Connect.RuntimeFixtures
+
+  test "generated action and sensor modules cannot collide" do
+    action = RuntimeFixtures.action_attrs()
+
+    actions = [
+      Map.merge(action, %{name: :foo_bar, id: "demo.foo_bar"}),
+      Map.merge(action, %{name: :foo__bar, id: "demo.foo__bar"})
+    ]
+
+    action_spec = RuntimeFixtures.build_spec(actions: actions, triggers: [])
+
+    assert_raise Connect.Error.ValidationError, ~r/Duplicate generated action module/, fn ->
+      ProjectionBuilder.build(RuntimeFixtures.Integration, action_spec)
+    end
+
+    trigger = RuntimeFixtures.trigger_attrs()
+
+    triggers = [
+      Map.merge(trigger, %{name: :foo_bar, id: "demo.foo_bar"}),
+      Map.merge(trigger, %{name: :foo__bar, id: "demo.foo__bar"})
+    ]
+
+    trigger_spec = RuntimeFixtures.build_spec(actions: [], triggers: triggers)
+
+    assert_raise Connect.Error.ValidationError, ~r/Duplicate generated sensor module/, fn ->
+      ProjectionBuilder.build(RuntimeFixtures.Integration, trigger_spec)
+    end
+
+    valid_spec =
+      RuntimeFixtures.build_spec(
+        actions: [List.first(actions), Map.merge(action, %{name: :foo_baz, id: "demo.foo_baz"})],
+        triggers: []
+      )
+
+    projection = ProjectionBuilder.build(RuntimeFixtures.Integration, valid_spec)
+    assert length(Enum.uniq_by(projection.actions, & &1.module)) == 2
+  end
 
   test "spec validation errors use the package taxonomy" do
     assert_raise Connect.Error.ValidationError, ~r/Unknown auth profile/, fn ->
