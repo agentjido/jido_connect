@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-13T19:17:29Z",
+  "description": "User goal: tidy Connect issues and PRs, integrate SharePoint, maintain v2/v3 branch boundaries, complete agreed MCP support using ExMCP, verify and prepare a clean release candidate. Do not modify jido_mcp. No Hex publication until separately requested. Expanded MCP client versus server scope is pending user response.",
+  "id": "jido_con-s91",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "Complete Connect v3 release candidate and MCP support",
+  "type": "epic",
+  "updated_at": "2026-09-13T19:17:29Z"
+}
