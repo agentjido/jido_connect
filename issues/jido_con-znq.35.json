@@ -9,9 +9,15 @@
     "v3-release-blocker"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed in a28e5a4e. Unhandled JSON Schema constraints now fail closed; focused compatibility tests pass. Full umbrella mix quality and demo format, warnings-as-errors compile, and 21 demo tests pass.",
+      "timestamp": "2026-09-13T23:11:36Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Schema checks accept unhandled constraints",
   "type": "bug",
-  "updated_at": "2026-09-13T22:58:38Z"
+  "updated_at": "2026-09-13T23:11:36Z"
 }
