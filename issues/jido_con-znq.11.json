@@ -7,9 +7,15 @@
   "id": "jido_con-znq.11",
   "labels": [],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Fixed on release/3.0 in 464a5ff1. Added a regression that failed against the original policy override and passes after strict atom/string filter-key validation. Fresh v3 dependencies: mix quality passed (core 182 tests plus umbrella apps); demo format, warnings-as-errors compile, and 21 tests passed. No jido_mcp changes.",
+      "timestamp": "2026-09-13T20:24:39Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Catalog filters can replace the host policy",
   "type": "bug",
-  "updated_at": "2026-09-13T20:16:44Z"
+  "updated_at": "2026-09-13T20:24:39Z"
 }
