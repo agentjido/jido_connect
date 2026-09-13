@@ -2,6 +2,7 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-13T22:37:36Z",
   "created": "2026-09-13T20:05:15Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-210c-79f0-9e9f-669bbeed6dfc\n\n2. **P2 — Pack restrictions change after JSON storage.**  \n   [pack.ex:362](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/catalog/pack.ex:362) accepts all atom filter keys. The string-key path recognizes only some keys. Thus `%{ status: :unavailable}` excludes an available provider, but the same pack returns that provider after JSON encoding and decoding. `category`, `visibility`, `package`, and other provider filters have the same problem. Use one supported-key list for atom and string keys. Reject unsupported keys with a validation error.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.18",
@@ -16,7 +17,7 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Pack restrictions change after JSON storage",
   "type": "bug",
   "updated_at": "2026-09-13T22:37:36Z"
