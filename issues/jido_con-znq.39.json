@@ -5,11 +5,13 @@
   "created": "2026-09-13T20:05:29Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2858-7750-b28e-72cf480d2cec\n\n1. **P1 — Workflow polling can omit updates on later pages.**  \n   [workflow_run_updates_poller.ex:41](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_github/lib/jido_connect/github/handlers/triggers/workflow_run_updates_poller.ex:41)\n\n   The poller always requests page 1. It then advances the checkpoint to the latest timestamp on that page. If another updated run is on page 2, that run is never read. The client returns `total_count`, but the poller ignores it. The `checkpoint` parameter also does not enter the HTTP query.\n\n   An isolated check reproduced this omission. Existing tests cover successive ticks with one page. **Correction:** read all required pages before advancing the checkpoint. Keep the old checkpoint if any page fails.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.39",
-  "labels": [],
+  "labels": [
+    "v3-follow-up"
+  ],
   "parent": "jido_con-znq",
   "priority": 1,
   "status": "open",
   "title": "Workflow polling can omit updates on later pages",
   "type": "bug",
-  "updated_at": "2026-09-13T20:05:29Z"
+  "updated_at": "2026-09-13T21:59:17Z"
 }
