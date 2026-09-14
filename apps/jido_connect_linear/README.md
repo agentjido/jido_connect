@@ -39,8 +39,8 @@ end
 
 The provider supports two authentication profiles:
 
-- **API key** (`:api_key`): Linear personal access token passed as a Bearer
-  token. Recommended for server-to-server integrations, development, and CI.
+- **API key** (`:api_key`): Linear personal API key passed directly in the
+  `Authorization` header. See [Linear authentication](https://linear.app/developers/graphql#authentication).
 
 - **OAuth2** (`:oauth2_user`): Standard OAuth2 authorization code flow
   with PKCE against the Linear authorization server. Grants scoped
@@ -150,7 +150,8 @@ Catalog.search_tools("linear",
 
 All Linear API traffic uses GraphQL through
 `Jido.Connect.Linear.Client.Transport`, which builds bearer
-requests against the Linear GraphQL endpoint at
+requests for OAuth tokens and direct `Authorization` headers for personal API
+keys against the Linear GraphQL endpoint at
 `https://api.linear.app/graphql`.
 
 ## Live-Test Guidance

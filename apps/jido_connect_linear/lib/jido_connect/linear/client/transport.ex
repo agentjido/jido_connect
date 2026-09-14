@@ -1,13 +1,30 @@
 defmodule Jido.Connect.Linear.Client.Transport do
   @moduledoc "Linear GraphQL API transport boundary."
 
-  alias Jido.Connect.{Error, Provider.Transport}
+  alias Jido.Connect.{Error, Http, Provider.Transport}
 
   @default_base_url "https://api.linear.app"
 
-  @doc "Builds a Linear GraphQL API bearer request."
-  @spec request(String.t(), keyword()) :: Req.Request.t()
-  def request(access_token, opts \\ []) when is_binary(access_token) and is_list(opts) do
+  @doc "Builds a Linear GraphQL request for an API key or OAuth token."
+  @spec request(String.t() | {:api_key | :oauth2, String.t()}, keyword()) :: Req.Request.t()
+  def request(credential, opts \\ [])
+
+  def request({:api_key, api_key}, opts) when is_binary(api_key) and is_list(opts) do
+    Req.new(
+      base_url: Keyword.get(opts, :base_url, base_url()),
+      headers: [
+        {"authorization", api_key},
+        {"user-agent", "jido-connect"},
+        {"accept", "application/json"},
+        {"content-type", "application/json"}
+      ]
+    )
+    |> Http.maybe_merge_req_options(req_options(opts))
+  end
+
+  def request({:oauth2, access_token}, opts), do: request(access_token, opts)
+
+  def request(access_token, opts) when is_binary(access_token) and is_list(opts) do
     Transport.bearer_request(
       Keyword.get(opts, :base_url, base_url()),
       access_token,
@@ -15,10 +32,13 @@ defmodule Jido.Connect.Linear.Client.Transport do
         {"accept", "application/json"},
         {"content-type", "application/json"}
       ],
-      req_options:
-        Application.get_env(:jido_connect_linear, :linear_req_options, [])
-        |> Keyword.merge(Keyword.get(opts, :req_options, []))
+      req_options: req_options(opts)
     )
+  end
+
+  defp req_options(opts) do
+    Application.get_env(:jido_connect_linear, :linear_req_options, [])
+    |> Keyword.merge(Keyword.get(opts, :req_options, []))
   end
 
   @doc "Returns the configured Linear API base URL."

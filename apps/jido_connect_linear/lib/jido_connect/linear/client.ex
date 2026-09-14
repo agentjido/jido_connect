@@ -138,19 +138,17 @@ defmodule Jido.Connect.Linear.Client do
   """
 
   @doc "Fetches a single Linear issue by ID."
-  def get_issue(issue_id, access_token, _opts \\ [])
-      when is_binary(issue_id) and is_binary(access_token) do
+  def get_issue(issue_id, credential, _opts \\ []) when is_binary(issue_id) do
     variables = %{id: issue_id}
 
-    access_token
+    credential
     |> Transport.request()
     |> Transport.graphql(@get_issue_query, variables)
     |> Response.handle_issue_response()
   end
 
   @doc "Searches Linear issues using a filter."
-  def search_issues(filter, access_token, opts \\ [])
-      when is_map(filter) and is_binary(access_token) do
+  def search_issues(filter, credential, opts \\ []) when is_map(filter) do
     variables = %{
       filter: filter,
       first: Keyword.get(opts, :first, 50),
@@ -160,36 +158,35 @@ defmodule Jido.Connect.Linear.Client do
 
     variables = if variables.after, do: variables, else: Map.delete(variables, :after)
 
-    access_token
+    credential
     |> Transport.request()
     |> Transport.graphql(@search_issues_query, variables)
     |> Response.handle_issue_search_response()
   end
 
   @doc "Creates a new Linear issue."
-  def create_issue(attrs, access_token) when is_map(attrs) and is_binary(access_token) do
+  def create_issue(attrs, credential) when is_map(attrs) do
     input = build_issue_input(attrs)
 
-    access_token
+    credential
     |> Transport.request()
     |> Transport.graphql(@create_issue_mutation, %{input: input})
     |> Response.handle_issue_create_response()
   end
 
   @doc "Updates an existing Linear issue."
-  def update_issue(issue_id, fields, access_token)
-      when is_binary(issue_id) and is_map(fields) and is_binary(access_token) do
+  def update_issue(issue_id, fields, credential)
+      when is_binary(issue_id) and is_map(fields) do
     input = build_update_input(fields)
 
-    access_token
+    credential
     |> Transport.request()
     |> Transport.graphql(@update_issue_mutation, %{id: issue_id, input: input})
     |> Response.handle_issue_update_response()
   end
 
   @doc "Lists Linear teams visible to the authenticated user."
-  def list_teams(access_token, opts \\ [])
-      when is_binary(access_token) and is_list(opts) do
+  def list_teams(credential, opts \\ []) when is_list(opts) do
     variables = %{
       first: Keyword.get(opts, :first, 50),
       after: Keyword.get(opts, :after)
@@ -197,15 +194,14 @@ defmodule Jido.Connect.Linear.Client do
 
     variables = if variables.after, do: variables, else: Map.delete(variables, :after)
 
-    access_token
+    credential
     |> Transport.request()
     |> Transport.graphql(@list_teams_query, variables)
     |> Response.handle_team_list_response()
   end
 
   @doc "Lists comments for a Linear issue with pagination."
-  def list_comments(issue_id, access_token, opts \\ [])
-      when is_binary(issue_id) and is_binary(access_token) do
+  def list_comments(issue_id, credential, opts \\ []) when is_binary(issue_id) do
     variables = %{
       issueId: issue_id,
       first: Keyword.get(opts, :first, 50),
@@ -214,32 +210,31 @@ defmodule Jido.Connect.Linear.Client do
 
     variables = if variables.after, do: variables, else: Map.delete(variables, :after)
 
-    access_token
+    credential
     |> Transport.request()
     |> Transport.graphql(@list_comments_query, variables)
     |> Response.handle_comments_list_response()
   end
 
   @doc "Fetches a single Linear team by ID."
-  def get_team(team_id, access_token, _opts \\ [])
-      when is_binary(team_id) and is_binary(access_token) do
+  def get_team(team_id, credential, _opts \\ []) when is_binary(team_id) do
     variables = %{id: team_id}
 
-    access_token
+    credential
     |> Transport.request()
     |> Transport.graphql(@get_team_query, variables)
     |> Response.handle_team_get_response()
   end
 
   @doc "Adds a comment to a Linear issue."
-  def add_comment(issue_id, body_text, access_token)
-      when is_binary(issue_id) and is_binary(body_text) and is_binary(access_token) do
+  def add_comment(issue_id, body_text, credential)
+      when is_binary(issue_id) and is_binary(body_text) do
     input = %{
       issueId: issue_id,
       body: body_text
     }
 
-    access_token
+    credential
     |> Transport.request()
     |> Transport.graphql(@create_comment_mutation, %{input: input})
     |> Response.handle_comment_response()
@@ -249,10 +244,10 @@ defmodule Jido.Connect.Linear.Client do
   def resolve(%{linear_client: client}) when is_atom(client), do: client
   def resolve(_credentials), do: __MODULE__
 
-  @doc "Extracts the bearer token from credential fields."
-  def credential_token(credentials) do
-    Map.get(credentials, :api_key) || Map.get(credentials, :access_token)
-  end
+  @doc "Returns the credential with its Linear authentication kind."
+  def credential_token(%{api_key: key}) when is_binary(key), do: {:api_key, key}
+  def credential_token(%{access_token: token}) when is_binary(token), do: {:oauth2, token}
+  def credential_token(_credentials), do: nil
 
   defp build_issue_input(attrs) do
     base = %{

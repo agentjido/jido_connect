@@ -3,7 +3,7 @@ ExUnit.start()
 defmodule Jido.Connect.Linear.MockClient do
   @moduledoc false
 
-  def get_issue("LIN-123", "token", _opts) do
+  def get_issue("LIN-123", {:api_key, "token"}, _opts) do
     {:ok,
      %{
        id: "uuid-001",
@@ -21,11 +21,11 @@ defmodule Jido.Connect.Linear.MockClient do
      }}
   end
 
-  def get_issue("LIN-123", "token") do
-    get_issue("LIN-123", "token", [])
+  def get_issue("LIN-123", {:api_key, "token"}) do
+    get_issue("LIN-123", {:api_key, "token"}, [])
   end
 
-  def search_issues(%{}, "token", _opts) do
+  def search_issues(%{}, {:api_key, "token"}, _opts) do
     {:ok,
      %{
        issues: [
@@ -49,7 +49,7 @@ defmodule Jido.Connect.Linear.MockClient do
           team_id: "team-1",
           title: "New issue"
         },
-        "token"
+        {:api_key, "token"}
       ) do
     {:ok,
      %{
@@ -59,7 +59,7 @@ defmodule Jido.Connect.Linear.MockClient do
      }}
   end
 
-  def create_issue(%{team_id: "team-1"}, "token") do
+  def create_issue(%{team_id: "team-1"}, {:api_key, "token"}) do
     {:ok,
      %{
        id: "uuid-002",
@@ -68,15 +68,15 @@ defmodule Jido.Connect.Linear.MockClient do
      }}
   end
 
-  def update_issue("LIN-ERR", _fields, "token") do
+  def update_issue("LIN-ERR", _fields, {:api_key, "token"}) do
     {:error, Jido.Connect.Error.provider("Linear API error", reason: :graphql_error)}
   end
 
-  def update_issue(_issue_id, _fields, "token") do
+  def update_issue(_issue_id, _fields, {:api_key, "token"}) do
     {:ok, %{updated: true}}
   end
 
-  def list_teams("token", _opts) do
+  def list_teams({:api_key, "token"}, _opts) do
     {:ok,
      %{
        teams: [
@@ -88,11 +88,11 @@ defmodule Jido.Connect.Linear.MockClient do
      }}
   end
 
-  def add_comment("LIN-ERR", _body_text, "token") do
+  def add_comment("LIN-ERR", _body_text, {:api_key, "token"}) do
     {:error, Jido.Connect.Error.provider("Linear API error", reason: :graphql_error)}
   end
 
-  def add_comment(_issue_id, _body_text, "token") do
+  def add_comment(_issue_id, _body_text, {:api_key, "token"}) do
     {:ok,
      %{
        id: "comment-1",
@@ -101,7 +101,7 @@ defmodule Jido.Connect.Linear.MockClient do
      }}
   end
 
-  def list_comments("uuid-001", "token", _opts) do
+  def list_comments("uuid-001", {:api_key, "token"}, _opts) do
     {:ok,
      %{
        comments: [
@@ -128,7 +128,7 @@ defmodule Jido.Connect.Linear.MockClient do
      }}
   end
 
-  def get_team("team-1", "token", _opts) do
+  def get_team("team-1", {:api_key, "token"}, _opts) do
     {:ok,
      %{
        id: "team-1",
@@ -141,8 +141,8 @@ defmodule Jido.Connect.Linear.MockClient do
      }}
   end
 
-  def get_team("team-1", "token") do
-    get_team("team-1", "token", [])
+  def get_team("team-1", {:api_key, "token"}) do
+    get_team("team-1", {:api_key, "token"}, [])
   end
 end
 

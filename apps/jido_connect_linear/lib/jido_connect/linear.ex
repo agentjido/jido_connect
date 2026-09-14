@@ -9,8 +9,8 @@ defmodule Jido.Connect.Linear do
 
   The provider supports two authentication profiles:
 
-  - **API key** (`:api_key`): Linear personal access token used as a Bearer
-    token. Recommended for server-to-server integrations, development, and CI.
+  - **API key** (`:api_key`): Linear personal API key sent directly in the
+    `Authorization` header. Recommended for development and personal scripts.
 
   - **OAuth2** (`:oauth2_user`): Standard OAuth2 authorization code flow
     against the Linear authorization server. Grants scoped access on behalf of
@@ -63,7 +63,7 @@ defmodule Jido.Connect.Linear do
       owner(:app_user)
       subject(:user)
       label("Linear API key")
-      setup :api_key_bearer_token
+      setup :api_key_header
       credential_fields([:api_key])
       lease_fields([:api_key])
 

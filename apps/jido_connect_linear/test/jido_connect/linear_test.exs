@@ -72,6 +72,7 @@ defmodule Jido.Connect.LinearTest do
              spec.auth_profiles
 
     assert api_key_profile.default? == true
+    assert api_key_profile.setup == :api_key_header
     assert "read" in api_key_profile.default_scopes
     assert "write" in api_key_profile.scopes
 
