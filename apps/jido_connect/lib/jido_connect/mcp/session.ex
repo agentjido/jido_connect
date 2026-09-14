@@ -10,8 +10,9 @@ defmodule Jido.Connect.MCP.Session do
   The immutable filter supports toolsListChanged, resourcesListChanged,
   promptsListChanged, and resourceSubscriptions. Each selected capability is
   authorized before the session opens. Modern streams require MCP 2026-07-28.
-  ExMCP owns acknowledgment, reconnect, and protocol state. The session checks
-  the endpoint lease before each event and stops when the lease is retired.
+  ExMCP owns acknowledgment, reconnect, and protocol state. The session keeps
+  the authorized filter and checks it before it forwards events or resync data.
+  It also checks the endpoint lease before each event and stops when the lease is retired.
   Hosts must fence a connection when policy or credentials change.
 
   This API returns a local process, not a serializable catalog result. No
@@ -59,18 +60,29 @@ defmodule Jido.Connect.MCP.Session do
          {:ok, token} <- EndpointResolver.resolve_lease(endpoint_id, opts) do
       case open(token, filter, Keyword.get(opts, :timeout, 5_000)) do
         {:ok, subscription} ->
-          Process.send_after(self(), :check_lease, 100)
+          if acknowledged_filter_authorized?(subscription, filter) do
+            Process.send_after(self(), :check_lease, 100)
 
-          {:ok,
-           %{
-             endpoint_id: endpoint_id,
-             status: :active,
-             token: token,
-             subscription: subscription,
-             owner: owner,
-             monitor: Process.monitor(owner),
-             subscription_monitor: Process.monitor(subscription.pid)
-           }}
+            {:ok,
+             %{
+               endpoint_id: endpoint_id,
+               status: :active,
+               token: token,
+               filter: filter,
+               subscription: subscription,
+               owner: owner,
+               monitor: Process.monitor(owner),
+               subscription_monitor: Process.monitor(subscription.pid)
+             }}
+          else
+            ExMCPClient.close_subscription(subscription)
+            release(token)
+
+            {:stop,
+             Error.auth("MCP subscription exceeds the authorized filter",
+               reason: :mcp_filter_expanded
+             )}
+          end
 
         {:error, error} ->
           release(token)
@@ -89,9 +101,12 @@ defmodule Jido.Connect.MCP.Session do
   @impl true
   def handle_info({:ex_mcp_subscription, subscription, method, params}, state) do
     if same_subscription?(subscription, state.subscription) do
-      case dispatchable(state.token) do
+      case dispatchable_subscription(state, subscription) do
         :ok ->
-          send(state.owner, {:jido_connect_mcp, self(), method, Sanitizer.sanitize(params)})
+          if event_authorized?(method, params, state.filter) do
+            send(state.owner, {:jido_connect_mcp, self(), method, Sanitizer.sanitize(params)})
+          end
+
           {:noreply, state}
 
         {:error, _} ->
@@ -104,7 +119,7 @@ defmodule Jido.Connect.MCP.Session do
 
   def handle_info({:ex_mcp_subscription_resync, subscription, {:complete, snapshot}}, state) do
     if same_subscription?(subscription, state.subscription) do
-      case dispatchable(state.token) do
+      case dispatchable_subscription(state, subscription) do
         :ok ->
           send(
             state.owner,
@@ -264,6 +279,49 @@ defmodule Jido.Connect.MCP.Session do
 
   defp dispatchable(%{legacy?: true}), do: :ok
   defp dispatchable(token), do: EndpointLeaseManager.ensure_dispatchable(token)
+
+  defp dispatchable_subscription(state, subscription) do
+    if acknowledged_filter_authorized?(subscription, state.filter) do
+      dispatchable(state.token)
+    else
+      {:error, :mcp_filter_expanded}
+    end
+  end
+
+  defp acknowledged_filter_authorized?(%{acknowledged_filter: acknowledged}, requested)
+       when is_map(acknowledged) do
+    Enum.all?(acknowledged, fn
+      {"resourceSubscriptions", uris} when is_list(uris) ->
+        requested_uris = Map.get(requested, "resourceSubscriptions", [])
+        Enum.all?(uris, &(&1 in requested_uris))
+
+      {key, true} when key in @keys ->
+        Map.get(requested, key) == true
+
+      {key, false} when key in @keys ->
+        true
+
+      _other ->
+        false
+    end)
+  end
+
+  defp acknowledged_filter_authorized?(_subscription, _requested), do: false
+
+  defp event_authorized?("notifications/tools/list_changed", _params, filter),
+    do: Map.get(filter, "toolsListChanged") == true
+
+  defp event_authorized?("notifications/resources/list_changed", _params, filter),
+    do: Map.get(filter, "resourcesListChanged") == true
+
+  defp event_authorized?("notifications/prompts/list_changed", _params, filter),
+    do: Map.get(filter, "promptsListChanged") == true
+
+  defp event_authorized?("notifications/resources/updated", %{"uri" => uri}, filter),
+    do: uri in Map.get(filter, "resourceSubscriptions", [])
+
+  defp event_authorized?(_method, _params, _filter), do: false
+
   defp release(%{legacy?: true}), do: :ok
   defp release(token), do: EndpointLeaseManager.release(token)
   defp public_snapshot({:error, _reason}), do: {:error, :request_failed}

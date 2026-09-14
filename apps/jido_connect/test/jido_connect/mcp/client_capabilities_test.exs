@@ -286,6 +286,37 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
     assert_receive {:DOWN, ^monitor, :process, ^session, :normal}
   end
 
+  test "session rejects events and resync data outside its authorized filter", state do
+    {:ok, session} = Session.start_link("test", %{"toolsListChanged" => true}, state.opts)
+    subscription = :sys.get_state(session).subscription
+
+    send(
+      session,
+      {:ex_mcp_subscription, subscription, "notifications/resources/updated",
+       %{"uri" => "test://private"}}
+    )
+
+    refute_receive {:jido_connect_mcp, ^session, "notifications/resources/updated", _}, 100
+
+    broadened = %{
+      subscription
+      | acknowledged_filter:
+          Map.put(subscription.acknowledged_filter, "resourceSubscriptions", ["test://private"])
+    }
+
+    monitor = Process.monitor(session)
+
+    send(
+      session,
+      {:ex_mcp_subscription_resync, broadened,
+       {:complete, %{"resources" => %{"test://private" => {:ok, "private"}}}}}
+    )
+
+    assert_receive {:DOWN, ^monitor, :process, ^session, :normal}, 1_000
+    refute_receive {:jido_connect_mcp, ^session, :resync, _}
+    assert Process.alive?(state.client)
+  end
+
   test "schema validation finds tools on later pages and rejects malformed lists", state do
     lease =
       Connect.CredentialLease.from_connection!(
