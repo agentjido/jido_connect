@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-14T00:02:27Z",
+  "close_reason": "Resolved in 4d90da1b; CI passed",
   "created": "2026-09-13T20:05:16Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-210c-79f0-9e9f-669bbeed6dfc\n\n4. **P2 — An unloaded ranker module cannot run.**  \n   [ranker.ex:47](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/catalog/ranker.ex:47) checks `function_exported?/3` without loading the module. A valid ranker BEAM on the code path produces fallback results until another caller loads it. The probe returned the requested order immediately after `Code.ensure_loaded!/1`. Load the module before checking `rank/2`. Current test modules are already loaded when their tests run.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.20",
@@ -16,7 +18,7 @@
     }
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "An unloaded ranker module cannot run",
   "type": "bug",
   "updated_at": "2026-09-14T00:02:27Z"
