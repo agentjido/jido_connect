@@ -76,6 +76,27 @@ defmodule Jido.Connect.Microsoft.OAuthTest do
     assert refreshed.access_token == "access"
   end
 
+  test "sends a PKCE verifier only when the host supplies one" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      params = URI.decode_query(body)
+
+      case params["code"] do
+        "with-pkce" -> assert params["code_verifier"] == "host-stored-verifier"
+        "without-pkce" -> refute Map.has_key?(params, "code_verifier")
+      end
+
+      Req.Test.json(conn, %{access_token: "access", expires_in: 3600})
+    end)
+
+    opts = [client_id: "client", client_secret: "secret", token_url: "https://oauth.test/token"]
+
+    assert {:ok, _} =
+             OAuth.exchange_code("with-pkce", opts ++ [code_verifier: "host-stored-verifier"])
+
+    assert {:ok, _} = OAuth.exchange_code("without-pkce", opts)
+  end
+
   test "gets application tokens with client credentials" do
     Req.Test.stub(__MODULE__, fn conn ->
       {:ok, body, conn} = Plug.Conn.read_body(conn)

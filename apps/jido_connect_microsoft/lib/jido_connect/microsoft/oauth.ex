@@ -37,7 +37,7 @@ defmodule Jido.Connect.Microsoft.OAuth do
     })
   end
 
-  @doc "Exchanges an authorization code for a Microsoft OAuth token response."
+  @doc "Exchanges a code; pass the host-stored `:code_verifier` for PKCE."
   @spec exchange_code(String.t(), keyword()) :: {:ok, map()} | {:error, Error.error()}
   def exchange_code(code, opts \\ []) when is_binary(code) and is_list(opts) do
     client_id = OAuth.fetch_required!(opts, :client_id, "MICROSOFT_CLIENT_ID")
@@ -45,14 +45,16 @@ defmodule Jido.Connect.Microsoft.OAuth do
 
     token_request(opts)
     |> Req.post(
-      form: %{
-        client_id: client_id,
-        client_secret: client_secret,
-        code: code,
-        grant_type: "authorization_code",
-        redirect_uri: Keyword.get(opts, :redirect_uri),
-        scope: opts |> Keyword.get(:scope) |> maybe_encode_scope()
-      }
+      form:
+        %{
+          client_id: client_id,
+          client_secret: client_secret,
+          code: code,
+          grant_type: "authorization_code",
+          redirect_uri: Keyword.get(opts, :redirect_uri),
+          scope: opts |> Keyword.get(:scope) |> maybe_encode_scope()
+        }
+        |> maybe_put(:code_verifier, Keyword.get(opts, :code_verifier))
     )
     |> handle_token_response("Microsoft OAuth code exchange failed")
   end
@@ -142,6 +144,9 @@ defmodule Jido.Connect.Microsoft.OAuth do
     )
     |> Req.merge(Application.get_env(:jido_connect_microsoft, :microsoft_oauth_req_options, []))
   end
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
 
   defp application_token_url(tenant_id, opts) do
     case Keyword.get(opts, :token_url) do

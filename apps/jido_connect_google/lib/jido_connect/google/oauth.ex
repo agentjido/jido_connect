@@ -37,7 +37,7 @@ defmodule Jido.Connect.Google.OAuth do
     })
   end
 
-  @doc "Exchanges an authorization code for a Google OAuth token response."
+  @doc "Exchanges a code; pass the host-stored `:code_verifier` for PKCE."
   @spec exchange_code(String.t(), keyword()) :: {:ok, map()} | {:error, Error.error()}
   def exchange_code(code, opts \\ []) when is_binary(code) and is_list(opts) do
     client_id = OAuth.fetch_required!(opts, :client_id, "GOOGLE_CLIENT_ID")
@@ -45,13 +45,15 @@ defmodule Jido.Connect.Google.OAuth do
 
     token_request(opts)
     |> Req.post(
-      form: %{
-        client_id: client_id,
-        client_secret: client_secret,
-        code: code,
-        grant_type: "authorization_code",
-        redirect_uri: Keyword.get(opts, :redirect_uri)
-      }
+      form:
+        %{
+          client_id: client_id,
+          client_secret: client_secret,
+          code: code,
+          grant_type: "authorization_code",
+          redirect_uri: Keyword.get(opts, :redirect_uri)
+        }
+        |> maybe_put(:code_verifier, Keyword.get(opts, :code_verifier))
     )
     |> handle_token_response("Google OAuth code exchange failed")
   end
@@ -117,6 +119,9 @@ defmodule Jido.Connect.Google.OAuth do
     )
     |> Req.merge(Application.get_env(:jido_connect_google, :google_oauth_req_options, []))
   end
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
 
   defp handle_token_response({:ok, %{status: status, body: body}}, message)
        when status in 200..299 and is_map(body) do
