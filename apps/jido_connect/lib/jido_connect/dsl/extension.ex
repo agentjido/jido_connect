@@ -5,6 +5,5 @@ defmodule Jido.Connect.Dsl.Extension do
 
   use Spark.Dsl.Extension,
     sections: @sections,
-    verifiers: [Jido.Connect.Dsl.Verifiers.ValidateOperations],
     transformers: [Jido.Connect.Dsl.Transformers.BuildSpec]
 end

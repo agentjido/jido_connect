@@ -2,6 +2,7 @@ defmodule Jido.Connect.Dsl.OperationRules do
   @moduledoc false
 
   alias Jido.Connect.Dsl
+  alias Jido.Connect.OperationChecks
 
   def violations(dsl_state, accessor) do
     module = accessor.get_persisted(dsl_state, :module)
@@ -69,7 +70,7 @@ defmodule Jido.Connect.Dsl.OperationRules do
   end
 
   defp missing_metadata_violation(module, path, operation, field, message) do
-    if is_nil(Map.get(operation, field)) do
+    if OperationChecks.missing_metadata?(operation, field) do
       violation(module, path ++ [operation.name], operation, message)
     end
   end
@@ -77,7 +78,7 @@ defmodule Jido.Connect.Dsl.OperationRules do
   defp unknown_auth_profile_violations(module, path, operation, auth_ids) do
     operation
     |> operation_auth_profiles()
-    |> Enum.reject(&MapSet.member?(auth_ids, &1))
+    |> OperationChecks.unknown_references(auth_ids)
     |> Enum.map(fn auth_profile ->
       violation(
         module,
@@ -91,7 +92,7 @@ defmodule Jido.Connect.Dsl.OperationRules do
   defp unknown_policy_violations(module, path, operation, policy_ids) do
     operation
     |> operation_policies()
-    |> Enum.reject(&MapSet.member?(policy_ids, &1))
+    |> OperationChecks.unknown_references(policy_ids)
     |> Enum.map(fn policy ->
       violation(
         module,
@@ -175,7 +176,7 @@ defmodule Jido.Connect.Dsl.OperationRules do
   defp effect_compatibility_violations(_module, _action), do: []
 
   defp mutating_effect_violations(module, %Dsl.Action{effect: %Dsl.Effect{} = effect} = action) do
-    if mutating_risk?(effect.risk) && effect.confirmation in [nil, :none] do
+    if OperationChecks.unconfirmed_mutating_risk?(effect.risk, effect.confirmation) do
       [
         violation(
           module,
@@ -192,7 +193,7 @@ defmodule Jido.Connect.Dsl.OperationRules do
   defp mutating_effect_violations(_module, _action), do: []
 
   defp trigger_shape_violations(module, %Dsl.Trigger{kind: :poll} = trigger) do
-    if is_nil(trigger.checkpoint) || is_nil(trigger.dedupe) do
+    if OperationChecks.missing_poll_contract?(trigger) do
       [
         violation(
           module,
@@ -207,7 +208,7 @@ defmodule Jido.Connect.Dsl.OperationRules do
   end
 
   defp trigger_shape_violations(module, %Dsl.Trigger{kind: :webhook} = trigger) do
-    unless Jido.Connect.WebhookVerification.declared?(trigger.verification) do
+    if OperationChecks.missing_webhook_verification?(trigger) do
       [
         violation(
           module,
@@ -235,8 +236,6 @@ defmodule Jido.Connect.Dsl.OperationRules do
     do: policies
 
   defp operation_policies(%{policies: policies}), do: policies
-
-  defp mutating_risk?(risk), do: risk not in [:read, :metadata]
 
   defp violation(module, path, entity, message) do
     %{module: module, path: path, entity: entity, message: message}

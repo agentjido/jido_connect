@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Spec.Validator do
   @moduledoc false
 
-  alias Jido.Connect.{Authorization, Error, Schema, Spec, Taxonomy}
+  alias Jido.Connect.{Authorization, Error, OperationChecks, Schema, Spec, Taxonomy}
 
   @doc false
   @spec validate!(Spec.t()) :: Spec.t()
@@ -40,15 +40,19 @@ defmodule Jido.Connect.Spec.Validator do
   end
 
   defp validate_auth_profiles!(operation, auth_ids) do
-    Enum.each(Authorization.operation_auth_profiles(operation), fn auth_profile ->
-      unless MapSet.member?(auth_ids, auth_profile) do
+    Enum.each(
+      OperationChecks.unknown_references(
+        Authorization.operation_auth_profiles(operation),
+        auth_ids
+      ),
+      fn auth_profile ->
         raise Error.validation("Unknown auth profile",
                 reason: :unknown_auth_profile,
                 subject: auth_profile,
                 details: %{operation_id: operation.id}
               )
       end
-    end)
+    )
 
     if operation.auth_profile not in Authorization.operation_auth_profiles(operation) do
       raise Error.validation("Unknown auth profile",
@@ -60,14 +64,14 @@ defmodule Jido.Connect.Spec.Validator do
   end
 
   defp validate_mutation!(action) do
-    if action.risk not in [:read, :metadata] and not action.mutation? do
+    if OperationChecks.missing_mutation?(action) do
       raise Error.validation("Write-risk action must declare mutation",
               reason: :mutation_risk_mismatch,
               subject: action.id
             )
     end
 
-    if action.mutation? and action.confirmation in [nil, :none] do
+    if action.mutation? and OperationChecks.missing_confirmation?(action.confirmation) do
       raise Error.validation("Mutation action must declare confirmation policy",
               reason: :missing_confirmation_policy,
               subject: action.id
@@ -76,15 +80,14 @@ defmodule Jido.Connect.Spec.Validator do
   end
 
   defp validate_trigger_contract!(trigger) do
-    if trigger.kind == :poll and (is_nil(trigger.checkpoint) or is_nil(trigger.dedupe)) do
+    if OperationChecks.missing_poll_contract?(trigger) do
       raise Error.validation("Poll trigger must declare checkpoint and dedupe",
               reason: :missing_poll_contract,
               subject: trigger.id
             )
     end
 
-    if trigger.kind == :webhook and
-         not Jido.Connect.WebhookVerification.declared?(trigger.verification) do
+    if OperationChecks.missing_webhook_verification?(trigger) do
       raise Error.validation("Webhook trigger must declare verification",
               reason: :missing_webhook_verification,
               subject: trigger.id
@@ -113,9 +116,9 @@ defmodule Jido.Connect.Spec.Validator do
   end
 
   defp validate_operation_taxonomy!(operation) do
-    validate_required!(:resource, operation.resource, operation.id)
-    validate_required!(:verb, operation.verb, operation.id)
-    validate_required!(:data_classification, operation.data_classification, operation.id)
+    validate_required!(:resource, operation)
+    validate_required!(:verb, operation)
+    validate_required!(:data_classification, operation)
 
     validate_known!(
       :verb,
@@ -152,15 +155,15 @@ defmodule Jido.Connect.Spec.Validator do
     end
   end
 
-  defp validate_required!(field, value, operation_id) when value in [nil, ""] do
-    raise Error.validation("Operation must declare #{field}",
-            reason: :missing_operation_metadata,
-            subject: operation_id,
-            details: %{field: field}
-          )
+  defp validate_required!(field, operation) do
+    if OperationChecks.missing_metadata?(operation, field) do
+      raise Error.validation("Operation must declare #{field}",
+              reason: :missing_operation_metadata,
+              subject: operation.id,
+              details: %{field: field}
+            )
+    end
   end
-
-  defp validate_required!(_field, _value, _operation_id), do: :ok
 
   defp validate_known!(field, value, allowed, subject, known?) do
     unless known?.(value) do
@@ -173,14 +176,12 @@ defmodule Jido.Connect.Spec.Validator do
   end
 
   defp validate_policy_refs!(policies, policy_ids, operation_id) do
-    Enum.each(policies || [], fn policy ->
-      unless MapSet.member?(policy_ids, policy) do
-        raise Error.validation("Unknown policy",
-                reason: :unknown_policy,
-                subject: policy,
-                details: %{operation_id: operation_id}
-              )
-      end
+    Enum.each(OperationChecks.unknown_references(policies, policy_ids), fn policy ->
+      raise Error.validation("Unknown policy",
+              reason: :unknown_policy,
+              subject: policy,
+              details: %{operation_id: operation_id}
+            )
     end)
   end
 

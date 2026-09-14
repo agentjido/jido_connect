@@ -386,7 +386,7 @@ defmodule Jido.Connect.DslV2Test do
     assert error.path == [:actions, :mixed_access]
   end
 
-  test "DSL verifier requires confirmation for mutating effects" do
+  test "DSL requires confirmation for mutating effects" do
     error =
       assert_raise Spark.Error.DslError, ~r/Mutating effect must declare confirmation/, fn ->
         compile_bad!(
