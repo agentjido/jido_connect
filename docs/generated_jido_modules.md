@@ -38,6 +38,14 @@ Generated actions and poll sensors expect the host to pass either a resolved
 cases raw credentials stay out of agent context; execution still requires a
 short-lived `Jido.Connect.CredentialLease`.
 
+The poll adapter keeps its initial context in the returned state. Before each
+`:tick`, the host must resolve the current connection, mint a fresh lease, and
+call `Jido.Connect.Sensor.replace_context/2` on that state. Pass the result to
+the generated sensor's `handle_event/2`. The helper keeps the checkpoint, so
+the next poll continues from the last successful result. The host must also
+apply the returned schedule and emit instructions. Lease renewal and the poll
+process remain host responsibilities.
+
 Generated plugin modules also expose `tool_availability/1` for host UIs and
 agent planners that need to show which connector tools can be used before a
 credential lease exists:

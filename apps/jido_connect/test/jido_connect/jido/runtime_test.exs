@@ -207,6 +207,17 @@ defmodule Jido.Connect.Jido.RuntimeTest do
     assert first_signal.data.repo == "org/repo:first"
     assert advancing_state.checkpoint == "first"
 
+    fresh_lease = %{lease | expires_at: DateTime.add(DateTime.utc_now(), 300, :second)}
+
+    advancing_state =
+      Connect.Sensor.replace_context(advancing_state, %{
+        integration_context: context,
+        credential_lease: fresh_lease
+      })
+
+    assert advancing_state.checkpoint == "first"
+    assert advancing_state.context.credential_lease == fresh_lease
+
     assert {:ok, advancing_state, [{:emit, second_signal}, {:schedule, 1_000}]} =
              Connect.JidoSensorRuntime.handle_event(advancing_sensor, :tick, advancing_state)
 

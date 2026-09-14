@@ -18,4 +18,16 @@ defmodule Jido.Connect.Sensor do
 
   @callback init(config :: map(), context :: map()) :: result()
   @callback handle_event(event :: term(), state :: map()) :: result()
+
+  @doc """
+  Replaces a generated poll sensor's invocation context without losing its checkpoint.
+
+  The host can call this before each `:tick` with a current connection and a
+  fresh credential lease. The host still owns scheduling and lease renewal.
+  """
+  @spec replace_context(map(), map()) :: map()
+  def replace_context(%{context: _old, checkpoint: _checkpoint} = state, context)
+      when is_map(context) do
+    %{state | context: context}
+  end
 end
