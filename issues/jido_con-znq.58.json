@@ -9,9 +9,15 @@
     "v3-follow-up"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Resolved in f655b3ce on release/3.0. Full umbrella mix quality and demo checks passed. CI: https://github.com/agentjido/jido_connect/actions/runs/34793522267",
+      "timestamp": "2026-09-14T00:46:47Z"
+    }
+  ],
   "priority": 2,
   "status": "open",
   "title": "The ngrok task can announce an unrelated tunnel",
   "type": "bug",
-  "updated_at": "2026-09-13T21:59:40Z"
+  "updated_at": "2026-09-14T00:46:47Z"
 }
