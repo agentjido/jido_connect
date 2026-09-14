@@ -1,18 +1,26 @@
 defmodule Jido.Connect.Dev.Ngrok do
   @moduledoc """
   Local-development helpers for detecting ngrok public HTTPS tunnels.
+
+  Discovery matches the requested local port. Use `api_url:` or the
+  `:jido_connect, :ngrok_api_url` application setting if the ngrok API does not
+  run on port 4040.
   """
 
   alias Jido.Connect.Error
 
-  @api ~c"http://127.0.0.1:4040/api/tunnels"
+  @api "http://127.0.0.1:4040/api/tunnels"
 
-  @spec public_url(pos_integer()) :: {:ok, String.t()} | {:error, Error.error()}
-  def public_url(local_port \\ 4000) when is_integer(local_port) and local_port > 0 do
+  @spec public_url(pos_integer(), keyword()) :: {:ok, String.t()} | {:error, Error.error()}
+  def public_url(local_port \\ 4000, opts \\ [])
+      when is_integer(local_port) and local_port > 0 and is_list(opts) do
     Application.ensure_all_started(:inets)
     Application.ensure_all_started(:ssl)
 
-    case :httpc.request(:get, {@api, []}, [], body_format: :binary) do
+    api_url =
+      Keyword.get(opts, :api_url, Application.get_env(:jido_connect, :ngrok_api_url, @api))
+
+    case :httpc.request(:get, {String.to_charlist(api_url), []}, [], body_format: :binary) do
       {:ok, {{_, 200, _}, _headers, body}} ->
         body
         |> Jason.decode!()

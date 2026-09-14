@@ -30,5 +30,5 @@ Useful routes:
 Pair it with ngrok from the repo root:
 
 ```sh
-mix jido.connect.ngrok --provider github --port 4000
+mix jido.connect.ngrok --port 4000
 ```

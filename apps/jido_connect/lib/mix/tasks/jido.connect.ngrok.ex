@@ -4,8 +4,7 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
 
       mix jido.connect.ngrok
       mix jido.connect.ngrok --port 4001
-      mix jido.connect.ngrok --provider github
-      mix jido.connect.ngrok --provider slack
+      mix jido.connect.ngrok --api-url http://127.0.0.1:4041/api/tunnels
 
   The task runs until interrupted. It assumes `ngrok` is installed and available
   on `PATH`.
@@ -17,7 +16,6 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
 
   @shortdoc "Starts an ngrok tunnel for local Jido Connect demos"
   @default_port 4000
-  @ngrok_api ~c"http://127.0.0.1:4040/api/tunnels"
 
   @impl Mix.Task
   def run(args) do
@@ -28,7 +26,7 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
           port: :integer,
           host_header: :string,
           pooling_enabled: :boolean,
-          provider: :string
+          api_url: :string
         ]
       )
 
@@ -43,9 +41,6 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
     end
 
     configure_authtoken(opts)
-
-    Application.ensure_all_started(:inets)
-    Application.ensure_all_started(:ssl)
 
     ngrok_args = build_ngrok_args(port, opts)
 
@@ -64,8 +59,8 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
       )
 
     port_ref
-    |> await_tunnel_url(port)
-    |> print_urls(port, Keyword.get(opts, :provider))
+    |> await_tunnel_url(port, opts)
+    |> print_urls(port)
 
     stream_ngrok(port_ref)
   end
@@ -107,19 +102,19 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
     end
   end
 
-  defp await_tunnel_url(port_ref, local_port, attempts_left \\ 60)
+  defp await_tunnel_url(port_ref, local_port, opts, attempts_left \\ 60)
 
-  defp await_tunnel_url(_port_ref, _local_port, 0),
+  defp await_tunnel_url(_port_ref, _local_port, _opts, 0),
     do: Mix.raise("ngrok did not expose a public HTTPS tunnel for the requested port")
 
-  defp await_tunnel_url(port_ref, local_port, attempts_left) do
+  defp await_tunnel_url(port_ref, local_port, opts, attempts_left) do
     receive do
       {^port_ref, {:data, {:eol, line}}} ->
         Mix.shell().info("[ngrok] #{line}")
 
         case tunnel_url_from_log(line) do
           {:ok, url} -> url
-          :error -> await_tunnel_url(port_ref, local_port, attempts_left)
+          :error -> await_tunnel_url(port_ref, local_port, opts, attempts_left)
         end
 
       {^port_ref, {:data, {:noeol, line}}} ->
@@ -127,37 +122,25 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
 
         case tunnel_url_from_log(line) do
           {:ok, url} -> url
-          :error -> await_tunnel_url(port_ref, local_port, attempts_left)
+          :error -> await_tunnel_url(port_ref, local_port, opts, attempts_left)
         end
 
       {^port_ref, {:exit_status, status}} ->
         Mix.raise("ngrok exited before exposing a tunnel, status #{status}")
     after
       500 ->
-        case tunnel_url(local_port) do
+        case tunnel_url(local_port, opts) do
           {:ok, url} -> url
-          :error -> await_tunnel_url(port_ref, local_port, attempts_left - 1)
+          :error -> await_tunnel_url(port_ref, local_port, opts, attempts_left - 1)
         end
     end
   end
 
-  defp tunnel_url(local_port) do
-    case :httpc.request(:get, {@ngrok_api, []}, [], body_format: :binary) do
-      {:ok, {{_, 200, _}, _headers, body}} ->
-        body
-        |> Jason.decode!()
-        |> Map.get("tunnels", [])
-        |> Ngrok.select_public_url(local_port)
-        |> case do
-          {:ok, url} -> {:ok, url}
-          {:error, _reason} -> :error
-        end
-
-      _other ->
-        :error
+  defp tunnel_url(local_port, opts) do
+    case Ngrok.public_url(local_port, Keyword.take(opts, [:api_url])) do
+      {:ok, url} -> {:ok, url}
+      {:error, _reason} -> :error
     end
-  rescue
-    _error -> :error
   end
 
   defp tunnel_url_from_log(line) do
@@ -169,62 +152,13 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
     end
   end
 
-  defp print_urls(public_url, local_port, provider) do
+  defp print_urls(public_url, local_port) do
     Mix.shell().info("""
 
     Jido Connect local tunnel is ready.
 
     Local host:       http://localhost:#{local_port}
     Public base URL:  #{public_url}
-    Health check:     #{public_url}/health
-    Integrations:     #{public_url}/integrations
-    """)
-
-    if provider == "github" do
-      print_github_urls(public_url)
-    end
-
-    if provider == "slack" do
-      print_slack_urls(public_url)
-    end
-  end
-
-  defp print_github_urls(public_url) do
-    callback_url = public_url <> "/integrations/github/oauth/callback"
-    webhook_url = public_url <> "/integrations/github/webhook"
-    setup_url = public_url <> "/integrations/github/setup"
-
-    Mix.shell().info("""
-    GitHub App URLs:
-    Callback URL:     #{callback_url}
-    Webhook URL:      #{webhook_url}
-    Setup URL:        #{setup_url}
-
-    Local env keys:
-    GITHUB_APP_ID=
-    GITHUB_CLIENT_ID=
-    GITHUB_CLIENT_SECRET=
-    GITHUB_WEBHOOK_SECRET=
-    GITHUB_PRIVATE_KEY_PATH=
-    """)
-  end
-
-  defp print_slack_urls(public_url) do
-    callback_url = public_url <> "/integrations/slack/oauth/callback"
-    events_url = public_url <> "/integrations/slack/events"
-    interactivity_url = public_url <> "/integrations/slack/interactivity"
-
-    Mix.shell().info("""
-    Slack App URLs:
-    OAuth Redirect URL:      #{callback_url}
-    Events Request URL:      #{events_url}
-    Interactivity Request URL: #{interactivity_url}
-
-    Local env keys:
-    SLACK_CLIENT_ID=
-    SLACK_CLIENT_SECRET=
-    SLACK_SIGNING_SECRET=
-    SLACK_BOT_TOKEN=
     """)
   end
 

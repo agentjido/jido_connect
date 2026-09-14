@@ -48,7 +48,10 @@ defmodule Jido.Connect.Demo.Ngrok do
   end
 
   defp detect_ngrok_url do
-    case Jido.Connect.Dev.Ngrok.public_url() do
+    endpoint_config = Application.get_env(:jido_connect_demo, Jido.Connect.DemoWeb.Endpoint, [])
+    local_port = get_in(endpoint_config, [:http, :port]) || 4000
+
+    case Jido.Connect.Dev.Ngrok.public_url(local_port) do
       {:ok, url} -> url
       {:error, _error} -> nil
     end

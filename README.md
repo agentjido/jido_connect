@@ -284,7 +284,7 @@ mix phx.server
 For a public callback URL, run this from the repository root in another shell:
 
 ```sh
-mix jido.connect.ngrok --provider github --port 4000
+mix jido.connect.ngrok --port 4000
 ```
 
 Copy `.env.example` to `.env` for local credentials. Git ignores `.env`. Never

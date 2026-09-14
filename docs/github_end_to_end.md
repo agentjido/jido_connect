@@ -56,16 +56,17 @@ through `CredentialLease`.
 Once the demo host is running locally, start a tunnel with:
 
 ```sh
-mix jido.connect.ngrok --provider github --port 4000
+mix jido.connect.ngrok --port 4000
 ```
 
-The task stays attached until interrupted. It prints the public base URL plus
-the callback, setup, and webhook URLs to paste into the GitHub App settings.
+The task stays attached until interrupted. It prints the public base URL. The
+GitHub manifest task prints the callback, setup, and webhook URLs to paste into
+the GitHub App settings.
 
 If your local host requires a specific host header, pass:
 
 ```sh
-mix jido.connect.ngrok --provider github --port 4000 --host-header localhost:4000
+mix jido.connect.ngrok --port 4000 --host-header localhost:4000
 ```
 
 Local credential names are listed in `.env.example`. Copy that file to `.env`
@@ -76,13 +77,13 @@ pass it once:
 
 ```sh
 set -a && source .env && set +a
-mix jido.connect.ngrok --provider github --port 4000
+mix jido.connect.ngrok --port 4000
 ```
 
 or pass the token directly once:
 
 ```sh
-mix jido.connect.ngrok --provider github --port 4000 --authtoken ...
+mix jido.connect.ngrok --port 4000 --authtoken ...
 ```
 
 The task runs `ngrok config add-authtoken` before opening the tunnel.
@@ -148,9 +149,9 @@ next step once the action and poll demo is green.
 
 For a GitHub App demo, configure:
 
-- Callback URL: value printed by `mix jido.connect.ngrok --provider github`
-- Setup URL: value printed by `mix jido.connect.ngrok --provider github`
-- Webhook URL: value printed by `mix jido.connect.ngrok --provider github`
+- Callback URL: `<public-base-url>/integrations/github/oauth/callback`
+- Setup URL: `<public-base-url>/integrations/github/setup`
+- Webhook URL: `<public-base-url>/integrations/github/webhook`
 - Webhook secret: same value as `GITHUB_WEBHOOK_SECRET`
 - Repository permissions:
   - Issues: read/write
