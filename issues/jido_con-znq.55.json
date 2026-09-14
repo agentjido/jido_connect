@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-14T00:02:40Z",
+  "close_reason": "Resolved in fcfa171e; CI passed",
   "created": "2026-09-13T20:05:40Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2d23-7271-a03d-67000b3c156d\n\n4. **P2 — The generated test cannot run.**  \n   [provider_scaffold.ex:44](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/dev/provider_scaffold.ex:44) creates a test but no `test/test_helper.exs`. In the temporary package, Mix stopped with: `Cannot run tests because test helper file \"test/test_helper.exs\" does not exist`.  \n   **Correction:** Generate a test helper containing `ExUnit.start()`.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.55",
@@ -16,8 +18,8 @@
     }
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "The generated test cannot run",
   "type": "bug",
-  "updated_at": "2026-09-14T00:02:39Z"
+  "updated_at": "2026-09-14T00:02:40Z"
 }
