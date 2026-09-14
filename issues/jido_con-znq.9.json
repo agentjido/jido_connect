@@ -9,9 +9,15 @@
     "v3-follow-up"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Resolved in 5a4606f1 on release/3.0. Full umbrella mix quality and demo checks passed. CI: https://github.com/agentjido/jido_connect/actions/runs/34793522267",
+      "timestamp": "2026-09-14T00:46:51Z"
+    }
+  ],
   "priority": 3,
   "status": "open",
   "title": "Reduce repeated validation",
   "type": "task",
-  "updated_at": "2026-09-13T21:59:43Z"
+  "updated_at": "2026-09-14T00:46:51Z"
 }
