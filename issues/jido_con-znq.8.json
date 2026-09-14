@@ -9,9 +9,15 @@
     "v3-follow-up"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Resolved in c90164c6 on release/3.0. Full umbrella mix quality passed with Elixir 1.19.5/OTP 28; demo format, compile, and 21 tests passed. CI: https://github.com/agentjido/jido_connect/actions/runs/34791119512",
+      "timestamp": "2026-09-14T00:02:32Z"
+    }
+  ],
   "priority": 3,
   "status": "open",
   "title": "Mixed effect settings discard provider idempotency",
   "type": "bug",
-  "updated_at": "2026-09-13T21:59:44Z"
+  "updated_at": "2026-09-14T00:02:32Z"
 }
