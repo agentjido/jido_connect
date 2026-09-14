@@ -52,22 +52,28 @@ defmodule Jido.Connect.Salesforce.Client.Transport do
   @spec handle_error_response(term(), keyword()) :: {:error, Error.ProviderError.t()}
   def handle_error_response(response, opts \\ [])
 
-  def handle_error_response({:ok, %{status: status, body: body}}, opts)
+  def handle_error_response({:ok, %{status: status, body: body}} = response, opts)
       when is_integer(status) and is_map(body) do
     message = Keyword.get(opts, :message, "Salesforce API request failed")
 
-    {:error,
-     Error.provider(message,
-       provider: :salesforce,
-       reason: Keyword.get(opts, :reason, :http_error),
-       status: status,
-       details: %{message: salesforce_error_message(body), body: body}
-     )}
+    Transport.provider_error(
+      response,
+      Keyword.merge(opts,
+        provider: :salesforce,
+        message: message,
+        reason: Keyword.get(opts, :reason, :http_error),
+        detail_message: salesforce_error_message(body)
+      )
+    )
   end
 
   def handle_error_response(response, opts) do
     message = Keyword.get(opts, :message, "Salesforce API request failed")
-    Transport.provider_error(response, provider: :salesforce, message: message)
+
+    Transport.provider_error(
+      response,
+      Keyword.merge(opts, provider: :salesforce, message: message)
+    )
   end
 
   @doc "Returns a sanitized provider error for malformed success payloads."

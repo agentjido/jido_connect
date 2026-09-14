@@ -75,22 +75,24 @@ defmodule Jido.Connect.Linear.Client.Transport do
   @spec handle_error_response(term(), keyword()) :: {:error, Error.ProviderError.t()}
   def handle_error_response(response, opts \\ [])
 
-  def handle_error_response({:ok, %{status: status, body: body}}, opts)
+  def handle_error_response({:ok, %{status: status, body: body}} = response, opts)
       when is_integer(status) and is_map(body) do
     message = Keyword.get(opts, :message, "Linear API request failed")
 
-    {:error,
-     Error.provider(message,
-       provider: :linear,
-       reason: Keyword.get(opts, :reason, :http_error),
-       status: status,
-       details: %{message: linear_error_message(body), body: body}
-     )}
+    Transport.provider_error(
+      response,
+      Keyword.merge(opts,
+        provider: :linear,
+        message: message,
+        reason: Keyword.get(opts, :reason, :http_error),
+        detail_message: linear_error_message(body)
+      )
+    )
   end
 
   def handle_error_response(response, opts) do
     message = Keyword.get(opts, :message, "Linear API request failed")
-    Transport.provider_error(response, provider: :linear, message: message)
+    Transport.provider_error(response, Keyword.merge(opts, provider: :linear, message: message))
   end
 
   @doc "Returns a sanitized provider error for malformed success payloads."

@@ -28,22 +28,24 @@ defmodule Jido.Connect.HubSpot.Client.Transport do
   @spec handle_error_response(term(), keyword()) :: {:error, Error.ProviderError.t()}
   def handle_error_response(response, opts \\ [])
 
-  def handle_error_response({:ok, %{status: status, body: body}}, opts)
+  def handle_error_response({:ok, %{status: status, body: body}} = response, opts)
       when is_integer(status) and is_map(body) do
     message = Keyword.get(opts, :message, "HubSpot API request failed")
 
-    {:error,
-     Error.provider(message,
-       provider: :hubspot,
-       reason: Keyword.get(opts, :reason, :http_error),
-       status: status,
-       details: %{message: hubspot_error_message(body), body: body}
-     )}
+    Transport.provider_error(
+      response,
+      Keyword.merge(opts,
+        provider: :hubspot,
+        message: message,
+        reason: Keyword.get(opts, :reason, :http_error),
+        detail_message: hubspot_error_message(body)
+      )
+    )
   end
 
   def handle_error_response(response, opts) do
     message = Keyword.get(opts, :message, "HubSpot API request failed")
-    Transport.provider_error(response, provider: :hubspot, message: message)
+    Transport.provider_error(response, Keyword.merge(opts, provider: :hubspot, message: message))
   end
 
   @doc "Returns a sanitized provider error for malformed success payloads."

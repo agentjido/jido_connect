@@ -188,5 +188,21 @@ defmodule Jido.Connect.MicrosoftOutlook.Handlers.Actions.ListMessagesTest do
       assert {:error, %Jido.Connect.Error.ProviderError{provider: :microsoft}} =
                ListMessages.run(%{}, context)
     end
+
+    test "returns retry metadata from a Graph throttle response" do
+      Req.Test.stub(__MODULE__, fn conn ->
+        conn
+        |> Plug.Conn.put_resp_header("retry-after", "30")
+        |> Plug.Conn.put_status(429)
+        |> Req.Test.json(%{"error" => %{"message" => "throttled"}})
+      end)
+
+      context = %{credentials: %{access_token: "test-token"}}
+
+      assert {:error, error} = ListMessages.run(%{}, context)
+      assert error.details.message == "throttled"
+      assert error.details.retry_after == 30
+      assert error.details.response.retry_guidance == :safe_to_retry
+    end
   end
 end

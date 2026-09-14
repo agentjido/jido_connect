@@ -36,31 +36,24 @@ defmodule Jido.Connect.Jira.Client.Transport do
   @spec handle_error_response(term(), keyword()) :: {:error, Error.ProviderError.t()}
   def handle_error_response(response, opts \\ [])
 
-  def handle_error_response({:ok, %{status: status, body: body}}, opts)
+  def handle_error_response({:ok, %{status: status, body: body}} = response, opts)
       when is_integer(status) and is_map(body) do
     message = Keyword.get(opts, :message, "Jira API request failed")
 
-    {:error,
-     Error.provider(message,
-       provider: :jira,
-       reason: Keyword.get(opts, :reason, :http_error),
-       status: status,
-       delivery: :rejected,
-       mutation?: Keyword.get(opts, :mutation?, false),
-       provider_idempotency?: Keyword.get(opts, :provider_idempotency?, false),
-       details: %{message: jira_error_message(body), body: body}
-     )}
+    Transport.provider_error(
+      response,
+      Keyword.merge(opts,
+        provider: :jira,
+        message: message,
+        reason: Keyword.get(opts, :reason, :http_error),
+        detail_message: jira_error_message(body)
+      )
+    )
   end
 
   def handle_error_response(response, opts) do
     message = Keyword.get(opts, :message, "Jira API request failed")
-
-    Transport.provider_error(response,
-      provider: :jira,
-      message: message,
-      mutation?: Keyword.get(opts, :mutation?, false),
-      provider_idempotency?: Keyword.get(opts, :provider_idempotency?, false)
-    )
+    Transport.provider_error(response, Keyword.merge(opts, provider: :jira, message: message))
   end
 
   @doc "Returns a sanitized provider error for malformed success payloads."

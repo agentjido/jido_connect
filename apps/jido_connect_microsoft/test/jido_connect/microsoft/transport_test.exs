@@ -76,6 +76,30 @@ defmodule Jido.Connect.Microsoft.TransportTest do
   end
 
   describe "handle_error_response/2" do
+    test "retains retry and mutation data from a map error response" do
+      response =
+        {:ok,
+         %{
+           status: 429,
+           headers: %{"retry-after" => ["30"], "x-request-id" => ["graph-req"]},
+           body: %{"error" => %{"message" => "throttled"}}
+         }}
+
+      assert {:error, error} =
+               Transport.handle_error_response(response,
+                 operation: "graph.list",
+                 mutation?: true,
+                 provider_idempotency?: true,
+                 action_risk: :write
+               )
+
+      assert error.details.message == "throttled"
+      assert error.details.retry_after == 30
+      assert error.details.response.request_id == "graph-req"
+      assert error.details.response.operation == "graph.list"
+      assert error.details.response.retry_guidance == :retry_with_idempotency
+    end
+
     test "normalizes error responses with nested OData error message" do
       assert {:error,
               %Error.ProviderError{

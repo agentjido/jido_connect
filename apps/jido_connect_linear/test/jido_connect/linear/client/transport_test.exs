@@ -68,6 +68,27 @@ defmodule Jido.Connect.Linear.Client.TransportTest do
              )
   end
 
+  test "handle_error_response keeps retry metadata on map errors" do
+    response =
+      {:ok,
+       %{
+         status: 429,
+         headers: %{"retry-after" => ["30"], "x-request-id" => ["linear-req"]},
+         body: %{"errors" => [%{"message" => "rate limited"}]}
+       }}
+
+    assert {:error, error} =
+             Transport.handle_error_response(response,
+               operation: "linear.issues.search",
+               mutation?: false
+             )
+
+    assert error.details.message == "rate limited"
+    assert error.details.retry_after == 30
+    assert error.details.response.request_id == "linear-req"
+    assert error.details.response.operation == "linear.issues.search"
+  end
+
   test "handle_error_response extracts error messages from GraphQL format" do
     assert {:error, %Error.ProviderError{details: %{message: "Field is required"}}} =
              Transport.handle_error_response(

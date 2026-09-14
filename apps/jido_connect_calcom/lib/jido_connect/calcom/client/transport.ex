@@ -54,22 +54,24 @@ defmodule Jido.Connect.Calcom.Client.Transport do
   @spec handle_error_response(term(), keyword()) :: {:error, Error.ProviderError.t()}
   def handle_error_response(response, opts \\ [])
 
-  def handle_error_response({:ok, %{status: status, body: body}}, opts)
+  def handle_error_response({:ok, %{status: status, body: body}} = response, opts)
       when is_integer(status) and is_map(body) do
     message = Keyword.get(opts, :message, "Cal.com API request failed")
 
-    {:error,
-     Error.provider(message,
-       provider: :calcom,
-       reason: Keyword.get(opts, :reason, :http_error),
-       status: status,
-       details: %{message: calcom_error_message(body), body: body}
-     )}
+    Transport.provider_error(
+      response,
+      Keyword.merge(opts,
+        provider: :calcom,
+        message: message,
+        reason: Keyword.get(opts, :reason, :http_error),
+        detail_message: calcom_error_message(body)
+      )
+    )
   end
 
   def handle_error_response(response, opts) do
     message = Keyword.get(opts, :message, "Cal.com API request failed")
-    Transport.provider_error(response, provider: :calcom, message: message)
+    Transport.provider_error(response, Keyword.merge(opts, provider: :calcom, message: message))
   end
 
   @doc "Returns a sanitized provider error for malformed success payloads."

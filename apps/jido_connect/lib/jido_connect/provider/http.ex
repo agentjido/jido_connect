@@ -90,7 +90,7 @@ defmodule Jido.Connect.Http do
        mutation?: response.mutation?,
        provider_idempotency?: response.provider_idempotency?,
        details: %{
-         message: error_message(body),
+         message: Keyword.get(opts, :detail_message, error_message(body)),
          body: body,
          retry_after: response.retry_after,
          response: ProviderResponse.to_public_map(response)

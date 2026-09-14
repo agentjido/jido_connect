@@ -35,22 +35,28 @@ defmodule Jido.Connect.Nextcloud.Client.Transport do
   @doc "Normalizes a Nextcloud provider error response."
   def handle_error_response(response, opts \\ [])
 
-  def handle_error_response({:ok, %{status: status, body: body}}, opts)
+  def handle_error_response({:ok, %{status: status, body: body}} = response, opts)
       when is_integer(status) do
     message = Keyword.get(opts, :message, "Nextcloud API request failed")
 
-    {:error,
-     Error.provider(message,
-       provider: :nextcloud,
-       reason: Keyword.get(opts, :reason, reason_from_status(status)),
-       status: status,
-       details: %{message: error_message(body), body: body}
-     )}
+    Transport.provider_error(
+      response,
+      Keyword.merge(opts,
+        provider: :nextcloud,
+        message: message,
+        reason: Keyword.get(opts, :reason, reason_from_status(status)),
+        detail_message: error_message(body)
+      )
+    )
   end
 
   def handle_error_response(response, opts) do
     message = Keyword.get(opts, :message, "Nextcloud API request failed")
-    Transport.provider_error(response, provider: :nextcloud, message: message)
+
+    Transport.provider_error(
+      response,
+      Keyword.merge(opts, provider: :nextcloud, message: message)
+    )
   end
 
   def invalid_success_response(message, body) do

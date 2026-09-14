@@ -60,6 +60,30 @@ defmodule Jido.Connect.Google.TransportTest do
              )
   end
 
+  test "retains retry and mutation data from a map error response" do
+    response =
+      {:ok,
+       %{
+         status: 429,
+         headers: %{"retry-after" => ["30"], "x-request-id" => ["google-req"]},
+         body: %{"error" => %{"message" => "quota exceeded"}}
+       }}
+
+    assert {:error, error} =
+             Transport.handle_error_response(response,
+               operation: "google.read",
+               mutation?: true,
+               provider_idempotency?: true,
+               action_risk: :write
+             )
+
+    assert error.details.message == "quota exceeded"
+    assert error.details.retry_after == 30
+    assert error.details.response.request_id == "google-req"
+    assert error.details.response.operation == "google.read"
+    assert error.details.response.retry_guidance == :retry_with_idempotency
+  end
+
   test "normalizes alternate error response shapes and request failures" do
     assert {:error, %Error.ProviderError{details: %{message: "atom denied"}}} =
              Transport.handle_error_response(
