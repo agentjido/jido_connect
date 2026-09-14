@@ -12,8 +12,7 @@ defmodule Jido.Connect.MicrosoftOutlook.CatalogPacks do
   @triage_tools @metadata_tools ++
                   [
                     "microsoft.outlook.message.get",
-                    "microsoft.outlook.folder.get",
-                    "microsoft.outlook.message.move"
+                    "microsoft.outlook.folder.get"
                   ]
 
   @send_tools @metadata_tools ++
@@ -26,14 +25,8 @@ defmodule Jido.Connect.MicrosoftOutlook.CatalogPacks do
                   "microsoft.outlook.message.reply_all"
                 ]
 
-  @destructive_tools @metadata_tools ++
-                       [
-                         "microsoft.outlook.message.delete",
-                         "microsoft.outlook.draft.delete"
-                       ]
-
   @doc "Returns all built-in Outlook Mail catalog packs."
-  def all, do: [metadata(), triage(), send(), destructive()]
+  def all, do: [metadata(), triage(), send()]
 
   @doc "Read-only Outlook Mail metadata pack."
   def metadata do
@@ -48,13 +41,12 @@ defmodule Jido.Connect.MicrosoftOutlook.CatalogPacks do
     })
   end
 
-  @doc "Outlook Mail triage pack for reading and organizing messages."
+  @doc "Outlook Mail triage pack for reading messages and folders."
   def triage do
     Pack.new!(%{
       id: :microsoft_outlook_triage,
       label: "Outlook Mail triage",
-      description:
-        "Read Outlook Mail messages and folders, and move messages between folders. Excludes send, draft, and permanent delete tools.",
+      description: "Read Outlook Mail messages and folders. Excludes send and draft tools.",
       filters: %{provider: :microsoft_outlook},
       allowed_tools: @triage_tools,
       metadata: %{
@@ -63,9 +55,7 @@ defmodule Jido.Connect.MicrosoftOutlook.CatalogPacks do
           "microsoft.outlook.message.send",
           "microsoft.outlook.draft.create",
           "microsoft.outlook.draft.update",
-          "microsoft.outlook.draft.send",
-          "microsoft.outlook.message.delete",
-          "microsoft.outlook.draft.delete"
+          "microsoft.outlook.draft.send"
         ]
       }
     })
@@ -76,33 +66,16 @@ defmodule Jido.Connect.MicrosoftOutlook.CatalogPacks do
     Pack.new!(%{
       id: :microsoft_outlook_send,
       label: "Outlook Mail send",
-      description:
-        "Read Outlook Mail metadata and send or draft messages. Excludes mutation and delete tools.",
+      description: "Read Outlook Mail metadata and send or draft messages. Excludes other tools.",
       filters: %{provider: :microsoft_outlook},
       allowed_tools: @send_tools,
       metadata: %{
         package: :jido_connect_microsoft_outlook,
         excludes: [
           "microsoft.outlook.message.get",
-          "microsoft.outlook.folder.get",
-          "microsoft.outlook.message.move",
-          "microsoft.outlook.message.delete",
-          "microsoft.outlook.draft.delete"
+          "microsoft.outlook.folder.get"
         ]
       }
-    })
-  end
-
-  @doc "Outlook Mail destructive pack for explicit delete workflows."
-  def destructive do
-    Pack.new!(%{
-      id: :microsoft_outlook_destructive,
-      label: "Outlook Mail destructive",
-      description:
-        "Read Outlook Mail metadata and expose explicit message and draft delete operations.",
-      filters: %{provider: :microsoft_outlook},
-      allowed_tools: @destructive_tools,
-      metadata: %{package: :jido_connect_microsoft_outlook, risk: :destructive}
     })
   end
 end

@@ -76,14 +76,9 @@ Jido.Connect.MicrosoftOutlook.catalog_packs()
 | `microsoft.outlook.draft.send` | Send a draft message | message_content | required_for_ai | Mail.Send |
 | `microsoft.outlook.message.reply` | Reply to a message | message_content | required_for_ai | Mail.Send |
 | `microsoft.outlook.message.reply_all` | Reply-all to a message | message_content | required_for_ai | Mail.Send |
-| `microsoft.outlook.message.move` | Move message between folders | message_content | required_for_ai | Mail.ReadWrite |
 
-### Destructive
-
-| Action ID | Description | Classification | Confirmation | Scopes |
-|---|---|---|---|---|
-| `microsoft.outlook.message.delete` | Permanently delete a message | message_content | always | Mail.ReadWrite |
-| `microsoft.outlook.draft.delete` | Delete a draft message | message_content | always | Mail.ReadWrite |
+Message move, message delete, and draft delete are not in the active catalog.
+They need real handlers before the package can offer them.
 
 ## Privacy Boundary
 
@@ -108,12 +103,10 @@ guard for filtering sensitive keys.
 
 - **`:microsoft_outlook_metadata`** — Read-only profile, message list, and
   folder metadata. No mutation, send, or delete tools.
-- **`:microsoft_outlook_triage`** — Adds message get, folder get, and message
-  move. Excludes send, draft, and permanent delete tools.
+- **`:microsoft_outlook_triage`** — Adds message get and folder get. Excludes
+  send and draft tools.
 - **`:microsoft_outlook_send`** — Adds message send, draft create/update/send,
-  and reply/reply-all. Excludes move and delete tools.
-- **`:microsoft_outlook_destructive`** — Adds permanent message and draft
-  delete operations.
+  and reply/reply-all.
 
 ```elixir
 Jido.Connect.Catalog.search_tools("outlook",

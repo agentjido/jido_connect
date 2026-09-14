@@ -40,7 +40,7 @@ defmodule Jido.Connect.MicrosoftOutlook.CatalogPacksTest do
              )
   end
 
-  test "triage pack allows read and move tools and rejects send and delete" do
+  test "triage pack allows reads and rejects send" do
     assert {:ok, descriptor} =
              Catalog.describe_tool("microsoft.outlook.message.get",
                modules: [MicrosoftOutlook],
@@ -50,31 +50,15 @@ defmodule Jido.Connect.MicrosoftOutlook.CatalogPacksTest do
 
     assert descriptor.tool.id == "microsoft.outlook.message.get"
 
-    assert {:ok, move_descriptor} =
-             Catalog.describe_tool("microsoft.outlook.message.move",
-               modules: [MicrosoftOutlook],
-               packs: MicrosoftOutlook.catalog_packs(),
-               pack: :microsoft_outlook_triage
-             )
-
-    assert move_descriptor.tool.id == "microsoft.outlook.message.move"
-
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
              Catalog.describe_tool("microsoft.outlook.message.send",
                modules: [MicrosoftOutlook],
                packs: MicrosoftOutlook.catalog_packs(),
                pack: :microsoft_outlook_triage
              )
-
-    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
-             Catalog.describe_tool("microsoft.outlook.message.delete",
-               modules: [MicrosoftOutlook],
-               packs: MicrosoftOutlook.catalog_packs(),
-               pack: :microsoft_outlook_triage
-             )
   end
 
-  test "send pack allows send and draft tools and rejects destructive" do
+  test "send pack allows send and draft tools" do
     assert {:ok, descriptor} =
              Catalog.describe_tool("microsoft.outlook.message.send",
                modules: [MicrosoftOutlook],
@@ -92,46 +76,23 @@ defmodule Jido.Connect.MicrosoftOutlook.CatalogPacksTest do
              )
 
     assert draft_descriptor.tool.id == "microsoft.outlook.draft.create"
-
-    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
-             Catalog.describe_tool("microsoft.outlook.message.delete",
-               modules: [MicrosoftOutlook],
-               packs: MicrosoftOutlook.catalog_packs(),
-               pack: :microsoft_outlook_send
-             )
-
-    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
-             Catalog.describe_tool("microsoft.outlook.message.move",
-               modules: [MicrosoftOutlook],
-               packs: MicrosoftOutlook.catalog_packs(),
-               pack: :microsoft_outlook_send
-             )
   end
 
-  test "destructive pack exposes delete tools" do
-    assert {:ok, descriptor} =
-             Catalog.describe_tool("microsoft.outlook.message.delete",
-               modules: [MicrosoftOutlook],
-               packs: MicrosoftOutlook.catalog_packs(),
-               pack: :microsoft_outlook_destructive
-             )
+  test "no pack offers unimplemented move or delete operations" do
+    blocked = [
+      "microsoft.outlook.message.move",
+      "microsoft.outlook.message.delete",
+      "microsoft.outlook.draft.delete"
+    ]
 
-    assert descriptor.tool.id == "microsoft.outlook.message.delete"
+    assert Enum.map(MicrosoftOutlook.catalog_packs(), & &1.id) == [
+             :microsoft_outlook_metadata,
+             :microsoft_outlook_triage,
+             :microsoft_outlook_send
+           ]
 
-    assert {:ok, draft_descriptor} =
-             Catalog.describe_tool("microsoft.outlook.draft.delete",
-               modules: [MicrosoftOutlook],
-               packs: MicrosoftOutlook.catalog_packs(),
-               pack: :microsoft_outlook_destructive
-             )
-
-    assert draft_descriptor.tool.id == "microsoft.outlook.draft.delete"
-
-    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
-             Catalog.describe_tool("microsoft.outlook.message.send",
-               modules: [MicrosoftOutlook],
-               packs: MicrosoftOutlook.catalog_packs(),
-               pack: :microsoft_outlook_destructive
-             )
+    for pack <- MicrosoftOutlook.catalog_packs(), id <- blocked do
+      refute id in pack.allowed_tools
+    end
   end
 end

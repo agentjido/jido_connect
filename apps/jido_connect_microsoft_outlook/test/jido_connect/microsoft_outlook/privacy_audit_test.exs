@@ -23,10 +23,7 @@ defmodule Jido.Connect.MicrosoftOutlook.PrivacyAuditTest do
         "microsoft.outlook.draft.update",
         "microsoft.outlook.draft.send",
         "microsoft.outlook.message.reply",
-        "microsoft.outlook.message.reply_all",
-        "microsoft.outlook.message.move",
-        "microsoft.outlook.message.delete",
-        "microsoft.outlook.draft.delete"
+        "microsoft.outlook.message.reply_all"
       ])
 
     assert MapSet.new(Map.keys(actions_by_id)) == expected
@@ -87,22 +84,6 @@ defmodule Jido.Connect.MicrosoftOutlook.PrivacyAuditTest do
     assert reply_all.data_classification == :message_content
     assert reply_all.risk == :external_write
     assert reply_all.confirmation == :required_for_ai
-
-    move = actions_by_id["microsoft.outlook.message.move"]
-    assert move.data_classification == :message_content
-    assert move.risk == :write
-    assert move.confirmation == :required_for_ai
-
-    # ── Destructive actions ────────────────────────────────────────────
-    message_delete = actions_by_id["microsoft.outlook.message.delete"]
-    assert message_delete.data_classification == :message_content
-    assert message_delete.risk == :destructive
-    assert message_delete.confirmation == :always
-
-    draft_delete = actions_by_id["microsoft.outlook.draft.delete"]
-    assert draft_delete.data_classification == :message_content
-    assert draft_delete.risk == :destructive
-    assert draft_delete.confirmation == :always
   end
 
   test "normalizes Outlook message payloads without raw body leakage" do

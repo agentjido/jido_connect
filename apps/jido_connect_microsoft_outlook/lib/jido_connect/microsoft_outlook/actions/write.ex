@@ -4,7 +4,6 @@ defmodule Jido.Connect.MicrosoftOutlook.Actions.Write do
   use Spark.Dsl.Fragment, of: Jido.Connect
 
   @mail_send "Mail.Send"
-  @mail_read_write "Mail.ReadWrite"
   @scope_resolver Jido.Connect.MicrosoftOutlook.ScopeResolver
 
   actions do
@@ -165,31 +164,6 @@ defmodule Jido.Connect.MicrosoftOutlook.Actions.Write do
       output do
         field(:sent, :boolean)
         field(:message_id, :string)
-      end
-    end
-
-    action :move_message do
-      id("microsoft.outlook.message.move")
-      resource(:message)
-      verb(:update)
-      data_classification(:message_content)
-      label("Move Outlook Mail message")
-      description("Move an Outlook Mail message to a different folder.")
-      handler(Jido.Connect.MicrosoftOutlook.Handlers.Actions.MoveMessage)
-      effect(:write, confirmation: :required_for_ai)
-
-      access do
-        auth(:user)
-        scopes([@mail_read_write], resolver: @scope_resolver)
-      end
-
-      input do
-        field(:message_id, :string, required?: true, example: "AAMkAGI2...")
-        field(:destination_folder_id, :string, required?: true, example: "AAMkAGI2...")
-      end
-
-      output do
-        field(:message, :map)
       end
     end
   end

@@ -9,8 +9,7 @@ defmodule Jido.Connect.MicrosoftOutlook do
   use Jido.Connect,
     fragments: [
       Jido.Connect.MicrosoftOutlook.Actions.Read,
-      Jido.Connect.MicrosoftOutlook.Actions.Write,
-      Jido.Connect.MicrosoftOutlook.Actions.Destructive
+      Jido.Connect.MicrosoftOutlook.Actions.Write
     ]
 
   alias Jido.Connect.Microsoft.Scopes
@@ -20,7 +19,7 @@ defmodule Jido.Connect.MicrosoftOutlook do
     name("Microsoft Outlook Mail")
 
     description(
-      "Microsoft Outlook Mail message, draft, folder, send, and move tools via Microsoft Graph."
+      "Microsoft Outlook Mail message, draft, folder, and send tools via Microsoft Graph."
     )
 
     category(:email)
@@ -64,5 +63,4 @@ defmodule Jido.Connect.MicrosoftOutlook do
   defdelegate metadata_pack, to: Jido.Connect.MicrosoftOutlook.CatalogPacks, as: :metadata
   defdelegate triage_pack, to: Jido.Connect.MicrosoftOutlook.CatalogPacks, as: :triage
   defdelegate send_pack, to: Jido.Connect.MicrosoftOutlook.CatalogPacks, as: :send
-  defdelegate destructive_pack, to: Jido.Connect.MicrosoftOutlook.CatalogPacks, as: :destructive
 end

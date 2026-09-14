@@ -16,16 +16,12 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
     Jido.Connect.MicrosoftOutlook.Actions.UpdateDraft,
     Jido.Connect.MicrosoftOutlook.Actions.SendDraft,
     Jido.Connect.MicrosoftOutlook.Actions.ReplyMessage,
-    Jido.Connect.MicrosoftOutlook.Actions.ReplyAllMessage,
-    Jido.Connect.MicrosoftOutlook.Actions.MoveMessage,
-    Jido.Connect.MicrosoftOutlook.Actions.DeleteMessage,
-    Jido.Connect.MicrosoftOutlook.Actions.DeleteDraft
+    Jido.Connect.MicrosoftOutlook.Actions.ReplyAllMessage
   ]
 
   @outlook_dsl_fragments [
     Jido.Connect.MicrosoftOutlook.Actions.Read,
-    Jido.Connect.MicrosoftOutlook.Actions.Write,
-    Jido.Connect.MicrosoftOutlook.Actions.Destructive
+    Jido.Connect.MicrosoftOutlook.Actions.Write
   ]
 
   test "declares Microsoft Outlook Mail provider metadata" do
@@ -64,10 +60,7 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
              "microsoft.outlook.draft.update",
              "microsoft.outlook.draft.send",
              "microsoft.outlook.message.reply",
-             "microsoft.outlook.message.reply_all",
-             "microsoft.outlook.message.move",
-             "microsoft.outlook.message.delete",
-             "microsoft.outlook.draft.delete"
+             "microsoft.outlook.message.reply_all"
            ]
 
     send_action = Enum.find(spec.actions, &(&1.id == "microsoft.outlook.message.send"))
@@ -88,11 +81,9 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
     assert update_draft_action.risk == :write
     assert update_draft_action.confirmation == :required_for_ai
 
-    delete_message_action =
-      Enum.find(spec.actions, &(&1.id == "microsoft.outlook.message.delete"))
-
-    assert delete_message_action.risk == :destructive
-    assert delete_message_action.confirmation == :always
+    refute Enum.any?(spec.actions, &(&1.id == "microsoft.outlook.message.move"))
+    refute Enum.any?(spec.actions, &(&1.id == "microsoft.outlook.message.delete"))
+    refute Enum.any?(spec.actions, &(&1.id == "microsoft.outlook.draft.delete"))
   end
 
   test "compiles generated Jido modules for actions and plugin" do
@@ -107,8 +98,7 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
     ConnectorContracts.assert_catalog_pack_delegates(MicrosoftOutlook,
       metadata_pack: :microsoft_outlook_metadata,
       triage_pack: :microsoft_outlook_triage,
-      send_pack: :microsoft_outlook_send,
-      destructive_pack: :microsoft_outlook_destructive
+      send_pack: :microsoft_outlook_send
     )
 
     ConnectorContracts.assert_plugin_tool_availability(MicrosoftOutlook)
@@ -140,18 +130,6 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
              %{},
              %{scopes: ["Mail.Read"]}
            ) == ["Mail.Read"]
-
-    assert resolver.required_scopes(
-             %{id: "microsoft.outlook.message.move"},
-             %{},
-             %{scopes: ["Mail.ReadWrite"]}
-           ) == ["Mail.ReadWrite"]
-
-    assert resolver.required_scopes(
-             %{id: "microsoft.outlook.message.delete"},
-             %{},
-             %{scopes: ["Mail.ReadWrite"]}
-           ) == ["Mail.ReadWrite"]
 
     assert resolver.required_scopes(
              %{id: "microsoft.outlook.message.reply"},
@@ -203,16 +181,5 @@ defmodule Jido.Connect.MicrosoftOutlookTest do
 
     assert {:error, :missing_access_token} ==
              Jido.Connect.MicrosoftOutlook.Handlers.Actions.ReplyAllMessage.run(%{}, %{})
-  end
-
-  test "destructive shell handlers return not implemented" do
-    assert {:error, :not_implemented} ==
-             Jido.Connect.MicrosoftOutlook.Handlers.Actions.MoveMessage.run(%{}, %{})
-
-    assert {:error, :not_implemented} ==
-             Jido.Connect.MicrosoftOutlook.Handlers.Actions.DeleteMessage.run(%{}, %{})
-
-    assert {:error, :not_implemented} ==
-             Jido.Connect.MicrosoftOutlook.Handlers.Actions.DeleteDraft.run(%{}, %{})
   end
 end

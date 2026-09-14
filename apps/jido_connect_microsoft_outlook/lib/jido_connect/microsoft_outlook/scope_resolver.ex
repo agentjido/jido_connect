@@ -29,12 +29,6 @@ defmodule Jido.Connect.MicrosoftOutlook.ScopeResolver do
     "microsoft.outlook.message.reply_all"
   ]
 
-  @mutation_actions [
-    "microsoft.outlook.message.move",
-    "microsoft.outlook.message.delete",
-    "microsoft.outlook.draft.delete"
-  ]
-
   @doc "Returns the required Microsoft Graph scopes for the given operation."
   @spec required_scopes(map(), map(), map()) :: [String.t()]
   def required_scopes(operation, _input, connection) do
@@ -53,14 +47,6 @@ defmodule Jido.Connect.MicrosoftOutlook.ScopeResolver do
   end
 
   defp required_for_operation(operation_id, %{scopes: scopes})
-       when operation_id in @mutation_actions and is_list(scopes) do
-    cond do
-      @mail_read_write in scopes -> [@mail_read_write]
-      true -> [@mail_read_write]
-    end
-  end
-
-  defp required_for_operation(operation_id, %{scopes: scopes})
        when operation_id in @read_actions and is_list(scopes) do
     cond do
       @mail_read in scopes -> [@mail_read]
@@ -73,10 +59,6 @@ defmodule Jido.Connect.MicrosoftOutlook.ScopeResolver do
   defp required_for_operation(operation_id, _connection)
        when operation_id in @send_actions,
        do: [@mail_send]
-
-  defp required_for_operation(operation_id, _connection)
-       when operation_id in @mutation_actions,
-       do: [@mail_read_write]
 
   defp required_for_operation(_operation_id, _connection),
     do: [@mail_read]

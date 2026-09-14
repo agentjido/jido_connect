@@ -12,5 +12,5 @@
 - Do not log or expose access tokens, refresh tokens, or raw credential leases.
 - Normalize Graph mail payloads through dedicated Outlook structs once they are
   introduced.
-- Handlers in the initial scaffold return `{:error, :not_implemented}`. Replace
-  with real Graph calls in follow-up tasks.
+- Keep operations out of active declarations and packs until their handlers
+  make real Graph calls. Do not expose `{:error, :not_implemented}` handlers.
