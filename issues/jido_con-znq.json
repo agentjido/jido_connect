@@ -70,11 +70,15 @@
     {
       "text": "Release split after issue f670ce1c: 57 findings remain open. Tagged 25 core-package safety, MCP, API-contract, and release-documentation issues v3-release-blocker. Tagged 32 connector-only, authoring-tool, and lower-priority refinements v3-follow-up. The core Hex release gate waits for blockers and required checks, not every review finding. Follow-up issues remain in this goal and will keep one commit per issue. ExMCP notification-filter issue .38 remains an upstream-dependent blocker; GitHub workflow poller .39 is a connector follow-up. Work now proceeds in related batches of 3-5 issues, with focused tests per issue and umbrella/demo validation once per batch before close, sync, and push.",
       "timestamp": "2026-09-13T21:59:57Z"
+    },
+    {
+      "text": "Review cleanup progress: 65 of 67 child issues are closed. The release/3.0 branch includes one commit per local issue and passed CI at https://github.com/agentjido/jido_connect/actions/runs/34793709535. Remaining .37 waits for ExMCP PR #45 get_status/2 release and Connect timeout adoption. Remaining .38 has Connect-side filter enforcement in 44736e54 but waits for ExMCP PR #46 release and integration verification before close. No jido_mcp changes or package publication.",
+      "timestamp": "2026-09-14T00:50:40Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "Refine Jido Connect v3 from nine independent code reviews",
   "type": "epic",
-  "updated_at": "2026-09-13T21:59:57Z"
+  "updated_at": "2026-09-14T00:50:40Z"
 }
