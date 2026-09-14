@@ -17,11 +17,15 @@
     {
       "text": "Prepared upstream fix in ExMCP PR https://github.com/azmaveth/ex_mcp/pull/46 . Connect adoption remains open until ExMCP releases the acknowledgment validation and Connect verifies that reconnect reads stay within authorized scope.",
       "timestamp": "2026-09-13T23:23:03Z"
+    },
+    {
+      "text": "Connect defense landed in 44736e54 on release/3.0. The session now keeps its authorized filter, drops out-of-scope events, and stops before forwarding a broadened reconnect snapshot. The focused MCP test reproduced the pre-fix event leak, then 10 tests passed. Full umbrella mix quality and demo checks passed locally. ExMCP PR #46 remains open; adoption of a fixed release and read-level verification are still required before close. CI: https://github.com/agentjido/jido_connect/actions/runs/34793709535",
+      "timestamp": "2026-09-14T00:46:56Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "ExMCP accepts a broader notification filter from the server",
   "type": "task",
-  "updated_at": "2026-09-13T23:23:03Z"
+  "updated_at": "2026-09-14T00:46:56Z"
 }
