@@ -9,9 +9,15 @@
     "v3-follow-up"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Resolved in e97e217c on release/3.0. Full umbrella mix quality passed with Elixir 1.19.5/OTP 28; demo format, compile, and 21 tests passed. CI: https://github.com/agentjido/jido_connect/actions/runs/34791748831",
+      "timestamp": "2026-09-14T00:13:53Z"
+    }
+  ],
   "priority": 2,
   "status": "open",
   "title": "Outlook exposes unimplemented operations in available packs",
   "type": "bug",
-  "updated_at": "2026-09-13T21:59:42Z"
+  "updated_at": "2026-09-14T00:13:53Z"
 }
