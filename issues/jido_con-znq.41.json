@@ -9,9 +9,15 @@
     "v3-follow-up"
   ],
   "parent": "jido_con-znq",
+  "comments": [
+    {
+      "text": "Resolved in a432c7a7 on release/3.0. Full umbrella mix quality passed with Elixir 1.19.5/OTP 28; demo format, compile, and 21 tests passed. CI: https://github.com/agentjido/jido_connect/actions/runs/34791748831",
+      "timestamp": "2026-09-14T00:13:51Z"
+    }
+  ],
   "priority": 2,
   "status": "open",
   "title": "Google and Microsoft code exchanges omit the PKCE verifier",
   "type": "bug",
-  "updated_at": "2026-09-13T21:59:34Z"
+  "updated_at": "2026-09-14T00:13:51Z"
 }
