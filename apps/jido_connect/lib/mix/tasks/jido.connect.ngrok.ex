@@ -13,6 +13,8 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
 
   use Mix.Task
 
+  alias Jido.Connect.Dev.Ngrok
+
   @shortdoc "Starts an ngrok tunnel for local Jido Connect demos"
   @default_port 4000
   @ngrok_api ~c"http://127.0.0.1:4040/api/tunnels"
@@ -62,7 +64,7 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
       )
 
     port_ref
-    |> await_tunnel_url()
+    |> await_tunnel_url(port)
     |> print_urls(port, Keyword.get(opts, :provider))
 
     stream_ngrok(port_ref)
@@ -105,18 +107,19 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
     end
   end
 
-  defp await_tunnel_url(port_ref, attempts_left \\ 60)
+  defp await_tunnel_url(port_ref, local_port, attempts_left \\ 60)
 
-  defp await_tunnel_url(_port_ref, 0), do: Mix.raise("ngrok did not expose a public HTTPS tunnel")
+  defp await_tunnel_url(_port_ref, _local_port, 0),
+    do: Mix.raise("ngrok did not expose a public HTTPS tunnel for the requested port")
 
-  defp await_tunnel_url(port_ref, attempts_left) do
+  defp await_tunnel_url(port_ref, local_port, attempts_left) do
     receive do
       {^port_ref, {:data, {:eol, line}}} ->
         Mix.shell().info("[ngrok] #{line}")
 
         case tunnel_url_from_log(line) do
           {:ok, url} -> url
-          :error -> await_tunnel_url(port_ref, attempts_left)
+          :error -> await_tunnel_url(port_ref, local_port, attempts_left)
         end
 
       {^port_ref, {:data, {:noeol, line}}} ->
@@ -124,33 +127,31 @@ defmodule Mix.Tasks.Jido.Connect.Ngrok do
 
         case tunnel_url_from_log(line) do
           {:ok, url} -> url
-          :error -> await_tunnel_url(port_ref, attempts_left)
+          :error -> await_tunnel_url(port_ref, local_port, attempts_left)
         end
 
       {^port_ref, {:exit_status, status}} ->
         Mix.raise("ngrok exited before exposing a tunnel, status #{status}")
     after
       500 ->
-        case tunnel_url() do
+        case tunnel_url(local_port) do
           {:ok, url} -> url
-          :error -> await_tunnel_url(port_ref, attempts_left - 1)
+          :error -> await_tunnel_url(port_ref, local_port, attempts_left - 1)
         end
     end
   end
 
-  defp tunnel_url do
+  defp tunnel_url(local_port) do
     case :httpc.request(:get, {@ngrok_api, []}, [], body_format: :binary) do
       {:ok, {{_, 200, _}, _headers, body}} ->
         body
         |> Jason.decode!()
         |> Map.get("tunnels", [])
-        |> Enum.find_value(:error, fn tunnel ->
-          public_url = Map.get(tunnel, "public_url")
-
-          if is_binary(public_url) and String.starts_with?(public_url, "https://") do
-            {:ok, public_url}
-          end
-        end)
+        |> Ngrok.select_public_url(local_port)
+        |> case do
+          {:ok, url} -> {:ok, url}
+          {:error, _reason} -> :error
+        end
 
       _other ->
         :error
