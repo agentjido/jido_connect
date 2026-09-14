@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-14T00:46:38Z",
+  "close_reason": "Resolved in 6c440e35; CI passed",
   "created": "2026-09-13T20:05:32Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2858-7750-b28e-72cf480d2cec\n\n5. **P2 — Google and Microsoft error normalization removes retry metadata.**  \n   [Google transport.ex:39](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_google/lib/jido_connect/google/transport.ex:39), [Microsoft transport.ex:69](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_microsoft/lib/jido_connect/microsoft/transport.ex:69)\n\n   Map error responses bypass the shared response conversion. A `429` response with `Retry-After: 30` loses that interval when converted to a provider error. These clauses also ignore supplied mutation and idempotency options.\n\n   Google Sheets and Graph action callers use this path. Microsoft tests check header extraction separately from error normalization; they do not verify that callers receive the metadata.\n\n   **Correction:** preserve the common response fields from the original response, then add the provider-specific message. Pass the operation options through.\n\n---\n\nSource task: 01a09c57-2f9c-7a11-b8d1-4c833aa020b2\n\n3. **P2 — Shared foundation error handlers discard retry metadata.**  \n   [Microsoft transport line 69](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_microsoft/lib/jido_connect/microsoft/transport.ex:69) and [Google transport line 39](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_google/lib/jido_connect/google/transport.ex:39) extract only status and body from JSON error responses. They bypass the shared response envelope and discard response headers.\n\n   For a synthetic HTTP 429 response with `Retry-After: 30`, both foundations returned no retry delay. Linear had the same result. The shared core helper preserved the delay. Drive and Microsoft product handlers return these normalized errors, so the host cannot recover the lost value. **Smallest correction:** retain the complete response and use the core error helper, then add the provider-specific message. Add a test through a product handler. Fourteen transport files contain this copied clause pattern; check them during the correction.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.43",
@@ -16,8 +18,8 @@
     }
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "Google and Microsoft error normalization removes retry metadata",
   "type": "bug",
-  "updated_at": "2026-09-14T00:46:34Z"
+  "updated_at": "2026-09-14T00:46:38Z"
 }
