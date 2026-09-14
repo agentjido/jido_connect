@@ -43,6 +43,29 @@ defmodule Jido.Connect.Linear.Client.Normalizer do
 
   def issue(_payload), do: {:error, :invalid_issue_payload}
 
+  @doc "Projects a normalized issue into the fields returned by issue actions."
+  @spec action_issue(Issue.t()) :: map()
+  def action_issue(%Issue{} = issue) do
+    issue
+    |> Map.from_struct()
+    |> Map.take([
+      :id,
+      :identifier,
+      :title,
+      :description,
+      :priority,
+      :priority_label,
+      :created_at,
+      :updated_at
+    ])
+    |> Map.put(:status, project(issue.state, [:id, :name, :type, :color]))
+    |> Map.put(:team, project(issue.team, [:id, :key, :name]))
+    |> Map.put(:assignee, project(issue.assignee, [:id, :name, :email, :display_name]))
+    |> Map.put(:creator, project(issue.creator, [:id, :name, :email, :display_name]))
+    |> Map.put(:labels, Enum.map(issue.labels, &project(&1, [:id, :name, :color])))
+    |> Data.compact()
+  end
+
   # ---------------------------------------------------------------------------
   # Team
   # ---------------------------------------------------------------------------
@@ -169,6 +192,15 @@ defmodule Jido.Connect.Linear.Client.Normalizer do
   # ---------------------------------------------------------------------------
   # Private helpers
   # ---------------------------------------------------------------------------
+
+  defp project(nil, _fields), do: nil
+
+  defp project(%_{} = value, fields) do
+    value
+    |> Map.from_struct()
+    |> Map.take(fields)
+    |> Data.compact()
+  end
 
   defp normalize_state(nil), do: nil
 

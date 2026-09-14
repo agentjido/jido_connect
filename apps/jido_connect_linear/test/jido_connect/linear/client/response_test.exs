@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Linear.Client.ResponseTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Linear.Client.Response
+  alias Jido.Connect.Linear.Client.{Normalizer, Response}
 
   describe "handle_issue_response/1" do
     test "normalizes a successful issue get response" do
@@ -35,6 +35,12 @@ defmodule Jido.Connect.Linear.Client.ResponseTest do
       assert issue.assignee.name == "Test User"
       assert length(issue.labels) == 1
       assert hd(issue.labels).name == "bug"
+
+      assert {:ok, normalized} = Normalizer.issue(body["data"]["issue"])
+      assert issue.status.id == normalized.state.id
+      assert issue.team.key == normalized.team.key
+      refute Map.has_key?(issue, :state)
+      refute Map.has_key?(issue, :metadata)
     end
 
     test "returns error for GraphQL errors" do

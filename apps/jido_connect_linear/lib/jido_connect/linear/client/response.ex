@@ -2,7 +2,7 @@ defmodule Jido.Connect.Linear.Client.Response do
   @moduledoc "Linear GraphQL success and error response handling."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Linear.Client.Transport
+  alias Jido.Connect.Linear.Client.{Normalizer, Transport}
 
   @doc "Handles a GraphQL response, extracting data or errors."
   def handle_graphql_response({:ok, %{status: status, body: body}})
@@ -258,59 +258,13 @@ defmodule Jido.Connect.Linear.Client.Response do
   # ---------------------------------------------------------------------------
 
   defp normalize_issue(payload) when is_map(payload) do
-    %{
-      id: Data.get(payload, "id"),
-      identifier: Data.get(payload, "identifier"),
-      title: Data.get(payload, "title"),
-      description: Data.get(payload, "description"),
-      status: normalize_status(Data.get(payload, "state")),
-      priority: normalize_priority(Data.get(payload, "priority")),
-      priority_label: Data.get(payload, "priorityLabel"),
-      team: normalize_team_brief(Data.get(payload, "team")),
-      assignee: normalize_user(Data.get(payload, "assignee")),
-      creator: normalize_user(Data.get(payload, "creator")),
-      labels: normalize_labels(Data.get(payload, "labels", [])),
-      created_at: Data.get(payload, "createdAt"),
-      updated_at: Data.get(payload, "updatedAt")
-    }
-    |> Data.compact()
+    case Normalizer.issue(payload) do
+      {:ok, issue} -> Normalizer.action_issue(issue)
+      {:error, _reason} -> nil
+    end
   end
 
   defp normalize_issue(_payload), do: nil
-
-  defp normalize_status(nil), do: nil
-
-  defp normalize_status(state) when is_map(state) do
-    %{
-      id: Data.get(state, "id"),
-      name: Data.get(state, "name"),
-      type: Data.get(state, "type"),
-      color: Data.get(state, "color")
-    }
-    |> Data.compact()
-  end
-
-  defp normalize_priority(nil), do: nil
-
-  defp normalize_priority(priority) when is_integer(priority) do
-    %{
-      value: priority,
-      label: priority_label(priority)
-    }
-  end
-
-  defp normalize_priority(_), do: nil
-
-  defp normalize_team_brief(nil), do: nil
-
-  defp normalize_team_brief(team) when is_map(team) do
-    %{
-      id: Data.get(team, "id"),
-      key: Data.get(team, "key"),
-      name: Data.get(team, "name")
-    }
-    |> Data.compact()
-  end
 
   defp normalize_user(nil), do: nil
 
@@ -323,34 +277,6 @@ defmodule Jido.Connect.Linear.Client.Response do
     }
     |> Data.compact()
   end
-
-  defp normalize_labels(%{"nodes" => nodes}) when is_list(nodes) do
-    normalize_labels(nodes)
-  end
-
-  defp normalize_labels(labels) when is_list(labels) do
-    Enum.map(labels, fn
-      label when is_map(label) ->
-        %{
-          id: Data.get(label, "id"),
-          name: Data.get(label, "name"),
-          color: Data.get(label, "color")
-        }
-        |> Data.compact()
-
-      other ->
-        other
-    end)
-  end
-
-  defp normalize_labels(_), do: []
-
-  defp priority_label(0), do: "No priority"
-  defp priority_label(1), do: "Urgent"
-  defp priority_label(2), do: "High"
-  defp priority_label(3), do: "Medium"
-  defp priority_label(4), do: "Low"
-  defp priority_label(_), do: "Unknown"
 
   defp normalize_team(payload) when is_map(payload) do
     %{
