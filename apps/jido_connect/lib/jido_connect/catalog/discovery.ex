@@ -36,22 +36,40 @@ defmodule Jido.Connect.Catalog.Discovery do
 
   @spec discover_with_diagnostics(keyword()) :: DiscoveryResult.t()
   def discover_with_diagnostics(opts \\ []) do
+    {entry_specs, diagnostics} = discover_with_specs(opts)
+
+    DiscoveryResult.new!(%{
+      entries: Enum.map(entry_specs, fn {entry, _spec, _projection} -> entry end),
+      diagnostics: diagnostics
+    })
+  end
+
+  @doc false
+  @spec discover_with_specs(keyword()) ::
+          {[{Jido.Connect.Catalog.Entry.t(), Jido.Connect.Spec.t(), term()}],
+           [Jido.Connect.Catalog.Diagnostic.t()]}
+  def discover_with_specs(opts \\ []) do
     modules =
       opts
       |> Keyword.get(:modules, configured_modules())
       |> normalize_modules()
 
-    {entries, diagnostics} =
+    {entry_specs, diagnostics} =
       modules
       |> Enum.map(&entry_result/1)
       |> split_results()
 
-    entries =
-      entries
+    by_module =
+      Map.new(entry_specs, fn {entry, _spec, _projection} = value -> {entry.module, value} end)
+
+    entry_specs =
+      entry_specs
+      |> Enum.map(fn {entry, _spec, _projection} -> entry end)
       |> Filter.entries(opts)
       |> Search.entries(Keyword.get(opts, :query, Keyword.get(opts, :q)))
+      |> Enum.map(&Map.fetch!(by_module, &1.module))
 
-    DiscoveryResult.new!(%{entries: entries, diagnostics: diagnostics})
+    {entry_specs, diagnostics}
   end
 
   defp split_results(results) do
@@ -69,12 +87,16 @@ defmodule Jido.Connect.Catalog.Discovery do
     with {:module, ^module} <- Code.ensure_loaded(module),
          true <- function_exported?(module, :integration, 0),
          {:ok, spec} <- Provider.spec(module),
-         {:ok, entry} <-
-           Callback.run(fn -> Builder.entry_from_spec(spec, module, projection(module)) end,
+         {:ok, {entry, projection}} <-
+           Callback.run(
+             fn ->
+               projection = projection(module)
+               {Builder.entry_from_spec(spec, module, projection), projection}
+             end,
              phase: :catalog_discovery,
              details: %{module: module}
            ) do
-      {:entry, entry}
+      {:entry, {entry, spec, projection}}
     else
       {:error, %_{} = error} ->
         {:diagnostic,

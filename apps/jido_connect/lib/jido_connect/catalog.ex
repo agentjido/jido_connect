@@ -12,8 +12,8 @@ defmodule Jido.Connect.Catalog do
   modules configured with `config :jido_connect, :catalog_modules, [...]`.
 
   Use `discover/1` for lenient runtime catalog views and
-  `discover_with_diagnostics/1` for CI, demos, and admin screens that should
-  report broken or missing connectors.
+  `discover_with_diagnostics/1` for entry failures, or
+  `items_with_diagnostics/1` to also report item projection failures.
   """
 
   alias Jido.Connect.Catalog.{
@@ -23,6 +23,7 @@ defmodule Jido.Connect.Catalog do
     Entry,
     Filter,
     Item,
+    ItemDiscoveryResult,
     ItemLookup,
     ItemSearchResult,
     Manifest,
@@ -117,18 +118,36 @@ defmodule Jido.Connect.Catalog do
   @doc "Returns canonical catalog items across discovered providers."
   @spec items(keyword() | map()) :: [Item.t()]
   def items(opts \\ []) do
+    case items_with_diagnostics(opts) do
+      %ItemDiscoveryResult{items: items} -> items
+      {:error, _error} -> []
+    end
+  end
+
+  @doc "Returns catalog items and provider diagnostics, including item projection errors."
+  @spec items_with_diagnostics(keyword() | map()) ::
+          ItemDiscoveryResult.t() | {:error, Error.error()}
+  def items_with_diagnostics(opts \\ []) do
     opts = normalize_opts(opts)
 
     case Pack.resolve(Keyword.get(opts, :pack), opts) do
       {:ok, pack} ->
-        opts
-        |> Pack.apply_filters(pack)
-        |> item_entries()
-        |> Pack.filter_items(pack)
-        |> Search.items(Keyword.get(opts, :query, Keyword.get(opts, :q)))
+        %ItemDiscoveryResult{} =
+          result =
+          opts
+          |> Pack.apply_filters(pack)
+          |> item_entries_with_diagnostics()
 
-      {:error, _error} ->
-        []
+        %ItemDiscoveryResult{
+          result
+          | items:
+              result.items
+              |> Pack.filter_items(pack)
+              |> Search.items(Keyword.get(opts, :query, Keyword.get(opts, :q)))
+        }
+
+      {:error, _error} = error ->
+        error
     end
   end
 
@@ -289,31 +308,50 @@ defmodule Jido.Connect.Catalog do
   defdelegate to_map(entry_or_tool), to: Serializer
 
   defp item_entries(opts) do
-    provider_opts = Keyword.drop(opts, [:query, :q, :type, :risk, :confirmation, :pack, :packs])
-
-    provider_opts
-    |> discover()
-    |> Enum.flat_map(&items_for_entry/1)
-    |> Filter.items(opts)
+    item_entries_with_diagnostics(opts).items
   end
 
-  defp items_for_entry(%Entry{} = entry) do
-    with {:ok, spec} <- Provider.spec(entry.module),
-         {:ok, items} <-
-           Callback.run(
-             fn ->
-               Builder.items_from_spec(spec, entry.module, projection(entry.module),
-                 status: entry.status,
-                 version: entry.version
-               )
-             end,
-             phase: :catalog_item_projection,
-             details: %{module: entry.module}
-           ) do
-      items
-    else
-      _error -> []
-    end
+  defp item_entries_with_diagnostics(opts) do
+    provider_opts = Keyword.drop(opts, [:query, :q, :type, :risk, :confirmation, :pack, :packs])
+
+    {entry_specs, entry_diagnostics} = Discovery.discover_with_specs(provider_opts)
+
+    {items, item_diagnostics} =
+      Enum.reduce(entry_specs, {[], []}, fn {entry, spec, projection}, {items, diagnostics} ->
+        case items_for_entry(entry, spec, projection) do
+          {:ok, projected} ->
+            {items ++ projected, diagnostics}
+
+          {:error, error} ->
+            diagnostic =
+              Jido.Connect.Catalog.Diagnostic.new!(%{
+                module: entry.module,
+                reason: :item_projection_failed,
+                message: "Catalog items could not be built",
+                details: %{error: Error.to_map(error)}
+              })
+
+            {items, diagnostics ++ [diagnostic]}
+        end
+      end)
+
+    ItemDiscoveryResult.new!(%{
+      items: Filter.items(items, opts),
+      diagnostics: entry_diagnostics ++ item_diagnostics
+    })
+  end
+
+  defp items_for_entry(%Entry{} = entry, spec, projection) do
+    Callback.run(
+      fn ->
+        Builder.items_from_spec(spec, entry.module, projection,
+          status: entry.status,
+          version: entry.version
+        )
+      end,
+      phase: :catalog_item_projection,
+      details: %{module: entry.module}
+    )
   end
 
   defp require_exact_modules([]) do

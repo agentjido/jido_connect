@@ -117,6 +117,21 @@ defmodule Jido.Connect.CatalogFixtures do
     def integration, do: %{id: :not_a_spec}
   end
 
+  defmodule ProjectionFailureIntegration do
+    def integration do
+      spec = Integration.integration()
+      action = %{hd(spec.actions) | input_schema: :invalid_schema}
+      %{spec | id: :projection_failure, actions: [action]}
+    end
+  end
+
+  defmodule CountingIntegration do
+    def integration do
+      Process.put(:catalog_integration_reads, Process.get(:catalog_integration_reads, 0) + 1)
+      Integration.integration()
+    end
+  end
+
   defmodule MissingIntegrationCallback do
   end
 

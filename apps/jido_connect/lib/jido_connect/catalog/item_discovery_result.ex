@@ -1,13 +1,13 @@
-defmodule Jido.Connect.Catalog.Diagnostic do
-  @moduledoc "Diagnostic emitted when catalog discovery cannot build an entry or its items."
+defmodule Jido.Connect.Catalog.ItemDiscoveryResult do
+  @moduledoc "Catalog item result with diagnostics for entry and item projection failures."
+
+  alias Jido.Connect.Catalog.{Diagnostic, Item}
 
   @schema Zoi.struct(
             __MODULE__,
             %{
-              module: Zoi.module(),
-              reason: Zoi.atom(),
-              message: Zoi.string(),
-              details: Zoi.map() |> Zoi.default(%{})
+              items: Zoi.list(Item.schema()) |> Zoi.default([]),
+              diagnostics: Zoi.list(Diagnostic.schema()) |> Zoi.default([])
             },
             coerce: true
           )

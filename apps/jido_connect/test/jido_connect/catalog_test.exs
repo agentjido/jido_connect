@@ -391,6 +391,31 @@ defmodule Jido.Connect.CatalogTest do
            ] = Catalog.tools(modules: [CatalogFixtures.Integration])
   end
 
+  test "item diagnostics report a failure after a valid entry is built" do
+    modules = [CatalogFixtures.Integration, CatalogFixtures.ProjectionFailureIntegration]
+
+    assert [%Catalog.Entry{}, %Catalog.Entry{}] = Catalog.discover(modules: modules)
+
+    assert %Catalog.ItemDiscoveryResult{
+             items: [%Catalog.Item{provider: :catalog}, %Catalog.Item{provider: :catalog}],
+             diagnostics: [%Catalog.Diagnostic{} = diagnostic]
+           } = Catalog.items_with_diagnostics(modules: modules)
+
+    assert diagnostic.module == CatalogFixtures.ProjectionFailureIntegration
+    assert diagnostic.reason == :item_projection_failed
+    assert is_map(diagnostic.details.error)
+    assert Enum.map(Catalog.items(modules: modules), & &1.provider) == [:catalog, :catalog]
+  end
+
+  test "item discovery reads each integration spec once" do
+    Process.delete(:catalog_integration_reads)
+
+    assert %Catalog.ItemDiscoveryResult{items: [_action, _trigger], diagnostics: []} =
+             Catalog.items_with_diagnostics(modules: [CatalogFixtures.CountingIntegration])
+
+    assert Process.get(:catalog_integration_reads) == 1
+  end
+
   test "tool availability evaluates connection scopes without a credential lease" do
     {context, _lease} = CatalogFixtures.context_and_lease()
 
