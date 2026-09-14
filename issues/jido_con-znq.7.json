@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-14T00:02:31Z",
+  "close_reason": "Resolved in e553c2cc; CI passed",
   "created": "2026-09-13T20:05:08Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-1cfa-7d40-bb71-a5688aa49672\n\n7. **P2 — Generated provider packages do not register for catalog discovery.**  \n   [provider_scaffold.ex:74](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/dev/provider_scaffold.ex:74) generates application settings with only `extra_applications`. [discovery.ex:19](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/catalog/discovery.ex:19) finds installed providers through `:jido_connect_providers`. Therefore, a generated package remains absent from normal discovery unless the host adds separate configuration. The scaffold test checks file contents but does not check registration.  \n   **Correction:** Generate `env: [jido_connect_providers: [ProviderModule]]` in the package application settings.\n\n---\n\nSource task: 01a09c57-2d23-7271-a03d-67000b3c156d\n\n3. **P2 — Generated providers do not register for discovery.**  \n   [provider_scaffold.ex:74](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/dev/provider_scaffold.ex:74) emits only `extra_applications`. It omits `env: [jido_connect_providers: [...]]`. [Discovery:21](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/catalog/discovery.ex:21) reads that application metadata. The generated DSL does not replace this registration step. Thus, installing and starting the generated package does not make its provider discoverable.  \n   **Correction:** Include the generated integration module in the application metadata.\n\n---\n\nSource task: 01a09c57-2f9c-7a11-b8d1-4c833aa020b2\n\n2. **P2 — Generated provider packages do not register for discovery.**  \n   The generator emits an application definition without `jido_connect_providers` at [provider_scaffold.ex:74](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/dev/provider_scaffold.ex:74). Discovery reads this registration from loaded applications at [discovery.ex:20](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/catalog/discovery.ex:20).\n\n   A host that installs a generated package will not discover its provider unless it adds manual configuration. The generator test checks file content but does not check registration. **Smallest correction:** emit `env: [jido_connect_providers: [Jido.Connect.\u003cProvider\u003e]]` and verify discovery from a generated package.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.7",
@@ -16,8 +18,8 @@
     }
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "Generated provider packages do not register for catalog discovery",
   "type": "bug",
-  "updated_at": "2026-09-14T00:02:30Z"
+  "updated_at": "2026-09-14T00:02:31Z"
 }
