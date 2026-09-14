@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-14T00:13:53Z",
+  "close_reason": "Resolved in e97e217c; CI passed",
   "created": "2026-09-13T20:05:45Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2f9c-7a11-b8d1-4c833aa020b2\n\n4. **P2 — Outlook exposes unimplemented operations in available packs.**  \n   [Catalog packs](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_microsoft_outlook/lib/jido_connect/microsoft_outlook/catalog_packs.ex:12) include message move, message delete, and draft delete. The provider declares [available status](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_microsoft_outlook/lib/jido_connect/microsoft_outlook.ex:32), but the handlers always return `{:error, :not_implemented}`. See [DeleteMessage line 4](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_microsoft_outlook/lib/jido_connect/microsoft_outlook/handlers/actions/delete_message.ex:4).\n\n   The [existing test](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect_microsoft_outlook/test/jido_connect/microsoft_outlook_test.exs:208) explicitly confirms all three stubs. This is an exposure defect, not evidence that the planned implementation was overlooked. A host can offer approval for an operation that cannot execute. **Smallest correction:** remove these operations from active declarations and packs until implemented.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.62",
@@ -16,7 +18,7 @@
     }
   ],
   "priority": 2,
-  "status": "open",
+  "status": "closed",
   "title": "Outlook exposes unimplemented operations in available packs",
   "type": "bug",
   "updated_at": "2026-09-14T00:13:53Z"
