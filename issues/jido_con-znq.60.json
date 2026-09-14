@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-14T00:46:49Z",
+  "close_reason": "Resolved in 9385c913; CI passed",
   "created": "2026-09-13T20:05:44Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: design improvement.\n\nSource task: 01a09c57-2d23-7271-a03d-67000b3c156d\n\n- **P3 — Share tunnel discovery and separate demo route text.** [The core ngrok task](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/mix/tasks/jido.connect.ngrok.ex:171) contains fixed demo, GitHub, and Slack routes. It also duplicates the helper’s HTTP lookup. Share the lookup and make its API address configurable. Keep provider route text with its callers. The helper has active callers, so removal is not justified.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.60",
@@ -16,8 +18,8 @@
     }
   ],
   "priority": 3,
-  "status": "open",
+  "status": "closed",
   "title": "Share tunnel discovery and separate demo route text",
   "type": "task",
-  "updated_at": "2026-09-14T00:46:48Z"
+  "updated_at": "2026-09-14T00:46:49Z"
 }
