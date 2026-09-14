@@ -21,11 +21,15 @@
     {
       "text": "Connect defense landed in 44736e54 on release/3.0. The session now keeps its authorized filter, drops out-of-scope events, and stops before forwarding a broadened reconnect snapshot. The focused MCP test reproduced the pre-fix event leak, then 10 tests passed. Full umbrella mix quality and demo checks passed locally. ExMCP PR #46 remains open; adoption of a fixed release and read-level verification are still required before close. CI: https://github.com/agentjido/jido_connect/actions/runs/34793709535",
       "timestamp": "2026-09-14T00:46:56Z"
+    },
+    {
+      "text": "Connect-side commit 44736e54 passed CI https://github.com/agentjido/jido_connect/actions/runs/34793709535, including umbrella quality, demo, and connector factory. Keep open for ExMCP PR #46 merge/release, fixed dependency adoption, and read-level integration test.",
+      "timestamp": "2026-09-14T00:50:40Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "ExMCP accepts a broader notification filter from the server",
   "type": "task",
-  "updated_at": "2026-09-14T00:46:56Z"
+  "updated_at": "2026-09-14T00:50:40Z"
 }
