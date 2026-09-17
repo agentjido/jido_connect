@@ -83,11 +83,15 @@
     {
       "text": "All 67 review children are closed. Final two: .37 in baa2a539 and .38 in 0f2b7981. ExMCP is pinned to merged Git commit d07c18b0c3f38fa21f65974899d8a9a5047e2dbe. Core and umbrella quality, demo checks, and dependency audit passed. Connect GitHub #82/#83 remain as Hex-release migration trackers; #81 legacy notifications and #79 Cowlib findings are separate. No jido_mcp changes or package publication.",
       "timestamp": "2026-09-17T19:12:29Z"
+    },
+    {
+      "text": "Final verification: pushed release/3.0 head 0f2b7981. GitHub CI run https://github.com/agentjido/jido_connect/actions/runs/35263521069 passed umbrella quality, demo format/compile/tests, and connector factory checks. All 67 review children remain closed. The Git pin is a development dependency; Hex release migration remains in Connect GitHub #82/#83.",
+      "timestamp": "2026-09-17T19:18:10Z"
     }
   ],
   "priority": 1,
   "status": "closed",
   "title": "Refine Jido Connect v3 from nine independent code reviews",
   "type": "epic",
-  "updated_at": "2026-09-17T19:12:29Z"
+  "updated_at": "2026-09-17T19:18:10Z"
 }
