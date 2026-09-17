@@ -74,11 +74,15 @@
     {
       "text": "Review cleanup progress: 65 of 67 child issues are closed. The release/3.0 branch includes one commit per local issue and passed CI at https://github.com/agentjido/jido_connect/actions/runs/34793709535. Remaining .37 waits for ExMCP PR #45 get_status/2 release and Connect timeout adoption. Remaining .38 has Connect-side filter enforcement in 44736e54 but waits for ExMCP PR #46 release and integration verification before close. No jido_mcp changes or package publication.",
       "timestamp": "2026-09-14T00:50:40Z"
+    },
+    {
+      "text": "Catch-up 2026-09-17: 65/67 review children closed. ExMCP PRs #45 and #46 are merged; issues #43 and #42 are closed. No Hex release newer than 1.3.0 exists yet, so Connect cannot adopt the fixed public API and subscription validation while keeping a Hex dependency. Children .37 and .38 remain open for the new release and Connect integration tests. Separate follow-ups: ExMCP #44 / Connect #81 for legacy notifications; Connect #79 for remaining Cowlib advisories. No jido_mcp changes or publication.",
+      "timestamp": "2026-09-17T13:50:23Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "Refine Jido Connect v3 from nine independent code reviews",
   "type": "epic",
-  "updated_at": "2026-09-14T00:50:40Z"
+  "updated_at": "2026-09-17T13:50:23Z"
 }
