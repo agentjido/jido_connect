@@ -25,11 +25,15 @@
     {
       "text": "Fixed in the Connect development line at the exact ExMCP Git commit d07c18b0c3f38fa21f65974899d8a9a5047e2dbe. Commit 73924eda was amended to include the final demo evidence; use the final commit hash from git log. The generated status action now passes its validated timeout through ExMCP.Client.get_status/2 and maps expiry to the safe timeout error. Focused test: 11 passed. Umbrella mix quality passed. Demo format, warnings-as-errors compile, and 21 tests passed. A Hex release is still needed before package publication.",
       "timestamp": "2026-09-17T19:06:23Z"
+    },
+    {
+      "text": "Final amended commit: baa2a539.",
+      "timestamp": "2026-09-17T19:06:29Z"
     }
   ],
   "priority": 2,
   "status": "in_progress",
   "title": "Status ignores the declared timeout",
   "type": "task",
-  "updated_at": "2026-09-17T19:06:23Z"
+  "updated_at": "2026-09-17T19:06:29Z"
 }
