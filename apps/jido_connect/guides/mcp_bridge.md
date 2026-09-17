@@ -1,6 +1,8 @@
 # MCP Client Bridge
 
-Core `jido_connect` uses ExMCP 1.3 for MCP client protocol and transports.
+Core `jido_connect` uses the pinned ExMCP Git commit in the
+[v3 dependency record](../../../docs/v3_status.md) for MCP client protocol and
+transports. Replace it with a fixed Hex release before package publication.
 The `release/3.0` branch is for maintainer development with Action v3.
 
 | Generated action | Required capability scope | Extra input |

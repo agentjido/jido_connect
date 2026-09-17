@@ -158,6 +158,28 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
     refute Map.has_key?(status, "transport")
   end
 
+  test "generated status action applies its timeout and keeps public fields", state do
+    assert {:ok, %{result: status}} = run(:Status, %{timeout: 1_000}, state)
+    assert status["protocol_version"]
+    refute Map.has_key?(status, "transport")
+
+    assert {:error, %{reason: :invalid_params}} =
+             ExMCPClient.status(state.client, timeout: 0)
+
+    :ok = :sys.suspend(state.client)
+
+    try do
+      started_at = System.monotonic_time(:millisecond)
+
+      assert {:error, %Connect.Error.ProviderError{reason: :timeout}} =
+               run(:Status, %{timeout: 20}, state)
+
+      assert System.monotonic_time(:millisecond) - started_at < 1_000
+    after
+      :ok = :sys.resume(state.client)
+    end
+  end
+
   test "requires resource and prompt permission before dispatch", state do
     assert {:error, %Connect.Error.AuthError{reason: :missing_scopes}} =
              run(:ReadResource, %{uri: "test://private"}, state)

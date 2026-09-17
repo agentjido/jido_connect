@@ -6,14 +6,14 @@ change with each deliberate upstream update.
 
 ## Dependency record
 
-Selected on 2026-09-13:
+Selected on 2026-09-17 for verification of the merged ExMCP fixes:
 
 | Package | Requirement | Source |
 | --- | --- | --- |
 | `jido_action` | `== 3.0.0-beta.10` | Hex |
 | `jido_signal` | `== 3.0.0-beta.4` | Hex |
 | `jido` | `b02052402a6f1c4be10098c2d560831f14daec58` | Exact commit from `v3-spike` |
-| `ex_mcp` | `~> 1.3`, locked to 1.3.0 | Hex |
+| `ex_mcp` | `d07c18b0c3f38fa21f65974899d8a9a5047e2dbe` | Exact GitHub commit after upstream PRs #45 and #46 |
 | `bandit` | Locked to 1.12.5 in the shared demo/umbrella lockfile | Hex |
 
 Action is a published beta, although this work may also use alpha packages.
@@ -21,6 +21,11 @@ The Action override selects the Hex package instead of the local path in the
 selected Jido source. Jido v3 is not yet on Hex. Replace its Git reference when
 a suitable package is available; do not return to the abandoned Jido v2/v3
 compatibility PR #324.
+
+ExMCP PRs #45 and #46 are merged, but Hex 1.3.0 does not contain their status
+timeout and subscription-filter fixes. The exact Git commit above selects both
+fixes for Connect verification. Replace it with a fixed Hex release before
+building a Connect Hex package.
 
 ## Client release scope
 
@@ -65,6 +70,12 @@ exceptions after each ExMCP or HTTP-stack update and before publication.
 
 ## Verification
 
+On 2026-09-17, the pinned ExMCP commit compiled with the v3 umbrella. The
+generated endpoint-status action passed a delayed-client timeout test and a
+responsive-client field check. Umbrella `mix quality` passed with this pin.
+Demo formatting, warnings-as-errors compilation, and 21 tests also passed.
+Subscription-filter integration follows in the next review issue.
+
 Checked locally on Elixir 1.20.3 and OTP 29.0.5:
 
 - Umbrella `mix quality`: passed, 4,137 tests across 41 packages; 39 live tests excluded.
@@ -78,7 +89,7 @@ Commit `09f3a555` loads the module before it checks the transport callback.
 That small fix can be backported to v2 independently.
 
 No package was published. A Hex package build was not claimed because the
-Jido dependency still uses Git. CI also checks the declared Elixir 1.19.5 /
+Jido and ExMCP dependencies use Git. CI also checks the declared Elixir 1.19.5 /
 OTP 28.3 environment when these commits are pushed.
 
 ## Work after this change

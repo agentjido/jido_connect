@@ -197,31 +197,25 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   def close_subscription(subscription), do: ExMCP.Client.Subscription.cancel(subscription)
 
   @impl true
-  def status(client, _opts) do
+  def status(client, opts) do
     request(fn ->
-      case ExMCP.Client.get_status(client) do
-        %{} = status ->
-          {:ok,
-           Map.take(status, [
-             :connection_status,
-             :protocol_version,
-             :server_info,
-             :server_capabilities
-           ])}
-
-        {:ok, %{} = status} ->
-          {:ok,
-           Map.take(status, [
-             :connection_status,
-             :protocol_version,
-             :server_info,
-             :server_capabilities
-           ])}
-
-        error ->
-          error
+      with {:ok, request_opts} <- request_opts(opts, false) do
+        case ExMCP.Client.get_status(client, Keyword.take(request_opts, [:timeout])) do
+          %{} = status -> {:ok, public_status(status)}
+          {:ok, %{} = status} -> {:ok, public_status(status)}
+          error -> error
+        end
       end
     end)
+  end
+
+  defp public_status(status) do
+    Map.take(status, [
+      :connection_status,
+      :protocol_version,
+      :server_info,
+      :server_capabilities
+    ])
   end
 
   @doc false
