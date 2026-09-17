@@ -2,6 +2,7 @@
   "assignee": "Mike Hostetler",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-17T19:06:30Z",
   "created": "2026-09-13T20:05:28Z",
   "description": "Review baseline: release/3.0 at fb5b59bda429b7545f82072dabe10f8b299432dc.\nClassification: review-confirmed defect.\n\nSource task: 01a09c57-2619-7251-b3f3-113072d196ce\n\n7. **P2 — Status ignores the declared timeout.**  \n   [ex_mcp_client.ex:200](/Users/mhostetler/Source/Jido/proj_jido_integration/jido_connect/apps/jido_connect/lib/jido_connect/mcp/ex_mcp_client.ex:200)\n\n   `status/2` discards its options. A test requested one millisecond and received success after 81 milliseconds. ExMCP’s status call uses its fixed GenServer timeout.\n\n   **Correction:** Add timeout support to ExMCP’s public status API and pass the Connect timeout through it.\n\nAcceptance: Reproduce the reported case against current source, apply the smallest correction described above, and add focused verification of both the failing case and supported behavior. For documentation/design work, update the public contract and verify its examples/callers. Preserve tenant, scope, lease, and host ownership boundaries. Use fresh matching v3 dependencies for final verification; saved local v2 build artifacts do not establish v3 conformance.\n\nDo not modify jido_mcp or publish packages. Full source review and its coverage/verification limits are preserved in the parent epic comments.",
   "id": "jido_con-znq.37",
@@ -32,8 +33,8 @@
     }
   ],
   "priority": 2,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Status ignores the declared timeout",
   "type": "task",
-  "updated_at": "2026-09-17T19:06:29Z"
+  "updated_at": "2026-09-17T19:06:30Z"
 }
