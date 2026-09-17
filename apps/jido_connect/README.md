@@ -117,8 +117,8 @@ Tool discovery returns `schema_hash`. A typed caller can give that value as
 `expected_schema_hash` to `mcp.tool.call`. Connect lists the tool again and
 rejects schema drift before the remote call.
 
-The v3 development branch pins ExMCP to the exact GitHub commit in the
-[dependency record](../../docs/v3_status.md). It does not depend on `jido_mcp`.
+The v3 development branch pins ExMCP to an exact GitHub commit until the
+needed fixes reach Hex. It does not depend on `jido_mcp`.
 
 ## Host Boundary
 

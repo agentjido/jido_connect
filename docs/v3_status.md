@@ -74,7 +74,9 @@ On 2026-09-17, the pinned ExMCP commit compiled with the v3 umbrella. The
 generated endpoint-status action passed a delayed-client timeout test and a
 responsive-client field check. Umbrella `mix quality` passed with this pin.
 Demo formatting, warnings-as-errors compilation, and 21 tests also passed.
-Subscription-filter integration follows in the next review issue.
+Connect integration tests also passed against the pinned ExMCP subscription
+fix: equal and narrower acknowledgments stay usable, and expanded initial or
+reconnect acknowledgments cause no unrequested resource read or snapshot.
 
 Checked locally on Elixir 1.20.3 and OTP 29.0.5:
 
