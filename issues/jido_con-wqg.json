@@ -2,6 +2,8 @@
   "assignee": "",
   "blocked_by": [],
   "blocks": [],
+  "closed_at": "2026-09-19T21:07:00Z",
+  "close_reason": "All four release-candidate tasks completed",
   "created": "2026-09-19T20:34:55Z",
   "description": "Move the verified v3 development candidate from Git pins to released Hex packages, update the Cowlib advisory record, and run release-candidate package checks. Do not publish packages or modify jido_mcp. Sequence: ExMCP 1.4 adoption, Jido 3.0 beta adoption, advisory cleanup, release verification.",
   "id": "jido_con-wqg",
@@ -17,8 +19,8 @@
     }
   ],
   "priority": 1,
-  "status": "open",
+  "status": "closed",
   "title": "Finish Jido Connect v3 Hex dependency migration",
   "type": "epic",
-  "updated_at": "2026-09-19T21:06:59Z"
+  "updated_at": "2026-09-19T21:07:00Z"
 }
