@@ -4,6 +4,8 @@
     "jido_con-wqg.3"
   ],
   "blocks": [],
+  "closed_at": "2026-09-19T21:06:58Z",
+  "close_reason": "Release candidate verified in 14920133",
   "created": "2026-09-19T20:35:10Z",
   "description": "Run documentation, Hex package build, focused MCP and connector tests, full umbrella, demo, dependency, and package-content checks. Update release status and report any true publication blockers. Do not publish.",
   "id": "jido_con-wqg.4",
@@ -16,8 +18,8 @@
     }
   ],
   "priority": 1,
-  "status": "in_progress",
+  "status": "closed",
   "title": "Verify the v3 Hex release candidate",
   "type": "task",
-  "updated_at": "2026-09-19T21:06:57Z"
+  "updated_at": "2026-09-19T21:06:58Z"
 }
