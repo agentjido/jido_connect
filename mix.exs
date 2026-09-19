@@ -8,14 +8,13 @@ defmodule JidoConnect.MixProject do
       start_permanent: Mix.env() == :prod,
       name: "Jido Connect",
       source_url: "https://github.com/agentjido/jido_connect",
-      # Cowlib 2.20.0 still has the three recorded encoder advisories.
+      # Cowlib 2.20.0 still has two recorded encoder advisories.
       # Connect uses the MCP client only. Keep the focused import/header tests.
-      # Reviewed 2026-09-13; see docs/v3_status.md. Issue #79 remains open.
+      # Reviewed 2026-09-19; see docs/v3_status.md. Issue #79 remains open.
       hex: [
         ignore_advisories: [
           "EEF-CVE-2026-43966",
-          "EEF-CVE-2026-43969",
-          "EEF-CVE-2026-43971"
+          "EEF-CVE-2026-43969"
         ]
       ],
       docs: docs(),

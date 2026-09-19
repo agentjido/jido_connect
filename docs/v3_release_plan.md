@@ -32,7 +32,7 @@ uncorrelated resource/list-change notifications. Connect uses its modern
 subscription API. It must not add a second protocol parser to work around
 this limit. Follow-up: [#81](https://github.com/agentjido/jido_connect/issues/81). See the guide for the supported protocol and host callbacks.
 
-Keep dependency issue #79 open while the three Cowlib findings remain.
+Keep dependency issue #79 open while the two Cowlib findings remain.
 A passing audit with recorded exceptions does not resolve those findings.
 Jido v3 still needs an exact Git commit until a suitable Hex package exists.
 These are publication checks, separate from the development candidate.

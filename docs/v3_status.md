@@ -56,10 +56,10 @@ an Agent. The host declares its routes and provides current invocation context.
 ## Security findings
 
 Bandit 1.12.5 removes the two Bandit findings reported for 1.12.4. Cowlib 2.20.0
-still has EEF-CVE-2026-43966, EEF-CVE-2026-43969, and EEF-CVE-2026-43971 in the
-Hex audit data. The existing three exact exceptions remain visible. The core
-tests check response header validation and the absence of direct imports of
-the affected cookie and link encoders from Connect and ExMCP.
+also resolves EEF-CVE-2026-43971. The Hex audit data still reports
+EEF-CVE-2026-43966 and EEF-CVE-2026-43969. The two exact exceptions remain
+visible. The core tests check response header validation and the absence of
+direct imports of the affected cookie and link encoders from Connect and ExMCP.
 
 An audit that succeeds with these exceptions does not mean Cowlib is fixed.
 Keep Connect issue #79 open until the findings are resolved. Review the
@@ -80,7 +80,7 @@ Checked locally on Elixir 1.20.3 and OTP 29.0.5:
 - Umbrella `mix quality`: passed, 4,137 tests across 41 packages; 39 live tests excluded.
 - Core `mix quality`: passed, 181 tests and 80.55% coverage. The 80% threshold is unchanged.
 - Demo formatting, compilation with warnings as errors, and tests: passed, 21 tests.
-- `mix hex.audit`: succeeds with the three existing Cowlib exceptions listed above.
+- `mix hex.audit`: succeeds with the two Cowlib exceptions listed above.
 - `git diff --check`: passed.
 
 The full run also found a cold-load defect in the Things transport validator.
