@@ -67,28 +67,34 @@ exceptions after each ExMCP or HTTP-stack update and before publication.
 
 ## Verification
 
-On 2026-09-19, ExMCP 1.4.0 from Hex compiled with the v3 umbrella. The
-generated endpoint-status action passed a delayed-client timeout test and a
-responsive-client field check. Umbrella `mix quality` passed with this pin.
-Demo formatting, warnings-as-errors compilation, and 21 tests also passed.
-Connect integration tests also passed against the ExMCP 1.4 subscription
-fix: equal and narrower acknowledgments stay usable, and expanded initial or
-reconnect acknowledgments cause no unrequested resource read or snapshot.
+Checked locally on 2026-09-19 with Elixir 1.19.5 and OTP 28.3.1:
 
-Checked locally on Elixir 1.20.3 and OTP 29.0.5:
-
-- Umbrella `mix quality`: passed, 4,137 tests across 41 packages; 39 live tests excluded.
-- Core `mix quality`: passed, 181 tests and 80.55% coverage. The 80% threshold is unchanged.
+- Umbrella `mix quality`: passed, 4,234 tests across 41 packages; 39 live tests excluded.
+- Core `mix quality`: passed, 264 tests and 82.63% coverage. The 80% threshold is unchanged.
+- Focused catalog and MCP tests: passed, 123 tests.
+- X and Trello tests: passed, 24 and 37 tests.
 - Demo formatting, compilation with warnings as errors, and tests: passed, 21 tests.
+- Core documentation: built without warnings.
+- Direct Hex dependencies: current according to `mix hex.outdated`.
 - `mix hex.audit`: succeeds with the two Cowlib exceptions listed above.
+- Connector factory type check: passed. `@types/bun` 1.4.2 is available as a non-package update.
+- Core Hex build: passed with only Hex package requirements and 133 intended files.
+- Package inventory excludes the demo, secrets, build output, dependencies, and generated docs.
+- No live source or package dependency refers to the removed `jido_connect_mcp` application.
 - `git diff --check`: passed.
+
+The generated endpoint-status action passes delayed-client timeout and
+responsive-client field tests. Equal and narrower subscription acknowledgments
+remain usable. Expanded initial and reconnect acknowledgments cause no
+unrequested resource read or snapshot.
 
 The full run also found a cold-load defect in the Things transport validator.
 Commit `09f3a555` loads the module before it checks the transport callback.
 That small fix can be backported to v2 independently.
 
-No package was published. CI also checks the declared Elixir 1.19.5 / OTP 28.3
-environment when these commits are pushed.
+The core package is ready for publication review. No package was published.
+CI also checks the declared Elixir 1.19.5 / OTP 28.3 environment when these
+commits are pushed.
 
 ## Work after this change
 

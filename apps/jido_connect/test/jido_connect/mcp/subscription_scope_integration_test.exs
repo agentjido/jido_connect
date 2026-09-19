@@ -101,7 +101,7 @@ defmodule Jido.Connect.MCP.SubscriptionScopeIntegrationTest do
     assert_receive {:subscription_opened, 1}
     assert_receive {:subscription_closed, 1}
     refute_receive {:resource_read, _uri}, 100
-    refute_receive {:jido_connect_mcp, _session, :resync, _snapshot}
+    refute_receive {:jido_connect, :mcp, _session, :resync, _snapshot}
   end
 
   test "equal and narrower acknowledgments remain usable", state do
@@ -124,7 +124,7 @@ defmodule Jido.Connect.MCP.SubscriptionScopeIntegrationTest do
         %{"uri" => "test://document"}
       })
 
-      assert_receive {:jido_connect_mcp, ^session, "notifications/resources/updated",
+      assert_receive {:jido_connect, :mcp, ^session, "notifications/resources/updated",
                       %{"uri" => "test://document"}}
 
       assert :ok = Session.close(session)
@@ -141,14 +141,14 @@ defmodule Jido.Connect.MCP.SubscriptionScopeIntegrationTest do
     monitor = Process.monitor(session)
 
     send(subscription.pid, {:client_subscription_disconnected, :transport_closed})
-    assert_receive {:jido_connect_mcp, ^session, :status, :reconnecting}
+    assert_receive {:jido_connect, :mcp, ^session, :status, :reconnecting}
     send(subscription.pid, :client_subscription_reconnect)
     assert_receive {:subscription_opened, 2}
-    assert_receive {:jido_connect_mcp, ^session, :status, :failed}
+    assert_receive {:jido_connect, :mcp, ^session, :status, :failed}
     assert_receive {:DOWN, ^monitor, :process, ^session, :normal}
     assert_receive {:subscription_closed, 2}
     refute_receive {:resource_read, _uri}, 100
-    refute_receive {:jido_connect_mcp, ^session, :resync, _snapshot}
+    refute_receive {:jido_connect, :mcp, ^session, :resync, _snapshot}
   end
 
   defp session_opts(state, acknowledgments) do

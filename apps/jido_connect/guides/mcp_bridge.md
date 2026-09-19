@@ -275,10 +275,10 @@ alone is insufficient; pass the client reference through a credential lease.
   subscriber: self()
 )
 
-# Receive {:jido_connect_mcp, session, method, sanitized_params}.
+# Receive {:jido_connect, :mcp, session, method, sanitized_params}.
 # After ExMCP reconnects and reads fresh state, receive
-# {:jido_connect_mcp, session, :resync, sanitized_snapshot}.
-# Reconnect status arrives as {:jido_connect_mcp, session, :status, phase}.
+# {:jido_connect, :mcp, session, :resync, sanitized_snapshot}.
+# Reconnect status arrives as {:jido_connect, :mcp, session, :status, phase}.
 Jido.Connect.MCP.Session.status(session)
 Jido.Connect.MCP.Session.close(session)
 ```

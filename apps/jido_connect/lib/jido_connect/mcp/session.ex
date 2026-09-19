@@ -5,7 +5,7 @@ defmodule Jido.Connect.MCP.Session do
   Start this process under the host supervisor. Pass the same `:context`,
   `:credential_lease`, and `:policy` options used for Connect operations.
   `:subscriber` defaults to the caller. Events arrive as
-  `{:jido_connect_mcp, session, method, sanitized_params}`.
+  `{:jido_connect, :mcp, session, method, sanitized_params}`.
 
   The immutable filter supports toolsListChanged, resourcesListChanged,
   promptsListChanged, and resourceSubscriptions. Each selected capability is
@@ -104,7 +104,7 @@ defmodule Jido.Connect.MCP.Session do
       case dispatchable_subscription(state, subscription) do
         :ok ->
           if event_authorized?(method, params, state.filter) do
-            send(state.owner, {:jido_connect_mcp, self(), method, Sanitizer.sanitize(params)})
+            send(state.owner, {:jido_connect, :mcp, self(), method, Sanitizer.sanitize(params)})
           end
 
           {:noreply, state}
@@ -123,7 +123,7 @@ defmodule Jido.Connect.MCP.Session do
         :ok ->
           send(
             state.owner,
-            {:jido_connect_mcp, self(), :resync, Sanitizer.sanitize(public_snapshot(snapshot))}
+            {:jido_connect, :mcp, self(), :resync, Sanitizer.sanitize(public_snapshot(snapshot))}
           )
 
           {:noreply, %{state | status: :active}}
@@ -140,11 +140,11 @@ defmodule Jido.Connect.MCP.Session do
     if same_subscription?(subscription, state.subscription) do
       case {dispatchable(state.token), phase} do
         {:ok, :started} ->
-          send(state.owner, {:jido_connect_mcp, self(), :status, :reconnecting})
+          send(state.owner, {:jido_connect, :mcp, self(), :status, :reconnecting})
           {:noreply, %{state | status: :reconnecting}}
 
         {:ok, {:failed, _reason}} ->
-          send(state.owner, {:jido_connect_mcp, self(), :status, :failed})
+          send(state.owner, {:jido_connect, :mcp, self(), :status, :failed})
           {:stop, :normal, state}
 
         {{:error, _}, _} ->

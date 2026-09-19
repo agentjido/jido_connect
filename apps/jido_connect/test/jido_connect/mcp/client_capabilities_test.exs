@@ -216,7 +216,7 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
     assert %{endpoint_id: "test", status: :active} = Session.status(session)
     assert :ok = ExMCP.Server.notify_resource_update(state.server, "test://document")
 
-    assert_receive {:jido_connect_mcp, ^session, "notifications/resources/updated",
+    assert_receive {:jido_connect, :mcp, ^session, "notifications/resources/updated",
                     %{"uri" => "test://document"}},
                    1_000
 
@@ -279,10 +279,10 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
     {:ok, session} = Session.start_link("test", %{"toolsListChanged" => true}, state.opts)
     subscription = :sys.get_state(session).subscription
     send(session, {:ex_mcp_subscription_resync, subscription.pid, :started})
-    assert_receive {:jido_connect_mcp, ^session, :status, :reconnecting}
+    assert_receive {:jido_connect, :mcp, ^session, :status, :reconnecting}
     assert %{status: :reconnecting} = Session.status(session)
     send(session, {:ex_mcp_subscription, %{pid: self()}, "ignored", %{}})
-    refute_receive {:jido_connect_mcp, ^session, "ignored", _}
+    refute_receive {:jido_connect, :mcp, ^session, "ignored", _}
 
     send(
       session,
@@ -290,7 +290,7 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
        %{"access_token" => "secret-value", "name" => "public"}}
     )
 
-    assert_receive {:jido_connect_mcp, ^session, _, params}
+    assert_receive {:jido_connect, :mcp, ^session, _, params}
     refute inspect(params) =~ "secret-value"
 
     send(
@@ -299,12 +299,12 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
        {:complete, %{"access_token" => "secret-value", "resources" => {:error, "secret-value"}}}}
     )
 
-    assert_receive {:jido_connect_mcp, ^session, :resync, snapshot}
+    assert_receive {:jido_connect, :mcp, ^session, :resync, snapshot}
     refute inspect(snapshot) =~ "secret-value"
     assert %{status: :active} = Session.status(session)
     monitor = Process.monitor(session)
     send(session, {:ex_mcp_subscription_resync, subscription.pid, {:failed, "secret-value"}})
-    assert_receive {:jido_connect_mcp, ^session, :status, :failed}
+    assert_receive {:jido_connect, :mcp, ^session, :status, :failed}
     assert_receive {:DOWN, ^monitor, :process, ^session, :normal}
   end
 
@@ -318,7 +318,7 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
        %{"uri" => "test://private"}}
     )
 
-    refute_receive {:jido_connect_mcp, ^session, "notifications/resources/updated", _}, 100
+    refute_receive {:jido_connect, :mcp, ^session, "notifications/resources/updated", _}, 100
 
     broadened = %{
       subscription
@@ -335,7 +335,7 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
     )
 
     assert_receive {:DOWN, ^monitor, :process, ^session, :normal}, 1_000
-    refute_receive {:jido_connect_mcp, ^session, :resync, _}
+    refute_receive {:jido_connect, :mcp, ^session, :resync, _}
     assert Process.alive?(state.client)
   end
 

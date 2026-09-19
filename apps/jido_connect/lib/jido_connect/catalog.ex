@@ -41,9 +41,11 @@ defmodule Jido.Connect.Catalog do
   alias Jido.Connect.Provider
   alias Jido.Connect.Jido.ToolAvailability
 
+  @doc "Builds one catalog entry from an integration module."
   @spec entry(module(), keyword()) :: Entry.t()
   defdelegate entry(integration_module, opts \\ []), to: Builder
 
+  @doc "Builds one catalog manifest from an integration module."
   @spec manifest(module(), keyword()) :: Manifest.t()
   defdelegate manifest(integration_module, opts \\ []), to: Builder
 
@@ -97,21 +99,27 @@ defmodule Jido.Connect.Catalog do
     invalid_reviewed_modules(integration_modules)
   end
 
+  @doc "Returns catalog modules configured directly by the host."
   @spec configured_modules() :: [module()]
   defdelegate configured_modules, to: Discovery
 
+  @doc "Returns catalog modules registered by loaded provider applications."
   @spec registered_modules() :: [module()]
   defdelegate registered_modules, to: Discovery
 
+  @doc "Discovers catalog entries from configured and registered providers."
   @spec discover(keyword()) :: [Entry.t()]
   defdelegate discover(opts \\ []), to: Discovery
 
+  @doc "Discovers catalog entries and returns provider diagnostics."
   @spec discover_with_diagnostics(keyword()) :: DiscoveryResult.t()
   defdelegate discover_with_diagnostics(opts \\ []), to: Discovery
 
+  @doc "Searches a supplied list of catalog entries."
   @spec search([Entry.t()], String.t() | nil) :: [Entry.t()]
   defdelegate search(entries, query), to: Search, as: :entries
 
+  @doc "Filters a supplied list of catalog entries."
   @spec filter([Entry.t()], keyword()) :: [Entry.t()]
   defdelegate filter(entries, opts), to: Filter, as: :entries
 
@@ -294,6 +302,7 @@ defmodule Jido.Connect.Catalog do
      )}
   end
 
+  @doc "Converts a catalog value to a plain map."
   @spec to_map(
           Entry.t()
           | Item.t()

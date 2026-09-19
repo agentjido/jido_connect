@@ -40,10 +40,9 @@ mix compile --warnings-as-errors
 mix test
 ```
 
-Run the documentation and dependency checks separately:
+Run the dependency checks separately:
 
 ```sh
-MIX_ENV=docs mix docs
 mix hex.outdated
 mix hex.audit
 ```
@@ -103,7 +102,7 @@ mix test
 
 ## Package Inventory
 
-The umbrella contains 40 package projects:
+The umbrella contains 41 package projects:
 
 - Core: `jido_connect`
 - Shared services: `jido_connect_google`, `jido_connect_microsoft`, and

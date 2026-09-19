@@ -34,5 +34,6 @@ this limit. Follow-up: [#81](https://github.com/agentjido/jido_connect/issues/81
 
 Keep dependency issue #79 open while the two Cowlib findings remain.
 A passing audit with recorded exceptions does not resolve those findings.
-Jido v3 still needs an exact Git commit until a suitable Hex package exists.
+Jido, Jido Action, Jido Signal, and ExMCP now use Hex releases. The core Hex
+package builds without a Git dependency.
 These are publication checks, separate from the development candidate.
