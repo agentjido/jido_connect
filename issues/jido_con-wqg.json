@@ -6,9 +6,15 @@
   "description": "Move the verified v3 development candidate from Git pins to released Hex packages, update the Cowlib advisory record, and run release-candidate package checks. Do not publish packages or modify jido_mcp. Sequence: ExMCP 1.4 adoption, Jido 3.0 beta adoption, advisory cleanup, release verification.",
   "id": "jido_con-wqg",
   "labels": [],
+  "comments": [
+    {
+      "text": "Execution order: jido_con-wqg.3 -\u003e jido_con-wqg.4. Each step gets its own commit and verification. No package publication and no jido_mcp changes.",
+      "timestamp": "2026-09-19T20:35:12Z"
+    }
+  ],
   "priority": 1,
   "status": "open",
   "title": "Finish Jido Connect v3 Hex dependency migration",
   "type": "epic",
-  "updated_at": "2026-09-19T20:34:55Z"
+  "updated_at": "2026-09-19T20:35:12Z"
 }
