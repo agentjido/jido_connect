@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-19T20:34:58Z",
+  "description": "Replace the verified ExMCP Git pin in core and Trello with Hex 1.4, retain status and notification-scope integration tests, run focused and umbrella checks, update the dependency record, and close GitHub issues #82 and #83 when verified.",
+  "id": "jido_con-wqg.1",
+  "labels": [],
+  "parent": "jido_con-wqg",
+  "priority": 1,
+  "status": "open",
+  "title": "Adopt ExMCP 1.4 from Hex",
+  "type": "task",
+  "updated_at": "2026-09-19T20:34:58Z"
+}
