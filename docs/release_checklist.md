@@ -133,11 +133,9 @@ tag without explicit user approval. When publishing starts, publish
 packages that use it. Create a release tag only from the verified commit on the selected release
 branch.
 
-The v3 line uses Jido Action from Hex and an exact Jido Git commit. Alpha and
-beta Hex dependencies are allowed. A Hex publication still needs a package
-dependency set that Hex accepts; replace the remaining Jido Git reference
-before publication. Do not report a package build as passed if this requirement
-prevents it.
+The v3 line uses exact Jido, Jido Action, and Jido Signal beta packages from
+Hex. Alpha and beta Hex dependencies are allowed. Verify the selected
+prereleases together before publication.
 
 Dependabot must remain enabled for vulnerability alerts, security updates, and
 the update groups in `.github/dependabot.yml`.

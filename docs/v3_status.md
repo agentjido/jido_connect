@@ -10,17 +10,15 @@ Selected on 2026-09-19:
 
 | Package | Requirement | Source |
 | --- | --- | --- |
-| `jido_action` | `== 3.0.0-beta.10` | Hex |
+| `jido_action` | `== 3.0.0-beta.11` | Hex |
 | `jido_signal` | `== 3.0.0-beta.4` | Hex |
-| `jido` | `b02052402a6f1c4be10098c2d560831f14daec58` | Exact commit from `v3-spike` |
+| `jido` | `== 3.0.0-beta.1` | Hex |
 | `ex_mcp` | `~> 1.4`, locked to 1.4.0 | Hex |
 | `bandit` | Locked to 1.12.5 in the shared demo/umbrella lockfile | Hex |
 
-Action is a published beta, although this work may also use alpha packages.
-The Action override selects the Hex package instead of the local path in the
-selected Jido source. Jido v3 is not yet on Hex. Replace its Git reference when
-a suitable package is available; do not return to the abandoned Jido v2/v3
-compatibility PR #324.
+Jido, Action, and Signal use exact published beta versions. This keeps each
+upstream change deliberate during v3 development. Do not return to the
+abandoned Jido v2/v3 compatibility PR #324.
 
 ExMCP 1.4.0 contains the status-timeout and subscription-filter fixes from
 upstream PRs #45 and #46. Connect verifies both behaviors through its generated
@@ -89,15 +87,13 @@ The full run also found a cold-load defect in the Things transport validator.
 Commit `09f3a555` loads the module before it checks the transport callback.
 That small fix can be backported to v2 independently.
 
-No package was published. A Hex package build was not claimed because the
-Jido dependency uses Git. CI also checks the declared Elixir 1.19.5 /
-OTP 28.3 environment when these commits are pushed.
+No package was published. CI also checks the declared Elixir 1.19.5 / OTP 28.3
+environment when these commits are pushed.
 
 ## Work after this change
 
 - SharePoint PR #66 is integrated on v3 at `74f41c69`.
-- Follow upstream Jido v3 changes with explicit dependency updates and tests.
-- Replace the Jido Git reference when its v3 package is on Hex.
+- Follow Jido, Action, and Signal prereleases with explicit dependency updates and tests.
 - Clear the remaining Cowlib findings in #79.
 - Prepare package versions and release notes only when publication is wanted.
 - Track legacy notification support in #81.

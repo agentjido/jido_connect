@@ -67,9 +67,7 @@ defmodule Jido.Connect.CatalogTest do
 
   test "host catalog route keeps domain state through Agent.cmd" do
     agent =
-      Jido.Agent.new!(CatalogHostAgent,
-        state: %{workspace: "tenant-1", catalog_results: []}
-      )
+      CatalogHostAgent.new!(state: %{workspace: "tenant-1", catalog_results: []})
 
     signal = Jido.Signal.new!("connect.catalog.search", %{query: "mcp.tools"}, source: "/host")
 

@@ -41,10 +41,10 @@ add the core app as a path dependency:
 {:jido_connect, path: "../jido_connect/apps/jido_connect"}
 ```
 
-The core app currently requires Elixir 1.19 or later, Jido Action
-`3.0.0-beta.10`, and Jido Signal `3.0.0-beta.4`. See the packaged `mix.exs` for
-the complete dependency set. A normal Hex dependency can replace the local
-path after the v3 package is published.
+The core app currently requires Elixir 1.19 or later, Jido `3.0.0-beta.1`,
+Jido Action `3.0.0-beta.11`, and Jido Signal `3.0.0-beta.4`. See the packaged
+`mix.exs` for the complete dependency set. A normal Hex dependency can replace
+the local path after the v3 package is published.
 
 ## MCP Client Bridge
 
@@ -374,7 +374,7 @@ defmodule MyApp.CatalogAgent do
 end
 
 agent =
-  Jido.Agent.new!(MyApp.CatalogAgent,
+  MyApp.CatalogAgent.new!(
     state: %{workspace: "tenant-1", catalog_results: []}
   )
 
