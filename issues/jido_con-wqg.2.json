@@ -1,5 +1,5 @@
 {
-  "assignee": "",
+  "assignee": "Mike Hostetler",
   "blocked_by": [
     "jido_con-wqg.1"
   ],
@@ -12,8 +12,8 @@
   "labels": [],
   "parent": "jido_con-wqg",
   "priority": 1,
-  "status": "open",
+  "status": "in_progress",
   "title": "Adopt Jido 3.0.0-beta.1 from Hex",
   "type": "task",
-  "updated_at": "2026-09-19T20:35:18Z"
+  "updated_at": "2026-09-19T20:43:55Z"
 }
