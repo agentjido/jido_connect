@@ -3,7 +3,9 @@
   "blocked_by": [
     "jido_con-wqg.1"
   ],
-  "blocks": [],
+  "blocks": [
+    "jido_con-wqg.3"
+  ],
   "created": "2026-09-19T20:35:00Z",
   "description": "Replace the old Jido Git commit with the published Jido 3.0.0-beta.1 package, align exact Action and Signal prereleases, fix only demonstrated compatibility issues, and run core and umbrella checks.",
   "id": "jido_con-wqg.2",
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "Adopt Jido 3.0.0-beta.1 from Hex",
   "type": "task",
-  "updated_at": "2026-09-19T20:35:17Z"
+  "updated_at": "2026-09-19T20:35:18Z"
 }

@@ -1,6 +1,8 @@
 {
   "assignee": "",
-  "blocked_by": [],
+  "blocked_by": [
+    "jido_con-wqg.2"
+  ],
   "blocks": [
     "jido_con-wqg.4"
   ],
@@ -13,5 +15,5 @@
   "status": "open",
   "title": "Correct Cowlib advisory record",
   "type": "task",
-  "updated_at": "2026-09-19T20:35:11Z"
+  "updated_at": "2026-09-19T20:35:18Z"
 }
