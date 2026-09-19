@@ -297,7 +297,7 @@ acknowledgments remain usable.
 
 Sessions use MCP 2026-07-28 notification streams through `ExMCP.Client.listen/3`.
 Configure that protocol on the host client or endpoint. Ordinary tools,
-resources, and prompts also work with legacy peers. ExMCP 1.3 does not expose
+resources, and prompts also work with legacy peers. ExMCP 1.4 does not expose
 legacy uncorrelated list-change/resource-update events through this subscription
 API. Connect does not claim legacy notification delivery. Track this gap in
 [#81](https://github.com/agentjido/jido_connect/issues/81).
