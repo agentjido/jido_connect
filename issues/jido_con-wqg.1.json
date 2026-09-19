@@ -9,9 +9,15 @@
   "id": "jido_con-wqg.1",
   "labels": [],
   "parent": "jido_con-wqg",
+  "comments": [
+    {
+      "text": "Completed in f291eb36. ExMCP 1.4.0 is now a Hex dependency in core and Trello. Mint was refreshed to 1.10.1 to remove EEF-CVE-2026-82672. MCP capability, status-timeout, and subscription-scope tests passed. Core quality passed with 264 tests and 82.59% coverage. The full umbrella quality suite passed. GitHub issues #82 and #83 are closed.",
+      "timestamp": "2026-09-19T20:43:48Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Adopt ExMCP 1.4 from Hex",
   "type": "task",
-  "updated_at": "2026-09-19T20:35:19Z"
+  "updated_at": "2026-09-19T20:43:48Z"
 }
