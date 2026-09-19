@@ -11,9 +11,15 @@
   "id": "jido_con-wqg.3",
   "labels": [],
   "parent": "jido_con-wqg",
+  "comments": [
+    {
+      "text": "Completed in d67987d4. Removed the resolved EEF-CVE-2026-43971 exception from root and core. Both audit commands now report only EEF-CVE-2026-43966 and EEF-CVE-2026-43969. The two focused dependency security tests pass. GitHub issue #79 now records the current two-advisory state and remains open.",
+      "timestamp": "2026-09-19T20:50:06Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Correct Cowlib advisory record",
   "type": "task",
-  "updated_at": "2026-09-19T20:48:53Z"
+  "updated_at": "2026-09-19T20:50:06Z"
 }
