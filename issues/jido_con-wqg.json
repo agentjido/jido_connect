@@ -10,11 +10,15 @@
     {
       "text": "Execution order: jido_con-wqg.3 -\u003e jido_con-wqg.4. Each step gets its own commit and verification. No package publication and no jido_mcp changes.",
       "timestamp": "2026-09-19T20:35:12Z"
+    },
+    {
+      "text": "Completed the Hex dependency and release-candidate path in f291eb36, 02c1a6c0, d67987d4, and 14920133. Open upstream follow-ups remain in GitHub #79 and #81; they are documented and are not hidden by this completed work.",
+      "timestamp": "2026-09-19T21:06:59Z"
     }
   ],
   "priority": 1,
   "status": "open",
   "title": "Finish Jido Connect v3 Hex dependency migration",
   "type": "epic",
-  "updated_at": "2026-09-19T20:35:12Z"
+  "updated_at": "2026-09-19T21:06:59Z"
 }
