@@ -11,9 +11,15 @@
   "id": "jido_con-wqg.2",
   "labels": [],
   "parent": "jido_con-wqg",
+  "comments": [
+    {
+      "text": "Completed in 02c1a6c0. Core now uses exact Hex releases Jido 3.0.0-beta.1, Jido Action 3.0.0-beta.11, and Jido Signal 3.0.0-beta.4. The only compatibility change was the published Agent module constructor in one integration test and its README example. Core quality passed with 264 tests and 82.63% coverage. The full umbrella quality suite passed.",
+      "timestamp": "2026-09-19T20:48:48Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Adopt Jido 3.0.0-beta.1 from Hex",
   "type": "task",
-  "updated_at": "2026-09-19T20:43:55Z"
+  "updated_at": "2026-09-19T20:48:48Z"
 }
