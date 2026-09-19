@@ -9,9 +9,15 @@
   "id": "jido_con-wqg.4",
   "labels": [],
   "parent": "jido_con-wqg",
+  "comments": [
+    {
+      "text": "Completed in 14920133. Umbrella quality passed with 4,234 tests across 41 packages. Core quality passed with 264 tests and 82.63% coverage. Focused MCP, X, Trello, demo, documentation, audit, dependency, factory, and package checks passed. The core 0.9.0 Hex archive has 133 intended files and only Hex package requirements. Core docs build without warnings. Notification events now use the core-owned {:jido_connect, :mcp, ...} tuple. No package was published.",
+      "timestamp": "2026-09-19T21:06:57Z"
+    }
+  ],
   "priority": 1,
   "status": "in_progress",
   "title": "Verify the v3 Hex release candidate",
   "type": "task",
-  "updated_at": "2026-09-19T20:50:11Z"
+  "updated_at": "2026-09-19T21:06:57Z"
 }
