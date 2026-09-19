@@ -15,9 +15,9 @@ defmodule JidoConnectCore.MixProject do
       package: package(),
       docs: docs(),
       source_url: "https://github.com/agentjido/jido_connect",
-      # Cowlib 2.20.0 still has two recorded encoder advisories.
-      # Connect uses the MCP client only. Keep the focused import/header tests.
-      # Reviewed 2026-09-19; see docs/v3_status.md. Issue #79 remains open.
+      # Cowlib 2.20.0 has two won't-fix encoder advisories.
+      # Connect uses the MCP client only and does not call the affected encoders.
+      # Accepted 2026-09-19; see docs/v3_status.md and closed issue #79.
       hex: [
         ignore_advisories: [
           "EEF-CVE-2026-43966",

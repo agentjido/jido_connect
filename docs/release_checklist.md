@@ -47,6 +47,9 @@ mix hex.outdated
 mix hex.audit
 ```
 
+Confirm that only the two reviewed Cowlib exceptions are ignored. Any new
+advisory must fail the audit. See `docs/v3_status.md` for the acceptance record.
+
 Verify the core MCP replacement and its security regression tests:
 
 ```sh

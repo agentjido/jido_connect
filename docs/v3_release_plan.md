@@ -12,14 +12,14 @@ flowchart TD
   C --> D
   D --> E[Update guides, release notes, and issue status]
   E --> F[Present the v3 development candidate]
-  F --> G[Resolve upstream dependency findings before publication]
+  F --> G[Review dependency exceptions before publication]
 ```
 
 | Work | Beadwork | State |
 | --- | --- | --- |
 | SharePoint on v3 | `jido_con-s91.1` | Landed at `74f41c69`; PR #66 closed |
 | Tools, resources, prompts, completion, notifications, connection lifecycle | `jido_con-s91.2` | Implemented at `a783ef6d`; core, umbrella, and demo checks pass |
-| Release record and issue cleanup | `jido_con-s91.3` | Checks recorded; issue follow-ups #79 and #81 remain |
+| Release record and issue cleanup | `jido_con-s91.3` | Checks recorded; #79 accepted and closed; #81 remains |
 
 The MCP client work includes scoped access, pages, normalized errors, lease
 expiry and revocation, host client ownership, and stream cleanup. Modern
@@ -32,8 +32,10 @@ uncorrelated resource/list-change notifications. Connect uses its modern
 subscription API. It must not add a second protocol parser to work around
 this limit. Follow-up: [#81](https://github.com/agentjido/jido_connect/issues/81). See the guide for the supported protocol and host callbacks.
 
-Keep dependency issue #79 open while the two Cowlib findings remain.
-A passing audit with recorded exceptions does not resolve those findings.
+The two Cowlib findings are accepted as exact, reviewed exceptions. Connect and
+ExMCP do not call the affected encoders, and Connect does not publish a Cowboy
+server. Issue #79 records the decision and is closed. Recheck the exceptions
+after dependency updates and remove them when ExMCP can omit Cowboy.
 Jido, Jido Action, Jido Signal, and ExMCP now use Hex releases. The core Hex
 package builds without a Git dependency.
 These are publication checks, separate from the development candidate.

@@ -58,12 +58,19 @@ an Agent. The host declares its routes and provides current invocation context.
 Bandit 1.12.5 removes the two Bandit findings reported for 1.12.4. Cowlib 2.20.0
 also resolves EEF-CVE-2026-43971. The Hex audit data still reports
 EEF-CVE-2026-43966 and EEF-CVE-2026-43969. The two exact exceptions remain
-visible. The core tests check response header validation and the absence of
-direct imports of the affected cookie and link encoders from Connect and ExMCP.
+visible. The core tests check response header validation and confirm that
+Connect and ExMCP do not import the affected Cowlib encoders.
 
-An audit that succeeds with these exceptions does not mean Cowlib is fixed.
-Keep Connect issue #79 open until the findings are resolved. Review the
-exceptions after each ExMCP or HTTP-stack update and before publication.
+Cowlib rejected fixes for both encoders because Cowboy and Gun validate the
+values at their network boundaries. ExMCP 1.4 records the same two exact
+exceptions and plans to make its HTTP server dependency optional in 2.0.
+Connect uses the ExMCP client and does not publish a Cowboy server.
+
+Connect accepted these scoped exceptions on 2026-09-19 and closed issue #79.
+An audit that succeeds with these exceptions does not mean the Cowlib functions
+changed. Review the exceptions after each ExMCP or HTTP-stack update and before
+publication. Remove them when ExMCP can omit Cowboy or the advisory records
+change. The exact list ensures that any new advisory still fails the audit.
 
 ## Verification
 
@@ -100,7 +107,7 @@ commits are pushed.
 
 - SharePoint PR #66 is integrated on v3 at `74f41c69`.
 - Follow Jido, Action, and Signal prereleases with explicit dependency updates and tests.
-- Clear the remaining Cowlib findings in #79.
+- Recheck the accepted Cowlib exceptions after each ExMCP or HTTP-stack update.
 - Prepare package versions and release notes only when publication is wanted.
 - Track legacy notification support in #81.
 - Keep all Jido MCP work separate.

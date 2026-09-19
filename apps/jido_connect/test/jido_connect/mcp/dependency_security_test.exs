@@ -13,12 +13,13 @@ defmodule Jido.Connect.MCP.DependencySecurityTest do
     end
   end
 
-  test "Connect and ExMCP do not import the acknowledged Cowlib encoders" do
+  test "Connect and ExMCP do not import the affected Cowlib encoders" do
     imports =
       [:jido_connect, :ex_mcp]
       |> Enum.flat_map(&application_imports/1)
 
     refute {:cow_cookie, :cookie, 1} in imports
+    refute {:cow_http_struct_hd, :item, 1} in imports
     refute {:cow_link, :link, 1} in imports
   end
 

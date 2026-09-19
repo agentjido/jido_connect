@@ -232,13 +232,14 @@ schema drift, uncertain writes, endpoint ownership, supported `jido_mcp`
 migration paths, and excluded features. Core package documentation includes
 this guide.
 
-The release dependency audit temporarily accepts Cowlib `2.19.0` advisories
-`EEF-CVE-2026-43966`, `EEF-CVE-2026-43969`, and `EEF-CVE-2026-43971`. ExMCP
-uses the newest compatible Cowlib release. Connect uses the MCP client path and
-does not publish an MCP or Cowboy server. Regression tests confirm that Plug
-rejects the affected header bytes and that Connect and ExMCP do not import the
-two affected Cowlib encoders. Review the exceptions by 2026-09-12 or when a
-fixed Cowlib release is available.
+The release dependency audit accepts Cowlib `2.20.0` advisories
+`EEF-CVE-2026-43966` and `EEF-CVE-2026-43969` as exact, reviewed exceptions.
+Cowlib `2.20.0` resolves `EEF-CVE-2026-43971`. Connect uses the MCP client path
+and does not publish an MCP or Cowboy server. Regression tests confirm that
+Plug rejects the affected header bytes and that Connect and ExMCP do not import
+the affected Cowlib encoders. Review the exceptions after each ExMCP or HTTP
+stack update. Remove them when ExMCP can omit Cowboy or the advisory records
+change.
 
 The local demo host uses fixed Bandit `1.12.5`. The demo is not part of the
 core Hex package.

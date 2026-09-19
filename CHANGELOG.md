@@ -9,8 +9,8 @@
 - Integrate SharePoint on the Action v3 compatibility line.
 - Use Hex releases for Jido 3, Jido Action 3, Jido Signal 3, and ExMCP 1.4.
 - Build the standalone core Hex package with no Git dependency.
-- Remove the resolved Cowlib 43971 audit exception. Keep the two unresolved
-  Cowlib findings visible.
+- Remove the resolved Cowlib 43971 audit exception. Accept the two remaining
+  won't-fix encoder findings as exact, reviewed exceptions for the client path.
 
 - Add the experimental `jido_connect_things` package for guarded Things Cloud
   Inbox list, create, and update actions.
