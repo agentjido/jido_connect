@@ -1,0 +1,15 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-19T20:35:09Z",
+  "description": "Remove the resolved EEF-CVE-2026-43971 exception, record the two remaining upstream advisories and mitigations, update GitHub #79, and verify the audit behavior.",
+  "id": "jido_con-wqg.3",
+  "labels": [],
+  "parent": "jido_con-wqg",
+  "priority": 1,
+  "status": "open",
+  "title": "Correct Cowlib advisory record",
+  "type": "task",
+  "updated_at": "2026-09-19T20:35:09Z"
+}
