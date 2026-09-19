@@ -27,7 +27,7 @@ notification streams use the public ExMCP subscription API. Resources and
 prompts preserve the MCP result maps. Tools retain the existing normalized
 Connect result and approval flow.
 
-The selected ExMCP commit has no public client event path for legacy,
+The selected ExMCP release has no public client event path for legacy,
 uncorrelated resource/list-change notifications. Connect uses its modern
 subscription API. It must not add a second protocol parser to work around
 this limit. Follow-up: [#81](https://github.com/agentjido/jido_connect/issues/81). See the guide for the supported protocol and host callbacks.

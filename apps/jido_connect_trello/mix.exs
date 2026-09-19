@@ -33,7 +33,7 @@ defmodule JidoConnectTrello.MixProject do
   defp deps do
     [
       jido_connect_dep(),
-      {:ex_mcp, github: "azmaveth/ex_mcp", ref: "d07c18b0c3f38fa21f65974899d8a9a5047e2dbe"},
+      {:ex_mcp, "~> 1.4"},
       {:jason, "~> 1.4"}
     ]
   end

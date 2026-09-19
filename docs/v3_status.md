@@ -6,14 +6,14 @@ change with each deliberate upstream update.
 
 ## Dependency record
 
-Selected on 2026-09-17 for verification of the merged ExMCP fixes:
+Selected on 2026-09-19:
 
 | Package | Requirement | Source |
 | --- | --- | --- |
 | `jido_action` | `== 3.0.0-beta.10` | Hex |
 | `jido_signal` | `== 3.0.0-beta.4` | Hex |
 | `jido` | `b02052402a6f1c4be10098c2d560831f14daec58` | Exact commit from `v3-spike` |
-| `ex_mcp` | `d07c18b0c3f38fa21f65974899d8a9a5047e2dbe` | Exact GitHub commit after upstream PRs #45 and #46 |
+| `ex_mcp` | `~> 1.4`, locked to 1.4.0 | Hex |
 | `bandit` | Locked to 1.12.5 in the shared demo/umbrella lockfile | Hex |
 
 Action is a published beta, although this work may also use alpha packages.
@@ -22,10 +22,9 @@ selected Jido source. Jido v3 is not yet on Hex. Replace its Git reference when
 a suitable package is available; do not return to the abandoned Jido v2/v3
 compatibility PR #324.
 
-ExMCP PRs #45 and #46 are merged, but Hex 1.3.0 does not contain their status
-timeout and subscription-filter fixes. The exact Git commit above selects both
-fixes for Connect verification. Replace it with a fixed Hex release before
-building a Connect Hex package.
+ExMCP 1.4.0 contains the status-timeout and subscription-filter fixes from
+upstream PRs #45 and #46. Connect verifies both behaviors through its generated
+status action and notification-session integration tests.
 
 ## Client release scope
 
@@ -70,11 +69,11 @@ exceptions after each ExMCP or HTTP-stack update and before publication.
 
 ## Verification
 
-On 2026-09-17, the pinned ExMCP commit compiled with the v3 umbrella. The
+On 2026-09-19, ExMCP 1.4.0 from Hex compiled with the v3 umbrella. The
 generated endpoint-status action passed a delayed-client timeout test and a
 responsive-client field check. Umbrella `mix quality` passed with this pin.
 Demo formatting, warnings-as-errors compilation, and 21 tests also passed.
-Connect integration tests also passed against the pinned ExMCP subscription
+Connect integration tests also passed against the ExMCP 1.4 subscription
 fix: equal and narrower acknowledgments stay usable, and expanded initial or
 reconnect acknowledgments cause no unrequested resource read or snapshot.
 
@@ -91,7 +90,7 @@ Commit `09f3a555` loads the module before it checks the transport callback.
 That small fix can be backported to v2 independently.
 
 No package was published. A Hex package build was not claimed because the
-Jido and ExMCP dependencies use Git. CI also checks the declared Elixir 1.19.5 /
+Jido dependency uses Git. CI also checks the declared Elixir 1.19.5 /
 OTP 28.3 environment when these commits are pushed.
 
 ## Work after this change

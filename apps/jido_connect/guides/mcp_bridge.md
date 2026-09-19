@@ -1,7 +1,6 @@
 # MCP Client Bridge
 
-Core `jido_connect` uses a pinned ExMCP Git commit for MCP client protocol and
-transports. Replace it with a fixed Hex release before package publication.
+Core `jido_connect` uses ExMCP 1.4 for MCP client protocol and transports.
 The `release/3.0` branch is for maintainer development with Action v3.
 
 | Generated action | Required capability scope | Extra input |
@@ -290,7 +289,7 @@ resource-read scopes. This also authorizes the reads ExMCP makes during
 resynchronization. Filters accept at most 100 resource URIs. Start a new
 session to change its filter.
 
-The pinned ExMCP commit rejects a server acknowledgment that adds notification
+ExMCP 1.4 rejects a server acknowledgment that adds notification
 categories or resource URIs. It checks the acknowledgment before reconnect
 resynchronization can read resources. Connect also keeps the original allowed
 filter and checks each event and snapshot before delivery. Equal and narrower

@@ -56,7 +56,7 @@ defmodule JidoConnectCore.MixProject do
       {:jido, github: "agentjido/jido", ref: "b02052402a6f1c4be10098c2d560831f14daec58"},
       {:jido_action, "== 3.0.0-beta.10", override: true},
       {:jido_signal, "== 3.0.0-beta.4"},
-      {:ex_mcp, github: "azmaveth/ex_mcp", ref: "d07c18b0c3f38fa21f65974899d8a9a5047e2dbe"},
+      {:ex_mcp, "~> 1.4"},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false},
       {:jason, "~> 1.4"},
       {:req, "~> 0.6"},
