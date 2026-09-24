@@ -1,0 +1,14 @@
+{
+  "assignee": "",
+  "blocked_by": [],
+  "blocks": [],
+  "created": "2026-09-24T19:33:25Z",
+  "description": "Resolve GitHub issue #81 on release/3.0: update ExMCP to 1.5, integrate the public legacy notification listener API into the Connect session adapter, preserve authorization and sanitization, add legacy delivery and lifecycle tests, update documentation, run quality and demo checks, and open a PR against release/3.0.",
+  "id": "jido_con-zn1",
+  "labels": [],
+  "priority": 2,
+  "status": "open",
+  "title": "Integrate ExMCP 1.5 legacy notifications",
+  "type": "task",
+  "updated_at": "2026-09-24T19:33:25Z"
+}
