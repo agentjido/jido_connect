@@ -6,9 +6,15 @@
   "description": "Resolve GitHub issue #81 on release/3.0: update ExMCP to 1.5, integrate the public legacy notification listener API into the Connect session adapter, preserve authorization and sanitization, add legacy delivery and lifecycle tests, update documentation, run quality and demo checks, and open a PR against release/3.0.",
   "id": "jido_con-zn1",
   "labels": [],
+  "comments": [
+    {
+      "text": "Implemented ExMCP 1.5 legacy notification integration. Evidence: focused MCP tests 20 passed; umbrella mix quality 4,240 passed across 41 packages with 39 live tests excluded; demo format/compile --warnings-as-errors/test passed with 21 tests; mix hex.audit passed with only the two accepted Cowlib exceptions; git diff --check passed. Legacy HandlerServer tests cover delivery, filter authority, sanitization, close cleanup, lease revocation, subscriber exit, and authorization. Reconnect transport tests cover resource resubscription success and fail-closed behavior.",
+      "timestamp": "2026-09-24T19:54:18Z"
+    }
+  ],
   "priority": 2,
   "status": "in_progress",
   "title": "Integrate ExMCP 1.5 legacy notifications",
   "type": "task",
-  "updated_at": "2026-09-24T19:33:32Z"
+  "updated_at": "2026-09-24T19:54:18Z"
 }
