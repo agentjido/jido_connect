@@ -24,6 +24,10 @@ defmodule Jido.Connect.MCP.SubscriptionScopeIntegrationTest do
     end
 
     @impl true
+    def handle_call({:register_notification_listener, _filter, _subscriber}, _from, state) do
+      {:reply, {:error, :use_listen}, state}
+    end
+
     def handle_call({:open_subscription, subscription, requested}, _from, state) do
       id = state.next_id
       acknowledged = Enum.at(state.acknowledgments, id - 1, requested)

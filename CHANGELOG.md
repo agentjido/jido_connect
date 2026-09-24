@@ -3,11 +3,11 @@
 ## Unreleased
 
 - Add MCP client resources, templates, prompts, completion, ping, and status.
-- Add authorized modern notification sessions with lease checks, subscriber
-  monitoring, stream cleanup, and sanitized events.
+- Add authorized modern and legacy notification sessions with lease checks,
+  subscriber monitoring, stream cleanup, and sanitized events.
 - Preserve list cursors and search later tool pages during schema checks.
 - Integrate SharePoint on the Action v3 compatibility line.
-- Use Hex releases for Jido 3, Jido Action 3, Jido Signal 3, and ExMCP 1.4.
+- Use Hex releases for Jido 3, Jido Action 3, Jido Signal 3, and ExMCP 1.5.
 - Build the standalone core Hex package with no Git dependency.
 - Remove the resolved Cowlib 43971 audit exception. Accept the two remaining
   won't-fix encoder findings as exact, reviewed exceptions for the client path.

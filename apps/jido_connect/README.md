@@ -117,7 +117,7 @@ Tool discovery returns `schema_hash`. A typed caller can give that value as
 `expected_schema_hash` to `mcp.tool.call`. Connect lists the tool again and
 rejects schema drift before the remote call.
 
-The v3 development branch uses ExMCP `~> 1.4`. It does not depend on
+The v3 development branch uses ExMCP `~> 1.5`. It does not depend on
 `jido_mcp`.
 
 ## Host Boundary

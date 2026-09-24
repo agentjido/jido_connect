@@ -55,7 +55,7 @@ defmodule JidoConnectCore.MixProject do
       {:jido, "== 3.0.0-beta.1"},
       {:jido_action, "== 3.0.0-beta.11"},
       {:jido_signal, "== 3.0.0-beta.4"},
-      {:ex_mcp, "~> 1.4"},
+      {:ex_mcp, "~> 1.5"},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false},
       {:jason, "~> 1.4"},
       {:req, "~> 0.6"},

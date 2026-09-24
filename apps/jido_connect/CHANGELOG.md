@@ -5,7 +5,8 @@
 - Move the MCP client bridge into core Connect with tools, resources, resource
   templates, prompts, completion, ping, status, notifications, and connection
   lifecycle support.
-- Use ExMCP `1.4` for protocol and transports. Preserve endpoint fencing,
+- Use ExMCP `1.5` for protocol and transports, including legacy notification
+  listeners. Preserve endpoint fencing,
   credential leases, authorization, schema checks, notification scope, status
   deadlines, and host-owned client references.
 - Use Jido `3.0.0-beta.1`, Jido Action `3.0.0-beta.11`, and Jido Signal
