@@ -9,9 +9,10 @@ defmodule Jido.Connect.MCP.Session do
 
   The immutable filter supports toolsListChanged, resourcesListChanged,
   promptsListChanged, and resourceSubscriptions. Each selected capability is
-  authorized before the session opens. Modern streams require MCP 2026-07-28.
-  ExMCP owns acknowledgment, reconnect, and protocol state. The session keeps
-  the authorized filter and checks it before it forwards events or resync data.
+  authorized before the session opens. Modern streams use MCP 2026-07-28;
+  legacy peers use ExMCP's local notification listener. ExMCP owns
+  acknowledgment, reconnect, and protocol state. The session keeps the
+  authorized filter and checks it before it forwards events or resync data.
   It also checks the endpoint lease before each event and stops when the lease is retired.
   Hosts must fence a connection when policy or credentials change.
 
@@ -60,7 +61,7 @@ defmodule Jido.Connect.MCP.Session do
          {:ok, token} <- EndpointResolver.resolve_lease(endpoint_id, opts) do
       case open(token, filter, Keyword.get(opts, :timeout, 5_000)) do
         {:ok, subscription} ->
-          if acknowledged_filter_authorized?(subscription, filter) do
+          if subscription_filter_authorized?(subscription, filter) do
             Process.send_after(self(), :check_lease, 100)
 
             {:ok,
@@ -72,7 +73,7 @@ defmodule Jido.Connect.MCP.Session do
                subscription: subscription,
                owner: owner,
                monitor: Process.monitor(owner),
-               subscription_monitor: Process.monitor(subscription.pid)
+               subscription_monitor: Process.monitor(subscription_monitor_target(subscription))
              }}
           else
             ExMCPClient.close_subscription(subscription)
@@ -102,6 +103,24 @@ defmodule Jido.Connect.MCP.Session do
   def handle_info({:ex_mcp_subscription, subscription, method, params}, state) do
     if same_subscription?(subscription, state.subscription) do
       case dispatchable_subscription(state, subscription) do
+        :ok ->
+          if event_authorized?(method, params, state.filter) do
+            send(state.owner, {:jido_connect, :mcp, self(), method, Sanitizer.sanitize(params)})
+          end
+
+          {:noreply, state}
+
+        {:error, _} ->
+          {:stop, :normal, state}
+      end
+    else
+      {:noreply, state}
+    end
+  end
+
+  def handle_info({:ex_mcp_notification, listener, method, params}, state) do
+    if same_subscription?(listener, state.subscription) do
+      case dispatchable_subscription(state, listener) do
         :ok ->
           if event_authorized?(method, params, state.filter) do
             send(state.owner, {:jido_connect, :mcp, self(), method, Sanitizer.sanitize(params)})
@@ -160,6 +179,35 @@ defmodule Jido.Connect.MCP.Session do
 
   def handle_info({:ex_mcp_subscription_closed, subscription, _reason}, state) do
     if same_subscription?(subscription, state.subscription),
+      do: {:stop, :normal, state},
+      else: {:noreply, state}
+  end
+
+  def handle_info({:ex_mcp_notification_reconnected, listener, result}, state) do
+    if same_subscription?(listener, state.subscription) do
+      case {dispatchable_subscription(state, listener), result} do
+        {:ok, %{failed: []}} ->
+          send(state.owner, {:jido_connect, :mcp, self(), :status, :active})
+          {:noreply, %{state | status: :active}}
+
+        {:ok, %{failed: failed}} when is_list(failed) ->
+          send(state.owner, {:jido_connect, :mcp, self(), :status, :failed})
+          {:stop, :normal, state}
+
+        {{:error, _}, _} ->
+          {:stop, :normal, state}
+
+        _ ->
+          send(state.owner, {:jido_connect, :mcp, self(), :status, :failed})
+          {:stop, :normal, state}
+      end
+    else
+      {:noreply, state}
+    end
+  end
+
+  def handle_info({:ex_mcp_notification_closed, listener, _reason}, state) do
+    if same_subscription?(listener, state.subscription),
       do: {:stop, :normal, state},
       else: {:noreply, state}
   end
@@ -262,7 +310,8 @@ defmodule Jido.Connect.MCP.Session do
 
   defp open(%{client_module: ExMCPClient} = token, filter, timeout) do
     with :ok <- dispatchable(token),
-         {:ok, subscription} <- ExMCPClient.listen(token.client_ref, filter, timeout: timeout) do
+         {:ok, subscription} <-
+           ExMCPClient.open_notifications(token.client_ref, filter, timeout: timeout) do
       case dispatchable(token) do
         :ok ->
           {:ok, subscription}
@@ -281,15 +330,29 @@ defmodule Jido.Connect.MCP.Session do
   defp dispatchable(token), do: EndpointLeaseManager.ensure_dispatchable(token)
 
   defp dispatchable_subscription(state, subscription) do
-    if acknowledged_filter_authorized?(subscription, state.filter) do
+    if subscription_filter_authorized?(subscription, state.filter) do
       dispatchable(state.token)
     else
       {:error, :mcp_filter_expanded}
     end
   end
 
-  defp acknowledged_filter_authorized?(%{acknowledged_filter: acknowledged}, requested)
+  defp subscription_filter_authorized?(%{acknowledged_filter: acknowledged}, requested)
        when is_map(acknowledged) do
+    filter_authorized?(acknowledged, requested)
+  end
+
+  defp subscription_filter_authorized?(
+         %ExMCP.Client.NotificationListener.Ref{filter: filter},
+         requested
+       )
+       when is_map(filter) do
+    filter_authorized?(filter, requested)
+  end
+
+  defp subscription_filter_authorized?(_subscription, _requested), do: false
+
+  defp filter_authorized?(acknowledged, requested) do
     Enum.all?(acknowledged, fn
       {"resourceSubscriptions", uris} when is_list(uris) ->
         requested_uris = Map.get(requested, "resourceSubscriptions", [])
@@ -305,8 +368,6 @@ defmodule Jido.Connect.MCP.Session do
         false
     end)
   end
-
-  defp acknowledged_filter_authorized?(_subscription, _requested), do: false
 
   defp event_authorized?("notifications/tools/list_changed", _params, filter),
     do: Map.get(filter, "toolsListChanged") == true
@@ -335,5 +396,17 @@ defmodule Jido.Connect.MCP.Session do
 
   defp same_subscription?(pid, %{pid: pid}) when is_pid(pid), do: true
   defp same_subscription?(%{pid: pid}, %{pid: pid}), do: true
+
+  defp same_subscription?(
+         %ExMCP.Client.NotificationListener.Ref{id: id, client: client},
+         %ExMCP.Client.NotificationListener.Ref{id: id, client: client}
+       ),
+       do: true
+
   defp same_subscription?(_, _), do: false
+
+  defp subscription_monitor_target(%ExMCP.Client.NotificationListener.Ref{client: client}),
+    do: client
+
+  defp subscription_monitor_target(%{pid: pid}), do: pid
 end

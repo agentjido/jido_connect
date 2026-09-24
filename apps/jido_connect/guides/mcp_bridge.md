@@ -1,6 +1,6 @@
 # MCP Client Bridge
 
-Core `jido_connect` uses ExMCP 1.4 for MCP client protocol and transports.
+Core `jido_connect` uses ExMCP 1.5 for MCP client protocol and transports.
 The `release/3.0` branch is for maintainer development with Action v3.
 
 | Generated action | Required capability scope | Extra input |
@@ -225,7 +225,7 @@ Use this migration map:
 | Use reviewed Jido Actions | Generated Connect Action v3 modules |
 | Use runtime dynamic proxy Actions | Reviewed `Catalog.Item` values, packs, and `call_item/3`; there is no runtime proxy replacement |
 | Use MCP resources or prompts | Core Connect actions with endpoint and target scopes |
-| Receive modern list-change or resource notifications | `Jido.Connect.MCP.Session` |
+| Receive modern or legacy list-change and resource notifications | `Jido.Connect.MCP.Session` |
 | Publish MCP servers or use direct protocol transports | ExMCP |
 | Run coding-agent process lifecycles | Jido Harness |
 
@@ -289,18 +289,22 @@ resource-read scopes. This also authorizes the reads ExMCP makes during
 resynchronization. Filters accept at most 100 resource URIs. Start a new
 session to change its filter.
 
-ExMCP 1.4 rejects a server acknowledgment that adds notification
+ExMCP 1.5 rejects a modern server acknowledgment that adds notification
 categories or resource URIs. It checks the acknowledgment before reconnect
 resynchronization can read resources. Connect also keeps the original allowed
 filter and checks each event and snapshot before delivery. Equal and narrower
 acknowledgments remain usable.
 
-Sessions use MCP 2026-07-28 notification streams through `ExMCP.Client.listen/3`.
-Configure that protocol on the host client or endpoint. Ordinary tools,
-resources, and prompts also work with legacy peers. ExMCP 1.4 does not expose
-legacy uncorrelated list-change/resource-update events through this subscription
-API. Connect does not claim legacy notification delivery. Track this gap in
-[#81](https://github.com/agentjido/jido_connect/issues/81).
+Sessions use `ExMCP.Client.listen/3` with MCP 2026-07-28 peers. With MCP
+2024-11-05 through 2025-11-25 peers, they use the public ExMCP legacy listener
+API. Both paths keep the requested Connect filter authoritative. Legacy
+resource URIs are subscribed on the server and released when the session ends.
+
+Modern reconnects provide a resynchronization snapshot. Legacy reconnects
+restore requested resource subscriptions without a snapshot and report the
+session as active. If any requested URI cannot be restored, Connect reports a
+failed status and closes the session so the host cannot mistake partial event
+coverage for a healthy subscription.
 
 A session stops when its subscriber or subscription stops, or when its lease
 expires or is revoked. Lease checks run before event delivery and at 100 ms
@@ -308,7 +312,7 @@ intervals. Hosts must fence connections when credentials, scopes, or policy
 change. Status reports `:active` or `:reconnecting`. A failed resynchronization open
 sends the safe `:failed` status and closes the session. Monitor the session
 process to detect closure. Connect releases the
-lease and cancels the stream; it does not stop a host-owned client.
+lease and cancels the stream or listener; it does not stop a host-owned client.
 
 ## Connection and Host Callback Contract
 

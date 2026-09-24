@@ -194,7 +194,37 @@ defmodule Jido.Connect.MCP.ExMCPClient do
     end
   end
 
+  def open_notifications(client, filter, opts) do
+    try do
+      case ExMCP.Client.subscribe_notifications(client, filter, opts) do
+        {:ok, listener} ->
+          {:ok, listener}
+
+        {:error, :use_listen} ->
+          listen(client, filter, opts)
+
+        _ ->
+          subscription_error()
+      end
+    rescue
+      _ -> subscription_error()
+    catch
+      _, _ -> subscription_error()
+    end
+  end
+
+  def close_subscription(%ExMCP.Client.NotificationListener.Ref{} = listener),
+    do: ExMCP.Client.unsubscribe_notifications(listener)
+
   def close_subscription(subscription), do: ExMCP.Client.Subscription.cancel(subscription)
+
+  defp subscription_error do
+    {:error,
+     Jido.Connect.Error.provider("MCP subscription failed",
+       provider: :mcp,
+       reason: :subscription_failed
+     )}
+  end
 
   @impl true
   def status(client, opts) do
