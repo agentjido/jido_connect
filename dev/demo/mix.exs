@@ -61,7 +61,7 @@ defmodule Jido.Connect.Demo.MixProject do
       {:telemetry_metrics, "~> 1.1"},
       {:telemetry_poller, "~> 1.3"},
       {:jason, "~> 1.4"},
-      {:dns_cluster, "~> 0.2.0"},
+      {:dns_cluster, "~> 0.3"},
       {:bandit, "~> 1.12"},
       {:jido_connect, path: "../../apps/jido_connect"},
       {:jido_connect_github, path: "../../apps/jido_connect_github"},
