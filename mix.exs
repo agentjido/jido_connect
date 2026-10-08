@@ -30,6 +30,10 @@ defmodule JidoConnect.MixProject do
   # Run "mix help deps" for examples and options.
   defp deps do
     [
+      {:jido,
+       git: "https://github.com/agentjido/jido.git",
+       ref: "0c8853bf451a40330b7192c9d2200a06f9c61261",
+       override: true},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false}
     ]
   end
