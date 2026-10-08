@@ -30,6 +30,7 @@ defmodule JidoConnect.MixProject do
   # Run "mix help deps" for examples and options.
   defp deps do
     [
+      {:jido, "~> 2.4"},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false}
     ]
   end

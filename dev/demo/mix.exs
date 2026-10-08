@@ -44,6 +44,7 @@ defmodule Jido.Connect.Demo.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:jido, "~> 2.4"},
       {:phoenix, "~> 1.8.9"},
       {:phoenix_html, "~> 4.3"},
       {:phoenix_live_reload, "~> 1.6", only: :dev},

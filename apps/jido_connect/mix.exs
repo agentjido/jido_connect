@@ -41,9 +41,9 @@ defmodule JidoConnectCore.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jido, "~> 2.3"},
+      {:jido, "~> 2.4"},
       {:jido_action, "~> 2.3"},
-      {:jido_signal, "~> 2.2"},
+      {:jido_signal, "~> 2.3 and >= 2.3.1"},
       {:jason, "~> 1.4"},
       {:req, "~> 0.6"},
       {:plug, "~> 1.20", only: :test},
@@ -51,7 +51,7 @@ defmodule JidoConnectCore.MixProject do
       {:splode, "~> 0.3.0"},
       {:spark, "~> 2.7"},
       {:telemetry, "~> 1.3"},
-      {:zoi, "~> 0.18"}
+      {:zoi, "~> 0.18.11"}
     ]
   end
 

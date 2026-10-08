@@ -46,7 +46,7 @@ defmodule JidoConnectMCP.MixProject do
       jido_mcp_dep(),
       {:jason, "~> 1.4"},
       {:plug, "~> 1.20"},
-      {:zoi, "~> 0.18"}
+      {:zoi, "~> 0.18.11"}
     ]
   end
 
