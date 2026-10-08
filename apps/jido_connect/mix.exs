@@ -41,7 +41,7 @@ defmodule JidoConnectCore.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jido, "~> 2.4", override: true},
+      {:jido, "~> 2.4"},
       {:jido_action, "~> 2.3"},
       {:jido_signal, "~> 2.3 and >= 2.3.1"},
       {:jason, "~> 1.4"},
