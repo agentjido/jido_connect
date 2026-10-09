@@ -39,6 +39,18 @@ defmodule JidoConnect.MixProject do
   # Run "mix help deps" for examples and options.
   defp deps do
     [
+      {:jido,
+       git: "https://github.com/agentjido/jido.git",
+       ref: "90763478104f1edbf0afcfcf9444621c3f9755e8",
+       override: true},
+      {:jido_action,
+       git: "https://github.com/agentjido/jido_action.git",
+       ref: "8e9b3f7b268e175091b0eb3720bab3b8633d3c24",
+       override: true},
+      {:zoi,
+       git: "https://github.com/mikehostetler/zoi.git",
+       ref: "2fff2a23e23e7ac0b26f62f49bbc1b12f7818ac9",
+       override: true},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false}
     ]
   end

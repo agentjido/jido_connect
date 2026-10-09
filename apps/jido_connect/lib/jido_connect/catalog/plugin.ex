@@ -8,6 +8,7 @@ defmodule Jido.Connect.Catalog.Plugin do
   """
 
   alias Jido.Connect.Catalog.Actions.{CallTool, DescribeTool, SearchTools}
+  alias Jido.Agent.Plugin.Preparation
 
   @signal_routes [
     {"connect.catalog.search", SearchTools},
@@ -20,13 +21,12 @@ defmodule Jido.Connect.Catalog.Plugin do
   @catalog_signal_types Enum.map(@signal_routes, &elem(&1, 0))
 
   @impl Jido.Plugin
-  def prepare(%Jido.Agent.Command{signal: %{type: type}} = command, opts)
+  def prepare(%Preparation{signal: %{type: type}}, opts)
       when type in @catalog_signal_types do
-    context = Map.put_new(command.context, :catalog_config, Map.new(opts))
-    {:ok, %{command | context: context}}
+    {:ok, Map.new(opts)}
   end
 
-  def prepare(command, _opts), do: {:ok, command}
+  def prepare(%Preparation{}, _opts), do: {:ok, %{}}
 
   @doc "Returns the three Connect catalog Action modules."
   def actions, do: [SearchTools, DescribeTool, CallTool]
