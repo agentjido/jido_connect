@@ -46,7 +46,7 @@ defmodule JidoConnectMCP.MixProject do
       jido_mcp_dep(),
       {:jason, "~> 1.4"},
       {:plug, "~> 1.20"},
-      {:zoi, "~> 0.18"}
+      {:zoi, "~> 0.18.11"}
     ]
   end
 
@@ -60,9 +60,9 @@ defmodule JidoConnectMCP.MixProject do
 
   defp jido_mcp_dep do
     if hex_package_task?() do
-      {:jido_mcp, "~> 1.1"}
+      {:jido_mcp, github: "agentjido/jido_mcp", ref: "7368251f7bb008ece38c35e3a1374f5a0a374c27"}
     else
-      {:jido_mcp, github: "agentjido/jido_mcp", branch: "main"}
+      {:jido_mcp, github: "agentjido/jido_mcp", ref: "7368251f7bb008ece38c35e3a1374f5a0a374c27"}
     end
   end
 

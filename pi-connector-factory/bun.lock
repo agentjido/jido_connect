@@ -5,8 +5,8 @@
     "": {
       "name": "jido-connect-pi-connector-factory",
       "devDependencies": {
-        "@types/bun": "^1.4.2",
-        "typescript": "^7.0.2",
+        "@types/bun": "latest",
+        "typescript": "latest",
       },
     },
   },
