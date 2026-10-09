@@ -844,29 +844,48 @@ defmodule Jido.Connect.CatalogTest do
   end
 
   test "catalog plugin supplies configuration through the v3 preparation contract" do
-    assert {:ok, [%Jido.Plugin.Spec{module: Catalog.Plugin, state_key: nil}]} =
-             Jido.Plugin.normalize_all([{Catalog.Plugin, modules: [CatalogFixtures.Integration]}])
+    assert {:ok, %Jido.Plugin.Manifest{module: Catalog.Plugin, agent: Catalog.Plugin}} =
+             Jido.Plugin.manifest({Catalog.Plugin, modules: [CatalogFixtures.Integration]})
 
-    command = %Jido.Agent.Command{
-      agent: nil,
-      signal: Jido.Signal.new!("connect.catalog.search", %{}, source: "/test"),
-      context: %{request_id: "request-1"}
+    preparation = %Jido.Agent.Plugin.Preparation{
+      plugin: Catalog.Plugin,
+      agent_id: "catalog-preparation-test",
+      agent_module: __MODULE__,
+      agent_state: %{},
+      plugin_state: nil,
+      signal: Jido.Signal.new!("connect.catalog.search", %{}, source: "/test")
     }
 
     assert {:ok, prepared} =
-             Catalog.Plugin.prepare(command, modules: [CatalogFixtures.Integration])
+             Catalog.Plugin.prepare(preparation, modules: [CatalogFixtures.Integration])
 
-    assert prepared.context.request_id == "request-1"
-    assert prepared.context.catalog_config == %{modules: [CatalogFixtures.Integration]}
+    assert prepared == %{modules: [CatalogFixtures.Integration]}
+
+    context = %{
+      request_id: "request-1",
+      plugin_inputs: %{Catalog.Plugin => %Jido.Plugin.Input{prepared: prepared}}
+    }
 
     assert {:ok, %{results: [_ | _]}} =
-             Jido.Exec.run(SearchTools, %{}, prepared.context, timeout: 5_000)
+             Jido.Exec.run(SearchTools, %{}, context, timeout: 5_000)
 
-    custom = %{command | context: %{catalog_config: %{modules: []}}}
-    assert {:ok, ^custom} = Catalog.Plugin.prepare(custom, modules: [CatalogFixtures.Integration])
+    custom = Map.put(context, :catalog_config, %{modules: []})
+    assert {:ok, %{results: []}} = Jido.Exec.run(SearchTools, %{}, custom)
 
-    unrelated = %{command | signal: Jido.Signal.new!("other.event", %{}, source: "/test")}
-    assert {:ok, ^unrelated} = Catalog.Plugin.prepare(unrelated, modules: [])
+    unrelated = %{preparation | signal: Jido.Signal.new!("other.event", %{}, source: "/test")}
+    assert {:ok, %{}} = Catalog.Plugin.prepare(unrelated, modules: [])
+
+    agent =
+      Jido.Agent.new!(
+        name: "catalog_preparation",
+        schema: Zoi.object(%{results: Zoi.list(Zoi.any()) |> Zoi.default([])}),
+        routes: [{"connect.catalog.search", SearchTools}],
+        plugins: [{Catalog.Plugin, modules: [CatalogFixtures.Integration]}]
+      )
+      |> Jido.Agent.instantiate!(id: "catalog-preparation-test")
+
+    assert {:ok, next, []} = Jido.Agent.cmd(agent, preparation.signal)
+    assert [_ | _] = next.state.results
   end
 
   test "canonical items include stable refs and complete operation metadata" do

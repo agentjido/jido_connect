@@ -77,10 +77,22 @@ defmodule Jido.Connect.Catalog.Input do
     Data.get(action_context, :config) ||
       Data.get(action_context, :catalog_config) ||
       Data.get(action_context, :jido_connect_catalog) ||
+      prepared_config(action_context) ||
       case Data.get(action_context, :plugin_spec) do
         %{config: config} -> config
         _other -> %{}
       end
+  end
+
+  defp prepared_config(action_context) do
+    case Data.get(action_context, :plugin_inputs) do
+      %{Jido.Connect.Catalog.Plugin => %Jido.Plugin.Input{prepared: config}}
+      when is_map(config) ->
+        config
+
+      _other ->
+        nil
+    end
   end
 
   defp context_opts(action_context) when is_map(action_context) do
