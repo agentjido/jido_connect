@@ -34,7 +34,7 @@ defmodule JidoConnectTrello.MixProject do
     [
       jido_connect_dep(),
       jido_connect_mcp_dep(),
-      {:ex_mcp, "~> 1.5.0"},
+      {:ex_mcp, "~> 1.6"},
       {:jason, "~> 1.4"}
     ]
   end
