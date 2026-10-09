@@ -126,3 +126,7 @@ commits are pushed.
 
 The release branches do not publish packages. The old migration record keeps
 historical evidence; this file records the current v3 dependency set.
+
+## Zoi compatibility follow-up — 2026-10-09
+
+The dependency patch uses the merged Jido source at `90763478104f1edbf0afcfcf9444621c3f9755e8`. Its source tree is identical to the earlier pin, but the merged commit is reachable from the release branch. Catalog preparation now follows `Jido.Agent.Plugin.Preparation` and returns a package-owned value. Actions read that value from `context.plugin_inputs`. Explicit host configuration keeps priority. Public Agent command coverage and the full umbrella CI passed.
