@@ -1,7 +1,7 @@
-defmodule Jido.Connect.Trello.OAuth.DefaultFlow.ExMCPBackend do
+defmodule Jido.Connect.Trello.OAuth.DefaultFlow.ArborMCPBackend do
   @moduledoc false
 
-  alias ExMCP.Authorization.{
+  alias Arbor.MCP.Authorization.{
     ClientRegistration,
     OAuthFlow,
     OAuthTransactionStore,

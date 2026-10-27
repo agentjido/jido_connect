@@ -2,7 +2,7 @@ defmodule Jido.Connect.MCP.Endpoint do
   @moduledoc """
   A validated connection-scoped MCP client definition.
 
-  This value describes one ExMCP client. It is not an endpoint registry and it
+  This value describes one ArborMCP client. It is not an endpoint registry and it
   does not contain a public endpoint ID.
   """
 
@@ -82,7 +82,7 @@ defmodule Jido.Connect.MCP.Endpoint do
   defp validate_transport({:shell, opts}), do: validate_transport_opts(:stdio, opts)
 
   defp validate_transport({:sse, _opts}),
-    do: {:error, {:unsupported_transport, :sse, :ex_mcp}}
+    do: {:error, {:unsupported_transport, :sse, :arbor_mcp}}
 
   defp validate_transport({:streamable_http, opts}),
     do: validate_transport_opts(:streamable_http, opts)
@@ -171,8 +171,8 @@ defmodule Jido.Connect.MCP.Endpoint do
   defp validate_backend_marker(attrs) do
     case value(attrs, :backend) do
       nil -> :ok
-      backend when backend in [:ex_mcp, "ex_mcp"] -> :ok
-      backend -> {:error, {:unsupported_backend, kind(backend), :ex_mcp}}
+      backend when backend in [:arbor_mcp, "arbor_mcp"] -> :ok
+      backend -> {:error, {:unsupported_backend, kind(backend), :arbor_mcp}}
     end
   end
 

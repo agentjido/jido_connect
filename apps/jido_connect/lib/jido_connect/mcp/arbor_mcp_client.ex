@@ -1,9 +1,9 @@
-defmodule Jido.Connect.MCP.ExMCPClient do
+defmodule Jido.Connect.MCP.ArborMCPClient do
   @moduledoc false
 
   @behaviour Jido.Connect.MCP.Client
 
-  alias ExMCP.Error
+  alias Arbor.MCP.Error
   alias Jido.Connect.MCP.{ClientSupervisor, Endpoint}
 
   @protected_client_options [
@@ -61,7 +61,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   @spec start_client(Endpoint.t()) :: {:ok, pid()} | {:error, term()}
   def start_client(%Endpoint{} = endpoint) do
     with {:ok, opts} <- client_options(endpoint) do
-      spec = Supervisor.child_spec({ExMCP.Client, opts}, restart: :temporary)
+      spec = Supervisor.child_spec({Arbor.MCP.Client, opts}, restart: :temporary)
 
       case DynamicSupervisor.start_child(ClientSupervisor, spec) do
         {:ok, pid} -> {:ok, pid}
@@ -87,7 +87,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   def list_tools(client, opts) do
     request(fn ->
       with {:ok, request_opts} <- request_opts(opts, false) do
-        ExMCP.Client.list_tools(client, request_opts)
+        Arbor.MCP.Client.list_tools(client, request_opts)
       end
     end)
   end
@@ -96,7 +96,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   def call_tool(client, tool_name, arguments, opts) do
     request(fn ->
       with {:ok, request_opts} <- request_opts(opts, true) do
-        ExMCP.Client.call_tool(client, tool_name, arguments, request_opts)
+        Arbor.MCP.Client.call_tool(client, tool_name, arguments, request_opts)
       end
     end)
   end
@@ -105,7 +105,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   def list_resources(client, opts) do
     request(fn ->
       with {:ok, request_opts} <- request_opts(opts, false) do
-        ExMCP.Client.list_resources(client, request_opts)
+        Arbor.MCP.Client.list_resources(client, request_opts)
       end
     end)
   end
@@ -114,7 +114,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   def list_resource_templates(client, opts) do
     request(fn ->
       with {:ok, request_opts} <- request_opts(opts, false) do
-        ExMCP.Client.list_resource_templates(client, request_opts)
+        Arbor.MCP.Client.list_resource_templates(client, request_opts)
       end
     end)
   end
@@ -123,7 +123,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   def read_resource(client, uri, opts) do
     request(fn ->
       with {:ok, request_opts} <- request_opts(opts, false) do
-        ExMCP.Client.read_resource(client, uri, request_opts)
+        Arbor.MCP.Client.read_resource(client, uri, request_opts)
       end
     end)
   end
@@ -132,7 +132,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   def list_prompts(client, opts) do
     request(fn ->
       with {:ok, request_opts} <- request_opts(opts, false) do
-        ExMCP.Client.list_prompts(client, request_opts)
+        Arbor.MCP.Client.list_prompts(client, request_opts)
       end
     end)
   end
@@ -141,7 +141,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   def get_prompt(client, name, arguments, opts) do
     request(fn ->
       with {:ok, request_opts} <- request_opts(opts, false) do
-        ExMCP.Client.get_prompt(client, name, arguments, request_opts)
+        Arbor.MCP.Client.get_prompt(client, name, arguments, request_opts)
       end
     end)
   end
@@ -150,7 +150,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   def complete(client, ref, argument, opts) do
     request(fn ->
       with {:ok, request_opts} <- request_opts(opts, false) do
-        ExMCP.Client.complete(client, ref, argument, request_opts)
+        Arbor.MCP.Client.complete(client, ref, argument, request_opts)
       end
     end)
   end
@@ -159,14 +159,14 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   def ping(client, opts) do
     request(fn ->
       with {:ok, request_opts} <- request_opts(opts, false) do
-        ExMCP.Client.ping(client, request_opts)
+        Arbor.MCP.Client.ping(client, request_opts)
       end
     end)
   end
 
   def listen(client, filter, opts) do
     try do
-      case ExMCP.Client.listen(client, filter, opts) do
+      case Arbor.MCP.Client.listen(client, filter, opts) do
         {:ok, subscription} ->
           {:ok, subscription}
 
@@ -196,7 +196,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
 
   def open_notifications(client, filter, opts) do
     try do
-      case ExMCP.Client.subscribe_notifications(client, filter, opts) do
+      case Arbor.MCP.Client.subscribe_notifications(client, filter, opts) do
         {:ok, listener} ->
           {:ok, listener}
 
@@ -213,10 +213,10 @@ defmodule Jido.Connect.MCP.ExMCPClient do
     end
   end
 
-  def close_subscription(%ExMCP.Client.NotificationListener.Ref{} = listener),
-    do: ExMCP.Client.unsubscribe_notifications(listener)
+  def close_subscription(%Arbor.MCP.Client.NotificationListener.Ref{} = listener),
+    do: Arbor.MCP.Client.unsubscribe_notifications(listener)
 
-  def close_subscription(subscription), do: ExMCP.Client.Subscription.cancel(subscription)
+  def close_subscription(subscription), do: Arbor.MCP.Client.Subscription.cancel(subscription)
 
   defp subscription_error do
     {:error,
@@ -230,7 +230,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   def status(client, opts) do
     request(fn ->
       with {:ok, request_opts} <- request_opts(opts, false) do
-        case ExMCP.Client.get_status(client, Keyword.take(request_opts, [:timeout])) do
+        case Arbor.MCP.Client.get_status(client, Keyword.take(request_opts, [:timeout])) do
           %{} = status -> {:ok, public_status(status)}
           {:ok, %{} = status} -> {:ok, public_status(status)}
           error -> error
@@ -335,7 +335,7 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   end
 
   defp transport_options({transport, _opts}),
-    do: {:error, {:unsupported_transport, transport, :ex_mcp}}
+    do: {:error, {:unsupported_transport, transport, :arbor_mcp}}
 
   defp request_opts(opts, tool?) when is_list(opts) do
     if Keyword.keyword?(opts) and valid_timeout?(Keyword.get(opts, :timeout)) and
@@ -414,8 +414,8 @@ defmodule Jido.Connect.MCP.ExMCPClient do
   defp sanitize_start_error({:invalid_transport_options, field}),
     do: {:invalid_transport_options, safe_field(field)}
 
-  defp sanitize_start_error({:unsupported_transport, transport, :ex_mcp}),
-    do: {:unsupported_transport, transport, :ex_mcp}
+  defp sanitize_start_error({:unsupported_transport, transport, :arbor_mcp}),
+    do: {:unsupported_transport, transport, :arbor_mcp}
 
   defp sanitize_start_error({:protected_client_option, option}),
     do: {:protected_client_option, option}

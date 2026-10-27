@@ -2,7 +2,7 @@ defmodule Jido.Connect.MCP.ClientSource do
   @moduledoc false
 
   alias Jido.Connect.{CredentialLease, Error}
-  alias Jido.Connect.MCP.{Endpoint, ExMCPClient}
+  alias Jido.Connect.MCP.{Endpoint, ArborMCPClient}
 
   @enforce_keys [:module, :ownership]
   defstruct [:module, :ref, :endpoint, :ownership]
@@ -20,7 +20,7 @@ defmodule Jido.Connect.MCP.ClientSource do
       CredentialLease.get_field(
         lease,
         :mcp_client_module,
-        CredentialLease.get_field(lease, :mcp_client, ExMCPClient)
+        CredentialLease.get_field(lease, :mcp_client, ArborMCPClient)
       )
 
     ref = CredentialLease.get_field(lease, :mcp_client_ref, :missing)
@@ -37,14 +37,14 @@ defmodule Jido.Connect.MCP.ClientSource do
 
   def static(entry, _endpoint_id) when is_map(entry) or is_list(entry) do
     entry = if is_list(entry), do: Map.new(entry), else: entry
-    module = value(entry, :client_module, value(entry, :module, ExMCPClient))
+    module = value(entry, :client_module, value(entry, :module, ArborMCPClient))
     ref = value(entry, :client_ref, value(entry, :ref, :missing))
     static_source(module, ref)
   rescue
     _error -> {:error, :invalid_client_entry}
   end
 
-  def static(ref, _endpoint_id) when ref != nil, do: static_source(ExMCPClient, ref)
+  def static(ref, _endpoint_id) when ref != nil, do: static_source(ArborMCPClient, ref)
   def static(_entry, _endpoint_id), do: {:error, :invalid_client_entry}
 
   @spec start(t()) :: {:ok, module(), term(), boolean()} | {:error, term()}
@@ -100,10 +100,10 @@ defmodule Jido.Connect.MCP.ClientSource do
     end
   end
 
-  defp build(ExMCPClient, :missing, {:ok, %Endpoint{} = endpoint}) do
+  defp build(ArborMCPClient, :missing, {:ok, %Endpoint{} = endpoint}) do
     {:ok,
      %__MODULE__{
-       module: ExMCPClient,
+       module: ArborMCPClient,
        ref: nil,
        endpoint: endpoint,
        ownership: :connect

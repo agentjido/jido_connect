@@ -1,15 +1,15 @@
 defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
   use ExUnit.Case, async: false
   alias Jido.Connect
-  alias Jido.Connect.MCP.{EndpointLeaseManager, ExMCPClient, Session}
+  alias Jido.Connect.MCP.{EndpointLeaseManager, ArborMCPClient, Session}
 
   defmodule Policy do
     def authorize(_, _, _, _), do: :ok
   end
 
   defmodule Server do
-    use ExMCP.Server.Handler
-    use ExMCP.Server.DSL, name: "capabilities", version: "1.0.0"
+    use Arbor.MCP.Server.Handler
+    use Arbor.MCP.Server.DSL, name: "capabilities", version: "1.0.0"
 
     @impl true
     def handle_complete(_ref, _argument, state),
@@ -56,20 +56,14 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
   end
 
   setup do
-    registry = start_supervised!({ExMCP.Server.Subscriptions, name: nil})
-
     server =
       start_supervised!(
-        {ExMCP.Server.HandlerServer,
-         handler: Server,
-         transport: :test,
-         protocol_mode: :modern_only,
-         subscription_registry: registry}
+        {Arbor.MCP.Server, handler: Server, transport: :test, protocol_mode: :modern_only}
       )
 
     client =
       start_supervised!(
-        {ExMCP.Client,
+        {Arbor.MCP.Client,
          transport: :test, server: server, protocol_mode: :modern_only, health_check_interval: nil}
       )
 
@@ -164,7 +158,7 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
     refute Map.has_key?(status, "transport")
 
     assert {:error, %{reason: :invalid_params}} =
-             ExMCPClient.status(state.client, timeout: 0)
+             ArborMCPClient.status(state.client, timeout: 0)
 
     :ok = :sys.suspend(state.client)
 
@@ -214,7 +208,7 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
              )
 
     assert %{endpoint_id: "test", status: :active} = Session.status(session)
-    assert :ok = ExMCP.Server.notify_resource_update(state.server, "test://document")
+    assert :ok = Arbor.MCP.Server.notify_resource_update(state.server, "test://document")
 
     assert_receive {:jido_connect, :mcp, ^session, "notifications/resources/updated",
                     %{"uri" => "test://document"}},
@@ -243,7 +237,7 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
                state.opts
              )
 
-    assert {:error, _} = ExMCPClient.list_resources(state.client, cursor: 1)
+    assert {:error, _} = ArborMCPClient.list_resources(state.client, cursor: 1)
   end
 
   test "subscriber death closes its session", state do
@@ -271,7 +265,7 @@ defmodule Jido.Connect.MCP.ClientCapabilitiesTest do
     {:ok, session} = Session.start_link("test", %{"toolsListChanged" => true}, state.opts)
     ref = Process.monitor(session)
     subscription = :sys.get_state(session).subscription
-    ExMCPClient.close_subscription(subscription)
+    ArborMCPClient.close_subscription(subscription)
     assert_receive {:DOWN, ^ref, :process, ^session, :normal}, 1_000
   end
 

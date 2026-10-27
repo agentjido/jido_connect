@@ -41,10 +41,10 @@ add the core app as a path dependency:
 {:jido_connect, path: "../jido_connect/apps/jido_connect"}
 ```
 
-The core app currently requires Elixir 1.19 or later, Jido `3.0.0-beta.1`,
-Jido Action `3.0.0-beta.11`, and Jido Signal `3.0.0-beta.4`. See the packaged
-`mix.exs` for the complete dependency set. A normal Hex dependency can replace
-the local path after the v3 package is published.
+The core app currently requires Elixir 1.19 or later. Jido and Jido Action use
+the exact Git revisions in `mix.exs`. Jido Signal uses `3.0.0-beta.5`, and
+ArborMCP uses the exact `2.0.0-rc.6` release candidate. A normal Hex dependency
+can replace the local path after the v3 package is published.
 
 ## MCP Client Bridge
 
@@ -52,13 +52,13 @@ Core `jido_connect` includes client actions for MCP tools, resources, resource
 templates, prompts, completion, and endpoint inspection. It also offers a
 host-supervised notification session with connection lifecycle status. See the
 [MCP bridge guide](guides/mcp_bridge.md) for the action list, scopes, and
-session contract. ExMCP owns the protocol and transports.
+session contract. ArborMCP owns the protocol and transports.
 
 Connect checks endpoint and tool allowlists, connections, credential leases,
 scopes, policy, confirmation, schema drift, and uncertain write results. It
 does not publish an MCP server or create dynamic proxy Actions.
 
-For a host-owned ExMCP client, put the public endpoint ID in connection
+For a host-owned ArborMCP client, put the public endpoint ID in connection
 metadata. Put the supervised client name or process reference in the
 short-lived credential lease:
 
@@ -85,16 +85,16 @@ lease =
   )
 ```
 
-The host must start and supervise this ExMCP client. Connect does not stop a
+The host must start and supervise this ArborMCP client. Connect does not stop a
 host-owned client. The client reference must be secret-free. Keep credentials
 in the supervised client process or in a connection-scoped endpoint definition.
 A custom internal adapter can use `mcp_client_module`, but the default adapter
-calls `ExMCP.Client` directly.
+calls `Arbor.MCP.Client` directly.
 
 If a host cannot keep a shared supervised reference, the lease can contain an
-`mcp_endpoint` definition instead. Connect then starts one ExMCP client for the
+`mcp_endpoint` definition instead. Connect then starts one ArborMCP client for the
 connection generation and stops only that client after the generation drains.
-The endpoint definition supports ExMCP stdio, streamable HTTP, and BEAM-local
+The endpoint definition supports ArborMCP stdio, streamable HTTP, and BEAM-local
 transports.
 
 An application can also map a public endpoint ID to a host-supervised client:
@@ -106,7 +106,7 @@ config :jido_connect,
   }
 ```
 
-Public endpoint IDs never act as ExMCP process references. Each lease-backed
+Public endpoint IDs never act as ArborMCP process references. Each lease-backed
 connection also gets an opaque internal endpoint ID. Rotation, expiry,
 revocation, or connection removal fences the old generation before Connect
 stops a connection-scoped client. A remote write is sent at most one time. If
@@ -117,7 +117,7 @@ Tool discovery returns `schema_hash`. A typed caller can give that value as
 `expected_schema_hash` to `mcp.tool.call`. Connect lists the tool again and
 rejects schema drift before the remote call.
 
-The v3 development branch uses ExMCP `~> 1.5`. It does not depend on
+The v3 development branch uses ArborMCP `== 2.0.0-rc.6`. It does not depend on
 `jido_mcp`.
 
 ## Host Boundary

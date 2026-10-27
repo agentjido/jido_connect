@@ -1,6 +1,7 @@
 # MCP Client Bridge
 
-Core `jido_connect` uses ExMCP 1.5 for MCP client protocol and transports.
+Core `jido_connect` uses ArborMCP `2.0.0-rc.6` for MCP client protocol and
+transports.
 The `release/3.0` branch is for maintainer development with Action v3.
 
 | Generated action | Required capability scope | Extra input |
@@ -63,11 +64,11 @@ items.
 
 ## Configure a Client
 
-The public endpoint ID and the ExMCP client reference are different values.
+The public endpoint ID and the ArborMCP client reference are different values.
 The endpoint ID is safe catalog and policy data. A process name or reference
 is runtime data and must not contain a credential.
 
-A host can supervise an ExMCP client and put its reference in a short-lived
+A host can supervise an ArborMCP client and put its reference in a short-lived
 credential lease:
 
 ```elixir
@@ -111,9 +112,9 @@ config :jido_connect,
   }
 ```
 
-If the lease has an `mcp_endpoint` definition, Connect starts one ExMCP client
+If the lease has an `mcp_endpoint` definition, Connect starts one ArborMCP client
 for that connection generation. It stops that client after the generation
-drains. The endpoint type supports ExMCP stdio, streamable HTTP, and BEAM-local
+drains. The endpoint type supports ArborMCP stdio, streamable HTTP, and BEAM-local
 transports. This is connection-scoped ownership, not an endpoint pool.
 
 ## Apply Scopes and Policy
@@ -226,11 +227,11 @@ Use this migration map:
 | Use runtime dynamic proxy Actions | Reviewed `Catalog.Item` values, packs, and `call_item/3`; there is no runtime proxy replacement |
 | Use MCP resources or prompts | Core Connect actions with endpoint and target scopes |
 | Receive modern or legacy list-change and resource notifications | `Jido.Connect.MCP.Session` |
-| Publish MCP servers or use direct protocol transports | ExMCP |
+| Publish MCP servers or use direct protocol transports | ArborMCP |
 | Run coding-agent process lifecycles | Jido Harness |
 
 Core Connect provides the client operations and managed notification sessions
-listed above. Direct MCP protocol work and server publication belong in ExMCP.
+listed above. Direct MCP protocol work and server publication belong in Arbor.MCP.
 No change to the `jido_mcp` package is required for this release candidate.
 
 
@@ -276,7 +277,7 @@ alone is insufficient; pass the client reference through a credential lease.
 )
 
 # Receive {:jido_connect, :mcp, session, method, sanitized_params}.
-# After ExMCP reconnects and reads fresh state, receive
+# After ArborMCP reconnects and reads fresh state, receive
 # {:jido_connect, :mcp, session, :resync, sanitized_snapshot}.
 # Reconnect status arrives as {:jido_connect, :mcp, session, :status, phase}.
 Jido.Connect.MCP.Session.status(session)
@@ -285,18 +286,18 @@ Jido.Connect.MCP.Session.close(session)
 
 Filters also support `toolsListChanged` and `promptsListChanged`. A session
 requires `mcp:notifications:listen`, endpoint access, and the matching list or
-resource-read scopes. This also authorizes the reads ExMCP makes during
+resource-read scopes. This also authorizes the reads ArborMCP makes during
 resynchronization. Filters accept at most 100 resource URIs. Start a new
 session to change its filter.
 
-ExMCP 1.5 rejects a modern server acknowledgment that adds notification
+ArborMCP 2.0.0-rc.6 rejects a modern server acknowledgment that adds notification
 categories or resource URIs. It checks the acknowledgment before reconnect
 resynchronization can read resources. Connect also keeps the original allowed
 filter and checks each event and snapshot before delivery. Equal and narrower
 acknowledgments remain usable.
 
-Sessions use `ExMCP.Client.listen/3` with MCP 2026-07-28 peers. With MCP
-2024-11-05 through 2025-11-25 peers, they use the public ExMCP legacy listener
+Sessions use `Arbor.MCP.Client.listen/3` with MCP 2026-07-28 peers. With MCP
+2024-11-05 through 2025-11-25 peers, they use the public ArborMCP legacy listener
 API. Both paths keep the requested Connect filter authoritative. Legacy
 resource URIs are subscribed on the server and released when the session ends.
 
@@ -316,13 +317,13 @@ lease and cancels the stream or listener; it does not stop a host-owned client.
 
 ## Connection and Host Callback Contract
 
-`EndpointLeaseManager` owns Connect leases and generation changes. ExMCP owns
+`EndpointLeaseManager` owns Connect leases and generation changes. ArborMCP owns
 handshake, capability negotiation, protocol errors, transports, and subscription
 state. Connect-owned clients use bounded requests with automatic reconnect and
 request retry disabled. Reopen them with a new connection generation. A host
-that needs reconnect can supervise and configure its own ExMCP client.
+that needs reconnect can supervise and configure its own ArborMCP client.
 
-Use ExMCP's public `Client.Handler` callbacks for roots, sampling, elicitation,
+Use ArborMCP's public `Arbor.MCP.Client.Handler` callbacks for roots, sampling, elicitation,
 request progress, and log messages. Set the handler in the host client or in
 trusted endpoint `client_options`; declare only supported capabilities. The
 host applies its own approval and data policy to these server-initiated

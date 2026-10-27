@@ -1,4 +1,4 @@
-defmodule Jido.Connect.MCP.ExMCPClientTest do
+defmodule Jido.Connect.MCP.ArborMCPClientTest do
   use ExUnit.Case, async: false
 
   alias Jido.Connect
@@ -7,13 +7,13 @@ defmodule Jido.Connect.MCP.ExMCPClientTest do
     Endpoint,
     EndpointLeaseManager,
     EndpointResolver,
-    ExMCPClient,
+    ArborMCPClient,
     HostEndpoint
   }
 
   defmodule Server do
-    use ExMCP.Server.Handler
-    use ExMCP.Server.DSL, name: "jido-connect-test", version: "1.0.0"
+    use Arbor.MCP.Server.Handler
+    use Arbor.MCP.Server.DSL, name: "jido-connect-test", version: "1.0.0"
 
     tool "echo", "Echo text" do
       param(:text, :string, required: true)
@@ -24,7 +24,7 @@ defmodule Jido.Connect.MCP.ExMCPClientTest do
     end
   end
 
-  test "uses one scoped ExMCP client for tool listing and calls" do
+  test "uses one scoped ArborMCP client for tool listing and calls" do
     {:ok, server} = start_supervised({Server, transport: :beam, protocol_mode: :legacy_only})
 
     assert {:ok, endpoint} =
@@ -33,16 +33,16 @@ defmodule Jido.Connect.MCP.ExMCPClientTest do
                client_info: %{name: "jido-connect-test"}
              })
 
-    assert {:ok, client} = ExMCPClient.start_client(endpoint)
+    assert {:ok, client} = ArborMCPClient.start_client(endpoint)
     assert Process.alive?(client)
 
-    assert {:ok, %{"tools" => [tool]}} = ExMCPClient.list_tools(client, timeout: 1_000)
+    assert {:ok, %{"tools" => [tool]}} = ArborMCPClient.list_tools(client, timeout: 1_000)
     assert tool["name"] == "echo"
 
     assert {:ok, %{"content" => [%{"text" => "hello"}]}} =
-             ExMCPClient.call_tool(client, "echo", %{"text" => "hello"}, timeout: 1_000)
+             ArborMCPClient.call_tool(client, "echo", %{"text" => "hello"}, timeout: 1_000)
 
-    assert :ok = ExMCPClient.stop_client(client)
+    assert :ok = ArborMCPClient.stop_client(client)
     refute Process.alive?(client)
   end
 
@@ -55,7 +55,7 @@ defmodule Jido.Connect.MCP.ExMCPClientTest do
              })
 
     assert {:error, {:protected_client_option, :retry_policy}} =
-             ExMCPClient.client_options(endpoint)
+             ArborMCPClient.client_options(endpoint)
   end
 
   test "protects retry options inside transport input" do
@@ -66,10 +66,10 @@ defmodule Jido.Connect.MCP.ExMCPClientTest do
              })
 
     assert {:error, {:protected_client_option, :retry_policy}} =
-             ExMCPClient.client_options(endpoint)
+             ArborMCPClient.client_options(endpoint)
   end
 
-  test "maps safe stdio and HTTP endpoint options to ExMCP" do
+  test "maps safe stdio and HTTP endpoint options to ArborMCP" do
     stdio =
       endpoint(
         {:stdio,
@@ -80,7 +80,7 @@ defmodule Jido.Connect.MCP.ExMCPClientTest do
         client_options: [stream_idle_timeout: 500]
       )
 
-    assert {:ok, stdio_opts} = ExMCPClient.client_options(stdio)
+    assert {:ok, stdio_opts} = ArborMCPClient.client_options(stdio)
     assert stdio_opts[:transport] == :stdio
     assert stdio_opts[:command] == ["echo", "hello"]
     assert stdio_opts[:cd] == "/tmp"
@@ -100,7 +100,7 @@ defmodule Jido.Connect.MCP.ExMCPClientTest do
         protocol_version: "2026-01-01"
       )
 
-    assert {:ok, http_opts} = ExMCPClient.client_options(http)
+    assert {:ok, http_opts} = ArborMCPClient.client_options(http)
     assert http_opts[:transport] == :http
     assert http_opts[:url] == "https://mcp.example.test"
     assert http_opts[:endpoint] == "/tools"
@@ -127,7 +127,7 @@ defmodule Jido.Connect.MCP.ExMCPClientTest do
 
     for transport <- invalid_transports do
       assert {:error, {:invalid_transport_options, _field}} =
-               transport |> endpoint() |> ExMCPClient.client_options()
+               transport |> endpoint() |> ArborMCPClient.client_options()
     end
   end
 
@@ -146,14 +146,14 @@ defmodule Jido.Connect.MCP.ExMCPClientTest do
     ]
 
     for transport <- invalid_http do
-      assert {:error, error} = transport |> endpoint() |> ExMCPClient.client_options()
+      assert {:error, error} = transport |> endpoint() |> ArborMCPClient.client_options()
       assert elem(error, 0) in [:invalid_transport_options, :protected_client_option]
     end
 
     alive_server = spawn(fn -> Process.sleep(:infinity) end)
 
     assert {:ok, beam_opts} =
-             endpoint({:beam, server: alive_server}) |> ExMCPClient.client_options()
+             endpoint({:beam, server: alive_server}) |> ArborMCPClient.client_options()
 
     assert beam_opts[:transport] == :beam
     Process.exit(alive_server, :kill)
@@ -163,30 +163,30 @@ defmodule Jido.Connect.MCP.ExMCPClientTest do
     assert_receive {:DOWN, ^ref, :process, ^dead_server, _reason}
 
     assert {:error, {:invalid_transport_options, :server}} =
-             endpoint({:beam, server: dead_server}) |> ExMCPClient.client_options()
+             endpoint({:beam, server: dead_server}) |> ArborMCPClient.client_options()
 
     assert {:error, {:invalid_transport_options, :server}} =
-             endpoint({:beam, server: :not_a_pid}) |> ExMCPClient.client_options()
+             endpoint({:beam, server: :not_a_pid}) |> ArborMCPClient.client_options()
 
-    assert {:error, {:unsupported_transport, :sse, :ex_mcp}} =
-             endpoint({:sse, []}) |> ExMCPClient.client_options()
+    assert {:error, {:unsupported_transport, :sse, :arbor_mcp}} =
+             endpoint({:sse, []}) |> ArborMCPClient.client_options()
   end
 
   test "returns safe errors for invalid request options and missing clients" do
     assert {:error, %{reason: :invalid_params, details: %{field: :options}}} =
-             ExMCPClient.list_tools(:unused, %{timeout: 10})
+             ArborMCPClient.list_tools(:unused, %{timeout: 10})
 
     assert {:error, %{reason: :invalid_params, details: %{field: :options}}} =
-             ExMCPClient.list_tools(:unused, timeout: 0)
+             ArborMCPClient.list_tools(:unused, timeout: 0)
 
     assert {:error, %{reason: :invalid_params, details: %{field: :options}}} =
-             ExMCPClient.call_tool(:unused, "echo", %{}, timeout: -1)
+             ArborMCPClient.call_tool(:unused, "echo", %{}, timeout: -1)
 
     assert {:error, %{reason: :request_failed, details: %{}}} =
-             ExMCPClient.list_tools(:missing_ex_mcp_client, timeout: 1)
+             ArborMCPClient.list_tools(:missing_arbor_mcp_client, timeout: 1)
 
-    assert :ok = ExMCPClient.stop_client(self())
-    assert :ok = ExMCPClient.stop_client(:not_a_process)
+    assert :ok = ArborMCPClient.stop_client(self())
+    assert :ok = ArborMCPClient.stop_client(:not_a_process)
   end
 
   test "starts and stops one connection-scoped client for a lease" do
@@ -232,7 +232,7 @@ defmodule Jido.Connect.MCP.ExMCPClientTest do
 
     assert token.endpoint_id == HostEndpoint.internal_id(connection)
     refute token.endpoint_id == "local"
-    assert token.client_module == ExMCPClient
+    assert token.client_module == ArborMCPClient
     assert is_pid(token.client_ref)
     assert Process.alive?(token.client_ref)
 

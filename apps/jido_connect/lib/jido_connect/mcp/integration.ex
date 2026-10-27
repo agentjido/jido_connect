@@ -30,7 +30,7 @@ defmodule Jido.Connect.MCP do
     metadata %{
       bridge?: true,
       bridge_package: :jido_connect,
-      protocol_package: :ex_mcp
+      protocol_package: :arbor_mcp
     }
 
     capability :bridge do

@@ -10,7 +10,7 @@ defmodule Jido.Connect.MCP.Session do
   The immutable filter supports toolsListChanged, resourcesListChanged,
   promptsListChanged, and resourceSubscriptions. Each selected capability is
   authorized before the session opens. Modern streams use MCP 2026-07-28;
-  legacy peers use ExMCP's local notification listener. ExMCP owns
+  legacy peers use ArborMCP's local notification listener. ArborMCP owns
   acknowledgment, reconnect, and protocol state. The session keeps the
   authorized filter and checks it before it forwards events or resync data.
   It also checks the endpoint lease before each event and stops when the lease is retired.
@@ -23,7 +23,7 @@ defmodule Jido.Connect.MCP.Session do
 
   use GenServer
   alias Jido.Connect.{Authorization, Context, CredentialLease, Error, Sanitizer}
-  alias Jido.Connect.MCP.{EndpointLeaseManager, EndpointResolver, ExMCPClient}
+  alias Jido.Connect.MCP.{EndpointLeaseManager, EndpointResolver, ArborMCPClient}
 
   @keys ~w(toolsListChanged resourcesListChanged promptsListChanged resourceSubscriptions)
 
@@ -76,7 +76,7 @@ defmodule Jido.Connect.MCP.Session do
                subscription_monitor: Process.monitor(subscription_monitor_target(subscription))
              }}
           else
-            ExMCPClient.close_subscription(subscription)
+            ArborMCPClient.close_subscription(subscription)
             release(token)
 
             {:stop,
@@ -100,6 +100,8 @@ defmodule Jido.Connect.MCP.Session do
   end
 
   @impl true
+  # ArborMCP retains these ExMCP tuple tags as legacy delivery identifiers.
+  # They are message contracts, not module or package references.
   def handle_info({:ex_mcp_subscription, subscription, method, params}, state) do
     if same_subscription?(subscription, state.subscription) do
       case dispatchable_subscription(state, subscription) do
@@ -237,7 +239,7 @@ defmodule Jido.Connect.MCP.Session do
 
   @impl true
   def terminate(_reason, state) do
-    ExMCPClient.close_subscription(state.subscription)
+    ArborMCPClient.close_subscription(state.subscription)
     release(state.token)
   end
 
@@ -308,23 +310,23 @@ defmodule Jido.Connect.MCP.Session do
          key: :credential_lease
        )}
 
-  defp open(%{client_module: ExMCPClient} = token, filter, timeout) do
+  defp open(%{client_module: ArborMCPClient} = token, filter, timeout) do
     with :ok <- dispatchable(token),
          {:ok, subscription} <-
-           ExMCPClient.open_notifications(token.client_ref, filter, timeout: timeout) do
+           ArborMCPClient.open_notifications(token.client_ref, filter, timeout: timeout) do
       case dispatchable(token) do
         :ok ->
           {:ok, subscription}
 
         error ->
-          ExMCPClient.close_subscription(subscription)
+          ArborMCPClient.close_subscription(subscription)
           error
       end
     end
   end
 
   defp open(_token, _filter, _timeout),
-    do: {:error, Error.config("Notification sessions require ExMCP", key: :mcp_client_module)}
+    do: {:error, Error.config("Notification sessions require ArborMCP", key: :mcp_client_module)}
 
   defp dispatchable(%{legacy?: true}), do: :ok
   defp dispatchable(token), do: EndpointLeaseManager.ensure_dispatchable(token)
@@ -343,7 +345,7 @@ defmodule Jido.Connect.MCP.Session do
   end
 
   defp subscription_filter_authorized?(
-         %ExMCP.Client.NotificationListener.Ref{filter: filter},
+         %Arbor.MCP.Client.NotificationListener.Ref{filter: filter},
          requested
        )
        when is_map(filter) do
@@ -398,14 +400,14 @@ defmodule Jido.Connect.MCP.Session do
   defp same_subscription?(%{pid: pid}, %{pid: pid}), do: true
 
   defp same_subscription?(
-         %ExMCP.Client.NotificationListener.Ref{id: id, client: client},
-         %ExMCP.Client.NotificationListener.Ref{id: id, client: client}
+         %Arbor.MCP.Client.NotificationListener.Ref{id: id, client: client},
+         %Arbor.MCP.Client.NotificationListener.Ref{id: id, client: client}
        ),
        do: true
 
   defp same_subscription?(_, _), do: false
 
-  defp subscription_monitor_target(%ExMCP.Client.NotificationListener.Ref{client: client}),
+  defp subscription_monitor_target(%Arbor.MCP.Client.NotificationListener.Ref{client: client}),
     do: client
 
   defp subscription_monitor_target(%{pid: pid}), do: pid

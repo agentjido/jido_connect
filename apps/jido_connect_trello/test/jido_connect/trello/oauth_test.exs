@@ -123,7 +123,7 @@ defmodule Jido.Connect.Trello.OAuthTest do
     :ok
   end
 
-  test "default flow discovers, registers, exchanges, and refreshes through ExMCP boundaries" do
+  test "default flow discovers, registers, exchanges, and refreshes through ArborMCP boundaries" do
     previous = Application.get_env(:jido_connect_trello, :trello_oauth_backend)
     Application.put_env(:jido_connect_trello, :trello_oauth_backend, FakeBackend)
 

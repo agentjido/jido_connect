@@ -165,7 +165,7 @@ defmodule Jido.Connect.Trello.OAuth.DefaultFlow do
     Application.get_env(
       :jido_connect_trello,
       :trello_oauth_backend,
-      Jido.Connect.Trello.OAuth.DefaultFlow.ExMCPBackend
+      Jido.Connect.Trello.OAuth.DefaultFlow.ArborMCPBackend
     )
   end
 

@@ -15,15 +15,6 @@ defmodule JidoConnectCore.MixProject do
       package: package(),
       docs: docs(),
       source_url: "https://github.com/agentjido/jido_connect",
-      # Cowlib 2.20.0 has two won't-fix encoder advisories.
-      # Connect uses the MCP client only and does not call the affected encoders.
-      # Accepted 2026-09-19; see docs/v3_status.md and closed issue #79.
-      hex: [
-        ignore_advisories: [
-          "EEF-CVE-2026-43966",
-          "EEF-CVE-2026-43969"
-        ]
-      ],
       test_coverage: test_coverage(),
       test_ignore_filters: [~r/test\/support\//],
       deps: deps(),
@@ -60,8 +51,8 @@ defmodule JidoConnectCore.MixProject do
        git: "https://github.com/agentjido/jido_action.git",
        ref: "8e9b3f7b268e175091b0eb3720bab3b8633d3c24",
        override: true},
-      {:jido_signal, "== 3.0.0-beta.4"},
-      {:ex_mcp, "~> 1.5"},
+      {:jido_signal, "== 3.0.0-beta.5"},
+      {:arbor_mcp, "== 2.0.0-rc.6"},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false},
       {:jason, "~> 1.4"},
       {:req, "~> 0.6"},

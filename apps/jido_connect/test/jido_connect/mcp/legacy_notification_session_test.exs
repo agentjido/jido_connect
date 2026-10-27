@@ -1,8 +1,8 @@
 defmodule Jido.Connect.MCP.LegacyNotificationSessionTest do
   use ExUnit.Case, async: false
 
-  alias ExMCP.Server
-  alias ExMCP.Server.HandlerServer
+  alias Arbor.MCP.Server
+  alias Arbor.MCP.Server.HandlerServer
   alias Jido.Connect
   alias Jido.Connect.MCP.{EndpointLeaseManager, Session}
 
@@ -11,7 +11,7 @@ defmodule Jido.Connect.MCP.LegacyNotificationSessionTest do
   end
 
   defmodule Handler do
-    use ExMCP.Server.Handler
+    use Arbor.MCP.Server.Handler
 
     @impl true
     def init(opts), do: {:ok, %{observer: Keyword.fetch!(opts, :observer)}}
@@ -30,7 +30,7 @@ defmodule Jido.Connect.MCP.LegacyNotificationSessionTest do
   end
 
   defmodule ReconnectTransport do
-    @behaviour ExMCP.Transport
+    @behaviour Arbor.MCP.Transport
 
     defstruct [:agent, :observer, :pending]
 
@@ -223,13 +223,13 @@ defmodule Jido.Connect.MCP.LegacyNotificationSessionTest do
     refute_receive {:server_subscribe, "test://private"}, 100
   end
 
-  test "keeps a legacy session active after ExMCP reconnects and re-subscribes" do
+  test "keeps a legacy session active after ArborMCP reconnects and re-subscribes" do
     {:ok, agent} =
       Agent.start_link(fn -> %{connects: 0, client: nil, fail_subscribe?: false} end)
 
     client =
       start_supervised!(
-        {ExMCP.Client,
+        {Arbor.MCP.Client,
          transport: ReconnectTransport,
          agent: agent,
          observer: self(),
@@ -266,7 +266,7 @@ defmodule Jido.Connect.MCP.LegacyNotificationSessionTest do
 
     client =
       start_supervised!(
-        {ExMCP.Client,
+        {Arbor.MCP.Client,
          transport: ReconnectTransport,
          agent: agent,
          observer: self(),
@@ -311,7 +311,7 @@ defmodule Jido.Connect.MCP.LegacyNotificationSessionTest do
 
     client =
       start_supervised!(
-        {ExMCP.Client,
+        {Arbor.MCP.Client,
          transport: :test, server: server, protocol_mode: :legacy_only, health_check_interval: nil},
         id: make_ref()
       )

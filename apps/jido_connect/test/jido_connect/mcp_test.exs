@@ -289,7 +289,7 @@ defmodule Jido.Connect.MCPTest do
              )
   end
 
-  test "an ExMCP unknown outcome becomes one uncertain write" do
+  test "an ArborMCP unknown outcome becomes one uncertain write" do
     scopes = ["mcp:tools:call", "mcp:endpoint:remote", "mcp:tool:write"]
 
     connection =
