@@ -101,7 +101,14 @@ defmodule Jido.Connect.MCPTest do
   end
 
   setup do
+    previous = Application.get_env(:jido_connect_mcp, :mcp_clients)
     register_endpoint!(:filesystem)
+
+    on_exit(fn ->
+      if is_nil(previous),
+        do: Application.delete_env(:jido_connect_mcp, :mcp_clients),
+        else: Application.put_env(:jido_connect_mcp, :mcp_clients, previous)
+    end)
 
     :ok
   end
@@ -180,7 +187,7 @@ defmodule Jido.Connect.MCPTest do
     assert function_exported?(Jido.Connect.MCP.Plugin, :plugin_spec, 1)
   end
 
-  test "generated list tools action delegates through Jido MCP" do
+  test "generated list tools action delegates through ArborMCP" do
     {context, lease} = context_and_lease()
 
     assert {:ok, %{endpoint_id: "filesystem", tools: [tool]}} =
@@ -207,7 +214,7 @@ defmodule Jido.Connect.MCPTest do
     assert tool.description == "Read a text file without a timeout"
   end
 
-  test "generated call tool action delegates through Jido MCP" do
+  test "generated call tool action delegates through ArborMCP" do
     {context, lease} = context_and_lease()
 
     assert {:ok,
@@ -347,7 +354,7 @@ defmodule Jido.Connect.MCPTest do
              Jido.Connect.MCP.EndpointResolver.resolve("runtime_registered")
   end
 
-  test "prepared commit routes a host-owned endpoint through Jido MCP" do
+  test "prepared commit routes a host-owned endpoint through ArborMCP" do
     scopes = ["mcp:tools:call", "mcp:endpoint:slack", "mcp:tool:post_message"]
 
     connection =
@@ -431,8 +438,11 @@ defmodule Jido.Connect.MCPTest do
     internal_id = Jido.Connect.MCP.HostEndpoint.internal_id(connection)
     assert_received {:host_mcp_discovered, ^internal_id, [timeout: 1_000]}
     assert_received {:host_mcp_called, ^internal_id, "hello", [timeout: 1_000]}
-    assert {:ok, _endpoint} = Jido.MCP.ClientPool.fetch_endpoint(internal_id)
-    assert {:ok, _endpoint} = Jido.MCP.unregister_endpoint(internal_id)
+
+    assert [%{endpoint_id: ^internal_id}] =
+             Jido.Connect.MCP.EndpointLeaseManager.ownership(connection)
+
+    assert :ok = Jido.Connect.MCP.EndpointLeaseManager.force_stop(connection)
   end
 
   test "prepared commit rejects MCP tool schema drift before calling the tool" do
@@ -469,7 +479,7 @@ defmodule Jido.Connect.MCPTest do
     internal_id = Jido.Connect.MCP.HostEndpoint.internal_id(context.connection)
     assert_received {:host_mcp_discovered, ^internal_id, [timeout: 1_000]}
     refute_received {:host_mcp_called, ^internal_id, _text, _opts}
-    assert {:ok, _endpoint} = Jido.MCP.unregister_endpoint(internal_id)
+    assert :ok = Jido.Connect.MCP.EndpointLeaseManager.force_stop(context.connection)
   end
 
   test "scope resolver rejects ungranted tools before handler execution" do
@@ -611,15 +621,12 @@ defmodule Jido.Connect.MCPTest do
   end
 
   defp register_endpoint!(endpoint_id) do
-    {:ok, endpoint} =
-      Jido.MCP.Endpoint.new(endpoint_id, %{
-        transport: {:stdio, [command: "echo"]},
-        client_info: %{name: "jido-connect-mcp-test"}
-      })
+    clients = Application.get_env(:jido_connect_mcp, :mcp_clients, %{})
 
-    case Jido.MCP.register_endpoint(endpoint) do
-      {:ok, _endpoint} -> :ok
-      {:error, {:endpoint_already_registered, ^endpoint_id}} -> :ok
-    end
+    Application.put_env(
+      :jido_connect_mcp,
+      :mcp_clients,
+      Map.put(clients, endpoint_id, {FakeMCPClient, endpoint_id})
+    )
   end
 end

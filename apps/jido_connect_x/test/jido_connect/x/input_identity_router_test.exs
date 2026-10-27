@@ -76,7 +76,7 @@ defmodule Jido.Connect.X.InputIdentityRouterTest do
     assert :ok = Identity.validate_endpoint(explicit_endpoint.credential_lease)
 
     assert {:ok, endpoint_struct} =
-             Jido.MCP.Endpoint.new(
+             Jido.Connect.MCP.Endpoint.new(
                "x-test",
                explicit_endpoint.credential_lease.fields.mcp_endpoint
              )

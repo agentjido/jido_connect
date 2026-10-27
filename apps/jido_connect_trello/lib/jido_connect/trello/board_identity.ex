@@ -3,7 +3,7 @@ defmodule Jido.Connect.Trello.BoardIdentity do
 
   alias Jido.Connect.{Context, CredentialLease, Data, Error}
   alias Jido.Connect.Trello.Contract
-  alias Jido.MCP.Endpoint
+  alias Jido.Connect.MCP.Endpoint
 
   @object_id ~r/^[0-9a-f]{24}$/
   @short_id ~r/^[A-Za-z0-9]{8}$/

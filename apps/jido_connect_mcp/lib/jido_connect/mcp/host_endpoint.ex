@@ -2,8 +2,7 @@ defmodule Jido.Connect.MCP.HostEndpoint do
   @moduledoc false
 
   alias Jido.Connect.{Connection, CredentialLease, Data, Error}
-  alias Jido.Connect.MCP.EndpointLeaseManager
-  alias Jido.MCP.Endpoint
+  alias Jido.Connect.MCP.{ClientSource, EndpointLeaseManager}
 
   @id_prefix "jido-connect:"
 
@@ -19,12 +18,11 @@ defmodule Jido.Connect.MCP.HostEndpoint do
 
   @doc false
   @spec endpoint(atom() | String.t(), Connection.t(), CredentialLease.t()) ::
-          {:ok, String.t(), Endpoint.t()} | {:error, Error.error()}
+          {:ok, String.t(), ClientSource.t()} | {:error, Error.error()}
   def endpoint(requested_id, %Connection{} = connection, %CredentialLease{} = lease) do
     with {:ok, public_id} <- require_public_id(requested_id, connection),
-         {:ok, endpoint_source} <- fetch_endpoint_source(lease),
-         {:ok, endpoint} <- build_endpoint(internal_id(connection), endpoint_source) do
-      {:ok, public_id, endpoint}
+         {:ok, source} <- ClientSource.from_lease(internal_id(connection), lease) do
+      {:ok, public_id, source}
     end
   end
 
@@ -70,43 +68,6 @@ defmodule Jido.Connect.MCP.HostEndpoint do
         {:ok, requested_id}
     end
   end
-
-  defp fetch_endpoint_source(lease) do
-    case CredentialLease.fetch_field(lease, :mcp_endpoint) do
-      {:ok, source} -> {:ok, source}
-      :error -> {:error, Error.config("MCP endpoint lease field is required", key: :mcp_endpoint)}
-    end
-  end
-
-  defp build_endpoint(internal_id, %Endpoint{} = endpoint) do
-    internal_id
-    |> Endpoint.new(Map.from_struct(endpoint))
-    |> normalize_endpoint_result()
-  end
-
-  defp build_endpoint(internal_id, attrs) when is_map(attrs) or is_list(attrs) do
-    internal_id
-    |> Endpoint.new(attrs)
-    |> normalize_endpoint_result()
-  end
-
-  defp build_endpoint(_internal_id, _source) do
-    {:error, Error.config("MCP endpoint lease field is invalid", key: :mcp_endpoint)}
-  end
-
-  defp normalize_endpoint_result({:ok, %Endpoint{} = endpoint}), do: {:ok, endpoint}
-
-  defp normalize_endpoint_result({:error, reason}) do
-    {:error,
-     Error.config("MCP endpoint lease field is invalid",
-       key: :mcp_endpoint,
-       details: %{reason: safe_reason(reason)}
-     )}
-  end
-
-  defp safe_reason(reason) when is_atom(reason), do: reason
-  defp safe_reason(reason) when is_tuple(reason), do: elem(reason, 0)
-  defp safe_reason(_reason), do: :invalid_endpoint
 
   defp normalize_id(id) when is_atom(id), do: Atom.to_string(id)
   defp normalize_id(id) when is_binary(id), do: String.trim(id)

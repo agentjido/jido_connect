@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Move OAuth support from the ExMCP namespace to ArborMCP `2.0.0-rc.6`.
+
 ## 0.8.0
 
 - Add the distinct Trello provider identity.

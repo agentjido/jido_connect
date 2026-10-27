@@ -112,7 +112,7 @@ defmodule Jido.Connect.Trello.OAuth do
 
   defp endpoint(access_token) do
     %{
-      backend: :ex_mcp,
+      backend: :arbor_mcp,
       transport:
         {:streamable_http,
          [

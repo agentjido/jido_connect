@@ -359,11 +359,10 @@ defmodule Jido.Connect.Trello.RuntimeTest do
              Connect.invoke(Trello, "trello.board.get", %{}, runtime_opts(context))
 
     [ownership] = EndpointLeaseManager.ownership(context.context.connection)
-    assert {:ok, _endpoint} = Jido.MCP.ClientPool.fetch_endpoint(ownership.endpoint_id)
+    assert is_binary(ownership.endpoint_id)
 
     assert :ok = EndpointLeaseManager.connection_removed(context.context.connection)
     assert EndpointLeaseManager.ownership(context.context.connection) == []
-    assert {:error, :unknown_endpoint} = Jido.MCP.ClientPool.fetch_endpoint(ownership.endpoint_id)
 
     assert {:error, %Connect.Error.AuthError{reason: :mcp_endpoint_lease_stale}} =
              Connect.invoke(Trello, "trello.board.get", %{}, runtime_opts(context))
