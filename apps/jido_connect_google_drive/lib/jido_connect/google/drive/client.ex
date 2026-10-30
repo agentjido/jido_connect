@@ -23,6 +23,17 @@ defmodule Jido.Connect.Google.Drive.Client do
   defdelegate update_file(params, access_token), to: Files
   defdelegate export_file(params, access_token), to: Files
   defdelegate download_file(params, access_token), to: Files
+
+  @doc "Streams a download to a caller-owned collector. See `Jido.Connect.Google.Drive.Client.Stream`."
+  defdelegate stream_download_file(params, access_token, opts),
+    to: Jido.Connect.Google.Drive.Client.Stream,
+    as: :download
+
+  @doc "Streams an export to a caller-owned collector. See `Jido.Connect.Google.Drive.Client.Stream`."
+  defdelegate stream_export_file(params, access_token, opts),
+    to: Jido.Connect.Google.Drive.Client.Stream,
+    as: :export
+
   defdelegate delete_file(params, access_token), to: Files
   defdelegate list_permissions(params, access_token), to: Permissions
   defdelegate create_permission(params, access_token), to: Permissions
