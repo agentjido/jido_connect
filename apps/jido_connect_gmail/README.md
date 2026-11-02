@@ -149,11 +149,51 @@ charset shows the conversion.
 ## Triggers
 
 - `google.gmail.message.received`
+- `google.gmail.message.changed`
 - `google.gmail.mailbox.changed`
 
 The message poller initializes from the Gmail profile `historyId` without
 replaying history, then drains Gmail history pages for `messageAdded` records
 and advances the checkpoint to the returned mailbox `historyId`.
+
+`google.gmail.message.changed` polls the same history the same way for
+permanent deletions and label changes. It requests the `historyTypes`
+`messageDeleted`, `labelAdded` and `labelRemoved` from the stored checkpoint,
+every 300,000 ms by default, with `page_size` (default 100) as `maxResults` and
+an optional `label_id`, unset by default, as Gmail's `labelId` filter. Each
+deleted message and each label change of a message is one signal with
+`change_type` (`message_deleted`, `label_added` or `label_removed`),
+`message_id`, `thread_id`, `history_id`, `changed_label_ids` and `label_ids`.
+`history_id` is the ID of the history record, `changed_label_ids` the labels
+the change added or removed, and `label_ids` the message's labels after the
+change as Gmail reports them. Signals carry no subject, snippet, headers or
+body. Hosts dedupe on `history_id`, `message_id` and `change_type`. Records
+without one of the three changes, which Gmail returns as well, yield no
+signal. Like the other metadata reads, the trigger needs `gmail.metadata`, or
+the first of `gmail.modify`, `gmail.readonly` and `https://mail.google.com/`
+that the connection holds.
+
+Gmail reports the usual mailbox actions as distinct changes. The live tests
+recorded the following, unless noted:
+
+- Archive removes `INBOX`: one `label_removed` signal with
+  `changed_label_ids: ["INBOX"]`.
+- Moving a message to Trash adds `TRASH`: a `label_added` signal with
+  `changed_label_ids: ["TRASH"]`. Trash also takes a message out of the
+  inbox: Gmail's answer to trashing an inbox message no longer lists `INBOX`.
+  Not recorded: on 2026-11-02 Gmail wrote that removal as a second history
+  record, so a `label_removed` signal with `["INBOX"]` followed.
+- Restoring from Trash removes `TRASH`: a `label_removed` signal with
+  `["TRASH"]`. Gmail does not add `INBOX` back; its answer to restoring a
+  message that Trash took out of the inbox lists no `INBOX`.
+- Permanent delete, which bypasses Trash, is a `message_deleted` signal with
+  empty `changed_label_ids`. `label_ids` holds the labels that Gmail reports
+  with the deletion; the recorded message had none left, so it was empty.
+
+An expired or unknown history ID fails the poll with reason
+`:checkpoint_expired`, and a repeated `nextPageToken` with
+`:invalid_response`; both carry `checkpoint_reset` guidance to clear the
+checkpoint and initialize again without replay.
 
 The mailbox-changed webhook trigger is metadata-only and models Gmail Cloud
 Pub/Sub push callbacks. Hosts remain responsible for Pub/Sub subscription
@@ -207,7 +247,7 @@ Jido.Connect.Gmail.Plugin.tool_availability(%{
 The connector prefers narrow Gmail scopes:
 
 - `gmail.metadata` for profile, label list, metadata reads, received-message
-  polling, history listing, and watch lifecycle operations.
+  and message-change polling, history listing, and watch lifecycle operations.
 - `gmail.labels` for label definition create, update, and delete operations.
 - Metadata reads other than the label list need `gmail.metadata` only when
   the connection holds no broader grant. If it holds `gmail.modify`,

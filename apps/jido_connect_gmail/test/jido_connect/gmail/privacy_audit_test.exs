@@ -109,6 +109,13 @@ defmodule Jido.Connect.Gmail.PrivacyAuditTest do
         trigger("google.gmail.message.received", :message_content,
           text_includes: ["message", "received"]
         ),
+        trigger("google.gmail.message.changed", :personal_data,
+          text_includes: [
+            "permanent message deletions",
+            "label additions and removals",
+            "no message content"
+          ]
+        ),
         trigger("google.gmail.mailbox.changed", :personal_data,
           text_includes: ["cloud pub/sub", "history ids"]
         )

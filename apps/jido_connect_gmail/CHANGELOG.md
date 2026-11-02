@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- Add the poll trigger `google.gmail.message.changed`. It requests Gmail
+  history from the stored checkpoint with the `historyTypes`
+  `messageDeleted`, `labelAdded` and `labelRemoved`, drains every page and
+  emits one signal per deleted message and per label change with
+  `change_type`, `message_id`, `thread_id`, `history_id`,
+  `changed_label_ids` and `label_ids`, and no message content. Config:
+  `page_size`, default 100, and an optional `label_id`. It needs
+  `gmail.metadata`, starts from the profile `historyId` without replay and
+  returns `Jido.Connect.Google.Checkpoint` errors with reset guidance for an
+  expired history ID and a repeated `nextPageToken`. The README describes how
+  archive, Trash, restore and permanent delete appear.
+- Both history poll triggers share one poller for profile initialization,
+  page draining, the repeated-token guard and the expired-checkpoint error.
+  `google.gmail.message.received` keeps its config, signals and behavior.
+- Fix `google.gmail.message.trash`, `google.gmail.message.untrash`,
+  `google.gmail.thread.trash` and `google.gmail.thread.untrash`, which sent a
+  POST without a body and so without `Content-Length`; Google rejected it
+  with HTTP 411. The requests now carry an empty body.
 - Add `google.gmail.message.attachment.content.get`. It selects one
   attachment of a message by Gmail `partId`, an enclosed `message/rfc822`
   original included, and returns `Jido.Connect.Gmail.AttachmentContent` with

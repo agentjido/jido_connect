@@ -42,6 +42,43 @@ defmodule Jido.Connect.Gmail.Triggers.Messages do
       end
     end
 
+    poll :message_changed do
+      id("google.gmail.message.changed")
+      resource(:message)
+      verb(:watch)
+      data_classification(:personal_data)
+      label("Message changed")
+
+      description(
+        "Poll Gmail history for permanent message deletions and label additions and removals, " <>
+          "with message, thread and label IDs and no message content."
+      )
+
+      interval_ms(300_000)
+      checkpoint(:history_id)
+      dedupe(%{key: [:history_id, :message_id, :change_type]})
+      handler(Jido.Connect.Gmail.Handlers.Triggers.MessageChangedPoller)
+
+      access do
+        auth(:user)
+        scopes([@metadata_scope], resolver: @scope_resolver)
+      end
+
+      config do
+        field(:page_size, :integer, default: 100)
+        field(:label_id, :string)
+      end
+
+      signal do
+        field(:change_type, :string)
+        field(:message_id, :string)
+        field(:thread_id, :string)
+        field(:history_id, :string)
+        field(:changed_label_ids, {:array, :string}, default: [])
+        field(:label_ids, {:array, :string}, default: [])
+      end
+    end
+
     webhook :mailbox_changed do
       id("google.gmail.mailbox.changed")
       resource(:mailbox)

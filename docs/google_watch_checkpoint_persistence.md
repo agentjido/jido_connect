@@ -171,7 +171,7 @@ channel and Pub/Sub subscription patterns.
 
 | Aspect | Detail |
 |--------|--------|
-| Poll trigger | `google.gmail.message.received` |
+| Poll trigger | `google.gmail.message.received`, `google.gmail.message.changed` |
 | Poll checkpoint | `historyId` (string). Initial poll returns current historyId. Subsequent polls drain history since the stored historyId. |
 | Poll expiration | Gmail returns `404` when a stored `historyId` is too old. `Checkpoint.expired/4` produces `reason: :checkpoint_expired` with reset guidance. |
 | Push trigger | `google.gmail.mailbox.changed` |

@@ -566,6 +566,119 @@ defmodule Jido.Connect.GmailTest do
     end
   end
 
+  defmodule RecordedHistoryGmailClient do
+    # Serves profile and history.list responses recorded from the live test
+    # account through the client's response handlers, so a poll sees what
+    # Client.get_profile/2 and Client.list_history/2 return for them. Each
+    # history request reports its query, encoded as the client sends it, to
+    # the test process.
+    #
+    # message_changed_history holds the live run of google.gmail.message.changed
+    # in live_smoke_test.exs: the disposable message archived, trashed,
+    # restored and permanently deleted, two history records per page, and an
+    # empty last page. Any checkpoint gets these pages in nextPageToken order;
+    # the start history IDs below select the other responses.
+
+    alias Jido.Connect.Gmail.Client.{Params, Response}
+    alias Jido.Connect.TestSupport.LiveSmoke
+
+    @pages ~w(message_changed_history message_changed_history.2 message_changed_history.3
+              message_changed_history.4)
+
+    def recorded_pages, do: Enum.map(@pages, &LiveSmoke.fixture!(:gmail, &1))
+
+    def get_profile(%{}, "token") do
+      send(self(), {:gmail_client_called, :get_profile})
+
+      Response.handle_profile_response(
+        {:ok, %{status: 200, body: LiveSmoke.fixture!(:gmail, "profile")}}
+      )
+    end
+
+    def list_history(params, "token") do
+      send(self(), {:gmail_history_request, Params.history_list_params(params)})
+      history_response(params.start_history_id, Map.get(params, :page_token))
+    end
+
+    # Recorded with status 404 for startHistoryId=1.
+    defp history_response("1", nil) do
+      Response.handle_history_list_response(
+        {:ok, %{status: 404, body: LiveSmoke.fixture!(:gmail, "message_changed_expired")}}
+      )
+    end
+
+    # Derived: Gmail never repeated a nextPageToken. This checkpoint gets the
+    # first recorded page for every request, so its token comes back.
+    defp history_response("repeated-page-token", _page_token), do: ok(hd(recorded_pages()))
+
+    defp history_response("derived-records", nil), do: ok(derived_page())
+    defp history_response("derived-two-changes", nil), do: ok(two_changes_page())
+
+    defp history_response(_checkpoint, page_token) do
+      pages = recorded_pages()
+
+      page =
+        case page_token do
+          nil -> hd(pages)
+          token -> pages |> Enum.drop_while(&(&1["nextPageToken"] != token)) |> Enum.at(1)
+        end
+
+      ok(page)
+    end
+
+    # Derived from the recorded run. Gmail returned one message per record,
+    # and it leaves messagesAdded records out of a list filtered to the three
+    # change types. The archive, Trash and delete records here each also
+    # carry the same change of a second message, the first message of the
+    # recorded query search, and the second recorded record with `messages`
+    # only gets a messagesAdded entry for its message. The first such record
+    # stays as recorded.
+    defp derived_page do
+      [first, second, third, last] = recorded_pages()
+      %{"history" => [messages_only, %{"labelsRemoved" => [archived]} = archive]} = first
+      %{"history" => [%{"labelsAdded" => [trashed]} = trash, added_only]} = second
+      %{"history" => [_restore, %{"messagesDeleted" => [deleted]} = delete]} = third
+
+      %{"messages" => [%{"id" => other_id, "threadId" => other_thread_id} | _rest]} =
+        LiveSmoke.fixture!(:gmail, "messages_list_query")
+
+      other = fn entry ->
+        put_in(entry, ["message"], %{
+          entry["message"]
+          | "id" => other_id,
+            "threadId" => other_thread_id
+        })
+      end
+
+      %{
+        "history" => [
+          messages_only,
+          %{archive | "labelsRemoved" => [archived, other.(archived)]},
+          %{trash | "labelsAdded" => [trashed, other.(trashed)]},
+          Map.put(added_only, "messagesAdded", [%{"message" => hd(added_only["messages"])}]),
+          %{delete | "messagesDeleted" => [deleted, other.(deleted)]}
+        ],
+        "historyId" => last["historyId"]
+      }
+    end
+
+    # Derived from the recorded run, where each record held one change. The
+    # archive record here also carries the recorded TRASH addition of the same
+    # message, so one record both adds and removes a label of one message.
+    defp two_changes_page do
+      [first, second | _rest] = recorded_pages()
+      %{"history" => [_messages_only, archive]} = first
+      %{"history" => [%{"labelsAdded" => trashed}, _added_only]} = second
+
+      %{
+        "history" => [Map.put(archive, "labelsAdded", trashed)],
+        "historyId" => first["historyId"]
+      }
+    end
+
+    defp ok(body), do: Response.handle_history_list_response({:ok, %{status: 200, body: body}})
+  end
+
   test "declares Gmail provider metadata" do
     spec = Gmail.integration()
 
@@ -646,6 +759,29 @@ defmodule Jido.Connect.GmailTest do
 
     assert {:ok,
             %{
+              id: "google.gmail.message.changed",
+              kind: :poll,
+              interval_ms: 300_000,
+              checkpoint: :history_id,
+              dedupe: %{key: [:history_id, :message_id, :change_type]},
+              scopes: ["https://www.googleapis.com/auth/gmail.metadata"],
+              scope_resolver: Jido.Connect.Gmail.ScopeResolver
+            } = changed} =
+             Connect.trigger(spec, "google.gmail.message.changed")
+
+    assert Enum.map(changed.config, &{&1.name, &1.default}) == [page_size: 100, label_id: nil]
+
+    assert Enum.map(changed.signal, & &1.name) == [
+             :change_type,
+             :message_id,
+             :thread_id,
+             :history_id,
+             :changed_label_ids,
+             :label_ids
+           ]
+
+    assert {:ok,
+            %{
               id: "google.gmail.mailbox.changed",
               kind: :webhook,
               verification: %{kind: :google_pubsub_push, oidc: :host_verified},
@@ -665,6 +801,12 @@ defmodule Jido.Connect.GmailTest do
           name: "google_gmail_message_received",
           trigger_id: "google.gmail.message.received",
           signal_type: "google.gmail.message.received"
+        },
+        %{
+          module: Jido.Connect.Gmail.Sensors.MessageChanged,
+          name: "google_gmail_message_changed",
+          trigger_id: "google.gmail.message.changed",
+          signal_type: "google.gmail.message.changed"
         },
         %{
           module: Jido.Connect.Gmail.Sensors.MailboxChanged,
@@ -1679,6 +1821,278 @@ defmodule Jido.Connect.GmailTest do
                credential_lease: lease,
                checkpoint: "loop-history"
              )
+  end
+
+  test "message changed poll initializes the checkpoint from the profile without signals" do
+    {context, lease} = context_and_lease(gmail_client: RecordedHistoryGmailClient)
+    %{"historyId" => history_id} = LiveSmoke.fixture!(:gmail, "profile")
+
+    assert {:ok, %{signals: [], checkpoint: ^history_id}} =
+             Connect.poll(
+               Gmail.integration(),
+               "google.gmail.message.changed",
+               %{},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert_received {:gmail_client_called, :get_profile}
+    refute_received {:gmail_history_request, _query}
+  end
+
+  test "message changed poll sends the checkpoint with the three change types, drains every page and returns the newest historyId" do
+    {context, lease} = context_and_lease(gmail_client: RecordedHistoryGmailClient)
+
+    [
+      %{
+        "history" => [
+          %{"messages" => [_only]},
+          %{
+            "id" => archived,
+            "labelsRemoved" => [%{"message" => %{"id" => message_id, "threadId" => thread_id}}]
+          }
+        ],
+        "nextPageToken" => second_page
+      },
+      %{
+        "history" => [%{"id" => trashed, "labelsAdded" => [_trash]}, %{"messages" => [_]}],
+        "nextPageToken" => third_page
+      },
+      %{
+        "history" => [
+          %{"id" => restored, "labelsRemoved" => [_restore]},
+          %{"id" => deleted, "messagesDeleted" => [_delete]}
+        ],
+        "nextPageToken" => last_page
+      },
+      %{"historyId" => newest} = empty
+    ] = RecordedHistoryGmailClient.recorded_pages()
+
+    refute Map.has_key?(empty, "history")
+
+    assert {:ok, %{signals: [], checkpoint: checkpoint}} =
+             poll_changes(%{page_size: 2}, nil, context, lease)
+
+    assert {:ok, %{signals: signals, checkpoint: ^newest}} =
+             poll_changes(%{page_size: 2}, checkpoint, context, lease)
+
+    assert signals == [
+             %{
+               change_type: "label_removed",
+               message_id: message_id,
+               thread_id: thread_id,
+               history_id: archived,
+               changed_label_ids: ["INBOX"],
+               label_ids: []
+             },
+             %{
+               change_type: "label_added",
+               message_id: message_id,
+               thread_id: thread_id,
+               history_id: trashed,
+               changed_label_ids: ["TRASH"],
+               label_ids: ["TRASH"]
+             },
+             %{
+               change_type: "label_removed",
+               message_id: message_id,
+               thread_id: thread_id,
+               history_id: restored,
+               changed_label_ids: ["TRASH"],
+               label_ids: []
+             },
+             %{
+               change_type: "message_deleted",
+               message_id: message_id,
+               thread_id: thread_id,
+               history_id: deleted,
+               changed_label_ids: [],
+               label_ids: []
+             }
+           ]
+
+    for page_token <- [nil, second_page, third_page, last_page] do
+      assert_received {:gmail_history_request, query}
+
+      assert Enum.sort(query) ==
+               Enum.sort(
+                 [
+                   startHistoryId: checkpoint,
+                   maxResults: 2,
+                   historyTypes: "messageDeleted",
+                   historyTypes: "labelAdded",
+                   historyTypes: "labelRemoved"
+                 ] ++ if(page_token, do: [pageToken: page_token], else: [])
+               )
+    end
+
+    refute_received {:gmail_history_request, _query}
+  end
+
+  test "message changed poll sends a configured label_id and the default page size" do
+    {context, lease} = context_and_lease(gmail_client: RecordedHistoryGmailClient)
+
+    assert {:ok, %{signals: [_archive, _trash, _restore, _delete]}} =
+             poll_changes(%{label_id: "Label_1"}, "1000", context, lease)
+
+    assert_received {:gmail_history_request, query}
+
+    assert Enum.sort(query) ==
+             Enum.sort(
+               startHistoryId: "1000",
+               labelId: "Label_1",
+               maxResults: 100,
+               historyTypes: "messageDeleted",
+               historyTypes: "labelAdded",
+               historyTypes: "labelRemoved"
+             )
+  end
+
+  test "message changed poll emits one signal per message of a record and none for records without changes" do
+    {context, lease} = context_and_lease(gmail_client: RecordedHistoryGmailClient)
+
+    [
+      %{
+        "history" => [
+          _only,
+          %{
+            "id" => archived,
+            "labelsRemoved" => [%{"message" => %{"id" => message_id, "threadId" => thread_id}}]
+          }
+        ]
+      },
+      %{"history" => [%{"id" => trashed}, _]},
+      %{"history" => [_restore, %{"id" => deleted}]},
+      _empty
+    ] = RecordedHistoryGmailClient.recorded_pages()
+
+    %{"messages" => [%{"id" => other_id, "threadId" => other_thread_id} | _rest]} =
+      LiveSmoke.fixture!(:gmail, "messages_list_query")
+
+    assert other_id != message_id
+
+    assert {:ok, %{signals: signals}} = poll_changes(%{}, "derived-records", context, lease)
+
+    assert Enum.map(
+             signals,
+             &{&1.change_type, &1.history_id, &1.message_id, &1.thread_id, &1.changed_label_ids}
+           ) == [
+             {"label_removed", archived, message_id, thread_id, ["INBOX"]},
+             {"label_removed", archived, other_id, other_thread_id, ["INBOX"]},
+             {"label_added", trashed, message_id, thread_id, ["TRASH"]},
+             {"label_added", trashed, other_id, other_thread_id, ["TRASH"]},
+             {"message_deleted", deleted, message_id, thread_id, []},
+             {"message_deleted", deleted, other_id, other_thread_id, []}
+           ]
+  end
+
+  test "message changed poll emits both label changes of one message in a derived record, the addition first" do
+    {context, lease} = context_and_lease(gmail_client: RecordedHistoryGmailClient)
+
+    [
+      %{
+        "history" => [
+          _only,
+          %{
+            "id" => archived,
+            "labelsRemoved" => [%{"message" => %{"id" => message_id, "threadId" => thread_id}}]
+          }
+        ]
+      }
+      | _rest
+    ] = RecordedHistoryGmailClient.recorded_pages()
+
+    assert {:ok, %{signals: signals}} = poll_changes(%{}, "derived-two-changes", context, lease)
+
+    assert Enum.map(
+             signals,
+             &{&1.change_type, &1.history_id, &1.message_id, &1.thread_id, &1.changed_label_ids}
+           ) == [
+             {"label_added", archived, message_id, thread_id, ["TRASH"]},
+             {"label_removed", archived, message_id, thread_id, ["INBOX"]}
+           ]
+  end
+
+  test "message changed poll surfaces an expired history ID as a checkpoint error" do
+    {context, lease} = context_and_lease(gmail_client: RecordedHistoryGmailClient)
+
+    %{"error" => %{"message" => provider_message}} =
+      LiveSmoke.fixture!(:gmail, "message_changed_expired")
+
+    assert {:error,
+            %Connect.Error.ProviderError{
+              provider: :google,
+              reason: :checkpoint_expired,
+              status: 404,
+              details: %{
+                checkpoint: "1",
+                checkpoint_reset: %{
+                  action: :clear_checkpoint,
+                  behavior: :initialize_without_replay
+                },
+                provider_details: %{message: ^provider_message}
+              }
+            }} = poll_changes(%{}, "1", context, lease)
+  end
+
+  test "message changed poll surfaces a repeated page token with reset guidance" do
+    {context, lease} = context_and_lease(gmail_client: RecordedHistoryGmailClient)
+    %{"nextPageToken" => page_token} = hd(RecordedHistoryGmailClient.recorded_pages())
+
+    assert {:error,
+            %Connect.Error.ProviderError{
+              provider: :google,
+              reason: :invalid_response,
+              details: %{
+                next_page_token: ^page_token,
+                checkpoint_reset: %{
+                  action: :clear_checkpoint,
+                  behavior: :initialize_without_replay
+                }
+              }
+            }} = poll_changes(%{}, "repeated-page-token", context, lease)
+
+    assert_received {:gmail_history_request, first}
+    refute Keyword.has_key?(first, :pageToken)
+    assert_received {:gmail_history_request, second}
+    assert Keyword.get(second, :pageToken) == page_token
+    refute_received {:gmail_history_request, _query}
+  end
+
+  test "message changed poll runs on a metadata-only lease and stops a send-only lease before the client call" do
+    {context, lease} =
+      context_and_lease(scopes: send_scopes(), gmail_client: RecordedHistoryGmailClient)
+
+    for checkpoint <- [nil, "1000"] do
+      assert {:error,
+              %Connect.Error.AuthError{
+                reason: :missing_scopes,
+                missing_scopes: ["https://www.googleapis.com/auth/gmail.metadata"]
+              }} = poll_changes(%{}, checkpoint, context, lease)
+    end
+
+    refute_received {:gmail_client_called, :get_profile}
+    refute_received {:gmail_history_request, _query}
+
+    {context, lease} =
+      context_and_lease(scopes: metadata_scopes(), gmail_client: RecordedHistoryGmailClient)
+
+    assert {:ok, %{signals: [], checkpoint: checkpoint}} =
+             poll_changes(%{}, nil, context, lease)
+
+    assert {:ok, %{signals: [_archive, _trash, _restore, _delete]}} =
+             poll_changes(%{}, checkpoint, context, lease)
+
+    assert_received {:gmail_client_called, :get_profile}
+    assert_received {:gmail_history_request, _query}
+  end
+
+  defp poll_changes(config, checkpoint, context, lease) do
+    Connect.poll(Gmail.integration(), "google.gmail.message.changed", config,
+      context: context,
+      credential_lease: lease,
+      checkpoint: checkpoint
+    )
   end
 
   defp context_and_lease(opts \\ []) do

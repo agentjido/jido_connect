@@ -5,6 +5,43 @@ defmodule Jido.Connect.Gmail.ClientTest do
   alias Jido.Connect.Gmail.Client.Response
   alias Jido.Connect.TestSupport.LiveSmoke
 
+  defmodule RecordedBodyAdapter do
+    # Req adapter that reports the method, path and body of each request to
+    # the calling test process and answers with the recording of the same
+    # method and path: the live trash and untrash answers for the disposable
+    # message and its one-message thread.
+
+    @recordings ~w(message_trash message_untrash thread_trash thread_untrash)
+
+    def run(request) do
+      send(self(), {:gmail_request, request.method, request.url.path, request.body})
+      method = request.method |> Atom.to_string() |> String.upcase()
+
+      %{"status" => status, "headers" => headers, "body" => body} =
+        Enum.find_value(@recordings, fn name ->
+          recording = recording!(name)
+
+          if recording["request"] == %{"method" => method, "path" => request.url.path},
+            do: recording
+        end) || raise "no recording of #{method} #{request.url.path}"
+
+      {request,
+       Req.Response.new(
+         status: status,
+         headers: Map.take(headers, ["content-type"]),
+         body: Jason.encode!(body)
+       )}
+    end
+
+    # A whole recording: the request, the status, the headers and the body.
+    def recording!(name) do
+      ["test", "fixtures", "gmail", "recorded", "#{name}.json"]
+      |> Path.join()
+      |> File.read!()
+      |> Jason.decode!()
+    end
+  end
+
   setup {Req.Test, :verify_on_exit!}
 
   setup do
@@ -473,6 +510,73 @@ defmodule Jido.Connect.Gmail.ClientTest do
 
     assert message.message_id == "msg123"
     refute inspect(message) =~ "body-bytes"
+  end
+
+  test "requests the three change types as repeated historyTypes without a label filter" do
+    %{"history" => [_only, _archive], "nextPageToken" => next_page_token} =
+      page = LiveSmoke.fixture!(:gmail, "message_changed_history")
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.request_path == "/gmail/v1/users/me/history"
+
+      assert conn.query_string |> URI.query_decoder() |> Enum.sort() == [
+               {"historyTypes", "labelAdded"},
+               {"historyTypes", "labelRemoved"},
+               {"historyTypes", "messageDeleted"},
+               {"maxResults", "2"},
+               {"startHistoryId", "15659"}
+             ]
+
+      Req.Test.json(conn, page)
+    end)
+
+    assert {:ok, %{history: [_only, _archive], next_page_token: ^next_page_token}} =
+             Client.list_history(
+               %{
+                 start_history_id: "15659",
+                 page_size: 2,
+                 history_types: ["messageDeleted", "labelAdded", "labelRemoved"]
+               },
+               "token"
+             )
+  end
+
+  test "trash and untrash requests carry an empty body, so Google receives a Content-Length" do
+    # Mint sends Content-Length only with a request body, and Google answers a
+    # POST without one with 411 Length Required, as the live change poll test
+    # saw for google.gmail.message.trash. A plug cannot tell a missing body
+    # from an empty one, so RecordedBodyAdapter replaces the network and
+    # answers with the live recordings of the four calls.
+    Application.put_env(:jido_connect_google, :google_req_options, adapter: RecordedBodyAdapter)
+    %{"body" => %{"id" => message_id}} = RecordedBodyAdapter.recording!("message_trash")
+    %{"body" => %{"id" => thread_id}} = RecordedBodyAdapter.recording!("thread_trash")
+
+    assert {:ok, %Message{message_id: ^message_id, thread_id: ^thread_id, label_ids: ["TRASH"]}} =
+             Client.trash_message(%{message_id: message_id}, "token")
+
+    assert {:ok, %Message{message_id: ^message_id, thread_id: ^thread_id, label_ids: []}} =
+             Client.untrash_message(%{message_id: message_id}, "token")
+
+    assert {:ok,
+            %Thread{
+              thread_id: ^thread_id,
+              messages: [%Message{message_id: ^message_id, label_ids: ["TRASH"]}]
+            }} = Client.trash_thread(%{thread_id: thread_id}, "token")
+
+    assert {:ok,
+            %Thread{
+              thread_id: ^thread_id,
+              messages: [%Message{message_id: ^message_id, label_ids: []}]
+            }} = Client.untrash_thread(%{thread_id: thread_id}, "token")
+
+    for path <- [
+          "/gmail/v1/users/me/messages/#{message_id}/trash",
+          "/gmail/v1/users/me/messages/#{message_id}/untrash",
+          "/gmail/v1/users/me/threads/#{thread_id}/trash",
+          "/gmail/v1/users/me/threads/#{thread_id}/untrash"
+        ] do
+      assert_received {:gmail_request, :post, ^path, ""}
+    end
   end
 
   test "returns provider errors for malformed Gmail history records" do

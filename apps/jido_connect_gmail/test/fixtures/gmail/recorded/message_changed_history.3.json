@@ -1,0 +1,85 @@
+{
+  "body": {
+    "history": [
+      {
+        "id": "15726",
+        "labelsRemoved": [
+          {
+            "labelIds": [
+              "TRASH"
+            ],
+            "message": {
+              "id": "1a18d01153510f50",
+              "threadId": "1a18d01153510f50"
+            }
+          }
+        ],
+        "messages": [
+          {
+            "id": "1a18d01153510f50",
+            "threadId": "1a18d01153510f50"
+          }
+        ]
+      },
+      {
+        "id": "15745",
+        "messages": [
+          {
+            "id": "1a18d01153510f50",
+            "threadId": "1a18d01153510f50"
+          }
+        ],
+        "messagesDeleted": [
+          {
+            "message": {
+              "id": "1a18d01153510f50",
+              "threadId": "1a18d01153510f50"
+            }
+          }
+        ]
+      }
+    ],
+    "historyId": "15752",
+    "nextPageToken": "03088135896871936267"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 12:14:49 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/history"
+  },
+  "status": 200
+}

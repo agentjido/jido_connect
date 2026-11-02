@@ -580,6 +580,233 @@ defmodule Jido.Connect.Gmail.LiveSmokeTest do
              invoke_attachment_content(message_id, "0", context, lease)
   end
 
+  # google.gmail.message.changed. The polls run on a metadata-only lease with
+  # the gmail.metadata token. The write steps run through the write actions on
+  # the full grant, prepared and committed with a host authorization as a
+  # host would run them, and before any recording starts, so the recordings
+  # hold only the poll under test.
+
+  @req_options {:jido_connect_google, :google_req_options}
+  @metadata_scope "https://www.googleapis.com/auth/gmail.metadata"
+  @modify_scope "https://www.googleapis.com/auth/gmail.modify"
+  @mail_scope "https://mail.google.com/"
+
+  # Gmail's history can trail a write; a step polls this often, 2 s apart.
+  @change_polls 15
+
+  @tag env!(["GOOGLE_GMAIL_METADATA_ACCESS_TOKEN"])
+  test "the change poll turns a history ID older than Gmail's history into a checkpoint reset",
+       %{env: env} do
+    LiveSmoke.record(@req_options, :gmail, "message_changed_expired")
+
+    assert {:error,
+            %Connect.Error.ProviderError{
+              provider: :google,
+              reason: :checkpoint_expired,
+              status: 404,
+              details: %{
+                checkpoint: "1",
+                checkpoint_reset: %{
+                  action: :clear_checkpoint,
+                  behavior: :initialize_without_replay
+                }
+              }
+            }} = poll_changes(%{}, "1", env["GOOGLE_GMAIL_METADATA_ACCESS_TOKEN"])
+  end
+
+  @tag env!([
+         "GOOGLE_ACCESS_TOKEN",
+         "GOOGLE_GMAIL_METADATA_ACCESS_TOKEN",
+         "GOOGLE_GMAIL_DISPOSABLE_MESSAGE_ID"
+       ])
+  @tag write!(:google)
+  @tag timeout: :timer.minutes(5)
+  test "the change poll reports archive, Trash, restore and permanent delete of the disposable message",
+       %{env: env} do
+    metadata_token = env["GOOGLE_GMAIL_METADATA_ACCESS_TOKEN"]
+    grant = write_grant(env["GOOGLE_ACCESS_TOKEN"])
+    message_id = env["GOOGLE_GMAIL_DISPOSABLE_MESSAGE_ID"]
+
+    assert {:ok, %{message: %{thread_id: thread_id, label_ids: labels}}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.message.get",
+               %{message_id: message_id},
+               context: grant.context,
+               credential_lease: grant.lease
+             )
+
+    assert "INBOX" in labels
+    refute "TRASH" in labels
+    archived = Enum.sort(labels -- ["INBOX"])
+
+    # Each step is one change of the message: archive removes INBOX, Trash
+    # adds TRASH, restore removes TRASH and leaves the labels from before
+    # Trash, and permanent delete reports no changed and no remaining labels.
+    steps = [
+      {"google.gmail.message.labels.apply",
+       %{message_id: message_id, remove_label_ids: ["INBOX"]},
+       {"label_removed", ["INBOX"], archived}},
+      {"google.gmail.message.trash", %{message_id: message_id},
+       {"label_added", ["TRASH"], Enum.sort(["TRASH" | archived])}},
+      {"google.gmail.message.untrash", %{message_id: message_id},
+       {"label_removed", ["TRASH"], archived}},
+      {"google.gmail.message.delete", %{message_id: message_id}, {"message_deleted", [], []}}
+    ]
+
+    assert {:ok, %{signals: [], checkpoint: start}} = poll_changes(%{}, nil, metadata_token)
+
+    final =
+      Enum.reduce(steps, start, fn {action_id, input, expected}, checkpoint ->
+        assert {:ok, _output} = commit(grant, action_id, input)
+
+        {signals, next} = await_change(metadata_token, checkpoint, message_id)
+        assert changes(signals, message_id) == [expected]
+        assert Enum.all?(signals, &(&1.message_id != message_id or &1.thread_id == thread_id))
+        assert String.to_integer(next) > String.to_integer(checkpoint)
+        next
+      end)
+
+    # The whole run from the first checkpoint, two history records per page.
+    LiveSmoke.record(@req_options, :gmail, "message_changed_history")
+
+    assert {:ok, %{signals: signals, checkpoint: checkpoint}} =
+             poll_changes(%{page_size: 2}, start, metadata_token)
+
+    assert changes(signals, message_id) == Enum.map(steps, &elem(&1, 2))
+    assert String.to_integer(checkpoint) >= String.to_integer(final)
+  end
+
+  # The trash and untrash calls for a message and for a thread, committed
+  # through the write actions. The disposable message is a one-message thread
+  # in the inbox; it is read before the first recording starts, so each
+  # recording holds only the answer to its write. Trash takes the message out
+  # of the inbox and restore does not put it back, so the thread steps run on
+  # an archived message and the message ends restored from Trash but archived.
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_GMAIL_DISPOSABLE_MESSAGE_ID"])
+  @tag write!(:google)
+  test "trash and untrash answer with the disposable message and its one-message thread",
+       %{env: env} do
+    grant = write_grant(env["GOOGLE_ACCESS_TOKEN"])
+    message_id = env["GOOGLE_GMAIL_DISPOSABLE_MESSAGE_ID"]
+
+    assert {:ok, %{message: %{thread_id: thread_id, label_ids: labels}}} =
+             invoke(grant, "google.gmail.message.get", %{message_id: message_id})
+
+    assert "INBOX" in labels
+    refute "TRASH" in labels
+
+    assert {:ok, %{thread: %{thread_id: ^thread_id, messages: [%{message_id: ^message_id}]}}} =
+             invoke(grant, "google.gmail.thread.get", %{thread_id: thread_id})
+
+    LiveSmoke.record(@req_options, :gmail, "message_trash")
+
+    assert {:ok, %{message: %{message_id: ^message_id, label_ids: trashed}}} =
+             commit(grant, "google.gmail.message.trash", %{message_id: message_id})
+
+    assert "TRASH" in trashed
+    refute "INBOX" in trashed
+
+    LiveSmoke.record(@req_options, :gmail, "message_untrash")
+
+    assert {:ok, %{message: %{message_id: ^message_id, label_ids: restored}}} =
+             commit(grant, "google.gmail.message.untrash", %{message_id: message_id})
+
+    refute "TRASH" in restored
+    refute "INBOX" in restored
+
+    LiveSmoke.record(@req_options, :gmail, "thread_trash")
+
+    assert {:ok,
+            %{
+              thread: %{
+                thread_id: ^thread_id,
+                messages: [%{message_id: ^message_id, label_ids: thread_trashed}]
+              }
+            }} = commit(grant, "google.gmail.thread.trash", %{thread_id: thread_id})
+
+    assert "TRASH" in thread_trashed
+
+    LiveSmoke.record(@req_options, :gmail, "thread_untrash")
+
+    assert {:ok,
+            %{
+              thread: %{
+                thread_id: ^thread_id,
+                messages: [%{message_id: ^message_id, label_ids: thread_restored}]
+              }
+            }} = commit(grant, "google.gmail.thread.untrash", %{thread_id: thread_id})
+
+    refute "TRASH" in thread_restored
+  end
+
+  defp invoke(%{context: context, lease: lease}, action_id, input) do
+    Connect.invoke(Gmail.integration(), action_id, input,
+      context: context,
+      credential_lease: lease
+    )
+  end
+
+  # Polls from `checkpoint` until a signal for `message_id` arrives and
+  # returns the signals with the next checkpoint.
+  defp await_change(access_token, checkpoint, message_id, poll \\ 1) do
+    assert {:ok, %{signals: signals, checkpoint: next}} =
+             poll_changes(%{}, checkpoint, access_token)
+
+    cond do
+      changes(signals, message_id) != [] ->
+        {signals, next}
+
+      poll < @change_polls ->
+        Process.sleep(2_000)
+        await_change(access_token, checkpoint, message_id, poll + 1)
+
+      true ->
+        flunk("Gmail history lacked a change of #{message_id} after #{poll} polls")
+    end
+  end
+
+  defp changes(signals, message_id) do
+    for %{message_id: ^message_id} = signal <- signals do
+      {signal.change_type, signal.changed_label_ids, Enum.sort(signal.label_ids)}
+    end
+  end
+
+  defp poll_changes(config, checkpoint, metadata_token) do
+    {context, lease} = grant(metadata_token, [@metadata_scope])
+
+    Connect.poll(Gmail.integration(), "google.gmail.message.changed", config,
+      context: context,
+      credential_lease: lease,
+      checkpoint: checkpoint
+    )
+  end
+
+  defp write_grant(access_token) do
+    {context, lease} = grant(access_token, [@modify_scope, @mail_scope])
+    %{context: context, lease: lease}
+  end
+
+  defp commit(%{context: context, lease: lease}, action_id, input) do
+    opts = [context: context, credential_lease: lease]
+
+    with {:ok, prepared} <- Connect.prepare(Gmail.integration(), action_id, input, opts) do
+      Connect.commit(
+        Gmail.integration(),
+        prepared,
+        input,
+        opts ++
+          [
+            execution_authorization: %{prepared_action_id: prepared.id},
+            authorization_validator: &authorize/4
+          ]
+      )
+    end
+  end
+
+  defp authorize(%{prepared_action_id: id}, %{id: id}, _context, _validator_context), do: :ok
+  defp authorize(_evidence, _prepared, _context, _validator_context), do: :error
+
   defp attachment_content!(message_id, part_id, access_token) do
     {context, lease} = read_grant(access_token)
 
@@ -749,7 +976,9 @@ defmodule Jido.Connect.Gmail.LiveSmokeTest do
     )
   end
 
-  defp read_grant(access_token) do
+  defp read_grant(access_token), do: grant(access_token, [@readonly_scope])
+
+  defp grant(access_token, scopes) do
     connection =
       Connect.Connection.new!(%{
         id: "live-gmail",
@@ -759,7 +988,7 @@ defmodule Jido.Connect.Gmail.LiveSmokeTest do
         owner_type: :app_user,
         owner_id: "live-user",
         status: :connected,
-        scopes: [@readonly_scope]
+        scopes: scopes
       })
 
     context =
@@ -776,7 +1005,7 @@ defmodule Jido.Connect.Gmail.LiveSmokeTest do
         profile: :user,
         expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
         fields: %{access_token: access_token},
-        scopes: [@readonly_scope]
+        scopes: scopes
       })
 
     {context, lease}
