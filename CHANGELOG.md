@@ -19,6 +19,10 @@
 
 - Add the experimental `jido_connect_things` package for guarded Things Cloud
   Inbox list, create, and update actions.
+- Add the experimental `jido_connect_tempo` package with Tempo API token and
+  OAuth profiles, OAuth helpers, the connection contract, a Bearer transport
+  with an origin guard, bounded pagination and the scope resolver. It has no
+  actions yet.
 
 ## 0.9.0 - 2026-08-25
 

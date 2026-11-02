@@ -26,7 +26,7 @@ The env files hold plain `NAME=value` lines, so `set -a` exports them to
 `GOOGLE_ACCESS_TOKEN` and `GOOGLE_GMAIL_METADATA_ACCESS_TOKEN` from the refresh
 tokens before each run.
 
-The Slack, Jira and Confluence packages declare `plug` as a test-only
+The Slack, Jira, Confluence and Tempo packages declare `plug` as a test-only
 dependency, which conflicts with a transitive dependency when Mix runs inside
 the app directory. Run them from the umbrella root instead:
 
@@ -37,9 +37,9 @@ MIX_ENV=test mix do --app jido_connect_slack test --only live_smoke
 The packages that load the harness are `jido_connect_gmail`,
 `jido_connect_google_calendar`, `jido_connect_google_meet`,
 `jido_connect_google_drive`, `jido_connect_google_docs`, `jido_connect_slack`,
-`jido_connect_jira` and `jido_connect_confluence`. Each has a
-`live_smoke_test.exs` with one read-only self-test. New packages adopt the same
-`test_helper.exs` lines when they are created:
+`jido_connect_jira`, `jido_connect_confluence` and `jido_connect_tempo`. Each
+has a `live_smoke_test.exs` with at least one read-only test. New packages
+adopt the same `test_helper.exs` lines when they are created:
 
 ```elixir
 ExUnit.start(exclude: [:live_smoke])
@@ -199,12 +199,30 @@ as seed input belong to the scripts that create the test data.
 | `TEMPO_OAUTH_ACCESS_TOKEN` | credential | OAuth access token |
 | `TEMPO_OAUTH_REFRESH_TOKEN` | credential | OAuth refresh token; each refresh replaces it |
 | `TEMPO_OAUTH_ACCESS_TOKEN_EXPIRES_AT` | setting | Expiry of the stored access token |
+| `TEMPO_OAUTH_CODE` | credential | Authorization code of one browser authorization |
+| `TEMPO_OAUTH_TOKEN_FILE` | setting | Absolute path of a new or empty file outside the repository that receives the token pair of the exchange test |
 | `SEED_TEMPO_API_TOKEN` | credential | Seed input: Tempo API token with admin rights |
 | `TEMPO_API_ORIGIN` | setting | Tempo API origin |
 | `TEMPO_ACCOUNT_ID` | setting | Tempo account linked to the test project |
 | `TEMPO_JIRA_ISSUE_ID` | setting | Jira issue for worklogs |
 | `TEMPO_JIRA_PROJECT_ID` | setting | Jira project for worklogs |
 | `TEMPO_LIVE_DESTRUCTIVE` | gate | `true` allows tests that create worklogs |
+
+The Tempo exchange test runs only when `TEMPO_OAUTH_CODE` is set, taken from
+the `code` parameter of the redirect after one browser authorization. One run
+consumes the code and rotates the pair: it exchanges the code for a new pair,
+refreshes that pair once and writes each pair at once to
+`TEMPO_OAUTH_TOKEN_FILE`, with mode 0600, as `TEMPO_OAUTH_ACCESS_TOKEN`,
+`TEMPO_OAUTH_REFRESH_TOKEN` and `TEMPO_OAUTH_ACCESS_TOKEN_EXPIRES_AT` lines.
+Put that file in a directory only you can write, such as
+`~/.config/jido_connect/live`, and name it with an absolute path; the test
+fails before the exchange when the path is relative or inside the repository.
+The file then holds the only valid refresh token of that authorization; copy
+its lines to `atlassian.env` and the password manager. The test does not use
+the stored `TEMPO_OAUTH_REFRESH_TOKEN`. With recording on, it writes the two
+token responses to `oauth_exchange.json` and `oauth_refresh.json`, with the
+token fields redacted, and deletes a file that still holds a token or the
+code.
 
 ### Confluence
 

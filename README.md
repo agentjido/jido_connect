@@ -82,7 +82,7 @@ connector packages remain at `0.8.0`.
 
 | Product area | Packages |
 | --- | --- |
-| Collaboration and development | `jido_connect_bitbucket`, `jido_connect_confluence`, `jido_connect_github`, `jido_connect_gitlab`, `jido_connect_jira`, `jido_connect_linear`, `jido_connect_slack`, `jido_connect_trello`, `jido_connect_x` |
+| Collaboration and development | `jido_connect_bitbucket`, `jido_connect_confluence`, `jido_connect_github`, `jido_connect_gitlab`, `jido_connect_jira`, `jido_connect_linear`, `jido_connect_slack`, `jido_connect_tempo`, `jido_connect_trello`, `jido_connect_x` |
 | CRM and customer service | `jido_connect_hubspot`, `jido_connect_intercom`, `jido_connect_salesforce`, `jido_connect_zendesk` |
 | Work and data | `jido_connect_airtable`, `jido_connect_asana`, `jido_connect_nextcloud`, `jido_connect_notion`, `jido_connect_posthog`, `jido_connect_things` |
 | Scheduling | `jido_connect_calcom`, `jido_connect_calendly` |

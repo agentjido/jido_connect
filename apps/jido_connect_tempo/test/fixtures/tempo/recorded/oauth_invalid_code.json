@@ -1,0 +1,65 @@
+{
+  "body": {
+    "message": "authorization code is invalid",
+    "status": 403
+  },
+  "headers": {
+    "alt-svc": [
+      "h3=\":443\"; ma=86400"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 07:50:31 GMT"
+    ],
+    "referrer-policy": [
+      "strict-origin-when-cross-origin"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "3b563b1b2253efa24d83702f2086f314"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 7f50c4297c734e04046c5ba262693b20.cloudfront.net (CloudFront)"
+    ],
+    "x-amz-cf-id": [
+      "fAMY7xBLaY35hva6UlFMoBk8g1J4Ks88xFmH17y-FgGqi4j9FRPXZQ=="
+    ],
+    "x-cache": [
+      "Error from cloudfront"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-envoy-decorator-operation": [
+      "organization-public.default.svc.cluster.local:80/*"
+    ],
+    "x-envoy-upstream-service-time": [
+      "21"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/oauth/token/"
+  },
+  "status": 403
+}

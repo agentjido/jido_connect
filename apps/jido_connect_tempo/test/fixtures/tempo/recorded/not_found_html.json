@@ -1,0 +1,29 @@
+{
+  "body": "Not found\n",
+  "headers": {
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "10"
+    ],
+    "content-type": [
+      "text/html"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 07:39:47 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "cc671e2b2c7d571049741c93af6191af"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/global-configurations"
+  },
+  "status": 404
+}
