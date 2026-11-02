@@ -52,15 +52,23 @@ schemas, normalized structs, and tests in this package.
 
 - `google.drive.file.changed`
 - `google.drive.file.changed.push`
+- `google.drive.collection.changes`
+- `google.drive.collection.changes.push`
 
-The change poller initializes from Drive `startPageToken` without replaying
-history, then advances checkpoints through `nextPageToken` or
-`newStartPageToken`.
+Both change pollers initialize from Drive `startPageToken` without replaying
+history, then advance checkpoints through `nextPageToken` or
+`newStartPageToken`. `google.drive.file.changed` returns every change in the
+change log it reads; `google.drive.collection.changes` returns file changes
+with their relation to one folder, as described in
+[Listing Folder Contents](#listing-folder-contents) and
+[Added Files](#added-files).
 
-The push trigger normalizes Google Drive `X-Goog-*` channel headers for
-notifications created with `google.drive.changes.watch` or
-`google.drive.file.watch`. Hosts remain responsible for verifying the HTTPS
-delivery and the channel token before calling the normalizer.
+The push triggers normalize Google Drive `X-Goog-*` channel headers.
+`google.drive.file.changed.push` covers notifications of channels created with
+`google.drive.changes.watch` or `google.drive.file.watch`,
+`google.drive.collection.changes.push` those of `google.drive.collection.watch`.
+Hosts remain responsible for verifying the HTTPS delivery and the channel token
+before calling the normalizer.
 
 Drive channels are provider resources. There is no automatic renew endpoint;
 renewal is modeled as creating a replacement watch channel with a new
@@ -192,11 +200,11 @@ change made between that first poll and the listing can show up in both, so
 the host applies signals by `provider_record_id`, and a change the listing
 already contains updates the same entry again.
 
-Each signal carries `collection_match`: `"yes"` when the changed file is the
-folder or lists it in `parents`, `"no"` when it does not, which includes a file
-moved out of the folder, and `"unknown"` when Drive sends no file, as for a
-removed one. As long as every poll continues from the checkpoint the previous
-poll returned, the host does not have to list the folder again.
+Each signal's `collection_match` says whether the changed file is in the
+folder. [Added Files](#added-files) lists its values, and
+[Removed Files](#removed-files) covers removals and the trash. As long as every
+poll continues from the checkpoint the previous poll returned, the host does
+not have to list the folder again.
 
 A poll that cannot continue from its checkpoint, for example because Drive
 reports it expired (`reason: :checkpoint_expired`), returns an error whose
@@ -204,6 +212,104 @@ reports it expired (`reason: :checkpoint_expired`), returns an error whose
 polls again. That poll starts from Drive's current position without the
 missed changes, so it takes the place of the first poll above, and the host
 lists the folder again after it.
+
+## Added Files
+
+Drive sends no creation event. A new file arrives as a change like any later
+metadata change: in `google.drive.file.changed` with `change_type: "file"` and
+`removed: false`, in `google.drive.collection.changes` with
+`change_type: "updated"`. Drive merges the changes of one file between two
+polls into one, so a file created and renamed in that time arrives once, with
+its current metadata.
+
+The evidence for a new file is its creation time, `file.created_time` in a
+`google.drive.file.changed` signal and `record.created_at` in a
+`google.drive.collection.changes` signal. A creation time after the host's
+previous poll marks a file created since then. A file moved into a folder
+keeps its original creation time.
+
+`collection_match` relates the changed file to the folder in `collection_id`:
+
+- `"yes"` when the file lists the folder in `parents`, which makes it a direct
+  child, or when the change concerns the folder itself.
+- `"no"` when the file's `parents` do not include the folder: a file in a
+  subfolder, a file moved out of the folder, or a file elsewhere in Drive.
+  Membership is not recursive. A host that follows a tree compares
+  `record.parents` with the folder IDs it knows.
+- `"unknown"` when Drive sends no file metadata, as for a removal. The one
+  exception is a change to the folder itself that is not a removal, which is
+  `"yes"`. Once the folder itself is gone, polls fail instead, as described
+  under [Removed Files](#removed-files).
+
+The two triggers take a folder or shared drive differently.
+`google.drive.collection.changes` takes the folder ID as `collection_id`; its
+config takes only `collection_id` and `page_size`. On every poll it reads the
+folder with `supportsAllDrives=true`, rejects an ID that is not a folder and
+derives the settings itself. For a folder in a shared drive it
+reads that drive's change log with the drive's `drive_id`,
+`include_items_from_all_drives: true` and `supports_all_drives: true`. For a
+My Drive folder it reads the user's change log without shared-drive items.
+
+`google.drive.file.changed` takes no folder. It reads the user's change log,
+and the host sets the shared-drive settings itself. `drive_id` selects the
+change log of one shared drive. `include_items_from_all_drives` and
+`supports_all_drives` default to `false`, which leaves out shared-drive items;
+reading a shared drive needs both set to `true`. With both `true`, the poll
+also returns drive-level changes, described under
+[Removed Files](#removed-files).
+
+## Removed Files
+
+A removal is a change with `removed: true`;
+`google.drive.collection.changes` reports it as `removed?: true` with
+`change_type: "deleted"`. According to Google's `changes` reference, `removed`
+means that the file was removed from the user's list of changes, for example
+by deletion or loss of access. For a file that someone shared with the user, a
+removal can therefore mean that the access ended while the file still exists.
+The signal does not say which.
+
+A removal carries the file's ID and no metadata. `google.drive.file.changed`
+returns `file_id`, `removed: true`, `time` and `change_type` without a `file`
+key. `google.drive.collection.changes` returns `provider_record_id` with
+`collection_match: "unknown"` and no `record`, so a host removes the file from
+every folder view that holds it.
+
+When a poll repeats a checkpoint, Drive merges a file's changes in that range
+into one, so a removal can carry the `time` of an update the host already
+received. The declared dedupe key of `google.drive.file.changed`,
+`[:change_type, :file_id, :drive_id, :time]`, is then the same for both
+signals. A host that deduplicates its signals across polls includes `removed`
+in the key. `google.drive.collection.changes` tells the two apart by
+`change_type`.
+
+`google.drive.collection.changes` reads the folder in `collection_id` before
+it reads the change log. Once that folder is deleted for good or the user can
+no longer see it, Drive answers the folder read with 404, and the poll returns
+a `Jido.Connect.Error.ProviderError` with `reason: :http_error` and
+`status: 404` instead of signals. The error carries no `checkpoint_reset`, and
+a poll without a checkpoint fails the same way. The removals of the folder and
+of its files therefore do not arrive through this trigger; a removal of the
+folder itself arrives as `"unknown"` only when Drive records it between the
+folder read and the change read of one poll. A host that receives this error
+treats the folder and its view as gone. If the user regains access, the host
+follows the folder again with a first poll and a new listing, as described
+under [Listing Folder Contents](#listing-folder-contents).
+
+Moving a file to the trash is not a removal. Drive reports it as an update with
+`removed: false` and the file's metadata, in which `trashed?` is `true`:
+`file.trashed?` in `google.drive.file.changed`, `record.trashed?` in
+`google.drive.collection.changes`. A trashed child keeps the folder in
+`parents` and therefore arrives with `collection_match: "yes"`. A host whose
+folder view leaves out trashed files, as the listing with `trashed = false`
+above does, checks `trashed?` before it applies a `"yes"` signal and removes
+the file from the view when it is `true`.
+
+A drive-level change concerns a shared drive, for example its new name, and
+names no file. Drive marks it with `changeType: "drive"` and sends it only when
+`include_items_from_all_drives` and `supports_all_drives` are `true`.
+`google.drive.file.changed` returns it with `change_type: "drive"`, `drive_id`,
+`removed` and `time`, without `file_id` and `file`.
+`google.drive.collection.changes` leaves drive-level changes out.
 
 ## Permission-Aware Field Projections
 

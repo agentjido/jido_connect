@@ -1,0 +1,53 @@
+{
+  "body": {
+    "changes": [],
+    "newStartPageToken": "113"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "no-cache, no-store, max-age=0, must-revalidate"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 09:46:57 GMT"
+    ],
+    "expires": [
+      "Mon, 01 Jan 1990 00:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Origin, X-Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/changes"
+  },
+  "status": 200
+}

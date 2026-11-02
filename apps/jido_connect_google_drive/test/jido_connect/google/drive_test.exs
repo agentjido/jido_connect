@@ -117,7 +117,7 @@ defmodule Jido.Connect.Google.DriveTest do
     def get_file(
           %{
             file_id: "folder123",
-            fields: "id,mimeType,driveId",
+            fields: "id,name,mimeType,driveId",
             supports_all_drives: true
           },
           "token"

@@ -4,7 +4,7 @@ defmodule Jido.Connect.Google.Drive.CollectionChanges.Config do
   alias Jido.Connect.{Data, Error}
 
   @folder_mime_type "application/vnd.google-apps.folder"
-  @collection_lookup_fields "id,mimeType,driveId"
+  @collection_lookup_fields "id,name,mimeType,driveId"
   @default_page_size 100
   @max_page_size 1000
   @derived_fields [

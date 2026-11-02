@@ -21,7 +21,7 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
   # Account identifiers and the content thumbnail URL that no offline test needs.
   @masked [fields: ["permissionId", "photoLink", "thumbnailLink"]]
 
-  # Upper bound for the paging loop, so a provider that keeps returning
+  # Upper bound for the paging loops, so a provider that keeps returning
   # `nextPageToken` fails the test instead of looping.
   @max_pages 20
 
@@ -32,6 +32,21 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
   # direct children outside the trash and one trashed child. The seed script
   # restores them, possibly under new IDs.
   @folder_children 5
+
+  @folder_mime_type "application/vnd.google-apps.folder"
+
+  # Drive lists drive-level changes (`changeType: "drive"`) only to a poll that
+  # includes shared-drive items.
+  @all_drives %{include_items_from_all_drives: true, supports_all_drives: true}
+
+  # The write tests change Drive the way a person or another app would: with
+  # plain requests that bypass the package's Req options, so the recorder only
+  # writes the polls under test.
+  @drive_api "https://www.googleapis.com/drive/v3"
+
+  # Drive's change log can lag behind a write; reads wait this often, 2 s apart.
+  @change_log_reads 15
+  @change_log_fields "nextPageToken,changes(fileId,removed,changeType,driveId,file(id,trashed))"
 
   @tag env!(["GOOGLE_ACCESS_TOKEN"])
   test "reads the Drive about resource", %{env: env} do
@@ -155,6 +170,131 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
     refute inspect(error) =~ resource_key
   end
 
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DRIVE_WATCH_FOLDER_ID"])
+  @tag write!(:google)
+  test "sees files added to the watch folder and a deleted file by its ID", %{env: env} do
+    token = env["GOOGLE_ACCESS_TOKEN"]
+    folder_id = env["GOOGLE_DRIVE_WATCH_FOLDER_ID"]
+    watch = %{collection_id: folder_id}
+    started_at = DateTime.utc_now()
+
+    assert {:ok, %{signals: [], checkpoint: collection_checkpoint}} =
+             poll("google.drive.collection.changes", watch, nil, token)
+
+    assert {:ok, %{signals: [], checkpoint: file_checkpoint}} =
+             poll("google.drive.file.changed", %{}, nil, token)
+
+    added_id = create_externally(token, "jcl-live added", "text/plain", folder_id)
+    subfolder_id = create_externally(token, "jcl-live subfolder", @folder_mime_type, folder_id)
+    nested_id = create_externally(token, "jcl-live nested", "text/plain", subfolder_id)
+
+    await_change_log(token, collection_checkpoint, [], fn changes ->
+      Enum.all?([added_id, subfolder_id, nested_id], &change_for(changes, &1))
+    end)
+
+    LiveSmoke.record(@req_options, :google_drive, "collection_changes_added", @masked)
+
+    assert {:ok, %{signals: signals}} =
+             poll("google.drive.collection.changes", watch, collection_checkpoint, token)
+
+    assert %{
+             collection_match: "yes",
+             change_type: "updated",
+             record: %{created_at: created_at, parents: [^folder_id]}
+           } = record_signal(signals, added_id)
+
+    assert {:ok, created, 0} = DateTime.from_iso8601(created_at)
+    assert DateTime.after?(created, started_at)
+
+    assert %{collection_match: "yes"} = record_signal(signals, subfolder_id)
+
+    assert %{collection_match: "no", record: %{parents: [^subfolder_id]}} =
+             record_signal(signals, nested_id)
+
+    delete_externally(token, added_id)
+
+    await_change_log(token, file_checkpoint, [], fn changes ->
+      match?(%{"removed" => true}, change_for(changes, added_id))
+    end)
+
+    LiveSmoke.record(@req_options, :google_drive, "file_changed_removed", @masked)
+
+    assert {:ok, %{signals: signals}} =
+             poll("google.drive.file.changed", %{}, file_checkpoint, token)
+
+    assert %{file_id: ^added_id, removed: true, change_type: "file"} =
+             removal = file_signal(signals, added_id)
+
+    assert Enum.sort(Map.keys(removal)) == [:change_type, :file_id, :removed, :time]
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DRIVE_WATCH_FOLDER_ID"])
+  @tag write!(:google)
+  test "tells a trashed file, a removed file and a drive-level change apart", %{env: env} do
+    token = env["GOOGLE_ACCESS_TOKEN"]
+    folder_id = env["GOOGLE_DRIVE_WATCH_FOLDER_ID"]
+    watch = %{collection_id: folder_id}
+
+    trashed_id = create_externally(token, "jcl-live trashed", "text/plain", folder_id)
+    removed_id = create_externally(token, "jcl-live removed", "text/plain", folder_id)
+    drive_id = create_shared_drive_externally(token, "jcl-live drive")
+
+    assert {:ok, %{signals: [], checkpoint: file_checkpoint}} =
+             poll("google.drive.file.changed", @all_drives, nil, token)
+
+    assert {:ok, %{signals: [], checkpoint: collection_checkpoint}} =
+             poll("google.drive.collection.changes", watch, nil, token)
+
+    assert %{status: 200} =
+             external(:patch, "/files/#{trashed_id}", token, json: %{trashed: true})
+
+    delete_externally(token, removed_id)
+
+    assert %{status: 200} =
+             external(:patch, "/drives/#{drive_id}", token,
+               json: %{name: "jcl-live drive renamed"}
+             )
+
+    all_drives = [includeItemsFromAllDrives: true, supportsAllDrives: true]
+
+    await_change_log(token, file_checkpoint, all_drives, fn changes ->
+      match?(
+        %{"removed" => false, "file" => %{"trashed" => true}},
+        change_for(changes, trashed_id)
+      ) and
+        match?(%{"removed" => true}, change_for(changes, removed_id)) and
+        Enum.any?(changes, &match?(%{"changeType" => "drive", "driveId" => ^drive_id}, &1))
+    end)
+
+    LiveSmoke.record(@req_options, :google_drive, "file_changed_mixed", @masked)
+
+    assert {:ok, %{signals: signals}} =
+             poll("google.drive.file.changed", @all_drives, file_checkpoint, token)
+
+    assert %{removed: false, change_type: "file", file: %{trashed?: true}} =
+             file_signal(signals, trashed_id)
+
+    assert %{removed: true} = removal = file_signal(signals, removed_id)
+    refute Map.has_key?(removal, :file)
+
+    assert [drive_change] =
+             Enum.filter(signals, &match?(%{change_type: "drive", drive_id: ^drive_id}, &1))
+
+    refute Map.has_key?(drive_change, :file_id)
+    refute Map.has_key?(drive_change, :file)
+
+    LiveSmoke.record(@req_options, :google_drive, "collection_changes_trashed", @masked)
+
+    assert {:ok, %{signals: signals}} =
+             poll("google.drive.collection.changes", watch, collection_checkpoint, token)
+
+    assert %{collection_match: "yes", removed?: false, record: %{trashed?: true}} =
+             record_signal(signals, trashed_id)
+
+    assert %{collection_match: "unknown", change_type: "deleted", removed?: true} =
+             record_signal(signals, removed_id)
+  end
+
   defp list_pages(input, access_token, pages \\ []) do
     assert length(pages) < @max_pages
     assert {:ok, page} = invoke("google.drive.files.list", input, access_token)
@@ -170,7 +310,117 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
 
   defp file_ids(%{files: files}), do: Enum.map(files, & &1.file_id)
 
+  defp file_signal(signals, file_id), do: Enum.find(signals, &(&1[:file_id] == file_id))
+
+  defp record_signal(signals, file_id),
+    do: Enum.find(signals, &(&1[:provider_record_id] == file_id))
+
+  defp change_for(changes, file_id), do: Enum.find(changes, &(&1["fileId"] == file_id))
+
+  # Every object a test creates is deleted when the test exits. Deleting a
+  # folder also deletes the descendants the test user owns.
+  defp create_externally(access_token, name, mime_type, parent_id) do
+    assert %{status: 200, body: %{"id" => id}} =
+             external(:post, "/files", access_token,
+               json: %{name: name, mimeType: mime_type, parents: [parent_id]}
+             )
+
+    on_exit(fn -> delete_leftover(access_token, "/files/#{id}") end)
+    id
+  end
+
+  defp create_shared_drive_externally(access_token, name) do
+    request_id = "jcl-live-#{System.system_time(:millisecond)}"
+
+    assert %{status: 200, body: %{"id" => id}} =
+             external(:post, "/drives", access_token,
+               params: [requestId: request_id],
+               json: %{name: name}
+             )
+
+    on_exit(fn -> delete_leftover(access_token, "/drives/#{id}") end)
+    id
+  end
+
+  defp delete_externally(access_token, file_id) do
+    assert %{status: 204} = external(:delete, "/files/#{file_id}", access_token)
+  end
+
+  # An object that is already gone, 404 or 410, counts as deleted. Any other
+  # answer raises with the object's path and status, without the response
+  # body, so an object left in the shared account fails the test.
+  defp delete_leftover(access_token, path) do
+    case external(:delete, path, access_token) do
+      %{status: status} when status in 200..299 or status in [404, 410] ->
+        :ok
+
+      %{status: status} ->
+        raise "cleanup could not delete live Drive object #{path}: HTTP #{status}"
+    end
+  end
+
+  defp await_change_log(access_token, page_token, params, done?, read \\ 1) do
+    cond do
+      done?.(read_change_log(access_token, page_token, params)) ->
+        :ok
+
+      read < @change_log_reads ->
+        Process.sleep(2_000)
+        await_change_log(access_token, page_token, params, done?, read + 1)
+
+      true ->
+        flunk("Drive's change log lacked the expected changes after #{read} reads")
+    end
+  end
+
+  # Drive can end a page with `nextPageToken` before `pageSize` is reached, so
+  # a read follows the token through the last page.
+  defp read_change_log(access_token, page_token, params, changes \\ [], pages \\ 0) do
+    assert pages < @max_pages
+
+    assert %{status: 200, body: body} =
+             external(:get, "/changes", access_token,
+               params:
+                 [
+                   pageToken: page_token,
+                   pageSize: 1000,
+                   includeRemoved: true,
+                   fields: @change_log_fields
+                 ] ++ params
+             )
+
+    changes = changes ++ Map.get(body, "changes", [])
+
+    case body do
+      %{"nextPageToken" => next_page_token} ->
+        read_change_log(access_token, next_page_token, params, changes, pages + 1)
+
+      _last_page ->
+        changes
+    end
+  end
+
+  defp external(method, path, access_token, opts \\ []) do
+    Req.request!(
+      [method: method, url: @drive_api <> path, auth: {:bearer, access_token}, retry: false] ++
+        opts
+    )
+  end
+
+  defp poll(trigger_id, config, checkpoint, access_token) do
+    Connect.poll(
+      Drive.integration(),
+      trigger_id,
+      config,
+      [checkpoint: checkpoint] ++ connect_opts(access_token)
+    )
+  end
+
   defp invoke(action_id, input, access_token) do
+    Connect.invoke(Drive.integration(), action_id, input, connect_opts(access_token))
+  end
+
+  defp connect_opts(access_token) do
     connection =
       Connect.Connection.new!(%{
         id: "live_smoke",
@@ -200,9 +450,6 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
         scopes: [@drive_scope]
       })
 
-    Connect.invoke(Drive.integration(), action_id, input,
-      context: context,
-      credential_lease: lease
-    )
+    [context: context, credential_lease: lease]
   end
 end

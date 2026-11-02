@@ -14,7 +14,7 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
       verb(:watch)
       data_classification(:workspace_metadata)
       label("File changed")
-      description("Poll Google Drive changes for file metadata updates, removals, and creations.")
+      description("Poll Google Drive changes for file metadata updates and removals.")
       interval_ms(300_000)
       checkpoint(:page_token)
       dedupe(%{key: [:change_type, :file_id, :drive_id, :time]})
