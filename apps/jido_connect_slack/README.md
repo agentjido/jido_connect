@@ -10,6 +10,7 @@ It includes:
 - OAuth v2 helpers in `Jido.Connect.Slack.OAuth`
 - Slack Web API helpers in `Jido.Connect.Slack.Client`
 - signed request verification and Events API helpers in `Jido.Connect.Slack.Webhook`
+- verification of signed interactivity requests in `Jido.Connect.Slack.Interactivity`
 
 The Spark DSL declaration lives in `lib/jido_connect/slack/integration.ex`.
 Provider handlers live under `lib/jido_connect/slack/handlers/`.
@@ -131,3 +132,48 @@ checks the `v0` HMAC signature and rejects timestamps outside the replay window.
 
 Events API `url_verification` callbacks can be handled with
 `Jido.Connect.Slack.Webhook.url_verification_challenge/1`.
+
+## Interactivity
+
+Slack posts button clicks, shortcuts and other interactions to the app's
+interactivity request URL as a form body whose `payload` field holds JSON.
+`Jido.Connect.Slack.Interactivity.verify_delivery/4` takes the exact raw body,
+the request headers, the signing secret and options, and returns a verified
+`Jido.Connect.WebhookDelivery`:
+
+```elixir
+{:ok, delivery} =
+  Jido.Connect.Slack.Interactivity.verify_delivery(raw_body, headers, signing_secret,
+    seen_delivery_ids: processed_ids
+  )
+```
+
+Options:
+
+- `:max_body_bytes` bounds the raw body, by default 262,144 bytes (256 KiB);
+  `nil` also selects the default. A larger body fails with reason
+  `:body_too_large` before the signature check.
+- `:now` sets the current Unix time for the five-minute timestamp window.
+- `:seen_delivery_ids` lists delivery IDs the host has already processed.
+
+The signature and timestamp checks are those of
+`Jido.Connect.Slack.Webhook.verify_signature/4` and return its auth errors. The
+body must hold exactly one `payload` field whose JSON value is an object;
+otherwise the error reason is `:missing_payload`, `:duplicate_payload` or
+`:invalid_payload`.
+
+Slack sends no delivery ID with interactivity requests. The delivery ID is the
+lowercase hex SHA-256 of the verified raw body. A byte-identical redelivery
+gets the same ID and is marked `duplicate?: true` when that ID is in
+`:seen_delivery_ids`; a body that differs in any byte gets another ID.
+
+`event` is the payload `type`, and `metadata` carries `team_id` and
+`api_app_id`. `payload` is the decoded object without the temporary
+capabilities `token`, `bot_access_token`, `response_url`, `response_urls` and
+`trigger_id`. A `view_submission` can also carry `response_urls` inside `view`,
+and an interaction from a workflow step carries
+`interactivity.interactivity_pointer`; both are dropped as well. `interactor`
+and `function_data` stay. The raw body is not kept. No payload type is
+normalized yet, so `normalized_signal` is `nil`.
+Verification makes no HTTP request and does not acknowledge the request; the
+host answers Slack.
