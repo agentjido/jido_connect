@@ -31,6 +31,21 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
     end
   end
 
+  @poll_triggers ["google.meet.transcript.available"]
+
+  @workspace_events_triggers [
+    "google.meet.conference.started",
+    "google.meet.conference.ended",
+    "google.meet.participant.joined",
+    "google.meet.participant.left",
+    "google.meet.recording.started",
+    "google.meet.recording.ended",
+    "google.meet.recording.file_generated",
+    "google.meet.transcript.started",
+    "google.meet.transcript.ended",
+    "google.meet.transcript.file_generated"
+  ]
+
   @metadata_reads [
     "google.meet.space.get",
     "google.meet.conference_record.list",
@@ -66,7 +81,7 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
 
     pack = Meet.reader_pack()
     assert pack.metadata.risk == :read
-    assert pack.metadata.triggers == :later
+    assert pack.metadata.triggers == @poll_triggers
     assert "google.meet.conference.started" in pack.metadata.future_triggers
 
     assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
@@ -113,7 +128,7 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
     pack = Meet.transcript_reader_pack()
     assert pack.id == :google_meet_transcript_reader
     assert pack.metadata.risk == :read
-    assert pack.metadata.triggers == :later
+    assert pack.metadata.triggers == @poll_triggers
     assert pack in Meet.catalog_packs()
 
     ConnectorContracts.assert_google_naming_and_catalog_conventions(Meet,
@@ -144,8 +159,16 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
 
     pack = Meet.scheduler_pack()
     assert pack.metadata.risk == :write
-    assert pack.metadata.triggers == :later
+    assert pack.metadata.triggers == @poll_triggers
     assert "google.meet.transcript.file_generated" in pack.metadata.future_triggers
+  end
+
+  test "every pack names the poll trigger and keeps the Workspace Events triggers for later" do
+    for pack <- Meet.catalog_packs() do
+      assert pack.metadata.triggers == @poll_triggers
+      assert pack.metadata.future_triggers == @workspace_events_triggers
+      refute "google.meet.transcript.available" in pack.allowed_tools
+    end
   end
 
   test "pack restrictions apply to call_tool" do

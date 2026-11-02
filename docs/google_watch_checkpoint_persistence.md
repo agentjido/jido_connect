@@ -38,11 +38,22 @@ ticks. The record shape is:
 
 - `checkpoint` is `nil` on first run. The poller initializes without replaying
   history and returns the first provider checkpoint for the host to persist.
+  The Meet transcript poll has no provider cursor; its first checkpoint is
+  synthetic and starts at the current time.
 - The host passes the stored checkpoint on subsequent ticks. The poller drains
   all provider pages and returns the newest checkpoint.
-- Expired or invalid checkpoints produce a provider error with
-  `reason: :checkpoint_expired` and `checkpoint_reset` guidance. The host
-  should clear the stored value and retry.
+- A checkpoint that cannot be advanced produces an error with
+  `checkpoint_reset` guidance in its `details`. The host should clear the
+  stored value and retry. The reasons are:
+  - `:checkpoint_expired`, a provider error: the provider rejected the stored
+    cursor as too old.
+  - `:invalid_response`, a provider error: a page repeated its
+    `nextPageToken`, or the Meet conference record list returned a record
+    without an end time.
+  - `:poll_bound_exceeded`, a provider error from the Meet transcript poll: a
+    list exceeded its page or item bound.
+  - `:invalid_checkpoint`, a validation error from the Meet transcript poll:
+    the stored checkpoint could not be decoded.
 
 ### Push Channel Record
 
@@ -208,7 +219,9 @@ channel and Pub/Sub subscription patterns.
 
 | Aspect | Detail |
 |--------|--------|
-| No poll trigger | Meet does not have a poll trigger. All real-time Meet events require Workspace Events subscriptions. |
+| Poll trigger | `google.meet.transcript.available` polls per connection and signals each transcript once it reaches `FILE_GENERATED` with a `document_id`. All other real-time Meet events require Workspace Events subscriptions. |
+| Poll checkpoint | Synthetic JSON string, because Meet has no sync token: a watermark on conference end times, the records at or after it that need no further check, and pending records, bounded to 50 records and 24 hours. The package README documents the shape. |
+| Poll reset | `reason: :poll_bound_exceeded` for more than 10 pages or 100 conference records per poll, or 5 pages or 25 transcripts per record; `reason: :invalid_response` for a repeated page token or a record without an end time; a validation error with `reason: :invalid_checkpoint` for an unreadable checkpoint. Each carries `checkpoint_reset`. |
 | Push mechanism | Workspace Events API `subscriptions.create` registers a target resource and event types against a Google Cloud Pub/Sub topic. Google publishes CloudEvent-formatted messages. |
 | Target resources | `//meet.googleapis.com/spaces/{space_id}` for a specific space, or `//cloudidentity.googleapis.com/users/{user_id}` for all spaces owned by a user. |
 | Event types | `conference.v2.started`, `conference.v2.ended`, `participant.v2.joined`, `participant.v2.left`, `recording.v2.*`, `transcript.v2.*`, `smartNote.v2.*`. |
@@ -218,7 +231,7 @@ channel and Pub/Sub subscription patterns.
 | Push dedupe | By CloudEvent `id` and Pub/Sub message ID. |
 | Push verification | Pub/Sub push with OIDC verification, same as Gmail. |
 | Event normalization | Incoming CloudEvent envelopes carry resource names only (no rich payload). Hydration requires calling back to Meet API actions (`conference_record.get`, `recording.get`, `transcript.get`). |
-| Persistence needed | Workspace Events subscription record per target resource and event type combination. Renewal job scheduling anchored to `renewal_deadline`. |
+| Persistence needed | Poll: checkpoint record per connection. Push: Workspace Events subscription record per target resource and event type combination. Renewal job scheduling anchored to `renewal_deadline`. |
 
 ## Host Renewal Job Requirements
 
@@ -238,13 +251,16 @@ deadline.
 
 ## Host Recovery Procedures
 
-### Expired Checkpoint
+### Expired or Invalid Checkpoint
 
-1. Poll action returns `{error, %ProviderError{reason: :checkpoint_expired}}`.
+1. Poll action returns an error with `checkpoint_reset` in `error.details`:
+   `%ProviderError{}` with `reason: :checkpoint_expired`, `:invalid_response`
+   or `:poll_bound_exceeded`, or `%ValidationError{reason: :invalid_checkpoint}`.
 2. Host reads `checkpoint_reset` from `error.details`.
 3. Host clears the stored checkpoint.
 4. Host re-runs the poll. The poller initializes from the provider's current
-   cursor without replaying older history.
+   cursor, or for the Meet transcript poll from the current time, without
+   replaying older history.
 
 ### Expired Channel or Subscription
 

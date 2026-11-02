@@ -25,7 +25,8 @@ defmodule Jido.Connect.Google.MeetTest do
     Jido.Connect.Google.Meet.Actions.Spaces,
     Jido.Connect.Google.Meet.Actions.ConferenceRecords,
     Jido.Connect.Google.Meet.Actions.Recordings,
-    Jido.Connect.Google.Meet.Actions.Transcripts
+    Jido.Connect.Google.Meet.Actions.Transcripts,
+    Jido.Connect.Google.Meet.Triggers.Transcripts
   ]
 
   defmodule FakeMeetClient do
@@ -163,7 +164,29 @@ defmodule Jido.Connect.Google.MeetTest do
              "google.meet.transcript.entry.list"
            ]
 
-    assert spec.triggers == []
+    assert [%{id: "google.meet.transcript.available"}] = spec.triggers
+
+    assert {:ok,
+            %{
+              kind: :poll,
+              interval_ms: 300_000,
+              checkpoint: :end_time_watermark,
+              dedupe: %{key: [:transcript_name]},
+              scope_resolver: Jido.Connect.Google.Meet.ScopeResolver,
+              handler: Jido.Connect.Google.Meet.Handlers.Triggers.TranscriptPoller
+            } = trigger} = Connect.trigger(spec, "google.meet.transcript.available")
+
+    assert Enum.map(trigger.signal, & &1.name) == [
+             :transcript_name,
+             :conference_record_name,
+             :document_id,
+             :state,
+             :start_time,
+             :end_time,
+             :export_uri
+           ]
+
+    refute Enum.any?(spec.triggers, &(&1.id == "google.meet.transcript.file_generated"))
 
     ConnectorContracts.assert_google_naming_and_catalog_conventions(Meet,
       id_prefix: "google.meet.",
@@ -185,6 +208,14 @@ defmodule Jido.Connect.Google.MeetTest do
     ConnectorContracts.assert_generated_surface(Meet,
       otp_app: :jido_connect_google_meet,
       action_modules: @meet_action_modules,
+      sensor_specs: [
+        %{
+          module: Jido.Connect.Google.Meet.Sensors.TranscriptAvailable,
+          name: "google_meet_transcript_available",
+          trigger_id: "google.meet.transcript.available",
+          signal_type: "google.meet.transcript.available"
+        }
+      ],
       plugin_module: Jido.Connect.Google.Meet.Plugin,
       plugin_name: "google_meet"
     )

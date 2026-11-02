@@ -3,6 +3,9 @@ defmodule Jido.Connect.Google.Meet.CatalogPacks do
 
   alias Jido.Connect.Catalog.Pack
 
+  @triggers ["google.meet.transcript.available"]
+
+  # Reserved for Google Workspace Events subscriptions.
   @future_triggers [
     "google.meet.conference.started",
     "google.meet.conference.ended",
@@ -70,7 +73,7 @@ defmodule Jido.Connect.Google.Meet.CatalogPacks do
     Pack.new!(%{
       id: :google_meet_scheduler,
       label: "Google Meet scheduler",
-      description: "Read Meet metadata and create meeting spaces. Triggers remain later work.",
+      description: "Read Meet metadata and create meeting spaces.",
       filters: %{provider: :google_meet},
       allowed_tools: @scheduler_tools,
       metadata: metadata(:write)
@@ -81,7 +84,7 @@ defmodule Jido.Connect.Google.Meet.CatalogPacks do
     %{
       package: :jido_connect_google_meet,
       risk: risk,
-      triggers: :later,
+      triggers: @triggers,
       future_triggers: @future_triggers
     }
   end
