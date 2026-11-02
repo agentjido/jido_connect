@@ -23,6 +23,7 @@ defmodule Jido.Connect.Jira.Webhook do
   """
 
   alias Jido.Connect.{Data, Error}
+  alias Jido.Connect.Jira.ADFText
   alias Jido.Connect.Jira.Webhook.Verification
 
   @supported_issue_events ~w(jira:issue_created jira:issue_updated)
@@ -97,6 +98,13 @@ defmodule Jido.Connect.Jira.Webhook do
   - **Comment events**: contain a `comment` object and an `issue` object
     providing context.
 
+  `comment_body` comes from `Jido.Connect.Jira.ADFText`: an ADF body is
+  rendered with the shared projection in `:degrade` mode and
+  `comment_body_unsupported_nodes` lists the skipped node and mark types; a
+  plain-string body, as administrator webhooks send it, passes through with
+  an empty list. A comment body that is not valid ADF fails the event with
+  `:invalid_webhook_event`.
+
   Returns `{:ok, signal_map}` on success, or `{:error, _}` on failure.
   """
   @spec normalize_event(map()) :: {:ok, map()} | {:error, Error.ProviderError.t()}
@@ -166,24 +174,7 @@ defmodule Jido.Connect.Jira.Webhook do
          )}
 
       true ->
-        signal =
-          %{
-            event_type: event_type,
-            change_type: comment_change_type(event_type),
-            comment_id: Data.get(comment_data, "id"),
-            comment_body: normalize_comment_body(Data.get(comment_data, "body")),
-            comment_created_at: Data.get(comment_data, "created"),
-            comment_updated_at: Data.get(comment_data, "updated"),
-            comment_author_id: get_in(comment_data, ["author", "accountId"]),
-            comment_author_name: get_in(comment_data, ["author", "displayName"]),
-            issue_id: Data.get(issue_data, "id"),
-            issue_key: Data.get(issue_data, "key"),
-            webhook_id: Data.get(payload, "webhookID"),
-            timestamp: Data.get(payload, "timestamp")
-          }
-          |> Data.compact()
-
-        {:ok, signal}
+        comment_signal(event_type, payload, comment_data, issue_data)
     end
   end
 
@@ -287,25 +278,38 @@ defmodule Jido.Connect.Jira.Webhook do
 
   defp normalize_changelog(_), do: nil
 
-  defp normalize_comment_body(%{"type" => "doc", "content" => content} = _adf)
-       when is_list(content) do
-    extract_text_from_adf(content)
-    |> String.trim()
+  defp comment_signal(event_type, payload, comment_data, issue_data) do
+    case ADFText.project(Data.get(comment_data, "body")) do
+      {:ok, body} ->
+        signal =
+          %{
+            event_type: event_type,
+            change_type: comment_change_type(event_type),
+            comment_id: Data.get(comment_data, "id"),
+            comment_body: ADFText.text(body),
+            comment_body_unsupported_nodes: ADFText.unsupported_nodes(body),
+            comment_created_at: Data.get(comment_data, "created"),
+            comment_updated_at: Data.get(comment_data, "updated"),
+            comment_author_id: get_in(comment_data, ["author", "accountId"]),
+            comment_author_name: get_in(comment_data, ["author", "displayName"]),
+            issue_id: Data.get(issue_data, "id"),
+            issue_key: Data.get(issue_data, "key"),
+            webhook_id: Data.get(payload, "webhookID"),
+            timestamp: Data.get(payload, "timestamp")
+          }
+          |> Data.compact()
+
+        {:ok, signal}
+
+      {:error, %Error.ValidationError{reason: reason}} ->
+        {:error,
+         Error.provider("Jira webhook comment body is invalid",
+           provider: :jira,
+           reason: :invalid_webhook_event,
+           details: %{event_type: event_type, field: "comment.body", adf_reason: reason}
+         )}
+    end
   end
-
-  defp normalize_comment_body(text) when is_binary(text), do: text
-  defp normalize_comment_body(_), do: nil
-
-  defp extract_text_from_adf(nodes) when is_list(nodes) do
-    Enum.map_join(nodes, "", &extract_text_from_adf/1)
-  end
-
-  defp extract_text_from_adf(%{"content" => content}) when is_list(content) do
-    extract_text_from_adf(content)
-  end
-
-  defp extract_text_from_adf(%{"text" => text}) when is_binary(text), do: text
-  defp extract_text_from_adf(_), do: ""
 
   # Constant-time string comparison to prevent timing attacks.
   defp secure_compare?(left, right) when byte_size(left) != byte_size(right), do: false

@@ -176,10 +176,17 @@ Issue events produce signals with:
 Comment events produce signals with:
 
 - `event_type`, `change_type` (`"created"` or `"updated"`)
-- `comment_id`, `comment_body`, `comment_author_id`, `comment_author_name`
+- `comment_id`, `comment_body`, `comment_body_unsupported_nodes`
+- `comment_author_id`, `comment_author_name`
 - `comment_created_at`, `comment_updated_at`
 - `issue_id`, `issue_key` (context)
 - `webhook_id`, `timestamp`
+
+`comment_body` follows the rich-text rules below. Administrator webhooks send
+the body as a plain string, which passes through with an empty
+`comment_body_unsupported_nodes`. A comment body that is not valid ADF fails
+the event with `:invalid_webhook_event`; `verify_delivery/4` then returns the
+verified delivery without a normalized signal.
 
 ## Catalog Packs
 
@@ -216,6 +223,28 @@ Catalog.search_tools("jira",
   pack: :jira_admin
 )
 ```
+
+## Rich Text
+
+Jira returns issue descriptions and comment bodies as Atlassian Document
+Format (ADF). `Jido.Connect.Jira.ADFText` renders them with
+`Jido.Connect.Atlassian.ADF.project/2` from `jido_connect_atlassian` in
+`:degrade` mode:
+
+- The text keeps document order and line boundaries for paragraphs, headings,
+  list items and hard breaks. Links keep their target and mentions their
+  display text.
+- Node and mark types outside the supported subset, such as images
+  (`mediaSingle`), macros (`extension`) or inline comments (`annotation`), are
+  skipped. `Issue.description_unsupported_nodes`,
+  `Comment.body_unsupported_nodes` and the signal field
+  `comment_body_unsupported_nodes` list each skipped type once, in document
+  order. Plain-string values pass through with an empty list.
+- Malformed ADF and documents beyond the projection's depth or node-count
+  limit fail explicitly. `Normalizer.issue/1` and `Normalizer.comment/1`
+  return the projection's `Jido.Connect.Error.ValidationError`, issue reads and
+  searches return an `:invalid_response` provider error that names the field
+  but not its content. Configure the limits through `jido_connect_atlassian`.
 
 ## API Boundaries
 

@@ -1,0 +1,107 @@
+{
+  "body": {
+    "_links": {
+      "base": "https://example.atlassian.net/wiki",
+      "editui": "/pages/resumedraft.action?draftId=3754852456",
+      "edituiv2": "/spaces/JCL/pages/edit-v2/3754852456",
+      "tinyui": "/x/aIDO3w",
+      "webui": "/spaces/JCL/pages/3754852456/JCL+rich+page"
+    },
+    "authorId": "account-1",
+    "body": {
+      "atlas_doc_format": {
+        "representation": "atlas_doc_format",
+        "value": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"This page carries content outside the supported ADF subset.\",\"type\":\"text\"}]},{\"type\":\"extension\",\"attrs\":{\"extensionType\":\"com.atlassian.confluence.macro.core\",\"extensionKey\":\"toc\",\"parameters\":{\"macroParams\":{},\"macroMetadata\":{\"macroId\":{\"value\":\"33223d75-d85c-4cbd-bb16-48ea9350c7d5\"},\"schemaVersion\":{\"value\":\"1\"},\"title\":\"Table of Contents\"}}}},{\"type\":\"heading\",\"attrs\":{\"level\":2},\"content\":[{\"text\":\"Images\",\"type\":\"text\"}]},{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"align-start\",\"width\":240,\"widthType\":\"pixel\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"width\":240,\"id\":\"b894412e-0367-4d04-804c-b95bd7b6ee42\",\"collection\":\"contentId-3754852456\",\"type\":\"file\",\"height\":160}}]},{\"type\":\"mediaSingle\",\"attrs\":{\"layout\":\"align-start\",\"width\":240,\"widthType\":\"pixel\"},\"content\":[{\"type\":\"media\",\"attrs\":{\"width\":240,\"id\":\"59eccfc7-c161-44ce-b1e9-5e4b7e90ec94\",\"collection\":\"contentId-3754852456\",\"type\":\"file\",\"height\":160}}]},{\"type\":\"heading\",\"attrs\":{\"level\":2},\"content\":[{\"text\":\"Macros\",\"type\":\"text\"}]},{\"type\":\"panel\",\"attrs\":{\"panelType\":\"info\"},\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"An info macro.\",\"type\":\"text\"}]}]},{\"type\":\"bodiedExtension\",\"attrs\":{\"extensionType\":\"com.atlassian.confluence.macro.core\",\"extensionKey\":\"excerpt\",\"parameters\":{\"macroParams\":{},\"macroMetadata\":{\"macroId\":{\"value\":\"d98db624-6d0b-4fdf-a4b1-9cce7cdef993\"},\"schemaVersion\":{\"value\":\"1\"},\"title\":\"Excerpt\"}}},\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"An excerpt macro.\",\"type\":\"text\"}]}]},{\"type\":\"codeBlock\",\"attrs\":{\"language\":\"elixir\"},\"content\":[{\"text\":\"IO.puts(\\\"jcl\\\")\",\"type\":\"text\"}]},{\"type\":\"heading\",\"attrs\":{\"level\":2},\"content\":[{\"text\":\"Date and comment\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Due on \",\"type\":\"text\"},{\"type\":\"date\",\"attrs\":{\"timestamp\":\"1795132800000\"}},{\"text\":\".\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"The phrase \",\"type\":\"text\"},{\"text\":\"JCL inline anchor\",\"type\":\"text\",\"marks\":[{\"type\":\"annotation\",\"attrs\":{\"annotationType\":\"inlineComment\",\"id\":\"113564f8-199a-4743-8425-c29f10a972cd\"}}]},{\"text\":\" carries an inline comment.\",\"type\":\"text\"}]}],\"version\":1}"
+      }
+    },
+    "createdAt": "2026-10-30T19:18:26.595Z",
+    "id": "3754852456",
+    "lastOwnerId": null,
+    "ownerId": "account-1",
+    "parentId": "3754655880",
+    "parentType": "page",
+    "position": 456,
+    "spaceId": "3754655746",
+    "status": "current",
+    "title": "JCL rich page",
+    "version": {
+      "authorId": "account-1",
+      "createdAt": "2026-10-30T19:18:29.348Z",
+      "message": "JCL live content",
+      "minorEdit": false,
+      "ncsStepVersion": "1",
+      "number": 2
+    }
+  },
+  "headers": {
+    "atl-request-id": [
+      "575cf4b6-6dff-463a-b180-a1b0d02880df"
+    ],
+    "atl-traceid": [
+      "575cf4b66dff463ab180a1b0d02880df"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:02:29 GMT"
+    ],
+    "link": [
+      "<https://example.atlassian.net/wiki>; rel=\"base\""
+    ],
+    "nel": [
+      "{\"failure_fraction\": 0.01, \"include_subdomains\": true, \"max_age\": 600, \"report_to\": \"endpoint-1\"}"
+    ],
+    "report-to": [
+      "{\"endpoints\": [{\"url\": \"https://dz8aopenkvv6s.cloudfront.net\"}], \"group\": \"endpoint-1\", \"include_subdomains\": true, \"max_age\": 600}"
+    ],
+    "reporting-endpoints": [
+      "default=\"https://dz8aopenkvv6s.cloudfront.net\""
+    ],
+    "server": [
+      "AtlassianEdge"
+    ],
+    "server-timing": [
+      "cdn-upstream-layer;desc=\"EDGE\",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=61,cdn-upstream-fbl;dur=296,atl-edge;dur=213,atl-edge-internal;dur=18,atl-edge-upstream;dur=195,atl-edge-pop;desc=\"aws-eu-west-1\",cdn-cache-miss,cdn-pop;desc=\"FRA56-P8\",cdn-rid;desc=\"UFjhoqyY4c1-300W8ol2iY-rKBXAw5bveXPIuSdpD3iUDuJ9mDUcMw==\",cdn-downstream-fbl;dur=300"
+    ],
+    "strict-transport-security": [
+      "max-age=63072000; includeSubDomains; preload"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding,Accept-Encoding"
+    ],
+    "via": [
+      "1.1 1eee8db55908814c8f0cde754e3bee5a.cloudfront.net (CloudFront)"
+    ],
+    "x-amz-cf-id": [
+      "UFjhoqyY4c1-300W8ol2iY-rKBXAw5bveXPIuSdpD3iUDuJ9mDUcMw=="
+    ],
+    "x-amz-cf-pop": [
+      "FRA56-P8"
+    ],
+    "x-cache": [
+      "Miss from cloudfront"
+    ],
+    "x-confluence-request-time": [
+      "1793606549341"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/wiki/api/v2/pages/3754852456"
+  },
+  "status": 200
+}

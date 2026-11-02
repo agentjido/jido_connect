@@ -1,0 +1,470 @@
+{
+  "body": {
+    "comments": [
+      {
+        "author": {
+          "accountId": "account-1",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-1",
+            "24x24": "24x24-1",
+            "32x32": "32x32-1",
+            "48x48": "48x48-1"
+          },
+          "displayName": "Person 1",
+          "emailAddress": "person-1@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-1",
+          "timeZone": "Europe/Berlin"
+        },
+        "body": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "First comment with a list and a mention of ",
+                  "type": "text"
+                },
+                {
+                  "attrs": {
+                    "accessLevel": "",
+                    "id": "account-2",
+                    "text": "@Person 2"
+                  },
+                  "type": "mention"
+                },
+                {
+                  "text": ".",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "Comment list item one",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "listItem"
+                },
+                {
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "Comment list item two",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "paragraph"
+                    }
+                  ],
+                  "type": "listItem"
+                }
+              ],
+              "type": "bulletList"
+            }
+          ],
+          "type": "doc",
+          "version": 1
+        },
+        "created": "2026-10-30T20:16:45.703+0100",
+        "id": "42672",
+        "jsdPublic": true,
+        "self": "https://example.atlassian.net/rest/api/3/issue/46096/comment/42672",
+        "updateAuthor": {
+          "accountId": "account-1",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-1",
+            "24x24": "24x24-1",
+            "32x32": "32x32-1",
+            "48x48": "48x48-1"
+          },
+          "displayName": "Person 1",
+          "emailAddress": "person-1@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-1",
+          "timeZone": "Europe/Berlin"
+        },
+        "updated": "2026-10-30T20:16:45.703+0100"
+      },
+      {
+        "author": {
+          "accountId": "account-1",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-1",
+            "24x24": "24x24-1",
+            "32x32": "32x32-1",
+            "48x48": "48x48-1"
+          },
+          "displayName": "Person 1",
+          "emailAddress": "person-1@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-1",
+          "timeZone": "Europe/Berlin"
+        },
+        "body": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "Restricted to the role 'Ext. Mitarbeiter', which the test user has.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "type": "doc",
+          "version": 1
+        },
+        "created": "2026-10-30T20:16:46.281+0100",
+        "id": "42673",
+        "jsdPublic": true,
+        "self": "https://example.atlassian.net/rest/api/3/issue/46096/comment/42673",
+        "updateAuthor": {
+          "accountId": "account-1",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-1",
+            "24x24": "24x24-1",
+            "32x32": "32x32-1",
+            "48x48": "48x48-1"
+          },
+          "displayName": "Person 1",
+          "emailAddress": "person-1@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-1",
+          "timeZone": "Europe/Berlin"
+        },
+        "updated": "2026-10-30T20:16:46.281+0100",
+        "visibility": {
+          "identifier": "Ext. Mitarbeiter",
+          "type": "role",
+          "value": "Ext. Mitarbeiter"
+        }
+      },
+      {
+        "author": {
+          "accountId": "account-1",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-1",
+            "24x24": "24x24-1",
+            "32x32": "32x32-1",
+            "48x48": "48x48-1"
+          },
+          "displayName": "Person 1",
+          "emailAddress": "person-1@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-1",
+          "timeZone": "Europe/Berlin"
+        },
+        "body": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "Comment with an embedded image:",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "attrs": {
+                "layout": "center"
+              },
+              "content": [
+                {
+                  "attrs": {
+                    "collection": "",
+                    "height": 183,
+                    "id": "91c11c8b-e56c-4ecd-becd-0d6c29965f85",
+                    "type": "file",
+                    "width": 200
+                  },
+                  "type": "media"
+                }
+              ],
+              "type": "mediaSingle"
+            }
+          ],
+          "type": "doc",
+          "version": 1
+        },
+        "created": "2026-10-30T20:16:47.338+0100",
+        "id": "42675",
+        "jsdPublic": true,
+        "self": "https://example.atlassian.net/rest/api/3/issue/46096/comment/42675",
+        "updateAuthor": {
+          "accountId": "account-1",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-1",
+            "24x24": "24x24-1",
+            "32x32": "32x32-1",
+            "48x48": "48x48-1"
+          },
+          "displayName": "Person 1",
+          "emailAddress": "person-1@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-1",
+          "timeZone": "Europe/Berlin"
+        },
+        "updated": "2026-10-30T20:16:47.338+0100"
+      },
+      {
+        "author": {
+          "accountId": "account-2",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-2",
+            "24x24": "24x24-2",
+            "32x32": "32x32-2",
+            "48x48": "48x48-2"
+          },
+          "displayName": "Person 2",
+          "emailAddress": "person-2@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-2",
+          "timeZone": "Europe/Berlin"
+        },
+        "body": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "Line 01 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "text": "Line 02 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "text": "Line 03 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "text": "Line 04 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "text": "Line 05 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "text": "Line 06 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "text": "Line 07 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "text": "Line 08 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "text": "Line 09 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "text": "Line 10 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "text": "Line 11 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            },
+            {
+              "content": [
+                {
+                  "text": "Line 12 of the long live-test text for a long comment: Umlaute äöü ß, Euro €, Dash –.",
+                  "type": "text"
+                }
+              ],
+              "type": "paragraph"
+            }
+          ],
+          "type": "doc",
+          "version": 1
+        },
+        "created": "2026-10-30T20:16:47.821+0100",
+        "id": "42676",
+        "jsdPublic": true,
+        "self": "https://example.atlassian.net/rest/api/3/issue/46096/comment/42676",
+        "updateAuthor": {
+          "accountId": "account-2",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-2",
+            "24x24": "24x24-2",
+            "32x32": "32x32-2",
+            "48x48": "48x48-2"
+          },
+          "displayName": "Person 2",
+          "emailAddress": "person-2@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-2",
+          "timeZone": "Europe/Berlin"
+        },
+        "updated": "2026-10-30T20:16:47.821+0100"
+      }
+    ],
+    "maxResults": 4,
+    "startAt": 0,
+    "total": 54
+  },
+  "headers": {
+    "atl-request-id": [
+      "59d80d38-5668-4fea-9049-82e583c5ab41"
+    ],
+    "atl-traceid": [
+      "59d80d3856684fea904982e583c5ab41"
+    ],
+    "cache-control": [
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json;charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:00:19 GMT"
+    ],
+    "nel": [
+      "{\"failure_fraction\": 0.01, \"include_subdomains\": true, \"max_age\": 600, \"report_to\": \"endpoint-1\"}"
+    ],
+    "ratelimit": [
+      "\"jira-burst-based\";r=349;t=1"
+    ],
+    "ratelimit-policy": [
+      "\"jira-burst-based\";q=100;w=1"
+    ],
+    "report-to": [
+      "{\"endpoints\": [{\"url\": \"https://dz8aopenkvv6s.cloudfront.net\"}], \"group\": \"endpoint-1\", \"include_subdomains\": true, \"max_age\": 600}"
+    ],
+    "server": [
+      "AtlassianEdge"
+    ],
+    "server-timing": [
+      "cdn-upstream-layer;desc=\"EDGE\",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=60,cdn-upstream-fbl;dur=264,atl-edge;dur=183,atl-edge-internal;dur=16,atl-edge-upstream;dur=167,atl-edge-pop;desc=\"aws-eu-west-1\",cdn-cache-miss,cdn-pop;desc=\"FRA56-P6\",cdn-rid;desc=\"1Sj98W9A5EemdKUWS7BtuaVWz56KpfVZz07xw0bTV8d4ma4gVjxEcw==\",cdn-downstream-fbl;dur=268"
+    ],
+    "strict-transport-security": [
+      "max-age=63072000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding,Accept-Encoding"
+    ],
+    "via": [
+      "1.1 1c7275102c069b3b4bff7bcc191ded2e.cloudfront.net (CloudFront)"
+    ],
+    "x-aaccountid": [
+      "account-1"
+    ],
+    "x-amz-cf-id": [
+      "1Sj98W9A5EemdKUWS7BtuaVWz56KpfVZz07xw0bTV8d4ma4gVjxEcw=="
+    ],
+    "x-amz-cf-pop": [
+      "FRA56-P6"
+    ],
+    "x-arequestid": [
+      "01c411ad549286d8fa21c61b0fb27e9d"
+    ],
+    "x-cache": [
+      "Miss from cloudfront"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-ratelimit-limit": [
+      "350"
+    ],
+    "x-ratelimit-remaining": [
+      "349"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/rest/api/3/issue/JCL-1/comment"
+  },
+  "status": 200
+}

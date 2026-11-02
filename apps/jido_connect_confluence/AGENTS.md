@@ -1,7 +1,9 @@
 # Confluence Connector Guidance
 
-- Keep Confluence-specific DSL, client code, normalization, ADF conversion, and
-  tests in this package.
+- Keep Confluence-specific DSL, client code, normalization, and tests in this
+  package. ADF conversion lives in `jido_connect_atlassian`;
+  `Jido.Connect.Confluence.ADF` is a delegating alias that applies the
+  Confluence Markdown limit.
 - Use the official Confluence Cloud REST API v2 through focused client modules.
 - Bind Basic credentials only to the validated `metadata.site_url` tenant under
   `atlassian.net`.

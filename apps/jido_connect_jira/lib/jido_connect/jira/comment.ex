@@ -8,6 +8,7 @@ defmodule Jido.Connect.Jira.Comment do
             %{
               id: Zoi.string(),
               body: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              body_unsupported_nodes: Zoi.list(Zoi.string()) |> Zoi.nullish() |> Zoi.optional(),
               rendered_body: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               author: User.schema() |> Zoi.nullish() |> Zoi.optional(),
               update_author: User.schema() |> Zoi.nullish() |> Zoi.optional(),

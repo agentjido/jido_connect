@@ -33,6 +33,7 @@ defmodule JidoConnectConfluence.MixProject do
   defp deps do
     [
       jido_connect_dep(),
+      jido_connect_atlassian_dep(),
       {:jason, "~> 1.4"},
       {:plug, "~> 1.20", only: :test},
       {:req, "~> 0.6"}
@@ -40,11 +41,23 @@ defmodule JidoConnectConfluence.MixProject do
   end
 
   defp jido_connect_dep do
-    if Enum.any?(System.argv(), &(&1 in ["hex.build", "hex.publish"])) do
+    if hex_package_task?() do
       {:jido_connect, "~> 0.8"}
     else
       {:jido_connect, in_umbrella: true}
     end
+  end
+
+  defp jido_connect_atlassian_dep do
+    if hex_package_task?() do
+      {:jido_connect_atlassian, "~> 0.8"}
+    else
+      {:jido_connect_atlassian, in_umbrella: true}
+    end
+  end
+
+  defp hex_package_task? do
+    Enum.any?(System.argv(), &(&1 in ["hex.build", "hex.publish"]))
   end
 
   defp aliases do

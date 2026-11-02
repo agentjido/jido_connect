@@ -1,13 +1,19 @@
 defmodule Jido.Connect.Jira.Client.Response do
   @moduledoc "Jira Cloud REST success and error response handling."
 
-  alias Jido.Connect.Data
+  alias Jido.Connect.{Data, Error}
   alias Jido.Connect.Jira.Client.{Normalizer, Transport}
 
-  @doc "Handles a single Jira issue get response."
+  @doc """
+  Handles a single Jira issue get response.
+
+  A description that is not valid ADF fails the read with an
+  `:invalid_response` error whose details name the field and the projection
+  reason, without the issue content.
+  """
   def handle_issue_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
-    {:ok, Normalizer.normalize_issue(body)}
+    read_issue(body, "Jira issue response was invalid")
   end
 
   def handle_issue_response({:ok, %{status: status, body: body}})
@@ -17,19 +23,27 @@ defmodule Jido.Connect.Jira.Client.Response do
 
   def handle_issue_response(response), do: Transport.handle_error_response(response)
 
-  @doc "Handles a Jira issue search (JQL) response."
+  @doc """
+  Handles a Jira issue search (JQL) response.
+
+  An issue whose description is not valid ADF fails the whole page, as in
+  `handle_issue_response/1`.
+  """
   def handle_issue_search_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
-    case Data.get(body, "issues") do
-      issues when is_list(issues) ->
-        {:ok,
-         %{
-           issues: Enum.map(issues, &Normalizer.normalize_issue/1),
-           total: Data.get(body, "total"),
-           start_at: Data.get(body, "startAt"),
-           max_results: Data.get(body, "maxResults"),
-           is_last: Data.get(body, "isLast")
-         }}
+    with issues when is_list(issues) <- Data.get(body, "issues"),
+         {:ok, issues} <- read_issues(issues, "Jira issue search response was invalid") do
+      {:ok,
+       %{
+         issues: issues,
+         total: Data.get(body, "total"),
+         start_at: Data.get(body, "startAt"),
+         max_results: Data.get(body, "maxResults"),
+         is_last: Data.get(body, "isLast")
+       }}
+    else
+      {:error, _error} = error ->
+        error
 
       _other ->
         Transport.invalid_success_response("Jira issue search response was invalid", body)
@@ -173,6 +187,41 @@ defmodule Jido.Connect.Jira.Client.Response do
   # ---------------------------------------------------------------------------
   # Private helpers
   # ---------------------------------------------------------------------------
+
+  # Issue reads keep the legacy `nil` for payloads the struct rejects, but a
+  # description that is not valid ADF fails explicitly.
+  defp read_issue(payload, message) do
+    case Normalizer.issue(payload) do
+      {:ok, issue} ->
+        {:ok, Normalizer.issue_map(issue)}
+
+      {:error, %Error.ValidationError{subject: :adf, reason: reason}} ->
+        {:error,
+         Error.provider(message,
+           provider: :jira,
+           reason: :invalid_response,
+           delivery: :response_received,
+           details: %{field: "description", adf_reason: reason}
+         )}
+
+      {:error, _invalid} ->
+        {:ok, nil}
+    end
+  end
+
+  defp read_issues(payloads, message) do
+    payloads
+    |> Enum.reduce_while({:ok, []}, fn payload, {:ok, issues} ->
+      case read_issue(payload, message) do
+        {:ok, issue} -> {:cont, {:ok, [issue | issues]}}
+        {:error, _error} = error -> {:halt, error}
+      end
+    end)
+    |> case do
+      {:ok, issues} -> {:ok, Enum.reverse(issues)}
+      {:error, _error} = error -> error
+    end
+  end
 
   defp normalize_project_map(payload) do
     case Normalizer.project(payload) do

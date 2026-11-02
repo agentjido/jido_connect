@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Move ADF conversion into the shared `jido_connect_atlassian` package.
+  `Jido.Connect.Confluence.ADF` stays as a delegating alias; `to_text/1` and
+  `from_markdown/1` keep their names, return shapes and results.
+
 ## 0.8.0
 
 - Add the distinct Confluence Cloud provider identity.
