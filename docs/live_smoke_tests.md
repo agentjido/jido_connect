@@ -142,7 +142,7 @@ as seed input belong to the scripts that create the test data.
 | `GOOGLE_DRIVE_SHARED_LINK_URL` | setting | Link-shared file with a resource key |
 | `GOOGLE_DRIVE_SHORTCUT_ID` | setting | Shortcut to that file |
 | `GOOGLE_DOCS_TABBED_DOCUMENT_ID` | setting | Document with nested tabs |
-| `GOOGLE_DRIVE_STARRED_FILE_ID` | setting | Starred file |
+| `GOOGLE_DRIVE_STARRED_FILE_ID` | setting | Starred file; its folder also holds exactly one unstarred file named `jcl-live unstarred.txt` |
 | `GOOGLE_DRIVE_FOLDER_ID` | setting | Folder with known direct children |
 | `GOOGLE_DRIVE_WATCH_FOLDER_ID` | setting | Folder for externally added files |
 | `GOOGLE_DRIVE_UPLOAD_FOLDER_ID` | setting | Upload folder created by the app |
