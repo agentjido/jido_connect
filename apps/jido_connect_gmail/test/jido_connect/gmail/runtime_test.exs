@@ -3,8 +3,9 @@ defmodule Jido.Connect.Gmail.RuntimeTest do
   Polls `google.gmail.message.received` through `Jido.Connect.poll/4` and
   invokes `google.gmail.message.labels.apply` through `Jido.Connect.invoke/4`
   with the real Gmail client against `Req.Test`. The lease carries no
-  `gmail_client`, and every answer is a response that `live_smoke_test.exs`
-  recorded from the Google Workspace test account.
+  `gmail_client`, and every answer is a response that
+  `history_live_smoke_test.exs` or `labels_live_smoke_test.exs` recorded from
+  the Google Workspace test account.
   """
 
   use ExUnit.Case, async: false

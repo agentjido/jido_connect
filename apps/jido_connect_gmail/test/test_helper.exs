@@ -10,3 +10,7 @@ unless Code.ensure_loaded?(Jido.Connect.Google.TestSupport.ConnectorContracts) d
     __DIR__
   )
 end
+
+unless Code.ensure_loaded?(Jido.Connect.Gmail.TestSupport.LiveGmail) do
+  Code.require_file("support/live_gmail.ex", __DIR__)
+end

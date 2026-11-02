@@ -49,6 +49,16 @@ unless Code.ensure_loaded?(Jido.Connect.TestSupport.LiveSmoke) do
 end
 ```
 
+Gmail keeps its capability checks beside `live_smoke_test.exs` in
+`apps/jido_connect_gmail/test/jido_connect/gmail/`, one file per capability
+family: `discovery_live_smoke_test.exs` for inbox and archive discovery,
+`content_live_smoke_test.exs` for message and thread content and forwards,
+`attachments_live_smoke_test.exs` for attachment content,
+`history_live_smoke_test.exs` for the new-message and change polls and Trash,
+and `labels_live_smoke_test.exs` for labels and archiving. Their shared helpers
+are in `test/support/live_gmail.ex`, which the package's `test_helper.exs`
+loads.
+
 ## Writing a Live Test
 
 ```elixir
@@ -81,7 +91,7 @@ empty, the test is skipped and the reason names the variable. ExUnit does not
 print skip reasons, so a run that includes `:live_smoke` prints a line such as:
 
 ```text
-live_smoke skip test/jido_connect/gmail/live_smoke_test.exs:15: set GOOGLE_ACCESS_TOKEN to run this live test
+live_smoke skip test/jido_connect/gmail/live_smoke_test.exs:20: set GOOGLE_ACCESS_TOKEN to run this live test
 ```
 
 `write!/1` marks a test that changes data in the provider account. The test is

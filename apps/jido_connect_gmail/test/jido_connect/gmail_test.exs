@@ -581,7 +581,7 @@ defmodule Jido.Connect.GmailTest do
     # the test process.
     #
     # message_changed_history holds the live run of google.gmail.message.changed
-    # in live_smoke_test.exs: the disposable message archived, trashed,
+    # in history_live_smoke_test.exs: the disposable message archived, trashed,
     # restored and permanently deleted, two history records per page, and an
     # empty last page. Any checkpoint gets these pages in nextPageToken order;
     # the start history IDs below select the other responses.
