@@ -4,14 +4,15 @@
 It includes:
 
 - `Jido.Connect.Tempo`, the provider declaration with two auth profiles,
-  five local labels and the read actions `tempo.worklogs.list_own` and
-  `tempo.period.bookability.get`
-- the worklog, period and timesheet approval reads in
-  `Jido.Connect.Tempo.Client`, the normalized `Jido.Connect.Tempo.Worklog`
+  five local labels, the read actions `tempo.worklogs.list_own` and
+  `tempo.period.bookability.get`, and the confirmation-gated write action
+  `tempo.worklog.create`
+- the worklog, period and timesheet approval reads and the worklog create
+  in `Jido.Connect.Tempo.Client`, the normalized `Jido.Connect.Tempo.Worklog`
   and `Jido.Connect.Tempo.TimesheetApproval`, and the result
   `Jido.Connect.Tempo.PeriodBookability`
-- the read-only catalog packs `:tempo_reader` and `:tempo_period_lookup` in
-  `Jido.Connect.Tempo.CatalogPacks`
+- the read-only catalog packs `:tempo_reader` and `:tempo_period_lookup` and
+  the writer pack `:tempo_writer` in `Jido.Connect.Tempo.CatalogPacks`
 - OAuth 2.0 helpers in `Jido.Connect.Tempo.OAuth`
 - the connection contract in `Jido.Connect.Tempo.Client.Request`
 - the Bearer transport in `Jido.Connect.Tempo.Client.Transport`
@@ -309,6 +310,148 @@ Tempo answered after `checked_at`; Tempo can change an approval or close a
 period at any time afterwards, and a write into a closed period is rejected
 only when it is made.
 
+## Worklog Creation
+
+`tempo.worklog.create` creates one worklog for the connection's own account
+and returns it as Tempo confirmed it. It declares
+`effect(:write, confirmation: :always, provider_idempotency?: false)`, the
+policy `:own_worklog_author` and the label `tempo.worklogs.write`, and it is
+the only tool of the writer pack `:tempo_writer`.
+
+### Confirmation
+
+The declaration alone does not enforce confirmation: the core allows direct
+mutation calls by default and only logs a deprecation warning. A strict host
+denies them with `config :jido_connect, direct_mutation_mode: :deny`, which
+also covers the generated Jido action, or per call with
+`direct_mutation_mode: :deny`, and creates a worklog in two steps:
+
+```elixir
+input = %{
+  author_account_id: connection.subject.account_id,
+  issue_id: 10_001,
+  start_date: "2026-10-29",
+  start_time: "09:00:00",
+  time_spent_seconds: 5400,
+  description: "Review"
+}
+
+{:ok, prepared} =
+  Jido.Connect.prepare(Jido.Connect.Tempo, "tempo.worklog.create", input,
+    context: context,
+    credential_lease: lease,
+    direct_mutation_mode: :deny
+  )
+
+# Show prepared.preview to the user and store the approval.
+
+{:ok, %{worklog: worklog}} =
+  Jido.Connect.commit(Jido.Connect.Tempo, prepared, input,
+    context: context,
+    credential_lease: lease,
+    direct_mutation_mode: :deny,
+    execution_authorization: approval,
+    authorization_validator: &MyApp.Approvals.validate/3
+  )
+```
+
+`prepare/4` sends no request. It checks the input and returns a preview
+with `operation`, `issue_id`, `start_date`, `start_time`,
+`time_spent_seconds`, `billable_seconds`, `description_bytes` and
+`attribute_count`; the description text and the attribute values stay out
+of it. `commit/4` fails before the POST without host evidence and when the
+input, connection, lease or binding changed since `prepare/4`. With direct
+calls denied, `invoke/4` fails with `:execution_authorization_required`.
+Core does not lock a prepared action: the host claims `prepared.id` before
+`commit/4`, as the core README describes, and never commits it twice.
+
+### Input
+
+| Field | Rule |
+| --- | --- |
+| `author_account_id` | required; must equal the connection's `subject.account_id` |
+| `issue_id` | required; the numeric Jira issue ID, a positive integer, not the issue key |
+| `start_date` | required; the booking day as `YYYY-MM-DD` |
+| `time_spent_seconds` | required; whole seconds, at least 1 |
+| `description` | optional string |
+| `attributes` | optional list of maps with exactly a `key` and a `value`, both strings; keys unique |
+| `start_time` | optional time of day as `HH:mm:ss` |
+| `billable_seconds` | optional whole seconds, at least 0 |
+
+Any other key, such as a raw body, `bypass_period_closures_and_approvals` or
+`remaining_estimate_seconds`, fails input validation. The input is checked
+three times with one rule: by the preview at `prepare/4`, by the handler
+before it resolves the provider client, and by
+`Jido.Connect.Tempo.Client.create_worklog/2` before its POST. An invalid
+value is a `Jido.Connect.Error.ValidationError` with reason
+`:invalid_worklog_input` and the field in `subject`; a type or bound that
+the action schema already rejects, such as an issue key or `5400.5`
+seconds, fails with reason `:input`. A foreign author is a
+`Jido.Connect.Error.AuthError` with reason `:foreign_worklog_author` that
+names neither account.
+
+The policy `:own_worklog_author` tells the host to check that the actor may
+book time as the connection's user; the action itself enforces the author
+rule whatever policy the host passes.
+
+### Request
+
+The create sends one JSON `POST /4/worklogs` with `authorAccountId`,
+`issueId`, `startDate`, `timeSpentSeconds` and the given optional fields
+`description`, `attributes`, `startTime` and `billableSeconds`, each value as
+given: no trimming, rounding or time zone shift. It never sends
+`bypassPeriodClosuresAndApprovals` or `remainingEstimateSeconds`.
+
+The POST is sent once. `Transport.post/3` sets `retry: false` after it has
+merged the Req options of `:tempo_req_options` and of the caller, so even
+`retry: :transient` cannot resend it.
+
+### Result
+
+A 2xx answer counts as a created worklog only when it normalizes through
+`Jido.Connect.Tempo.Worklog` with a Tempo ID and names the requested author,
+issue, booking day and seconds. The output is `%{worklog: worklog}`, a map
+with the keys of [Own Worklogs](#own-worklogs), with the full description and
+the attribute values.
+
+On the test site, a create at `08:15:00` on 2026-10-29 came back with
+`start_date_time_utc` `2026-10-29T07:15:00Z`, the worker's time zone being
+Europe/Berlin. Without `billable_seconds`, Tempo set the billable seconds to
+the time spent. Whether an omitted `remainingEstimateSeconds` changes the
+Jira remaining estimate was not checked.
+
+### Errors and Delivery
+
+Every error of the create carries `mutation?: true` and
+`provider_idempotency?: false`. Its `delivery` tells whether Tempo may have
+created the worklog:
+
+| Answer | Reason | Delivery | `Error.retry_guidance/1` |
+| --- | --- | --- | --- |
+| 403 `The timesheet status must be open for the period` | `:period_locked` | `:rejected` | `:do_not_retry` |
+| other 400, 401, 403, 404 | `:bad_request`, `:unauthorized`, `:forbidden`, `:not_found` | `:rejected` | `:do_not_retry` |
+| 429 | `:rate_limited`, with `retry_after` | `:rejected` | `:safe_to_retry` |
+| 3xx, 5xx | `:redirect_not_followed`, `:server_error` | `:sent_outcome_unknown` | `:do_not_retry` |
+| 2xx that is not a worklog | `:invalid_response`, `:invalid_worklog` | `:sent_outcome_unknown` | `:do_not_retry` |
+| 2xx with another author, issue, day or seconds | `:worklog_mismatch`, with `tempo_worklog_id` and `mismatched_fields` | `:sent_outcome_unknown` | `:do_not_retry` |
+| timeout, closed connection | `:request_error` | `:sent_outcome_unknown` | `:do_not_retry` |
+| refused connection, foreign origin | `:request_error` | `:not_sent` | `:safe_to_retry` |
+
+`:period_locked` is Tempo's 403 with the recorded text, observed on the test
+site for a booking into the approved August 2026 period. It is the signal
+that [Period Bookability](#period-bookability) cannot read in advance. Only
+this text gets the label; an unknown 400 or another 403 keeps its status
+reason. A booking into a period in review or into one closed in Period
+Management was not tried. Its answer may arrive as `:forbidden` or
+`:bad_request`, which are `:rejected` with `:do_not_retry` like
+`:period_locked`. After `:sent_outcome_unknown` the worklog may exist; read
+the day back with `tempo.worklogs.list_own` before booking it again.
+
+Errors hold neither the description nor the attribute values. Tempo quotes
+rejected input in its error text, as in `Non valid time '25:00:00'`; where
+that text quotes the description, an attribute value or the author's account
+ID, `details.message` shows `[redacted]` in its place.
+
 ## OAuth Flow
 
 The host owns the callback route, its session binding, token storage and
@@ -379,8 +522,9 @@ a token. Token revocation is not implemented.
 ## Transport
 
 `Jido.Connect.Tempo.Client.Transport.get/3` sends a GET for a path relative
-to the connection's origin and returns the decoded JSON body. The token
-never leaves that origin:
+to the connection's origin and returns the decoded JSON body;
+`Transport.post/3` sends one JSON POST under the rules of
+[Worklog Creation](#worklog-creation). The token never leaves that origin:
 
 - every request built by `Transport.request/2` checks its final URL before
   it is sent; another scheme, host or port fails with
@@ -389,7 +533,8 @@ never leaves that origin:
 - the Req options `:tempo_req_options`, meant for `Req.Test`, cannot change
   the base URL, the auth or the redirect policy
 
-Automatic retries are off by default.
+Automatic retries are off by default. A caller may enable them for a GET
+through `:req_options`; a POST is never retried.
 
 ## Pagination
 
@@ -436,7 +581,8 @@ that the token endpoint sends. Tempo answers 401 without a body. A 2xx
 response without valid JSON is `:invalid_response`; an error response with
 a malformed JSON body keeps its status, reason and `retry_after`. A
 transport failure, such as a timeout, is `:request_error`. Raw bodies are
-reduced to a value-free summary.
+reduced to a value-free summary. The worklog create adds the mutation rules
+of [Errors and Delivery](#errors-and-delivery).
 
 ## Limits Owned by the Host
 
@@ -485,6 +631,20 @@ same user:
 | --- | --- | --- |
 | August 15 to October 15: three segments, `blocked`, `blocked`, `unknown`, aggregate `blocked` | action, API token | `period_bookability` |
 | October as one period, then August 1 to September 30 as a range across periods, which gets Tempo's 400 | client, OAuth access token | `timesheet_approval` |
+
+Two tests write and run only with `TEMPO_LIVE_DESTRUCTIVE=true`:
+
+| Check | Path | Recording |
+| --- | --- | --- |
+| create one worklog on 2026-10-29 through `prepare/4` and `commit/4`, read it back with `tempo.worklogs.list_own` and compare ID, day and seconds, then book the same input on 2026-08-14 and get the `:period_locked` 403 | action, API token | `worklog_create` |
+| a hand-built POST with the start time `25:00:00` on 2026-08-14 gets Tempo's 400 | transport, API token | `worklog_create_invalid_time` |
+
+Each run of the first test leaves one worklog of the test user on
+2026-10-29; the package cannot delete it. The approved-period booking and
+the invalid start time cannot create one; if Tempo accepted either, the test
+stops at once and names the new ID. The 401 of a create with an invented
+token is recorded in `worklog_create_unauthorized` without the write gate,
+since that token cannot create anything.
 
 The successful code exchange and refresh are recorded in
 `oauth_exchange.json` and `oauth_refresh.json`, the rejections in

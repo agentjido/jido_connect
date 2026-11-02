@@ -29,6 +29,9 @@
   account's approval evidence of every period in an inclusive date range,
   with closure evidence `:unknown` and a derived state, and the read-only
   Tempo catalog pack `:tempo_period_lookup`.
+- Add the confirmation-gated Tempo write action `tempo.worklog.create` for
+  one own worklog, sent once as `POST /4/worklogs` and never retried, and
+  the Tempo catalog pack `:tempo_writer`.
 
 ## 0.9.0 - 2026-08-25
 

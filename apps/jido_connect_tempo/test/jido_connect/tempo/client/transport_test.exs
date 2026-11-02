@@ -158,6 +158,103 @@ defmodule Jido.Connect.Tempo.Client.TransportTest do
     assert_received {:late_step_body, %{"periods" => [_period]}}
   end
 
+  describe "post/3" do
+    test "sends the JSON body once with the Bearer credential to the origin" do
+      test_pid = self()
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+        send(
+          test_pid,
+          {:post, conn.method, conn.host, conn.request_path,
+           Plug.Conn.get_req_header(conn, "authorization"), Jason.decode!(body)}
+        )
+
+        Fixture.respond(conn, "worklog_create")
+      end)
+
+      request = request!(:oauth2_user, "https://api.us.tempo.io", "token-a")
+
+      assert {:ok, %{"tempoWorklogId" => 79_177}} =
+               Transport.post(request, "/4/worklogs", json: %{"issueId" => 1})
+
+      assert_received {:post, "POST", "api.us.tempo.io", "/4/worklogs", ["Bearer token-a"],
+                       %{"issueId" => 1}}
+    end
+
+    # The recorded 400 of a worklog create with only the status changed.
+    test "Req options that enable retries cannot resend a POST" do
+      put_req_options(plug: {Req.Test, __MODULE__}, retry: :transient, retry_delay: 0)
+      request = request!(:api_token, "https://api.us.tempo.io", "tok")
+
+      for req_options <- [[], [retry: :transient, retry_delay: 0, max_retries: 5]] do
+        Req.Test.expect(
+          __MODULE__,
+          1,
+          &Fixture.respond(&1, "worklog_create_invalid_time", status: 503)
+        )
+
+        assert {:error,
+                %Error.ProviderError{
+                  reason: :server_error,
+                  delivery: :sent_outcome_unknown,
+                  mutation?: true,
+                  provider_idempotency?: false
+                }} =
+                 Transport.post(request, "/4/worklogs", json: %{}, req_options: req_options)
+      end
+    end
+
+    # Tempo sent no redirect to a POST. This is the recorded 401 of a
+    # worklog create, which has no body, with only the status changed and a
+    # Location added.
+    test "a redirect answer to a POST is not followed and its outcome is unknown" do
+      test_pid = self()
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        send(test_pid, {:seen, conn.host})
+
+        Fixture.respond(conn, "worklog_create_unauthorized",
+          status: 303,
+          headers: [{"location", "https://collector.example.com/4/worklogs"}]
+        )
+      end)
+
+      request = request!(:api_token, "https://api.us.tempo.io", "tok")
+
+      assert {:error,
+              %Error.ProviderError{
+                reason: :redirect_not_followed,
+                status: 303,
+                delivery: :sent_outcome_unknown,
+                mutation?: true
+              } = error} = Transport.post(request, "/4/worklogs", json: %{})
+
+      assert Error.retry_guidance(error) == :do_not_retry
+      assert_received {:seen, "api.us.tempo.io"}
+      refute_received {:seen, _host}
+    end
+
+    test "a POST to any other origin fails before it is sent" do
+      test_pid = self()
+      Req.Test.stub(__MODULE__, fn conn -> send(test_pid, {:seen, conn.host}) end)
+      request = request!(:api_token, "https://api.us.tempo.io", "tok")
+
+      assert {:error,
+              %Error.ProviderError{
+                reason: :request_error,
+                delivery: :not_sent,
+                mutation?: true,
+                details: %{reason: :foreign_origin}
+              } = error} =
+               Transport.post(request, "https://collector.example.com/4/worklogs", json: %{})
+
+      assert Error.retry_guidance(error) == :safe_to_retry
+      refute_received {:seen, _host}
+    end
+  end
+
   defp put_req_options(options) do
     previous = Application.fetch_env(:jido_connect_tempo, :tempo_req_options)
     Application.put_env(:jido_connect_tempo, :tempo_req_options, options)

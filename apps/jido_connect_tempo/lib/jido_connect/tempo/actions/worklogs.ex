@@ -64,5 +64,79 @@ defmodule Jido.Connect.Tempo.Actions.Worklogs do
         )
       end
     end
+
+    action :create_worklog do
+      id("tempo.worklog.create")
+      resource(:worklog)
+      verb(:create)
+      data_classification(:personal_data)
+      label("Create own worklog")
+
+      description(
+        "Create one Tempo worklog for the connected account after confirmation. " <>
+          "Returns the worklog as Tempo confirmed it. Never retried: an uncertain " <>
+          "outcome is reported instead."
+      )
+
+      handler(Jido.Connect.Tempo.Handlers.Actions.CreateWorklog)
+      preview(Jido.Connect.Tempo.Previews.CreateWorklog)
+      effect(:write, confirmation: :always, provider_idempotency?: false)
+
+      access do
+        auth([:api_token, :oauth2_user], default: :api_token)
+        policies([:own_worklog_author])
+        scopes(["tempo.worklogs.write"], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:author_account_id, :string,
+          required?: true,
+          description: "Atlassian account ID of the author; must be the connected account."
+        )
+
+        field(:issue_id, :integer,
+          required?: true,
+          minimum: 1,
+          example: 10_001,
+          description: "Numeric Jira issue ID, not the issue key."
+        )
+
+        field(:start_date, :string,
+          required?: true,
+          example: "2026-10-29",
+          description: "Booking day, an ISO date (YYYY-MM-DD)."
+        )
+
+        field(:time_spent_seconds, :integer,
+          required?: true,
+          minimum: 1,
+          example: 5400,
+          description: "Time spent in whole seconds, at least 1."
+        )
+
+        field(:description, :string, description: "Worklog description.")
+
+        field(:attributes, {:array, :map},
+          description: "Work attribute values as maps with key and value strings; unique keys."
+        )
+
+        field(:start_time, :string,
+          example: "09:00:00",
+          description: "Start time on the booking day, HH:mm:ss."
+        )
+
+        field(:billable_seconds, :integer,
+          minimum: 0,
+          description: "Billable seconds, a whole number of at least 0."
+        )
+      end
+
+      output do
+        field(:worklog, :map,
+          description:
+            "The created worklog as Tempo confirmed it, with the keys of tempo.worklogs.list_own."
+        )
+      end
+    end
   end
 end

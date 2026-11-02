@@ -23,13 +23,22 @@ defmodule Jido.Connect.Tempo.Input.DateRange do
     end
   end
 
-  # Date.from_iso8601/1 alone would also accept forms such as +2026-10-01.
-  defp date(value, field) do
+  # Also the date rule of a worklog's booking day. Date.from_iso8601/1 alone
+  # would also accept forms such as +2026-10-01.
+  @spec iso_date(term()) :: {:ok, Date.t()} | :error
+  def iso_date(value) do
     with true <- is_binary(value) and Regex.match?(~r/\A\d{4}-\d{2}-\d{2}\z/, value),
          {:ok, date} <- Date.from_iso8601(value) do
       {:ok, date}
     else
-      _invalid -> invalid(field, "must be an ISO date such as 2026-10-01")
+      _invalid -> :error
+    end
+  end
+
+  defp date(value, field) do
+    case iso_date(value) do
+      {:ok, date} -> {:ok, date}
+      :error -> invalid(field, "must be an ISO date such as 2026-10-01")
     end
   end
 

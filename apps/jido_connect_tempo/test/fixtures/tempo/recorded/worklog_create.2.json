@@ -1,0 +1,89 @@
+{
+  "body": {
+    "metadata": {
+      "count": 2,
+      "limit": 50,
+      "offset": 0
+    },
+    "results": [
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79177/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 3661,
+        "createdAt": "2026-11-02T18:51:30Z",
+        "description": "JCL live create test",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79177",
+        "startDate": "2026-10-29",
+        "startDateTimeUtc": "2026-10-29T07:15:00Z",
+        "startTime": "08:15:00",
+        "tempoWorklogId": 79177,
+        "timeSpentSeconds": 3661,
+        "updatedAt": "2026-11-02T18:51:30Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79129/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 328,
+        "createdAt": "2026-10-30T19:19:27Z",
+        "description": "JCL live seed worklog: filler 28",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79129",
+        "startDate": "2026-10-29",
+        "startDateTimeUtc": "2026-10-29T08:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79129,
+        "timeSpentSeconds": 328,
+        "updatedAt": "2026-10-30T19:19:27Z"
+      }
+    ],
+    "self": "https://api.tempo.io/4/worklogs/user/account-1?from=2026-10-29&to=2026-10-29&offset=0&limit=50"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "1544"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 18:51:31 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "0c86cd29ef9bba11bb89098d17785045"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/worklogs/user/account-1"
+  },
+  "status": 200
+}

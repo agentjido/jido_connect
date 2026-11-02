@@ -75,16 +75,26 @@ defmodule Jido.Connect.Tempo.ScopeResolverTest do
     end
 
     test "maps the period bookability read to the period and approval read labels" do
-      assert ScopeResolver.operations() == %{
-               "tempo.worklogs.list_own" => ["tempo.worklogs.read"],
+      assert %{
                "tempo.period.bookability.get" => ["tempo.periods.read", "tempo.approvals.read"]
-             }
+             } = ScopeResolver.operations()
 
       assert ScopeResolver.required_scopes(
                %{action_id: "tempo.period.bookability.get"},
                %{},
                nil
              ) == ["tempo.periods.read", "tempo.approvals.read"]
+    end
+
+    test "maps the worklog create to the worklog write label only" do
+      assert ScopeResolver.operations() == %{
+               "tempo.worklogs.list_own" => ["tempo.worklogs.read"],
+               "tempo.worklog.create" => ["tempo.worklogs.write"],
+               "tempo.period.bookability.get" => ["tempo.periods.read", "tempo.approvals.read"]
+             }
+
+      assert ScopeResolver.required_scopes(%{action_id: "tempo.worklog.create"}, %{}, nil) ==
+               ["tempo.worklogs.write"]
     end
 
     test "every declared Tempo action has an entry" do

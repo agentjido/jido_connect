@@ -10,9 +10,9 @@ defmodule Jido.Connect.Tempo.Client.Transport do
 
   - Every request built by `request/2` checks its final URL before it is
     sent. Scheme, host and port must equal the connection's origin;
-    otherwise Req returns `{:error, %OriginError{}}`, which `get/3`
-    normalizes to a `:request_error` with `details.reason: :foreign_origin`
-    and `delivery: :not_sent`.
+    otherwise Req returns `{:error, %OriginError{}}`, which `get/3` and
+    `post/3` normalize to a `:request_error` with
+    `details.reason: :foreign_origin` and `delivery: :not_sent`.
   - Redirects are not followed. A 3xx response becomes a
     `Jido.Connect.Error.ProviderError`, so a `Location` on another origin
     never receives the `authorization` header.
@@ -22,12 +22,12 @@ defmodule Jido.Connect.Tempo.Client.Transport do
     `:follow_redirects` and `:location_trusted`, which Req 0.7 still reads
     before the current names.
 
-  Automatic retries are off by default; a caller may enable them through
-  `:req_options`. Failures carry `retry_after` for the host's own retry
-  policy. JSON bodies are decoded by the step of
-  `Response.attach_json_decoder/1`, not by Req, so a malformed error body
-  keeps its status and a response step added by an adapter, such as the
-  live smoke recorder's, sees the decoded body.
+  Automatic retries are off by default; a caller may enable them for a GET
+  through `:req_options`. A POST, sent by `post/3`, is never retried.
+  Failures carry `retry_after` for the host's own retry policy. JSON bodies
+  are decoded by the step of `Response.attach_json_decoder/1`, not by Req,
+  so a malformed error body keeps its status and a response step added by
+  an adapter, such as the live smoke recorder's, sees the decoded body.
   """
 
   alias Jido.Connect.Provider.Transport
@@ -83,9 +83,33 @@ defmodule Jido.Connect.Tempo.Client.Transport do
     |> handle()
   end
 
+  @doc """
+  Sends one JSON POST of `opts[:json]` to `path` and returns the decoded
+  JSON body.
+
+  A POST is a mutation that Tempo does not deduplicate. It is sent once:
+  `retry: false` is set after the Req options of the app and the caller are
+  merged, so no Req option can resend it. Errors follow the mutation rules
+  of `Jido.Connect.Tempo.Client.Response.handle/2`. Options: `:json`,
+  `:req_options`, and `:reasons` and `:redact` of `Response.handle/2`.
+  """
+  @spec post(Request.t(), String.t(), keyword()) ::
+          {:ok, map() | list()} | {:error, Jido.Connect.Error.ProviderError.t()}
+  def post(%Request{} = request, path, opts) when is_binary(path) do
+    request
+    |> request(opts)
+    |> Req.merge(retry: false)
+    |> Transport.request(:post, url: path, json: Keyword.fetch!(opts, :json))
+    |> handle([mutation?: true] ++ Keyword.take(opts, [:reasons, :redact]))
+  end
+
   # The origin guard halts before the adapter runs, so nothing was sent.
-  defp handle({:error, %OriginError{}} = result), do: Response.handle(result, delivery: :not_sent)
-  defp handle(result), do: Response.handle(result)
+  defp handle(result, opts \\ [])
+
+  defp handle({:error, %OriginError{}} = result, opts),
+    do: Response.handle(result, Keyword.put(opts, :delivery, :not_sent))
+
+  defp handle(result, opts), do: Response.handle(result, opts)
 
   defp origin_guard(api_origin) do
     %URI{scheme: scheme, host: host, port: port} = URI.parse(api_origin)

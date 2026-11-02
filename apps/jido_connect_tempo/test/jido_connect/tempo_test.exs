@@ -21,6 +21,7 @@ defmodule Jido.Connect.TempoTest do
 
     assert Enum.map(spec.actions, & &1.id) == [
              "tempo.worklogs.list_own",
+             "tempo.worklog.create",
              "tempo.period.bookability.get"
            ]
 
@@ -52,6 +53,7 @@ defmodule Jido.Connect.TempoTest do
   test "compiles the generated action and plugin surface" do
     actions = [
       Jido.Connect.Tempo.Actions.ListOwnWorklogs,
+      Jido.Connect.Tempo.Actions.CreateWorklog,
       Jido.Connect.Tempo.Actions.GetPeriodBookability
     ]
 
@@ -123,5 +125,52 @@ defmodule Jido.Connect.TempoTest do
              Connect.action(Tempo.integration(), "tempo.period.bookability.get")
 
     assert action.scopes == ["tempo.periods.read", "tempo.approvals.read"]
+  end
+
+  test "the generated action carries the DSL metadata of the worklog create" do
+    projection = Jido.Connect.Tempo.Actions.CreateWorklog.jido_connect_projection()
+
+    assert projection.action_id == "tempo.worklog.create"
+    assert projection.resource == :worklog
+    assert projection.verb == :create
+    assert projection.risk == :write
+    assert projection.confirmation == :always
+    assert projection.auth_profiles == [:api_token, :oauth2_user]
+    assert projection.scope_resolver == Jido.Connect.Tempo.ScopeResolver
+    assert projection.policies == [:own_worklog_author]
+
+    assert Enum.map(projection.input, & &1.name) == [
+             :author_account_id,
+             :issue_id,
+             :start_date,
+             :time_spent_seconds,
+             :description,
+             :attributes,
+             :start_time,
+             :billable_seconds
+           ]
+
+    assert Enum.map(projection.output, & &1.name) == [:worklog]
+
+    assert {:ok, action} = Connect.action(Tempo.integration(), "tempo.worklog.create")
+
+    assert %{
+             mutation?: true,
+             provider_idempotency?: false,
+             risk: :write,
+             confirmation: :always,
+             data_classification: :personal_data,
+             preview: Jido.Connect.Tempo.Previews.CreateWorklog,
+             scopes: ["tempo.worklogs.write"]
+           } = action
+
+    assert [
+             %{
+               id: :own_worklog_author,
+               subject: {:input, :author_account_id},
+               owner: {:connection, :owner},
+               decision: :allow_operation
+             }
+           ] = Tempo.integration().policies
   end
 end

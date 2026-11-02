@@ -238,6 +238,21 @@ cannot learn the account ID from it: the empty range is recorded after a
 seeded day, and the October 31 test stops in recording mode when that day
 has no worklog.
 
+The Tempo worklog create is the one Tempo check that creates data. With
+`TEMPO_LIVE_DESTRUCTIVE=true` it creates one worklog of the test user on
+`TEMPO_JIRA_ISSUE_ID` on 2026-10-29, in the open October period, reads it
+back and books the same input into the approved August period, which Tempo
+rejects with a 403. Each run leaves one worklog on 2026-10-29; the package
+cannot delete it, so it stays until the test data is cleaned up, and a
+re-recording of `worklogs_own` holds it. The test records the create, the
+read-back and the rejection in one session, `worklog_create.json` to `.3`,
+so the sanitizer learns the account ID from the created worklog's author
+before it writes the read-back path. 79177 is the worklog of that
+recording. A second write-gated test posts a start time of `25:00:00` into
+the approved period for Tempo's 400, `worklog_create_invalid_time.json`;
+it cannot create a worklog. If Tempo accepted a booking into the approved
+period, either test stops at once and names the new ID.
+
 The Tempo period checks rely only on the seeded approvals of the test user:
 August 2026 `APPROVED`, September `IN_REVIEW` and October `OPEN`. Further
 worklogs in October do not change them. Each status and its time are

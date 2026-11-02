@@ -34,6 +34,13 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
   time are compared with a direct approval read of the same period by the
   same user.
 
+  Two tests write and run only with `TEMPO_LIVE_DESTRUCTIVE=true`. The
+  worklog create creates one worklog of the test user on 2026-10-29 per run,
+  which stays on the site, and books the same input into the approved August
+  period, which Tempo rejects. The invalid start time test posts one booking
+  into the approved August period that Tempo cannot accept. Neither depends
+  on worklogs outside the seed except the one the create just made.
+
   ExUnit prints the arguments of a failing call, so checks that involve a real
   token or the test user's account ID compute a boolean first and fail with
   a fixed message.
@@ -49,6 +56,8 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
 
   @recorder {:jido_connect_tempo, :tempo_req_options}
   @oauth_recorder {:jido_connect_tempo, :tempo_oauth_req_options}
+  @create "tempo.worklog.create"
+  @create_marker "JCL live create test"
   @oauth ["TEMPO_OAUTH_CLIENT_ID", "TEMPO_OAUTH_CLIENT_SECRET", "TEMPO_OAUTH_REDIRECT_URI"]
   @october [params: [from: "2026-10-01", to: "2026-10-31"]]
   @jira ["JIRA_SITE", "JIRA_EMAIL", "JIRA_API_TOKEN"]
@@ -380,6 +389,143 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
     assert clean?, "the result holds an approval comment, a reviewer, an actor or an action"
   end
 
+  # The one live write. It creates one worklog of the test user on
+  # TEMPO_JIRA_ISSUE_ID on 2026-10-29, in the open October period, through
+  # prepare/4 and commit/4 with direct calls denied. The worklog stays on the
+  # site; the connector has no delete. The test reads it back with
+  # tempo.worklogs.list_own and then books the same input on 2026-08-14, in
+  # the approved August period, without bypass. Tempo rejects that booking
+  # with a 403 (recorded 2026-11-02); if it accepts it, the test stops at
+  # once with the new ID. Every provider call runs before the first
+  # assertion, so a failed check never needs a second create to learn the
+  # rest.
+  #
+  # The three responses go into one recording, so the sanitizer learns the
+  # account ID from the created worklog's author before it writes the path of
+  # the read.
+  @tag env!(["TEMPO_API_TOKEN", "TEMPO_API_ORIGIN", "TEMPO_JIRA_ISSUE_ID" | @jira])
+  @tag write!(:tempo)
+  test "creates one own worklog in the open period, reads it back and sees the approved period reject a booking",
+       %{env: env} do
+    token = env["TEMPO_API_TOKEN"]
+    context = context!(env, :api_token, ["tempo.worklogs.read", "tempo.worklogs.write"])
+    account_id = context.connection.subject.account_id
+    issue_id = String.to_integer(env["TEMPO_JIRA_ISSUE_ID"])
+    day = %{from: "2026-10-29", to: "2026-10-29"}
+
+    input = %{
+      author_account_id: account_id,
+      issue_id: issue_id,
+      start_date: "2026-10-29",
+      start_time: "08:15:00",
+      time_spent_seconds: 3661,
+      description: @create_marker
+    }
+
+    LiveSmoke.record(@recorder, :tempo, "worklog_create")
+
+    create = commit(context, :api_token, token, input)
+    read = invoke(context, :api_token, token, day)
+    approved = commit(context, :api_token, token, %{input | start_date: "2026-08-14"})
+
+    stop_if_created!(approved, "the approved August period")
+
+    %{worklog: created} = ok!(create, "the worklog create")
+
+    assert is_integer(created.tempo_worklog_id) and created.tempo_worklog_id > 0
+
+    assert {created.start_date, created.start_time, created.time_spent_seconds, created.issue_id,
+            created.description} ==
+             {"2026-10-29", "08:15:00", 3661, issue_id, @create_marker}
+
+    own? = created.author_account_id == account_id
+    assert own?, "the created worklog names another author than the connection's account"
+
+    case Enum.filter(
+           ok!(read, "the read-back").worklogs,
+           &(&1.tempo_worklog_id == created.tempo_worklog_id)
+         ) do
+      [readback] ->
+        assert {readback.tempo_worklog_id, readback.start_date, readback.time_spent_seconds} ==
+                 {created.tempo_worklog_id, "2026-10-29", 3661}
+
+        assert key(readback) == key(created)
+
+      found ->
+        flunk("the read-back of 2026-10-29 holds the created worklog #{length(found)} times")
+    end
+
+    assert match?(
+             {:error,
+              %Error.ProviderError{reason: :period_locked, status: 403, delivery: :rejected}},
+             approved
+           ),
+           "the approved-period booking got #{error_summary(approved)}"
+
+    {:error, rejection} = approved
+    assert Error.retry_guidance(rejection) == :do_not_retry
+    clean? = not String.contains?(inspect(Error.to_map(rejection)), @create_marker)
+    assert clean?, "the rejection holds the description"
+  end
+
+  # One hand-built POST that the connector itself refuses before sending: a
+  # start time of 25:00:00, booked in the approved August period without
+  # bypass. Tempo cannot create a worklog from it, but the test posts to the
+  # write endpoint with a valid token, so it carries the write gate.
+  @tag env!(["TEMPO_API_TOKEN", "TEMPO_API_ORIGIN", "TEMPO_JIRA_ISSUE_ID" | @jira])
+  @tag write!(:tempo)
+  test "a booking with an invalid start time gets a 400 that is not a period lock", %{env: env} do
+    token = env["TEMPO_API_TOKEN"]
+    request = request!(env, :api_token, token)
+    LiveSmoke.record(@recorder, :tempo, "worklog_create_invalid_time")
+
+    result =
+      Transport.post(request, "/4/worklogs",
+        json: %{
+          "authorAccountId" => request.account_id,
+          "issueId" => String.to_integer(env["TEMPO_JIRA_ISSUE_ID"]),
+          "startDate" => "2026-08-14",
+          "startTime" => "25:00:00",
+          "timeSpentSeconds" => 3661,
+          "description" => @create_marker
+        }
+      )
+
+    stop_if_created!(result, "the invalid start time")
+
+    assert match?(
+             {:error, %Error.ProviderError{reason: :bad_request, status: 400}},
+             result
+           ),
+           "the invalid start time got #{error_summary(result)}"
+  end
+
+  # A POST with an invented token cannot create a worklog, so this test needs
+  # no write gate.
+  @tag env!(["TEMPO_API_ORIGIN", "TEMPO_JIRA_ISSUE_ID" | @jira])
+  test "a worklog create with an invalid token gets a normalized auth error", %{env: env} do
+    token = "jido-connect-invalid-tempo-token"
+    request = request!(env, :api_token, token)
+    LiveSmoke.record(@recorder, :tempo, "worklog_create_unauthorized")
+
+    result =
+      Client.create_worklog(request, %{
+        author_account_id: request.account_id,
+        issue_id: String.to_integer(env["TEMPO_JIRA_ISSUE_ID"]),
+        start_date: "2026-10-29",
+        time_spent_seconds: 3661,
+        description: @create_marker
+      })
+
+    assert {:error,
+            %Error.ProviderError{reason: :unauthorized, status: 401, delivery: :rejected} = error} =
+             result
+
+    refute_leak(error, token)
+    clean? = not String.contains?(inspect(Error.to_map(error)), @create_marker)
+    assert clean?, "the auth error holds the description"
+  end
+
   # The token endpoint's rejections are recorded with an invented code and an
   # invented refresh token. A successful exchange needs the code of one
   # browser authorization and every refresh replaces both tokens, so that
@@ -585,6 +731,51 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
       credential_lease: lease
     )
   end
+
+  # Prepares and commits the worklog create with direct calls denied. The
+  # host evidence names the prepared action, and the validator accepts only
+  # that one.
+  defp commit(%Context{connection: connection} = context, :api_token, token, input) do
+    lease =
+      CredentialLease.from_connection!(connection, %{api_token: token},
+        expires_at: DateTime.add(DateTime.utc_now(), 300, :second)
+      )
+
+    opts = [context: context, credential_lease: lease, direct_mutation_mode: :deny]
+
+    with {:ok, prepared} <- Jido.Connect.prepare(Tempo, @create, input, opts) do
+      Jido.Connect.commit(
+        Tempo,
+        prepared,
+        input,
+        opts ++
+          [
+            execution_authorization: %{prepared_action_id: prepared.id},
+            authorization_validator: fn evidence, prepared, _context ->
+              evidence.prepared_action_id == prepared.id
+            end
+          ]
+      )
+    end
+  end
+
+  # A booking that Tempo should have refused but created: report its ID and
+  # stop, so the test sends nothing more.
+  defp stop_if_created!({:ok, %{worklog: %{tempo_worklog_id: id}}}, what),
+    do: flunk("STOP: Tempo created worklog #{id} for #{what}")
+
+  defp stop_if_created!({:ok, %{"tempoWorklogId" => id}}, what),
+    do: flunk("STOP: Tempo created worklog #{id} for #{what}")
+
+  defp stop_if_created!(_result, _what), do: :ok
+
+  # Reason and status only, since Tempo's error text may quote the
+  # booking, including the test user's account ID.
+  defp error_summary({:error, error}),
+    do: "reason #{inspect(Map.get(error, :reason))}, status #{inspect(Map.get(error, :status))}"
+
+  defp error_summary({:ok, _value}), do: "a success"
+  defp error_summary(_other), do: "an unexpected result"
 
   defp ok!({:ok, value}, _step), do: value
 

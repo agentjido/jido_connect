@@ -1,0 +1,26 @@
+{
+  "body": "",
+  "headers": {
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "0"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 18:50:53 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "4731a260f8ced7aa95bf05368e09174a"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/4/worklogs"
+  },
+  "status": 401
+}

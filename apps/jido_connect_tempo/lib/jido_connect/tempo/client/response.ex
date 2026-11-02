@@ -17,6 +17,13 @@ defmodule Jido.Connect.Tempo.Client.Response do
   | 5xx | `:server_error` |
   | other | `:http_error` |
 
+  The `:reasons` option of `handle/2` gives a failure of a given status
+  whose Tempo error text contains a given text its own reason instead of
+  the status reason. With `mutation?: true`, for a request that Tempo does
+  not deduplicate, every error carries `mutation?: true` and
+  `provider_idempotency?: false`, and a 3xx, a 5xx and a malformed 2xx get
+  `delivery: :sent_outcome_unknown`.
+
   `details.message` is Tempo's error text from the recorded body form
   `{"errors": [{"message": ...}]}`, else the top-level `message` of the
   token endpoint's form `{"message": ..., "status": ...}`; the `:redact`
@@ -39,6 +46,7 @@ defmodule Jido.Connect.Tempo.Client.Response do
   @message "Tempo API request failed"
   @json_step :tempo_decode_json
   @invalid_json :tempo_invalid_json
+  @mutation [mutation?: true, provider_idempotency?: false]
 
   @doc """
   Turns Req's body decoding off and appends Tempo's JSON decoding step.
@@ -63,9 +71,19 @@ defmodule Jido.Connect.Tempo.Client.Response do
   Expects a response of a request prepared by `attach_json_decoder/1`.
   Options: `:message`, the error message; `:redact`, values replaced by
   `[redacted]` in Tempo's error text before the error is built and that
-  text is cut to 256 bytes; and `:delivery`, which overrides the delivery
+  text is cut to 256 bytes; `:delivery`, which overrides the delivery
   inferred for a transport failure, such as `:not_sent` for a request that
-  was stopped before it was sent.
+  was stopped before it was sent; `:reasons`, a list of
+  `{status, text, reason}` that gives an HTTP failure with that status and
+  Tempo error text containing `text` that reason instead of the status
+  reason; and `:mutation?`.
+
+  With `mutation?: true` the request is a mutation that Tempo does not
+  deduplicate: every error carries `mutation?: true` and
+  `provider_idempotency?: false`, and a 3xx, a 5xx and a malformed 2xx get
+  `delivery: :sent_outcome_unknown`, since Tempo may have applied the
+  mutation. A transport failure keeps its inferred delivery, which is
+  `:sent_outcome_unknown` unless the reason shows that nothing was sent.
   """
   @spec handle(term(), keyword()) :: {:ok, map() | list()} | {:error, Error.ProviderError.t()}
   def handle(response, opts \\ [])
@@ -81,7 +99,11 @@ defmodule Jido.Connect.Tempo.Client.Response do
         do: "Tempo API response was not valid JSON",
         else: "Tempo API response was not JSON"
 
-    invalid_response(Keyword.get(opts, :message, message), body, status: status)
+    invalid_response(
+      Keyword.get(opts, :message, message),
+      body,
+      [status: status] ++ Keyword.take(opts, [:mutation?])
+    )
   end
 
   # An error body that is not valid JSON stays raw: the error keeps the
@@ -94,37 +116,65 @@ defmodule Jido.Connect.Tempo.Client.Response do
     Transport.provider_error(
       response,
       [provider: :tempo, message: Keyword.get(opts, :message, @message)] ++
-        Keyword.take(opts, [:delivery])
+        Keyword.take(opts, [:delivery]) ++ mutation(opts, nil)
     )
   end
 
-  @doc "Returns a provider error for a successful response whose payload is malformed."
+  @doc """
+  Returns a provider error for a successful response whose payload is malformed.
+
+  With `mutation?: true` its delivery is `:sent_outcome_unknown`, else
+  `:response_received`.
+  """
   @spec invalid_response(String.t(), term(), keyword()) :: {:error, Error.ProviderError.t()}
   def invalid_response(message, body, opts \\ []) do
+    mutation? = Keyword.get(opts, :mutation?, false)
+
     {:error,
      Error.provider(message,
        provider: :tempo,
        reason: Keyword.get(opts, :reason, :invalid_response),
        status: Keyword.get(opts, :status),
-       delivery: :response_received,
+       delivery: if(mutation?, do: :sent_outcome_unknown, else: :response_received),
+       mutation?: mutation?,
+       provider_idempotency?: false,
        details: Map.merge(%{body: body}, Keyword.get(opts, :details, %{}))
      )}
   end
 
   defp http_error(%{status: status, body: body} = response, opts) do
-    error_opts = [
-      provider: :tempo,
-      message: Keyword.get(opts, :message, @message),
-      reason: reason(status)
-    ]
+    message = error_message(body)
 
     error_opts =
-      case error_message(body) do
+      [
+        provider: :tempo,
+        message: Keyword.get(opts, :message, @message),
+        reason: reason(status, message, Keyword.get(opts, :reasons, []))
+      ] ++ mutation(opts, status)
+
+    error_opts =
+      case message do
         nil -> error_opts
         message -> Keyword.put(error_opts, :detail_message, redact(message, opts))
       end
 
     Transport.provider_error({:ok, response}, error_opts)
+  end
+
+  defp mutation(opts, status) do
+    cond do
+      not Keyword.get(opts, :mutation?, false) -> []
+      status in 300..399 or status in 500..599 -> @mutation ++ [delivery: :sent_outcome_unknown]
+      true -> @mutation
+    end
+  end
+
+  # A configured reason for this status and Tempo text, else the status reason.
+  defp reason(status, message, reasons) do
+    Enum.find_value(reasons, reason(status), fn {rule_status, text, reason} ->
+      if status == rule_status and is_binary(message) and String.contains?(message, text),
+        do: reason
+    end)
   end
 
   defp decode_json({request, %Req.Response{body: body} = response})

@@ -43,6 +43,7 @@ defmodule Jido.Connect.Tempo.ScopeResolver do
   # Operation ID => labels. Each Tempo action adds its entry here.
   @operations %{
     "tempo.worklogs.list_own" => ["tempo.worklogs.read"],
+    "tempo.worklog.create" => ["tempo.worklogs.write"],
     "tempo.period.bookability.get" => ["tempo.periods.read", "tempo.approvals.read"]
   }
 
