@@ -46,15 +46,12 @@ defmodule Jido.Connect.Tempo.Client.Worklogs do
          {:ok, results} <-
            Pagination.collect(
              request,
-             path(request),
+             Request.account_path(request, "/4/worklogs/user/"),
              [params: [from: range.from, to: range.to]] ++ Keyword.take(opts, @bounds)
            ) do
       own(results, request.account_id, range)
     end
   end
-
-  defp path(%Request{account_id: account_id}),
-    do: "/4/worklogs/user/" <> URI.encode(account_id, &URI.char_unreserved?/1)
 
   defp own(results, account_id, range) do
     results

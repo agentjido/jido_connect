@@ -18,7 +18,12 @@ defmodule Jido.Connect.TempoTest do
     assert spec.id == :tempo
     assert spec.package == :jido_connect_tempo
     assert spec.status == :experimental
-    assert Enum.map(spec.actions, & &1.id) == ["tempo.worklogs.list_own"]
+
+    assert Enum.map(spec.actions, & &1.id) == [
+             "tempo.worklogs.list_own",
+             "tempo.period.bookability.get"
+           ]
+
     assert spec.triggers == []
     assert Application.get_env(:jido_connect_tempo, :jido_connect_providers) == [Tempo]
   end
@@ -45,7 +50,10 @@ defmodule Jido.Connect.TempoTest do
   end
 
   test "compiles the generated action and plugin surface" do
-    actions = [Jido.Connect.Tempo.Actions.ListOwnWorklogs]
+    actions = [
+      Jido.Connect.Tempo.Actions.ListOwnWorklogs,
+      Jido.Connect.Tempo.Actions.GetPeriodBookability
+    ]
 
     assert Tempo.jido_action_modules() == actions
     assert Tempo.jido_sensor_modules() == []
@@ -60,8 +68,9 @@ defmodule Jido.Connect.TempoTest do
              }
            } = Tempo.jido_connect_manifest()
 
-    assert {:error, %Connect.Error.AuthError{reason: :context_required}} =
-             Jido.Connect.Tempo.Actions.ListOwnWorklogs.run(%{}, %{})
+    for action <- actions do
+      assert {:error, %Connect.Error.AuthError{reason: :context_required}} = action.run(%{}, %{})
+    end
   end
 
   test "the generated action carries the DSL metadata of the own worklog read" do
@@ -86,5 +95,33 @@ defmodule Jido.Connect.TempoTest do
 
     assert {:ok, %{mutation?: false, data_classification: :personal_data}} =
              Connect.action(Tempo.integration(), "tempo.worklogs.list_own")
+  end
+
+  test "the generated action carries the DSL metadata of the period bookability read" do
+    projection = Jido.Connect.Tempo.Actions.GetPeriodBookability.jido_connect_projection()
+
+    assert projection.action_id == "tempo.period.bookability.get"
+    assert projection.resource == :period
+    assert projection.verb == :get
+    assert projection.risk == :read
+    assert projection.auth_profiles == [:api_token, :oauth2_user]
+    assert projection.scope_resolver == Jido.Connect.Tempo.ScopeResolver
+    assert projection.policies == []
+    assert Enum.map(projection.input, & &1.name) == [:from, :to]
+
+    assert Enum.map(projection.output, & &1.name) == [
+             :account_id,
+             :from,
+             :to,
+             :checked_at,
+             :complete,
+             :state,
+             :segments
+           ]
+
+    assert {:ok, %{mutation?: false, data_classification: :workspace_metadata} = action} =
+             Connect.action(Tempo.integration(), "tempo.period.bookability.get")
+
+    assert action.scopes == ["tempo.periods.read", "tempo.approvals.read"]
   end
 end

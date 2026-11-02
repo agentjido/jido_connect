@@ -91,6 +91,14 @@ defmodule Jido.Connect.Tempo.Client.Request do
      Error.auth("Tempo request context is required", reason: :tempo_request_context_required)}
   end
 
+  @doc """
+  Returns `prefix` followed by the request's account ID, percent-encoded as
+  one path segment, such as `/4/worklogs/user/557058%3Aabc`.
+  """
+  @spec account_path(t(), String.t()) :: String.t()
+  def account_path(%__MODULE__{account_id: account_id}, prefix) when is_binary(prefix),
+    do: prefix <> URI.encode(account_id, &URI.char_unreserved?/1)
+
   @doc "Returns the leased token sent as the Bearer credential."
   @spec token(t()) :: String.t()
   def token(%__MODULE__{token: token}), do: token

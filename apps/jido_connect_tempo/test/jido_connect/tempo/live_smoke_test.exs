@@ -6,8 +6,9 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
 
   See `docs/live_smoke_tests.md` for the variables and the recording mode.
   The Atlassian account ID of the test user comes from Jira
-  `GET /rest/api/3/myself`; that helper call is not recorded. Neither is
-  the direct Tempo read that the own worklog checks compare against.
+  `GET /rest/api/3/myself`; that helper call is not recorded. Neither are
+  the direct Tempo reads that the own worklog and period checks compare
+  against.
 
   The own worklog checks hold on the test user's seeded worklogs on
   `TEMPO_JIRA_ISSUE_ID` alone: one on the first and one on the last day of
@@ -27,6 +28,11 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
   through Jira's worklog API without a comment and with an empty one, in
   `worklogs_own_jira.json`. Re-recording these files needs those worklogs,
   since the offline tests pin their IDs and shapes.
+
+  The period checks hold on the test user's seeded approvals alone: August
+  2026 APPROVED, September IN_REVIEW and October OPEN. Each status and its
+  time are compared with a direct approval read of the same period by the
+  same user.
 
   ExUnit prints the arguments of a failing call, so checks that involve a real
   token or the test user's account ID compute a boolean first and fail with
@@ -277,6 +283,103 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
              Enum.map(raw_worklogs!(env, token, range), &raw_key/1)
   end
 
+  # Tempo reads an approval only for the exact boundaries of one period and
+  # answers a range across periods with a 400. The open October period is
+  # read first, so the sanitizer learns the account ID from its `user`
+  # before it writes the path of the 400, whose body names no account.
+  @tag env!(["TEMPO_OAUTH_ACCESS_TOKEN", "TEMPO_API_ORIGIN" | @jira])
+  test "reads the open October approval and rejects a range across periods", %{env: env} do
+    token = env["TEMPO_OAUTH_ACCESS_TOKEN"]
+    request = request!(env, :oauth2_user, token)
+    LiveSmoke.record(@recorder, :tempo, "timesheet_approval")
+
+    approval =
+      ok!(
+        Client.get_timesheet_approval(request, "2026-10-01", "2026-10-31"),
+        "the October approval read"
+      )
+
+    raw = raw_approval!(env, token, %{from: "2026-10-01", to: "2026-10-31"})
+
+    assert approval.status == "OPEN"
+    assert {approval.status, approval.updated_at} == raw_evidence(raw)
+    assert {approval.period_from, approval.period_to} == {"2026-10-01", "2026-10-31"}
+
+    own? = approval.user_account_id == request.account_id
+    assert own?, "the approval names another user than the connection's account"
+
+    across = Client.get_timesheet_approval(request, "2026-08-01", "2026-09-30")
+
+    rejected? =
+      match?({:error, %Error.ProviderError{reason: :bad_request, status: 400}}, across) and
+        error_message(across) =~ "not a valid period"
+
+    assert rejected?, "a range across two periods did not get Tempo's 400"
+  end
+
+  # The seeded approvals of the test user: August 2026 APPROVED, September
+  # IN_REVIEW, October OPEN. Further worklogs in the open October period do
+  # not change them. The range starts and ends inside a period, so the first
+  # and the last segment are part of a full period. Each segment's evidence
+  # is compared with a direct read of the same period by the same user.
+  @tag env!(["TEMPO_API_TOKEN", "TEMPO_API_ORIGIN" | @jira])
+  test "the period bookability of the seeded periods matches the user's Tempo view", %{env: env} do
+    token = env["TEMPO_API_TOKEN"]
+    scopes = ["tempo.periods.read", "tempo.approvals.read"]
+    context = context!(env, :api_token, scopes)
+    range = %{from: "2026-08-15", to: "2026-10-15"}
+    LiveSmoke.record(@recorder, :tempo, "period_bookability")
+
+    before = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    result =
+      ok!(
+        invoke(context, :api_token, token, range, "tempo.period.bookability.get"),
+        "the period bookability read"
+      )
+
+    later = DateTime.utc_now()
+
+    complete? = result.from == range.from and result.to == range.to and result.complete == true
+    assert complete?, "the read did not return its range with complete: true"
+
+    own? = result.account_id == context.connection.subject.account_id
+    assert own?, "account_id is not the connection's subject.account_id"
+
+    {:ok, checked_at, 0} = DateTime.from_iso8601(result.checked_at)
+
+    assert DateTime.compare(checked_at, before) != :lt and
+             DateTime.compare(checked_at, later) != :gt
+
+    segments = result.segments
+
+    assert Enum.map(segments, &{&1.from, &1.to, &1.period_from, &1.period_to}) == [
+             {"2026-08-15", "2026-08-31", "2026-08-01", "2026-08-31"},
+             {"2026-09-01", "2026-09-30", "2026-09-01", "2026-09-30"},
+             {"2026-10-01", "2026-10-15", "2026-10-01", "2026-10-31"}
+           ]
+
+    assert Enum.map(segments, & &1.approval_status) == ["APPROVED", "IN_REVIEW", "OPEN"]
+    assert Enum.map(segments, & &1.approval_error) == [nil, nil, nil]
+
+    for segment <- segments do
+      raw = raw_approval!(env, token, %{from: segment.period_from, to: segment.period_to})
+      assert {segment.approval_status, segment.approval_updated_at} == raw_evidence(raw)
+    end
+
+    assert Enum.map(segments, &{&1.closure_evidence, &1.state}) == [
+             {:unknown, :blocked},
+             {:unknown, :blocked},
+             {:unknown, :unknown}
+           ]
+
+    assert result.state == :blocked
+
+    text = inspect(result)
+    clean? = not String.contains?(text, ["comment", "reviewer", "actor", "submit", "recall"])
+    assert clean?, "the result holds an approval comment, a reviewer, an actor or an action"
+  end
+
   # The token endpoint's rejections are recorded with an invented code and an
   # invented refresh token. A successful exchange needs the code of one
   # browser authorization and every refresh replaces both tokens, so that
@@ -463,7 +566,13 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
     refute leaked?, "the normalized error contains the token"
   end
 
-  defp invoke(%Context{connection: connection} = context, profile, token, input) do
+  defp invoke(
+         %Context{connection: connection} = context,
+         profile,
+         token,
+         input,
+         action \\ "tempo.worklogs.list_own"
+       ) do
     field = if profile == :api_token, do: :api_token, else: :access_token
 
     lease =
@@ -471,7 +580,7 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
         expires_at: DateTime.add(DateTime.utc_now(), 300, :second)
       )
 
-    Jido.Connect.invoke(Tempo, "tempo.worklogs.list_own", input,
+    Jido.Connect.invoke(Tempo, action, input,
       context: context,
       credential_lease: lease
     )
@@ -525,11 +634,35 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
     end
   end
 
-  defp context!(env, profile) do
+  # Reads one approval directly, outside the package and the recorder: the
+  # user's own Tempo view of that period.
+  defp raw_approval!(env, token, %{from: from, to: to}) do
+    path =
+      "/4/timesheet-approvals/user/" <> URI.encode(account_id!(env), &URI.char_unreserved?/1)
+
+    case Req.get(env["TEMPO_API_ORIGIN"] <> path,
+           auth: {:bearer, token},
+           params: [from: from, to: to],
+           retry: false
+         ) do
+      {:ok, %{status: 200, body: %{"status" => %{} = _status} = body}} -> body
+      _other -> flunk("the direct Tempo approval read of #{from} to #{to} failed")
+    end
+  end
+
+  defp raw_evidence(%{"status" => status}), do: {status["key"], status["updatedAt"]}
+
+  defp error_message({:error, %Error.ProviderError{details: %{message: message}}})
+       when is_binary(message),
+       do: message
+
+  defp error_message(_result), do: ""
+
+  defp context!(env, profile, scopes \\ ["tempo.worklogs.read"]) do
     Context.new!(%{
       tenant_id: "live",
       actor: %{id: "live", type: :app_user},
-      connection: connection!(env, profile, env["TEMPO_API_ORIGIN"], ["tempo.worklogs.read"])
+      connection: connection!(env, profile, env["TEMPO_API_ORIGIN"], scopes)
     })
   end
 

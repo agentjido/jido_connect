@@ -238,6 +238,18 @@ cannot learn the account ID from it: the empty range is recorded after a
 seeded day, and the October 31 test stops in recording mode when that day
 has no worklog.
 
+The Tempo period checks rely only on the seeded approvals of the test user:
+August 2026 `APPROVED`, September `IN_REVIEW` and October `OPEN`. Further
+worklogs in October do not change them. Each status and its time are
+compared with a direct approval read of the same period by the same user.
+`period_bookability.json` holds the periods of August 15 to October 15,
+2026, and `.2` to `.4` the three approvals; the sanitizer numbers the
+reviewer of August first, so the test user is `account-2` there.
+`timesheet_approval.json` holds the October approval and `.2` Tempo's 400
+for a range across two periods. That 400 names no account in its body, so
+it is recorded after the October approval, from whose `user` the sanitizer
+learns the account ID before it writes the request path.
+
 ### Confluence
 
 | Variable | Kind | Meaning |

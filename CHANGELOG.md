@@ -25,6 +25,10 @@
 - Add the Tempo read action `tempo.worklogs.list_own` for the connected
   account's worklogs in an inclusive date range, and the read-only Tempo
   catalog pack `:tempo_reader`.
+- Add the Tempo read action `tempo.period.bookability.get` for the connected
+  account's approval evidence of every period in an inclusive date range,
+  with closure evidence `:unknown` and a derived state, and the read-only
+  Tempo catalog pack `:tempo_period_lookup`.
 
 ## 0.9.0 - 2026-08-25
 

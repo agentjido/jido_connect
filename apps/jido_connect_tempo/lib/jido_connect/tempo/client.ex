@@ -8,7 +8,7 @@ defmodule Jido.Connect.Tempo.Client do
   inject its own module as `provider_client`.
   """
 
-  alias Jido.Connect.Tempo.Client.{Request, Worklogs}
+  alias Jido.Connect.Tempo.Client.{Periods, Request, TimesheetApprovals, Worklogs}
 
   @doc "Builds a request from the provider handler runtime."
   defdelegate request_context(runtime), to: Request, as: :from_runtime
@@ -24,4 +24,16 @@ defmodule Jido.Connect.Tempo.Client do
   `Jido.Connect.Tempo.Client.Worklogs.list_own/2`.
   """
   defdelegate list_own_worklogs(request, opts), to: Worklogs, as: :list_own
+
+  @doc """
+  Reads the full Tempo periods that intersect the range from `:from` to
+  `:to`, both inclusive. See `Jido.Connect.Tempo.Client.Periods.list/2`.
+  """
+  defdelegate list_periods(request, opts), to: Periods, as: :list
+
+  @doc """
+  Reads the request account's timesheet approval of the one period from
+  `from` to `to`. See `Jido.Connect.Tempo.Client.TimesheetApprovals.get/3`.
+  """
+  defdelegate get_timesheet_approval(request, from, to), to: TimesheetApprovals, as: :get
 end

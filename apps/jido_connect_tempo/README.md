@@ -4,10 +4,13 @@
 It includes:
 
 - `Jido.Connect.Tempo`, the provider declaration with two auth profiles,
-  five local labels and the read action `tempo.worklogs.list_own`
-- the worklog read in `Jido.Connect.Tempo.Client` and the normalized
-  `Jido.Connect.Tempo.Worklog`
-- the read-only catalog pack `:tempo_reader` in
+  five local labels and the read actions `tempo.worklogs.list_own` and
+  `tempo.period.bookability.get`
+- the worklog, period and timesheet approval reads in
+  `Jido.Connect.Tempo.Client`, the normalized `Jido.Connect.Tempo.Worklog`
+  and `Jido.Connect.Tempo.TimesheetApproval`, and the result
+  `Jido.Connect.Tempo.PeriodBookability`
+- the read-only catalog packs `:tempo_reader` and `:tempo_period_lookup` in
   `Jido.Connect.Tempo.CatalogPacks`
 - OAuth 2.0 helpers in `Jido.Connect.Tempo.OAuth`
 - the connection contract in `Jido.Connect.Tempo.Client.Request`
@@ -192,6 +195,120 @@ errors of [Pagination](#pagination) and [Errors](#errors), these are
 
 The details never hold a description or another account's ID.
 
+## Period Bookability
+
+`tempo.period.bookability.get` returns the approval evidence of every Tempo
+period that intersects an inclusive date range, for the connection's own
+account:
+
+```elixir
+Jido.Connect.invoke(
+  Jido.Connect.Tempo,
+  "tempo.period.bookability.get",
+  %{from: "2026-08-15", to: "2026-10-15"},
+  context: context,
+  credential_lease: lease
+)
+```
+
+The account is always `connection.subject.account_id`; the input holds only
+`from` and `to`, with the same date rule as the own worklog read, and fails
+before any request otherwise. The action requires `tempo.periods.read` and
+`tempo.approvals.read` and is the only tool of the read-only pack
+`:tempo_period_lookup`.
+
+The read calls `GET /4/periods` with `from` and `to`. Tempo answers with
+every full period that intersects the range, also when the range starts or
+ends inside a period. For each of these periods the read then calls
+`GET /4/timesheet-approvals/user/{accountId}` with the percent-encoded
+account ID and exactly that period's first and last day, because Tempo
+answers a range across periods with a 400: `This is not a valid period. Did
+you mean from '2026-08-01' to '2026-08-31'?`. All requests are GETs; the
+`submit` and `recall` links of an approval are never followed.
+`Jido.Connect.Tempo.Client.list_periods/2` and
+`Jido.Connect.Tempo.Client.get_timesheet_approval/3` offer the two reads.
+
+At most 20 periods are read. A range that intersects more fails after the
+periods read and before the first approval read with a
+`Jido.Connect.Error.ProviderError` with reason `:period_limit_exceeded` and
+`details.max_periods: 20`; a range of exactly 20 periods succeeds. The bound
+is the `:max_periods` option of
+`Jido.Connect.Tempo.PeriodBookability.build/4`. The action uses the
+default, and its input cannot change it.
+
+### Evidence
+
+| Output | Meaning |
+| --- | --- |
+| `account_id` | the connection's `subject.account_id`, the user of every approval |
+| `from`, `to` | the range as supplied |
+| `checked_at` | UTC time before the first Tempo request, ISO 8601 to the second |
+| `complete` | `true` when the segments cover every day of the range once and each has an approval status |
+| `segments` | one map per intersecting period, ordered by date |
+
+| Segment key | Meaning |
+| --- | --- |
+| `from`, `to` | the part of the range that lies in this period |
+| `period_from`, `period_to` | the full period as Tempo reports it |
+| `approval_status` | Tempo's `status.key` as sent: `OPEN`, `IN_REVIEW`, `APPROVED` or another raw string; `nil` when no status was read |
+| `approval_updated_at` | Tempo's `status.updatedAt` as sent, `nil` when absent; an `OPEN` status carries none |
+| `approval_error` | `nil` when the approval read returned an approval; else `reason`, `status` and `retry_after` of the failed read |
+| `closure_evidence` | always `:unknown` |
+| `state` | `:blocked` or `:unknown`, derived as below |
+
+On the test site, August 15 to October 15, 2026 gives three segments:
+August 15 to 31 of the August period, `APPROVED`; all of September,
+`IN_REVIEW`; and October 1 to 15 of the October period, `OPEN`. The
+evidence times are timestamps such as `2026-10-30T19:19:42Z`, while Tempo's
+OpenAPI documents a date; both are kept as sent.
+
+The output never holds the approval comment, the actor or the reviewer, the
+`actions` links, the worklog link or the approval's seconds.
+
+`approval_status` is `nil` when Tempo sent no status, when the approval read
+failed, and when Tempo answered for another user or another period. A
+missing status is never read as `OPEN`. An unfamiliar key stays the raw
+string; no atom is created for it.
+
+`approval_error` separates these cases. It is `nil` when Tempo answered
+with an approval, also one without a status. A failed read keeps only the
+`reason`, `status` and `retry_after` of its normalized error: a token that
+may read periods but not approvals gives `%{reason: :forbidden, status:
+403, retry_after: nil}` on every segment, a 429 with `Retry-After: 30`
+gives `%{reason: :rate_limited, status: 429, retry_after: 30}`, and an
+approval of another user gives `%{reason: :foreign_approval_user, status:
+nil, retry_after: nil}`. Any other error, such as one of an injected
+provider client, is `:approval_read_failed` with `status` and
+`retry_after` `nil`. Tempo's error text and the error details are not
+kept.
+
+`complete` is `false` when Tempo's periods leave a day of the range
+uncovered or cover it twice, and when a segment has no `approval_status`.
+The other segments keep their evidence. A failed `/4/periods` read returns
+the normalized error instead, with the status and `retry_after` of
+[Errors](#errors).
+
+### Derived State
+
+`state` is a derivation from the evidence, not a Tempo field:
+
+- a segment is `:blocked` when its `approval_status` is `IN_REVIEW` or
+  `APPROVED`, and `:unknown` otherwise: for `OPEN`, an unfamiliar key and a
+  missing status;
+- the result is `:blocked` when any segment is blocked, else `:unknown`.
+
+`:bookable` is never derived, because it would need closure evidence. No
+public Tempo Cloud API reads manual period closures, Scheduler freezes or
+grace periods, so `closure_evidence` stays `:unknown`. An `OPEN` approval
+therefore does not make a period bookable: Period Management can close a
+period for everyone while the user's approval is still `OPEN`. Missing
+evidence never turns a blocked segment into an unknown one.
+
+The result is neither a reservation nor a write guarantee. It reports what
+Tempo answered after `checked_at`; Tempo can change an approval or close a
+period at any time afterwards, and a write into a closed period is rejected
+only when it is made.
+
 ## OAuth Flow
 
 The host owns the callback route, its session binding, token storage and
@@ -323,7 +440,8 @@ reduced to a value-free summary.
 
 ## Limits Owned by the Host
 
-The package bounds the number of pages and results per read. It does not
+The package bounds the number of pages and results per read, and the
+approval reads of one period bookability read to 20 periods. It does not
 limit bytes: response size, the size of results passed to an agent and
 storage quotas are host policy.
 
@@ -357,6 +475,16 @@ and description with a direct Tempo read outside the package:
 The empty range must return `worklogs: []` and `complete: true`. Some of
 these recordings also hold worklogs that the seeded data lacks; see the
 Tempo section of `docs/live_smoke_tests.md`.
+
+The period checks rely on the seeded approvals of the test user: August
+2026 `APPROVED`, September `IN_REVIEW` and October `OPEN`. Each status and
+its time are compared with a direct approval read of the same period by the
+same user:
+
+| Check | Path | Recording |
+| --- | --- | --- |
+| August 15 to October 15: three segments, `blocked`, `blocked`, `unknown`, aggregate `blocked` | action, API token | `period_bookability` |
+| October as one period, then August 1 to September 30 as a range across periods, which gets Tempo's 400 | client, OAuth access token | `timesheet_approval` |
 
 The successful code exchange and refresh are recorded in
 `oauth_exchange.json` and `oauth_refresh.json`, the rejections in

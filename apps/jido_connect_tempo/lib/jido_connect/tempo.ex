@@ -3,9 +3,9 @@ defmodule Jido.Connect.Tempo do
   Tempo Cloud integration authored with the `Jido.Connect` Spark DSL.
 
   This module declares the provider, its two auth profiles, the five local
-  labels that Tempo actions require and the actions. The client modules under
-  `Jido.Connect.Tempo.Client` hold the connection contract, the transport and
-  the provider calls.
+  labels that Tempo actions require and the two read actions. The client
+  modules under `Jido.Connect.Tempo.Client` hold the connection contract, the
+  transport and the provider calls.
 
   ## Own Worklogs
 
@@ -17,6 +17,19 @@ defmodule Jido.Connect.Tempo do
   author or booking day outside the range; `complete: true` marks exhausted
   pagination. `issue_id` is the numeric Jira issue ID, readable with
   `jira.issue.get`.
+
+  ## Period Bookability
+
+  `tempo.period.bookability.get` returns, for the connection's
+  `subject.account_id` and an inclusive range from `from` to `to`, the
+  approval evidence of every Tempo period that intersects the range, with
+  closure evidence `:unknown` and a state derived from the evidence. It
+  reads `GET /4/periods` once and the user's approval once per intersecting
+  period, at most 20, with that period's exact boundaries, and requires
+  `tempo.periods.read` and `tempo.approvals.read`. See
+  `Jido.Connect.Tempo.PeriodBookability` for the evidence, `complete` and
+  the derivation. The result is neither a reservation nor a write
+  guarantee.
 
   ## Auth Profiles
 
@@ -34,7 +47,8 @@ defmodule Jido.Connect.Tempo do
   `Jido.Connect.Tempo.ScopeResolver`.
   """
 
-  use Jido.Connect, fragments: [Jido.Connect.Tempo.Actions.Worklogs]
+  use Jido.Connect,
+    fragments: [Jido.Connect.Tempo.Actions.Worklogs, Jido.Connect.Tempo.Actions.Periods]
 
   defdelegate catalog_packs, to: Jido.Connect.Tempo.CatalogPacks, as: :all
 

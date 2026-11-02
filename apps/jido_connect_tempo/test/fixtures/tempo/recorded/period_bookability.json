@@ -1,0 +1,47 @@
+{
+  "body": {
+    "periods": [
+      {
+        "from": "2026-08-01",
+        "to": "2026-08-31"
+      },
+      {
+        "from": "2026-09-01",
+        "to": "2026-09-30"
+      },
+      {
+        "from": "2026-10-01",
+        "to": "2026-10-31"
+      }
+    ]
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "133"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 17:29:22 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "7ab84d1c76f9c7242b34c3af1b01f7c2"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/periods"
+  },
+  "status": 200
+}
