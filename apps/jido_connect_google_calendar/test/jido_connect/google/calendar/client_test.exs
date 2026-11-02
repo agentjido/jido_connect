@@ -2,6 +2,7 @@ defmodule Jido.Connect.Google.Calendar.ClientTest do
   use ExUnit.Case, async: false
 
   alias Jido.Connect.Google.Calendar.{AclRule, Calendar, Channel, Client, Event}
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -116,6 +117,48 @@ defmodule Jido.Connect.Google.Calendar.ClientTest do
     assert event.summary == "Planning"
   end
 
+  test "lists the events of a period in a time zone and follows the page token" do
+    first = recorded("event_list")
+    second = recorded("event_list.2")
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.request_path == "/v3/calendars/primary/events"
+      assert conn.query_params["timeZone"] == "Europe/Berlin"
+      refute Map.has_key?(conn.query_params, "pageToken")
+      Req.Test.json(conn, first)
+    end)
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.request_path == "/v3/calendars/primary/events"
+      assert conn.query_params["timeZone"] == "Europe/Berlin"
+      assert conn.query_params["pageToken"] == first["nextPageToken"]
+      Req.Test.json(conn, second)
+    end)
+
+    # The window and page size of the live read that recorded both pages.
+    params = %{
+      calendar_id: "primary",
+      page_size: 5,
+      single_events: true,
+      order_by: "startTime",
+      time_min: "2026-11-09T00:00:00+01:00",
+      time_max: "2026-12-15T00:00:00+01:00",
+      time_zone: "Europe/Berlin"
+    }
+
+    assert {:ok, %{events: first_events, next_page_token: page_token}} =
+             Client.list_events(params, "token")
+
+    assert page_token == first["nextPageToken"]
+    assert Enum.map(first_events, & &1.event_id) == Enum.map(first["items"], & &1["id"])
+
+    assert {:ok, %{events: events}} =
+             Client.list_events(Map.put(params, :page_token, page_token), "token")
+
+    assert Enum.map(events, & &1.event_id) == Enum.map(second["items"], & &1["id"])
+    assert Enum.all?(events, &(&1.calendar_id == "primary"))
+  end
+
   test "gets events" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
@@ -146,6 +189,33 @@ defmodule Jido.Connect.Google.Calendar.ClientTest do
 
     assert event.event_id == "event123"
     assert event.calendar_id == "primary"
+  end
+
+  test "gets an event of an encoded calendar with the default detail fields" do
+    recorded = recorded("event_get")
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/calendars/team%40example.com/events/event123"
+      refute Map.has_key?(conn.query_params, "maxAttendees")
+
+      fields = String.split(conn.query_params["fields"], ",")
+
+      for field <-
+            ~w(description attendees attendeesOmitted attachments conferenceData hangoutLink) do
+        assert field in fields
+      end
+
+      Req.Test.json(conn, recorded)
+    end)
+
+    assert {:ok, %Event{} = event} =
+             Client.get_event(%{calendar_id: "team@example.com", event_id: "event123"}, "token")
+
+    # The stub answers with the recorded meeting, whatever ID was asked for.
+    assert event.event_id == recorded["id"]
+    assert event.calendar_id == "team@example.com"
+    assert event.description == recorded["description"]
   end
 
   test "creates events" do
@@ -206,6 +276,102 @@ defmodule Jido.Connect.Google.Calendar.ClientTest do
 
     assert event.event_id == "created123"
     assert event.calendar_id == "primary"
+  end
+
+  test "creates an event with a caller ID, content and attendee details in an encoded calendar" do
+    # The live create of the attendee list; its ID, description, location
+    # and times are sent again here.
+    recorded = recorded("event_create_attendees")
+
+    attendee = %{
+      email: "guest@example.com",
+      display_name: "Guest",
+      optional: true,
+      comment: "Joining late",
+      additional_guests: 2
+    }
+
+    params = %{
+      calendar_id: "team@example.com",
+      event_id: recorded["id"],
+      summary: recorded["summary"],
+      description: recorded["description"],
+      location: recorded["location"],
+      start: "2027-03-01T10:00:00+01:00",
+      end: "2027-03-01T11:00:00+01:00",
+      time_zone: "Europe/Berlin",
+      attendees: [attendee]
+    }
+
+    for send_updates <- ["externalOnly", "none"] do
+      Req.Test.expect(__MODULE__, 1, fn conn ->
+        assert conn.method == "POST"
+        assert conn.request_path == "/v3/calendars/team%40example.com/events"
+        assert conn.query_params["sendUpdates"] == send_updates
+
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+        body = Jason.decode!(body)
+
+        assert body["id"] == recorded["id"]
+        assert body["description"] == recorded["description"]
+        assert body["location"] == recorded["location"]
+
+        assert body["start"] == %{
+                 "dateTime" => "2027-03-01T10:00:00+01:00",
+                 "timeZone" => "Europe/Berlin"
+               }
+
+        assert body["attendees"] == [
+                 %{
+                   "email" => "guest@example.com",
+                   "displayName" => "Guest",
+                   "optional" => true,
+                   "comment" => "Joining late",
+                   "additionalGuests" => 2
+                 }
+               ]
+
+        Req.Test.json(conn, recorded)
+      end)
+
+      assert {:ok, %Event{} = event} =
+               Client.create_event(Map.put(params, :send_updates, send_updates), "token")
+
+      assert event.event_id == recorded["id"]
+      assert event.calendar_id == "team@example.com"
+      assert event.description == recorded["description"]
+      assert event.location == recorded["location"]
+      assert event.start == "2027-03-01T10:00:00+01:00"
+      assert event.start_time_zone == "Europe/Berlin"
+    end
+  end
+
+  test "creates one-day and multi-day all-day events with date-only times" do
+    for {finish, label} <- [{"2026-05-07", "one day"}, {"2026-05-09", "three days"}] do
+      Req.Test.expect(__MODULE__, fn conn ->
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+        body = Jason.decode!(body)
+
+        assert body["start"] == %{"date" => "2026-05-06"}, label
+        assert body["end"] == %{"date" => finish}, label
+
+        # The live all-day create.
+        Req.Test.json(conn, recorded("event_create.2"))
+      end)
+
+      assert {:ok, %Event{all_day?: true}} =
+               Client.create_event(
+                 %{
+                   calendar_id: "primary",
+                   summary: "Offsite",
+                   start: "2026-05-06",
+                   end: finish,
+                   all_day: true,
+                   time_zone: "Europe/Berlin"
+                 },
+                 "token"
+               )
+    end
   end
 
   test "updates events" do
@@ -814,4 +980,6 @@ defmodule Jido.Connect.Google.Calendar.ClientTest do
             }} =
              Client.get_event(%{calendar_id: "primary", event_id: "event123"}, "token")
   end
+
+  defp recorded(name), do: LiveSmoke.fixture!(:google_calendar, name)
 end

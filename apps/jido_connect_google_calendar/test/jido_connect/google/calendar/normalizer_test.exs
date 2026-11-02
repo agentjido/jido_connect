@@ -12,6 +12,7 @@ defmodule Jido.Connect.Google.Calendar.NormalizerTest do
   }
 
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   test "normalizes calendar-list entries" do
     assert {:ok, %Calendar{} = calendar} =
@@ -153,6 +154,139 @@ defmodule Jido.Connect.Google.Calendar.NormalizerTest do
     assert event.all_day?
     assert event.recurrence == ["RRULE:FREQ=WEEKLY;COUNT=2"]
     assert event.original_start == "2026-05-06"
+  end
+
+  describe "recorded event details" do
+    test "keep a long description with Unicode and HTML byte for byte" do
+      recorded = recorded("event_get")
+      description = recorded["description"]
+
+      assert byte_size(description) > 512
+      assert String.length(description) < byte_size(description)
+      assert description =~ "<b>"
+      assert description =~ "&amp;"
+
+      assert {:ok, %Event{} = event} = Normalizer.event(recorded, calendar_id: "primary")
+      assert event.description == description
+    end
+
+    test "keep 51 attendees in the order Google returned them" do
+      recorded = recorded("event_get_attendees")
+
+      assert {:ok, %Event{} = event} = Normalizer.event(recorded, calendar_id: "primary")
+
+      assert length(event.attendees) == 51
+
+      assert Enum.map(event.attendees, & &1.email) ==
+               Enum.map(recorded["attendees"], & &1["email"])
+
+      assert event.attendees_omitted? == false
+    end
+
+    test "keep attendee details and explicit false flags" do
+      recorded = recorded("event_get_attendees")
+      [detailed | _others] = Enum.filter(recorded["attendees"], &Map.has_key?(&1, "comment"))
+
+      # Derived: Google leaves false flags and zero extra guests out of its
+      # answers, so one recorded guest gets them added explicitly.
+      plain = Enum.find(recorded["attendees"], &(Map.keys(&1) == ["email", "responseStatus"]))
+
+      explicit =
+        Map.merge(plain, %{
+          "optional" => false,
+          "organizer" => false,
+          "resource" => false,
+          "self" => false,
+          "additionalGuests" => 0
+        })
+
+      attendees = Enum.map(recorded["attendees"], &if(&1 == plain, do: explicit, else: &1))
+
+      assert {:ok, %Event{} = event} =
+               Normalizer.event(Map.put(recorded, "attendees", attendees), calendar_id: "primary")
+
+      assert %Attendee{
+               display_name: display_name,
+               comment: comment,
+               optional?: true,
+               additional_guests: 2
+             } = attendee!(event, detailed["email"])
+
+      assert display_name == detailed["displayName"]
+      assert comment == detailed["comment"]
+
+      assert %Attendee{
+               optional?: false,
+               organizer?: false,
+               resource?: false,
+               self?: false,
+               additional_guests: 0
+             } = attendee!(event, explicit["email"])
+
+      assert %Attendee{organizer?: true, self?: true} =
+               Enum.find(event.attendees, & &1.self?)
+    end
+
+    test "mark a capped attendee list as omitted" do
+      recorded = recorded("event_get_attendees_omitted")
+      assert recorded["attendeesOmitted"] == true
+
+      assert {:ok, %Event{} = event} = Normalizer.event(recorded, calendar_id: "primary")
+
+      assert event.attendees_omitted? == true
+      assert [%Attendee{self?: true}] = event.attendees
+    end
+
+    test "keep attachments as provider-keyed maps with their links unchanged" do
+      recorded = recorded("event_get")
+
+      assert {:ok, %Event{} = event} = Normalizer.event(recorded, calendar_id: "primary")
+      assert event.attachments == recorded["attachments"]
+
+      agenda = Enum.find(event.attachments, &(&1["title"] == "jcl-live agenda"))
+
+      assert agenda |> Map.keys() |> Enum.sort() ==
+               ["fileId", "fileUrl", "iconLink", "mimeType", "title"]
+
+      assert agenda["mimeType"] == "application/vnd.google-apps.document"
+      assert agenda["fileUrl"] =~ agenda["fileId"]
+
+      handout = Enum.find(event.attachments, &(&1["title"] == "jcl-live handout.txt"))
+      refute Map.has_key?(handout, "fileId")
+      assert String.ends_with?(handout["fileUrl"], "?usp=drivesdk&jcl=a%20b")
+    end
+
+    test "keep the Meet link and conference data" do
+      recorded = recorded("event_get")
+
+      assert {:ok, %Event{} = event} = Normalizer.event(recorded, calendar_id: "primary")
+
+      assert event.hangout_link == recorded["hangoutLink"]
+      assert event.conference_data == recorded["conferenceData"]
+
+      # The recording replaced each entry point URI with a placeholder,
+      # because the `more` URI carries the dial-in PIN.
+      assert Enum.map(event.conference_data["entryPoints"], & &1["uri"]) ==
+               ["uri-1", "uri-2", "uri-3"]
+    end
+
+    test "keep the identity of an event without description, attachments or conference" do
+      recorded = recorded("event_create_get")
+
+      for field <- ~w(description attachments attendees conferenceData hangoutLink) do
+        refute Map.has_key?(recorded, field)
+      end
+
+      assert {:ok, %Event{} = event} = Normalizer.event(recorded, calendar_id: "primary")
+
+      assert event.event_id == recorded["id"]
+      assert event.calendar_id == "primary"
+      assert event.attachments == []
+      assert event.attendees == []
+      assert event.description == nil
+      assert event.hangout_link == nil
+      assert event.conference_data == nil
+    end
   end
 
   test "returns errors instead of raising for malformed attendees" do
@@ -311,5 +445,12 @@ defmodule Jido.Connect.Google.Calendar.NormalizerTest do
     )
 
     assert {:error, _error} = FreeBusy.new(%{time_min: "2026-05-06T00:00:00Z"})
+  end
+
+  defp recorded(name), do: LiveSmoke.fixture!(:google_calendar, name)
+
+  defp attendee!(event, email) do
+    assert [attendee] = Enum.filter(event.attendees, &(&1.email == email))
+    attendee
   end
 end
