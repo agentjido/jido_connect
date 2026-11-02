@@ -795,6 +795,80 @@ defmodule Jido.Connect.Gmail.ClientTest do
     assert message.label_ids == ["INBOX", "Label_123"]
   end
 
+  describe "message label changes" do
+    # The answers are messages.modify responses that live_smoke_test.exs
+    # recorded for one message of the archive pair and for the ID of a message
+    # deleted for good.
+
+    test "sends a message ID with a slash and a space as one encoded path segment" do
+      archived = LiveSmoke.fixture!(:gmail, "message_modify_archive")
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert conn.method == "POST"
+        assert conn.request_path == "/gmail/v1/users/me/messages/a%2Fb%20c/modify"
+        Req.Test.json(conn, archived)
+      end)
+
+      assert {:ok, %Message{}} =
+               Client.apply_message_labels(
+                 %{message_id: "a/b c", add_label_ids: [], remove_label_ids: ["INBOX"]},
+                 "token"
+               )
+    end
+
+    test "removing only UNREAD sends empty additions and returns the recorded message" do
+      %{"request" => %{"method" => "POST", "path" => path}, "body" => read} =
+        RecordedBodyAdapter.recording!("message_modify_read")
+
+      %{"id" => message_id, "threadId" => thread_id, "labelIds" => label_ids} = read
+      assert path == "/gmail/v1/users/me/messages/#{message_id}/modify"
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert {conn.method, conn.request_path} == {"POST", path}
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+        assert Jason.decode!(body) == %{"addLabelIds" => [], "removeLabelIds" => ["UNREAD"]}
+        Req.Test.json(conn, read)
+      end)
+
+      assert {:ok,
+              %Message{message_id: ^message_id, thread_id: ^thread_id, label_ids: ^label_ids} =
+                message} =
+               Client.apply_message_labels(
+                 %{message_id: message_id, remove_label_ids: ["UNREAD"]},
+                 "token"
+               )
+
+      refute "UNREAD" in message.label_ids
+    end
+
+    test "returns the recorded 404 for an unknown message ID as a provider error" do
+      %{"request" => %{"method" => "POST", "path" => path}, "status" => 404, "body" => rejection} =
+        RecordedBodyAdapter.recording!("message_modify_unknown_id")
+
+      ["/", "gmail", "v1", "users", "me", "messages", message_id, "modify"] = Path.split(path)
+      %{"error" => %{"message" => error_message}} = rejection
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert {conn.method, conn.request_path} == {"POST", path}
+
+        conn
+        |> Plug.Conn.put_status(404)
+        |> Req.Test.json(rejection)
+      end)
+
+      assert {:error,
+              %Jido.Connect.Error.ProviderError{
+                provider: :google,
+                status: 404,
+                details: %{message: ^error_message}
+              }} =
+               Client.apply_message_labels(
+                 %{message_id: message_id, add_label_ids: [], remove_label_ids: ["INBOX"]},
+                 "token"
+               )
+    end
+  end
+
   test "handles Gmail message lifecycle endpoints" do
     Req.Test.stub(__MODULE__, fn conn ->
       case {conn.method, conn.request_path} do

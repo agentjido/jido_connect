@@ -820,6 +820,24 @@ defmodule Jido.Connect.Gmail.LiveSmokeTest do
     assert received(recorded, message_ids) == received(signals, message_ids)
 
     assert String.to_integer(checkpoint) >= String.to_integer(next)
+
+    # Recordings for the offline poll tests: the first one-record page of the
+    # same history, and Google's answer to a page token it never issued.
+    page = %{
+      start_history_id: start,
+      label_id: "INBOX",
+      page_size: 1,
+      history_types: ["messageAdded"]
+    }
+
+    LiveSmoke.record(@req_options, :gmail, "message_received_history_first_page")
+    assert {:ok, %{next_page_token: page_token}} = Client.list_history(page, metadata_token)
+    assert is_binary(page_token)
+
+    LiveSmoke.record(@req_options, :gmail, "message_received_history_invalid_page_token")
+
+    assert {:error, %Connect.Error.ProviderError{}} =
+             Client.list_history(Map.put(page, :page_token, "jcl-live-invalid"), metadata_token)
   end
 
   # google.gmail.message.labels.apply on the archive pair: two messages of one
@@ -912,6 +930,55 @@ defmodule Jido.Connect.Gmail.LiveSmokeTest do
 
     LiveSmoke.record(@req_options, :gmail, "thread_metadata_archive_pair")
     assert thread_labels(grant, thread_id) == %{pair | message_id => archived}
+  end
+
+  # Recordings for the offline label tests: the answer to removing only
+  # UNREAD from one message of the archive pair, and Google's answer to a
+  # label change of a message deleted for good. A read message is marked
+  # unread first, outside the recorder.
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_GMAIL_ARCHIVE_MESSAGE_ID"])
+  @tag write!(:google)
+  test "labels.apply marks one message of the archive pair read and rejects a deleted message",
+       %{env: env} do
+    access_token = env["GOOGLE_ACCESS_TOKEN"]
+    grant = write_grant(access_token)
+    message_id = env["GOOGLE_GMAIL_ARCHIVE_MESSAGE_ID"]
+
+    {_thread_id, pair} = archive_pair!(grant, message_id)
+    labels = pair[message_id]
+    restore_labels_on_exit(access_token, message_id, labels, ["UNREAD"])
+
+    unless "UNREAD" in labels do
+      body = %{"addLabelIds" => ["UNREAD"], "removeLabelIds" => []}
+
+      assert %{status: 200} =
+               gmail_api(:post, "/messages/#{message_id}/modify", access_token, json: body)
+    end
+
+    LiveSmoke.record(@req_options, :gmail, "message_modify_read")
+
+    assert {:ok, %{message: %{message_id: ^message_id, label_ids: read}}} =
+             commit(grant, "google.gmail.message.labels.apply", %{
+               message_id: message_id,
+               add_label_ids: [],
+               remove_label_ids: ["UNREAD"]
+             })
+
+    assert Enum.sort(read) == labels -- ["UNREAD"]
+
+    %{"id" => deleted_id} =
+      insert_message!(access_token, [{"Subject", "jcl-live deleted #{run_id()}"}], ["INBOX"])
+
+    delete_message!(access_token, deleted_id)
+
+    LiveSmoke.record(@req_options, :gmail, "message_modify_unknown_id")
+
+    assert {:error, %Connect.Error.ProviderError{status: 404}} =
+             commit(grant, "google.gmail.message.labels.apply", %{
+               message_id: deleted_id,
+               add_label_ids: [],
+               remove_label_ids: ["INBOX"]
+             })
   end
 
   defp invoke(%{context: context, lease: lease}, action_id, input) do

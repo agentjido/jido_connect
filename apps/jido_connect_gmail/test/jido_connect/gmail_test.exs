@@ -546,6 +546,13 @@ defmodule Jido.Connect.GmailTest do
     end
   end
 
+  defmodule LabelSpyGmailClient do
+    def apply_message_labels(params, "token") do
+      send(self(), {:gmail_client_called, :apply_message_labels, params})
+      {:error, Connect.Error.provider("not served", provider: :google)}
+    end
+  end
+
   defmodule RecordedContentGmailClient do
     # Serves format=full responses recorded from the live test account and
     # reports each call to the test process.
@@ -1660,6 +1667,31 @@ defmodule Jido.Connect.GmailTest do
              )
   end
 
+  test "label apply rejects a blank added or removed label ID before the client call" do
+    {context, lease} =
+      context_and_lease(scopes: modify_scopes(), gmail_client: LabelSpyGmailClient)
+
+    for {input, field} <- [
+          {%{add_label_ids: [""]}, :add_label_ids},
+          {%{remove_label_ids: ["  "]}, :remove_label_ids}
+        ] do
+      assert {:error,
+              %Connect.Error.ValidationError{
+                reason: :invalid_label_mutation,
+                details: %{field: ^field}
+              }} =
+               Connect.invoke(
+                 Gmail.integration(),
+                 "google.gmail.message.labels.apply",
+                 Map.put(input, :message_id, "msg123"),
+                 context: context,
+                 credential_lease: lease
+               )
+    end
+
+    refute_received {:gmail_client_called, :apply_message_labels, _params}
+  end
+
   test "label lifecycle actions require label scope" do
     {context, lease} = context_and_lease()
 
@@ -1692,6 +1724,26 @@ defmodule Jido.Connect.GmailTest do
                context: context,
                credential_lease: lease
              )
+  end
+
+  test "message label mutations refuse a gmail.labels-only lease before the client call" do
+    {context, lease} =
+      context_and_lease(scopes: labels_scopes(), gmail_client: LabelSpyGmailClient)
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: ["https://www.googleapis.com/auth/gmail.modify"]
+            }} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.message.labels.apply",
+               %{message_id: "msg123", add_label_ids: ["Label_123"]},
+               context: context,
+               credential_lease: lease
+             )
+
+    refute_received {:gmail_client_called, :apply_message_labels, _params}
   end
 
   test "permanent deletes require full Gmail mailbox scope" do

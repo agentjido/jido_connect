@@ -81,6 +81,18 @@ defmodule Jido.Connect.Gmail.ScopeResolverTest do
         expected: @modify_scope
       },
       %{
+        label: "message label mutation accepts full Gmail mailbox scope",
+        operation: "google.gmail.message.labels.apply",
+        granted: [@mail_scope],
+        expected: @mail_scope
+      },
+      %{
+        label: "message label mutation is not satisfied by the label definition scope",
+        operation: "google.gmail.message.labels.apply",
+        granted: [@labels_scope],
+        expected: @modify_scope
+      },
+      %{
         label: "batch message label mutation accepts full Gmail mailbox scope",
         operation: "google.gmail.messages.batch_modify",
         granted: [@mail_scope],
