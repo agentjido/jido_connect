@@ -37,8 +37,9 @@ defmodule Jido.Connect.Confluence.Input.Pages do
     }
 
     with :ok <- required_string(:id, normalized.id, @identifier_max),
-         :ok <- integer(:max_characters, normalized.max_characters, 1, @maximum_max_characters) do
-      {:ok, normalized}
+         :ok <- integer(:max_characters, normalized.max_characters, 1, @maximum_max_characters),
+         {:ok, mode} <- unsupported_policy(Data.get(input, :on_unsupported)) do
+      {:ok, Map.put(normalized, :on_unsupported, mode)}
     end
   end
 
@@ -114,6 +115,11 @@ defmodule Jido.Connect.Confluence.Input.Pages do
        do: :ok
 
   defp integer(field, _value, _minimum, _maximum), do: invalid(field)
+
+  defp unsupported_policy(nil), do: {:ok, :fail}
+  defp unsupported_policy("fail"), do: {:ok, :fail}
+  defp unsupported_policy("degrade"), do: {:ok, :degrade}
+  defp unsupported_policy(_value), do: invalid(:on_unsupported)
 
   defp boolean(_field, value) when is_boolean(value), do: :ok
   defp boolean(field, _value), do: invalid(field)

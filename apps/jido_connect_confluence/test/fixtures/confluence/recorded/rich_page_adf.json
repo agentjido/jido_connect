@@ -35,10 +35,10 @@
   },
   "headers": {
     "atl-request-id": [
-      "575cf4b6-6dff-463a-b180-a1b0d02880df"
+      "0dc249cb-616d-4c5f-a3b4-16de6dec09bc"
     ],
     "atl-traceid": [
-      "575cf4b66dff463ab180a1b0d02880df"
+      "0dc249cb616d4c5fa3b416de6dec09bc"
     ],
     "connection": [
       "keep-alive"
@@ -47,7 +47,7 @@
       "application/json"
     ],
     "date": [
-      "Mon, 02 Nov 2026 08:02:29 GMT"
+      "Mon, 02 Nov 2026 13:42:08 GMT"
     ],
     "link": [
       "<https://example.atlassian.net/wiki>; rel=\"base\""
@@ -65,7 +65,7 @@
       "AtlassianEdge"
     ],
     "server-timing": [
-      "cdn-upstream-layer;desc=\"EDGE\",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=61,cdn-upstream-fbl;dur=296,atl-edge;dur=213,atl-edge-internal;dur=18,atl-edge-upstream;dur=195,atl-edge-pop;desc=\"aws-eu-west-1\",cdn-cache-miss,cdn-pop;desc=\"FRA56-P8\",cdn-rid;desc=\"UFjhoqyY4c1-300W8ol2iY-rKBXAw5bveXPIuSdpD3iUDuJ9mDUcMw==\",cdn-downstream-fbl;dur=300"
+      "cdn-upstream-layer;desc=\"EDGE\",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=104,atl-edge;dur=84,atl-edge-internal;dur=16,atl-edge-upstream;dur=68,atl-edge-pop;desc=\"aws-eu-west-1\",cdn-cache-miss,cdn-pop;desc=\"FRA60-P2\",cdn-rid;desc=\"atBlAWikI7ogoeQVddJbhQzTV-o9m3m8MLLOD5Pw-ij7l3dOUXLDMw==\",cdn-downstream-fbl;dur=108"
     ],
     "strict-transport-security": [
       "max-age=63072000; includeSubDomains; preload"
@@ -77,19 +77,19 @@
       "Accept-Encoding,Accept-Encoding"
     ],
     "via": [
-      "1.1 1eee8db55908814c8f0cde754e3bee5a.cloudfront.net (CloudFront)"
+      "1.1 b3bfeb8eb7405a05775de8861a4d117c.cloudfront.net (CloudFront)"
     ],
     "x-amz-cf-id": [
-      "UFjhoqyY4c1-300W8ol2iY-rKBXAw5bveXPIuSdpD3iUDuJ9mDUcMw=="
+      "atBlAWikI7ogoeQVddJbhQzTV-o9m3m8MLLOD5Pw-ij7l3dOUXLDMw=="
     ],
     "x-amz-cf-pop": [
-      "FRA56-P8"
+      "FRA60-P2"
     ],
     "x-cache": [
       "Miss from cloudfront"
     ],
     "x-confluence-request-time": [
-      "1793606549341"
+      "1793626928876"
     ],
     "x-content-type-options": [
       "nosniff"

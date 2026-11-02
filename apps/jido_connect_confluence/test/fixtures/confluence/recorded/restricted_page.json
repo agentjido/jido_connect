@@ -1,0 +1,80 @@
+{
+  "body": {
+    "errors": [
+      {
+        "code": "NOT_FOUND",
+        "detail": null,
+        "status": 404,
+        "title": "Not Found"
+      }
+    ]
+  },
+  "headers": {
+    "atl-request-id": [
+      "3b6fe8f4-a624-4c99-a333-807b5f7399e5"
+    ],
+    "atl-traceid": [
+      "3b6fe8f4a6244c99a333807b5f7399e5"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 13:42:08 GMT"
+    ],
+    "nel": [
+      "{\"failure_fraction\": 0.01, \"include_subdomains\": true, \"max_age\": 600, \"report_to\": \"endpoint-1\"}"
+    ],
+    "report-to": [
+      "{\"endpoints\": [{\"url\": \"https://dz8aopenkvv6s.cloudfront.net\"}], \"group\": \"endpoint-1\", \"include_subdomains\": true, \"max_age\": 600}"
+    ],
+    "reporting-endpoints": [
+      "default=\"https://dz8aopenkvv6s.cloudfront.net\""
+    ],
+    "server": [
+      "AtlassianEdge"
+    ],
+    "server-timing": [
+      "atl-edge;dur=78,atl-edge-internal;dur=16,atl-edge-upstream;dur=62,atl-edge-pop;desc=\"aws-eu-west-1\""
+    ],
+    "strict-transport-security": [
+      "max-age=63072000; includeSubDomains; preload"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding,Accept-Encoding"
+    ],
+    "via": [
+      "1.1 b3bfeb8eb7405a05775de8861a4d117c.cloudfront.net (CloudFront)"
+    ],
+    "x-amz-cf-id": [
+      "ULFovpBf9WHsYZxi6yuvZ-VjoyT5-E2bbL1iXalVmzeOucC8lPLqwg=="
+    ],
+    "x-amz-cf-pop": [
+      "FRA60-P2"
+    ],
+    "x-cache": [
+      "Error from cloudfront"
+    ],
+    "x-confluence-request-time": [
+      "1793626928018"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/wiki/api/v2/pages/3754819634"
+  },
+  "status": 404
+}

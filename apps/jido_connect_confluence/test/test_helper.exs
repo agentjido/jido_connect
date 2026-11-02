@@ -38,6 +38,18 @@ defmodule Jido.Connect.Confluence.TestRuntime do
       }
     }
   end
+
+  # Options for `Jido.Connect.invoke/4` with a short-lived lease of the runtime.
+  def invoke_opts(runtime) do
+    lease =
+      Jido.Connect.CredentialLease.from_connection!(
+        runtime.context.connection,
+        runtime.credentials,
+        expires_at: DateTime.add(DateTime.utc_now(), 60, :second)
+      )
+
+    [context: runtime.context, credential_lease: lease, provider_client: runtime.provider_client]
+  end
 end
 
 defmodule Jido.Connect.Confluence.MockClient do
