@@ -167,29 +167,67 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
 
   The body is rendered with `Jido.Connect.Jira.ADFText`:
   `body_unsupported_nodes` lists the ADF node and mark types skipped while
-  rendering it. A malformed ADF body returns the projection's
+  rendering it, and `body_adf` keeps the original ADF document. An empty
+  document keeps `body: ""`, so it stays apart from a comment without a body.
+  A malformed ADF body returns the projection's
   `Jido.Connect.Error.ValidationError`.
+
+  `url` is Jira's `self`; `visibility` is Jira's visibility restriction,
+  unchanged.
   """
   @spec comment(map()) :: {:ok, Comment.t()} | {:error, term()}
   def comment(payload) when is_map(payload) do
-    with {:ok, body} <- ADFText.project(Data.get(payload, "body")) do
+    raw_body = Data.get(payload, "body")
+
+    with {:ok, body} <- ADFText.project(raw_body) do
       %{
         id: Data.get(payload, "id"),
-        body: ADFText.text(body),
+        url: Data.get(payload, "self"),
+        body_adf: if(is_map(raw_body), do: raw_body),
         body_unsupported_nodes: ADFText.unsupported_nodes(body),
         rendered_body: Data.get(payload, "renderedBody"),
         author: normalize_user(Data.get(payload, "author")),
         update_author: normalize_user(Data.get(payload, "updateAuthor")),
         created_at: Data.get(payload, "created"),
         updated_at: Data.get(payload, "updated"),
+        visibility: Data.get(payload, "visibility"),
         jsd_public: Data.get(payload, "jsdPublic")
       }
       |> Data.compact()
+      |> put_text(:body, ADFText.text(body))
       |> Comment.new()
     end
   end
 
   def comment(_payload), do: {:error, :invalid_comment_payload}
+
+  @doc """
+  Returns the map shape of a normalized comment, without metadata.
+
+  Keys without a value are left out, also in the nested author and update
+  author, which become plain maps as the `:map` outputs of the generated
+  actions require.
+  """
+  @spec comment_map(Comment.t()) :: map()
+  def comment_map(%Comment{} = comment) do
+    comment
+    |> present_map()
+    |> Map.new(fn
+      {key, %User{} = user} -> {key, present_map(user)}
+      pair -> pair
+    end)
+  end
+
+  defp present_map(struct) when is_struct(struct) do
+    struct
+    |> Map.from_struct()
+    |> Map.drop([:metadata])
+    |> Map.reject(fn {_key, value} -> is_nil(value) end)
+  end
+
+  # `Data.compact/1` also drops "", the text of an empty document.
+  defp put_text(map, _key, nil), do: map
+  defp put_text(map, key, text), do: Map.put(map, key, text)
 
   # ---------------------------------------------------------------------------
   # Status

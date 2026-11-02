@@ -85,6 +85,11 @@ defmodule Jido.Connect.Jira.Client do
     to: Jido.Connect.Jira.Client.IssueSearch,
     as: :search
 
+  @doc "Lists one page of an issue's comments; see `Jido.Connect.Jira.Client.Comments`."
+  defdelegate list_comments(issue_key, request, opts \\ []),
+    to: Jido.Connect.Jira.Client.Comments,
+    as: :list
+
   @doc "Creates a new Jira issue."
   def create_issue(attrs, %Request{} = request) when is_map(attrs) do
     request

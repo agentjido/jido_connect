@@ -41,6 +41,15 @@
   `jira.issue.delete` reject the keys `.` and `..` before a request.
 - Return the nested status, assignee and reporter of issue reads as plain
   maps, which the `:map` outputs of the generated actions accept.
+- Add `jira.issue.comment.list`, a read-only action that returns one page of
+  an issue's comments, oldest first, through
+  `GET /rest/api/3/issue/{issueIdOrKey}/comment` without rendered HTML. The
+  page carries `issue` as supplied, `start_at`, `max_results`, `total`,
+  `is_last` and `next_start_at`, which is absent on the last page. The page
+  size defaults to 50 and accepts 1 to 100. Empty pages before the end and
+  malformed pages fail. The reader and editor packs include the action.
+- Add `url`, `body_adf` and `visibility` to `Comment`. A comment body that
+  projects to `""` keeps `body: ""` instead of losing the field.
 
 ## 0.1.0
 

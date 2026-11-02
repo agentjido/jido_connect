@@ -11,7 +11,6 @@ defmodule Jido.Connect.Jira.LiveSmokeTest do
   use Jido.Connect.TestSupport.LiveSmoke
 
   alias Jido.Connect.Jira.{Client, TestRuntime, Webhook}
-  alias Jido.Connect.Jira.Client.{Normalizer, Request, Transport}
 
   @tag env!(["JIRA_SITE", "JIRA_EMAIL", "JIRA_API_TOKEN", "JIRA_PROJECT_KEY"])
   test "reads the test project", %{env: env} do
@@ -35,26 +34,14 @@ defmodule Jido.Connect.Jira.LiveSmokeTest do
 
     assert {:ok, request} = request(env)
 
-    # The fourth comment of the test issue holds an image. Comment listing is
-    # not a client function yet, so the check reads the first page directly.
-    assert {:ok, %{status: 200, body: %{"comments" => comments}}} =
-             request
-             |> Transport.request()
-             |> Req.get(
-               url: Request.url(request, "/rest/api/3/issue/#{env["JIRA_ISSUE_KEY"]}/comment"),
-               params: %{startAt: 0, maxResults: 4, orderBy: "created"}
-             )
-
-    normalized =
-      Enum.map(comments, fn comment ->
-        assert {:ok, normalized} = Normalizer.comment(comment)
-        normalized
-      end)
+    # The fourth comment of the test issue holds an image.
+    assert {:ok, %{comments: comments}} =
+             Client.list_comments(env["JIRA_ISSUE_KEY"], request, max_results: 4)
 
     assert [_ | _] =
-             with_image = Enum.filter(normalized, &("mediaSingle" in &1.body_unsupported_nodes))
+             with_image = Enum.filter(comments, &("mediaSingle" in &1.body_unsupported_nodes))
 
-    assert Enum.all?(normalized -- with_image, &(&1.body_unsupported_nodes == []))
+    assert Enum.all?(comments -- with_image, &(&1.body_unsupported_nodes == []))
 
     assert {:ok, %{description: description, description_unsupported_nodes: []}} =
              Client.get_issue(env["JIRA_ISSUE_KEY"], request, fields: ["description"])
@@ -90,13 +77,8 @@ defmodule Jido.Connect.Jira.LiveSmokeTest do
 
     assert {:ok, request} = request(env)
 
-    assert {:ok, %{status: 200, body: %{"comments" => [_, _]}}} =
-             request
-             |> Transport.request()
-             |> Req.get(
-               url: Request.url(request, "/rest/api/3/issue/#{env["JIRA_ISSUE_KEY"]}/comment"),
-               params: %{startAt: 2, maxResults: 2, orderBy: "created"}
-             )
+    assert {:ok, %{comments: [_, _]}} =
+             Client.list_comments(env["JIRA_ISSUE_KEY"], request, start_at: 2, max_results: 2)
 
     issue_id = env["JIRA_ISSUE_ID"]
     issue_key = env["JIRA_ISSUE_KEY"]
@@ -204,6 +186,110 @@ defmodule Jido.Connect.Jira.LiveSmokeTest do
              invoke(env, "jira.issue.search", %{jql: jql, max_results: 1, fields: ["id"]})
   end
 
+  @tag env!([
+         "JIRA_SITE",
+         "JIRA_EMAIL",
+         "JIRA_API_TOKEN",
+         "JIRA_PROJECT_KEY",
+         "JIRA_ISSUE_KEY"
+       ])
+  test "lists the prepared issue's comments across two pages, the restricted one included",
+       %{env: env} do
+    # One recording for all reads. The first response, the first four
+    # comments, names both comment authors, so the sanitizer knows their
+    # account IDs and names before it meets the mention in the first comment
+    # on its own and the `x-aaccountid` headers. Avatar URLs carry e-mail
+    # hashes and initials, so they become placeholders.
+    LiveSmoke.record({:jido_connect_jira, :jira_req_options}, :jira, "comment_list",
+      fields: ~w(16x16 24x24 32x32 48x48)
+    )
+
+    issue_key = env["JIRA_ISSUE_KEY"]
+    list = &invoke(env, "jira.issue.comment.list", Map.put(&1, :issue_key, issue_key))
+
+    assert {:ok, %{issue: ^issue_key, start_at: 0, is_last: false, total: total} = four} =
+             list.(%{max_results: 4})
+
+    assert %{max_results: 4, next_start_at: 4, comments: [_, _, _, _]} = four
+
+    assert {:ok, %{start_at: 0, next_start_at: 2, is_last: false} = first} =
+             list.(%{max_results: 2})
+
+    assert {:ok, %{start_at: 2, next_start_at: 4, is_last: false} = second} =
+             list.(%{start_at: first.next_start_at, max_results: 2})
+
+    assert [_, _] = first.comments
+    assert first.total == total and second.total == total
+    assert second.issue == issue_key
+
+    # Two pages of two hold the same comments as one page of four, in the
+    # same order and with the same visibility.
+    assert ids_and_visibility(first.comments ++ second.comments) ==
+             ids_and_visibility(four.comments)
+
+    # The test user sees the comment restricted to its project role. Jira
+    # leaves out the one restricted to administrators.
+    assert [%{visibility: %{"type" => "role", "value" => _role}}] =
+             Enum.filter(four.comments, &Map.has_key?(&1, :visibility))
+
+    assert [%{body: text, body_unsupported_nodes: ["mediaSingle"]}] =
+             Enum.filter(four.comments, &(&1.body_unsupported_nodes != []))
+
+    assert text != ""
+
+    for comment <- four.comments do
+      assert %{id: id, url: url, body_adf: %{"type" => "doc"}, author: %{account_id: _}} =
+               comment
+
+      assert String.ends_with?(url, "/comment/#{id}")
+      assert %{created_at: _, updated_at: _, update_author: %{account_id: _}} = comment
+    end
+
+    # The last page ends the list; a page at the end is empty and also final.
+    last_start = total - 2
+
+    assert {:ok, %{start_at: ^last_start, is_last: true, comments: [_, _]} = last} =
+             list.(%{start_at: last_start, max_results: 2})
+
+    refute Map.has_key?(last, :next_start_at)
+
+    assert {:ok, %{start_at: ^total, is_last: true, comments: []} = past} =
+             list.(%{start_at: total, max_results: 2})
+
+    refute Map.has_key?(past, :next_start_at)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{status: 404}} =
+             invoke(env, "jira.issue.comment.list", %{
+               issue_key: "#{env["JIRA_PROJECT_KEY"]}-999999"
+             })
+  end
+
+  @tag env!(["JIRA_SITE", "JIRA_EMAIL", "JIRA_API_TOKEN", "JIRA_ISSUE_KEY"])
+  test "walks every visible comment of the prepared issue with the default page size",
+       %{env: env} do
+    issue_key = env["JIRA_ISSUE_KEY"]
+    pages = follow_comments(env, %{issue_key: issue_key})
+
+    # The test issue has more comments than one default page of 50.
+    assert [%{max_results: 50, is_last: false} | _] = pages
+    assert [_, _ | _] = pages
+
+    comments = Enum.flat_map(pages, & &1.comments)
+    ids = Enum.map(comments, & &1.id)
+
+    assert length(comments) == hd(pages).total
+    assert ids == Enum.uniq(ids)
+    assert ids == Enum.sort_by(ids, &String.to_integer/1)
+
+    assert {:ok, %{is_last: true, comments: all}} =
+             invoke(env, "jira.issue.comment.list", %{issue_key: issue_key, max_results: 100})
+
+    assert ids_and_visibility(all) == ids_and_visibility(comments)
+
+    assert [%{visibility: %{"type" => "role"}}] =
+             Enum.filter(comments, &Map.has_key?(&1, :visibility))
+  end
+
   @tag env!(["JIRA_WEBHOOK_SECRET", "JIRA_CAPTURE_DIR"])
   test "the newest captured delivery replays before and after sanitizing", %{env: env} do
     secret = env["JIRA_WEBHOOK_SECRET"]
@@ -289,6 +375,23 @@ defmodule Jido.Connect.Jira.LiveSmokeTest do
         follow_search(env, Map.put(input, :next_page_token, token), [page | pages])
     end
   end
+
+  # Follows `next_start_at` until `is_last`, with a bound against a loop.
+  defp follow_comments(env, input, pages \\ []) do
+    assert length(pages) < 10, "the comment list did not end within 10 pages"
+    assert {:ok, page} = invoke(env, "jira.issue.comment.list", input)
+
+    case page do
+      %{is_last: true} ->
+        Enum.reverse([page | pages])
+
+      %{next_start_at: next_start_at} ->
+        follow_comments(env, Map.put(input, :start_at, next_start_at), [page | pages])
+    end
+  end
+
+  defp ids_and_visibility(comments),
+    do: Enum.map(comments, &{&1.id, Map.get(&1, :visibility)})
 
   defmodule AllowPolicy do
     @moduledoc false

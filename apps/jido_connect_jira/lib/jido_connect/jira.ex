@@ -34,6 +34,14 @@ defmodule Jido.Connect.Jira do
   count only the issue fields the connector reads; custom fields behind them
   and other `*` selectors are not checked.
 
+  ## Issue Comments
+
+  `jira.issue.comment.list` returns one page of an issue's comments, oldest
+  first, with the plain-text body, the original ADF, authors, timestamps and
+  visibility. Pass `next_start_at` as `start_at` until `is_last` is `true`.
+  Jira's comment pages carry no last-page flag, so `is_last` comes from
+  `total`, and `next_start_at` is absent on the last page.
+
   ## Issue Search
 
   `jira.issue.search` uses Jira's enhanced JQL search,
@@ -50,6 +58,7 @@ defmodule Jido.Connect.Jira do
   use Jido.Connect,
     fragments: [
       Jido.Connect.Jira.Actions.Issues,
+      Jido.Connect.Jira.Actions.Comments,
       Jido.Connect.Jira.Actions.Projects,
       Jido.Connect.Jira.Actions.Metadata,
       Jido.Connect.Jira.Actions.Boards,

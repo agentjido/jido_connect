@@ -1,0 +1,94 @@
+{
+  "body": {
+    "errorMessages": [
+      "Issue does not exist or you do not have permission to see it."
+    ],
+    "errors": {}
+  },
+  "headers": {
+    "atl-request-id": [
+      "d528cf73-0f94-453b-b05e-e9f68738cc31"
+    ],
+    "atl-traceid": [
+      "d528cf730f94453bb05ee9f68738cc31"
+    ],
+    "cache-control": [
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json;charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 10:52:30 GMT"
+    ],
+    "nel": [
+      "{\"failure_fraction\": 0.01, \"include_subdomains\": true, \"max_age\": 600, \"report_to\": \"endpoint-1\"}"
+    ],
+    "ratelimit": [
+      "\"jira-burst-based\";r=348;t=1"
+    ],
+    "ratelimit-policy": [
+      "\"jira-burst-based\";q=100;w=1"
+    ],
+    "report-to": [
+      "{\"endpoints\": [{\"url\": \"https://dz8aopenkvv6s.cloudfront.net\"}], \"group\": \"endpoint-1\", \"include_subdomains\": true, \"max_age\": 600}"
+    ],
+    "server": [
+      "AtlassianEdge"
+    ],
+    "server-timing": [
+      "atl-edge;dur=54,atl-edge-internal;dur=17,atl-edge-upstream;dur=37,atl-edge-pop;desc=\"aws-eu-west-1\""
+    ],
+    "strict-transport-security": [
+      "max-age=63072000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 91353a8aba9ab05d79e9678e004043bc.cloudfront.net (CloudFront)"
+    ],
+    "x-aaccountid": [
+      "account-1"
+    ],
+    "x-amz-cf-id": [
+      "IM7tBV_fc6FpGzC7uUTwhR7gCJKYn7QGwkIz6u5TVNO4BRxoC1aEWA=="
+    ],
+    "x-amz-cf-pop": [
+      "FRA60-P1"
+    ],
+    "x-arequestid": [
+      "ae69e3b2cf2b9b30c7a6ad1edb059c11"
+    ],
+    "x-cache": [
+      "Error from cloudfront"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-ratelimit-limit": [
+      "350"
+    ],
+    "x-ratelimit-remaining": [
+      "348"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/rest/api/3/issue/JCL-999999/comment"
+  },
+  "status": 404
+}

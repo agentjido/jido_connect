@@ -1,0 +1,94 @@
+{
+  "body": {
+    "comments": [],
+    "maxResults": 2,
+    "startAt": 54,
+    "total": 54
+  },
+  "headers": {
+    "atl-request-id": [
+      "c17cfd9a-940b-4c93-af3b-e6bc46057323"
+    ],
+    "atl-traceid": [
+      "c17cfd9a940b4c93af3be6bc46057323"
+    ],
+    "cache-control": [
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json;charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 10:52:30 GMT"
+    ],
+    "nel": [
+      "{\"failure_fraction\": 0.01, \"include_subdomains\": true, \"max_age\": 600, \"report_to\": \"endpoint-1\"}"
+    ],
+    "ratelimit": [
+      "\"jira-burst-based\";r=349;t=1"
+    ],
+    "ratelimit-policy": [
+      "\"jira-burst-based\";q=100;w=1"
+    ],
+    "report-to": [
+      "{\"endpoints\": [{\"url\": \"https://dz8aopenkvv6s.cloudfront.net\"}], \"group\": \"endpoint-1\", \"include_subdomains\": true, \"max_age\": 600}"
+    ],
+    "server": [
+      "AtlassianEdge"
+    ],
+    "server-timing": [
+      "cdn-upstream-layer;desc=\"EDGE\",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=60,cdn-upstream-fbl;dur=167,atl-edge;dur=87,atl-edge-internal;dur=16,atl-edge-upstream;dur=71,atl-edge-pop;desc=\"aws-eu-west-1\",cdn-cache-miss,cdn-pop;desc=\"FRA60-P1\",cdn-rid;desc=\"4LXeTTAhlDcY9FUB474b28bOsHrpk-oe87ZHhq7XCcjIv-7drBLFjg==\",cdn-downstream-fbl;dur=172"
+    ],
+    "strict-transport-security": [
+      "max-age=63072000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding,Accept-Encoding"
+    ],
+    "via": [
+      "1.1 91353a8aba9ab05d79e9678e004043bc.cloudfront.net (CloudFront)"
+    ],
+    "x-aaccountid": [
+      "account-1"
+    ],
+    "x-amz-cf-id": [
+      "4LXeTTAhlDcY9FUB474b28bOsHrpk-oe87ZHhq7XCcjIv-7drBLFjg=="
+    ],
+    "x-amz-cf-pop": [
+      "FRA60-P1"
+    ],
+    "x-arequestid": [
+      "32658614bbc6fa2f09383498d486299e"
+    ],
+    "x-cache": [
+      "Miss from cloudfront"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-ratelimit-limit": [
+      "350"
+    ],
+    "x-ratelimit-remaining": [
+      "349"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/rest/api/3/issue/JCL-1/comment"
+  },
+  "status": 200
+}

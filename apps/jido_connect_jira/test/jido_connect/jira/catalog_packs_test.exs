@@ -19,6 +19,7 @@ defmodule Jido.Connect.Jira.CatalogPacksTest do
       # Issue reads
       assert "jira.issue.get" in ids
       assert "jira.issue.search" in ids
+      assert "jira.issue.comment.list" in ids
 
       # Project reads
       assert "jira.project.list" in ids
@@ -46,6 +47,27 @@ defmodule Jido.Connect.Jira.CatalogPacksTest do
       refute "jira.issue.assign" in ids
       refute "jira.issue.comment.create" in ids
       refute "jira.issue.delete" in ids
+    end
+
+    test "holds no write tool" do
+      results =
+        Catalog.search_tools("jira",
+          modules: [Jira],
+          packs: Jira.catalog_packs(),
+          pack: :jira_reader
+        )
+
+      assert [_ | _] = results
+      assert Enum.map(results, & &1.tool.risk) |> Enum.uniq() == [:read]
+    end
+
+    test "describe_tool accepts the comment list" do
+      assert {:ok, %{tool: %{id: "jira.issue.comment.list", risk: :read}}} =
+               Catalog.describe_tool("jira.issue.comment.list",
+                 modules: [Jira],
+                 packs: Jira.catalog_packs(),
+                 pack: :jira_reader
+               )
     end
 
     test "describe_tool accepts reader tools and rejects write tools" do
@@ -97,6 +119,7 @@ defmodule Jido.Connect.Jira.CatalogPacksTest do
       # All read tools
       assert "jira.issue.get" in ids
       assert "jira.issue.search" in ids
+      assert "jira.issue.comment.list" in ids
       assert "jira.project.list" in ids
       assert "jira.project.get" in ids
       assert "jira.field_schema.list" in ids

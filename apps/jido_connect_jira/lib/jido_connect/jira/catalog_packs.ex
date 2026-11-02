@@ -9,7 +9,7 @@ defmodule Jido.Connect.Jira.CatalogPacks do
 
   | Pack | Risk | Tools |
   |------|------|-------|
-  | `:jira_reader` | read | ordinary issue, project, board, and filter queries |
+  | `:jira_reader` | read | ordinary issue, comment, project, board, and filter queries |
   | `:jira_editor` | write | reader + non-destructive issue, board, and filter writes |
   | `:jira_admin` | privileged | plan reads and non-destructive plan writes |
   | `:jira_destructive` | destructive | issue delete, plan archive, and plan trash |
@@ -21,7 +21,8 @@ defmodule Jido.Connect.Jira.CatalogPacks do
 
   @issue_read_tools [
     "jira.issue.get",
-    "jira.issue.search"
+    "jira.issue.search",
+    "jira.issue.comment.list"
   ]
 
   @project_read_tools [
@@ -99,7 +100,8 @@ defmodule Jido.Connect.Jira.CatalogPacks do
       id: :jira_reader,
       label: "Jira reader",
       description:
-        "Read Jira issues, projects, boards, filters, transitions, and field schemas without mutation tools.",
+        "Read Jira issues, comments, projects, boards, filters, transitions, and field schemas " <>
+          "without mutation tools.",
       filters: %{provider: :jira},
       allowed_tools: @reader_tools,
       metadata: %{package: :jido_connect_jira, risk: :read}

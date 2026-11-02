@@ -23,7 +23,7 @@ The Spark DSL declaration lives in
 
 ## Status
 
-This package is **experimental**. Its 29 actions use fixed Jira Cloud REST
+This package is **experimental**. Its 30 actions use fixed Jira Cloud REST
 contracts, normalized results, and bounded inputs.
 
 ## Installation
@@ -77,6 +77,7 @@ mutation actions are needed.
 | `jira.issue.delete` | delete | destructive | Permanently delete an issue |
 | `jira.issue.assign` | update | write | Assign issue to user |
 | `jira.issue.comment.create` | create | external_write | Add comment to issue |
+| `jira.issue.comment.list` | list | read | List an issue's comments, one page per call |
 
 ### Issue Reads and Search
 
@@ -122,6 +123,44 @@ the action changed in place. Deprecated for one release and removed in the
 next: the `start_at` input accepts only `0` and rejects any other value before
 a request is sent, and the `total` and `start_at` outputs are declared but
 never returned. Enhanced search has neither offsets nor a total.
+
+### Issue Comments
+
+`jira.issue.comment.list` calls `GET /rest/api/3/issue/{issueIdOrKey}/comment`
+with `startAt`, `maxResults` and `orderBy=created`, so each page lists
+comments oldest first. It does not request rendered HTML. The `issue_key`
+input takes a key or a numeric issue ID, sent as one percent-encoded path
+segment, and the output returns it unchanged as `issue`.
+
+Each call returns one page with `comments`, `issue`, Jira's `start_at`,
+`max_results` and `total`, `is_last` and `next_start_at`. Jira's comment page
+has no last-page flag, so `is_last` is `true` once `start_at` plus the number
+of comments reaches `total`. A page with fewer comments than `max_results` can
+therefore be non-final. `next_start_at` is `start_at` plus the number of
+comments and is absent on the last page; pass it as `start_at` until `is_last`
+is `true`. A page at or past the end is empty and final. An empty page before
+the end, and a page without a `comments` list or with a `startAt`,
+`maxResults` or `total` that is not a non-negative integer, fail with an
+`:invalid_response` error.
+
+The page size is a connector choice: 50 by default, 1 to 100 allowed, where
+Jira's own default is 100. `start_at` must not be negative. Other values fail
+before a request is sent, because Jira would turn 0 into 1, cap larger sizes
+at 100 and read a negative offset as 0.
+
+Each comment carries `id`, `url` (the API `self` URL), the plain-text `body`
+with `body_unsupported_nodes`, the original ADF document as `body_adf`,
+`author`, `update_author`, `created_at`, `updated_at`, `jsd_public` and, for
+a restricted comment, Jira's `visibility` map unchanged, such as
+`%{"type" => "role", "value" => "Developers", "identifier" => "Developers"}`.
+Keys without a value are left out. Jira lists only the comments that the
+caller may see, and `total` counts only those.
+
+Missing, empty and malformed bodies stay apart. A comment without a body has
+no `body`, `body_adf` or `body_unsupported_nodes`. An empty ADF document gives
+`body: ""` next to its `body_adf`. A body that is not valid ADF fails the page
+with an `:invalid_response` error whose details name `body`, the comment ID
+and the projection reason, without comment text.
 
 ### Project and Metadata Actions
 
@@ -239,7 +278,7 @@ The provider ships with curated catalog packs for scoped tool discovery:
 
 | Pack | Tools |
 |---|---|
-| `:jira_reader` | Ordinary issue, project, board, filter, transition, and field schema reads |
+| `:jira_reader` | Ordinary issue, comment, project, board, filter, transition, and field schema reads |
 | `:jira_editor` | Reader + non-destructive issue, board, and filter writes |
 | `:jira_admin` | Non-destructive plan reads and writes; host policy is still required |
 | `:jira_destructive` | Issue delete, plan archive, and plan trash |
@@ -287,9 +326,12 @@ Format (ADF). `Jido.Connect.Jira.ADFText` renders them with
   order. Plain-string values pass through with an empty list.
 - Malformed ADF and documents beyond the projection's depth or node-count
   limit fail explicitly. `Normalizer.issue/1` and `Normalizer.comment/1`
-  return the projection's `Jido.Connect.Error.ValidationError`, issue reads and
-  searches return an `:invalid_response` provider error that names the field
-  but not its content. Configure the limits through `jido_connect_atlassian`.
+  return the projection's `Jido.Connect.Error.ValidationError`, issue reads,
+  searches and comment lists return an `:invalid_response` provider error that
+  names the field but not its content. Configure the limits through
+  `jido_connect_atlassian`.
+- `Comment.body_adf` keeps the original ADF document of a comment body. An
+  empty document renders as `""`, which stays in `Comment.body`.
 
 ## API Boundaries
 
