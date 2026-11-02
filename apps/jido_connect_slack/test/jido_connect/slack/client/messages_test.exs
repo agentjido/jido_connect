@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Slack.Client.MessagesTest do
   use ExUnit.Case, async: false
   alias Jido.Connect
-  alias Jido.Connect.Slack.Client
+  alias Jido.Connect.Slack.{CatalogPacks, Client}
   alias Jido.Connect.TestSupport.LiveSmoke
 
   setup {Req.Test, :verify_on_exit!}
@@ -334,6 +334,78 @@ defmodule Jido.Connect.Slack.Client.MessagesTest do
              Client.post_message(%{channel: "C0CEEB41FU0", text: text}, "token")
   end
 
+  describe "slack.message.post with Block Kit blocks through Jido.Connect.invoke" do
+    # Recorded: the block actions live test posts a section and an actions
+    # block with an Approve and a Reject button, with a fallback text, to the
+    # public channel and deletes the post again. The test sends the blocks
+    # as Slack stored them.
+    test "sends blocks and the fallback text to chat.postMessage unchanged" do
+      %{"ts" => ts, "message" => %{"text" => text, "blocks" => blocks} = message} =
+        fixture = LiveSmoke.fixture!(:slack, "chat_post_message_blocks")
+
+      assert [
+               %{"type" => "section"},
+               %{
+                 "type" => "actions",
+                 "elements" => [
+                   %{"type" => "button", "value" => "capture-1:approve"},
+                   %{"type" => "button", "value" => "capture-1:reject"}
+                 ]
+               }
+             ] = blocks
+
+      expect_post(fixture)
+
+      assert {:ok, %{channel: @channel, ts: ^ts, message: ^message}} =
+               post(%{channel: @channel, text: text, blocks: blocks})
+
+      assert_received {:slack_post, body}
+
+      assert body == %{
+               "channel" => @channel,
+               "text" => text,
+               "blocks" => blocks,
+               "reply_broadcast" => false
+             }
+    end
+
+    # Recorded: the text-only post of the delivery check.
+    test "a text-only post sends no blocks key" do
+      %{"ts" => ts, "message" => %{"text" => text}} =
+        fixture = LiveSmoke.fixture!(:slack, "chat_post_message_channel")
+
+      expect_post(fixture)
+
+      assert {:ok, %{channel: @channel, ts: ^ts}} = post(%{channel: @channel, text: text})
+      assert_received {:slack_post, body}
+      assert body == %{"channel" => @channel, "text" => text, "reply_broadcast" => false}
+    end
+
+    test "blocks are optional and leave scopes, confirmation and the pack allowlists as they were" do
+      assert {:ok, action} = Connect.action(Jido.Connect.Slack, "slack.message.post")
+
+      assert %{
+               scopes: ["chat:write"],
+               policies: [:workspace_access],
+               auth_profiles: [:bot, :user],
+               mutation?: true,
+               risk: :write,
+               confirmation: :required_for_ai
+             } = action
+
+      assert [
+               %{name: :channel, required?: true},
+               %{name: :text, required?: true},
+               %{name: :thread_ts, required?: false},
+               %{name: :reply_broadcast, required?: false},
+               %{name: :blocks, required?: false, type: {:array, :map}}
+             ] = action.input
+
+      assert "slack.message.post" in CatalogPacks.editor().allowed_tools
+      refute "slack.message.post" in CatalogPacks.reader().allowed_tools
+    end
+  end
+
   test "schedule message sends expected request and normalizes output" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "POST"
@@ -472,9 +544,29 @@ defmodule Jido.Connect.Slack.Client.MessagesTest do
     end
   end
 
+  # Answers one chat.postMessage request with `response` and sends the
+  # decoded request body to the test.
+  defp expect_post(response) do
+    test_pid = self()
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/api/chat.postMessage"
+      assert ["Bearer token"] = Plug.Conn.get_req_header(conn, "authorization")
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      send(test_pid, {:slack_post, Jason.decode!(body)})
+      Req.Test.json(conn, response)
+    end)
+  end
+
+  defp post(input), do: invoke("slack.message.post", input, ["chat:write"])
+
+  defp invoke(input, scopes \\ ["channels:history"]),
+    do: invoke("slack.thread.replies", input, scopes)
+
   # The lease carries no `slack_client`, so the action uses `Client` and the
   # stub above answers its request.
-  defp invoke(input, scopes \\ ["channels:history"]) do
+  defp invoke(action_id, input, scopes) do
     connection =
       Connect.Connection.new!(%{
         id: "slack-bot",
@@ -487,7 +579,7 @@ defmodule Jido.Connect.Slack.Client.MessagesTest do
         scopes: scopes
       })
 
-    Connect.invoke(Jido.Connect.Slack, "slack.thread.replies", input,
+    Connect.invoke(Jido.Connect.Slack, action_id, input,
       context:
         Connect.Context.new!(%{
           tenant_id: "tenant-1",

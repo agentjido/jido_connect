@@ -1555,7 +1555,8 @@ defmodule Jido.Connect.SlackTest do
              Jido.Connect.Slack.Sensors.AppUninstalled,
              Jido.Connect.Slack.Sensors.TokensRevoked,
              Jido.Connect.Slack.Sensors.ScopeDenied,
-             Jido.Connect.Slack.Sensors.AppHomeOpened
+             Jido.Connect.Slack.Sensors.AppHomeOpened,
+             Jido.Connect.Slack.Sensors.BlockActions
            ]
 
     assert Jido.Connect.Slack.jido_plugin_module() == Jido.Connect.Slack.Plugin
@@ -1638,7 +1639,8 @@ defmodule Jido.Connect.SlackTest do
                  Jido.Connect.Slack.Sensors.AppUninstalled,
                  Jido.Connect.Slack.Sensors.TokensRevoked,
                  Jido.Connect.Slack.Sensors.ScopeDenied,
-                 Jido.Connect.Slack.Sensors.AppHomeOpened
+                 Jido.Connect.Slack.Sensors.AppHomeOpened,
+                 Jido.Connect.Slack.Sensors.BlockActions
                ],
                plugin: Jido.Connect.Slack.Plugin
              }
@@ -1784,7 +1786,8 @@ defmodule Jido.Connect.SlackTest do
              :channel,
              :text,
              :thread_ts,
-             :reply_broadcast
+             :reply_broadcast,
+             :blocks
            ]
 
     assert projection.risk == :write

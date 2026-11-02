@@ -239,6 +239,8 @@ defmodule Jido.Connect.Slack.InteractivityTest do
                Interactivity.verify_delivery(@doc_body, headers, @doc_secret, now: @doc_now)
     end
 
+    # The documented example's button sits in a legacy attachment, so it
+    # yields no block action signal.
     test "returns a verified delivery for a signed block_actions form body" do
       body = form_body(@block_actions_payload)
 
@@ -360,7 +362,10 @@ defmodule Jido.Connect.Slack.InteractivityTest do
   end
 
   describe "payload type dispatch" do
-    test "returns unsupported types as verified deliveries without a signal or HTTP request" do
+    # The documented block_actions example clicks a button in a legacy
+    # attachment (`container.type` "message_attachment"), which the block
+    # action normalizer does not take.
+    test "returns unsupported payloads as verified deliveries without a signal or HTTP request" do
       attach_http_probe()
 
       for {json, event, team_id, api_app_id} <- [
@@ -383,7 +388,7 @@ defmodule Jido.Connect.Slack.InteractivityTest do
     test "Normalizer.normalize_signal/3 rejects types without a normalizer" do
       {:ok, %WebhookDelivery{payload: payload}} = verify(form_body(@shortcut_payload))
 
-      for type <- ["shortcut", "message_action", "block_actions", "view_submission", nil] do
+      for type <- ["shortcut", "message_action", "view_submission", nil] do
         assert {:error,
                 %Error.ProviderError{
                   provider: :slack,

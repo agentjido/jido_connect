@@ -1,0 +1,17 @@
+{
+  "body": "payload=%7B%22actions%22%3A%5B%7B%22action_id%22%3A%22jc_capture_approve%22%2C%22action_ts%22%3A%221793627604.412086%22%2C%22block_id%22%3A%22jc_capture_decision_1%22%2C%22style%22%3A%22primary%22%2C%22text%22%3A%7B%22emoji%22%3Atrue%2C%22text%22%3A%22Approve%22%2C%22type%22%3A%22plain_text%22%7D%2C%22type%22%3A%22button%22%2C%22value%22%3A%22capture-1%3Aapprove%22%7D%5D%2C%22api_app_id%22%3A%22A0CDHUBBHRC%22%2C%22channel%22%3A%7B%22id%22%3A%22C0CEEB41FU0%22%2C%22name%22%3A%22name-1%22%7D%2C%22container%22%3A%7B%22channel_id%22%3A%22C0CEEB41FU0%22%2C%22is_ephemeral%22%3Afalse%2C%22message_ts%22%3A%221793627512.599759%22%2C%22type%22%3A%22message%22%7D%2C%22enterprise%22%3Anull%2C%22is_enterprise_install%22%3Afalse%2C%22message%22%3A%7B%22app_id%22%3A%22A0CDHUBBHRC%22%2C%22blocks%22%3A%5B%7B%22block_id%22%3A%22jc_capture_text_1%22%2C%22text%22%3A%7B%22text%22%3A%22%2AButton+capture+1%2A%5CnLive+capture+for+the+Slack+button+tests.+Click+one+button.%22%2C%22type%22%3A%22mrkdwn%22%2C%22verbatim%22%3Afalse%7D%2C%22type%22%3A%22section%22%7D%2C%7B%22block_id%22%3A%22jc_capture_decision_1%22%2C%22elements%22%3A%5B%7B%22action_id%22%3A%22jc_capture_approve%22%2C%22style%22%3A%22primary%22%2C%22text%22%3A%7B%22emoji%22%3Atrue%2C%22text%22%3A%22Approve%22%2C%22type%22%3A%22plain_text%22%7D%2C%22type%22%3A%22button%22%2C%22value%22%3A%22capture-1%3Aapprove%22%7D%2C%7B%22action_id%22%3A%22jc_capture_reject%22%2C%22style%22%3A%22danger%22%2C%22text%22%3A%7B%22emoji%22%3Atrue%2C%22text%22%3A%22Reject%22%2C%22type%22%3A%22plain_text%22%7D%2C%22type%22%3A%22button%22%2C%22value%22%3A%22capture-1%3Areject%22%7D%5D%2C%22type%22%3A%22actions%22%7D%5D%2C%22bot_id%22%3A%22B0CDHUEB8MC%22%2C%22team%22%3A%22T0CEE692400%22%2C%22text%22%3A%22Button+capture+1%3A+please+click+one+button.%22%2C%22ts%22%3A%221793627512.599759%22%2C%22type%22%3A%22message%22%2C%22user%22%3A%22U0CDHUEBVEJ%22%7D%2C%22response_url%22%3A%22response_url-1%22%2C%22state%22%3A%7B%22values%22%3A%7B%7D%7D%2C%22team%22%3A%7B%22domain%22%3A%22domain-1%22%2C%22id%22%3A%22T0CEE692400%22%7D%2C%22token%22%3A%22%5Bredacted%5D%22%2C%22trigger_id%22%3A%22trigger_id-1%22%2C%22type%22%3A%22block_actions%22%2C%22user%22%3A%7B%22id%22%3A%22U0CDPFT1RDJ%22%2C%22name%22%3A%22name-2%22%2C%22team_id%22%3A%22T0CEE692400%22%2C%22username%22%3A%22Person+1%22%7D%7D",
+  "captured_at": 1793627604,
+  "headers": {
+    "accept": "application/json,*/*",
+    "accept-encoding": "gzip,deflate",
+    "content-length": "2523",
+    "content-type": "application/x-www-form-urlencoded",
+    "host": "example.ngrok-free.dev",
+    "user-agent": "Slackbot 1.0 (+https://api.slack.com/robots)",
+    "x-slack-request-timestamp": "1793627604",
+    "x-slack-signature": "v0=ab59d4109470113b4c683791a3d119966dd785f70469e540f5f94fbf437e8b4a"
+  },
+  "method": "POST",
+  "path": "/integrations/slack/interactivity",
+  "provider": "slack"
+}

@@ -10,7 +10,8 @@ It includes:
 - OAuth v2 helpers in `Jido.Connect.Slack.OAuth`
 - Slack Web API helpers in `Jido.Connect.Slack.Client`
 - signed request verification and Events API helpers in `Jido.Connect.Slack.Webhook`
-- verification of signed interactivity requests in `Jido.Connect.Slack.Interactivity`
+- verification of signed interactivity requests and button clicks in
+  `Jido.Connect.Slack.Interactivity`
 
 The Spark DSL declaration lives in `lib/jido_connect/slack/integration.ex`.
 Provider handlers live under `lib/jido_connect/slack/handlers/`.
@@ -164,6 +165,12 @@ Slack `chat.postMessage` unchanged, with `reply_broadcast` defaulting to
 a link; the package does not escape, shorten or split it. `thread_ts` is the
 string timestamp of the thread's parent message. Posting needs `chat:write`
 and no history scope.
+
+`blocks` is optional and goes to Slack as given, so a post can carry Block
+Kit layout such as buttons; [Buttons in messages](#buttons-in-messages)
+shows an example. `text` stays required: Slack shows it in notifications
+and in clients that cannot render the blocks. A post without `blocks` sends
+no `blocks` key.
 
 `slack.conversation.open` sends `users` to Slack `conversations.open` as a
 comma-separated list and returns the conversation ID as `channel`, the target
@@ -424,6 +431,9 @@ Options:
   `:body_too_large` before the signature check.
 - `:now` sets the current Unix time for the five-minute timestamp window.
 - `:seen_delivery_ids` lists delivery IDs the host has already processed.
+- `:api_app_id` names the host's Slack app. Only the `block_actions`
+  normalizer reads it, as the next section describes; the transport does not
+  check the app.
 
 The signature and timestamp checks are those of
 `Jido.Connect.Slack.Webhook.verify_signature/4` and return its auth errors. The
@@ -434,7 +444,11 @@ otherwise the error reason is `:missing_payload`, `:duplicate_payload` or
 Slack sends no delivery ID with interactivity requests. The delivery ID is the
 lowercase hex SHA-256 of the verified raw body. A byte-identical redelivery
 gets the same ID and is marked `duplicate?: true` when that ID is in
-`:seen_delivery_ids`; a body that differs in any byte gets another ID.
+`:seen_delivery_ids`; a body that differs in any byte gets another ID. The
+ID, `duplicate?` and `received_at` stay on the delivery. Unlike a signal from
+`Jido.Connect.Slack.Webhook.normalize_signal/1`, an interactivity signal
+carries no `delivery` map, so a host that handles both reads `delivery_id`
+from the `WebhookDelivery`.
 
 `event` is the payload `type`, and `metadata` carries `team_id` and
 `api_app_id`. `payload` is the decoded object without the temporary
@@ -442,7 +456,118 @@ capabilities `token`, `bot_access_token`, `response_url`, `response_urls` and
 `trigger_id`. A `view_submission` can also carry `response_urls` inside `view`,
 and an interaction from a workflow step carries
 `interactivity.interactivity_pointer`; both are dropped as well. `interactor`
-and `function_data` stay. The raw body is not kept. No payload type is
-normalized yet, so `normalized_signal` is `nil`.
+and `function_data` stay. The raw body is not kept. Only `block_actions`
+payloads are normalized, as the next section describes; every other payload
+keeps `normalized_signal: nil`.
 Verification makes no HTTP request and does not acknowledge the request; the
 host answers Slack.
+
+### Buttons in messages
+
+A message with buttons is a post with `blocks` and a fallback `text`. Each
+button carries an `action_id`, the `block_id` of its actions block and an
+opaque `value` that the host chooses, such as a correlation key:
+
+```elixir
+Jido.Connect.invoke(
+  Jido.Connect.Slack,
+  "slack.message.post",
+  %{
+    channel: "C012AB3CD",
+    text: "Request 42: Approve or Reject",
+    blocks: [
+      %{type: "section", text: %{type: "mrkdwn", text: "*Request 42*"}},
+      %{
+        type: "actions",
+        block_id: "request_42",
+        elements: [
+          %{
+            type: "button",
+            action_id: "approve",
+            text: %{type: "plain_text", text: "Approve"},
+            value: "request-42:approve"
+          },
+          %{
+            type: "button",
+            action_id: "reject",
+            text: %{type: "plain_text", text: "Reject"},
+            value: "request-42:reject"
+          }
+        ]
+      }
+    ]
+  },
+  context: context,
+  credential_lease: lease
+)
+```
+
+A click arrives at the interactivity request URL as a signed `block_actions`
+payload. `verify_delivery/4` sets `normalized_signal` to the fields of
+`Jido.Connect.Slack.BlockAction`, without those that are `nil`, when the
+click is on one button in a message:
+
+```elixir
+{:ok, delivery} =
+  Jido.Connect.Slack.Interactivity.verify_delivery(raw_body, headers, signing_secret,
+    api_app_id: "A012AB3CD",
+    seen_delivery_ids: processed_ids
+  )
+
+%{user_id: user, channel_id: channel, message_ts: ts, value: value} =
+  delivery.normalized_signal
+```
+
+`user_id` is the person who clicked. It comes from `user.id`, not from the
+message's `user`, and is the message's author or the app's installer only
+when that person clicked; the host decides who may click. `channel_id`,
+`message_ts` and, when Slack sends it, `thread_ts` name the message that
+holds the button; `action_id`, `block_id` and `value` are the button's, and
+`action_ts` is the time of the click. `api_app_id`, `team_id`,
+`user_team_id` and, for a workspace in an enterprise organization,
+`enterprise_id` come with them. IDs, timestamps and the value stay Slack's
+exact strings. A `value` may have up to 2,000 characters and an `action_id`
+or `block_id` up to 255, as Slack allows; a longer one fails. The trigger
+`slack.interactivity.block_actions` declares this signal with bot auth, the
+`:workspace_access` policy and no OAuth scope beyond the app's install, and
+dedupes on `team_id`, `channel_id`, `message_ts`, `user_id`, `block_id`,
+`action_id`, `value` and `action_ts`.
+
+A click on several actions, on another element such as a select, or outside
+a message, as in a modal or a legacy attachment, keeps
+`normalized_signal: nil`. A button in an ephemeral message, such as one
+posted with `slack.message.post_ephemeral`, gets no signal either: Slack
+sends that click with `container.is_ephemeral: true` and without the
+message. Neither does an org-wide install, which sends no workspace; the
+package takes only apps installed in a workspace. Call
+`Jido.Connect.Slack.Interactivity.normalize_signal/2` on such a delivery,
+with the same options, for a `Jido.Connect.Error.ProviderError` that names
+the reason and the payload path, never a value:
+
+- `:unsupported_block_action` for several actions, another element,
+  another container or an ephemeral message;
+- `:no_workspace` for an org-wide install or a payload without `team.id`;
+- `:invalid_block_action` for a missing or empty field, a value that is no
+  string, or a value or ID over the limit;
+- `:conflicting_block_action` when the container and the message name
+  different channels, messages or threads;
+- `:unexpected_app` when `:api_app_id` is given and the click is for another
+  app.
+
+A click for another app still verifies, without a signal and without an
+error, because only the normalizer reads `:api_app_id`. A wrong
+`:api_app_id` in the host's configuration therefore drops every click
+silently; `metadata.api_app_id` of the delivery shows the app Slack named.
+
+`Jido.Connect.WebhookDelivery.to_public_map/1`, and with it `inspect/2` of a
+delivery, bounds every binary at 512 bytes by design, so a long `value`
+appears there truncated. The full value is in `normalized_signal` and in the
+`Jido.Connect.Slack.BlockAction` struct, which `BlockAction.new/1` builds
+from the signal. The package does not call `response_url`, update the
+message or attach any meaning to a click; the host decides what a value
+stands for, who may click and until when.
+
+Two clicks of a person on bot messages in the test workspace were captured
+and replay offline. A click by a second person, a button in a thread, a
+workspace in an enterprise organization and the error cases are derived from
+those captures.

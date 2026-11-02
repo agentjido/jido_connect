@@ -22,7 +22,8 @@ defmodule Jido.Connect.Slack do
       Jido.Connect.Slack.Triggers.Events.Reactions,
       Jido.Connect.Slack.Triggers.Events.Channels,
       Jido.Connect.Slack.Triggers.Events.Files,
-      Jido.Connect.Slack.Triggers.Events.Lifecycle
+      Jido.Connect.Slack.Triggers.Events.Lifecycle,
+      Jido.Connect.Slack.Triggers.Interactivity.BlockActions
     ]
 
   integration do

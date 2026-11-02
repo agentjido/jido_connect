@@ -398,15 +398,16 @@ LiveSmoke.write_capture!(raw_path, :slack, "message_changed",
 ```elixir
 LiveSmoke.replay(path, webhook: Jido.Connect.Slack.Webhook)
 LiveSmoke.replay(raw_path, webhook: Jido.Connect.Slack.Webhook, secret: env["SLACK_SIGNING_SECRET"])
+LiveSmoke.replay(click_path, webhook: Jido.Connect.Slack.Interactivity, api_app_id: env["SLACK_APP_ID"])
 ```
 
 A sanitized capture verifies with the default replay secret; a raw capture
 needs the provider's signing secret. Any change to the body after signing fails
-verification. `replay/2` suits deliveries that the package's
-`verify_delivery/4` accepts, such as Slack Events API payloads and Jira
-administrator webhook deliveries (`webhook: Jido.Connect.Jira.Webhook`). Slack
-interactivity captures are form bodies; check them with
-`Jido.Connect.Slack.Webhook.verify_signature/4` and the capture time as `now`.
+verification. Other options go on to `verify_delivery/4`. `replay/2` suits
+deliveries that the package's `verify_delivery/4` accepts: Slack Events API
+payloads (`webhook: Jido.Connect.Slack.Webhook`), Slack interactivity form
+bodies such as button clicks (`webhook: Jido.Connect.Slack.Interactivity`) and
+Jira administrator webhook deliveries (`webhook: Jido.Connect.Jira.Webhook`).
 
 ## Evidence
 

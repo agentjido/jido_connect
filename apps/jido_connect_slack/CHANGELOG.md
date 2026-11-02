@@ -19,8 +19,26 @@
   delivery ID is the lowercase hex SHA-256 of the raw body, and the payload
   drops `token`, `bot_access_token`, `response_url`, `response_urls` and
   `trigger_id`, as well as `response_urls` inside a submitted `view` and
-  `interactivity.interactivity_pointer` of workflow step interactions. No
-  payload type is normalized yet.
+  `interactivity.interactivity_pointer` of workflow step interactions.
+  Options go on to a normalizer for the payload type; only `block_actions`
+  has one. `Interactivity.normalize_signal/2` returns the signal of a
+  verified delivery or the reason it has none.
+- Add optional `blocks` to `slack.message.post`, sent to
+  `chat.postMessage` unchanged; `text` stays required as the fallback, and
+  a text-only post sends no `blocks`.
+- Add `Jido.Connect.Slack.BlockAction` and the trigger
+  `slack.interactivity.block_actions` with bot auth, the `:workspace_access`
+  policy and no OAuth scope. A `block_actions` click on one button in a
+  message becomes a signal with the clicking user from `user.id`, the
+  message's `channel_id`, `message_ts` and `thread_ts`, and the button's
+  `action_id`, `block_id` and opaque `value`. A value of up to 2,000
+  characters and IDs of up to 255 are kept. Several actions, another
+  element, another container or an ephemeral message fail with
+  `:unsupported_block_action`, an org-wide install with `:no_workspace`, a
+  missing or malformed field with `:invalid_block_action`, container and
+  message IDs that disagree with `:conflicting_block_action`, and with the
+  option `:api_app_id` a click for another app with `:unexpected_app`. Every
+  such delivery still verifies, with `normalized_signal: nil`.
 - Normalize the message subtypes `file_share` and `thread_broadcast` as new
   messages. Their signals carry `subtype`, and file shares also `file_ids`;
   a broadcast reply also reaches `slack.event.message.thread_reply`. Every
