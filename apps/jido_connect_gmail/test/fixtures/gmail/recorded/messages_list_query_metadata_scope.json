@@ -1,0 +1,56 @@
+{
+  "body": {
+    "error": {
+      "code": 403,
+      "errors": [
+        {
+          "domain": "global",
+          "message": "Metadata scope does not support 'q' parameter",
+          "reason": "forbidden"
+        }
+      ],
+      "message": "Metadata scope does not support 'q' parameter",
+      "status": "PERMISSION_DENIED"
+    }
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 06:27:32 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/messages"
+  },
+  "status": 403
+}

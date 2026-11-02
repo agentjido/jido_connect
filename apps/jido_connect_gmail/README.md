@@ -108,8 +108,18 @@ The connector prefers narrow Gmail scopes:
 - `gmail.metadata` for profile, label list, metadata reads, received-message
   polling, history listing, and watch lifecycle operations.
 - `gmail.labels` for label definition create, update, and delete operations.
-- `gmail.readonly` or `gmail.modify` can satisfy metadata-read tools when a
-  host already has broader grants.
+- Metadata reads other than the label list need `gmail.metadata` only when
+  the connection holds no broader grant. If it holds `gmail.modify`,
+  `gmail.readonly` or `https://mail.google.com/`, the first of them in that
+  order is required, and a lease narrowed to `gmail.metadata` fails with
+  missing scopes. The label list keeps `gmail.metadata` whenever it is
+  granted.
+- `google.gmail.messages.list` and `google.gmail.threads.list` with a
+  non-empty `query` need `gmail.readonly`, or an already granted
+  `gmail.modify` or `https://mail.google.com/`, because Gmail rejects the `q`
+  parameter under `gmail.metadata`. The rule follows what the client sends as
+  `q`, so a query of whitespace counts as a search. Without a query, or with
+  an empty one, both resolve like the other metadata reads.
 - `gmail.readonly` or `gmail.modify` for label get and attachment body retrieval.
 - `gmail.send` for direct send, with `gmail.compose` or `gmail.modify` accepted
   when already granted.

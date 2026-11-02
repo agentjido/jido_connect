@@ -530,6 +530,18 @@ defmodule Jido.Connect.GmailTest do
     end
   end
 
+  defmodule ListSpyGmailClient do
+    def list_messages(params, "token") do
+      send(self(), {:gmail_client_called, :list_messages, params})
+      {:ok, %{messages: []}}
+    end
+
+    def list_threads(params, "token") do
+      send(self(), {:gmail_client_called, :list_threads, params})
+      {:ok, %{threads: []}}
+    end
+  end
+
   test "declares Gmail provider metadata" do
     spec = Gmail.integration()
 
@@ -807,7 +819,7 @@ defmodule Jido.Connect.GmailTest do
   end
 
   test "invokes list messages through injected client and lease" do
-    {context, lease} = context_and_lease()
+    {context, lease} = context_and_lease(scopes: readonly_scopes())
 
     assert {:ok,
             %{
@@ -855,7 +867,7 @@ defmodule Jido.Connect.GmailTest do
   end
 
   test "invokes list threads through injected client and lease" do
-    {context, lease} = context_and_lease()
+    {context, lease} = context_and_lease(scopes: readonly_scopes())
 
     assert {:ok,
             %{
@@ -876,6 +888,54 @@ defmodule Jido.Connect.GmailTest do
                context: context,
                credential_lease: lease
              )
+  end
+
+  test "list searches with a query need a read grant before the client is called" do
+    {context, lease} = context_and_lease(gmail_client: ListSpyGmailClient)
+
+    for action_id <- ["google.gmail.messages.list", "google.gmail.threads.list"],
+        query <- ["subject:report", "  "] do
+      assert {:error,
+              %Connect.Error.AuthError{
+                reason: :missing_scopes,
+                missing_scopes: ["https://www.googleapis.com/auth/gmail.readonly"]
+              }} =
+               Connect.invoke(
+                 Gmail.integration(),
+                 action_id,
+                 %{query: query},
+                 context: context,
+                 credential_lease: lease
+               )
+    end
+
+    refute_received {:gmail_client_called, _function, _params}
+  end
+
+  test "list requests without a query run on a metadata-only grant" do
+    {context, lease} = context_and_lease(gmail_client: ListSpyGmailClient)
+
+    assert {:ok, %{messages: []}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.messages.list",
+               %{label_ids: ["INBOX"]},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert_received {:gmail_client_called, :list_messages, %{label_ids: ["INBOX"]}}
+
+    assert {:ok, %{threads: []}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.threads.list",
+               %{},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert_received {:gmail_client_called, :list_threads, %{page_size: 25}}
   end
 
   test "invokes get thread metadata through injected client and lease" do
@@ -1547,7 +1607,10 @@ defmodule Jido.Connect.GmailTest do
         provider: :google,
         profile: :user,
         expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
-        fields: %{access_token: "token", gmail_client: FakeGmailClient},
+        fields: %{
+          access_token: "token",
+          gmail_client: Keyword.get(opts, :gmail_client, FakeGmailClient)
+        },
         scopes: scopes
       })
 

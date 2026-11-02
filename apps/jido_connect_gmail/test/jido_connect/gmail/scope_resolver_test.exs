@@ -112,4 +112,51 @@ defmodule Jido.Connect.Gmail.ScopeResolverTest do
       }
     ])
   end
+
+  describe "message and thread list searches" do
+    @list_actions ["google.gmail.messages.list", "google.gmail.threads.list"]
+
+    test "a query requires a read grant beyond gmail.metadata" do
+      for operation <- @list_actions,
+          query <- ["subject:report", "  "],
+          {connection, expected} <- [
+            {nil, [@readonly_scope]},
+            {%{scopes: []}, [@readonly_scope]},
+            {%{scopes: [@metadata_scope]}, [@readonly_scope]},
+            {%{scopes: [@readonly_scope]}, [@readonly_scope]},
+            {%{scopes: [@modify_scope]}, [@modify_scope]},
+            {%{scopes: [@mail_scope]}, [@mail_scope]},
+            {%{scopes: [@metadata_scope, @modify_scope]}, [@modify_scope]}
+          ] do
+        assert ScopeResolver.required_scopes(
+                 %{id: operation},
+                 %{query: query},
+                 connection
+               ) == expected,
+               "#{operation} with #{inspect(query)} and #{inspect(connection)}"
+      end
+    end
+
+    test "a host-supplied string-keyed query requires the same read grant" do
+      for operation <- @list_actions do
+        assert ScopeResolver.required_scopes(
+                 %{id: operation},
+                 %{"query" => "subject:report"},
+                 %{scopes: [@metadata_scope]}
+               ) == [@readonly_scope]
+      end
+    end
+
+    test "without a query a metadata-only grant still suffices" do
+      for operation <- @list_actions,
+          input <- [%{}, %{query: nil}, %{query: ""}, %{label_ids: ["INBOX"]}] do
+        assert ScopeResolver.required_scopes(
+                 %{id: operation},
+                 input,
+                 %{scopes: [@metadata_scope]}
+               ) == [@metadata_scope],
+               "#{operation} with #{inspect(input)}"
+      end
+    end
+  end
 end

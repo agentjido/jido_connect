@@ -115,7 +115,7 @@ as seed input belong to the scripts that create the test data.
 | `GOOGLE_ACCESS_TOKEN` | credential | Access token minted per run from the refresh token |
 | `GOOGLE_GMAIL_METADATA_REFRESH_TOKEN` | credential | Refresh token with `gmail.metadata` only |
 | `GOOGLE_GMAIL_METADATA_ACCESS_TOKEN` | credential | Access token minted from it |
-| `GOOGLE_GMAIL_QUERY` | setting | Query matching inbox and archived test messages |
+| `GOOGLE_GMAIL_QUERY` | setting | Query matching exactly five prepared messages, two of them archived |
 | `GOOGLE_GMAIL_THREAD_ID` | setting | Three-message conversation |
 | `GOOGLE_GMAIL_ATTACHMENT_MESSAGE_ID` | setting | Message with attachments and nested parts |
 | `GOOGLE_GMAIL_FORWARD_INLINE_ID` | setting | Inline forward |

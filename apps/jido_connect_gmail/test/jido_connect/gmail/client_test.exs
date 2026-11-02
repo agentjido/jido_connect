@@ -3,6 +3,7 @@ defmodule Jido.Connect.Gmail.ClientTest do
 
   alias Jido.Connect.Gmail.{Attachment, Client, Draft, Label, Message, Profile, Thread, Watch}
   alias Jido.Connect.Gmail.Client.Response
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -104,6 +105,67 @@ defmodule Jido.Connect.Gmail.ClientTest do
 
     assert message.message_id == "msg123"
     assert message.thread_id == "thread123"
+  end
+
+  test "pages a recorded query search to its empty last page" do
+    %{
+      "messages" => [%{"id" => message_id, "threadId" => thread_id}],
+      "nextPageToken" => next_page_token,
+      "resultSizeEstimate" => estimate
+    } = first_page = LiveSmoke.fixture!(:gmail, "messages_list_query")
+
+    %{"resultSizeEstimate" => 0} = last_page = LiveSmoke.fixture!(:gmail, "messages_list_query.6")
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.request_path == "/gmail/v1/users/me/messages"
+
+      assert conn.query_params == %{
+               "q" => "subject:report",
+               "maxResults" => "1",
+               "includeSpamTrash" => "false"
+             }
+
+      Req.Test.json(conn, first_page)
+    end)
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.query_params["pageToken"] == next_page_token
+      Req.Test.json(conn, last_page)
+    end)
+
+    params = %{query: "subject:report", label_ids: [], page_size: 1, include_spam_trash: false}
+
+    assert {:ok,
+            %{
+              messages: [%Message{message_id: ^message_id, thread_id: ^thread_id}],
+              next_page_token: ^next_page_token,
+              result_size_estimate: ^estimate
+            }} = Client.list_messages(params, "token")
+
+    assert {:ok, %{messages: [], result_size_estimate: 0} = end_of_search} =
+             Client.list_messages(Map.put(params, :page_token, next_page_token), "token")
+
+    refute Map.has_key?(end_of_search, :next_page_token)
+  end
+
+  test "returns the recorded rejection of a query search under gmail.metadata" do
+    %{"error" => %{"message" => message}} =
+      rejection = LiveSmoke.fixture!(:gmail, "messages_list_query_metadata_scope")
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.query_params["q"] == "subject:report"
+
+      conn
+      |> Plug.Conn.put_status(403)
+      |> Req.Test.json(rejection)
+    end)
+
+    assert {:error,
+            %Jido.Connect.Error.ProviderError{
+              provider: :google,
+              status: 403,
+              details: %{message: ^message}
+            }} = Client.list_messages(%{query: "subject:report", page_size: 1}, "token")
   end
 
   test "returns provider errors for malformed Gmail list items" do
