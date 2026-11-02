@@ -860,6 +860,89 @@ defmodule Jido.Connect.Gmail.ClientTest do
              Client.delete_label(%{label_id: "Label_123"}, "token")
   end
 
+  describe "content requests" do
+    # The response bodies are format=full responses recorded from the prepared
+    # messages of the live test account; live_smoke_test.exs records them.
+
+    test "gets a message with format=full and without metadataHeaders" do
+      recorded = LiveSmoke.fixture!(:gmail, "message_full_forward_attached")
+      message_id = recorded["id"]
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert conn.method == "GET"
+        assert conn.request_path == "/gmail/v1/users/me/messages/#{message_id}"
+        assert conn.query_params == %{"format" => "full"}
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+
+        Req.Test.json(conn, recorded)
+      end)
+
+      assert Client.get_message_content(%{message_id: message_id}, "token") == {:ok, recorded}
+    end
+
+    test "gets a thread with format=full and without metadataHeaders" do
+      recorded = LiveSmoke.fixture!(:gmail, "thread_full_conversation")
+      thread_id = recorded["id"]
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert conn.method == "GET"
+        assert conn.request_path == "/gmail/v1/users/me/threads/#{thread_id}"
+        assert conn.query_params == %{"format" => "full"}
+
+        Req.Test.json(conn, recorded)
+      end)
+
+      assert Client.get_thread_content(%{thread_id: thread_id}, "token") == {:ok, recorded}
+    end
+
+    test "sends the message and thread ID as one encoded path segment" do
+      message = LiveSmoke.fixture!(:gmail, "message_full_single_part")
+      thread = LiveSmoke.fixture!(:gmail, "thread_full_conversation")
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert conn.request_path == "/gmail/v1/users/me/messages/a%2Fb%20c%3F"
+        Req.Test.json(conn, message)
+      end)
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert conn.request_path == "/gmail/v1/users/me/threads/a%2Fb%20c%3F"
+        Req.Test.json(conn, thread)
+      end)
+
+      assert {:ok, ^message} = Client.get_message_content(%{message_id: "a/b c?"}, "token")
+      assert {:ok, ^thread} = Client.get_thread_content(%{thread_id: "a/b c?"}, "token")
+    end
+
+    test "returns provider errors for failed requests and success bodies that are not objects" do
+      # Google answers every Gmail call with the same error envelope; this body
+      # is the recorded rejection of a query search.
+      %{"error" => %{"message" => message}} =
+        rejection = LiveSmoke.fixture!(:gmail, "messages_list_query_metadata_scope")
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        conn
+        |> Plug.Conn.put_status(403)
+        |> Req.Test.json(rejection)
+      end)
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("text/plain")
+        |> Plug.Conn.send_resp(200, "not a JSON object")
+      end)
+
+      assert {:error,
+              %Jido.Connect.Error.ProviderError{
+                provider: :google,
+                status: 403,
+                details: %{message: ^message}
+              }} = Client.get_message_content(%{message_id: "msg"}, "token")
+
+      assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+               Client.get_thread_content(%{thread_id: "thread"}, "token")
+    end
+  end
+
   defp message_payload do
     %{
       "id" => "msg123",

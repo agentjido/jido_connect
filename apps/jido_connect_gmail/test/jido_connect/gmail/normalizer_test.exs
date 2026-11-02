@@ -6,10 +6,12 @@ defmodule Jido.Connect.Gmail.NormalizerTest do
     Draft,
     Label,
     Message,
+    MessageContent,
     Normalizer,
     Privacy,
     Profile,
     Thread,
+    ThreadContent,
     Watch
   }
 
@@ -219,6 +221,28 @@ defmodule Jido.Connect.Gmail.NormalizerTest do
       size: 0,
       metadata: %{}
     )
+  end
+
+  test "content struct constructors expose schema defaults" do
+    ConnectorContracts.assert_struct_defaults(MessageContent, %{message_id: "msg123"},
+      label_ids: [],
+      headers: [],
+      from: nil,
+      references: nil,
+      text_parts: [],
+      attachments: [],
+      messages: [],
+      metadata: %{}
+    )
+
+    assert {:error, _error} = MessageContent.new(%{})
+
+    ConnectorContracts.assert_struct_defaults(ThreadContent, %{thread_id: "thread123"},
+      messages: [],
+      metadata: %{}
+    )
+
+    assert {:error, _error} = ThreadContent.new(%{})
   end
 
   defp message_payload do

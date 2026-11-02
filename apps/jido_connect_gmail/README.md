@@ -14,8 +14,9 @@ message content depending on the action. Normalized message, thread, and draft
 structs intentionally avoid raw RFC822 bodies, Gmail `raw` payloads, and MIME
 part `body.data` bytes. Message body and attachment bytes come only from
 actions that declare content access, and the opt-in `:google_gmail_content`
-catalog pack gathers those actions. Today that is
-`google.gmail.message.attachment.get`, which returns Gmail's base64url-encoded
+catalog pack gathers those actions: `google.gmail.message.content.get` and
+`google.gmail.thread.content.get` return full body text, and
+`google.gmail.message.attachment.get` returns Gmail's base64url-encoded
 attachment `data` field.
 
 ## MIME Traversal
@@ -31,6 +32,34 @@ ISO-8859-15 or Windows-1252, also under their IANA aliases; a `koi8-r` part
 fetched that way keeps `decoded: false`. Gmail pads base64url data, and the
 traversal accepts it with and without padding.
 
+## Message Content
+
+`google.gmail.message.content.get` takes a `message_id` and returns `message`,
+a `Jido.Connect.Gmail.MessageContent`. `google.gmail.thread.content.get` takes
+a `thread_id` and returns `thread`, a `Jido.Connect.Gmail.ThreadContent` that
+holds every message of the thread, sent replies included, ordered by the
+numeric value of Gmail's `internalDate`; messages with the same date keep
+Gmail's order. Both read Gmail's `format=full` representation.
+
+A message carries Gmail's IDs, labels and `internalDate`, every header with
+repeats, the first `From`, `To`, `Cc`, `Bcc`, `Reply-To`, `Subject`, `Date`,
+`Message-ID`, `In-Reply-To` and `References` values, its body text parts, the
+attachment manifest and the enclosed `message/rfc822` messages, in the shapes
+that the traversal documents. When Gmail stores a body text part behind an
+`attachmentId`, the action fetches it with `attachments.get` and puts it back
+in Gmail's part order. It never fetches a file attachment; pass an
+`attachment_id` from the manifest to `google.gmail.message.attachment.get` for
+the bytes. An inline forward keeps the quoted original inside its text parts.
+A forward as attachment shows the original as an enclosed message, or as a
+`message/rfc822` manifest entry when Gmail supplies no nested parts. Neither
+result verifies a quoted sender or separates a comment from the original.
+
+Text is never truncated; intake limits belong to the host. Each message is
+walked with the traversal's default `max_depth` and `max_parts`, and the
+thread input `max_messages`, default 100, bounds a thread. A longer thread
+fails with reason `:thread_messages_exceeded`, and a failed fetch of a text
+part fails the whole read. Neither returns partial content.
+
 ## Actions
 
 - `google.gmail.profile.get`
@@ -44,6 +73,8 @@ traversal accepts it with and without padding.
 - `google.gmail.draft.get`
 - `google.gmail.history.list`
 - `google.gmail.message.attachment.get`
+- `google.gmail.message.content.get`
+- `google.gmail.thread.content.get`
 - `google.gmail.watch.start`
 - `google.gmail.watch.stop`
 - `google.gmail.message.send`
@@ -93,6 +124,7 @@ dedupe is based on Gmail `history_id`.
 - `:google_gmail_destructive` exposes trash and explicit draft, label, message,
   and thread delete operations behind destructive action metadata.
 - `:google_gmail_content` is the opt-in read pack for message content. It adds
+  `google.gmail.message.content.get`, `google.gmail.thread.content.get` and
   `google.gmail.message.attachment.get` to the metadata tools and excludes
   send, draft, label mutation, watch, trash, and delete tools.
 
@@ -138,7 +170,8 @@ The connector prefers narrow Gmail scopes:
   parameter under `gmail.metadata`. The rule follows what the client sends as
   `q`, so a query of whitespace counts as a search. Without a query, or with
   an empty one, both resolve like the other metadata reads.
-- `gmail.readonly` or `gmail.modify` for label get and attachment body retrieval.
+- `gmail.readonly` or `gmail.modify` for label get, message and thread content,
+  and attachment body retrieval.
 - `gmail.send` for direct send, with `gmail.compose` or `gmail.modify` accepted
   when already granted.
 - `gmail.compose` for draft list/get/create/update/send/delete, with

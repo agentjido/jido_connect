@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Gmail.Client do
   @moduledoc "Gmail API client facade."
 
-  alias Jido.Connect.Gmail.Client.Users
+  alias Jido.Connect.Gmail.Client.{Content, Users}
 
   defdelegate get_profile(params, access_token), to: Users
   defdelegate list_labels(params, access_token), to: Users
@@ -14,6 +14,8 @@ defmodule Jido.Connect.Gmail.Client do
   defdelegate get_draft(params, access_token), to: Users
   defdelegate list_history(params, access_token), to: Users
   defdelegate get_attachment(params, access_token), to: Users
+  defdelegate get_message_content(params, access_token), to: Content
+  defdelegate get_thread_content(params, access_token), to: Content
   defdelegate start_watch(params, access_token), to: Users
   defdelegate stop_watch(params, access_token), to: Users
   defdelegate send_message(params, access_token), to: Users

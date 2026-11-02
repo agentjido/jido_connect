@@ -1,0 +1,135 @@
+{
+  "body": {
+    "historyId": "15570",
+    "id": "1a1985190f814293",
+    "internalDate": "1793556845000",
+    "labelIds": [
+      "INBOX"
+    ],
+    "payload": {
+      "body": {
+        "size": 0
+      },
+      "filename": "",
+      "headers": [
+        {
+          "name": "Received",
+          "value": "from 000000000000 named unknown by gmailapi.google.com with HTTPREST; Mon, 2 Nov 2026 05:14:11 -0500"
+        },
+        {
+          "name": "From",
+          "value": "Person 1 <person-1@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "Person 2 <person-2@example.com>"
+        },
+        {
+          "name": "Subject",
+          "value": "jcl-live large windows-1252 body"
+        },
+        {
+          "name": "Date",
+          "value": "Sun, 01 Nov 2026 18:14:05 +0000"
+        },
+        {
+          "name": "Message-ID",
+          "value": "<person-3@example.com>"
+        },
+        {
+          "name": "MIME-Version",
+          "value": "1.0"
+        },
+        {
+          "name": "Content-Type",
+          "value": "multipart/alternative; boundary=\"jcl-alternative-68473d670b\""
+        }
+      ],
+      "mimeType": "multipart/alternative",
+      "partId": "",
+      "parts": [
+        {
+          "body": {
+            "attachmentId": "ANGjdJ_XZAqoOjS5u9n7I7ZwcE_65AUmhVVhhpszB7mVIck3BH-OXBfg7qvz639F8Tc-WJdA-FN0L4kzGBTnf6-hgr1kIQfMSCAhWgHyE52z5Vnph2sMkZs0yNHbtiKPxiNL6puu5HQYQOKjl9Js8goGlBTd_ok-ajwLs0SxA5ilB7BFiu0ahPkCvQdz6KcC73D7oI5OyKPTl28DpSkp-gcpVDgzKcLtZYiPhGkzMi3iasYYZLFbAeEF7Y7v98pGr2eaX82_JGgLQkAFPyU7CN_lqJmkUKDoCSldRDyE3ePWoPKge6S5sqVMFVKWirxfSYPHJonRZSf6y2tBSmamRgXaPUbI9lxT96cOUrR3jyYLnqXRNL83ZlkxYUj6Np6H4zehnzc0TgHnH-ANYzXG",
+            "size": 3149652
+          },
+          "filename": "",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "text/plain; charset=\"windows-1252\""
+            },
+            {
+              "name": "Content-Transfer-Encoding",
+              "value": "base64"
+            }
+          ],
+          "mimeType": "text/plain",
+          "partId": "0"
+        },
+        {
+          "body": {
+            "data": "PHA-R3Jvw59lciBUZXh0a8O2cnBlciBpbiB3aW5kb3dzLTEyNTIsIE1hcmtlciA8Yj5qY2wtbWFya2VyLWxhcmdlLWJvZHk8L2I-LjwvcD4=",
+            "size": 80
+          },
+          "filename": "",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "text/html; charset=\"utf-8\""
+            },
+            {
+              "name": "Content-Transfer-Encoding",
+              "value": "quoted-printable"
+            }
+          ],
+          "mimeType": "text/html",
+          "partId": "1"
+        }
+      ]
+    },
+    "sizeEstimate": 4310897,
+    "snippet": "Großer Textkörper in windows-1252, Marker jcl-marker-large-body.",
+    "threadId": "1a1985190f814293"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 10:16:04 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/messages/1a1985190f814293"
+  },
+  "status": 200
+}

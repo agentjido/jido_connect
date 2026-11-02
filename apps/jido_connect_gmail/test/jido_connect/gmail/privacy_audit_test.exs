@@ -1,9 +1,21 @@
 defmodule Jido.Connect.Gmail.PrivacyAuditTest do
   use ExUnit.Case, async: true
 
+  import ExUnit.CaptureLog
+
+  alias Jido.Connect
   alias Jido.Connect.Gmail
   alias Jido.Connect.Gmail.Normalizer
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
+  alias Jido.Connect.TestSupport.LiveSmoke
+
+  @readonly_scope "https://www.googleapis.com/auth/gmail.readonly"
+
+  defmodule RecordedThreadClient do
+    # Serves the recorded format=full conversation.
+    def get_thread_content(%{thread_id: _thread_id}, "token"),
+      do: {:ok, LiveSmoke.fixture!(:gmail, "thread_full_conversation")}
+  end
 
   test "classifies every Gmail action and trigger privacy boundary" do
     ConnectorContracts.assert_privacy_matrix(
@@ -35,6 +47,23 @@ defmodule Jido.Connect.Gmail.PrivacyAuditTest do
         ),
         action("google.gmail.message.attachment.get", :message_content, :read, :none,
           text_includes: ["base64url-encoded", "attachment data"]
+        ),
+        action("google.gmail.message.content.get", :message_content, :read, :none,
+          text_includes: [
+            "full body text",
+            "attachment manifest",
+            "reads the message body",
+            "does not fetch attachment bytes"
+          ]
+        ),
+        action("google.gmail.thread.content.get", :message_content, :read, :none,
+          text_includes: [
+            "every message of a gmail thread",
+            "sent replies",
+            "full body text",
+            "reads message bodies",
+            "does not fetch attachment bytes"
+          ]
         ),
         action("google.gmail.message.send", :message_content, :external_write, :required_for_ai,
           text_includes: ["send", "body content"]
@@ -101,6 +130,91 @@ defmodule Jido.Connect.Gmail.PrivacyAuditTest do
     refute inspect(message) =~ "part-secret"
     assert message.payload_summary.body_size == 99
     assert [%{body_size: 12}] = message.payload_summary.parts
+  end
+
+  test "content reads return text beyond 512 bytes whole and keep it out of logs and telemetry" do
+    test_pid = self()
+    handler_id = "gmail-content-privacy-#{System.unique_integer([:positive])}"
+
+    :telemetry.attach_many(
+      handler_id,
+      [[:jido, :connect, :invoke, :start], [:jido, :connect, :invoke, :stop]],
+      fn event, _measurements, metadata, _config ->
+        send(test_pid, {:telemetry, event, metadata})
+      end,
+      nil
+    )
+
+    on_exit(fn -> :telemetry.detach(handler_id) end)
+    Logger.put_process_level(self(), :debug)
+
+    log =
+      capture_log([level: :debug], fn ->
+        assert {:ok, %{thread: %{messages: [_received, _sent, long]}}} =
+                 Connect.invoke(
+                   Gmail.integration(),
+                   "google.gmail.thread.content.get",
+                   %{thread_id: "thread"},
+                   readonly_grant(RecordedThreadClient)
+                 )
+
+        send(test_pid, {:long_message, long})
+      end)
+
+    assert_received {:long_message, long}
+    assert [%{size: 55_272, content: content}] = long.text_parts
+    assert byte_size(content) == 55_272
+    assert String.ends_with?(content, "Marker jcl-marker-conv-long-end.\r\n")
+
+    refute log =~ "jcl-marker"
+    refute log =~ "Danke. Anbei die Notizen"
+
+    events = drain_telemetry()
+    assert Enum.any?(events, &match?({:telemetry, [:jido, :connect, :invoke, :stop], _}, &1))
+
+    for {:telemetry, _event, metadata} <- events do
+      refute inspect(metadata, limit: :infinity, printable_limit: :infinity) =~ "jcl-marker"
+    end
+  end
+
+  defp drain_telemetry(acc \\ []) do
+    receive do
+      {:telemetry, _event, _metadata} = message -> drain_telemetry([message | acc])
+    after
+      0 -> acc
+    end
+  end
+
+  defp readonly_grant(client) do
+    connection =
+      Connect.Connection.new!(%{
+        id: "conn_1",
+        provider: :google,
+        profile: :user,
+        tenant_id: "tenant_1",
+        owner_type: :app_user,
+        owner_id: "user_1",
+        status: :connected,
+        scopes: [@readonly_scope]
+      })
+
+    [
+      context:
+        Connect.Context.new!(%{
+          tenant_id: "tenant_1",
+          actor: %{id: "user_1", type: :user},
+          connection: connection
+        }),
+      credential_lease:
+        Connect.CredentialLease.new!(%{
+          connection_id: "conn_1",
+          provider: :google,
+          profile: :user,
+          expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
+          fields: %{access_token: "token", gmail_client: client},
+          scopes: [@readonly_scope]
+        })
+    ]
   end
 
   defp action(id, classification, risk, confirmation, opts \\ []) do

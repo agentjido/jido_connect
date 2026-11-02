@@ -233,7 +233,7 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
              )
   end
 
-  test "content pack is an opt-in read pack with metadata reads and attachment content" do
+  test "content pack is an opt-in read pack with metadata reads, message content and attachment content" do
     pack = Gmail.content_pack()
 
     assert pack.id == :google_gmail_content
@@ -258,17 +258,32 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
                "google.gmail.threads.list",
                "google.gmail.thread.get",
                "google.gmail.history.list",
-               "google.gmail.message.attachment.get"
+               "google.gmail.message.attachment.get",
+               "google.gmail.message.content.get",
+               "google.gmail.thread.content.get"
              ])
 
-    assert {:ok, descriptor} =
-             Catalog.describe_tool("google.gmail.message.attachment.get",
-               modules: [Gmail],
-               packs: Gmail.catalog_packs(),
-               pack: :google_gmail_content
-             )
+    for tool_id <- [
+          "google.gmail.message.attachment.get",
+          "google.gmail.message.content.get",
+          "google.gmail.thread.content.get"
+        ] do
+      assert {:ok, descriptor} =
+               Catalog.describe_tool(tool_id,
+                 modules: [Gmail],
+                 packs: Gmail.catalog_packs(),
+                 pack: :google_gmail_content
+               )
 
-    assert descriptor.tool.id == "google.gmail.message.attachment.get"
+      assert descriptor.tool.id == tool_id
+    end
+  end
+
+  test "only the content pack exposes the message and thread content reads" do
+    for pack <- Gmail.catalog_packs(), pack.id != :google_gmail_content do
+      refute "google.gmail.message.content.get" in pack.allowed_tools
+      refute "google.gmail.thread.content.get" in pack.allowed_tools
+    end
   end
 
   test "content pack rejects send, mutation, and delete tools" do

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Add `google.gmail.message.content.get` and `google.gmail.thread.content.get`.
+  Both read Gmail's `format=full` representation and return
+  `Jido.Connect.Gmail.MessageContent` and `Jido.Connect.Gmail.ThreadContent`
+  with every header, the body text parts, the attachment manifest and the
+  enclosed `message/rfc822` messages. A body text part stored behind an
+  `attachmentId` is fetched with `attachments.get`; file attachments are not
+  fetched. Thread messages are ordered by numeric `internalDate`, and
+  `max_messages`, default 100, bounds a thread. Both require `gmail.readonly`,
+  or an already granted `gmail.modify` or `https://mail.google.com/`, and join
+  the `:google_gmail_content` pack. The metadata actions and their structs are
+  unchanged.
 - Add `Jido.Connect.Gmail.MIME.Traversal`, a network-free walk over Gmail
   `format=full` payloads. It returns body text parts, an attachment manifest
   keyed by Gmail `partId`, nested `message/rfc822` messages and the text parts

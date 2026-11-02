@@ -113,6 +113,27 @@ defmodule Jido.Connect.Gmail.ScopeResolverTest do
     ])
   end
 
+  describe "message and thread content reads" do
+    test "require gmail.readonly and accept an already granted modify or full mailbox grant" do
+      for operation <- ["google.gmail.message.content.get", "google.gmail.thread.content.get"],
+          {connection, expected} <- [
+            {nil, [@readonly_scope]},
+            {%{scopes: []}, [@readonly_scope]},
+            {%{scopes: [@metadata_scope]}, [@readonly_scope]},
+            {%{scopes: [@compose_scope]}, [@readonly_scope]},
+            {%{scopes: [@send_scope]}, [@readonly_scope]},
+            {%{scopes: [@labels_scope]}, [@readonly_scope]},
+            {%{scopes: [@readonly_scope]}, [@readonly_scope]},
+            {%{scopes: [@modify_scope]}, [@modify_scope]},
+            {%{scopes: [@mail_scope]}, [@mail_scope]},
+            {%{scopes: [@metadata_scope, @readonly_scope]}, [@readonly_scope]}
+          ] do
+        assert ScopeResolver.required_scopes(%{id: operation}, %{}, connection) == expected,
+               "#{operation} with #{inspect(connection)}"
+      end
+    end
+  end
+
   describe "message and thread list searches" do
     @list_actions ["google.gmail.messages.list", "google.gmail.threads.list"]
 

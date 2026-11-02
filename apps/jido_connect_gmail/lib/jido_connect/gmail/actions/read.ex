@@ -301,5 +301,67 @@ defmodule Jido.Connect.Gmail.Actions.Read do
         field(:attachment, :map)
       end
     end
+
+    action :get_message_content do
+      id("google.gmail.message.content.get")
+      resource(:message)
+      verb(:get)
+      data_classification(:message_content)
+      label("Get Gmail message content")
+
+      description(
+        "Fetch a Gmail message with its full body text, every header and an attachment manifest. Reads the message body; does not fetch attachment bytes."
+      )
+
+      handler(Jido.Connect.Gmail.Handlers.Actions.GetMessageContent)
+      effect(:read)
+
+      access do
+        auth(:user)
+        scopes([@readonly_scope], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:message_id, :string, required?: true, example: "18c...")
+      end
+
+      output do
+        field(:message, :map)
+      end
+    end
+
+    action :get_thread_content do
+      id("google.gmail.thread.content.get")
+      resource(:thread)
+      verb(:get)
+      data_classification(:message_content)
+      label("Get Gmail thread content")
+
+      description(
+        "Fetch every message of a Gmail thread, sent replies included, with full body text, every header and attachment manifests, ordered by internal date. Reads message bodies; does not fetch attachment bytes."
+      )
+
+      handler(Jido.Connect.Gmail.Handlers.Actions.GetThreadContent)
+      effect(:read)
+
+      access do
+        auth(:user)
+        scopes([@readonly_scope], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:thread_id, :string, required?: true, example: "18c...")
+
+        field(:max_messages, :integer,
+          default: 100,
+          description:
+            "Most messages the thread may hold; a longer thread fails instead of being cut short."
+        )
+      end
+
+      output do
+        field(:thread, :map)
+      end
+    end
   end
 end

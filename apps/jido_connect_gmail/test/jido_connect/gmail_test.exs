@@ -4,6 +4,7 @@ defmodule Jido.Connect.GmailTest do
   alias Jido.Connect
   alias Jido.Connect.Gmail
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   @gmail_action_modules [
     Jido.Connect.Gmail.Actions.GetProfile,
@@ -17,6 +18,8 @@ defmodule Jido.Connect.GmailTest do
     Jido.Connect.Gmail.Actions.GetDraft,
     Jido.Connect.Gmail.Actions.ListHistory,
     Jido.Connect.Gmail.Actions.GetAttachment,
+    Jido.Connect.Gmail.Actions.GetMessageContent,
+    Jido.Connect.Gmail.Actions.GetThreadContent,
     Jido.Connect.Gmail.Actions.SendMessage,
     Jido.Connect.Gmail.Actions.CreateDraft,
     Jido.Connect.Gmail.Actions.UpdateDraft,
@@ -542,6 +545,26 @@ defmodule Jido.Connect.GmailTest do
     end
   end
 
+  defmodule RecordedContentGmailClient do
+    # Serves format=full responses recorded from the live test account and
+    # reports each call to the test process.
+
+    def get_message_content(params, "token") do
+      send(self(), {:gmail_client_called, :get_message_content, params})
+      {:ok, LiveSmoke.fixture!(:gmail, "message_full_forward_attached")}
+    end
+
+    def get_thread_content(params, "token") do
+      send(self(), {:gmail_client_called, :get_thread_content, params})
+      {:ok, LiveSmoke.fixture!(:gmail, "thread_full_conversation")}
+    end
+
+    def get_attachment(params, "token") do
+      send(self(), {:gmail_client_called, :get_attachment, params})
+      {:error, Connect.Error.provider("not served", provider: :google)}
+    end
+  end
+
   test "declares Gmail provider metadata" do
     spec = Gmail.integration()
 
@@ -581,6 +604,8 @@ defmodule Jido.Connect.GmailTest do
              "google.gmail.draft.get",
              "google.gmail.history.list",
              "google.gmail.message.attachment.get",
+             "google.gmail.message.content.get",
+             "google.gmail.thread.content.get",
              "google.gmail.message.send",
              "google.gmail.draft.create",
              "google.gmail.draft.update",
@@ -1081,6 +1106,86 @@ defmodule Jido.Connect.GmailTest do
                context: context,
                credential_lease: lease
              )
+  end
+
+  test "content reads run on a gmail.readonly lease" do
+    {context, lease} =
+      context_and_lease(scopes: readonly_scopes(), gmail_client: RecordedContentGmailClient)
+
+    %{"id" => message_id} = LiveSmoke.fixture!(:gmail, "message_full_forward_attached")
+    %{"id" => thread_id} = LiveSmoke.fixture!(:gmail, "thread_full_conversation")
+
+    assert {:ok, %{message: message}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.message.content.get",
+               %{message_id: message_id},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert_received {:gmail_client_called, :get_message_content, %{message_id: ^message_id}}
+    assert %{message_id: ^message_id, subject: "Fwd: jcl-live attached originals"} = message
+
+    assert [%{part_id: "0", content: "Two originals attached as messages.\r\n"}] =
+             message.text_parts
+
+    assert {:ok, %{thread: thread}} =
+             Connect.invoke(
+               Gmail.integration(),
+               "google.gmail.thread.content.get",
+               %{thread_id: thread_id},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert_received {:gmail_client_called, :get_thread_content, %{thread_id: ^thread_id}}
+    assert %{thread_id: ^thread_id, messages: [_received, _sent, _later]} = thread
+    refute_received {:gmail_client_called, :get_attachment, _params}
+  end
+
+  test "content reads stop metadata-only, compose-only and send-only leases before the client call" do
+    for scopes <- [metadata_scopes(), compose_scopes(), send_scopes()],
+        {action_id, input} <- [
+          {"google.gmail.message.content.get", %{message_id: "msg123"}},
+          {"google.gmail.thread.content.get", %{thread_id: "thread123"}}
+        ] do
+      {context, lease} =
+        context_and_lease(scopes: scopes, gmail_client: RecordedContentGmailClient)
+
+      assert {:error,
+              %Connect.Error.AuthError{
+                reason: :missing_scopes,
+                missing_scopes: ["https://www.googleapis.com/auth/gmail.readonly"]
+              }} =
+               Connect.invoke(Gmail.integration(), action_id, input,
+                 context: context,
+                 credential_lease: lease
+               ),
+             "#{action_id} with #{inspect(scopes)}"
+    end
+
+    refute_received {:gmail_client_called, _function, _params}
+  end
+
+  test "content reads reject blank IDs and a max_messages below one before the client call" do
+    {context, lease} =
+      context_and_lease(scopes: readonly_scopes(), gmail_client: RecordedContentGmailClient)
+
+    for {action_id, input, reason} <- [
+          {"google.gmail.message.content.get", %{message_id: "  "}, :invalid_gmail_id},
+          {"google.gmail.thread.content.get", %{thread_id: ""}, :invalid_gmail_id},
+          {"google.gmail.thread.content.get", %{thread_id: "thread123", max_messages: 0},
+           :invalid_max_messages}
+        ] do
+      assert {:error, %Connect.Error.ValidationError{reason: ^reason}} =
+               Connect.invoke(Gmail.integration(), action_id, input,
+                 context: context,
+                 credential_lease: lease
+               )
+    end
+
+    refute_received {:gmail_client_called, _function, _params}
   end
 
   test "invokes watch lifecycle through injected client and lease" do
@@ -1616,6 +1721,15 @@ defmodule Jido.Connect.GmailTest do
       })
 
     {context, lease}
+  end
+
+  defp metadata_scopes do
+    [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/gmail.metadata"
+    ]
   end
 
   defp send_scopes do

@@ -47,7 +47,9 @@ defmodule Jido.Connect.Gmail.ScopeResolver do
     "google.gmail.label.delete"
   ]
   @content_read_actions [
-    "google.gmail.message.attachment.get"
+    "google.gmail.message.attachment.get",
+    "google.gmail.message.content.get",
+    "google.gmail.thread.content.get"
   ]
   @search_list_actions [
     "google.gmail.messages.list",
