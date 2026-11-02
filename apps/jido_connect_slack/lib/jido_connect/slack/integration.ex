@@ -18,6 +18,7 @@ defmodule Jido.Connect.Slack do
       Jido.Connect.Slack.Actions.Reactions,
       Jido.Connect.Slack.Actions.Users,
       Jido.Connect.Slack.Triggers.Events.Messages,
+      Jido.Connect.Slack.Triggers.Events.MessageChanges,
       Jido.Connect.Slack.Triggers.Events.Reactions,
       Jido.Connect.Slack.Triggers.Events.Channels,
       Jido.Connect.Slack.Triggers.Events.Files,

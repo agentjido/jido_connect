@@ -33,6 +33,21 @@
   into a group DM was captured.
 - Pin message, DM, group DM, thread reply and app mention normalization with
   Events API deliveries captured from the test workspace.
+- Add `slack.event.message.{channels,groups,im,mpim}.{changed,deleted}`,
+  triggers for message edits and deletions on the existing message
+  subscriptions, and `Jido.Connect.Slack.MessageChange`, the shape of their
+  signal. Its `ts` is the edited or deleted message's `ts`, apart from the
+  notification's. Edits keep their full text, also when it is empty, and
+  their editor; deletions carry no text. A `message_changed` event without
+  a new `message.edited`, such as an unfurl of a message edited before,
+  returns `:not_an_edit`, a malformed change `:invalid_message_change` and
+  a conflicting `previous_message` `:conflicting_message_change`. A deleted
+  thread parent with replies, which Slack sends as a `message_changed` with
+  a tombstone, becomes a deletion with the author from `previous_message`;
+  the later removal of the tombstone becomes a second deletion without
+  author. The generic `message` event and `normalize_event/1` now normalize
+  both subtypes, so a verified edit or deletion carries a signal; the
+  message triggers still reject them.
 
 ## 0.1.0
 

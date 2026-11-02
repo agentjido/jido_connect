@@ -684,7 +684,7 @@ defmodule Jido.Connect.Slack.WebhookTest do
       assert {:ok, ^signal} = Zoi.parse(trigger("slack.event.app_mention").signal_schema, signal)
     end
 
-    test "edits, deletions, bot messages and unknown subtypes stay unsupported" do
+    test "message triggers reject edits, deletions, bot messages and unknown subtypes" do
       # Derived: the captured plain message as a classic `bot_message`, with a
       # `bot_id` instead of a `user`, and with a subtype Slack does not define.
       public = payload!("message_public")
@@ -698,34 +698,37 @@ defmodule Jido.Connect.Slack.WebhookTest do
 
       unknown = put_in(public, ["event", "subtype"], "jc_unknown_subtype")
 
-      rows = [
-        {"message_changed", payload!("message_changed")},
-        {"message_deleted", payload!("message_deleted")},
-        {"bot_message", bot_message},
-        {"jc_unknown_subtype", unknown}
+      changes = [
+        {"message_changed", payload!("message_changed_public")},
+        {"message_deleted", payload!("message_deleted_public")},
+        {"message_changed", payload!("message_changed_thread_reply")},
+        {"message_deleted", payload!("message_deleted_thread_reply")}
       ]
 
-      for {subtype, payload} <- rows,
-          event <- ["message", "message.channels", "message.thread_reply"] do
+      others = [{"bot_message", bot_message}, {"jc_unknown_subtype", unknown}]
+
+      message_triggers =
+        ~w(message.channels message.groups message.im message.mpim message.thread_reply)
+
+      # Edits and deletions take the generic `message` event to the change
+      # triggers; see message_changes_test.exs.
+      rows =
+        for(
+          {subtype, payload} <- changes,
+          event <- message_triggers,
+          do: {subtype, payload, event}
+        ) ++
+          for {subtype, payload} <- others, event <- ["message" | message_triggers] do
+            {subtype, payload, event}
+          end
+
+      for {subtype, payload, event} <- rows do
         assert {:error,
                 %Error.ProviderError{
                   reason: :unsupported_message_subtype,
                   details: %{subtype: ^subtype}
                 }} = Webhook.normalize_signal(event, payload),
                "#{subtype} under #{event}"
-      end
-
-      for {name, delivery_id} <- [
-            {"message_changed", "Ev0CDZKJCP45"},
-            {"message_deleted", "Ev0CE6TBSZU1"}
-          ] do
-        assert {:ok,
-                %WebhookDelivery{
-                  event: "message",
-                  delivery_id: ^delivery_id,
-                  signature_state: :verified,
-                  normalized_signal: nil
-                }} = replay(name)
       end
     end
 
@@ -749,7 +752,7 @@ defmodule Jido.Connect.Slack.WebhookTest do
         for subtype <- subtypes,
             # Derived: the captured plain message with the subtype.
             payload = put_in(payload!("message_public"), ["event", "subtype"], subtype),
-            match?({:ok, _signal}, Webhook.normalize_signal("message", payload)),
+            match?({:ok, _signal}, Webhook.normalize_signal("message.channels", payload)),
             do: subtype
 
       assert accepted == ["file_share", "thread_broadcast"]

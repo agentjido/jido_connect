@@ -2,9 +2,12 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
   @moduledoc false
 
   alias Jido.Connect.{Data, Error, WebhookDelivery}
-  alias Jido.Connect.Slack.Webhook.SharedMessages
+  alias Jido.Connect.Slack.MessageChange
+  alias Jido.Connect.Slack.Webhook.{MessageChanges, SharedMessages}
 
   @human_message_subtypes ["file_share", "thread_broadcast"]
+  @change_subtypes MessageChange.subtypes()
+  @change_events MessageChanges.trigger_events()
 
   # The message triggers declare these as the enum of their `subtype` field.
   @doc false
@@ -31,6 +34,19 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
        ts: Data.get(event, "ts"),
        thread_ts: Data.get(event, "thread_ts")
      })}
+  end
+
+  # Edits and deletions take their own path; every other subtype stays with
+  # the message triggers, which reject both.
+  def normalize_signal(
+        "message",
+        %{
+          "type" => "event_callback",
+          "event" => %{"type" => "message", "subtype" => subtype}
+        } = payload
+      )
+      when subtype in @change_subtypes do
+    MessageChanges.normalize_signal("message", payload)
   end
 
   def normalize_signal(
@@ -103,6 +119,10 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
                "app_home_opened"
              ] do
     {:ok, lifecycle_signal(payload, event)}
+  end
+
+  def normalize_signal(event, payload) when event in @change_events do
+    MessageChanges.normalize_signal(event, payload)
   end
 
   def normalize_signal(event, _payload) do

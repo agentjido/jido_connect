@@ -1395,6 +1395,75 @@ defmodule Jido.Connect.SlackTest do
            ]
   end
 
+  test "message change triggers declare one history scope, event dedupe and their signal" do
+    spec = Jido.Connect.Slack.integration()
+
+    rows = [
+      {"channels", "channels:history", "channel"},
+      {"groups", "groups:history", "group"},
+      {"im", "im:history", "im"},
+      {"mpim", "mpim:history", "mpim"}
+    ]
+
+    identity = [:team_id, :event_id, :channel, :channel_type, :subtype, :ts, :thread_ts]
+    authors = [:user, :bot_id, :app_id]
+    timestamps = [:notification_ts, :event_ts]
+
+    for {family, scope, _channel_type} <- rows,
+        {action, subtype, fields} <- [
+          {"changed", "message_changed",
+           identity ++ authors ++ [:editor, :edited_ts, :text] ++ timestamps},
+          {"deleted", "message_deleted", identity ++ authors ++ timestamps}
+        ] do
+      id = "slack.event.message.#{family}.#{action}"
+
+      assert {:ok,
+              %{
+                kind: :webhook,
+                resource: :message,
+                verb: :watch,
+                data_classification: :workspace_content,
+                auth_profile: :bot,
+                policies: [:workspace_access],
+                scopes: [^scope],
+                dedupe: %{key: [:team_id, :event_id]},
+                verification: %{
+                  kind: :slack_signed_request,
+                  signature_header: "x-slack-signature",
+                  timestamp_header: "x-slack-request-timestamp"
+                }
+              } = trigger} = Connect.trigger(spec, id)
+
+      assert Enum.map(trigger.signal, & &1.name) == fields, id
+
+      required = for field <- trigger.signal, field.required?, do: field.name
+      assert required == [:team_id, :event_id, :channel, :subtype, :ts], id
+
+      assert %{enum: [^subtype]} = Enum.find(trigger.signal, &(&1.name == :subtype))
+    end
+
+    # The bot's default grants stay without the private history scopes.
+    assert %{
+             default_scopes: [
+               "channels:read",
+               "channels:manage",
+               "channels:history",
+               "groups:write",
+               "im:write",
+               "mpim:write",
+               "app_mentions:read",
+               "chat:write",
+               "files:write",
+               "pins:read",
+               "pins:write",
+               "reactions:read",
+               "reactions:write",
+               "team:read",
+               "users:read"
+             ]
+           } = Enum.find(spec.auth_profiles, &(&1.id == :bot))
+  end
+
   test "Slack catalog entry exposes setup, auth, and runtime capabilities" do
     entry = Connect.Catalog.entry(Jido.Connect.Slack)
     features = entry.capabilities |> Enum.map(& &1.feature) |> MapSet.new()
@@ -1462,6 +1531,14 @@ defmodule Jido.Connect.SlackTest do
              Jido.Connect.Slack.Sensors.DirectMessage,
              Jido.Connect.Slack.Sensors.MultiPersonDirectMessage,
              Jido.Connect.Slack.Sensors.ThreadReply,
+             Jido.Connect.Slack.Sensors.PublicChannelMessageChanged,
+             Jido.Connect.Slack.Sensors.PublicChannelMessageDeleted,
+             Jido.Connect.Slack.Sensors.PrivateChannelMessageChanged,
+             Jido.Connect.Slack.Sensors.PrivateChannelMessageDeleted,
+             Jido.Connect.Slack.Sensors.DirectMessageChanged,
+             Jido.Connect.Slack.Sensors.DirectMessageDeleted,
+             Jido.Connect.Slack.Sensors.MultiPersonDirectMessageChanged,
+             Jido.Connect.Slack.Sensors.MultiPersonDirectMessageDeleted,
              Jido.Connect.Slack.Sensors.ReactionAdded,
              Jido.Connect.Slack.Sensors.ReactionRemoved,
              Jido.Connect.Slack.Sensors.ChannelCreated,
@@ -1537,6 +1614,14 @@ defmodule Jido.Connect.SlackTest do
                  Jido.Connect.Slack.Sensors.DirectMessage,
                  Jido.Connect.Slack.Sensors.MultiPersonDirectMessage,
                  Jido.Connect.Slack.Sensors.ThreadReply,
+                 Jido.Connect.Slack.Sensors.PublicChannelMessageChanged,
+                 Jido.Connect.Slack.Sensors.PublicChannelMessageDeleted,
+                 Jido.Connect.Slack.Sensors.PrivateChannelMessageChanged,
+                 Jido.Connect.Slack.Sensors.PrivateChannelMessageDeleted,
+                 Jido.Connect.Slack.Sensors.DirectMessageChanged,
+                 Jido.Connect.Slack.Sensors.DirectMessageDeleted,
+                 Jido.Connect.Slack.Sensors.MultiPersonDirectMessageChanged,
+                 Jido.Connect.Slack.Sensors.MultiPersonDirectMessageDeleted,
                  Jido.Connect.Slack.Sensors.ReactionAdded,
                  Jido.Connect.Slack.Sensors.ReactionRemoved,
                  Jido.Connect.Slack.Sensors.ChannelCreated,
@@ -3947,6 +4032,29 @@ defmodule Jido.Connect.SlackTest do
       Jido.Connect.Slack.Sensors.ThreadReply,
       "slack.event.message.thread_reply"
     )
+  end
+
+  test "generated message change sensors expose metadata-only runtime mode" do
+    sensors = [
+      {Jido.Connect.Slack.Sensors.PublicChannelMessageChanged,
+       "slack.event.message.channels.changed"},
+      {Jido.Connect.Slack.Sensors.PublicChannelMessageDeleted,
+       "slack.event.message.channels.deleted"},
+      {Jido.Connect.Slack.Sensors.PrivateChannelMessageChanged,
+       "slack.event.message.groups.changed"},
+      {Jido.Connect.Slack.Sensors.PrivateChannelMessageDeleted,
+       "slack.event.message.groups.deleted"},
+      {Jido.Connect.Slack.Sensors.DirectMessageChanged, "slack.event.message.im.changed"},
+      {Jido.Connect.Slack.Sensors.DirectMessageDeleted, "slack.event.message.im.deleted"},
+      {Jido.Connect.Slack.Sensors.MultiPersonDirectMessageChanged,
+       "slack.event.message.mpim.changed"},
+      {Jido.Connect.Slack.Sensors.MultiPersonDirectMessageDeleted,
+       "slack.event.message.mpim.deleted"}
+    ]
+
+    for {sensor, trigger_id} <- sensors do
+      assert_metadata_only_sensor(sensor, trigger_id)
+    end
   end
 
   test "generated reaction added sensor exposes metadata-only runtime mode" do
