@@ -4,7 +4,8 @@ defmodule Jido.Connect.Google.Docs.BatchUpdateRequest do
 
   Each request in the `requests` list must contain exactly one operation.
   Supported operation keys provide safe schema boundaries for the most common
-  Google Docs batch update operations.
+  Google Docs batch update operations. They are the snake_case proto names of
+  Google's `Request` kinds, which Google accepts as sent.
   """
 
   @supported_operations MapSet.new(~w(
@@ -14,8 +15,8 @@ defmodule Jido.Connect.Google.Docs.BatchUpdateRequest do
     update_text_style
     update_paragraph_style
     create_paragraph_bullets
+    delete_paragraph_bullets
     insert_table
-    delete_table
     update_table_cell_style
     insert_inline_image
     replace_image

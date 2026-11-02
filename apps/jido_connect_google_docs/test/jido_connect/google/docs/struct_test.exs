@@ -173,17 +173,23 @@ defmodule Jido.Connect.Google.Docs.StructTest do
              BatchUpdateRequest.validate_requests(["not a map"])
   end
 
-  test "batch update request supported_operations includes expected operations" do
-    ops = BatchUpdateRequest.supported_operations()
-
-    assert MapSet.member?(ops, "insert_text")
-    assert MapSet.member?(ops, "update_text_style")
-    assert MapSet.member?(ops, "insert_table")
-    assert MapSet.member?(ops, "insert_inline_image")
-    assert MapSet.member?(ops, "delete_content_range")
-    assert MapSet.member?(ops, "replace_all_text")
-    assert MapSet.member?(ops, "update_paragraph_style")
-    assert MapSet.member?(ops, "update_table_cell_style")
+  # Google has no deleteTable request and rejects the name as an unknown field;
+  # deleteParagraphBullets is the inverse of createParagraphBullets.
+  test "batch update request supported_operations lists the eleven Docs requests" do
+    assert BatchUpdateRequest.supported_operations() ==
+             MapSet.new(~w(
+               insert_text
+               delete_content_range
+               replace_all_text
+               update_text_style
+               update_paragraph_style
+               create_paragraph_bullets
+               delete_paragraph_bullets
+               insert_table
+               update_table_cell_style
+               insert_inline_image
+               replace_image
+             ))
   end
 
   test "batch update request max_requests returns limit" do

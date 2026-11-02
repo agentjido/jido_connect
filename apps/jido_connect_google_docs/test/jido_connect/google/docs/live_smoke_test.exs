@@ -25,6 +25,54 @@ defmodule Jido.Connect.Google.Docs.LiveSmokeTest do
   @second_marker "jcl-marker-tab-second"
   @nested_marker "jcl-marker-tab-nested"
 
+  # The scratch document is empty between runs: one tab `t.0` whose body holds
+  # only the final newline. The write test fills it with test markers at
+  # indexes that hold for an empty document, and empties it again on exit.
+  # `batch_update_test.exs` replays the recordings with the same batches.
+  @docs_api "https://docs.googleapis.com/v1/documents/"
+
+  # Inserted in this order at index 1, so the first marker ends up on top.
+  @insert_batch [
+    %{
+      "insert_text" => %{
+        "location" => %{"index" => 1, "tab_id" => "t.0"},
+        "text" => "jcl-live-second\n"
+      }
+    },
+    %{
+      "insert_text" => %{
+        "location" => %{"index" => 1, "tab_id" => "t.0"},
+        "text" => "jcl-live-first\n"
+      }
+    }
+  ]
+
+  # Replaces the second marker, indexes 16 to 31, and keeps its newline.
+  @range_replacement_batch [
+    %{
+      "delete_content_range" => %{
+        "range" => %{"start_index" => 16, "end_index" => 31, "tab_id" => "t.0"}
+      }
+    },
+    %{
+      "insert_text" => %{
+        "location" => %{"index" => 16, "tab_id" => "t.0"},
+        "text" => "jcl-live-replaced"
+      }
+    }
+  ]
+
+  @text_after_replacement "jcl-live-first\njcl-live-replaced\n\n"
+
+  @stale_batch [
+    %{
+      "insert_text" => %{
+        "location" => %{"index" => 1, "tab_id" => "t.0"},
+        "text" => "jcl-live-stale\n"
+      }
+    }
+  ]
+
   @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DOCS_SCRATCH_DOCUMENT_ID"])
   test "reads the scratch document", %{env: env} do
     LiveSmoke.record({:jido_connect_google, :google_req_options}, :google_docs, "document")
@@ -85,6 +133,83 @@ defmodule Jido.Connect.Google.Docs.LiveSmokeTest do
     refute text(document.body) =~ @nested_marker
   end
 
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DOCS_SCRATCH_DOCUMENT_ID"])
+  @tag write!(:google)
+  test "applies an insertion and a range replacement and rejects a stale revision",
+       %{env: env} do
+    token = env["GOOGLE_ACCESS_TOKEN"]
+    document_id = env["GOOGLE_DOCS_SCRATCH_DOCUMENT_ID"]
+
+    assert %{tab_id: "t.0", revision_id: initial_revision, text: "\n"} =
+             read_scratch(token, document_id)
+
+    # Registered after the document proved empty and before the first write.
+    # Cleanup then removes only what this test wrote, also when an assertion
+    # below fails, and never touches a document that was not empty.
+    on_exit(fn -> empty_scratch_document!(token, document_id) end)
+
+    LiveSmoke.record(@req_options, :google_docs, "batch_update_insert")
+
+    assert {:ok, inserted} =
+             batch_update(
+               %{
+                 document_id: document_id,
+                 requests: @insert_batch,
+                 write_control: %{"required_revision_id" => initial_revision}
+               },
+               token
+             )
+
+    assert %{
+             document_id: ^document_id,
+             replies: [%{}, %{}],
+             write_control: %{"requiredRevisionId" => inserted_revision}
+           } = inserted
+
+    refute Map.has_key?(inserted, :document)
+
+    assert read_scratch(token, document_id).text ==
+             "jcl-live-first\njcl-live-second\n\n"
+
+    LiveSmoke.record(@req_options, :google_docs, "batch_update_range_replacement")
+
+    assert {:ok, replaced} =
+             batch_update(
+               %{
+                 document_id: document_id,
+                 requests: @range_replacement_batch,
+                 write_control: %{"required_revision_id" => inserted_revision}
+               },
+               token
+             )
+
+    assert %{
+             document_id: ^document_id,
+             replies: [%{}, %{}],
+             write_control: %{"requiredRevisionId" => replaced_revision}
+           } = replaced
+
+    assert replaced_revision != inserted_revision
+
+    assert read_scratch(token, document_id).text == @text_after_replacement
+
+    LiveSmoke.record(@req_options, :google_docs, "batch_update_stale_revision")
+
+    assert {:error, %Connect.Error.ProviderError{reason: :http_error, status: 400} = error} =
+             batch_update(
+               %{
+                 document_id: document_id,
+                 requests: @stale_batch,
+                 write_control: %{"required_revision_id" => initial_revision}
+               },
+               token
+             )
+
+    assert error.details.message =~ "does not match the latest revision"
+
+    assert read_scratch(token, document_id).text == @text_after_replacement
+  end
+
   defp text(%{"content" => content}) do
     for %{"paragraph" => %{"elements" => elements}} <- content,
         %{"textRun" => %{"content" => run}} <- elements,
@@ -92,7 +217,61 @@ defmodule Jido.Connect.Google.Docs.LiveSmokeTest do
         do: run
   end
 
+  # Reads and cleanup bypass the package's Req options, so the recorder only
+  # writes the batch updates under test.
+  defp read_scratch(access_token, document_id) do
+    assert %{status: 200, body: %{"revisionId" => revision_id, "tabs" => [tab]}} =
+             external(:get, document_id, access_token, params: [includeTabsContent: true])
+
+    %{"tabProperties" => %{"tabId" => tab_id}, "documentTab" => %{"body" => body}} = tab
+    %{"content" => content} = body
+
+    %{
+      tab_id: tab_id,
+      revision_id: revision_id,
+      text: text(body),
+      end_index: content |> List.last() |> Map.fetch!("endIndex")
+    }
+  end
+
+  # Deletes everything but the final newline, which a Docs body always keeps,
+  # and raises unless the document is empty afterwards.
+  defp empty_scratch_document!(access_token, document_id) do
+    %{tab_id: tab_id, end_index: end_index} = read_scratch(access_token, document_id)
+
+    if end_index > 2 do
+      range = %{startIndex: 1, endIndex: end_index - 1, tabId: tab_id}
+
+      %{status: status} =
+        external(:post, "#{document_id}:batchUpdate", access_token,
+          json: %{requests: [%{deleteContentRange: %{range: range}}]}
+        )
+
+      unless status == 200, do: raise("cleanup could not empty the scratch document: #{status}")
+    end
+
+    case read_scratch(access_token, document_id) do
+      %{text: "\n", end_index: 2} -> :ok
+      _other -> raise "the scratch document is not empty after cleanup"
+    end
+  end
+
+  defp external(method, path, access_token, opts) do
+    Req.request!(
+      [method: method, url: @docs_api <> path, auth: {:bearer, access_token}, retry: false] ++
+        opts
+    )
+  end
+
+  defp batch_update(input, access_token) do
+    invoke("google.docs.document.batch_update", input, access_token)
+  end
+
   defp get_document(input, access_token) do
+    invoke("google.docs.document.get", input, access_token)
+  end
+
+  defp invoke(action_id, input, access_token) do
     connection =
       Connect.Connection.new!(%{
         id: "live_smoke",
@@ -122,7 +301,7 @@ defmodule Jido.Connect.Google.Docs.LiveSmokeTest do
         scopes: [@documents_scope]
       })
 
-    Connect.invoke(Docs.integration(), "google.docs.document.get", input,
+    Connect.invoke(Docs.integration(), action_id, input,
       context: context,
       credential_lease: lease
     )

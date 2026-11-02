@@ -37,6 +37,78 @@ A tab at any depth that is not a map, or whose fields do not have Google's
 shape, makes the action return a `Jido.Connect.Error.ProviderError` with
 reason `:invalid_response`.
 
+## Batch Update
+
+`google.docs.document.batch_update` sends one `documents.batchUpdate` call.
+Google applies the requests in list order and all or none of them.
+
+### Request Naming
+
+Requests use the snake_case proto names of Google's request kinds and
+fields, such as `insert_text`, `location.tab_id`, `delete_content_range` and
+`range.start_index`. Google accepts these names as sent, at every nesting
+level, and rejects a name it does not know with HTTP 400. The client
+translates no keys: `requests` goes out unchanged, and `write_control` goes
+out as Google's `writeControl` with the given map inside.
+
+```elixir
+%{
+  document_id: "1abc...",
+  requests: [
+    %{"delete_content_range" => %{
+      "range" => %{"start_index" => 20, "end_index" => 39, "tab_id" => "t.0"}
+    }},
+    %{"insert_text" => %{
+      "location" => %{"index" => 20, "tab_id" => "t.0"},
+      "text" => "replacement"
+    }}
+  ],
+  write_control: %{"required_revision_id" => revision_id}
+}
+```
+
+The action takes 1 to 100 requests. Each request holds exactly one of these
+operations:
+
+- `insert_text`, `delete_content_range`, `replace_all_text`
+- `update_text_style`, `update_paragraph_style`
+- `create_paragraph_bullets`, `delete_paragraph_bullets`
+- `insert_table`, `update_table_cell_style`
+- `insert_inline_image`, `replace_image`
+
+Google has no request that deletes a table; delete its range with
+`delete_content_range`. An empty list, more than 100 requests, a request
+with no or several operations, or any other operation key, camelCase names
+such as `insertText` included, returns a `Jido.Connect.Error.ValidationError`
+before any request reaches Google. `Client.batch_update/2` does not validate
+and passes camelCase keys through unchanged as well.
+
+The action computes no indexes and no tab IDs. Read them with
+`google.docs.document.get`; indexes count UTF-16 code units.
+
+### Response Fields
+
+- `document_id`: the updated document.
+- `write_control`: Google's write control object as returned, such as
+  `%{"requiredRevisionId" => revision_id}`, with the revision after the
+  update. Google accepts it unchanged as the next request's `write_control`.
+- `replies`: one reply per request, in request order. Requests without a
+  reply, such as `insert_text` and `delete_content_range`, return an empty
+  map.
+- `document`: Google's batchUpdate response carries no document, so this
+  field is absent. A response whose inline document is not a map, or has a
+  tab without Google's shape, returns a `ProviderError` with reason
+  `:invalid_response`.
+
+### Revision Conflicts
+
+When `required_revision_id` is not the document's latest revision, Google
+answers HTTP 400 and applies nothing. The action returns a `ProviderError`
+with reason `:http_error`, status 400 and Google's message in
+`details.message`, "The required revision ID '…' does not match the latest
+revision." Google uses the same status for other invalid requests; only the
+message tells a revision conflict apart. The action does not retry.
+
 ## Auth Profiles
 
 Docs declares a user OAuth profile:

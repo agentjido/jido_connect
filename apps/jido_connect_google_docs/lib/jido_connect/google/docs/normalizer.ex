@@ -83,34 +83,39 @@ defmodule Jido.Connect.Google.Docs.Normalizer do
     |> DocumentResult.new()
   end
 
-  @doc "Normalizes a Google Docs batch update result payload."
+  @doc """
+  Normalizes a Google Docs batch update result payload.
+
+  Keeps `documentId`, the `replies` and Google's `writeControl` object as
+  returned. Google's response has no document; an inline `document` that is
+  not a map, or that has a tab at any depth without the provider's shape,
+  returns an error.
+  """
   @spec batch_update_result(map()) :: {:ok, map()} | {:error, term()}
   def batch_update_result(payload) when is_map(payload) do
-    document =
-      case Data.get(payload, "document") do
-        nil -> nil
-        doc_payload -> document(doc_payload)
-      end
+    with {:ok, document} <- inline_document(Data.get(payload, "document")) do
+      replies =
+        payload
+        |> Data.get("replies", [])
+        |> Enum.map(&public_map/1)
 
-    replies =
-      payload
-      |> Data.get("replies", [])
-      |> Enum.map(&public_map/1)
-
-    result = %{
-      document_id: Data.get(payload, "documentId"),
-      replies: replies,
-      write_control: Data.get(payload, "writeControl")
-    }
-
-    result =
-      case document do
-        {:ok, doc} -> Map.put(result, :document, public_map(doc))
-        _ -> result
-      end
-
-    {:ok, Data.compact(result)}
+      {:ok,
+       Data.compact(%{
+         document_id: Data.get(payload, "documentId"),
+         replies: replies,
+         write_control: Data.get(payload, "writeControl"),
+         document: document
+       })}
+    end
   end
+
+  defp inline_document(nil), do: {:ok, nil}
+
+  defp inline_document(payload) when is_map(payload) do
+    with {:ok, document} <- document(payload), do: {:ok, public_map(document)}
+  end
+
+  defp inline_document(_payload), do: {:error, :invalid_document_payload}
 
   defp normalize_tabs(tabs) when is_list(tabs) do
     tabs

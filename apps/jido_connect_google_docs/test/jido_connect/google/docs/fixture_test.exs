@@ -43,42 +43,31 @@ defmodule Jido.Connect.Google.Docs.FixtureTest do
     assert doc.tabs == []
   end
 
-  test "normalizes Google Docs batch update result fixture" do
-    payload = fixture!("batch_update_result.json")
+  test "normalizes the recorded batch update response" do
+    payload = LiveSmoke.fixture!(:google_docs, "batch_update_insert")
 
     assert {:ok, result} = Normalizer.batch_update_result(payload)
-    assert result.document_id == "doc_batch101"
-    assert result.replies == []
+
+    assert result == %{
+             document_id: "1t47PcdwCWroHLmzucoB5YxoFZRyUD9a8dymU8ju-pwE",
+             replies: [%{}, %{}],
+             write_control: %{
+               "requiredRevisionId" => payload["writeControl"]["requiredRevisionId"]
+             }
+           }
   end
 
-  test "normalizes batch update result with replies" do
-    payload = %{
-      "documentId" => "doc_reply_001",
-      "replies" => [
-        %{"insertText" => %{}},
-        %{"updateTextStyle" => %{}}
-      ]
-    }
+  test "normalizes a recorded document read placed inline in a batch update response" do
+    document = LiveSmoke.fixture!(:google_docs, "document_without_tabs_content")
 
-    assert {:ok, result} = Normalizer.batch_update_result(payload)
-    assert result.document_id == "doc_reply_001"
-    assert length(result.replies) == 2
-  end
+    payload =
+      :google_docs
+      |> LiveSmoke.fixture!("batch_update_insert")
+      |> Map.put("document", document)
 
-  test "normalizes batch update result with inline document" do
-    payload = %{
-      "documentId" => "doc_inline_001",
-      "document" => %{
-        "documentId" => "doc_inline_001",
-        "title" => "Updated Doc"
-      },
-      "replies" => [%{"insertText" => %{}}]
-    }
-
-    assert {:ok, result} = Normalizer.batch_update_result(payload)
-    assert result.document_id == "doc_inline_001"
-    assert %{document_id: "doc_inline_001", title: "Updated Doc"} = result.document
-    assert length(result.replies) == 1
+    assert {:ok, %{document: inline}} = Normalizer.batch_update_result(payload)
+    assert %{document_id: "1Ej83l690dmUeDhX90Suxdef_SR97A-Kleilmdg5G9_E", tabs: []} = inline
+    assert inline.body == document["body"]
   end
 
   test "normalizes a recorded tab from tabProperties and documentTab" do

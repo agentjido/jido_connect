@@ -41,10 +41,11 @@ defmodule Jido.Connect.Google.DocsTest do
           %{document_id: "doc_abc123", requests: [%{insert_text: _}]},
           "token"
         ) do
+      # Google answers an insert with an empty reply object.
       {:ok,
        %{
          document_id: "doc_abc123",
-         replies: [%{insert_text: %{}}]
+         replies: [%{}]
        }}
     end
   end
@@ -195,7 +196,7 @@ defmodule Jido.Connect.Google.DocsTest do
   test "invokes batch update document through injected client and lease" do
     {context, lease} = context_and_lease(scopes: write_scopes())
 
-    assert {:ok, %{replies: [%{insert_text: %{}}]}} =
+    assert {:ok, %{replies: replies}} =
              Connect.invoke(
                Docs.integration(),
                "google.docs.document.batch_update",
@@ -206,6 +207,8 @@ defmodule Jido.Connect.Google.DocsTest do
                context: context,
                credential_lease: lease
              )
+
+    assert replies == [%{}]
   end
 
   test "batch update rejects empty requests" do

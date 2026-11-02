@@ -15,6 +15,18 @@
 - `google.docs.document.get` accepts a connection that holds `documents`
   without `documents.readonly`. Before, such a connection failed with
   missing scopes, although Google accepts `documents` for reads.
+- `google.docs.document.batch_update` returns `document_id` and
+  `write_control`, Google's write control with the revision after the
+  update. Before, the action result held only `replies`.
+- The batch update allowlist drops `delete_table`, which Google does not
+  have and rejects, and adds `delete_paragraph_bullets`. A batch with
+  `delete_table` now fails validation before any request.
+- A batch update response whose inline document is not a map or has a
+  malformed tab returns a `ProviderError` with reason `:invalid_response`.
+  Before, the document was dropped, or the handler raised.
+- The README states that requests use snake_case names, which Google
+  accepts as sent, and describes the response fields and revision
+  conflicts.
 
 ## 0.1.0
 
