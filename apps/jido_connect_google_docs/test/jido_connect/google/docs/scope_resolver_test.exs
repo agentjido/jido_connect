@@ -54,6 +54,18 @@ defmodule Jido.Connect.Google.Docs.ScopeResolverTest do
         expected: @readonly_scope
       },
       %{
+        label: "get document accepts an existing write grant",
+        operation: "google.docs.document.get",
+        granted: [@write_scope],
+        expected: @write_scope
+      },
+      %{
+        label: "get document prefers readonly scope when both are granted",
+        operation: "google.docs.document.get",
+        granted: [@write_scope, @readonly_scope],
+        expected: @readonly_scope
+      },
+      %{
         label: "create document requires write scope",
         operation: "google.docs.document.create",
         granted: [],

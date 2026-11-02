@@ -46,6 +46,7 @@ defmodule Jido.Connect.Google.Docs.StructTest do
       ConnectorContracts.assert_struct_defaults(
         Tab,
         %{tab_id: "tab_summary", title: "Summary"},
+        child_tabs: [],
         metadata: %{}
       )
 

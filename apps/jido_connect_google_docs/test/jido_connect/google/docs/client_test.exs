@@ -1,7 +1,10 @@
 defmodule Jido.Connect.Google.Docs.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Google.Docs.{Client, Document}
+  alias Jido.Connect.Google.Docs.{Client, Document, Tab}
+  alias Jido.Connect.TestSupport.LiveSmoke
+
+  @tabbed_document_id "1Ej83l690dmUeDhX90Suxdef_SR97A-Kleilmdg5G9_E"
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -55,30 +58,30 @@ defmodule Jido.Connect.Google.Docs.ClientTest do
   end
 
   test "gets document with tab content" do
+    recorded = LiveSmoke.fixture!(:google_docs, "document_with_tabs_content")
+    %{"tabs" => [first, second]} = recorded
+
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
-      assert conn.request_path == "/v1/documents/doc_abc123"
+      assert conn.request_path == "/v1/documents/#{@tabbed_document_id}"
       assert conn.query_params["includeTabsContent"] == "true"
 
-      Req.Test.json(conn, %{
-        "documentId" => "doc_abc123",
-        "title" => "Project Plan",
-        "tabs" => [
-          %{
-            "tabProperties" => %{"id" => "tab_summary", "title" => "Summary"},
-            "documentTab" => %{"body" => %{"content" => []}}
-          }
-        ]
-      })
+      Req.Test.json(conn, recorded)
     end)
 
     assert {:ok, %Document{} = document} =
              Client.get_document(
-               %{document_id: "doc_abc123", include_tabs_content: true},
+               %{document_id: @tabbed_document_id, include_tabs_content: true},
                "token"
              )
 
-    assert [%{tab_id: "tab_summary", title: "Summary"}] = document.tabs
+    assert [
+             %Tab{tab_id: "t.0", title: "First", body: first_body},
+             %Tab{tab_id: "t.1mzp8ctna0b6", title: "Second", body: second_body}
+           ] = document.tabs
+
+    assert first_body == first["documentTab"]["body"]
+    assert second_body == second["documentTab"]["body"]
   end
 
   test "creates document" do

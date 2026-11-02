@@ -1,5 +1,8 @@
 defmodule Jido.Connect.Google.Docs.Tab do
-  @moduledoc "Normalized Google Docs tab (body/content container) metadata."
+  @moduledoc """
+  Normalized Google Docs tab: ID and title from the tab's `tabProperties`,
+  body from its `documentTab`, and its nested child tabs as `Tab` structs.
+  """
 
   @schema Zoi.struct(
             __MODULE__,
@@ -7,6 +10,7 @@ defmodule Jido.Connect.Google.Docs.Tab do
               tab_id: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               title: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               body: Zoi.map() |> Zoi.nullish() |> Zoi.optional(),
+              child_tabs: Zoi.list(Zoi.lazy({__MODULE__, :schema, []})) |> Zoi.default([]),
               metadata: Zoi.map() |> Zoi.default(%{})
             },
             coerce: true

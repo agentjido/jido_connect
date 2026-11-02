@@ -37,7 +37,10 @@ defmodule Jido.Connect.Google.Docs.Actions.Documents do
 
         field(:include_tabs_content, :boolean,
           example: true,
-          description: "Populate the Document.tabs field instead of legacy text content fields."
+          description:
+            "true returns every tab in tabs, with nested tabs in child_tabs, and no legacy body. " <>
+              "false returns only the first tab in the legacy body, with tabs empty. " <>
+              "No default: the request carries includeTabsContent only when this is set."
         )
       end
 
