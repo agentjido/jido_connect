@@ -11,10 +11,11 @@ defmodule Jido.Connect.Google.Calendar.LiveSmokeTest do
   use Jido.Connect.TestSupport.LiveSmoke
 
   alias Jido.Connect.Google.Calendar.Client
+  alias Jido.Connect.Google.Calendar.TestSupport.LiveCalendar
 
   @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_CALENDAR_ID"])
   test "lists one page of events on the test calendar", %{env: env} do
-    LiveSmoke.record({:jido_connect_google, :google_req_options}, :google_calendar, "events")
+    LiveCalendar.record("events")
 
     assert {:ok, result} =
              Client.list_events(

@@ -1,0 +1,85 @@
+{
+  "body": {
+    "created": "2026-11-02T08:18:04.000Z",
+    "creator": {
+      "email": "person-1@example.com",
+      "self": true
+    },
+    "end": {
+      "dateTime": "2027-02-01T11:15:00+01:00",
+      "timeZone": "Europe/Berlin"
+    },
+    "etag": "\"3587214970252318\"",
+    "eventType": "default",
+    "htmlLink": "htmlLink-1",
+    "iCalUID": "person-2@example.com",
+    "id": "jcls1totf4p0uv",
+    "organizer": {
+      "email": "person-1@example.com",
+      "self": true
+    },
+    "reminders": {
+      "useDefault": true
+    },
+    "sequence": 0,
+    "start": {
+      "dateTime": "2027-02-01T10:00:00+01:00",
+      "timeZone": "Europe/Berlin"
+    },
+    "status": "confirmed",
+    "summary": "jcl-live create timed otf4p0uv",
+    "updated": "2026-11-02T08:18:05.126Z"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "no-cache, no-store, max-age=0, must-revalidate"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:18:05 GMT"
+    ],
+    "expires": [
+      "Mon, 01 Jan 1990 00:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-l2-request-path": [
+      "l2-managed-14"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/calendar/v3/calendars/person-1@example.com/events"
+  },
+  "status": 200
+}

@@ -124,8 +124,11 @@ as seed input belong to the scripts that create the test data.
 | `GOOGLE_GMAIL_DISPOSABLE_MESSAGE_ID` | setting | Message that a write test may delete |
 | `GOOGLE_GMAIL_ARCHIVE_MESSAGE_ID` | setting | One message of the two-message archive and label thread |
 | `GOOGLE_GMAIL_RECIPIENT` | setting | Second mailbox for sent mail |
-| `GOOGLE_CALENDAR_ID` | setting | Test calendar |
-| `GOOGLE_CALENDAR_EVENT_ID` | setting | Event with attendees, attachments and Meet data |
+| `GOOGLE_CALENDAR_ID` | setting | Test calendar with six prepared `jcl-live` events from 2026-11-09 to 2026-11-15, timed in three zones, across midnight, all-day and multi-day, and a weekly series of six Monday occurrences from 2026-11-09 whose second one is moved |
+| `GOOGLE_CALENDAR_EVENT_ID` | setting | Meeting with a 963-byte description, the test user and `GOOGLE_SEED_ATTENDEES` as attendees, an agenda and a handout attachment, and Meet data |
+| `GOOGLE_CALENDAR_AGENDA_FILE_ID` | setting | Google Docs agenda attached to that event |
+| `GOOGLE_CALENDAR_HANDOUT_URL` | setting | URL-only attachment of that event, ending in `&jcl=a%20b` |
+| `GOOGLE_CALENDAR_CONFERENCE_ID` | setting | Meet conference ID of that event |
 | `GOOGLE_MEET_CONFERENCE_RECORD` | setting | Past meeting with transcript and recording |
 | `GOOGLE_MEET_TRANSCRIPT` | setting | Transcript of that meeting |
 | `GOOGLE_MEET_RECORDING` | setting | Recording of that meeting |

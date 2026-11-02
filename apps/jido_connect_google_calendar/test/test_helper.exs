@@ -10,3 +10,7 @@ unless Code.ensure_loaded?(Jido.Connect.Google.TestSupport.ConnectorContracts) d
     __DIR__
   )
 end
+
+unless Code.ensure_loaded?(Jido.Connect.Google.Calendar.TestSupport.LiveCalendar) do
+  Code.require_file("support/live_calendar.ex", __DIR__)
+end
