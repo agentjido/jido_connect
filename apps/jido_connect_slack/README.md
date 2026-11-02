@@ -221,6 +221,104 @@ checks the `v0` HMAC signature and rejects timestamps outside the replay window.
 Events API `url_verification` callbacks can be handled with
 `Jido.Connect.Slack.Webhook.url_verification_challenge/1`.
 
+`Jido.Connect.Slack.Webhook.verify_delivery/4` returns a verified
+`Jido.Connect.WebhookDelivery` whose delivery ID is Slack's `event_id`, so a
+retry with `x-slack-retry-num` is a duplicate for `:seen_delivery_ids`.
+Verification and normalization are separate: a delivery whose signature
+verifies keeps `normalized_signal: nil` when the package does not normalize
+its event, such as an edit, a deletion, a join notice or a URL challenge.
+The same holds when normalization fails, as for a message with a malformed
+share. `Jido.Connect.Slack.Webhook.normalize_signal/2` returns the reason,
+for example `:unsupported_message_subtype` or `:invalid_shared_message`.
+
+### Message events
+
+The bot receives messages only from conversations it belongs to: public and
+private channels it is a member of, its own DM, which needs the Messages tab
+of the app's App Home, and group DMs that include it. A channel the bot has
+left sends it nothing. Subscribe the app's bot events to:
+
+| Slack subscription | Scope | Trigger |
+| --- | --- | --- |
+| `message.channels` | `channels:history` | `slack.event.message.channels` |
+| `message.groups` | `groups:history` | `slack.event.message.groups` |
+| `message.im` | `im:history` | `slack.event.message.im` |
+| `message.mpim` | `mpim:history` | `slack.event.message.mpim` |
+| `app_mention` | `app_mentions:read` | `slack.event.app_mention` |
+
+The four message subscriptions all deliver Slack's `message` event, and its
+`channel_type` (`channel`, `group`, `im`, `mpim`) selects the trigger. Thread
+replies arrive through the same subscriptions: `slack.event.message.thread_reply`
+has no subscription of its own and accepts a message whose `thread_ts`
+differs from its `ts`. A thread parent and a message without `thread_ts` are
+no thread reply.
+
+`app_mention` concerns the bot only. When a person mentions the app in a
+channel the bot belongs to, Slack sends two deliveries with the same `ts` and
+their own `event_id`: an `app_mention` event and a `message` event. The
+message signal keeps the mention as `<@U…>` text and is no app mention; a
+host that handles both can match them by `channel` and `ts`.
+
+The message triggers accept messages without a subtype and two subtypes of
+new messages that people write:
+
+- `file_share`, a message with files. A person uploads them with the
+  message, or shares an existing file into the conversation with the file's
+  own share action. That hands over the file, not the message it was posted
+  with, so the signal has no `shared_messages`. The signal carries
+  `subtype: "file_share"` and `file_ids`, the IDs from `files[].id`; file
+  content, previews and links stay out of the signal. `conversations.history`
+  returns the same message without the subtype.
+- `thread_broadcast`, a thread reply also sent to the channel. It normalizes
+  under the channel's trigger and under `slack.event.message.thread_reply`,
+  with `subtype: "thread_broadcast"`.
+
+Every other subtype, such as `message_changed`, `message_deleted`,
+`channel_join` or `bot_message`, returns `:unsupported_message_subtype`.
+Signals of plain messages carry no `subtype`. The subtype does not tell
+people from bots: an app posting with `chat.postMessage` sends messages
+without a subtype, and they normalize like a person's. To skip the bot's own
+posts, compare `user` with the installation's bot user ID.
+
+`text` is Slack's full text, also beyond 512 bytes, and IDs and timestamps
+stay Slack's strings. DM and group DM signals add `conversation` (`id` and
+`type`) and `sender` (`id`, and `team_id` only when Slack sends `user_team`
+or `source_team`). The DMs captured from the test workspace carried neither,
+so `sender` held only the ID; the package does not take the event's `team`
+instead.
+
+### Handing a message over
+
+A person hands a message to the app by sharing it into the bot DM with
+Slack's "Share message". Slack delivers a `message.im` event whose
+`attachments` hold the shared message with `is_share: true`; the shares
+captured from the test workspace had no subtype. The signal keeps the person
+who shared as `user` and adds `shared_messages`, one entry per shared
+attachment:
+
+- `channel`, the conversation the message comes from,
+- `ts`, the shared message's timestamp,
+- `user`, its author, when Slack names one,
+- `text`, its text,
+- `from_url`, Slack's link to it.
+
+The app sees only the shared message, not the rest of its conversation or
+thread. An entry has no `thread_ts`: the package reads no thread from the
+attachment, so for a shared thread reply only `from_url`, Slack's link to
+the reply, names the thread. Group DM signals keep shares the same way,
+through the same path as DMs.
+
+The shares captured from the test workspace were the sharer's own top-level
+messages from a public and a private channel, shared into the bot DM.
+Shares of thread replies, of bot messages and of other authors' messages,
+and shares into a group DM, were not captured.
+
+A share without source channel or `ts`, a share field that is not a string,
+or `attachments` that are not a list make normalization fail with
+`:invalid_shared_message`, whose details name the payload path, never a
+value. A DM without a shared attachment has no `shared_messages`. The
+package declares no message shortcut.
+
 ## Interactivity
 
 Slack posts button clicks, shortcuts and other interactions to the app's

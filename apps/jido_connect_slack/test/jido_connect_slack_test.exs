@@ -1096,7 +1096,9 @@ defmodule Jido.Connect.SlackTest do
              :text,
              :ts,
              :thread_ts,
-             :event_ts
+             :event_ts,
+             :subtype,
+             :file_ids
            ]
 
     assert {:ok,
@@ -1124,7 +1126,9 @@ defmodule Jido.Connect.SlackTest do
              :text,
              :ts,
              :thread_ts,
-             :event_ts
+             :event_ts,
+             :subtype,
+             :file_ids
            ]
 
     assert {:ok,
@@ -1156,7 +1160,10 @@ defmodule Jido.Connect.SlackTest do
              :thread_ts,
              :event_ts,
              :sender,
-             :conversation
+             :conversation,
+             :subtype,
+             :file_ids,
+             :shared_messages
            ]
 
     assert {:ok,
@@ -1188,7 +1195,10 @@ defmodule Jido.Connect.SlackTest do
              :thread_ts,
              :event_ts,
              :sender,
-             :conversation
+             :conversation,
+             :subtype,
+             :file_ids,
+             :shared_messages
            ]
 
     assert {:ok,
@@ -1220,7 +1230,10 @@ defmodule Jido.Connect.SlackTest do
              :thread_ts,
              :event_ts,
              :sender,
-             :conversation
+             :conversation,
+             :subtype,
+             :file_ids,
+             :shared_messages
            ]
 
     assert {:ok,

@@ -2,6 +2,13 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
   @moduledoc false
 
   alias Jido.Connect.{Data, Error, WebhookDelivery}
+  alias Jido.Connect.Slack.Webhook.SharedMessages
+
+  @human_message_subtypes ["file_share", "thread_broadcast"]
+
+  # The message triggers declare these as the enum of their `subtype` field.
+  @doc false
+  def human_message_subtypes, do: @human_message_subtypes
 
   def normalize_signal(%WebhookDelivery{event: event, payload: payload} = delivery) do
     with {:ok, signal} <- normalize_signal(event, payload) do
@@ -32,7 +39,7 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
       ) do
     with :ok <- reject_message_subtype(event),
          :ok <- require_message_channel_type(event, [nil, "channel", "group", "im", "mpim"]) do
-      {:ok, message_signal(payload, event)}
+      message_signal(payload, event)
     end
   end
 
@@ -145,12 +152,13 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
     })
   end
 
+  # Slack marks a new message that a person writes with a file as
+  # `file_share`, and a thread reply also sent to the channel as
+  # `thread_broadcast`. Every other subtype, such as an edit, a deletion, a
+  # join notice or a classic bot message, is no new human message.
   defp reject_message_subtype(event) do
     case Data.get(event, "subtype") do
-      nil ->
-        :ok
-
-      "" ->
+      subtype when subtype in [nil, "" | @human_message_subtypes] ->
         :ok
 
       subtype ->
@@ -169,7 +177,7 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
        ) do
     with :ok <- reject_message_subtype(event),
          :ok <- require_message_channel_type(event, channel_types) do
-      {:ok, message_signal(payload, event)}
+      message_signal(payload, event)
     end
   end
 
@@ -187,7 +195,7 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
     with :ok <- reject_message_subtype(event),
          :ok <- require_message_channel_type(event, [nil, "channel", "group", "im", "mpim"]),
          :ok <- require_thread_reply(event) do
-      {:ok, message_signal(payload, event)}
+      message_signal(payload, event)
     end
   end
 
@@ -210,15 +218,31 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
         text: Data.get(event, "text"),
         ts: Data.get(event, "ts"),
         thread_ts: Data.get(event, "thread_ts"),
-        event_ts: Data.get(event, "event_ts")
+        event_ts: Data.get(event, "event_ts"),
+        subtype: Data.get(event, "subtype"),
+        file_ids: file_ids(event)
       })
 
     case Data.get(event, "channel_type") do
       channel_type when channel_type in ["im", "mpim"] ->
-        Map.merge(signal, direct_message_metadata(event))
+        with {:ok, metadata} <- direct_message_metadata(event) do
+          {:ok, Map.merge(signal, metadata)}
+        end
 
       _other ->
-        signal
+        {:ok, signal}
+    end
+  end
+
+  # Only the IDs; file metadata, content and links stay in the delivery payload.
+  defp file_ids(event) do
+    with "file_share" <- Data.get(event, "subtype"),
+         files when is_list(files) <- Data.get(event, "files"),
+         [_ | _] = ids <-
+           for(file <- files, id = Data.get(file, "id"), is_binary(id) and id != "", do: id) do
+      ids
+    else
+      _no_file_ids -> nil
     end
   end
 
@@ -247,12 +271,16 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
   end
 
   defp direct_message_metadata(event) do
-    Data.compact(%{
-      user_team: Data.get(event, "user_team"),
-      source_team: Data.get(event, "source_team"),
-      sender: sender_metadata(event),
-      conversation: conversation_metadata(event)
-    })
+    with {:ok, shared_messages} <- SharedMessages.from_event(event) do
+      {:ok,
+       Data.compact(%{
+         user_team: Data.get(event, "user_team"),
+         source_team: Data.get(event, "source_team"),
+         sender: sender_metadata(event),
+         conversation: conversation_metadata(event),
+         shared_messages: shared_messages
+       })}
+    end
   end
 
   defp sender_metadata(event) do

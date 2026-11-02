@@ -21,6 +21,18 @@
   `trigger_id`, as well as `response_urls` inside a submitted `view` and
   `interactivity.interactivity_pointer` of workflow step interactions. No
   payload type is normalized yet.
+- Normalize the message subtypes `file_share` and `thread_broadcast` as new
+  messages. Their signals carry `subtype`, and file shares also `file_ids`;
+  a broadcast reply also reaches `slack.event.message.thread_reply`. Every
+  other subtype still returns `:unsupported_message_subtype`, and plain
+  messages carry no `subtype`.
+- Add `shared_messages` to DM and group DM signals for messages shared
+  natively into the conversation (`attachments[].is_share`), with source
+  channel, `ts`, author as `user`, `text` and `from_url`. A malformed share
+  fails with `:invalid_shared_message`. Group DMs take the DM path; no share
+  into a group DM was captured.
+- Pin message, DM, group DM, thread reply and app mention normalization with
+  Events API deliveries captured from the test workspace.
 
 ## 0.1.0
 
