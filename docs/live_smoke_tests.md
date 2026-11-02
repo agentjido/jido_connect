@@ -224,6 +224,20 @@ token responses to `oauth_exchange.json` and `oauth_refresh.json`, with the
 token fields redacted, and deletes a file that still holds a token or the
 code.
 
+The Tempo own worklog checks rely only on the test user's seeded worklogs
+and compare each read with a direct Tempo read, so further own worklogs do
+not break them. Three recordings also hold worklogs that the test user
+created on JCL-2 on 2026-11-02, outside the seeded data:
+`worklogs_own.2.json` and `worklogs_own_day.json` hold 79166, booked at
+00:30 Europe/Berlin on 2026-10-31 with a description of 778 bytes, and
+`worklogs_own_jira.json` holds 79167 and 79168, created through Jira's
+worklog API without a comment and with an empty one. Re-recording these
+files needs those worklogs, since the offline tests pin their IDs and
+shapes. An empty answer names the account only in links, so the sanitizer
+cannot learn the account ID from it: the empty range is recorded after a
+seeded day, and the October 31 test stops in recording mode when that day
+has no worklog.
+
 ### Confluence
 
 | Variable | Kind | Meaning |

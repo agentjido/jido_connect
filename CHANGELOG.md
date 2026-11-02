@@ -21,8 +21,10 @@
   Inbox list, create, and update actions.
 - Add the experimental `jido_connect_tempo` package with Tempo API token and
   OAuth profiles, OAuth helpers, the connection contract, a Bearer transport
-  with an origin guard, bounded pagination and the scope resolver. It has no
-  actions yet.
+  with an origin guard, bounded pagination and the scope resolver.
+- Add the Tempo read action `tempo.worklogs.list_own` for the connected
+  account's worklogs in an inclusive date range, and the read-only Tempo
+  catalog pack `:tempo_reader`.
 
 ## 0.9.0 - 2026-08-25
 

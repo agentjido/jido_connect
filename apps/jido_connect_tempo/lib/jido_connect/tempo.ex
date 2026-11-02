@@ -2,10 +2,21 @@ defmodule Jido.Connect.Tempo do
   @moduledoc """
   Tempo Cloud integration authored with the `Jido.Connect` Spark DSL.
 
-  This module declares the provider, its two auth profiles and the five local
-  labels that Tempo actions require. It has no actions yet; the client
-  modules under `Jido.Connect.Tempo.Client` hold the connection contract and
-  the transport that later actions use.
+  This module declares the provider, its two auth profiles, the five local
+  labels that Tempo actions require and the actions. The client modules under
+  `Jido.Connect.Tempo.Client` hold the connection contract, the transport and
+  the provider calls.
+
+  ## Own Worklogs
+
+  `tempo.worklogs.list_own` returns every worklog of the connection's
+  `subject.account_id` with a booking day from `from` to `to`, both
+  inclusive, as `Jido.Connect.Tempo.Worklog` maps. The input selects only the
+  range, never an account. The read requires `tempo.worklogs.read` and fails
+  as a whole on any failed or malformed page, malformed worklog, foreign
+  author or booking day outside the range; `complete: true` marks exhausted
+  pagination. `issue_id` is the numeric Jira issue ID, readable with
+  `jira.issue.get`.
 
   ## Auth Profiles
 
@@ -23,7 +34,9 @@ defmodule Jido.Connect.Tempo do
   `Jido.Connect.Tempo.ScopeResolver`.
   """
 
-  use Jido.Connect, fragments: []
+  use Jido.Connect, fragments: [Jido.Connect.Tempo.Actions.Worklogs]
+
+  defdelegate catalog_packs, to: Jido.Connect.Tempo.CatalogPacks, as: :all
 
   @labels Jido.Connect.Tempo.ScopeResolver.labels()
   @read_labels @labels -- ["tempo.worklogs.write"]

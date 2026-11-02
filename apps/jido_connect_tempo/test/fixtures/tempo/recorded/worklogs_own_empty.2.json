@@ -1,0 +1,40 @@
+{
+  "body": {
+    "metadata": {
+      "count": 0,
+      "limit": 50,
+      "offset": 0
+    },
+    "results": [],
+    "self": "https://api.tempo.io/4/worklogs/user/account-1?from=2026-07-01&to=2026-07-31&offset=0&limit=50"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "197"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 16:52:45 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "9d414745ee805613b38e5d6c2a48da33"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/worklogs/user/account-1"
+  },
+  "status": 200
+}

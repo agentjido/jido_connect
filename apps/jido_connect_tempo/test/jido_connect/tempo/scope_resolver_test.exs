@@ -64,8 +64,22 @@ defmodule Jido.Connect.Tempo.ScopeResolverTest do
   end
 
   describe "required_scopes/3" do
-    test "has no operations before the first Tempo action" do
-      assert ScopeResolver.operations() == %{}
+    test "maps the own worklog read to the worklog read label only" do
+      assert ScopeResolver.operations() == %{
+               "tempo.worklogs.list_own" => ["tempo.worklogs.read"]
+             }
+
+      assert ScopeResolver.required_scopes(
+               %{action_id: "tempo.worklogs.list_own"},
+               %{},
+               nil
+             ) == ["tempo.worklogs.read"]
+    end
+
+    test "every declared Tempo action has an entry" do
+      for action <- Tempo.integration().actions do
+        assert Map.has_key?(ScopeResolver.operations(), action.id)
+      end
     end
 
     test "an operation without an entry fails closed" do

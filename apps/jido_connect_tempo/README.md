@@ -1,11 +1,14 @@
 # Jido Connect Tempo
 
 `jido_connect_tempo` is the Tempo Cloud provider package for `jido_connect`.
-It is the shared foundation for Tempo actions and has no actions yet. It
-includes:
+It includes:
 
-- `Jido.Connect.Tempo`, the provider declaration with two auth profiles and
-  five local labels
+- `Jido.Connect.Tempo`, the provider declaration with two auth profiles,
+  five local labels and the read action `tempo.worklogs.list_own`
+- the worklog read in `Jido.Connect.Tempo.Client` and the normalized
+  `Jido.Connect.Tempo.Worklog`
+- the read-only catalog pack `:tempo_reader` in
+  `Jido.Connect.Tempo.CatalogPacks`
 - OAuth 2.0 helpers in `Jido.Connect.Tempo.OAuth`
 - the connection contract in `Jido.Connect.Tempo.Client.Request`
 - the Bearer transport in `Jido.Connect.Tempo.Client.Transport`
@@ -99,6 +102,95 @@ The effective rights stay bounded by the user's Tempo permissions.
 `ScopeResolver.required_scopes/3` resolves each operation through an
 operation map that each Tempo action extends. An operation without an entry
 fails closed with a `Jido.Connect.Error.ConfigError`.
+
+## Own Worklogs
+
+`tempo.worklogs.list_own` returns every Tempo worklog of the connection's
+own account with a booking day from `from` to `to`, both inclusive:
+
+```elixir
+Jido.Connect.invoke(
+  Jido.Connect.Tempo,
+  "tempo.worklogs.list_own",
+  %{from: "2026-10-01", to: "2026-10-31"},
+  context: context,
+  credential_lease: lease
+)
+```
+
+The account is always `connection.subject.account_id`; the input holds only
+`from` and `to`, and any other key fails input validation. The action
+requires `tempo.worklogs.read` and is the only tool of the read-only pack
+`:tempo_reader`. `from` and `to` are ISO dates in the form `YYYY-MM-DD`, and
+`from` must not be after `to`; otherwise the call fails with a
+`Jido.Connect.Error.ValidationError` with reason `:invalid_date_range`
+before any request.
+
+The read calls `GET /4/worklogs/user/{accountId}` with the percent-encoded
+account ID, `from`, `to`, `offset` and `limit`, and never `updatedFrom`. It
+reads pages of 50 within the bounds of [Pagination](#pagination): at most 20
+pages and 1000 worklogs. `Jido.Connect.Tempo.Client.list_own_worklogs/2`
+offers the same read with other bounds.
+
+| Output | Meaning |
+| --- | --- |
+| `account_id` | the connection's `subject.account_id`, the author of every worklog |
+| `from`, `to` | the range as supplied |
+| `worklogs` | the worklogs in Tempo's order, as maps |
+| `complete` | `true`: Tempo's pagination for the range is exhausted |
+
+`complete` means that the read followed Tempo's pages until one came without
+a `next` link. It is not a snapshot: the pages are read one after another,
+and Tempo can add, change or delete worklogs during and after the read. It
+is not a write receipt either. A read that does not exhaust the pages
+returns an error and no worklogs, so a successful result always carries
+`complete: true`.
+
+Each worklog has these keys; the last six appear only when Tempo sent them:
+
+| Key | Tempo field |
+| --- | --- |
+| `tempo_worklog_id` | `tempoWorklogId` |
+| `author_account_id` | `author.accountId` |
+| `start_date` | `startDate`, the booking day |
+| `time_spent_seconds` | `timeSpentSeconds`, exact seconds |
+| `issue_id` | `issue.id`, the numeric Jira issue ID |
+| `description` | `description`, `nil` when Tempo sent none |
+| `work_attributes` | `attributes.values` as `%{key: key, value: value}` maps, `[]` when absent |
+| `start_time` | `startTime` |
+| `start_date_time_utc` | `startDateTimeUtc` |
+| `billable_seconds` | `billableSeconds`, `0` stays `0` |
+| `created_at` | `createdAt` |
+| `updated_at` | `updatedAt` |
+| `self` | `self`, Tempo's link to the worklog |
+
+`start_date` is the booking day in the worker's time zone, and Tempo filters
+`from` and `to` by it. It can differ from the date of `start_date_time_utc`:
+on the test site, a worklog booked at 00:30 Europe/Berlin on 2026-10-31 has
+`start_date_time_utc` `2026-10-30T23:30:00Z` and belongs to the range
+2026-10-31 to 2026-10-31. An empty description stays `""`, apart from an
+absent one. On the test site, Tempo answered worklogs created through Tempo
+without a description and with an empty one with its default text
+`Working on work item <issue key>`, and worklogs created through Jira's
+worklog API without a comment and with an empty comment with `""`. No
+answer left `description` out.
+
+`issue_id` is the only booking target. The Tempo package does not call Jira;
+to read the issue, call `jira.issue.get` of `jido_connect_jira` with
+`issue_key: Integer.to_string(issue_id)`, since Jira accepts the numeric ID
+as `issueIdOrKey`.
+
+The read fails as a whole; no part of the range is returned. Besides the
+errors of [Pagination](#pagination) and [Errors](#errors), these are
+`Jido.Connect.Error.ProviderError`s with `delivery: :response_received`:
+
+| Reason | Cause | Details |
+| --- | --- | --- |
+| `:invalid_worklog` | a missing or malformed field, such as a worklog without Tempo ID, author, booking date, duration or issue ID | `field`, the Tempo field path |
+| `:foreign_worklog_author` | a worklog whose `author.accountId` is not the connection's account | `tempo_worklog_id` |
+| `:worklog_outside_range` | a booking day before `from` or after `to` | `tempo_worklog_id`, `start_date`, `from`, `to` |
+
+The details never hold a description or another account's ID.
 
 ## OAuth Flow
 
@@ -248,6 +340,23 @@ runs only with `TEMPO_OAUTH_CODE` and writes each new pair to
 set -a; source ~/.config/jido_connect/live/atlassian.env; set +a
 MIX_ENV=test mix do --app jido_connect_tempo test --only live_smoke
 ```
+
+The own worklog checks rely on the test user's seeded worklogs from August
+to October 2026. Each read except the empty range compares every worklog's
+ID, booking day, start time, UTC start, seconds, billable seconds, issue ID
+and description with a direct Tempo read outside the package:
+
+| Check | Path | Recording |
+| --- | --- | --- |
+| August 1 to October 31: every period boundary day, more than one page | action, API token | `worklogs_own` |
+| October 1 in pages of two | client, OAuth access token | `worklogs_own_small_page` |
+| October 31 as a one-day range | action, OAuth access token | `worklogs_own_day` |
+| October 30, then July 2026 as the empty range | action, OAuth access token | `worklogs_own_empty` |
+| October 28, with the descriptions as Tempo sends them | action, API token | `worklogs_own_jira` |
+
+The empty range must return `worklogs: []` and `complete: true`. Some of
+these recordings also hold worklogs that the seeded data lacks; see the
+Tempo section of `docs/live_smoke_tests.md`.
 
 The successful code exchange and refresh are recorded in
 `oauth_exchange.json` and `oauth_refresh.json`, the rejections in

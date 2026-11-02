@@ -18,7 +18,7 @@ defmodule Jido.Connect.TempoTest do
     assert spec.id == :tempo
     assert spec.package == :jido_connect_tempo
     assert spec.status == :experimental
-    assert spec.actions == []
+    assert Enum.map(spec.actions, & &1.id) == ["tempo.worklogs.list_own"]
     assert spec.triggers == []
     assert Application.get_env(:jido_connect_tempo, :jido_connect_providers) == [Tempo]
   end
@@ -44,14 +44,47 @@ defmodule Jido.Connect.TempoTest do
     assert oauth.scopes == @labels
   end
 
-  test "compiles a generated plugin surface without actions" do
-    assert Tempo.jido_action_modules() == []
+  test "compiles the generated action and plugin surface" do
+    actions = [Jido.Connect.Tempo.Actions.ListOwnWorklogs]
+
+    assert Tempo.jido_action_modules() == actions
     assert Tempo.jido_sensor_modules() == []
 
     assert %Connect.Catalog.Manifest{
              id: :tempo,
              package: :jido_connect_tempo,
-             generated_modules: %{actions: [], sensors: [], plugin: Jido.Connect.Tempo.Plugin}
+             generated_modules: %{
+               actions: ^actions,
+               sensors: [],
+               plugin: Jido.Connect.Tempo.Plugin
+             }
            } = Tempo.jido_connect_manifest()
+
+    assert {:error, %Connect.Error.AuthError{reason: :context_required}} =
+             Jido.Connect.Tempo.Actions.ListOwnWorklogs.run(%{}, %{})
+  end
+
+  test "the generated action carries the DSL metadata of the own worklog read" do
+    projection = Jido.Connect.Tempo.Actions.ListOwnWorklogs.jido_connect_projection()
+
+    assert projection.action_id == "tempo.worklogs.list_own"
+    assert projection.resource == :worklog
+    assert projection.verb == :list
+    assert projection.risk == :read
+    assert projection.auth_profiles == [:api_token, :oauth2_user]
+    assert projection.scope_resolver == Jido.Connect.Tempo.ScopeResolver
+    assert projection.policies == []
+    assert Enum.map(projection.input, & &1.name) == [:from, :to]
+
+    assert Enum.map(projection.output, & &1.name) == [
+             :account_id,
+             :from,
+             :to,
+             :worklogs,
+             :complete
+           ]
+
+    assert {:ok, %{mutation?: false, data_classification: :personal_data}} =
+             Connect.action(Tempo.integration(), "tempo.worklogs.list_own")
   end
 end

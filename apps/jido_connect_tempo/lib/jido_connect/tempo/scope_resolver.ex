@@ -41,7 +41,7 @@ defmodule Jido.Connect.Tempo.ScopeResolver do
   @labels Enum.map(@grants, fn {label, _grants} -> label end)
 
   # Operation ID => labels. Each Tempo action adds its entry here.
-  @operations %{}
+  @operations %{"tempo.worklogs.list_own" => ["tempo.worklogs.read"]}
 
   @doc "Returns the five local labels in declaration order."
   @spec labels() :: [String.t()]

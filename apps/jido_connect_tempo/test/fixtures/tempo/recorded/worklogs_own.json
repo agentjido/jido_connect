@@ -1,0 +1,1242 @@
+{
+  "body": {
+    "metadata": {
+      "count": 50,
+      "limit": 50,
+      "next": "https://api.tempo.io/4/worklogs/user/account-1?from=2026-08-01&to=2026-10-31&offset=50&limit=50",
+      "offset": 0
+    },
+    "results": [
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79093/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 5400,
+        "createdAt": "2026-10-30T19:19:04Z",
+        "description": "JCL live seed worklog: approved period, first day",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79093",
+        "startDate": "2026-08-01",
+        "startDateTimeUtc": "2026-08-01T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79093,
+        "timeSpentSeconds": 5400,
+        "updatedAt": "2026-10-30T19:19:04Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79094/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 5400,
+        "createdAt": "2026-10-30T19:19:04Z",
+        "description": "JCL live seed worklog: approved period, last day",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79094",
+        "startDate": "2026-08-31",
+        "startDateTimeUtc": "2026-08-31T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79094,
+        "timeSpentSeconds": 5400,
+        "updatedAt": "2026-10-30T19:19:04Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79095/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 5400,
+        "createdAt": "2026-10-30T19:19:05Z",
+        "description": "JCL live seed worklog: submitted period, first day",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79095",
+        "startDate": "2026-09-01",
+        "startDateTimeUtc": "2026-09-01T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79095,
+        "timeSpentSeconds": 5400,
+        "updatedAt": "2026-10-30T19:19:05Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79096/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 5400,
+        "createdAt": "2026-10-30T19:19:06Z",
+        "description": "JCL live seed worklog: submitted period, last day",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79096",
+        "startDate": "2026-09-30",
+        "startDateTimeUtc": "2026-09-30T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79096,
+        "timeSpentSeconds": 5400,
+        "updatedAt": "2026-10-30T19:19:06Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79097/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 5400,
+        "createdAt": "2026-10-30T19:19:07Z",
+        "description": "JCL live seed worklog: open period, first day",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79097",
+        "startDate": "2026-10-01",
+        "startDateTimeUtc": "2026-10-01T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79097,
+        "timeSpentSeconds": 5400,
+        "updatedAt": "2026-10-30T19:22:34Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79099/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 600,
+        "createdAt": "2026-10-30T19:19:08Z",
+        "description": "Working on work item JCL-2",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79099",
+        "startDate": "2026-10-01",
+        "startDateTimeUtc": "2026-10-01T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79099,
+        "timeSpentSeconds": 600,
+        "updatedAt": "2026-10-30T19:19:08Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79100/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 600,
+        "createdAt": "2026-10-30T19:19:09Z",
+        "description": "Working on work item JCL-2",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79100",
+        "startDate": "2026-10-01",
+        "startDateTimeUtc": "2026-10-01T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79100,
+        "timeSpentSeconds": 600,
+        "updatedAt": "2026-10-30T19:19:09Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79101/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 0,
+        "createdAt": "2026-10-30T19:19:10Z",
+        "description": "JCL live seed worklog: zero billable seconds",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79101",
+        "startDate": "2026-10-01",
+        "startDateTimeUtc": "2026-10-01T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79101,
+        "timeSpentSeconds": 900,
+        "updatedAt": "2026-10-30T19:19:10Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79131/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 330,
+        "createdAt": "2026-10-30T19:19:28Z",
+        "description": "JCL live seed worklog: filler 30",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79131",
+        "startDate": "2026-10-01",
+        "startDateTimeUtc": "2026-10-01T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79131,
+        "timeSpentSeconds": 330,
+        "updatedAt": "2026-10-30T19:19:28Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79102/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 301,
+        "createdAt": "2026-10-30T19:19:10Z",
+        "description": "JCL live seed worklog: filler 01",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79102",
+        "startDate": "2026-10-02",
+        "startDateTimeUtc": "2026-10-02T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79102,
+        "timeSpentSeconds": 301,
+        "updatedAt": "2026-10-30T19:19:10Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79132/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 331,
+        "createdAt": "2026-10-30T19:19:29Z",
+        "description": "JCL live seed worklog: filler 31",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79132",
+        "startDate": "2026-10-02",
+        "startDateTimeUtc": "2026-10-02T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79132,
+        "timeSpentSeconds": 331,
+        "updatedAt": "2026-10-30T19:19:29Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79103/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 302,
+        "createdAt": "2026-10-30T19:19:11Z",
+        "description": "JCL live seed worklog: filler 02",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79103",
+        "startDate": "2026-10-03",
+        "startDateTimeUtc": "2026-10-03T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79103,
+        "timeSpentSeconds": 302,
+        "updatedAt": "2026-10-30T19:19:11Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79133/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 332,
+        "createdAt": "2026-10-30T19:19:29Z",
+        "description": "JCL live seed worklog: filler 32",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79133",
+        "startDate": "2026-10-03",
+        "startDateTimeUtc": "2026-10-03T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79133,
+        "timeSpentSeconds": 332,
+        "updatedAt": "2026-10-30T19:19:29Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79104/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 303,
+        "createdAt": "2026-10-30T19:19:12Z",
+        "description": "JCL live seed worklog: filler 03",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79104",
+        "startDate": "2026-10-04",
+        "startDateTimeUtc": "2026-10-04T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79104,
+        "timeSpentSeconds": 303,
+        "updatedAt": "2026-10-30T19:19:12Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79134/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 333,
+        "createdAt": "2026-10-30T19:19:30Z",
+        "description": "JCL live seed worklog: filler 33",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79134",
+        "startDate": "2026-10-04",
+        "startDateTimeUtc": "2026-10-04T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79134,
+        "timeSpentSeconds": 333,
+        "updatedAt": "2026-10-30T19:19:30Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79105/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 304,
+        "createdAt": "2026-10-30T19:19:12Z",
+        "description": "JCL live seed worklog: filler 04",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79105",
+        "startDate": "2026-10-05",
+        "startDateTimeUtc": "2026-10-05T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79105,
+        "timeSpentSeconds": 304,
+        "updatedAt": "2026-10-30T19:19:12Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79135/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 334,
+        "createdAt": "2026-10-30T19:19:31Z",
+        "description": "JCL live seed worklog: filler 34",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79135",
+        "startDate": "2026-10-05",
+        "startDateTimeUtc": "2026-10-05T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79135,
+        "timeSpentSeconds": 334,
+        "updatedAt": "2026-10-30T19:19:31Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79106/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 305,
+        "createdAt": "2026-10-30T19:19:13Z",
+        "description": "JCL live seed worklog: filler 05",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79106",
+        "startDate": "2026-10-06",
+        "startDateTimeUtc": "2026-10-06T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79106,
+        "timeSpentSeconds": 305,
+        "updatedAt": "2026-10-30T19:19:13Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79136/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 335,
+        "createdAt": "2026-10-30T19:19:31Z",
+        "description": "JCL live seed worklog: filler 35",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79136",
+        "startDate": "2026-10-06",
+        "startDateTimeUtc": "2026-10-06T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79136,
+        "timeSpentSeconds": 335,
+        "updatedAt": "2026-10-30T19:19:31Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79107/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 306,
+        "createdAt": "2026-10-30T19:19:14Z",
+        "description": "JCL live seed worklog: filler 06",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79107",
+        "startDate": "2026-10-07",
+        "startDateTimeUtc": "2026-10-07T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79107,
+        "timeSpentSeconds": 306,
+        "updatedAt": "2026-10-30T19:19:14Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79137/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 336,
+        "createdAt": "2026-10-30T19:19:32Z",
+        "description": "JCL live seed worklog: filler 36",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79137",
+        "startDate": "2026-10-07",
+        "startDateTimeUtc": "2026-10-07T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79137,
+        "timeSpentSeconds": 336,
+        "updatedAt": "2026-10-30T19:19:32Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79108/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 307,
+        "createdAt": "2026-10-30T19:19:14Z",
+        "description": "JCL live seed worklog: filler 07",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79108",
+        "startDate": "2026-10-08",
+        "startDateTimeUtc": "2026-10-08T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79108,
+        "timeSpentSeconds": 307,
+        "updatedAt": "2026-10-30T19:19:14Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79138/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 337,
+        "createdAt": "2026-10-30T19:19:33Z",
+        "description": "JCL live seed worklog: filler 37",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79138",
+        "startDate": "2026-10-08",
+        "startDateTimeUtc": "2026-10-08T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79138,
+        "timeSpentSeconds": 337,
+        "updatedAt": "2026-10-30T19:19:33Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79109/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 308,
+        "createdAt": "2026-10-30T19:19:15Z",
+        "description": "JCL live seed worklog: filler 08",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79109",
+        "startDate": "2026-10-09",
+        "startDateTimeUtc": "2026-10-09T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79109,
+        "timeSpentSeconds": 308,
+        "updatedAt": "2026-10-30T19:19:15Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79139/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 338,
+        "createdAt": "2026-10-30T19:19:33Z",
+        "description": "JCL live seed worklog: filler 38",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79139",
+        "startDate": "2026-10-09",
+        "startDateTimeUtc": "2026-10-09T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79139,
+        "timeSpentSeconds": 338,
+        "updatedAt": "2026-10-30T19:19:33Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79110/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 309,
+        "createdAt": "2026-10-30T19:19:16Z",
+        "description": "JCL live seed worklog: filler 09",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79110",
+        "startDate": "2026-10-10",
+        "startDateTimeUtc": "2026-10-10T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79110,
+        "timeSpentSeconds": 309,
+        "updatedAt": "2026-10-30T19:19:16Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79140/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 339,
+        "createdAt": "2026-10-30T19:19:34Z",
+        "description": "JCL live seed worklog: filler 39",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79140",
+        "startDate": "2026-10-10",
+        "startDateTimeUtc": "2026-10-10T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79140,
+        "timeSpentSeconds": 339,
+        "updatedAt": "2026-10-30T19:19:34Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79111/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 310,
+        "createdAt": "2026-10-30T19:19:16Z",
+        "description": "JCL live seed worklog: filler 10",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79111",
+        "startDate": "2026-10-11",
+        "startDateTimeUtc": "2026-10-11T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79111,
+        "timeSpentSeconds": 310,
+        "updatedAt": "2026-10-30T19:19:16Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79141/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 340,
+        "createdAt": "2026-10-30T19:19:35Z",
+        "description": "JCL live seed worklog: filler 40",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79141",
+        "startDate": "2026-10-11",
+        "startDateTimeUtc": "2026-10-11T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79141,
+        "timeSpentSeconds": 340,
+        "updatedAt": "2026-10-30T19:19:35Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79112/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 311,
+        "createdAt": "2026-10-30T19:19:17Z",
+        "description": "JCL live seed worklog: filler 11",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79112",
+        "startDate": "2026-10-12",
+        "startDateTimeUtc": "2026-10-12T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79112,
+        "timeSpentSeconds": 311,
+        "updatedAt": "2026-10-30T19:19:17Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79142/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 341,
+        "createdAt": "2026-10-30T19:19:35Z",
+        "description": "JCL live seed worklog: filler 41",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79142",
+        "startDate": "2026-10-12",
+        "startDateTimeUtc": "2026-10-12T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79142,
+        "timeSpentSeconds": 341,
+        "updatedAt": "2026-10-30T19:19:35Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79113/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 312,
+        "createdAt": "2026-10-30T19:19:18Z",
+        "description": "JCL live seed worklog: filler 12",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79113",
+        "startDate": "2026-10-13",
+        "startDateTimeUtc": "2026-10-13T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79113,
+        "timeSpentSeconds": 312,
+        "updatedAt": "2026-10-30T19:19:18Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79143/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 342,
+        "createdAt": "2026-10-30T19:19:36Z",
+        "description": "JCL live seed worklog: filler 42",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79143",
+        "startDate": "2026-10-13",
+        "startDateTimeUtc": "2026-10-13T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79143,
+        "timeSpentSeconds": 342,
+        "updatedAt": "2026-10-30T19:19:36Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79114/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 313,
+        "createdAt": "2026-10-30T19:19:18Z",
+        "description": "JCL live seed worklog: filler 13",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79114",
+        "startDate": "2026-10-14",
+        "startDateTimeUtc": "2026-10-14T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79114,
+        "timeSpentSeconds": 313,
+        "updatedAt": "2026-10-30T19:19:18Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79144/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 343,
+        "createdAt": "2026-10-30T19:19:36Z",
+        "description": "JCL live seed worklog: filler 43",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79144",
+        "startDate": "2026-10-14",
+        "startDateTimeUtc": "2026-10-14T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79144,
+        "timeSpentSeconds": 343,
+        "updatedAt": "2026-10-30T19:19:36Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79115/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 314,
+        "createdAt": "2026-10-30T19:19:19Z",
+        "description": "JCL live seed worklog: filler 14",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79115",
+        "startDate": "2026-10-15",
+        "startDateTimeUtc": "2026-10-15T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79115,
+        "timeSpentSeconds": 314,
+        "updatedAt": "2026-10-30T19:19:19Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79145/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 344,
+        "createdAt": "2026-10-30T19:19:37Z",
+        "description": "JCL live seed worklog: filler 44",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79145",
+        "startDate": "2026-10-15",
+        "startDateTimeUtc": "2026-10-15T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79145,
+        "timeSpentSeconds": 344,
+        "updatedAt": "2026-10-30T19:19:37Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79116/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 315,
+        "createdAt": "2026-10-30T19:19:19Z",
+        "description": "JCL live seed worklog: filler 15",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79116",
+        "startDate": "2026-10-16",
+        "startDateTimeUtc": "2026-10-16T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79116,
+        "timeSpentSeconds": 315,
+        "updatedAt": "2026-10-30T19:19:19Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79146/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 345,
+        "createdAt": "2026-10-30T19:19:37Z",
+        "description": "JCL live seed worklog: filler 45",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79146",
+        "startDate": "2026-10-16",
+        "startDateTimeUtc": "2026-10-16T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79146,
+        "timeSpentSeconds": 345,
+        "updatedAt": "2026-10-30T19:19:37Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79117/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 316,
+        "createdAt": "2026-10-30T19:19:20Z",
+        "description": "JCL live seed worklog: filler 16",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79117",
+        "startDate": "2026-10-17",
+        "startDateTimeUtc": "2026-10-17T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79117,
+        "timeSpentSeconds": 316,
+        "updatedAt": "2026-10-30T19:19:20Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79147/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 346,
+        "createdAt": "2026-10-30T19:19:38Z",
+        "description": "JCL live seed worklog: filler 46",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79147",
+        "startDate": "2026-10-17",
+        "startDateTimeUtc": "2026-10-17T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79147,
+        "timeSpentSeconds": 346,
+        "updatedAt": "2026-10-30T19:19:38Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79118/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 317,
+        "createdAt": "2026-10-30T19:19:20Z",
+        "description": "JCL live seed worklog: filler 17",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79118",
+        "startDate": "2026-10-18",
+        "startDateTimeUtc": "2026-10-18T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79118,
+        "timeSpentSeconds": 317,
+        "updatedAt": "2026-10-30T19:19:20Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79148/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 347,
+        "createdAt": "2026-10-30T19:19:39Z",
+        "description": "JCL live seed worklog: filler 47",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79148",
+        "startDate": "2026-10-18",
+        "startDateTimeUtc": "2026-10-18T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79148,
+        "timeSpentSeconds": 347,
+        "updatedAt": "2026-10-30T19:19:39Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79119/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 318,
+        "createdAt": "2026-10-30T19:19:21Z",
+        "description": "JCL live seed worklog: filler 18",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79119",
+        "startDate": "2026-10-19",
+        "startDateTimeUtc": "2026-10-19T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79119,
+        "timeSpentSeconds": 318,
+        "updatedAt": "2026-10-30T19:19:21Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79149/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 348,
+        "createdAt": "2026-10-30T19:19:39Z",
+        "description": "JCL live seed worklog: filler 48",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79149",
+        "startDate": "2026-10-19",
+        "startDateTimeUtc": "2026-10-19T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79149,
+        "timeSpentSeconds": 348,
+        "updatedAt": "2026-10-30T19:19:39Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79120/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 319,
+        "createdAt": "2026-10-30T19:19:22Z",
+        "description": "JCL live seed worklog: filler 19",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79120",
+        "startDate": "2026-10-20",
+        "startDateTimeUtc": "2026-10-20T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79120,
+        "timeSpentSeconds": 319,
+        "updatedAt": "2026-10-30T19:19:22Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79150/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 349,
+        "createdAt": "2026-10-30T19:19:40Z",
+        "description": "JCL live seed worklog: filler 49",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79150",
+        "startDate": "2026-10-20",
+        "startDateTimeUtc": "2026-10-20T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79150,
+        "timeSpentSeconds": 349,
+        "updatedAt": "2026-10-30T19:19:40Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79121/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 320,
+        "createdAt": "2026-10-30T19:19:22Z",
+        "description": "JCL live seed worklog: filler 20",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79121",
+        "startDate": "2026-10-21",
+        "startDateTimeUtc": "2026-10-21T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79121,
+        "timeSpentSeconds": 320,
+        "updatedAt": "2026-10-30T19:19:22Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79151/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 350,
+        "createdAt": "2026-10-30T19:19:41Z",
+        "description": "JCL live seed worklog: filler 50",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79151",
+        "startDate": "2026-10-21",
+        "startDateTimeUtc": "2026-10-21T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79151,
+        "timeSpentSeconds": 350,
+        "updatedAt": "2026-10-30T19:19:41Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79122/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 321,
+        "createdAt": "2026-10-30T19:19:23Z",
+        "description": "JCL live seed worklog: filler 21",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79122",
+        "startDate": "2026-10-22",
+        "startDateTimeUtc": "2026-10-22T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79122,
+        "timeSpentSeconds": 321,
+        "updatedAt": "2026-10-30T19:19:23Z"
+      }
+    ],
+    "self": "https://api.tempo.io/4/worklogs/user/account-1?from=2026-08-01&to=2026-10-31&offset=0&limit=50"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 15:53:58 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "83f3c63039bd261c4fae3d1b6354fb96"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/worklogs/user/account-1"
+  },
+  "status": 200
+}

@@ -1,0 +1,65 @@
+{
+  "body": {
+    "metadata": {
+      "count": 1,
+      "limit": 50,
+      "offset": 0
+    },
+    "results": [
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79166/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 1801,
+        "createdAt": "2026-11-02T15:40:29Z",
+        "description": "JCL live worklog: long description, booked at 00:30 local time on the last day of the open period. Zeile 01: Prüftext für eine lange Beschreibung – über 512 Bytes, ohne Kürzung. Zeile 02: Prüftext für eine lange Beschreibung – über 512 Bytes, ohne Kürzung. Zeile 03: Prüftext für eine lange Beschreibung – über 512 Bytes, ohne Kürzung. Zeile 04: Prüftext für eine lange Beschreibung – über 512 Bytes, ohne Kürzung. Zeile 05: Prüftext für eine lange Beschreibung – über 512 Bytes, ohne Kürzung. Zeile 06: Prüftext für eine lange Beschreibung – über 512 Bytes, ohne Kürzung. Zeile 07: Prüftext für eine lange Beschreibung – über 512 Bytes, ohne Kürzung. Zeile 08: Prüftext für eine lange Beschreibung – über 512 Bytes, ohne Kürzung.",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79166",
+        "startDate": "2026-10-31",
+        "startDateTimeUtc": "2026-10-30T23:30:00Z",
+        "startTime": "00:30:00",
+        "tempoWorklogId": 79166,
+        "timeSpentSeconds": 1801,
+        "updatedAt": "2026-11-02T15:40:29Z"
+      }
+    ],
+    "self": "https://api.tempo.io/4/worklogs/user/account-1?from=2026-10-31&to=2026-10-31&offset=0&limit=50"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "1623"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 15:55:32 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "d0917da964c197432ba910af2e438ec4"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/worklogs/user/account-1"
+  },
+  "status": 200
+}
