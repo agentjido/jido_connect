@@ -260,13 +260,15 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
                "google.gmail.history.list",
                "google.gmail.message.attachment.get",
                "google.gmail.message.content.get",
-               "google.gmail.thread.content.get"
+               "google.gmail.thread.content.get",
+               "google.gmail.message.attachment.content.get"
              ])
 
     for tool_id <- [
           "google.gmail.message.attachment.get",
           "google.gmail.message.content.get",
-          "google.gmail.thread.content.get"
+          "google.gmail.thread.content.get",
+          "google.gmail.message.attachment.content.get"
         ] do
       assert {:ok, descriptor} =
                Catalog.describe_tool(tool_id,
@@ -283,6 +285,12 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
     for pack <- Gmail.catalog_packs(), pack.id != :google_gmail_content do
       refute "google.gmail.message.content.get" in pack.allowed_tools
       refute "google.gmail.thread.content.get" in pack.allowed_tools
+    end
+  end
+
+  test "only the content pack exposes attachment content by MIME part" do
+    for pack <- Gmail.catalog_packs(), pack.id != :google_gmail_content do
+      refute "google.gmail.message.attachment.content.get" in pack.allowed_tools
     end
   end
 

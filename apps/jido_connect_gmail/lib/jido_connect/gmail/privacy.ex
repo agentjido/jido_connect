@@ -9,9 +9,10 @@ defmodule Jido.Connect.Gmail.Privacy do
   content access. `google.gmail.message.content.get` and
   `google.gmail.thread.content.get` return it in
   `Jido.Connect.Gmail.MessageContent` and `Jido.Connect.Gmail.ThreadContent`.
-  `google.gmail.message.attachment.get` returns the bytes of a manifest entry;
-  for a `message/rfc822` entry those are the whole enclosed original, its body
-  text included.
+  `google.gmail.message.attachment.get` returns the bytes of a manifest entry,
+  and `google.gmail.message.attachment.content.get` those of a part selected
+  by MIME part ID; for a `message/rfc822` entry or an enclosed message they
+  are the whole original, its body text included.
   """
 
   @message_content_fields [

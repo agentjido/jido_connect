@@ -1,0 +1,198 @@
+{
+  "body": {
+    "historyId": "15490",
+    "id": "1a197b4b97e720cc",
+    "internalDate": "1793546566000",
+    "labelIds": [
+      "INBOX"
+    ],
+    "payload": {
+      "body": {
+        "size": 0
+      },
+      "filename": "",
+      "headers": [
+        {
+          "name": "Received",
+          "value": "from 000000000000 named unknown by gmailapi.google.com with HTTPREST; Mon, 2 Nov 2026 03:22:50 -0600"
+        },
+        {
+          "name": "From",
+          "value": "Person 1 <person-1@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "Person 2 <person-2@example.com>"
+        },
+        {
+          "name": "Subject",
+          "value": "Fwd: jcl-live opaque originals"
+        },
+        {
+          "name": "Date",
+          "value": "Sun, 01 Nov 2026 15:22:46 +0000"
+        },
+        {
+          "name": "Message-ID",
+          "value": "<person-3@example.com>"
+        },
+        {
+          "name": "MIME-Version",
+          "value": "1.0"
+        },
+        {
+          "name": "Content-Type",
+          "value": "multipart/mixed; boundary=\"jcl-mixed-504dd588c2\""
+        }
+      ],
+      "mimeType": "multipart/mixed",
+      "partId": "",
+      "parts": [
+        {
+          "body": {
+            "data": "VHdvIG9yaWdpbmFscyB3aXRob3V0IGEgYm9keSwgbWFya2VyIGpjbC1tYXJrZXItZm9yd2FyZC1vcGFxdWUuDQo=",
+            "size": 65
+          },
+          "filename": "",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "text/plain; charset=\"utf-8\""
+            },
+            {
+              "name": "Content-Transfer-Encoding",
+              "value": "quoted-printable"
+            }
+          ],
+          "mimeType": "text/plain",
+          "partId": "0"
+        },
+        {
+          "body": {
+            "data": "",
+            "size": 0
+          },
+          "filename": "empty.eml",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "message/rfc822"
+            },
+            {
+              "name": "Content-Disposition",
+              "value": "attachment; filename=\"empty.eml\""
+            }
+          ],
+          "mimeType": "message/rfc822",
+          "partId": "1",
+          "parts": [
+            {
+              "body": {
+                "data": "",
+                "size": 0
+              },
+              "filename": "",
+              "mimeType": "text/plain",
+              "partId": "1.0"
+            }
+          ]
+        },
+        {
+          "body": {
+            "attachmentId": "ANGjdJ91jcedV-ZsENJcFOsce3mD-MTQLRpJQzSGqlxJNrxXgefb3oy_qPFk-Zqz_sxR5dqIcewLMsD7VAbotCeg6nBNZzOptB4CB0m4cNXUpuPXZcTfFiPOUxqpjpJ1GZNuu8cGAKnkBGcrNZOztdPt9M7ZhsMNvE_4D0EmOfAi11zX9RynzpBCqYBYOxCuvyRiFl7bipIdnErLAKp5md56OazoKgKh5CM1DV5lRjBV452gdhcji0O-iFAE7EKA6R7MMvNsfHl2HiMJqs4l2_noW7YgF0L9JE4gmCrwaHxFrWN6wh5QPaD_4e1XQMtOByHB9CPPl-8ps2uOEZ4IwxNohrq_Fjtd4zSC4RK_sLyNcL4kb3kTXU3qq10f7A4",
+            "size": 258
+          },
+          "filename": "headers-only.eml",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "message/rfc822"
+            },
+            {
+              "name": "Content-Disposition",
+              "value": "attachment; filename=\"headers-only.eml\""
+            }
+          ],
+          "mimeType": "message/rfc822",
+          "partId": "2",
+          "parts": [
+            {
+              "body": {
+                "data": "",
+                "size": 0
+              },
+              "filename": "",
+              "headers": [
+                {
+                  "name": "From",
+                  "value": "Person 3 <person-4@example.com>"
+                },
+                {
+                  "name": "To",
+                  "value": "Person 4 <person-5@example.com>"
+                },
+                {
+                  "name": "Subject",
+                  "value": "jcl-live headers-only original"
+                },
+                {
+                  "name": "Date",
+                  "value": "Thu, 29 Oct 2026 21:22:46 +0000"
+                },
+                {
+                  "name": "Message-ID",
+                  "value": "<person-6@example.com>"
+                }
+              ],
+              "mimeType": "text/plain",
+              "partId": "2.0"
+            }
+          ]
+        }
+      ]
+    },
+    "sizeEstimate": 1131,
+    "snippet": "Two originals without a body, marker jcl-marker-forward-opaque.",
+    "threadId": "1a197b4b97e720cc"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 10:56:57 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/messages/1a197b4b97e720cc"
+  },
+  "status": 200
+}

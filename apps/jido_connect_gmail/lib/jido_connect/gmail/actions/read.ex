@@ -363,5 +363,40 @@ defmodule Jido.Connect.Gmail.Actions.Read do
         field(:thread, :map)
       end
     end
+
+    action :get_attachment_content do
+      id("google.gmail.message.attachment.content.get")
+      resource(:attachment)
+      verb(:get)
+      data_classification(:message_content)
+      label("Get Gmail attachment content")
+
+      description(
+        "Fetch one attachment of a Gmail message by MIME part ID with its base64url-encoded bytes, filename, MIME type and size, whether Gmail keeps the data inline or behind an attachment ID. Reads attachment bytes."
+      )
+
+      handler(Jido.Connect.Gmail.Handlers.Actions.GetAttachmentContent)
+      effect(:read)
+
+      access do
+        auth(:user)
+        scopes([@readonly_scope], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:message_id, :string, required?: true, example: "18c...")
+
+        field(:part_id, :string,
+          required?: true,
+          example: "1",
+          description:
+            "Gmail partId of an attachment or enclosed message from the manifest of google.gmail.message.content.get."
+        )
+      end
+
+      output do
+        field(:attachment, :map)
+      end
+    end
   end
 end

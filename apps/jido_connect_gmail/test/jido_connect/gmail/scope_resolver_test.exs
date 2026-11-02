@@ -115,7 +115,11 @@ defmodule Jido.Connect.Gmail.ScopeResolverTest do
 
   describe "message and thread content reads" do
     test "require gmail.readonly and accept an already granted modify or full mailbox grant" do
-      for operation <- ["google.gmail.message.content.get", "google.gmail.thread.content.get"],
+      for operation <- [
+            "google.gmail.message.content.get",
+            "google.gmail.thread.content.get",
+            "google.gmail.message.attachment.content.get"
+          ],
           {connection, expected} <- [
             {nil, [@readonly_scope]},
             {%{scopes: []}, [@readonly_scope]},

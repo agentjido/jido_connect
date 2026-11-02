@@ -3,6 +3,7 @@ defmodule Jido.Connect.Gmail.NormalizerTest do
 
   alias Jido.Connect.Gmail.{
     Attachment,
+    AttachmentContent,
     Draft,
     Label,
     Message,
@@ -243,6 +244,21 @@ defmodule Jido.Connect.Gmail.NormalizerTest do
     )
 
     assert {:error, _error} = ThreadContent.new(%{})
+
+    ConnectorContracts.assert_struct_defaults(
+      AttachmentContent,
+      %{message_id: "msg123", part_id: "1", size: 0, data: ""},
+      thread_id: nil,
+      attachment_id: nil,
+      filename: nil,
+      content_id: nil,
+      metadata: %{}
+    )
+
+    for missing <- [:message_id, :part_id, :size, :data] do
+      attrs = Map.delete(%{message_id: "msg123", part_id: "1", size: 0, data: ""}, missing)
+      assert {:error, _error} = AttachmentContent.new(attrs), "without #{missing}"
+    end
   end
 
   defp message_payload do

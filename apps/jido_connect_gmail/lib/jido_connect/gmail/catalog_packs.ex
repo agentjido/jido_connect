@@ -61,7 +61,8 @@ defmodule Jido.Connect.Gmail.CatalogPacks do
                    [
                      "google.gmail.message.attachment.get",
                      "google.gmail.message.content.get",
-                     "google.gmail.thread.content.get"
+                     "google.gmail.thread.content.get",
+                     "google.gmail.message.attachment.content.get"
                    ]
 
   @doc "Returns all built-in Gmail catalog packs."

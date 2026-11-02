@@ -65,6 +65,15 @@ defmodule Jido.Connect.Gmail.PrivacyAuditTest do
             "does not fetch attachment bytes"
           ]
         ),
+        action("google.gmail.message.attachment.content.get", :message_content, :read, :none,
+          text_includes: [
+            "one attachment of a gmail message",
+            "mime part id",
+            "base64url-encoded bytes",
+            "inline or behind an attachment id",
+            "reads attachment bytes"
+          ]
+        ),
         action("google.gmail.message.send", :message_content, :external_write, :required_for_ai,
           text_includes: ["send", "body content"]
         ),

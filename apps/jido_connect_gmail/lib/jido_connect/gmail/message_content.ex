@@ -20,8 +20,10 @@ defmodule Jido.Connect.Gmail.MessageContent do
       Gmail's part order, also those that Gmail stores behind an
       `attachmentId`, which the action fetches with `attachments.get`.
     * `attachments` is the attachment manifest. The action fetches no
-      attachment bytes; `google.gmail.message.attachment.get` returns them
-      for an `attachment_id` from the manifest.
+      attachment bytes; `google.gmail.message.attachment.content.get`
+      returns them for a `part_id` from the manifest, also of an enclosed
+      message, and `google.gmail.message.attachment.get` for an
+      `attachment_id`.
     * `messages` lists the enclosed `message/rfc822` messages for which Gmail
       supplies nested parts: the manifest fields of the part, its `headers`
       and its own `text_parts`, `attachments` and `messages`. A

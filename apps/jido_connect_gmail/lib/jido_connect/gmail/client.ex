@@ -16,6 +16,7 @@ defmodule Jido.Connect.Gmail.Client do
   defdelegate get_attachment(params, access_token), to: Users
   defdelegate get_message_content(params, access_token), to: Content
   defdelegate get_thread_content(params, access_token), to: Content
+  defdelegate get_attachment_content(params, access_token), to: Content
   defdelegate start_watch(params, access_token), to: Users
   defdelegate stop_watch(params, access_token), to: Users
   defdelegate send_message(params, access_token), to: Users
