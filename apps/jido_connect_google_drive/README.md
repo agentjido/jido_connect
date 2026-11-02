@@ -18,7 +18,8 @@ schemas, normalized structs, and tests in this package.
 - `google.drive.file.copy`
 - `google.drive.file.update`
 - `google.drive.file.export`
-- `google.drive.file.download`
+- `google.drive.file.download`, the stored bytes unparsed, see
+  [Downloading Files](#downloading-files)
 - `google.drive.file.delete`
 - `google.drive.permissions.list`
 - `google.drive.permission.create`
@@ -370,6 +371,18 @@ same name in one folder. After a timeout the error carries
 its execution claim and looks for the file in the folder before it prepares a
 new upload. Claims and replay rules are described under "Replay And Retry
 Safety" in the `jido_connect` README.
+
+## Downloading Files
+
+`google.drive.file.download` returns the bytes Drive stores for a file that is
+not a Google Workspace document, as `file_content`. The package does not parse
+them, whatever their media type: a JSON file comes back as its text, not as a
+map or a list. Valid UTF-8 without NUL bytes comes back as `content` with
+`encoding: "utf-8"`; other bytes come back as `content_base64` with
+`encoding: "base64"` and `binary: true`. `size` is the byte count, and
+`mime_type` is the media type of the response without parameters, such as
+`application/json`. Google Workspace documents need
+`google.drive.file.export`, which converts them to a requested format.
 
 ## Permission-Aware Field Projections
 

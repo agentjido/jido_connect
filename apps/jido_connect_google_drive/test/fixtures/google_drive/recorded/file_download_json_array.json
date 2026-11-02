@@ -1,0 +1,56 @@
+{
+  "body": "[[\"name\", \"total\"], [\"Budget\", 10]]\n",
+  "headers": {
+    "access-control-allow-credentials": [
+      "true"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate"
+    ],
+    "content-disposition": [
+      "attachment"
+    ],
+    "content-length": [
+      "36"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 15:50:35 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 15:50:35 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "vary": [
+      "Origin, X-Origin"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-goog-hash": [
+      "crc32c=oYBrVw=="
+    ],
+    "x-guploader-uploadid": [
+      "AFy3sg3gBVLUhHB_5QcB0IzyiZ0nQ-wDngqRzgt7Ncc_QuEXk0J1JmFBpEb-WP-kNbTPwm3r"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/14MazlIltIXCsgU6ZTMpVV2-GXKkI1McP"
+  },
+  "status": 200
+}

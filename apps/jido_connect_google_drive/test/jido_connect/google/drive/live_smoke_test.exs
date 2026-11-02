@@ -50,6 +50,19 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
 
   @upload_limit 5_242_880
 
+  # Two small JSON files whose bytes change when they are decoded and encoded
+  # again: spacing, key order, a trailing zero, an escaped slash, and "ä", two
+  # bytes but one character.
+  @json_files [
+    object:
+      ~S({"jcl": "live-json", "b": 1, "a": [2.50, true, null], "path": "a\/b", "text": "ä"}) <>
+        "\n",
+    array: ~S([["name", "total"], ["Budget", 10]]) <> "\n"
+  ]
+
+  # A file ID that names no file of the test account.
+  @missing_file_id "1JclLiveSmokeMissingFile000000000"
+
   # The seed script prepares GOOGLE_DRIVE_STARRED_FILE_ID next to an unstarred
   # twin of this name. No variable names the twin, so the selection test looks
   # it up by name in the starred file's folder.
@@ -242,7 +255,7 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
     assert {:error, %Connect.Error.ProviderError{status: 404} = error} =
              invoke(
                "google.drive.file.get",
-               %{file_id: "1JclLiveSmokeMissingFile000000000", resource_key: resource_key},
+               %{file_id: @missing_file_id, resource_key: resource_key},
                env["GOOGLE_ACCESS_TOKEN"]
              )
 
@@ -508,6 +521,75 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
 
     assert hex_digest(:sha256, Base.decode64!(downloaded.content_base64)) ==
              hex_digest(:sha256, content)
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DRIVE_UPLOAD_FOLDER_ID"])
+  @tag write!(:google)
+  test "uploads a JSON object and a JSON array into the upload folder and downloads their exact bytes by ID",
+       %{env: env} do
+    token = env["GOOGLE_ACCESS_TOKEN"]
+    folder_id = env["GOOGLE_DRIVE_UPLOAD_FOLDER_ID"]
+    run = Base.encode16(:crypto.strong_rand_bytes(6), case: :lower)
+
+    # Both uploads come first: the recorder writes every response after
+    # `LiveSmoke.record/4` under its name, so only the downloads are recorded.
+    uploads =
+      for {kind, content} <- @json_files do
+        name = "jcl-live json #{kind} #{run}.json"
+        on_exit(fn -> delete_uploads_named(token, folder_id, name) end)
+
+        assert {:ok, %{file: uploaded}} =
+                 invoke(
+                   "google.drive.file.upload",
+                   %{
+                     name: name,
+                     content: content,
+                     mime_type: "application/json",
+                     parents: [folder_id]
+                   },
+                   token
+                 )
+
+        file_id = uploaded.file_id
+        on_exit(fn -> delete_leftover(token, "/files/#{file_id}") end)
+
+        # Drive computed the checksum from the bytes it stored.
+        assert uploaded.parents == [folder_id]
+        assert uploaded.md5_checksum == hex_digest(:md5, content)
+
+        {kind, file_id, content}
+      end
+
+    for {kind, file_id, content} <- uploads do
+      LiveSmoke.record(@req_options, :google_drive, "file_download_json_#{kind}", @masked)
+
+      assert {:ok, %{file_content: downloaded}} =
+               invoke("google.drive.file.download", %{file_id: file_id}, token)
+
+      assert %{
+               file_id: ^file_id,
+               mime_type: "application/json",
+               encoding: "utf-8",
+               binary: false
+             } = downloaded
+
+      assert downloaded.size == byte_size(content)
+      assert hex_digest(:sha256, downloaded.content) == hex_digest(:sha256, content)
+    end
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN"])
+  test "a missing file's download error carries Google's message", %{env: env} do
+    LiveSmoke.record(@req_options, :google_drive, "file_download_not_found", @masked)
+
+    assert {:error, %Connect.Error.ProviderError{status: 404} = error} =
+             invoke(
+               "google.drive.file.download",
+               %{file_id: @missing_file_id},
+               env["GOOGLE_ACCESS_TOKEN"]
+             )
+
+    assert error.details.message == "File not found: #{@missing_file_id}."
   end
 
   # Every byte value, 20,480 times: exactly the multipart limit.

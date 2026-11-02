@@ -107,7 +107,7 @@ defmodule Jido.Connect.Google.Drive.Client.Files do
       when is_binary(file_id) and is_binary(access_token) do
     with {:ok, resource_key_headers} <- Params.resource_key_headers(params) do
       access_token
-      |> Transport.request()
+      |> Transport.media_request()
       |> Req.get(
         url: "/v3/files/#{encode_id(file_id)}",
         params: Params.file_download_params(params),

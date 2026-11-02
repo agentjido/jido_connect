@@ -704,6 +704,116 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     refute Map.has_key?(content, :content_base64)
   end
 
+  # Drive sent both JSON files as `application/json`. Their bytes change when
+  # they are decoded and encoded again, so only the recorded bytes match.
+  for kind <- ["object", "array"] do
+    test "downloads a JSON #{kind} file as its exact bytes with their byte count" do
+      recorded = recorded_download!("file_download_json_#{unquote(kind)}")
+      body = recorded["body"]
+      [content_length] = recorded["headers"]["content-length"]
+
+      refute Jason.encode!(Jason.decode!(body)) == body
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert conn.request_path == "/v3/files/file123"
+        assert conn.query_params == %{"alt" => "media"}
+
+        replay_download(conn, recorded, body)
+      end)
+
+      assert {:ok, content} = Client.download_file(%{file_id: "file123"}, "token")
+
+      assert content == %{
+               file_id: "file123",
+               mime_type: "application/json",
+               size: String.to_integer(content_length),
+               content: body,
+               encoding: "utf-8",
+               binary: false
+             }
+    end
+  end
+
+  test "a failed download keeps Google's error message" do
+    recorded = recorded_download!("file_download_not_found")
+    %{"error" => %{"message" => message}} = recorded["body"]
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      replay_download(conn, recorded, Jason.encode!(recorded["body"]))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{provider: :google, status: 404} = error} =
+             Client.download_file(%{file_id: "file123"}, "token")
+
+    assert error.details.message == message
+  end
+
+  # The recorded error body cut off after half its bytes, as a dropped
+  # connection leaves it: the content type still says JSON, the body no
+  # longer decodes.
+  test "a failed download with a truncated JSON error body keeps the raw body" do
+    recorded = recorded_download!("file_download_not_found")
+    encoded = Jason.encode!(recorded["body"])
+    truncated = binary_part(encoded, 0, div(byte_size(encoded), 2))
+
+    assert {:error, %Jason.DecodeError{}} = Jason.decode(truncated)
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      replay_download(conn, recorded, truncated)
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{provider: :google, status: 404} = error} =
+             Client.download_file(%{file_id: "file123"}, "token")
+
+    assert error.details.body_summary == %{type: :binary, bytes: byte_size(truncated)}
+  end
+
+  # The recorded 404 with its content type replaced by text/plain or removed.
+  # The body is still Google's valid JSON error, so only the missing JSON
+  # media type keeps it raw.
+  for {label, content_type} <- [
+        {"a text/plain content type", "text/plain; charset=UTF-8"},
+        {"no content type", nil}
+      ] do
+    test "a failed download with #{label} keeps the raw body" do
+      recorded =
+        "file_download_not_found"
+        |> recorded_download!()
+        |> with_content_type(unquote(content_type))
+
+      body = Jason.encode!(recorded["body"])
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        replay_download(conn, recorded, body)
+      end)
+
+      assert {:error, %Jido.Connect.Error.ProviderError{provider: :google, status: 404} = error} =
+               Client.download_file(%{file_id: "file123"}, "token")
+
+      assert error.details.body_summary == %{type: :binary, bytes: byte_size(body)}
+    end
+  end
+
+  # The recorded 404 with its content type replaced by a structured JSON
+  # media type, which ends in +json instead of being application/json.
+  test "a failed download with a +json content type keeps Google's error message" do
+    recorded =
+      "file_download_not_found"
+      |> recorded_download!()
+      |> with_content_type("application/problem+json")
+
+    %{"error" => %{"message" => message}} = recorded["body"]
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      replay_download(conn, recorded, Jason.encode!(recorded["body"]))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{provider: :google, status: 404} = error} =
+             Client.download_file(%{file_id: "file123"}, "token")
+
+    assert error.details.message == message
+  end
+
   # The replay needs the recorded status and headers, which
   # `LiveSmoke.fixture!/2` leaves out, so this loads the whole recording.
   defp recorded_download!(name) do
@@ -725,6 +835,13 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     |> Plug.Conn.merge_resp_headers(headers)
     |> Plug.Conn.resp(recorded["status"], body)
   end
+
+  # Replaces the recorded content type; nil removes the header.
+  defp with_content_type(recorded, nil),
+    do: update_in(recorded["headers"], &Map.delete(&1, "content-type"))
+
+  defp with_content_type(recorded, content_type),
+    do: put_in(recorded["headers"]["content-type"], [content_type])
 
   test "deletes files" do
     Req.Test.stub(__MODULE__, fn conn ->
