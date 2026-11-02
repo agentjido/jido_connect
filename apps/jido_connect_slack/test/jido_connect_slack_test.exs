@@ -3080,6 +3080,39 @@ defmodule Jido.Connect.SlackTest do
              )
   end
 
+  # Slack gives private channels and group DMs C IDs too, so an explicit
+  # conversation_type decides the scope even for a C channel.
+  test "get thread replies needs the history scope of an explicit conversation type" do
+    {context, lease} = context_and_lease()
+
+    history_scopes = %{
+      "public_channel" => "channels:history",
+      "private_channel" => "groups:history",
+      "im" => "im:history",
+      "mpim" => "mpim:history"
+    }
+
+    other_scopes = context.connection.scopes -- Map.values(history_scopes)
+
+    run = fn type, scopes ->
+      Jido.Connect.Slack.Actions.GetThreadReplies.run(
+        %{channel: "C123", ts: "1700000000.000100", conversation_type: type},
+        %{
+          integration_context: %{context | connection: %{context.connection | scopes: scopes}},
+          credential_lease: lease
+        }
+      )
+    end
+
+    for {type, scope} <- history_scopes do
+      assert {:error, %Connect.Error.AuthError{reason: :missing_scopes, missing_scopes: [^scope]}} =
+               run.(type, other_scopes ++ (Map.values(history_scopes) -- [scope]))
+
+      assert {:ok, %{channel: "C123", thread_ts: "1700000000.000100"}} =
+               run.(type, other_scopes ++ [scope])
+    end
+  end
+
   test "generated post message action delegates through integration runtime" do
     {context, lease} = context_and_lease()
 

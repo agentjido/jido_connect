@@ -119,6 +119,30 @@ defmodule Jido.Connect.Slack.TestSupport.LiveSlack do
     end
   end
 
+  @doc """
+  Deletes the file `file_id` with `files.delete` outside the package and
+  confirms with `files.info` that Slack no longer has it.
+
+  Like `delete_message!/3`, a failure fails the test and names only the HTTP
+  status and Slack's error code.
+  """
+  def delete_file!(token, file_id) do
+    case reference_request(token, :post, "files.delete", form: [file: file_id]) do
+      %{status: 200, body: %{"ok" => true}} ->
+        assert %{status: 200, body: %{"ok" => false, "error" => error}} =
+                 reference_request(token, :get, "files.info", params: [file: file_id])
+
+        assert error in ["file_not_found", "file_deleted"]
+        IO.puts("live_smoke slack: deleted file #{file_id}")
+
+      %{status: status, body: body} ->
+        flunk(
+          "files.delete left the live test file #{file_id}: " <>
+            "HTTP #{status}, #{slack_error(body)}; delete it before the next live run"
+        )
+    end
+  end
+
   @doc "Calls the Slack Web API directly, without the package's client and Req options."
   def reference_request(token, method, path, options) do
     [method: method, url: "#{@slack_api}/#{path}", auth: {:bearer, token}, retry: false]

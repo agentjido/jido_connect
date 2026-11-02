@@ -1,0 +1,113 @@
+{
+  "body": {
+    "has_more": false,
+    "messages": [
+      {
+        "blocks": [
+          {
+            "block_id": "ALgpe",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "Live test: human message from the authorizing user in the private channel.",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "client_msg_id": "d58f7cb7-e66d-47f3-aedf-9150e983a4f4",
+        "team": "T0CEE692400",
+        "text": "Live test: human message from the authorizing user in the private channel.",
+        "ts": "1793373077.101539",
+        "type": "message",
+        "user": "U0CDPFT1RDJ"
+      }
+    ],
+    "ok": true
+  },
+  "headers": {
+    "access-control-allow-headers": [
+      "slack-route, x-slack-version-ts, x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-b3-flags, x-background"
+    ],
+    "access-control-allow-origin": [
+      "*"
+    ],
+    "access-control-expose-headers": [
+      "x-slack-req-id, retry-after"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, quic=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, no-cache, no-store, must-revalidate"
+    ],
+    "content-length": [
+      "472"
+    ],
+    "content-type": [
+      "application/json; charset=utf-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 12:00:59 GMT"
+    ],
+    "expires": [
+      "Sat, 26 Jul 1997 05:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "referrer-policy": [
+      "no-referrer"
+    ],
+    "server": [
+      "Apache"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-0436e59c2b6a4d329,ingress-edge-fra-prod-00842835cb69d110a"
+    ],
+    "x-backend": [
+      "api_normal"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-edge-backend": [
+      "envoy-www"
+    ],
+    "x-envoy-upstream-service-time": [
+      "116"
+    ],
+    "x-server": [
+      "slack-www-hhvm-api-iad-0o1wz7n7ip1u"
+    ],
+    "x-slack-req-id": [
+      "9824d0e548e3bfd695e2dc15f121d325"
+    ],
+    "x-slack-unique-id": [
+      "ea570f5b-4251-404c-acba-f9d67d320a03"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/api/conversations.replies"
+  },
+  "status": 200
+}

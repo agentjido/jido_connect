@@ -5,8 +5,8 @@
 It includes:
 
 - `Jido.Connect.Slack`, a Spark-authored provider that compiles into Jido tools
-- generated actions for listing conversations, reading conversation history,
-  and posting, updating, and deleting messages
+- generated actions for listing conversations, reading conversation history
+  and thread replies, and posting, updating, and deleting messages
 - OAuth v2 helpers in `Jido.Connect.Slack.OAuth`
 - Slack Web API helpers in `Jido.Connect.Slack.Client`
 - signed request verification and Events API helpers in `Jido.Connect.Slack.Webhook`
@@ -106,6 +106,55 @@ holds `mpim:history`, which Slack requires, the read succeeds and its messages
 say `public_channel`. Do not base visibility, indexing or policies on this
 field. The `is_private`, `is_im` and `is_mpim` flags of
 `slack.conversation.info` or the host's own record say what a conversation is.
+
+## Thread replies
+
+`slack.thread.replies` reads one page of a thread through Slack
+`conversations.replies`, with the bot or the user profile.
+
+Inputs:
+
+- `channel` and `ts`, the timestamp of the thread's parent message, are
+  required.
+- `conversation_type` is optional and takes `public_channel`,
+  `private_channel`, `im` or `mpim`. It only selects the required scope
+  (`channels:history`, `groups:history`, `im:history` or `mpim:history`) and
+  is not sent to Slack. The action does not reject other values; they fall
+  back to `channels:history`. Without it, the channel ID decides: a `G` ID
+  needs `groups:history`, a `D` ID `im:history` and every other ID
+  `channels:history`. Private channels and group DMs can carry `C` IDs, so
+  pass the type for them.
+- `cursor`, `oldest`, `latest` and `inclusive` (default `false`) go to Slack
+  unchanged. `limit` defaults to 100.
+
+One call sends one request and returns one page: `messages`, `reply_count`,
+`latest_reply`, `has_more` and, while further pages follow, `next_cursor`.
+`channel` and `thread_ts` repeat the input. To read the next page, pass
+`next_cursor` as `cursor` with the same other inputs; on the last page
+`has_more` is `false` and the output has no `next_cursor`. The action does not
+read further pages on its own and does not retry. In the recordings of this
+package, Slack puts the parent first on every page, followed by that page's
+replies in ascending order, and the first page holds the newest replies.
+
+`reply_count` and `latest_reply` come from the first message of the page,
+which is the parent, when Slack sends them there. Otherwise the action counts
+the replies on the page and takes the last `ts` of the page. Neither value
+shows that the thread is complete or that the page holds every reply: a page
+of two replies from a thread of 22 reports 22, and a computed value describes
+only the returned page. A parent without replies comes back alone, with
+`reply_count` 0 and its own `ts` as `latest_reply`.
+
+Each message is a map with the keys `type`, `subtype`, `user`, `username`,
+`bot_id`, `app_id`, `text`, `ts`, `thread_ts`, `parent_user_id`,
+`reply_count`, `reply_users_count`, `latest_reply`, `blocks`, `files`,
+`attachments` and `reactions`, holding Slack's values unchanged. A key whose
+value Slack does not send or sends as an empty string is left out. Authors are
+the IDs Slack sends: a person's reply has `user`, a bot's reply also `bot_id`
+and `app_id`. `text` is the full text, also beyond 512 bytes.
+
+An unknown `ts` is an error, not an empty page: Slack answers HTTP 200 with
+`ok: false`, and the action returns a `Jido.Connect.Error.ProviderError` with
+`reason` `"thread_not_found"`.
 
 ## Message delivery
 
