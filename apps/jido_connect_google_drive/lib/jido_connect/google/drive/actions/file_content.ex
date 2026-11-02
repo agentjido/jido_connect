@@ -27,6 +27,12 @@ defmodule Jido.Connect.Google.Drive.Actions.FileContent do
       input do
         field(:file_id, :string, required?: true, example: "1abc...")
         field(:mime_type, :string, required?: true, example: "application/pdf")
+
+        field(:resource_key, :string,
+          description:
+            "Resource key of a link-shared file, sent as the X-Goog-Drive-Resource-Keys header.",
+          example: "0-AbCdEf..."
+        )
       end
 
       output do
@@ -52,6 +58,12 @@ defmodule Jido.Connect.Google.Drive.Actions.FileContent do
       input do
         field(:file_id, :string, required?: true, example: "1abc...")
         field(:supports_all_drives, :boolean, default: false)
+
+        field(:resource_key, :string,
+          description:
+            "Resource key of a link-shared file, sent as the X-Goog-Drive-Resource-Keys header.",
+          example: "0-AbCdEf..."
+        )
       end
 
       output do

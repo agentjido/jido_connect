@@ -79,6 +79,78 @@ Connect action/trigger catalog. Service-account token minting lives in
 `jido_connect_google`; Drive stays responsible for Drive-specific scopes and
 endpoint behavior.
 
+## Resolving Links, Resource Keys and Shortcuts
+
+`Jido.Connect.Google.Drive.Link.parse/1` turns a Drive or Docs link into a file
+ID and, when the link carries a `resourcekey` query parameter, a resource key.
+It makes no HTTP request. It accepts these `https` shapes:
+
+- `drive.google.com/file/d/<id>`, optionally followed by `/view`, `/edit` or
+  `/preview`
+- `drive.google.com/open?id=<id>`
+- `drive.google.com/drive/folders/<id>` and `drive.google.com/drive/u/<n>/folders/<id>`
+- `docs.google.com/{document,spreadsheets,presentation}/d/<id>/...`, also with
+  `/u/<n>` before `/d`
+
+"Publish to the web" links such as
+`docs.google.com/spreadsheets/d/e/<token>/pubhtml` carry a publish token
+instead of a file ID and are rejected.
+
+Other query parameters and the fragment are ignored. Other hosts and shapes,
+`http`, missing or conflicting IDs and malformed or conflicting resource keys
+return a `Jido.Connect.Error.ValidationError` with reason
+`:unsupported_drive_link`, `:missing_file_id`, `:conflicting_file_id` or
+`:invalid_resource_key`. The error does not contain the link.
+
+The result uses the input names of the file actions, so it can be passed on
+directly:
+
+```elixir
+{:ok, link} =
+  Jido.Connect.Google.Drive.Link.parse(
+    "https://drive.google.com/file/d/1AbC/view?usp=sharing&resourcekey=0-XyZ"
+  )
+
+# link == %{file_id: "1AbC", resource_key: "0-XyZ"}
+Jido.Connect.invoke(Jido.Connect.Google.Drive, "google.drive.file.get", link,
+  context: context,
+  credential_lease: lease
+)
+```
+
+`google.drive.file.get`, `google.drive.file.export` and
+`google.drive.file.download` take an optional `resource_key`. With it, that
+request sends `X-Goog-Drive-Resource-Keys: <fileId>/<resourceKey>`, which Drive
+needs for some link-shared files. An empty `resource_key` counts as absent. A
+key, or a file ID sent with a key, that contains characters other than
+letters, digits, `-` and `_` returns a `ValidationError` with reason
+`:invalid_resource_key` or `:invalid_file_id` before any request, because `,`
+and `/` would change the header's pairs. The key is never sent as a query
+parameter and does not appear in returned error details.
+
+The default file metadata projection, `Fields.file_metadata()`, requests
+`resourceKey` and `shortcutDetails(targetId,targetMimeType,targetResourceKey)`.
+Normalized files carry them as `resource_key`, `shortcut_target_id`,
+`shortcut_target_mime_type` and `shortcut_target_resource_key`; fields that
+Drive omits stay `nil`. A shortcut is returned as the shortcut file itself and
+is not followed. To read the target, call `google.drive.file.get` with
+`shortcut_target_id` and, if present, `shortcut_target_resource_key` as
+`resource_key`. Optional action inputs reject `nil`, so leave `resource_key`
+out when the target has no key:
+
+```elixir
+target_input =
+  case shortcut.shortcut_target_resource_key do
+    nil -> %{file_id: shortcut.shortcut_target_id}
+    key -> %{file_id: shortcut.shortcut_target_id, resource_key: key}
+  end
+
+Jido.Connect.invoke(Jido.Connect.Google.Drive, "google.drive.file.get", target_input,
+  context: context,
+  credential_lease: lease
+)
+```
+
 ## Permission-Aware Field Projections
 
 Google Drive `fields` expressions are provider-specific. `jido_connect` core

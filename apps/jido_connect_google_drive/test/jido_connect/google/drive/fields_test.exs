@@ -50,4 +50,13 @@ defmodule Jido.Connect.Google.Drive.FieldsTest do
     assert Fields.shared_drive_list_presets().default == Fields.shared_drive_list()
     assert Fields.about_presets().default == Fields.about_metadata()
   end
+
+  test "file metadata requests the resource key and shortcut target fields" do
+    fields = String.split(Fields.file_metadata(), ",", trim: true)
+
+    assert "resourceKey" in fields
+    assert Fields.file_metadata() =~ "shortcutDetails(targetId,targetMimeType,targetResourceKey)"
+    assert Fields.file_with_permissions() =~ "resourceKey"
+    assert Fields.file_list() =~ "shortcutDetails(targetId,targetMimeType,targetResourceKey)"
+  end
 end

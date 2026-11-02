@@ -22,6 +22,10 @@ defmodule Jido.Connect.Google.Drive.File do
               trashed?: Zoi.boolean() |> Zoi.default(false),
               starred?: Zoi.boolean() |> Zoi.default(false),
               drive_id: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              resource_key: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              shortcut_target_id: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              shortcut_target_mime_type: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              shortcut_target_resource_key: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               permissions:
                 Zoi.list(Jido.Connect.Google.Drive.Permission.schema()) |> Zoi.default([]),
               metadata: Zoi.map() |> Zoi.default(%{})

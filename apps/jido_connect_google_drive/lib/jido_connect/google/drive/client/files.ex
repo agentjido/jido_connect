@@ -12,13 +12,16 @@ defmodule Jido.Connect.Google.Drive.Client.Files do
 
   def get_file(%{file_id: file_id} = params, access_token)
       when is_binary(file_id) and is_binary(access_token) do
-    access_token
-    |> Transport.request()
-    |> Req.get(
-      url: "/v3/files/#{URI.encode(file_id, &URI.char_unreserved?/1)}",
-      params: Params.get_file_params(params)
-    )
-    |> Response.handle_file_response()
+    with {:ok, resource_key_headers} <- Params.resource_key_headers(params) do
+      access_token
+      |> Transport.request()
+      |> Req.get(
+        url: "/v3/files/#{URI.encode(file_id, &URI.char_unreserved?/1)}",
+        params: Params.get_file_params(params),
+        headers: resource_key_headers
+      )
+      |> Response.handle_file_response()
+    end
   end
 
   def create_file(%{name: name} = params, access_token)
@@ -88,26 +91,30 @@ defmodule Jido.Connect.Google.Drive.Client.Files do
 
   def export_file(%{file_id: file_id, mime_type: mime_type} = params, access_token)
       when is_binary(file_id) and is_binary(mime_type) and is_binary(access_token) do
-    access_token
-    |> Transport.request()
-    |> Req.get(
-      url: "/v3/files/#{encode_id(file_id)}/export",
-      params: Params.file_export_params(params),
-      headers: [{"accept", mime_type}]
-    )
-    |> Response.handle_file_content_response(params)
+    with {:ok, resource_key_headers} <- Params.resource_key_headers(params) do
+      access_token
+      |> Transport.request()
+      |> Req.get(
+        url: "/v3/files/#{encode_id(file_id)}/export",
+        params: Params.file_export_params(params),
+        headers: [{"accept", mime_type} | resource_key_headers]
+      )
+      |> Response.handle_file_content_response(params)
+    end
   end
 
   def download_file(%{file_id: file_id} = params, access_token)
       when is_binary(file_id) and is_binary(access_token) do
-    access_token
-    |> Transport.request()
-    |> Req.get(
-      url: "/v3/files/#{encode_id(file_id)}",
-      params: Params.file_download_params(params),
-      headers: [{"accept", "*/*"}]
-    )
-    |> Response.handle_file_content_response(params)
+    with {:ok, resource_key_headers} <- Params.resource_key_headers(params) do
+      access_token
+      |> Transport.request()
+      |> Req.get(
+        url: "/v3/files/#{encode_id(file_id)}",
+        params: Params.file_download_params(params),
+        headers: [{"accept", "*/*"} | resource_key_headers]
+      )
+      |> Response.handle_file_content_response(params)
+    end
   end
 
   def delete_file(%{file_id: file_id} = params, access_token)

@@ -25,7 +25,9 @@ defmodule Jido.Connect.Google.Drive.Fields do
     "shared",
     "trashed",
     "starred",
-    "driveId"
+    "driveId",
+    "resourceKey",
+    "shortcutDetails(targetId,targetMimeType,targetResourceKey)"
   ]
 
   @permission_metadata [

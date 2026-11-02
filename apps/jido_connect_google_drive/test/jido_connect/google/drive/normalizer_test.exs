@@ -16,6 +16,9 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
   }
 
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
+  alias Jido.Connect.TestSupport.LiveSmoke
+
+  @shared_file_id "1IDOut2ayPl-ubqUf9LlQRbmQV76nve9x"
 
   test "normalizes file payloads" do
     assert {:ok, %File{} = file} =
@@ -350,4 +353,66 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
 
     assert {:error, _error} = SharedDrive.new(%{shared_drive_id: "drive123"})
   end
+
+  describe "file resolution fields" do
+    # The test tenant has no file with a resource key, so the recorded
+    # response lacks `resourceKey`; this test adds one to the recorded body.
+    test "maps resourceKey to resource_key" do
+      payload =
+        "file_get_shared_link"
+        |> recorded()
+        |> Map.put("resourceKey", "0-AbCdEf_GhIjKl12345")
+
+      assert {:ok, %File{file_id: @shared_file_id, resource_key: "0-AbCdEf_GhIjKl12345"}} =
+               Normalizer.file(payload)
+    end
+
+    test "leaves resource_key and shortcut targets absent when Drive omits them" do
+      payload = recorded("file_get_shared_link")
+      refute Map.has_key?(payload, "resourceKey")
+      refute Map.has_key?(payload, "shortcutDetails")
+
+      assert {:ok,
+              %File{
+                file_id: @shared_file_id,
+                resource_key: nil,
+                shortcut_target_id: nil,
+                shortcut_target_mime_type: nil,
+                shortcut_target_resource_key: nil,
+                metadata: metadata
+              }} = Normalizer.file(payload)
+
+      assert metadata == %{}
+    end
+
+    test "maps shortcutDetails to the shortcut target fields" do
+      payload = recorded("file_get_shortcut")
+
+      assert {:ok,
+              %File{
+                file_id: "1oHPs5PO_okRteaz1Ix_jQvlQLQg1dT-w",
+                mime_type: "application/vnd.google-apps.shortcut",
+                shortcut_target_id: @shared_file_id,
+                shortcut_target_mime_type: "text/plain",
+                shortcut_target_resource_key: nil
+              }} = Normalizer.file(payload)
+    end
+
+    # The recorded shortcut points at a file without a resource key; this test
+    # adds `targetResourceKey` to the recorded `shortcutDetails`.
+    test "maps targetResourceKey to shortcut_target_resource_key" do
+      payload =
+        "file_get_shortcut"
+        |> recorded()
+        |> put_in(["shortcutDetails", "targetResourceKey"], "0-AbCdEf_GhIjKl12345")
+
+      assert {:ok,
+              %File{
+                shortcut_target_id: @shared_file_id,
+                shortcut_target_resource_key: "0-AbCdEf_GhIjKl12345"
+              }} = Normalizer.file(payload)
+    end
+  end
+
+  defp recorded(name), do: LiveSmoke.fixture!(:google_drive, name)
 end

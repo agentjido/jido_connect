@@ -6,6 +6,7 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
 
   @max_multipart_upload_bytes 5 * 1024 * 1024
   @max_base64_upload_bytes 4 * div(@max_multipart_upload_bytes + 2, 3)
+  @resource_key_header_token ~r/\A[A-Za-z0-9_-]+\z/
   @mime_type_regex ~r/\A[0-9A-Za-z][!#$%&'*+\-.^_`|~0-9A-Za-z]*\/[0-9A-Za-z][!#$%&'*+\-.^_`|~0-9A-Za-z]*\z/
 
   @default_change_fields [
@@ -262,6 +263,54 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
       supportsAllDrives: Data.get(params, :supports_all_drives)
     }
     |> Data.compact()
+  end
+
+  @doc """
+  Builds the `X-Goog-Drive-Resource-Keys` header for a request on one file.
+
+  Returns `{:ok, [{"x-goog-drive-resource-keys", "<fileId>/<resourceKey>"}]}`
+  when `params` carry a `:resource_key`, and `{:ok, []}` when the key is absent
+  or `""`. The header separates pairs with `,` and ID from key with `/`, so a
+  key or file ID with characters other than letters, digits, `-` and `_`
+  returns a validation error before any request. The error does not contain
+  the key. The key travels only in this header, never in the query string.
+  """
+  def resource_key_headers(params) do
+    case Data.get(params, :resource_key) do
+      key when key in [nil, ""] ->
+        {:ok, []}
+
+      key ->
+        file_id = Data.get(params, :file_id)
+
+        with :ok <- resource_key_header_token(key, :resource_key),
+             :ok <- resource_key_header_token(file_id, :file_id) do
+          {:ok, [{"x-goog-drive-resource-keys", "#{file_id}/#{key}"}]}
+        end
+    end
+  end
+
+  defp resource_key_header_token(value, subject) do
+    if is_binary(value) and Regex.match?(@resource_key_header_token, value),
+      do: :ok,
+      else: invalid_resource_key_header(subject)
+  end
+
+  defp invalid_resource_key_header(:resource_key) do
+    {:error,
+     Error.validation("Google Drive resource key must contain only letters, digits, - and _",
+       reason: :invalid_resource_key,
+       subject: :resource_key
+     )}
+  end
+
+  defp invalid_resource_key_header(:file_id) do
+    {:error,
+     Error.validation(
+       "Google Drive file ID sent with a resource key must contain only letters, digits, - and _",
+       reason: :invalid_file_id,
+       subject: :file_id
+     )}
   end
 
   @doc "Builds query params for file deletes."

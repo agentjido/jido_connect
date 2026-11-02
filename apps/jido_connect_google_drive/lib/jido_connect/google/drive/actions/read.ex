@@ -84,6 +84,12 @@ defmodule Jido.Connect.Google.Drive.Actions.Read do
         )
 
         field(:supports_all_drives, :boolean, default: false)
+
+        field(:resource_key, :string,
+          description:
+            "Resource key of a link-shared file, sent as the X-Goog-Drive-Resource-Keys header.",
+          example: "0-AbCdEf..."
+        )
       end
 
       output do
