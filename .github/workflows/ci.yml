@@ -56,12 +56,15 @@ jobs:
         run: mix test
 
       - name: Set up Bun
+        if: hashFiles('pi-connector-factory/package.json') != ''
         uses: oven-sh/setup-bun@v2
 
       - name: Install connector factory dependencies
+        if: hashFiles('pi-connector-factory/package.json') != ''
         working-directory: pi-connector-factory
         run: bun install --frozen-lockfile
 
       - name: Check connector factory
+        if: hashFiles('pi-connector-factory/package.json') != ''
         working-directory: pi-connector-factory
         run: bun run check
