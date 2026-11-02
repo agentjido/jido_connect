@@ -567,6 +567,7 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
       assert conn.query_params["supportsAllDrives"] == "true"
       assert Plug.Conn.get_req_header(conn, "accept") == ["*/*"]
 
+      # Plug appends `; charset=utf-8`, which the MIME type drops.
       conn
       |> Plug.Conn.put_resp_content_type("application/pdf")
       |> Plug.Conn.resp(200, <<0, 1, 2>>)
@@ -578,8 +579,87 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     assert content.file_id == "file123"
     assert content.mime_type == "application/pdf"
     assert content.content_base64 == "AAEC"
+    assert content.size == 3
     assert content.encoding == "base64"
     assert content.binary == true
+  end
+
+  test "downloads a recording's MP4 bytes as base64 with their byte count" do
+    # The recorded download of the test meeting's MP4 keeps its headers and
+    # byte count but not its bytes. The body here is the head of an MP4 file:
+    # an `ftyp` box whose size field begins with NUL bytes, then a `free` box
+    # that holds "ä", two bytes but one character.
+    recorded = recorded_download!("file_download_recording")
+    ftyp = <<0, 0, 0, 24, "ftyp", "isom", 0, 0, 2, 0, "isom", "mp41">>
+    body = ftyp <> <<0, 0, 0, 10, "free", 0xC3, 0xA4>>
+
+    # Valid UTF-8, so only the NUL bytes keep it out of `content`.
+    assert String.valid?(body)
+    assert String.length(body) < byte_size(body)
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/file123"
+      assert conn.query_params["alt"] == "media"
+      assert conn.query_params["supportsAllDrives"] == "true"
+      assert Plug.Conn.get_req_header(conn, "accept") == ["*/*"]
+
+      replay_download(conn, recorded, body)
+    end)
+
+    assert {:ok, content} =
+             Client.download_file(%{file_id: "file123", supports_all_drives: true}, "token")
+
+    assert content.file_id == "file123"
+    assert content.mime_type == "video/mp4"
+    assert Base.decode64!(content.content_base64) == body
+    assert content.size == byte_size(body)
+    assert content.encoding == "base64"
+    assert content.binary == true
+    refute Map.has_key?(content, :content)
+  end
+
+  test "downloads a UTF-8 text file unchanged with its byte count" do
+    recorded = recorded_download!("file_download")
+    body = recorded["body"]
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.request_path == "/v3/files/file123"
+      assert conn.query_params == %{"alt" => "media"}
+
+      replay_download(conn, recorded, body)
+    end)
+
+    assert {:ok, content} = Client.download_file(%{file_id: "file123"}, "token")
+
+    assert content.mime_type == "text/plain"
+    assert content.content == body
+    assert content.size == byte_size(body)
+    assert content.encoding == "utf-8"
+    assert content.binary == false
+    refute Map.has_key?(content, :content_base64)
+  end
+
+  # The replay needs the recorded status and headers, which
+  # `LiveSmoke.fixture!/2` leaves out, so this loads the whole recording.
+  defp recorded_download!(name) do
+    Jido.Connect.Google.TestSupport.ConnectorContracts.google_fixture!(
+      :google_drive,
+      "recorded/#{name}.json",
+      __DIR__
+    )
+  end
+
+  # Answers with the recorded status and headers around `body`, leaving out
+  # the length and checksum headers of the recorded bytes.
+  defp replay_download(conn, recorded, body) do
+    headers =
+      for {name, values} <- Map.drop(recorded["headers"], ["content-length", "x-goog-hash"]),
+          do: {name, Enum.join(values, ", ")}
+
+    conn
+    |> Plug.Conn.merge_resp_headers(headers)
+    |> Plug.Conn.resp(recorded["status"], body)
   end
 
   test "deletes files" do

@@ -30,7 +30,9 @@ defmodule Jido.Connect.Google.Meet.LiveMeetingLookupTest do
   transcript check here would no longer hold. See `docs/live_smoke_tests.md`
   for the variables and the recording mode.
 
-  The space and recording responses are recorded. The conference record
+  The space and recording responses are recorded, and so are the field
+  projections of the prepared record and recording that leave their times
+  out. The offline tests expect those times as `nil`. The conference record
   lists and the transcript have the shapes of `conference_records_window.json`
   and `transcripts.json` and are not.
   """
@@ -117,6 +119,29 @@ defmodule Jido.Connect.Google.Meet.LiveMeetingLookupTest do
     end
   end
 
+  describe "google.meet.conference_record.get" do
+    @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_MEET_CONFERENCE_RECORD"])
+    test "a field projection leaves the prepared record's end and expire times out", %{
+      env: env
+    } do
+      name = env["GOOGLE_MEET_CONFERENCE_RECORD"]
+
+      LiveSmoke.record(@req_options, :google_meet, "conference_record_get_start_only")
+
+      assert {:ok, %{conference_record: record}} =
+               invoke(
+                 "google.meet.conference_record.get",
+                 %{conference_record_name: name, fields: "name,space,startTime"},
+                 env["GOOGLE_ACCESS_TOKEN"]
+               )
+
+      assert record.conference_record_name == name
+      assert "spaces/" <> _id = record.space
+      assert started_in_occurrence?(record)
+      assert {record.end_time, record.expire_time} == {nil, nil}
+    end
+  end
+
   describe "google.meet.recording.get and google.meet.recording.list" do
     @tag env!([
            "GOOGLE_ACCESS_TOKEN",
@@ -153,6 +178,47 @@ defmodule Jido.Connect.Google.Meet.LiveMeetingLookupTest do
                )
 
       refute Map.has_key?(page, :next_page_token)
+      assert listed == recording
+    end
+
+    @tag env!([
+           "GOOGLE_ACCESS_TOKEN",
+           "GOOGLE_MEET_CONFERENCE_RECORD",
+           "GOOGLE_MEET_RECORDING",
+           "GOOGLE_MEET_RECORDING_FILE_ID"
+         ])
+    test "a field projection leaves the prepared recording's times out", %{env: env} do
+      token = env["GOOGLE_ACCESS_TOKEN"]
+
+      LiveSmoke.record(@req_options, :google_meet, "recording_get_untimed")
+
+      assert {:ok, %{recording: recording}} =
+               invoke(
+                 "google.meet.recording.get",
+                 %{
+                   recording_name: env["GOOGLE_MEET_RECORDING"],
+                   fields: "name,state,driveDestination"
+                 },
+                 token
+               )
+
+      assert recording.recording_name == env["GOOGLE_MEET_RECORDING"]
+      assert recording.state == "FILE_GENERATED"
+      assert recording.drive_file_id == env["GOOGLE_MEET_RECORDING_FILE_ID"]
+      assert {recording.start_time, recording.end_time} == {nil, nil}
+
+      LiveSmoke.record(@req_options, :google_meet, "recordings_untimed")
+
+      assert {:ok, %{recordings: [listed]}} =
+               invoke(
+                 "google.meet.recording.list",
+                 %{
+                   conference_record_name: env["GOOGLE_MEET_CONFERENCE_RECORD"],
+                   fields: "recordings(name,state,driveDestination)"
+                 },
+                 token
+               )
+
       assert listed == recording
     end
   end

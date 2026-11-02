@@ -1,0 +1,53 @@
+{
+  "body": {
+    "driveDestination": {
+      "exportUri": "https://drive.google.com/file/d/1XXsU_Na3ZfzaeDj5OyYOLLV7SwyDYev3/view?usp=drive_web",
+      "file": "1XXsU_Na3ZfzaeDj5OyYOLLV7SwyDYev3"
+    },
+    "name": "conferenceRecords/tjT2Egxvkox7JrzCoRAODxIUOBEQAjIGCIoCIAAYAwg/recordings/eb7a697f-92a0-4ce2-814e-627d5ceb9298",
+    "state": "FILE_GENERATED"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 11:34:00 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "server-timing": [
+      "gfet4t7; dur=536"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/v2/conferenceRecords/tjT2Egxvkox7JrzCoRAODxIUOBEQAjIGCIoCIAAYAwg/recordings/eb7a697f-92a0-4ce2-814e-627d5ceb9298"
+  },
+  "status": 200
+}
