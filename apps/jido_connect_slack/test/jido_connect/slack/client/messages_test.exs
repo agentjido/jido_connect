@@ -1,6 +1,7 @@
 defmodule Jido.Connect.Slack.Client.MessagesTest do
   use ExUnit.Case, async: false
   alias Jido.Connect.Slack.Client
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -140,25 +141,28 @@ defmodule Jido.Connect.Slack.Client.MessagesTest do
              )
   end
 
+  # Recorded from the test workspace: the bot posts a text with a link,
+  # longer than 512 bytes, to the public channel.
   test "post message sends expected request" do
-    Req.Test.stub(__MODULE__, fn conn ->
+    %{"ts" => ts, "message" => %{"text" => text} = message} =
+      fixture = LiveSmoke.fixture!(:slack, "chat_post_message_channel")
+
+    assert byte_size(text) > 512
+
+    Req.Test.expect(__MODULE__, fn conn ->
       assert conn.method == "POST"
       assert conn.request_path == "/api/chat.postMessage"
+      assert ["Bearer token"] = Plug.Conn.get_req_header(conn, "authorization")
 
       {:ok, body, conn} = Plug.Conn.read_body(conn)
 
-      assert %{"channel" => "C123", "text" => "Hello"} = Jason.decode!(body)
+      assert Jason.decode!(body) == %{"channel" => "C0CEEB41FU0", "text" => text}
 
-      Req.Test.json(conn, %{
-        ok: true,
-        channel: "C123",
-        ts: "1700000000.000100",
-        message: %{text: "Hello"}
-      })
+      Req.Test.json(conn, fixture)
     end)
 
-    assert {:ok, %{channel: "C123", ts: "1700000000.000100"}} =
-             Client.post_message(%{channel: "C123", text: "Hello"}, "token")
+    assert {:ok, %{channel: "C0CEEB41FU0", ts: ts, message: message}} ==
+             Client.post_message(%{channel: "C0CEEB41FU0", text: text}, "token")
   end
 
   test "schedule message sends expected request and normalizes output" do

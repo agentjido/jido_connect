@@ -107,6 +107,45 @@ say `public_channel`. Do not base visibility, indexing or policies on this
 field. The `is_private`, `is_im` and `is_mpim` flags of
 `slack.conversation.info` or the host's own record say what a conversation is.
 
+## Message delivery
+
+`slack.message.post` sends `channel`, `text` and, when given, `thread_ts` to
+Slack `chat.postMessage` unchanged, with `reply_broadcast` defaulting to
+`false`. The text is Slack mrkdwn, so `<https://example.com|label>` arrives as
+a link; the package does not escape, shorten or split it. `thread_ts` is the
+string timestamp of the thread's parent message. Posting needs `chat:write`
+and no history scope.
+
+`slack.conversation.open` sends `users` to Slack `conversations.open` as a
+comma-separated list and returns the conversation ID as `channel`, the target
+for `slack.message.post`. One user opens the DM with the bot and needs
+`im:write`; several users open a group DM and need `mpim:write`. To resume a
+conversation by `channel`, the scope check reads only the ID: a `G` ID needs
+`mpim:write`, every other ID `im:write`. Group DMs can also carry a `C` ID,
+like the one in this package's recordings, and are then checked against
+`im:write`; a token that resumes group DMs by `channel` should hold both
+scopes. The action takes its client from a context `provider_client`, then
+from the lease's `slack_client`, then `Jido.Connect.Slack.Client`, so a lease
+with only an `access_token` works.
+
+The package makes no delivery guarantee beyond Slack's answer:
+
+- The returned `channel` and `ts` identify the message Slack stored. They are
+  not read receipts and do not say that anyone saw the message or was
+  notified.
+- A successful response without `channel` or `ts` stays a success, and the
+  output then lacks those fields. Check both before keeping a reference.
+- Posting forwards no idempotency key, so every call that reaches Slack can
+  post another message.
+- The transport does not retry. After a timeout the error carries
+  `delivery: :sent_outcome_unknown`, and the message may exist; look for it
+  before posting again, with `slack.conversation.history` for a post and with
+  `slack.thread.replies` for a thread reply, which the conversation history
+  lists only when it is broadcast. A Slack `ok: false` answer, an HTTP error
+  and a transport failure are separate `Jido.Connect.Error.ProviderError`s:
+  `reason` is Slack's error code, `:http_error` with the HTTP `status`, or
+  `:request_error`.
+
 ## Rate limits
 
 Slack answers a rate-limited call with HTTP 429 and an `ok: false` body. Every

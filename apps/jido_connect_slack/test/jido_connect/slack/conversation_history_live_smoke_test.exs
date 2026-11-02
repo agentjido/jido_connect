@@ -17,9 +17,8 @@ defmodule Jido.Connect.Slack.ConversationHistoryLiveSmokeTest do
 
   alias Jido.Connect
   alias Jido.Connect.Slack.Client
+  alias Jido.Connect.Slack.TestSupport.LiveSlack
 
-  @slack_api "https://slack.com/api"
-  @req_options {:jido_connect_slack, :slack_req_options}
   @history_scopes ["channels:history", "groups:history", "im:history", "mpim:history"]
 
   # File previews hold file content, and file links name the workspace or
@@ -119,7 +118,7 @@ defmodule Jido.Connect.Slack.ConversationHistoryLiveSmokeTest do
     channel = env["SLACK_PUBLIC_CHANNEL_ID"]
 
     ts =
-      post_reference!(token, %{
+      LiveSlack.post_reference!(token, %{
         channel: channel,
         text: "",
         attachments: [
@@ -132,7 +131,7 @@ defmodule Jido.Connect.Slack.ConversationHistoryLiveSmokeTest do
         ]
       })
 
-    on_exit(fn -> delete_reference!(token, channel, ts) end)
+    LiveSlack.delete_on_exit(token, channel, ts)
 
     record("conversation_history_attachments")
 
@@ -154,7 +153,7 @@ defmodule Jido.Connect.Slack.ConversationHistoryLiveSmokeTest do
     assert [%{"fields" => [%{"title" => "Kind"}]}] = message.attachments
   end
 
-  defp record(name), do: LiveSmoke.record(@req_options, :slack, name, fields: @file_fields)
+  defp record(name), do: LiveSlack.record(name, fields: @file_fields)
 
   defp assert_two_pages_match(profile, token, channel, type) do
     reference = reference_history!(token, channel)
@@ -201,51 +200,13 @@ defmodule Jido.Connect.Slack.ConversationHistoryLiveSmokeTest do
   end
 
   defp history(profile, token, params) do
-    Connect.invoke(
-      Jido.Connect.Slack,
-      "slack.conversation.history",
-      params,
-      runtime(profile, token)
-    )
-  end
-
-  defp runtime(profile, token) do
-    connection =
-      Connect.Connection.new!(%{
-        id: "slack-live-#{profile}",
-        provider: :slack,
-        profile: profile,
-        tenant_id: "live-smoke",
-        owner_type: if(profile == :user, do: :user, else: :tenant),
-        owner_id: "live-smoke",
-        status: :connected,
-        scopes: @history_scopes
-      })
-
-    [
-      context:
-        Connect.Context.new!(%{
-          tenant_id: "live-smoke",
-          actor: %{id: "live-smoke", type: :user},
-          connection: connection
-        }),
-      credential_lease:
-        Connect.CredentialLease.new!(%{
-          connection_id: connection.id,
-          expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
-          scopes: @history_scopes,
-          fields: %{access_token: token}
-        })
-    ]
+    LiveSlack.invoke("slack.conversation.history", params, token, @history_scopes, profile)
   end
 
   defp people(env) do
-    {:ok, %{"user_id" => bot_user}} = Client.auth_test(env["SLACK_BOT_TOKEN"])
-    {:ok, %{"user_id" => authorizing_user}} = Client.auth_test(env["SLACK_USER_TOKEN"])
-
     %{
-      bot_user: bot_user,
-      authorizing_user: authorizing_user,
+      bot_user: LiveSlack.user_id!(env["SLACK_BOT_TOKEN"]),
+      authorizing_user: LiveSlack.user_id!(env["SLACK_USER_TOKEN"]),
       second_user: env["SLACK_SECOND_USER_ID"]
     }
   end
@@ -277,43 +238,10 @@ defmodule Jido.Connect.Slack.ConversationHistoryLiveSmokeTest do
 
   defp reference_history!(token, channel) do
     %{status: 200, body: %{"ok" => true, "has_more" => false, "messages" => messages}} =
-      reference_request(token, :get, "conversations.history",
+      LiveSlack.reference_request(token, :get, "conversations.history",
         params: [channel: channel, limit: 100]
       )
 
     messages
-  end
-
-  defp post_reference!(token, payload) do
-    %{status: 200, body: %{"ok" => true, "ts" => ts}} =
-      reference_request(token, :post, "chat.postMessage", json: payload)
-
-    ts
-  end
-
-  # A message left behind moves the page boundary of the next recording and
-  # breaks the offline tests that expect its pages, so a failed delete fails
-  # the test. The message names only the HTTP status and Slack's error code.
-  defp delete_reference!(token, channel, ts) do
-    case reference_request(token, :post, "chat.delete", json: %{channel: channel, ts: ts}) do
-      %{status: 200, body: %{"ok" => true}} ->
-        :ok
-
-      %{status: status, body: body} ->
-        flunk(
-          "chat.delete left the attachment message #{ts} in #{channel}: " <>
-            "HTTP #{status}, #{slack_error(body)}; delete it before the next recording"
-        )
-    end
-  end
-
-  defp slack_error(%{"error" => error}) when is_binary(error), do: error
-  defp slack_error(_body), do: "no Slack error code"
-
-  # Calls Slack directly, without the package's client and Req options.
-  defp reference_request(token, method, path, options) do
-    [method: method, url: "#{@slack_api}/#{path}", auth: {:bearer, token}, retry: false]
-    |> Keyword.merge(options)
-    |> Req.request!()
   end
 end

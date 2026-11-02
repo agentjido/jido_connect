@@ -321,42 +321,23 @@ defmodule Jido.Connect.SlackTest do
       {:ok, %{channel: "G999", user: "U123"}}
     end
 
-    def open_conversation(%{users: ["U123"]}, "token") do
-      {:ok,
-       %{
-         channel: "D123",
-         conversation: %{
-           id: "D123",
-           is_im: true,
-           is_open: true,
-           user: "U123"
-         }
-       }}
+    # Shaped like the recordings conversations_open_im and conversations_open_mpim:
+    # without return_im Slack returns only the DM's ID, and a group DM carries a
+    # C ID and no member list.
+    def open_conversation(%{users: ["U123"], return_im: false}, "token") do
+      {:ok, %{channel: "D123", conversation: %{id: "D123"}}}
     end
 
-    def open_conversation(%{users: ["U123", "U456"]}, "token") do
+    def open_conversation(%{users: ["U123", "U456"], return_im: false}, "token") do
       {:ok,
        %{
-         channel: "GMP123",
+         channel: "C456",
          conversation: %{
-           id: "GMP123",
+           id: "C456",
+           is_im: false,
            is_mpim: true,
            is_private: true,
-           is_open: true,
-           users: ["U123", "U456"]
-         }
-       }}
-    end
-
-    def open_conversation(%{channel: "D123"}, "token") do
-      {:ok,
-       %{
-         channel: "D123",
-         conversation: %{
-           id: "D123",
-           is_im: true,
-           is_open: true,
-           user: "U123"
+           is_open: true
          }
        }}
     end
@@ -2963,16 +2944,7 @@ defmodule Jido.Connect.SlackTest do
   test "generated open conversation action delegates through integration runtime" do
     {context, lease} = context_and_lease()
 
-    assert {:ok,
-            %{
-              channel: "D123",
-              conversation: %{
-                id: "D123",
-                is_im: true,
-                is_open: true,
-                user: "U123"
-              }
-            }} =
+    assert {:ok, %{channel: "D123", conversation: %{id: "D123"}}} ==
              Jido.Connect.Slack.Actions.OpenConversation.run(
                %{users: ["U123"]},
                %{integration_context: context, credential_lease: lease}
@@ -3010,7 +2982,7 @@ defmodule Jido.Connect.SlackTest do
                %{integration_context: no_write_context, credential_lease: lease}
              )
 
-    assert {:ok, %{channel: "GMP123", conversation: %{is_mpim: true}}} =
+    assert {:ok, %{channel: "C456", conversation: %{is_im: false, is_mpim: true}}} =
              Jido.Connect.Slack.Actions.OpenConversation.run(
                %{users: ["U123", "U456"]},
                %{integration_context: context, credential_lease: lease}

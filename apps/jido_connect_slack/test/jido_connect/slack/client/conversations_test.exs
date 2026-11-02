@@ -360,45 +360,76 @@ defmodule Jido.Connect.Slack.Client.ConversationsTest do
              Client.kick_conversation(%{channel: "C123", user: "U123"}, "token")
   end
 
+  # Recorded from the test workspace: the bot opens its group DM with the
+  # authorizing and the second user.
   test "open conversation sends expected request and normalizes output" do
-    Req.Test.stub(__MODULE__, fn conn ->
+    Req.Test.expect(__MODULE__, fn conn ->
       assert conn.method == "POST"
       assert conn.request_path == "/api/conversations.open"
+      assert ["Bearer token"] = Plug.Conn.get_req_header(conn, "authorization")
 
       {:ok, body, conn} = Plug.Conn.read_body(conn)
 
-      assert %{
-               "users" => "U123,U456",
-               "return_im" => true,
+      assert Jason.decode!(body) == %{
+               "users" => "U0CDPFT1RDJ,U0CDEL6734M",
+               "return_im" => false,
                "prevent_creation" => false
-             } = Jason.decode!(body)
+             }
 
-      Req.Test.json(conn, %{
-        ok: true,
-        channel: %{
-          id: "G123",
-          is_mpim: true,
-          is_private: true,
-          name: "mpdm-user-1--user-2-1",
-          users: ["U123", "U456"],
-          unread_count: 10
-        }
-      })
+      Req.Test.json(conn, LiveSmoke.fixture!(:slack, "conversations_open_mpim"))
     end)
 
     assert {:ok,
             %{
-              channel: "G123",
+              channel: "C0CDELYPYKF",
               conversation: %{
-                id: "G123",
+                id: "C0CDELYPYKF",
+                name: "name-1",
+                is_im: false,
                 is_mpim: true,
                 is_private: true,
-                name: "mpdm-user-1--user-2-1",
-                users: ["U123", "U456"]
+                is_open: true
               }
-            }} =
+            }} ==
              Client.open_conversation(
-               %{users: ["U123", "U456"], return_im: true, prevent_creation: false},
+               %{
+                 users: ["U0CDPFT1RDJ", "U0CDEL6734M"],
+                 return_im: false,
+                 prevent_creation: false
+               },
+               "token"
+             )
+  end
+
+  # Recorded from the test workspace: the bot opens its DM with the
+  # authorizing user and asks for the full DM definition.
+  test "open conversation sends return_im and returns the DM's user" do
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.request_path == "/api/conversations.open"
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "users" => "U0CDPFT1RDJ",
+               "return_im" => true,
+               "prevent_creation" => false
+             }
+
+      Req.Test.json(conn, LiveSmoke.fixture!(:slack, "conversations_open_im_return_im"))
+    end)
+
+    assert {:ok,
+            %{
+              channel: "D0CD4G48UFR",
+              conversation: %{
+                id: "D0CD4G48UFR",
+                is_im: true,
+                is_open: true,
+                user: "U0CDPFT1RDJ"
+              }
+            }} ==
+             Client.open_conversation(
+               %{users: ["U0CDPFT1RDJ"], return_im: true, prevent_creation: false},
                "token"
              )
   end
