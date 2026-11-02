@@ -17,6 +17,7 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
   }
 
   alias Jido.Connect.Google.Drive.Client.Response
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -381,6 +382,35 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     assert file.file_id == "image123"
   end
 
+  test "uploads exactly 5,242,880 bytes, the multipart limit, unchanged" do
+    # Every byte value, 20,480 times: the content of the recorded live upload.
+    content = :binary.copy(:binary.list_to_bin(Enum.to_list(0..255)), 20_480)
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.request_path == "/upload/drive/v3/files"
+
+      ["multipart/related; boundary=" <> boundary] =
+        Plug.Conn.get_req_header(conn, "content-type")
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert [_metadata, media] =
+               String.split(body, "Content-Type: application/octet-stream\r\n\r\n", parts: 2)
+
+      # Compared by digest, so a mismatch does not print 5 MiB.
+      assert :crypto.hash(:sha256, media) ==
+               :crypto.hash(:sha256, content <> "\r\n--#{boundary}--\r\n")
+
+      Req.Test.json(conn, LiveSmoke.fixture!(:google_drive, "file_upload"))
+    end)
+
+    assert {:ok, %File{} = file} =
+             Client.upload_file(%{name: "jcl-live upload.bin", content: content}, "token")
+
+    assert file.size == 5_242_880
+    assert file.md5_checksum == Base.encode16(:crypto.hash(:md5, content), case: :lower)
+  end
+
   test "rejects multipart uploads larger than 5 MiB before sending a request" do
     content = :binary.copy(<<0>>, 5 * 1024 * 1024 + 1)
 
@@ -389,7 +419,10 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
               reason: :upload_too_large,
               subject: :content,
               details: %{actual_bytes: 5_242_881, max_bytes: 5_242_880}
-            }} = Client.upload_file(%{name: "large.bin", content: content}, "token")
+            } = error} = Client.upload_file(%{name: "large.bin", content: content}, "token")
+
+    assert error.message =~ "5,242,880 bytes"
+    assert error.message =~ "larger files are not supported"
   end
 
   test "rejects invalid upload MIME types before sending a request" do

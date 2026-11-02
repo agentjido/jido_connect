@@ -6,6 +6,7 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
 
   @max_multipart_upload_bytes 5 * 1024 * 1024
   @max_base64_upload_bytes 4 * div(@max_multipart_upload_bytes + 2, 3)
+  @upload_too_large_message "Google Drive file uploads are limited to 5,242,880 bytes (5 MiB); larger files are not supported"
   @resource_key_header_token ~r/\A[A-Za-z0-9_-]+\z/
   @mime_type_regex ~r/\A[0-9A-Za-z][!#$%&'*+\-.^_`|~0-9A-Za-z]*\/[0-9A-Za-z][!#$%&'*+\-.^_`|~0-9A-Za-z]*\z/
 
@@ -101,7 +102,7 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
       :ok
     else
       {:error,
-       Error.validation("Google Drive multipart uploads must be 5 MiB or smaller",
+       Error.validation(@upload_too_large_message,
          reason: :upload_too_large,
          subject: :content,
          details: %{
@@ -116,7 +117,7 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   def validate_file_upload_base64_size(content_base64) when is_binary(content_base64) do
     if oversized_base64_content?(content_base64, 0) do
       {:error,
-       Error.validation("Google Drive multipart uploads must be 5 MiB or smaller",
+       Error.validation(@upload_too_large_message,
          reason: :upload_too_large,
          subject: :content_base64,
          details: %{
