@@ -52,6 +52,7 @@ defmodule Jido.Connect.Google.Drive.Actions.Read do
       output do
         field(:files, {:array, :map})
         field(:next_page_token, :string)
+        field(:incomplete_search, :boolean)
       end
     end
 

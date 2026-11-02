@@ -1,0 +1,93 @@
+{
+  "body": {
+    "files": [
+      {
+        "id": "1XN6NpT9HZsm8uiasW7kfMuz2t14zkxNuLpG2UZQxPHA",
+        "mimeType": "application/vnd.google-apps.document",
+        "name": "listing-doc",
+        "parents": [
+          "1K45M4kocXuEeMv_mrnUE_bzilqkb6rL9"
+        ]
+      },
+      {
+        "id": "1NsrjaNAf2qa6zbkr7wNUw5OAd98ePc6X",
+        "mimeType": "application/vnd.google-apps.folder",
+        "name": "listing-sub",
+        "parents": [
+          "1K45M4kocXuEeMv_mrnUE_bzilqkb6rL9"
+        ]
+      },
+      {
+        "id": "1t3de328T902X6-aROW3-5vhyO7q8xzcl",
+        "mimeType": "text/csv",
+        "name": "listing-c.csv",
+        "parents": [
+          "1K45M4kocXuEeMv_mrnUE_bzilqkb6rL9"
+        ]
+      },
+      {
+        "id": "1CXJDDp5r_aKLYhJMOanLFZLFOa53dXIg",
+        "mimeType": "text/plain",
+        "name": "listing-b.txt",
+        "parents": [
+          "1K45M4kocXuEeMv_mrnUE_bzilqkb6rL9"
+        ]
+      },
+      {
+        "id": "1gxM0HVAtE-MRSf_5yKbX2Bw2VrmPfvUP",
+        "mimeType": "text/plain",
+        "name": "listing-a.txt",
+        "parents": [
+          "1K45M4kocXuEeMv_mrnUE_bzilqkb6rL9"
+        ]
+      }
+    ]
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "no-cache, no-store, max-age=0, must-revalidate"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:51:01 GMT"
+    ],
+    "expires": [
+      "Mon, 01 Jan 1990 00:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Origin, X-Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files"
+  },
+  "status": 200
+}

@@ -1,0 +1,83 @@
+{
+  "body": {
+    "files": [
+      {
+        "createdTime": "2026-10-30T15:29:32.851Z",
+        "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/text/plain",
+        "id": "1gxM0HVAtE-MRSf_5yKbX2Bw2VrmPfvUP",
+        "md5Checksum": "7a599a79eaca7cb9619b7aade9619a6d",
+        "mimeType": "text/plain",
+        "modifiedTime": "2026-10-30T15:29:32.851Z",
+        "name": "listing-a.txt",
+        "owners": [
+          {
+            "displayName": "Person 1",
+            "emailAddress": "person-1@example.com",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "permissionId-1",
+            "photoLink": "photoLink-1"
+          }
+        ],
+        "parents": [
+          "1K45M4kocXuEeMv_mrnUE_bzilqkb6rL9"
+        ],
+        "shared": false,
+        "size": "25",
+        "starred": false,
+        "thumbnailLink": "thumbnailLink-4",
+        "trashed": false,
+        "webContentLink": "https://drive.google.com/uc?id=1gxM0HVAtE-MRSf_5yKbX2Bw2VrmPfvUP&export=download",
+        "webViewLink": "https://drive.google.com/file/d/1gxM0HVAtE-MRSf_5yKbX2Bw2VrmPfvUP/view?usp=drivesdk"
+      }
+    ],
+    "incompleteSearch": false
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "no-cache, no-store, max-age=0, must-revalidate"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:51:03 GMT"
+    ],
+    "expires": [
+      "Mon, 01 Jan 1990 00:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Origin, X-Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files"
+  },
+  "status": 200
+}

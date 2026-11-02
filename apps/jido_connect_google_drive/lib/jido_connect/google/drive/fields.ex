@@ -142,11 +142,12 @@ defmodule Jido.Connect.Google.Drive.Fields do
     join(@file_metadata ++ ["permissions(#{permission_metadata()})"])
   end
 
-  @doc "Default `files.list` field expression."
-  def file_list, do: "nextPageToken,files(#{file_metadata()})"
+  @doc "Default `files.list` field expression, including `incompleteSearch`."
+  def file_list, do: "nextPageToken,incompleteSearch,files(#{file_metadata()})"
 
-  @doc "Permission-aware `files.list` field expression."
-  def file_list_with_permissions, do: "nextPageToken,files(#{file_with_permissions()})"
+  @doc "Permission-aware `files.list` field expression, including `incompleteSearch`."
+  def file_list_with_permissions,
+    do: "nextPageToken,incompleteSearch,files(#{file_with_permissions()})"
 
   @doc "Default `permissions.list` field expression."
   def permission_list, do: "nextPageToken,permissions(#{permission_metadata()})"

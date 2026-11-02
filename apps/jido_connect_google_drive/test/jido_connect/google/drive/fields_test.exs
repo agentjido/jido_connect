@@ -15,10 +15,10 @@ defmodule Jido.Connect.Google.Drive.FieldsTest do
     assert Fields.about_metadata() =~ "user,storageQuota,importFormats"
 
     assert Fields.file_list() ==
-             "nextPageToken,files(#{Fields.file_metadata()})"
+             "nextPageToken,incompleteSearch,files(#{Fields.file_metadata()})"
 
     assert Fields.file_list_with_permissions() ==
-             "nextPageToken,files(#{Fields.file_with_permissions()})"
+             "nextPageToken,incompleteSearch,files(#{Fields.file_with_permissions()})"
 
     assert Fields.permission_list() ==
              "nextPageToken,permissions(#{Fields.permission_metadata()})"

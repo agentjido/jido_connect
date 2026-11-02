@@ -16,7 +16,8 @@ defmodule Jido.Connect.Google.Drive.Client.Response do
       {:ok,
        %{
          files: files,
-         next_page_token: Data.get(body, "nextPageToken")
+         next_page_token: Data.get(body, "nextPageToken"),
+         incomplete_search: Data.get(body, "incompleteSearch")
        }
        |> Data.compact()}
     end

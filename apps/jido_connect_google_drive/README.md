@@ -151,6 +151,60 @@ Jido.Connect.invoke(Jido.Connect.Google.Drive, "google.drive.file.get", target_i
 )
 ```
 
+## Listing Folder Contents
+
+`google.drive.files.list` sends `query` to Drive as `q`. A query such as
+`'<folderId>' in parents` returns the folder's direct children only, not the
+files in its subfolders. The package has no recursive listing; a host that
+needs a whole tree lists each subfolder itself.
+
+Drive's `files.list` returns trashed files as well, unless the query adds
+`trashed = false`:
+
+```elixir
+Jido.Connect.invoke(
+  Jido.Connect.Google.Drive,
+  "google.drive.files.list",
+  %{query: "'#{folder_id}' in parents and trashed = false"},
+  context: context,
+  credential_lease: lease
+)
+```
+
+A result with `next_page_token` has more pages. Pass the token back as
+`page_token` until a result comes without it.
+
+`incomplete_search` is Drive's `incompleteSearch` flag. `true` means Drive did
+not search every document, so matching files may be missing from the result.
+According to Google this happens when a search with `corpora: "allDrives"`
+cannot cover every corpus; Google then recommends narrowing the search to the
+`user` or `drive` corpus. The default field presets, `Fields.file_list()` and
+`Fields.file_list_with_permissions()`, request the flag, and `false` is
+returned as `false`. A caller-supplied `fields` is sent unchanged; when it does
+not name `incompleteSearch`, the result has no `incomplete_search` key.
+
+To follow a folder, poll the `google.drive.collection.changes` trigger once
+with the folder ID as `collection_id` before the first listing. A poll without
+a checkpoint returns no signals and Drive's current change position as its
+checkpoint; it does not replay earlier changes. The host stores the
+checkpoint, lists the folder and then polls from the stored checkpoint. A
+change made between that first poll and the listing can show up in both, so
+the host applies signals by `provider_record_id`, and a change the listing
+already contains updates the same entry again.
+
+Each signal carries `collection_match`: `"yes"` when the changed file is the
+folder or lists it in `parents`, `"no"` when it does not, which includes a file
+moved out of the folder, and `"unknown"` when Drive sends no file, as for a
+removed one. As long as every poll continues from the checkpoint the previous
+poll returned, the host does not have to list the folder again.
+
+A poll that cannot continue from its checkpoint, for example because Drive
+reports it expired (`reason: :checkpoint_expired`), returns an error whose
+`details` carry `checkpoint_reset`. The host then clears the checkpoint and
+polls again. That poll starts from Drive's current position without the
+missed changes, so it takes the place of the first poll above, and the host
+lists the folder again after it.
+
 ## Permission-Aware Field Projections
 
 Google Drive `fields` expressions are provider-specific. `jido_connect` core
