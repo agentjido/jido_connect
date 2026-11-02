@@ -13,6 +13,7 @@ defmodule Jido.Connect.Gmail.LiveSmokeTest do
   alias Jido.Connect
   alias Jido.Connect.Gmail
   alias Jido.Connect.Gmail.Client
+  alias Jido.Connect.Gmail.MIME.Traversal
 
   @readonly_scope "https://www.googleapis.com/auth/gmail.readonly"
   @max_pages 20
@@ -84,6 +85,132 @@ defmodule Jido.Connect.Gmail.LiveSmokeTest do
                env["GOOGLE_GMAIL_METADATA_ACCESS_TOKEN"]
              )
   end
+
+  # The format=full payloads of the prepared messages are the fixtures of
+  # mime_traversal_test.exs. Each test records exactly one response, so the
+  # recorder sanitizes its body with fresh placeholders, as LiveSmoke.sanitize/2
+  # does with the live body below; the comparison therefore sees the same
+  # addresses and names on both sides. Gmail issues a new attachmentId with
+  # every response, so only the presence of an attachment ID is compared.
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_GMAIL_ARCHIVE_MESSAGE_ID"])
+  test "traverses the single-part message like its recording", %{env: env} do
+    assert_traversal_matches_recording(
+      env["GOOGLE_ACCESS_TOKEN"],
+      "/gmail/v1/users/me/messages/#{env["GOOGLE_GMAIL_ARCHIVE_MESSAGE_ID"]}",
+      "message_full_single_part"
+    )
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_GMAIL_ATTACHMENT_MESSAGE_ID"])
+  test "traverses the nested attachment message like its recording", %{env: env} do
+    assert_traversal_matches_recording(
+      env["GOOGLE_ACCESS_TOKEN"],
+      "/gmail/v1/users/me/messages/#{env["GOOGLE_GMAIL_ATTACHMENT_MESSAGE_ID"]}",
+      "message_full_attachments"
+    )
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_GMAIL_FORWARD_ATTACHED_ID"])
+  test "traverses the forward with attached messages like its recording", %{env: env} do
+    assert_traversal_matches_recording(
+      env["GOOGLE_ACCESS_TOKEN"],
+      "/gmail/v1/users/me/messages/#{env["GOOGLE_GMAIL_FORWARD_ATTACHED_ID"]}",
+      "message_full_forward_attached"
+    )
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_GMAIL_CHARSET_MESSAGE_ID"])
+  test "traverses the charset message like its recording", %{env: env} do
+    assert_traversal_matches_recording(
+      env["GOOGLE_ACCESS_TOKEN"],
+      "/gmail/v1/users/me/messages/#{env["GOOGLE_GMAIL_CHARSET_MESSAGE_ID"]}",
+      "message_full_charsets"
+    )
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_GMAIL_THREAD_ID"])
+  test "traverses every message of the conversation like its recording", %{env: env} do
+    assert_traversal_matches_recording(
+      env["GOOGLE_ACCESS_TOKEN"],
+      "/gmail/v1/users/me/threads/#{env["GOOGLE_GMAIL_THREAD_ID"]}",
+      "thread_full_conversation"
+    )
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_GMAIL_ATTACHMENT_MESSAGE_ID"])
+  test "attachments.get returns the original ISO-8859-15 bytes of notes.txt", %{env: env} do
+    access_token = env["GOOGLE_ACCESS_TOKEN"]
+    message_id = env["GOOGLE_GMAIL_ATTACHMENT_MESSAGE_ID"]
+
+    # Not recorded: the attachment ID comes from this response, and
+    # message_full_attachments already holds its recording.
+    assert {:ok, %Req.Response{status: 200, body: %{"payload" => payload}}} =
+             access_token
+             |> Client.Transport.request()
+             |> Req.get(
+               url: "/gmail/v1/users/me/messages/#{message_id}",
+               params: [format: "full"]
+             )
+
+    assert {:ok, %{attachments: attachments}} = Traversal.traverse(payload)
+
+    assert %{filename: "notes.txt", size: size, attachment_id: attachment_id} =
+             Enum.find(attachments, &(&1.part_id == "3"))
+
+    LiveSmoke.record(
+      {:jido_connect_google, :google_req_options},
+      :gmail,
+      "attachment_notes_latin9"
+    )
+
+    assert {:ok, %Gmail.Attachment{data: data}} =
+             Client.get_attachment(
+               %{message_id: message_id, attachment_id: attachment_id},
+               access_token
+             )
+
+    assert byte_size(Base.url_decode64!(data, padding: false)) == size
+
+    assert {:ok, %{content: "Notizen: € Œ œ Š š Ž ž Ÿ.\r\n", decoded: true}} =
+             Traversal.decode_external_text_part(
+               %{part_id: "3", mime_type: "text/plain", charset: "iso-8859-15"},
+               data
+             )
+  end
+
+  defp assert_traversal_matches_recording(access_token, path, fixture) do
+    LiveSmoke.record({:jido_connect_google, :google_req_options}, :gmail, fixture)
+
+    assert {:ok, %Req.Response{status: 200, body: live}} =
+             access_token
+             |> Client.Transport.request()
+             |> Req.get(url: path, params: [format: "full"])
+
+    live_traversals = traverse_payloads(LiveSmoke.sanitize(live))
+    recorded_traversals = traverse_payloads(LiveSmoke.fixture!(:gmail, fixture))
+
+    assert live_traversals != []
+    assert live_traversals == recorded_traversals
+  end
+
+  defp traverse_payloads(%{"messages" => messages}),
+    do: Enum.flat_map(messages, &traverse_payloads/1)
+
+  defp traverse_payloads(%{"payload" => payload}) do
+    assert {:ok, traversal} = Traversal.traverse(payload)
+    [mask_attachment_ids(traversal)]
+  end
+
+  defp mask_attachment_ids(%{} = map) do
+    Map.new(map, fn
+      {:attachment_id, id} when is_binary(id) -> {:attachment_id, :supplied}
+      {key, value} -> {key, mask_attachment_ids(value)}
+    end)
+  end
+
+  defp mask_attachment_ids(list) when is_list(list), do: Enum.map(list, &mask_attachment_ids/1)
+  defp mask_attachment_ids(value), do: value
 
   defp page_through(input, context, lease, pages \\ []) do
     assert length(pages) < @max_pages, "pagination did not end after #{@max_pages} pages"

@@ -1,8 +1,8 @@
 defmodule Jido.Connect.TestSupport.LiveSmoke.LeakError do
   @moduledoc """
   Raised when sanitized live smoke output still holds a credential value or an
-  identifying value: a site or tunnel host, a configured email address or an
-  account ID.
+  identifying value: a site or tunnel host, a configured email address, an
+  account ID or the Google project number.
   """
 
   defexception [:variable]
@@ -45,6 +45,7 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
   # Placeholders this module writes; learning them again would flag clean output.
   @host_placeholder ~r/^(?:example(?:-\d+)?\.[a-z0-9.-]+|host-\d+\.example\.com)$/
   @account_placeholder ~r/^account-\d+$/
+  @project_number_placeholder "000000000000"
   @min_credential_bytes 8
 
   # `credentials` is a function returning `{variable, value}` pairs, so that
@@ -58,23 +59,28 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
             hosts: %{},
             identifying: [],
             names: %{},
+            project_numbers: [],
             values: %{}
 
   @doc """
   Builds a state from the `:fields`, `:name_keys`, `:keep_keys`, `:credentials`,
-  `:hosts` and `:identifying` options. `:hosts` holds `{source, host}` pairs
-  that get placeholders before any value is read; `:identifying` holds
-  `{source, value}` pairs that must not remain, such as configured emails.
+  `:hosts`, `:identifying` and `:project_numbers` options. `:hosts` holds
+  `{source, host}` pairs that get placeholders before any value is read;
+  `:identifying` holds `{source, value}` pairs that must not remain, such as
+  configured emails; `:project_numbers` holds `{source, number}` pairs whose
+  number becomes `000000000000` and must not remain either.
   """
   def new(opts) do
     hosts = Keyword.get(opts, :hosts, [])
+    numbers = Keyword.get(opts, :project_numbers, [])
 
     state = %__MODULE__{
       fields: strings(Keyword.get(opts, :fields, [])),
       name_keys: @name_keys ++ strings(Keyword.get(opts, :name_keys, [])),
       keep_keys: strings(Keyword.get(opts, :keep_keys, ["fields"])),
       credentials: credentials(Keyword.get(opts, :credentials, [])),
-      identifying: Keyword.get(opts, :identifying, []) ++ hosts
+      identifying: Keyword.get(opts, :identifying, []) ++ hosts ++ numbers,
+      project_numbers: Enum.map(numbers, fn {_source, number} -> number end)
     }
 
     Enum.reduce(hosts, state, fn {_source, host}, state -> add_host(state, host) end)
@@ -304,6 +310,17 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
         text
         |> String.replace(id, placeholder)
         |> String.replace(URI.encode_www_form(id), placeholder)
+      end)
+
+    # Whole numbers only, so a longer number that contains one stays intact and
+    # the leak guard reports it instead.
+    text =
+      Enum.reduce(state.project_numbers, text, fn number, text ->
+        Regex.replace(
+          ~r/(?<![0-9])#{Regex.escape(number)}(?![0-9])/,
+          text,
+          @project_number_placeholder
+        )
       end)
 
     state.names

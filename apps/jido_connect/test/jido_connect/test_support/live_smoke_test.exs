@@ -377,6 +377,65 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
       end)
     end
 
+    test "replaces the Google project number of GOOGLE_CLIENT_ID wherever it is a whole number" do
+      # An invented number in the shape of a Cloud project number.
+      number = "987654321098"
+      client_id = "#{number}-0abc1def2ghi.apps.googleusercontent.com"
+
+      body = %{
+        "headers" => [
+          %{
+            "name" => "Received",
+            "value" => "from #{number} named unknown by gmailapi.google.com with HTTPREST"
+          }
+        ],
+        "client" => client_id,
+        "topic" => "projects/#{number}/topics/inbox",
+        number => "keyed by the number",
+        "shorter" => "98765432109"
+      }
+
+      with_env(Map.put(@no_sites, "GOOGLE_CLIENT_ID", client_id), fn ->
+        sanitized = LiveSmoke.sanitize(body)
+
+        assert sanitized == %{
+                 "headers" => [
+                   %{
+                     "name" => "Received",
+                     "value" =>
+                       "from 000000000000 named unknown by gmailapi.google.com with HTTPREST"
+                   }
+                 ],
+                 "client" => "000000000000-0abc1def2ghi.apps.googleusercontent.com",
+                 "topic" => "projects/000000000000/topics/inbox",
+                 "000000000000" => "keyed by the number",
+                 "shorter" => "98765432109"
+               }
+
+        assert LiveSmoke.sanitize(sanitized) == sanitized
+      end)
+    end
+
+    test "fails when the Google project number survives encoded or inside a longer number" do
+      number = "987654321098"
+
+      env =
+        Map.put(
+          @no_sites,
+          "GOOGLE_CLIENT_ID",
+          "#{number}-0abc1def2ghi.apps.googleusercontent.com"
+        )
+
+      with_env(env, fn ->
+        # The replacement keeps other numbers intact, so the guard reports this one.
+        for body <- [%{"blob" => Base.encode64(number)}, %{"internalDate" => "1#{number}"}] do
+          error = assert_raise LeakError, fn -> LiveSmoke.sanitize(body) end
+          assert Exception.message(error) =~ "the Google project number"
+          refute Exception.message(error) =~ number
+        end
+      end)
+    end
+
     test "guards credential-shaped variables that the convention does not list" do
       secret = "seed-only-secret-value"
 

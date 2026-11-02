@@ -12,9 +12,24 @@ Gmail data is sensitive by default. The connector classifies addresses,
 subjects, snippets, headers, labels, and payload summaries as personal or
 message content depending on the action. Normalized message, thread, and draft
 structs intentionally avoid raw RFC822 bodies, Gmail `raw` payloads, and MIME
-part `body.data` bytes. Attachment body access is isolated to
-`google.gmail.message.attachment.get`, which explicitly returns Gmail's
-base64url-encoded attachment `data` field.
+part `body.data` bytes. Message body and attachment bytes come only from
+actions that declare content access, and the opt-in `:google_gmail_content`
+catalog pack gathers those actions. Today that is
+`google.gmail.message.attachment.get`, which returns Gmail's base64url-encoded
+attachment `data` field.
+
+## MIME Traversal
+
+`Jido.Connect.Gmail.MIME.Traversal` walks the payload of a `format=full`
+message without network access; its moduledoc describes the result, the
+attachment manifest and the bounds. For `format=full`, Gmail returns text data
+already converted to UTF-8, so an inline text part has `decoded: false` only
+when its data is not valid UTF-8, and an inline `koi8-r` part arrives decoded.
+`attachments.get` returns the original bytes, which
+`decode_external_text_part/2` decodes as UTF-8, US-ASCII, ISO-8859-1,
+ISO-8859-15 or Windows-1252, also under their IANA aliases; a `koi8-r` part
+fetched that way keeps `decoded: false`. Gmail pads base64url data, and the
+traversal accepts it with and without padding.
 
 ## Actions
 
@@ -77,6 +92,9 @@ dedupe is based on Gmail `history_id`.
   and excludes label mutation, attachment, and delete tools.
 - `:google_gmail_destructive` exposes trash and explicit draft, label, message,
   and thread delete operations behind destructive action metadata.
+- `:google_gmail_content` is the opt-in read pack for message content. It adds
+  `google.gmail.message.attachment.get` to the metadata tools and excludes
+  send, draft, label mutation, watch, trash, and delete tools.
 
 ```elixir
 Jido.Connect.Catalog.search_tools("gmail",

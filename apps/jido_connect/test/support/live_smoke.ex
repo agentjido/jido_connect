@@ -40,7 +40,8 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
                       GOOGLE_GMAIL_METADATA_REFRESH_TOKEN GOOGLE_GMAIL_METADATA_ACCESS_TOKEN),
       settings: ~w(GOOGLE_CLIENT_ID GOOGLE_GMAIL_QUERY GOOGLE_GMAIL_THREAD_ID
                    GOOGLE_GMAIL_ATTACHMENT_MESSAGE_ID GOOGLE_GMAIL_FORWARD_INLINE_ID
-                   GOOGLE_GMAIL_FORWARD_ATTACHED_ID GOOGLE_GMAIL_LABEL_ID
+                   GOOGLE_GMAIL_FORWARD_ATTACHED_ID GOOGLE_GMAIL_CHARSET_MESSAGE_ID
+                   GOOGLE_GMAIL_LABEL_ID
                    GOOGLE_GMAIL_DISPOSABLE_MESSAGE_ID GOOGLE_GMAIL_RECIPIENT GOOGLE_CALENDAR_ID
                    GOOGLE_CALENDAR_EVENT_ID GOOGLE_CALENDAR_AGENDA_FILE_ID
                    GOOGLE_CALENDAR_HANDOUT_URL GOOGLE_CALENDAR_CONFERENCE_ID
@@ -222,11 +223,12 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
 
   Redacts the sensitive keys of `Jido.Connect.Sanitizer` except `:keep_keys`
   (default `["fields"]`, the issue payload of Jira), replaces email addresses,
-  display names, site and tunnel hosts and Atlassian account IDs with stable
-  placeholders, and replaces the values under `:fields` with `<field>-<n>`.
-  `:name_keys` adds keys that hold display names. Raises `LeakError` when a
-  credential value, a configured host or email address, or a replaced host or
-  account ID remains.
+  display names, site and tunnel hosts, Atlassian account IDs and the Google
+  project number with stable placeholders, and replaces the values under
+  `:fields` with `<field>-<n>`. `:name_keys` adds keys that hold display names.
+  Raises `LeakError` when a credential value, a configured host or email
+  address, the Google project number, or a replaced host or account ID
+  remains.
   """
   @spec sanitize(term(), keyword()) :: term()
   def sanitize(value, opts \\ []) do
@@ -388,7 +390,17 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
     |> Keyword.put(:credentials, credential_values())
     |> Keyword.put(:hosts, configured_hosts() ++ extra_hosts)
     |> Keyword.put(:identifying, configured_emails())
+    |> Keyword.put(:project_numbers, project_numbers())
     |> Sanitize.new()
+  end
+
+  # Gmail's Received headers name the Cloud project of the OAuth client by its
+  # number, the numeric prefix of `<number>-<id>.apps.googleusercontent.com`.
+  defp project_numbers do
+    case Regex.run(~r/^(\d+)-/, System.get_env("GOOGLE_CLIENT_ID") || "") do
+      [_match, number] -> [{"the Google project number", number}]
+      nil -> []
+    end
   end
 
   # Listed settings and every set variable ending in _EMAIL whose value is an address.

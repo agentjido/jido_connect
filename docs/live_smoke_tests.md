@@ -120,6 +120,7 @@ as seed input belong to the scripts that create the test data.
 | `GOOGLE_GMAIL_ATTACHMENT_MESSAGE_ID` | setting | Message with attachments and nested parts |
 | `GOOGLE_GMAIL_FORWARD_INLINE_ID` | setting | Inline forward |
 | `GOOGLE_GMAIL_FORWARD_ATTACHED_ID` | setting | Forward as attachment |
+| `GOOGLE_GMAIL_CHARSET_MESSAGE_ID` | setting | Message with ISO-8859-15, US-ASCII and invalid UTF-8 text parts and a base64 `message/rfc822` part |
 | `GOOGLE_GMAIL_LABEL_ID` | setting | Test label |
 | `GOOGLE_GMAIL_DISPOSABLE_MESSAGE_ID` | setting | Message that a write test may delete |
 | `GOOGLE_GMAIL_ARCHIVE_MESSAGE_ID` | setting | One message of the two-message archive and label thread |
@@ -283,6 +284,9 @@ Recordings and captures pass through the same sanitizer, also available as
 - Atlassian account IDs under `accountId`, `authorAccountId`,
   `leadAccountId`, `authorId`, `ownerId` and `lastOwnerId` become
   `account-<n>` wherever they appear, also percent-encoded in links.
+- The Google project number, the numeric prefix of `GOOGLE_CLIENT_ID`, becomes
+  `000000000000` wherever it appears as a whole number, as in the `Received`
+  headers of Gmail messages.
 - Display names become `Person <n>`. They are taken from keys such as
   `displayName`, `real_name`, `publicName` and `username`, and from address
   lists such as `Ada Lovelace <ada@example.org>, bob@example.org`. Once known,
@@ -295,8 +299,9 @@ Recordings and captures pass through the same sanitizer, also available as
 - If the value of any credential variable listed above, eight bytes or longer,
   still appears in the output, raw or JSON-, percent- or Base64-encoded, the
   sanitizer raises `LiveSmoke.LeakError`. The same holds for the hosts above,
-  for email addresses in listed settings and in variables ending in `_EMAIL`,
-  and for every tenant host and account ID the sanitizer replaced elsewhere.
+  for the Google project number, also inside a longer number, for email
+  addresses in listed settings and in variables ending in `_EMAIL`, and for
+  every tenant host and account ID the sanitizer replaced elsewhere.
   The message names the variable or the kind of value, not the value, and
   nothing is written.
 

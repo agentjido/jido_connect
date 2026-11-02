@@ -654,7 +654,8 @@ defmodule Jido.Connect.GmailTest do
       metadata_pack: :google_gmail_metadata,
       triage_pack: :google_gmail_triage,
       send_pack: :google_gmail_send,
-      destructive_pack: :google_gmail_destructive
+      destructive_pack: :google_gmail_destructive,
+      content_pack: :google_gmail_content
     )
 
     ConnectorContracts.assert_plugin_tool_availability(Gmail)
