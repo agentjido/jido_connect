@@ -1,7 +1,18 @@
 defmodule Jido.Connect.Google.Meet.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Google.Meet.{Client, ConferenceRecord, Recording, Space, Transcript}
+  alias Jido.Connect.Google.Meet.{
+    Client,
+    ConferenceRecord,
+    Recording,
+    Space,
+    Transcript,
+    TranscriptEntry
+  }
+
+  alias Jido.Connect.TestSupport.LiveSmoke
+
+  @transcript_name "conferenceRecords/abc/transcripts/def"
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -256,6 +267,121 @@ defmodule Jido.Connect.Google.Meet.ClientTest do
              )
 
     assert transcript.state == "FILE_GENERATED"
+  end
+
+  test "lists Meet transcript entries with the next page token" do
+    recorded = LiveSmoke.fixture!(:google_meet, "transcript_entries")
+    [recorded_entry] = recorded["transcriptEntries"]
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v2/conferenceRecords/abc/transcripts/def/entries"
+      assert conn.query_params["pageSize"] == "1"
+      assert conn.query_params["pageToken"] == "older"
+
+      Req.Test.json(conn, recorded)
+    end)
+
+    assert {:ok, %{transcript_entries: [%TranscriptEntry{} = entry], next_page_token: next}} =
+             Client.list_transcript_entries(
+               %{transcript_name: @transcript_name, page_size: 1, page_token: "older"},
+               "token"
+             )
+
+    assert next == recorded["nextPageToken"]
+    assert entry.entry_name == recorded_entry["name"]
+    assert entry.participant == recorded_entry["participant"]
+    assert entry.text == recorded_entry["text"]
+    assert entry.language_code == recorded_entry["languageCode"]
+    assert entry.start_time == recorded_entry["startTime"]
+    assert entry.end_time == recorded_entry["endTime"]
+  end
+
+  test "lists no Meet transcript entries when the body has none" do
+    recorded = LiveSmoke.fixture!(:google_meet, "transcript_entries.2")
+    refute Map.has_key?(recorded, "nextPageToken")
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.request_path == "/v2/conferenceRecords/abc/transcripts/def/entries"
+
+      Req.Test.json(conn, Map.delete(recorded, "transcriptEntries"))
+    end)
+
+    assert {:ok, %{transcript_entries: []} = result} =
+             Client.list_transcript_entries(%{transcript_name: @transcript_name}, "token")
+
+    refute Map.has_key?(result, :next_page_token)
+  end
+
+  test "percent-encodes reserved characters in the transcript name segments" do
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.request_path == "/v2/conferenceRecords/abc/transcripts/d%3Fe%23f/entries"
+      assert conn.query_params == %{"pageSize" => "1"}
+
+      Req.Test.json(conn, LiveSmoke.fixture!(:google_meet, "transcript_entries.2"))
+    end)
+
+    assert {:ok, %{transcript_entries: [%TranscriptEntry{}]}} =
+             Client.list_transcript_entries(
+               %{transcript_name: "conferenceRecords/abc/transcripts/d?e#f", page_size: 1},
+               "token"
+             )
+  end
+
+  test "returns provider errors for malformed transcript entry list responses" do
+    recorded = LiveSmoke.fixture!(:google_meet, "transcript_entries")
+    [recorded_entry] = recorded["transcriptEntries"]
+
+    malformed_entries = [
+      Map.delete(recorded_entry, "name"),
+      Map.put(recorded_entry, "text", [recorded_entry["text"]])
+    ]
+
+    for malformed_entry <- malformed_entries do
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert conn.request_path == "/v2/conferenceRecords/abc/transcripts/def/entries"
+
+        Req.Test.json(conn, Map.put(recorded, "transcriptEntries", [malformed_entry]))
+      end)
+
+      assert {:error,
+              %Jido.Connect.Error.ProviderError{
+                provider: :google,
+                reason: :invalid_response
+              }} = Client.list_transcript_entries(%{transcript_name: @transcript_name}, "token")
+    end
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      Req.Test.json(conn, Map.put(recorded, "transcriptEntries", recorded_entry))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
+             Client.list_transcript_entries(%{transcript_name: @transcript_name}, "token")
+
+    Req.Test.stub(__MODULE__, &Req.Test.json(&1, recorded["transcriptEntries"]))
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response, status: nil}} =
+             Client.list_transcript_entries(%{transcript_name: @transcript_name}, "token")
+  end
+
+  test "returns a provider error for a missing transcript instead of empty entries" do
+    not_found = LiveSmoke.fixture!(:google_meet, "transcript_entries_not_found")
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.request_path == "/v2/conferenceRecords/abc/transcripts/def/entries"
+
+      conn
+      |> Plug.Conn.put_status(not_found["error"]["code"])
+      |> Req.Test.json(not_found)
+    end)
+
+    assert {:error,
+            %Jido.Connect.Error.ProviderError{
+              provider: :google,
+              reason: :http_error,
+              status: 404,
+              details: %{message: "Transcript not found"}
+            }} = Client.list_transcript_entries(%{transcript_name: @transcript_name}, "token")
   end
 
   test "returns provider errors for malformed space responses" do

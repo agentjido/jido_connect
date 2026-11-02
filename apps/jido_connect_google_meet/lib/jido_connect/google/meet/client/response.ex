@@ -135,6 +135,35 @@ defmodule Jido.Connect.Google.Meet.Client.Response do
 
   def handle_transcript_response(response), do: Transport.handle_error_response(response)
 
+  def handle_transcript_entry_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, transcript_entries} <-
+           normalize_items(
+             body,
+             "transcriptEntries",
+             &Normalizer.transcript_entry/1,
+             "Google Meet transcript entry list response was invalid"
+           ) do
+      {:ok,
+       %{
+         transcript_entries: transcript_entries,
+         next_page_token: Data.get(body, "nextPageToken")
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_transcript_entry_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response(
+      "Google Meet transcript entry list response was invalid",
+      body
+    )
+  end
+
+  def handle_transcript_entry_list_response(response),
+    do: Transport.handle_error_response(response)
+
   defp normalize_one(body, normalizer, message) do
     case normalizer.(body) do
       {:ok, item} -> {:ok, item}

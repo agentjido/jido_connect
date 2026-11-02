@@ -20,6 +20,7 @@ Trigger work is intentionally split into later roadmap tasks.
 - `Jido.Connect.Google.Meet.Participant`
 - `Jido.Connect.Google.Meet.Recording`
 - `Jido.Connect.Google.Meet.Transcript`
+- `Jido.Connect.Google.Meet.TranscriptEntry`
 
 ## OAuth Scopes
 
@@ -42,13 +43,33 @@ scopes:
 - `google.meet.recording.get`
 - `google.meet.transcript.list`
 - `google.meet.transcript.get`
+- `google.meet.transcript.entry.list`
 
 No Meet triggers are exposed yet. The generated plugin and provider metadata
 are present so later tasks can add action families without changing package
 wiring.
 
-Recording and transcript actions expose metadata only. They do not download
-recording media, Google Docs transcript content, or transcript entry text.
+The recording actions, `google.meet.transcript.list` and
+`google.meet.transcript.get` expose metadata only. They do not download
+recording media or the transcript document.
+
+`google.meet.transcript.entry.list` returns transcript text entry by entry.
+Each entry carries its `entry_name`, the speaking `participant` as a
+conference participant resource name, `text`, `language_code`, `start_time`
+and `end_time`, so a caller can cite an excerpt against its speaker and time.
+It pages with `page_size` (default 10; Google returns at most 100 entries per
+page) and `page_token`, and resolves `meetings.space.readonly`, or
+`meetings.space.created` when the connection holds it.
+
+Google deletes transcript entries 30 days after the conference ends. Entries
+come from the transcription itself and can differ from the transcript document
+when someone has edited that document.
+
+The transcript document stays readable through the Drive package:
+`google.meet.transcript.get` returns its `document_id`, and
+`google.drive.file.export` with `mime_type: "text/plain"` exports it. That
+route needs the `drive.readonly` grant; `drive.file` covers only files the app
+created or opened, which a Meet transcript document is not.
 
 ## Workspace Events Spike
 
@@ -60,9 +81,12 @@ host-owned durable state. The design spike for that work lives in
 
 - `:google_meet_reader` exposes metadata-first read actions for spaces,
   conference records, recordings, and transcripts.
+- `:google_meet_transcript_reader` is opt-in and adds
+  `google.meet.transcript.entry.list`, which returns transcript text, to the
+  reader surface. `:google_meet_reader` stays metadata-only.
 - `:google_meet_scheduler` adds meeting-space creation to the reader surface.
 
-Both packs are action-first and mark Workspace Events triggers as later work.
+All packs are action-first and mark Workspace Events triggers as later work.
 They do not expose trigger ids until subscription lifecycle and host-owned
 durable state are implemented.
 

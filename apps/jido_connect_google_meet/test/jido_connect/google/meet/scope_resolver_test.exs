@@ -61,4 +61,23 @@ defmodule Jido.Connect.Google.Meet.ScopeResolverTest do
              %{scopes: [@created_scope]}
            ) == [@created_scope]
   end
+
+  test "resolves Meet artifact read scopes for transcript entries" do
+    operation = %{action_id: "google.meet.transcript.entry.list"}
+
+    assert ScopeResolver.required_scopes(operation, %{}, %{scopes: [@readonly_scope]}) ==
+             [@readonly_scope]
+
+    assert ScopeResolver.required_scopes(operation, %{}, %{scopes: [@created_scope]}) ==
+             [@created_scope]
+
+    assert ScopeResolver.required_scopes(
+             operation,
+             %{},
+             %{scopes: [@readonly_scope, @created_scope]}
+           ) == [@created_scope]
+
+    assert ScopeResolver.required_scopes(operation, %{}, %{scopes: []}) == [@readonly_scope]
+    assert ScopeResolver.required_scopes(operation, %{}, nil) == [@readonly_scope]
+  end
 end

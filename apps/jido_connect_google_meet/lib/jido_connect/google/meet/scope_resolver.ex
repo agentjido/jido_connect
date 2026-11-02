@@ -24,7 +24,8 @@ defmodule Jido.Connect.Google.Meet.ScopeResolver do
     "google.meet.recording.list",
     "google.meet.recording.get",
     "google.meet.transcript.list",
-    "google.meet.transcript.get"
+    "google.meet.transcript.get",
+    "google.meet.transcript.entry.list"
   ]
 
   def required_scopes(operation, _input, connection) do

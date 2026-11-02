@@ -6,10 +6,12 @@ defmodule Jido.Connect.Google.Meet.StructTest do
     Participant,
     Recording,
     Space,
-    Transcript
+    Transcript,
+    TranscriptEntry
   }
 
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   test "space struct validates with Zoi" do
     space =
@@ -94,5 +96,38 @@ defmodule Jido.Connect.Google.Meet.StructTest do
 
     assert transcript.document_id == "doc-123"
     assert {:error, _error} = Transcript.new(%{})
+  end
+
+  test "transcript entry struct keeps Unicode text and attribution unchanged" do
+    [recorded] = LiveSmoke.fixture!(:google_meet, "transcript_entries")["transcriptEntries"]
+    text = "Grüße aus Köln 👋\nZweite Zeile: 東京, café\r\n— Ende"
+
+    entry =
+      ConnectorContracts.assert_struct_defaults(
+        TranscriptEntry,
+        %{
+          entry_name: recorded["name"],
+          participant: recorded["participant"],
+          text: text,
+          language_code: recorded["languageCode"],
+          start_time: recorded["startTime"],
+          end_time: recorded["endTime"]
+        },
+        metadata: %{}
+      )
+
+    assert entry.entry_name == recorded["name"]
+    assert entry.participant == recorded["participant"]
+    assert entry.text == text
+    assert entry.language_code == recorded["languageCode"]
+    assert entry.start_time == recorded["startTime"]
+    assert entry.end_time == recorded["endTime"]
+
+    bare = TranscriptEntry.new!(%{entry_name: recorded["name"]})
+    assert {bare.participant, bare.text, bare.language_code} == {nil, nil, nil}
+    assert {bare.start_time, bare.end_time} == {nil, nil}
+
+    assert {:error, _error} = TranscriptEntry.new(%{})
+    assert {:error, _error} = TranscriptEntry.new(%{entry_name: recorded["name"], text: 42})
   end
 end

@@ -11,4 +11,5 @@ defmodule Jido.Connect.Google.Meet.Client do
   defdelegate get_recording(params, access_token), to: Recordings
   defdelegate list_transcripts(params, access_token), to: Transcripts
   defdelegate get_transcript(params, access_token), to: Transcripts
+  defdelegate list_transcript_entries(params, access_token), to: Transcripts
 end

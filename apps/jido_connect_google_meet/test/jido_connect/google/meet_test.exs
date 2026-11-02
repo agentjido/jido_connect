@@ -4,6 +4,7 @@ defmodule Jido.Connect.Google.MeetTest do
   alias Jido.Connect
   alias Jido.Connect.Google.Meet
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   @meet_readonly_scope "https://www.googleapis.com/auth/meetings.space.readonly"
   @meet_created_scope "https://www.googleapis.com/auth/meetings.space.created"
@@ -16,7 +17,8 @@ defmodule Jido.Connect.Google.MeetTest do
     Jido.Connect.Google.Meet.Actions.ListRecordings,
     Jido.Connect.Google.Meet.Actions.GetRecording,
     Jido.Connect.Google.Meet.Actions.ListTranscripts,
-    Jido.Connect.Google.Meet.Actions.GetTranscript
+    Jido.Connect.Google.Meet.Actions.GetTranscript,
+    Jido.Connect.Google.Meet.Actions.ListTranscriptEntries
   ]
 
   @meet_dsl_fragments [
@@ -128,6 +130,15 @@ defmodule Jido.Connect.Google.MeetTest do
          document_id: "doc-1"
        })}
     end
+
+    def list_transcript_entries(
+          %{transcript_name: "conferenceRecords/abc/transcripts/def", page_size: 10},
+          "token"
+        ) do
+      Meet.Client.Response.handle_transcript_entry_list_response(
+        {:ok, %{status: 200, body: LiveSmoke.fixture!(:google_meet, "transcript_entries")}}
+      )
+    end
   end
 
   test "declares Google Meet provider metadata" do
@@ -148,7 +159,8 @@ defmodule Jido.Connect.Google.MeetTest do
              "google.meet.recording.list",
              "google.meet.recording.get",
              "google.meet.transcript.list",
-             "google.meet.transcript.get"
+             "google.meet.transcript.get",
+             "google.meet.transcript.entry.list"
            ]
 
     assert spec.triggers == []
@@ -344,6 +356,79 @@ defmodule Jido.Connect.Google.MeetTest do
                context: context,
                credential_lease: lease
              )
+  end
+
+  test "invokes list transcript entries through injected client and lease" do
+    recorded = LiveSmoke.fixture!(:google_meet, "transcript_entries")
+    [recorded_entry] = recorded["transcriptEntries"]
+
+    for scope <- [@meet_readonly_scope, @meet_created_scope] do
+      {context, lease} = context_and_lease(scopes: [scope])
+
+      assert {:ok, %{transcript_entries: [entry], next_page_token: next_page_token}} =
+               Connect.invoke(
+                 Meet.integration(),
+                 "google.meet.transcript.entry.list",
+                 %{transcript_name: "conferenceRecords/abc/transcripts/def"},
+                 context: context,
+                 credential_lease: lease
+               )
+
+      refute is_struct(entry)
+      assert next_page_token == recorded["nextPageToken"]
+
+      assert %{
+               entry_name: entry_name,
+               participant: participant,
+               text: text,
+               language_code: language_code,
+               start_time: start_time,
+               end_time: end_time
+             } = entry
+
+      assert {entry_name, participant, text} ==
+               {recorded_entry["name"], recorded_entry["participant"], recorded_entry["text"]}
+
+      assert {language_code, start_time, end_time} ==
+               {recorded_entry["languageCode"], recorded_entry["startTime"],
+                recorded_entry["endTime"]}
+    end
+  end
+
+  test "rejects list transcript entries without a Meet scope" do
+    {context, lease} = context_and_lease(scopes: ["openid", "email", "profile"])
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: [@meet_readonly_scope]
+            }} =
+             Connect.invoke(
+               Meet.integration(),
+               "google.meet.transcript.entry.list",
+               %{transcript_name: "conferenceRecords/abc/transcripts/def"},
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "rejects list transcript entries with a blank transcript name" do
+    {context, lease} = context_and_lease(scopes: [@meet_readonly_scope])
+
+    for transcript_name <- ["", "   "] do
+      assert {:error,
+              %Connect.Error.ValidationError{
+                reason: :invalid_artifact_request,
+                details: %{field: :transcript_name}
+              }} =
+               Connect.invoke(
+                 Meet.integration(),
+                 "google.meet.transcript.entry.list",
+                 %{transcript_name: transcript_name},
+                 context: context,
+                 credential_lease: lease
+               )
+    end
   end
 
   defp context_and_lease(opts) do

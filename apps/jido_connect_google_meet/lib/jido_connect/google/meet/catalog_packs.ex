@@ -26,13 +26,18 @@ defmodule Jido.Connect.Google.Meet.CatalogPacks do
     "google.meet.transcript.get"
   ]
 
+  @transcript_reader_tools @reader_tools ++
+                             [
+                               "google.meet.transcript.entry.list"
+                             ]
+
   @scheduler_tools @reader_tools ++
                      [
                        "google.meet.space.create"
                      ]
 
   @doc "Returns all built-in Google Meet catalog packs."
-  def all, do: [reader(), scheduler()]
+  def all, do: [reader(), transcript_reader(), scheduler()]
 
   @doc "Read-only Meet metadata pack for spaces, conferences, recordings, and transcripts."
   def reader do
@@ -43,6 +48,19 @@ defmodule Jido.Connect.Google.Meet.CatalogPacks do
         "Read Meet space, conference record, recording, and transcript metadata without mutation tools.",
       filters: %{provider: :google_meet},
       allowed_tools: @reader_tools,
+      metadata: metadata(:read)
+    })
+  end
+
+  @doc "Opt-in Meet pack with the metadata reads plus transcript entry text."
+  def transcript_reader do
+    Pack.new!(%{
+      id: :google_meet_transcript_reader,
+      label: "Google Meet transcript reader",
+      description:
+        "Read Meet metadata and transcript text entry by entry with participant, language, and times.",
+      filters: %{provider: :google_meet},
+      allowed_tools: @transcript_reader_tools,
       metadata: metadata(:read)
     })
   end

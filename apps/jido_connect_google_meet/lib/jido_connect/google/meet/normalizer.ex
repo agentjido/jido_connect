@@ -2,7 +2,7 @@ defmodule Jido.Connect.Google.Meet.Normalizer do
   @moduledoc "Normalizes Google Meet API payloads into stable package structs."
 
   alias Jido.Connect.Data
-  alias Jido.Connect.Google.Meet.{ConferenceRecord, Recording, Space, Transcript}
+  alias Jido.Connect.Google.Meet.{ConferenceRecord, Recording, Space, Transcript, TranscriptEntry}
 
   @doc "Normalizes a Google Meet space payload."
   @spec space(map()) :: {:ok, Space.t()} | {:error, term()}
@@ -77,4 +77,21 @@ defmodule Jido.Connect.Google.Meet.Normalizer do
   end
 
   def transcript(_payload), do: {:error, :invalid_transcript_payload}
+
+  @doc "Normalizes a Google Meet transcript entry payload."
+  @spec transcript_entry(map()) :: {:ok, TranscriptEntry.t()} | {:error, term()}
+  def transcript_entry(payload) when is_map(payload) do
+    %{
+      entry_name: Data.get(payload, "name"),
+      participant: Data.get(payload, "participant"),
+      text: Data.get(payload, "text"),
+      language_code: Data.get(payload, "languageCode"),
+      start_time: Data.get(payload, "startTime"),
+      end_time: Data.get(payload, "endTime")
+    }
+    |> Data.compact()
+    |> TranscriptEntry.new()
+  end
+
+  def transcript_entry(_payload), do: {:error, :invalid_transcript_entry_payload}
 end

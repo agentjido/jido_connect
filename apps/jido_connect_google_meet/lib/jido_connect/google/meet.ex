@@ -29,6 +29,10 @@ defmodule Jido.Connect.Google.Meet do
   defdelegate reader_pack, to: Jido.Connect.Google.Meet.CatalogPacks, as: :reader
   defdelegate scheduler_pack, to: Jido.Connect.Google.Meet.CatalogPacks, as: :scheduler
 
+  defdelegate transcript_reader_pack,
+    to: Jido.Connect.Google.Meet.CatalogPacks,
+    as: :transcript_reader
+
   auth do
     oauth2 :user do
       default?(true)

@@ -67,5 +67,41 @@ defmodule Jido.Connect.Google.Meet.Actions.Transcripts do
         field(:transcript, :map)
       end
     end
+
+    action :list_transcript_entries do
+      id("google.meet.transcript.entry.list")
+      resource(:transcript_entry)
+      verb(:list)
+      data_classification(:workspace_content)
+      label("List Meet transcript entries")
+
+      description(
+        "List Google Meet transcript text entry by entry with participant, language, and times."
+      )
+
+      handler(Jido.Connect.Google.Meet.Handlers.Actions.ListTranscriptEntries)
+      effect(:read)
+
+      access do
+        auth(:user)
+        scopes([@readonly_scope], resolver: @scope_resolver)
+      end
+
+      input do
+        field(:transcript_name, :string,
+          required?: true,
+          example: "conferenceRecords/abc/transcripts/def"
+        )
+
+        field(:page_size, :integer, default: 10)
+        field(:page_token, :string)
+        field(:fields, :string)
+      end
+
+      output do
+        field(:transcript_entries, {:array, :map})
+        field(:next_page_token, :string)
+      end
+    end
   end
 end

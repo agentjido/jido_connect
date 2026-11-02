@@ -4,6 +4,8 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
   alias Jido.Connect
   alias Jido.Connect.Catalog
   alias Jido.Connect.Google.Meet
+  alias Jido.Connect.Google.TestSupport.ConnectorContracts
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   @readonly_scope "https://www.googleapis.com/auth/meetings.space.readonly"
   @created_scope "https://www.googleapis.com/auth/meetings.space.created"
@@ -18,7 +20,26 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
          config: %{"accessType" => "OPEN"}
        })}
     end
+
+    def list_transcript_entries(
+          %{transcript_name: "conferenceRecords/abc/transcripts/def"},
+          "token"
+        ) do
+      Meet.Client.Response.handle_transcript_entry_list_response(
+        {:ok, %{status: 200, body: LiveSmoke.fixture!(:google_meet, "transcript_entries")}}
+      )
+    end
   end
+
+  @metadata_reads [
+    "google.meet.space.get",
+    "google.meet.conference_record.list",
+    "google.meet.conference_record.get",
+    "google.meet.recording.list",
+    "google.meet.recording.get",
+    "google.meet.transcript.list",
+    "google.meet.transcript.get"
+  ]
 
   test "reader pack exposes action-first metadata reads only" do
     results =
@@ -38,7 +59,10 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
     assert "google.meet.transcript.list" in ids
     assert "google.meet.transcript.get" in ids
     refute "google.meet.space.create" in ids
+    refute "google.meet.transcript.entry.list" in ids
     refute "google.meet.conference.started" in ids
+
+    assert Enum.sort(Meet.reader_pack().allowed_tools) == Enum.sort(@metadata_reads)
 
     pack = Meet.reader_pack()
     assert pack.metadata.risk == :read
@@ -51,6 +75,52 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
                packs: Meet.catalog_packs(),
                pack: :google_meet_reader
              )
+  end
+
+  test "transcript reader pack adds transcript entries to the metadata reads" do
+    results =
+      Catalog.search_tools("meet",
+        modules: [Meet],
+        packs: Meet.catalog_packs(),
+        pack: :google_meet_transcript_reader
+      )
+
+    ids = Enum.map(results, & &1.tool.id)
+
+    for tool_id <- @metadata_reads do
+      assert tool_id in ids
+    end
+
+    assert "google.meet.transcript.entry.list" in ids
+    refute "google.meet.space.create" in ids
+
+    assert {:ok, descriptor} =
+             Catalog.describe_tool("google.meet.transcript.entry.list",
+               modules: [Meet],
+               packs: Meet.catalog_packs(),
+               pack: :google_meet_transcript_reader
+             )
+
+    assert descriptor.tool.id == "google.meet.transcript.entry.list"
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.describe_tool("google.meet.transcript.entry.list",
+               modules: [Meet],
+               packs: Meet.catalog_packs(),
+               pack: :google_meet_reader
+             )
+
+    pack = Meet.transcript_reader_pack()
+    assert pack.id == :google_meet_transcript_reader
+    assert pack.metadata.risk == :read
+    assert pack.metadata.triggers == :later
+    assert pack in Meet.catalog_packs()
+
+    ConnectorContracts.assert_google_naming_and_catalog_conventions(Meet,
+      id_prefix: "google.meet.",
+      pack_id_prefix: "google_meet_",
+      module_namespace: Jido.Connect.Google.Meet
+    )
   end
 
   test "scheduler pack adds meeting-space creation without exposing triggers" do
@@ -96,6 +166,29 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
              Catalog.call_tool(
                "google.meet.space.create",
                %{access_type: "OPEN"},
+               modules: [Meet],
+               packs: Meet.catalog_packs(),
+               pack: :google_meet_reader,
+               context: context,
+               credential_lease: lease
+             )
+  end
+
+  test "only the transcript reader pack calls the transcript entry list" do
+    {context, lease} = context_and_lease(scopes: [@readonly_scope])
+    input = %{transcript_name: "conferenceRecords/abc/transcripts/def"}
+
+    assert {:ok, %{transcript_entries: [_entry]}} =
+             Catalog.call_tool("google.meet.transcript.entry.list", input,
+               modules: [Meet],
+               packs: Meet.catalog_packs(),
+               pack: :google_meet_transcript_reader,
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+             Catalog.call_tool("google.meet.transcript.entry.list", input,
                modules: [Meet],
                packs: Meet.catalog_packs(),
                pack: :google_meet_reader,

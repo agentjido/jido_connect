@@ -1,7 +1,18 @@
 defmodule Jido.Connect.Google.Meet.NormalizerTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Google.Meet.{ConferenceRecord, Normalizer, Recording, Space, Transcript}
+  alias Jido.Connect.Google.Meet.{
+    ConferenceRecord,
+    Normalizer,
+    Recording,
+    Space,
+    Transcript,
+    TranscriptEntry
+  }
+
+  alias Jido.Connect.TestSupport.LiveSmoke
+
+  @unicode_text "Grüße aus Köln 👋\nZweite Zeile: 東京, café\r\n— Ende"
 
   test "normalizes Meet space payloads" do
     assert {:ok,
@@ -103,5 +114,47 @@ defmodule Jido.Connect.Google.Meet.NormalizerTest do
   test "rejects malformed Meet transcript payloads" do
     assert {:error, _error} = Normalizer.transcript(%{"state" => "FILE_GENERATED"})
     assert {:error, :invalid_transcript_payload} = Normalizer.transcript(nil)
+  end
+
+  test "normalizes recorded Meet transcript entries with Unicode text unchanged" do
+    recorded_entry = recorded_entry() |> Map.put("text", @unicode_text)
+
+    assert {:ok, %TranscriptEntry{} = entry} = Normalizer.transcript_entry(recorded_entry)
+
+    assert entry.entry_name == recorded_entry["name"]
+    assert entry.participant == recorded_entry["participant"]
+    assert entry.text == @unicode_text
+    assert entry.language_code == recorded_entry["languageCode"]
+    assert entry.start_time == recorded_entry["startTime"]
+    assert entry.end_time == recorded_entry["endTime"]
+    assert entry.metadata == %{}
+  end
+
+  test "keeps absent optional transcript entry fields absent" do
+    recorded_entry =
+      Map.drop(recorded_entry(), ["participant", "text", "languageCode", "startTime", "endTime"])
+
+    assert {:ok, %TranscriptEntry{} = entry} = Normalizer.transcript_entry(recorded_entry)
+
+    assert entry.entry_name == recorded_entry["name"]
+    assert entry.participant == nil
+    assert entry.text == nil
+    assert entry.language_code == nil
+    assert entry.start_time == nil
+    assert entry.end_time == nil
+  end
+
+  test "rejects malformed Meet transcript entry payloads" do
+    assert {:error, _error} = Normalizer.transcript_entry(Map.delete(recorded_entry(), "name"))
+
+    assert {:error, _error} =
+             Normalizer.transcript_entry(Map.put(recorded_entry(), "text", %{"value" => "x"}))
+
+    assert {:error, :invalid_transcript_entry_payload} = Normalizer.transcript_entry(nil)
+  end
+
+  defp recorded_entry do
+    [entry] = LiveSmoke.fixture!(:google_meet, "transcript_entries")["transcriptEntries"]
+    entry
   end
 end
