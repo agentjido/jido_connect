@@ -190,8 +190,8 @@ defmodule Jido.Connect.JiraTest do
 
     assert issue.key == "PROJ-123"
     assert issue.summary == "Test issue"
-    refute Map.has_key?(issue, :id)
-    refute Map.has_key?(issue, :url)
+    assert issue.id == "10001"
+    assert issue.url == "https://example.atlassian.net/rest/api/3/issue/10001"
     refute Map.has_key?(issue, :issue_type)
   end
 
@@ -493,14 +493,20 @@ defmodule Jido.Connect.JiraTest do
 
     assert Enum.map(projection.output, & &1.name) == [
              :key,
+             :id,
+             :url,
              :summary,
+             :description,
+             :description_unsupported_nodes,
              :status,
              :project,
              :assignee,
              :priority,
              :labels,
+             :due_date,
              :created_at,
-             :updated_at
+             :updated_at,
+             :missing_fields
            ]
 
     assert projection.risk == :read

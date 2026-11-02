@@ -20,6 +20,27 @@
   the `jira.comment.changed` signal field `comment_body_unsupported_nodes`.
   Plain-string bodies pass through. Malformed ADF now fails issue reads,
   searches and comment events explicitly instead of yielding partial text.
+- Move `jira.issue.search` in place to Jira's enhanced JQL search,
+  `POST /rest/api/3/search/jql`, because `POST /rest/api/3/search` answers
+  `410 Gone`. Add `next_page_token` as input and output; `is_last` reports the
+  last page. Default fields add `description`, `project` and `duedate`; a
+  field list that names only `id` also requests `key`. Deprecated for one
+  release: `start_at` accepts only `0`, and the outputs `total` and
+  `start_at` stay declared but are never returned. `max_results`
+  now reports the page size sent. Malformed pages and failed later pages
+  return errors instead of empty results.
+- Add `id`, `url`, `description`, `description_unsupported_nodes`,
+  `due_date` and `missing_fields` to the `jira.issue.get` output.
+  `missing_fields`, also on `Issue` and on each search result, lists requested
+  field keys that Jira left out, apart from fields it returned as `null`.
+  `*all` and `*navigable` count as the issue fields the connector reads, and a
+  list that only excludes fields starts from Jira's selection for it. Custom
+  fields behind a selector and other `*` selectors are not checked.
+  `issue_key` accepts a numeric issue ID and is sent as one encoded path
+  segment. `jira.issue.get`, `jira.issue.transition.list` and
+  `jira.issue.delete` reject the keys `.` and `..` before a request.
+- Return the nested status, assignee and reporter of issue reads as plain
+  maps, which the `:map` outputs of the generated actions accept.
 
 ## 0.1.0
 

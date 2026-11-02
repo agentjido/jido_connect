@@ -4,6 +4,7 @@ defmodule Jido.Connect.Jira.RichTextTest do
   alias Jido.Connect.{Error, WebhookDelivery}
   alias Jido.Connect.Jira.Client.{Normalizer, Response}
   alias Jido.Connect.Jira.Webhook
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   # An ADF document composed of examples from Atlassian's document format
   # reference, in a `doc` root as on
@@ -166,7 +167,7 @@ defmodule Jido.Connect.Jira.RichTextTest do
       for {handler, body, message} <- [
             {&Response.handle_issue_response/1, issue, "Jira issue response was invalid"},
             {&Response.handle_issue_search_response/1,
-             %{"issues" => [fixture!("issue_common.json"), issue]},
+             search_page([fixture!("issue_common.json"), issue]),
              "Jira issue search response was invalid"}
           ] do
         assert {:error, %Error.ProviderError{} = error} =
@@ -190,7 +191,7 @@ defmodule Jido.Connect.Jira.RichTextTest do
                  {:ok,
                   %{
                     status: 200,
-                    body: %{"issues" => [fixture!("issue_common.json"), with_description(@adf)]}
+                    body: search_page([fixture!("issue_common.json"), with_description(@adf)])
                   }}
                )
     end
@@ -279,6 +280,11 @@ defmodule Jido.Connect.Jira.RichTextTest do
     do: put_in(fixture!("issue_common.json"), ["fields", "description"], description)
 
   defp with_body(body), do: Map.put(fixture!("comment_common.json"), "body", body)
+
+  # The recorded last page of an enhanced search, `issue_context.6`, with
+  # other issues in it.
+  defp search_page(issues),
+    do: Map.put(LiveSmoke.fixture!(:jira, "issue_context.6"), "issues", issues)
 
   defp sign(body, secret) do
     "sha256=" <> (:hmac |> :crypto.mac(:sha256, secret, body) |> Base.encode16(case: :lower))

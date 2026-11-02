@@ -4,58 +4,67 @@ defmodule Jido.Connect.Jira.Client.Response do
   alias Jido.Connect.{Data, Error}
   alias Jido.Connect.Jira.Client.{Normalizer, Transport}
 
+  @issue_invalid "Jira issue response was invalid"
+  @search_invalid "Jira issue search response was invalid"
+
   @doc """
   Handles a single Jira issue get response.
 
-  A description that is not valid ADF fails the read with an
-  `:invalid_response` error whose details name the field and the projection
-  reason, without the issue content.
+  `requested_fields` is the field list of the request, `["*all"]` when it
+  named none; see `Normalizer.issue/2` for `missing_fields`. A description
+  that is not valid ADF fails the read with an `:invalid_response` error whose
+  details name the field and the projection reason, without the issue content.
   """
-  def handle_issue_response({:ok, %{status: status, body: body}})
+  def handle_issue_response(response, requested_fields \\ nil)
+
+  def handle_issue_response({:ok, %{status: status, body: body}}, requested_fields)
       when status in 200..299 and is_map(body) do
-    read_issue(body, "Jira issue response was invalid")
-  end
-
-  def handle_issue_response({:ok, %{status: status, body: body}})
-      when status in 200..299 do
-    Transport.invalid_success_response("Jira issue response was invalid", body)
-  end
-
-  def handle_issue_response(response), do: Transport.handle_error_response(response)
-
-  @doc """
-  Handles a Jira issue search (JQL) response.
-
-  An issue whose description is not valid ADF fails the whole page, as in
-  `handle_issue_response/1`.
-  """
-  def handle_issue_search_response({:ok, %{status: status, body: body}})
-      when status in 200..299 and is_map(body) do
-    with issues when is_list(issues) <- Data.get(body, "issues"),
-         {:ok, issues} <- read_issues(issues, "Jira issue search response was invalid") do
-      {:ok,
-       %{
-         issues: issues,
-         total: Data.get(body, "total"),
-         start_at: Data.get(body, "startAt"),
-         max_results: Data.get(body, "maxResults"),
-         is_last: Data.get(body, "isLast")
-       }}
-    else
-      {:error, _error} = error ->
-        error
-
-      _other ->
-        Transport.invalid_success_response("Jira issue search response was invalid", body)
+    case read_issue(body, requested_fields) do
+      :invalid -> {:ok, nil}
+      result -> result
     end
   end
 
-  def handle_issue_search_response({:ok, %{status: status, body: body}})
+  def handle_issue_response({:ok, %{status: status, body: body}}, _requested_fields)
       when status in 200..299 do
-    Transport.invalid_success_response("Jira issue search response was invalid", body)
+    Transport.invalid_success_response(@issue_invalid, body)
   end
 
-  def handle_issue_search_response(response), do: Transport.handle_error_response(response)
+  def handle_issue_response(response, _requested_fields),
+    do: Transport.handle_error_response(response)
+
+  @doc """
+  Handles one page of a Jira enhanced JQL search (`POST /rest/api/3/search/jql`).
+
+  Returns `issues`, `next_page_token` and `is_last`. A page can be empty while
+  `is_last` is `false`. `next_page_token` is `nil` on the last page. The
+  result never carries `total` or `start_at`, which enhanced search does not
+  return.
+
+  A page fails with an `:invalid_response` error whose details name the
+  offending key, without page content, when `issues` is not a list, `isLast`
+  is not a boolean, `nextPageToken` is neither absent nor a non-empty string,
+  a non-final page has no token, or an issue does not normalize. An issue
+  whose description is not valid ADF fails the page, as in
+  `handle_issue_response/2`.
+  """
+  def handle_issue_search_response(response, requested_fields \\ nil)
+
+  def handle_issue_search_response({:ok, %{status: status, body: body}}, requested_fields)
+      when status in 200..299 and is_map(body) do
+    with {:ok, page} <- search_page(body),
+         {:ok, issues} <- read_issues(page.issues, requested_fields, body) do
+      {:ok, %{page | issues: issues}}
+    end
+  end
+
+  def handle_issue_search_response({:ok, %{status: status, body: body}}, _requested_fields)
+      when status in 200..299 do
+    Transport.invalid_success_response(@search_invalid, body)
+  end
+
+  def handle_issue_search_response(response, _requested_fields),
+    do: Transport.handle_error_response(response)
 
   @doc "Handles a Jira issue create response."
   def handle_issue_create_response({:ok, %{status: status, body: body}})
@@ -188,10 +197,11 @@ defmodule Jido.Connect.Jira.Client.Response do
   # Private helpers
   # ---------------------------------------------------------------------------
 
-  # Issue reads keep the legacy `nil` for payloads the struct rejects, but a
-  # description that is not valid ADF fails explicitly.
-  defp read_issue(payload, message) do
-    case Normalizer.issue(payload) do
+  # A description that is not valid ADF fails explicitly. Payloads the struct
+  # rejects return `:invalid`: issue reads keep the legacy `nil` for them,
+  # search pages fail.
+  defp read_issue(payload, requested_fields, message \\ @issue_invalid) do
+    case Normalizer.issue(payload, requested_fields: requested_fields) do
       {:ok, issue} ->
         {:ok, Normalizer.issue_map(issue)}
 
@@ -205,22 +215,61 @@ defmodule Jido.Connect.Jira.Client.Response do
          )}
 
       {:error, _invalid} ->
-        {:ok, nil}
+        :invalid
     end
   end
 
-  defp read_issues(payloads, message) do
+  defp read_issues(payloads, requested_fields, body) do
     payloads
     |> Enum.reduce_while({:ok, []}, fn payload, {:ok, issues} ->
-      case read_issue(payload, message) do
+      case read_issue(payload, requested_fields, @search_invalid) do
         {:ok, issue} -> {:cont, {:ok, [issue | issues]}}
         {:error, _error} = error -> {:halt, error}
+        :invalid -> {:halt, invalid_search_page(body, "issues")}
       end
     end)
     |> case do
       {:ok, issues} -> {:ok, Enum.reverse(issues)}
       {:error, _error} = error -> error
     end
+  end
+
+  # Checks the page envelope of enhanced search before any issue is read.
+  defp search_page(body) do
+    issues = Data.get(body, "issues")
+    is_last = Data.get(body, "isLast")
+    token = Data.get(body, "nextPageToken")
+
+    cond do
+      not is_list(issues) ->
+        invalid_search_page(body, "issues")
+
+      not is_boolean(is_last) ->
+        invalid_search_page(body, "isLast")
+
+      not (is_nil(token) or (is_binary(token) and token != "")) ->
+        invalid_search_page(body, "nextPageToken")
+
+      is_last ->
+        {:ok, %{issues: issues, next_page_token: nil, is_last: true}}
+
+      is_nil(token) ->
+        invalid_search_page(body, "nextPageToken")
+
+      true ->
+        {:ok, %{issues: issues, next_page_token: token, is_last: false}}
+    end
+  end
+
+  # `Error.provider/2` keeps only a value-free summary of `body`.
+  defp invalid_search_page(body, field) do
+    {:error,
+     Error.provider(@search_invalid,
+       provider: :jira,
+       reason: :invalid_response,
+       delivery: :response_received,
+       details: %{field: field, body: body}
+     )}
   end
 
   defp normalize_project_map(payload) do

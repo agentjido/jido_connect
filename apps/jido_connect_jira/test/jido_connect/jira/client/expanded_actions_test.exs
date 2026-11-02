@@ -289,6 +289,16 @@ defmodule Jido.Connect.Jira.Client.ExpandedActionsTest do
              Client.delete_issue("PROJ-1", request)
   end
 
+  test "rejects an issue key that a path would resolve as a dot segment", %{request: request} do
+    for key <- [".", ".."] do
+      assert {:error, %Error.ValidationError{reason: :invalid_issue_key, subject: :issue_key}} =
+               Client.list_issue_transitions(key, request)
+
+      assert {:error, %Error.ValidationError{reason: :invalid_issue_key, subject: :issue_key}} =
+               Client.delete_issue(key, request)
+    end
+  end
+
   test "uses Jira Plans endpoints, cursor paging, and JSON Patch", %{request: request} do
     Req.Test.expect(__MODULE__, fn conn ->
       assert conn.method == "GET"

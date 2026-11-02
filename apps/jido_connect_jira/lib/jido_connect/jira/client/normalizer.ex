@@ -2,6 +2,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   @moduledoc "Jira Cloud REST response normalization helpers."
 
   alias Jido.Connect.Data
+  alias Jido.Connect.Jira.Client.Normalizer.IssueFields
 
   alias Jido.Connect.Jira.{
     ADFText,
@@ -26,9 +27,21 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   `description_unsupported_nodes` lists the ADF node and mark types skipped
   while rendering it. A malformed ADF description returns the projection's
   `Jido.Connect.Error.ValidationError`.
+
+  Pass the request's field list as `requested_fields:` to fill
+  `missing_fields` with the requested keys that the payload leaves out; use
+  `["*all"]` when the request named no fields. Without the option the list
+  stays empty. `*all` and `*navigable` count as the fields this function
+  reads, `timetracking` only for `*all`; other fields behind them and other
+  `*` selectors are not checked. A list that names no field, such as
+  `["-description"]`, starts from `*all`, as an issue read does; pass
+  `["*navigable" | list]` for enhanced search, which starts it from
+  `*navigable`.
   """
-  @spec issue(map()) :: {:ok, Issue.t()} | {:error, term()}
-  def issue(payload) when is_map(payload) do
+  @spec issue(map(), keyword()) :: {:ok, Issue.t()} | {:error, term()}
+  def issue(payload, opts \\ [])
+
+  def issue(payload, opts) when is_map(payload) and is_list(opts) do
     fields = Data.get(payload, "fields") || %{}
 
     with {:ok, description} <- ADFText.project(Data.get(fields, "description")) do
@@ -55,11 +68,12 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
         updated_at: Data.get(fields, "updated")
       }
       |> Data.compact()
+      |> Map.put(:missing_fields, IssueFields.missing(fields, opts[:requested_fields]))
       |> Issue.new()
     end
   end
 
-  def issue(_payload), do: {:error, :invalid_issue_payload}
+  def issue(_payload, _opts), do: {:error, :invalid_issue_payload}
 
   @doc """
   Normalizes a Jira issue into a consistent map shape (legacy helper).
@@ -76,9 +90,25 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
 
   def normalize_issue(_payload), do: nil
 
-  @doc "Returns the map shape of a normalized issue, without metadata."
+  @doc """
+  Returns the map shape of a normalized issue, without metadata.
+
+  The nested status, assignee and reporter become plain maps too, as the
+  `:map` outputs of the generated actions require.
+  """
   @spec issue_map(Issue.t()) :: map()
-  def issue_map(%Issue{} = issue), do: issue |> Map.from_struct() |> Map.drop([:metadata])
+  def issue_map(%Issue{} = issue) do
+    issue
+    |> plain_map()
+    |> Map.update!(:status, &plain_map/1)
+    |> Map.update!(:assignee, &plain_map/1)
+    |> Map.update!(:reporter, &plain_map/1)
+  end
+
+  defp plain_map(nil), do: nil
+
+  defp plain_map(struct) when is_struct(struct),
+    do: struct |> Map.from_struct() |> Map.drop([:metadata])
 
   # ---------------------------------------------------------------------------
   # Project
@@ -252,7 +282,9 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   # Private helpers
   # ---------------------------------------------------------------------------
 
-  defp normalize_status(nil), do: nil
+  # Each nested helper normalizes an object and passes `nil` or any other
+  # value through unchanged, so the struct rejects a value that is not an
+  # object instead of the helper raising.
 
   defp normalize_status(status) when is_map(status) do
     case status(status) do
@@ -261,7 +293,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     end
   end
 
-  defp normalize_user(nil), do: nil
+  defp normalize_status(other), do: other
 
   defp normalize_user(user) when is_map(user) do
     case user(user) do
@@ -270,7 +302,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     end
   end
 
-  defp normalize_project_brief(nil), do: nil
+  defp normalize_user(other), do: other
 
   defp normalize_project_brief(project) when is_map(project) do
     %{
@@ -281,7 +313,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     |> Data.compact()
   end
 
-  defp normalize_issue_type(nil), do: nil
+  defp normalize_project_brief(other), do: other
 
   defp normalize_issue_type(type) when is_map(type) do
     %{
@@ -292,7 +324,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     |> Data.compact()
   end
 
-  defp normalize_priority(nil), do: nil
+  defp normalize_issue_type(other), do: other
 
   defp normalize_priority(priority) when is_map(priority) do
     %{
@@ -301,4 +333,6 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     }
     |> Data.compact()
   end
+
+  defp normalize_priority(other), do: other
 end

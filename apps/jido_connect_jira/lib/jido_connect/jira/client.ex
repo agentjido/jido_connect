@@ -56,33 +56,34 @@ defmodule Jido.Connect.Jira.Client do
   defdelegate archive_plan(id, request), to: Jido.Connect.Jira.Client.Plans, as: :archive
   defdelegate trash_plan(id, request), to: Jido.Connect.Jira.Client.Plans, as: :trash
 
-  @doc "Fetches a single Jira issue by key."
+  @doc """
+  Fetches a single Jira issue by key, such as `PROJ-123`, or numeric ID, such
+  as `10001`.
+
+  `:fields` selects the Jira fields to return; without it Jira returns all
+  fields. The result lists requested fields that Jira left out in
+  `missing_fields`.
+
+  The identifier is percent-encoded as one path segment. An empty identifier,
+  `.` and `..` fail with a `Jido.Connect.Error.ValidationError` before a
+  request is sent, because a URL path resolves them as dot segments.
+  """
   def get_issue(issue_key, %Request{} = request, opts \\ []) when is_binary(issue_key) do
     fields = Keyword.get(opts, :fields)
     params = if fields, do: %{fields: Enum.join(fields, ",")}, else: %{}
 
-    request
-    |> Transport.request()
-    |> Req.get(url: Request.url(request, "/rest/api/3/issue/#{issue_key}"), params: params)
-    |> Response.handle_issue_response()
+    with {:ok, segment} <- Request.issue_segment(issue_key) do
+      request
+      |> Transport.request()
+      |> Req.get(url: Request.url(request, "/rest/api/3/issue/" <> segment), params: params)
+      |> Response.handle_issue_response(fields || ["*all"])
+    end
   end
 
-  @doc "Searches Jira issues using JQL."
-  def search_issues(jql, %Request{} = request, opts \\ []) when is_binary(jql) do
-    fields = Keyword.get(opts, :fields)
-
-    body = %{
-      jql: jql,
-      startAt: Keyword.get(opts, :start_at, 0),
-      maxResults: Keyword.get(opts, :max_results, 50),
-      fields: fields || ["summary", "status", "assignee", "updated"]
-    }
-
-    request
-    |> Transport.request()
-    |> Req.post(url: Request.url(request, "/rest/api/3/search"), json: body)
-    |> Response.handle_issue_search_response()
-  end
+  @doc "Searches Jira issues with JQL; see `Jido.Connect.Jira.Client.IssueSearch`."
+  defdelegate search_issues(jql, request, opts \\ []),
+    to: Jido.Connect.Jira.Client.IssueSearch,
+    as: :search
 
   @doc "Creates a new Jira issue."
   def create_issue(attrs, %Request{} = request) when is_map(attrs) do

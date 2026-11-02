@@ -4,14 +4,27 @@ defmodule Jido.Connect.Jira.Client.IssueLifecycle do
   alias Jido.Connect.Jira.Client.{Normalizer, Request, Transport}
 
   def list_transitions(issue_key, %Request{} = request) when is_binary(issue_key) do
-    response =
+    with {:ok, segment} <- Request.issue_segment(issue_key) do
       request
       |> Transport.request(req_options: [retry: false])
       |> Req.get(
-        url: Request.url(request, "/rest/api/3/issue/#{path_segment(issue_key)}/transitions"),
+        url: Request.url(request, "/rest/api/3/issue/#{segment}/transitions"),
         params: %{expand: "transitions.fields"}
       )
+      |> handle_transitions_response(issue_key)
+    end
+  end
 
+  def delete(issue_key, %Request{} = request) when is_binary(issue_key) do
+    with {:ok, segment} <- Request.issue_segment(issue_key) do
+      request
+      |> Transport.request(req_options: [retry: false])
+      |> Req.delete(url: Request.url(request, "/rest/api/3/issue/#{segment}"))
+      |> handle_delete_response(issue_key)
+    end
+  end
+
+  defp handle_transitions_response(response, issue_key) do
     case response do
       {:ok, %{status: status, body: body}} when status in 200..299 and is_map(body) ->
         normalize_transitions(body, issue_key)
@@ -29,12 +42,7 @@ defmodule Jido.Connect.Jira.Client.IssueLifecycle do
     end
   end
 
-  def delete(issue_key, %Request{} = request) when is_binary(issue_key) do
-    response =
-      request
-      |> Transport.request(req_options: [retry: false])
-      |> Req.delete(url: Request.url(request, "/rest/api/3/issue/#{path_segment(issue_key)}"))
-
+  defp handle_delete_response(response, issue_key) do
     case response do
       {:ok, %{status: status}} when status in 200..299 ->
         {:ok, %{issue_key: issue_key, deleted: true}}
@@ -81,6 +89,4 @@ defmodule Jido.Connect.Jira.Client.IssueLifecycle do
         )
     end
   end
-
-  defp path_segment(value), do: URI.encode(value, &URI.char_unreserved?/1)
 end

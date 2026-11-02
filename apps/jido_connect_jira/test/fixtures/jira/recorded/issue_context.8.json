@@ -1,0 +1,91 @@
+{
+  "body": {
+    "errorMessages": [
+      "The provided next page token is invalid or expired."
+    ],
+    "errors": {}
+  },
+  "headers": {
+    "atl-request-id": [
+      "127a87d8-727c-476a-aa8a-27150b87c7b4"
+    ],
+    "atl-traceid": [
+      "127a87d8727c476aaa8a27150b87c7b4"
+    ],
+    "cache-control": [
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json;charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 09:18:45 GMT"
+    ],
+    "nel": [
+      "{\"failure_fraction\": 0.01, \"include_subdomains\": true, \"max_age\": 600, \"report_to\": \"endpoint-1\"}"
+    ],
+    "ratelimit": [
+      "\"jira-burst-based\";r=199;t=1"
+    ],
+    "ratelimit-policy": [
+      "\"jira-burst-based\";q=100;w=1"
+    ],
+    "report-to": [
+      "{\"endpoints\": [{\"url\": \"https://dz8aopenkvv6s.cloudfront.net\"}], \"group\": \"endpoint-1\", \"include_subdomains\": true, \"max_age\": 600}"
+    ],
+    "server": [
+      "AtlassianEdge"
+    ],
+    "server-timing": [
+      "atl-edge;dur=51,atl-edge-internal;dur=17,atl-edge-upstream;dur=34,atl-edge-pop;desc=\"aws-eu-west-1\""
+    ],
+    "strict-transport-security": [
+      "max-age=63072000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "via": [
+      "1.1 5c14dc328191a14142654d833f772c6c.cloudfront.net (CloudFront)"
+    ],
+    "x-aaccountid": [
+      "account-1"
+    ],
+    "x-amz-cf-id": [
+      "84759IYBV9HJJ1DDlcd3yKJeBu1NGqRoSwqcuBve172URWTSE60Jfg=="
+    ],
+    "x-amz-cf-pop": [
+      "FRA56-P5"
+    ],
+    "x-arequestid": [
+      "7408b561ab122e1210e512ca7871dbb4"
+    ],
+    "x-cache": [
+      "Error from cloudfront"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-ratelimit-limit": [
+      "200"
+    ],
+    "x-ratelimit-remaining": [
+      "199"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/rest/api/3/search/jql"
+  },
+  "status": 400
+}

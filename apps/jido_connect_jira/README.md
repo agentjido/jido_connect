@@ -68,8 +68,8 @@ mutation actions are needed.
 
 | Action ID | Verb | Risk | Description |
 |---|---|---|---|
-| `jira.issue.get` | get | read | Fetch an issue by key |
-| `jira.issue.search` | search | read | Search issues with JQL |
+| `jira.issue.get` | get | read | Fetch an issue by key or numeric ID |
+| `jira.issue.search` | search | read | Search issues with JQL, one page per call |
 | `jira.issue.create` | create | write | Create a new issue |
 | `jira.issue.update` | update | write | Update issue fields |
 | `jira.issue.transition` | update | write | Transition issue status |
@@ -77,6 +77,51 @@ mutation actions are needed.
 | `jira.issue.delete` | delete | destructive | Permanently delete an issue |
 | `jira.issue.assign` | update | write | Assign issue to user |
 | `jira.issue.comment.create` | create | external_write | Add comment to issue |
+
+### Issue Reads and Search
+
+`jira.issue.get` calls `GET /rest/api/3/issue/{issueIdOrKey}`. The
+`issue_key` input takes a key such as `PROJ-123` or a numeric issue ID such
+as `10001`; the client sends it as one percent-encoded path segment. The
+output carries `id`, `key`, `url` (the API `self` URL), `project`,
+`assignee`, `status`, `priority`, `labels`, the plain-text `description` with
+`description_unsupported_nodes`, the date-only `due_date` and the
+timestamps. A field that Jira returns as `null` is absent from the output.
+`missing_fields` lists the requested Jira field keys, such as `parent` on a
+top-level issue or a field that the site's field configuration hides, that the
+response does not contain at all, so an empty field and an unavailable one
+stay apart.
+
+Without `fields`, a read requests `*all`. The selectors `*all` and
+`*navigable` count as the issue fields the connector reads: `summary`,
+`description`, `status`, `issuetype`, `project`, `assignee`, `reporter`,
+`priority`, `labels`, `components`, `fixVersions`, `duedate`, `resolution`,
+`created`, `updated` and, for `*all` only, `timetracking`, which Jira does not
+count as navigable. A list that only excludes fields, such as
+`-description`, starts from `*all` for `jira.issue.get` and from `*navigable`
+for `jira.issue.search`, as Jira does. Two limits remain: other fields that a
+selector brings, such as custom fields, are not checked, and other selectors
+starting with `*` are not resolved. Their absence never shows in
+`missing_fields`.
+
+`jira.issue.search` calls Jira's enhanced JQL search,
+`POST /rest/api/3/search/jql`, with `jql`, `fields`, `maxResults` and
+`nextPageToken`. The default fields are `summary`, `status`, `assignee`,
+`updated`, `description`, `project` and `duedate`. A field list that names
+only `id` is sent with `key` added, because Jira answers it with bare issue
+IDs and each result carries its key. Each call returns one page with
+`issues`, `next_page_token`, `is_last` and the page size sent as
+`max_results`. Pass `next_page_token` to the next call until `is_last` is
+`true`. Jira can return fewer issues than `max_results`, and a page can be
+empty while `is_last` is `false`, so only `is_last` marks the end. A page
+without an `issues` list or a boolean `isLast`, or a non-final page without a
+token, fails with an `:invalid_response` error instead of ending the search.
+
+Atlassian removed `POST /rest/api/3/search`, which now answers `410 Gone`, so
+the action changed in place. Deprecated for one release and removed in the
+next: the `start_at` input accepts only `0` and rejects any other value before
+a request is sent, and the `total` and `start_at` outputs are declared but
+never returned. Enhanced search has neither offsets nor a total.
 
 ### Project and Metadata Actions
 

@@ -1,0 +1,176 @@
+{
+  "body": {
+    "isLast": false,
+    "issues": [
+      {
+        "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+        "fields": {
+          "assignee": null,
+          "description": null,
+          "duedate": null,
+          "project": {
+            "avatarUrls": {
+              "16x16": "16x16-3",
+              "24x24": "24x24-3",
+              "32x32": "32x32-3",
+              "48x48": "48x48-3"
+            },
+            "id": "10882",
+            "key": "JCL",
+            "name": "Jido Connect Live",
+            "projectTypeKey": "software",
+            "self": "https://example.atlassian.net/rest/api/3/project/10882",
+            "simplified": false
+          },
+          "status": {
+            "description": "",
+            "iconUrl": "https://example.atlassian.net/",
+            "id": "10916",
+            "name": "Backlog",
+            "self": "https://example.atlassian.net/rest/api/3/status/10916",
+            "statusCategory": {
+              "colorName": "blue-gray",
+              "id": 2,
+              "key": "new",
+              "name": "To Do",
+              "self": "https://example.atlassian.net/rest/api/3/statuscategory/2"
+            }
+          },
+          "summary": "JCL live: webhook capture target",
+          "updated": "2026-10-30T20:17:13.848+0100"
+        },
+        "id": "46098",
+        "key": "JCL-3",
+        "self": "https://example.atlassian.net/rest/api/3/issue/46098"
+      },
+      {
+        "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+        "fields": {
+          "assignee": null,
+          "description": null,
+          "duedate": null,
+          "project": {
+            "avatarUrls": {
+              "16x16": "16x16-3",
+              "24x24": "24x24-3",
+              "32x32": "32x32-3",
+              "48x48": "48x48-3"
+            },
+            "id": "10882",
+            "key": "JCL",
+            "name": "Jido Connect Live",
+            "projectTypeKey": "software",
+            "self": "https://example.atlassian.net/rest/api/3/project/10882",
+            "simplified": false
+          },
+          "status": {
+            "description": "",
+            "iconUrl": "https://example.atlassian.net/",
+            "id": "10916",
+            "name": "Backlog",
+            "self": "https://example.atlassian.net/rest/api/3/status/10916",
+            "statusCategory": {
+              "colorName": "blue-gray",
+              "id": 2,
+              "key": "new",
+              "name": "To Do",
+              "self": "https://example.atlassian.net/rest/api/3/statuscategory/2"
+            }
+          },
+          "summary": "JCL search filler 01",
+          "updated": "2026-10-30T20:17:14.568+0100"
+        },
+        "id": "46099",
+        "key": "JCL-4",
+        "self": "https://example.atlassian.net/rest/api/3/issue/46099"
+      }
+    ],
+    "nextPageToken": "CjBpc3N1ZUtleSZpc3N1ZUtleSZPUkRFUl9BU0MjU3RyaW5nJlNrTk0lSW50Jk5BPT0QBBitnLfcmTQiL3Byb2plY3QgPSBKQ0wgQU5EIGtleSA8PSBKQ0wtNSBPUkRFUiBCWSBrZXkgQVNDKgJbXQ=="
+  },
+  "headers": {
+    "atl-request-id": [
+      "8b269790-9327-44ca-939e-b99e01669bfa"
+    ],
+    "atl-traceid": [
+      "8b269790932744ca939eb99e01669bfa"
+    ],
+    "cache-control": [
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json;charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 09:18:44 GMT"
+    ],
+    "nel": [
+      "{\"failure_fraction\": 0.01, \"include_subdomains\": true, \"max_age\": 600, \"report_to\": \"endpoint-1\"}"
+    ],
+    "ratelimit": [
+      "\"jira-burst-based\";r=198;t=1"
+    ],
+    "ratelimit-policy": [
+      "\"jira-burst-based\";q=100;w=1"
+    ],
+    "report-to": [
+      "{\"endpoints\": [{\"url\": \"https://dz8aopenkvv6s.cloudfront.net\"}], \"group\": \"endpoint-1\", \"include_subdomains\": true, \"max_age\": 600}"
+    ],
+    "server": [
+      "AtlassianEdge"
+    ],
+    "server-timing": [
+      "cdn-upstream-layer;desc=\"EDGE\",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=60,cdn-upstream-fbl;dur=232,atl-edge;dur=152,atl-edge-internal;dur=23,atl-edge-upstream;dur=129,atl-edge-pop;desc=\"aws-eu-west-1\",cdn-cache-miss,cdn-pop;desc=\"FRA56-P5\",cdn-rid;desc=\"bmuhllD-WNtNzzmaEmj-QzyTt7zRz5PIXCePpTx18niy66Tgz6vsxg==\",cdn-downstream-fbl;dur=235"
+    ],
+    "strict-transport-security": [
+      "max-age=63072000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding,Accept-Encoding"
+    ],
+    "via": [
+      "1.1 5c14dc328191a14142654d833f772c6c.cloudfront.net (CloudFront)"
+    ],
+    "x-aaccountid": [
+      "account-1"
+    ],
+    "x-amz-cf-id": [
+      "bmuhllD-WNtNzzmaEmj-QzyTt7zRz5PIXCePpTx18niy66Tgz6vsxg=="
+    ],
+    "x-amz-cf-pop": [
+      "FRA56-P5"
+    ],
+    "x-arequestid": [
+      "981defa5f39345c6d4b3bd358b4de69f"
+    ],
+    "x-cache": [
+      "Miss from cloudfront"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-ratelimit-limit": [
+      "200"
+    ],
+    "x-ratelimit-remaining": [
+      "198"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/rest/api/3/search/jql"
+  },
+  "status": 200
+}

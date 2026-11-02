@@ -1,0 +1,100 @@
+{
+  "body": {
+    "isLast": false,
+    "issues": [
+      {
+        "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+        "id": "46098",
+        "key": "JCL-3",
+        "self": "https://example.atlassian.net/rest/api/3/issue/46098"
+      }
+    ],
+    "nextPageToken": "CjBpc3N1ZUtleSZpc3N1ZUtleSZPUkRFUl9BU0MjU3RyaW5nJlNrTk0lSW50Jk13PT0QARidy_LdmTQiSXByb2plY3QgPSBKQ0wgQU5EIGFzc2lnbmVlIGlzIEVNUFRZIEFORCBkdWVkYXRlIGlzIEVNUFRZIE9SREVSIEJZIGtleSBBU0MqAltd"
+  },
+  "headers": {
+    "atl-request-id": [
+      "a8278e46-f906-48c0-97c6-4b57fd98dda7"
+    ],
+    "atl-traceid": [
+      "a8278e46f90648c097c64b57fd98dda7"
+    ],
+    "cache-control": [
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json;charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 10:09:54 GMT"
+    ],
+    "nel": [
+      "{\"failure_fraction\": 0.01, \"include_subdomains\": true, \"max_age\": 600, \"report_to\": \"endpoint-1\"}"
+    ],
+    "ratelimit": [
+      "\"jira-burst-based\";r=198;t=1"
+    ],
+    "ratelimit-policy": [
+      "\"jira-burst-based\";q=100;w=1"
+    ],
+    "report-to": [
+      "{\"endpoints\": [{\"url\": \"https://dz8aopenkvv6s.cloudfront.net\"}], \"group\": \"endpoint-1\", \"include_subdomains\": true, \"max_age\": 600}"
+    ],
+    "server": [
+      "AtlassianEdge"
+    ],
+    "server-timing": [
+      "cdn-upstream-layer;desc=\"EDGE\",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=62,cdn-upstream-fbl;dur=229,atl-edge;dur=147,atl-edge-internal;dur=19,atl-edge-upstream;dur=128,atl-edge-pop;desc=\"aws-eu-west-1\",cdn-cache-miss,cdn-pop;desc=\"FRA56-P6\",cdn-rid;desc=\"ofi9j9KxHKH4CoGSVce7Vh0Cw-3rhQLREdXpjt0K29I3y0vrdubu4Q==\",cdn-downstream-fbl;dur=232"
+    ],
+    "strict-transport-security": [
+      "max-age=63072000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding,Accept-Encoding"
+    ],
+    "via": [
+      "1.1 e016ea20838aeed1d878a5244c9e2552.cloudfront.net (CloudFront)"
+    ],
+    "x-aaccountid": [
+      "account-1"
+    ],
+    "x-amz-cf-id": [
+      "ofi9j9KxHKH4CoGSVce7Vh0Cw-3rhQLREdXpjt0K29I3y0vrdubu4Q=="
+    ],
+    "x-amz-cf-pop": [
+      "FRA56-P6"
+    ],
+    "x-arequestid": [
+      "2ef85510e181a92b4e98252a41597a5d"
+    ],
+    "x-cache": [
+      "Miss from cloudfront"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-ratelimit-limit": [
+      "200"
+    ],
+    "x-ratelimit-remaining": [
+      "198"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/rest/api/3/search/jql"
+  },
+  "status": 200
+}

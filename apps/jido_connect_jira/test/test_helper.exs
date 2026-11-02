@@ -88,10 +88,9 @@ defmodule Jido.Connect.Jira.MockClient do
            updated_at: "2026-05-15T12:00:00.000+0000"
          }
        ],
-       total: 1,
-       start_at: Keyword.get(opts, :start_at, 0),
-       max_results: Keyword.get(opts, :max_results, 50),
-       is_last: true
+       next_page_token: if(Keyword.get(opts, :next_page_token), do: nil, else: "page-2"),
+       is_last: Keyword.get(opts, :next_page_token) != nil,
+       max_results: Keyword.get(opts, :max_results, 50)
      }}
   end
 

@@ -63,6 +63,27 @@ defmodule Jido.Connect.Jira.Client.Request do
     endpoint <> "/" <> String.trim_leading(path, "/")
   end
 
+  @doc """
+  Encodes an issue key, such as `PROJ-123`, or numeric issue ID as one URL
+  path segment for `/rest/api/3/issue/{issueIdOrKey}` and the paths below it.
+
+  Every character outside the unreserved set is percent-encoded, so `/`, `?`
+  and `#` stay inside the segment. An empty value, `.` and `..` fail with a
+  `Jido.Connect.Error.ValidationError`, because a URL path resolves them as
+  dot segments.
+  """
+  @spec issue_segment(String.t()) :: {:ok, String.t()} | {:error, Error.error()}
+  def issue_segment(issue_key) when issue_key in ["", ".", ".."] do
+    {:error,
+     Error.validation("Jira issue key or ID must be one non-empty path segment",
+       reason: :invalid_issue_key,
+       subject: :issue_key
+     )}
+  end
+
+  def issue_segment(issue_key) when is_binary(issue_key),
+    do: {:ok, URI.encode(issue_key, &URI.char_unreserved?/1)}
+
   defp endpoint(%Connection{metadata: metadata, id: connection_id}) do
     endpoint =
       Enum.find_value([:cloud_endpoint, :site, :base_url], fn key ->

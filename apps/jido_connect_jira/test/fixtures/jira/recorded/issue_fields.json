@@ -1,0 +1,291 @@
+{
+  "body": {
+    "isLast": false,
+    "issues": [
+      {
+        "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations,customfield_10104.properties,customfield_10105.properties,customfield_10010.requestTypePractice",
+        "fields": {
+          "customfield_10610": null,
+          "customfield_10115": null,
+          "customfield_10005": null,
+          "customfield_10010": null,
+          "customfield_10246": null,
+          "customfield_10709": null,
+          "customfield_10643": null,
+          "creator": {
+            "accountId": "account-1",
+            "accountType": "atlassian",
+            "active": true,
+            "avatarUrls": {
+              "16x16": "16x16-2",
+              "24x24": "24x24-2",
+              "32x32": "32x32-2",
+              "48x48": "48x48-2"
+            },
+            "displayName": "Person 1",
+            "emailAddress": "person-1@example.com",
+            "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-1",
+            "timeZone": "Europe/Berlin"
+          },
+          "watches": {
+            "isWatching": true,
+            "self": "https://example.atlassian.net/rest/api/3/issue/JCL-3/watchers",
+            "watchCount": 1
+          },
+          "customfield_10105": null,
+          "assignee": null,
+          "customfield_10250": null,
+          "timespent": null,
+          "subtasks": [],
+          "customfield_10247": null,
+          "customfield_10020": null,
+          "votes": {
+            "hasVoted": false,
+            "self": "https://example.atlassian.net/rest/api/3/issue/JCL-3/votes",
+            "votes": 0
+          },
+          "customfield_10107": null,
+          "customfield_10101": null,
+          "resolution": null,
+          "fixVersions": [],
+          "customfield_10015": null,
+          "customfield_10177": null,
+          "created": "2026-10-30T20:17:13.810+0100",
+          "versions": [],
+          "customfield_10007": null,
+          "resolutiondate": null,
+          "customfield_10113": null,
+          "customfield_10116": null,
+          "customfield_10112": null,
+          "customfield_10176": null,
+          "customfield_10009": null,
+          "customfield_10160": null,
+          "aggregateprogress": {
+            "progress": 0,
+            "total": 0
+          },
+          "customfield_10253": null,
+          "customfield_10019": "0|i01r9n:",
+          "status": {
+            "description": "",
+            "iconUrl": "https://example.atlassian.net/",
+            "id": "10916",
+            "name": "Backlog",
+            "self": "https://example.atlassian.net/rest/api/3/status/10916",
+            "statusCategory": {
+              "colorName": "blue-gray",
+              "id": 2,
+              "key": "new",
+              "name": "To Do",
+              "self": "https://example.atlassian.net/rest/api/3/statuscategory/2"
+            }
+          },
+          "summary": "JCL live: webhook capture target",
+          "timeestimate": null,
+          "customfield_10100": null,
+          "lastViewed": null,
+          "priority": {
+            "iconUrl": "https://example.atlassian.net/images/icons/priorities/medium_new.svg",
+            "id": "3",
+            "name": "Medium",
+            "self": "https://example.atlassian.net/rest/api/3/priority/3"
+          },
+          "progress": {
+            "progress": 0,
+            "total": 0
+          },
+          "description": null,
+          "customfield_10021": null,
+          "environment": null,
+          "aggregatetimespent": null,
+          "customfield_10016": null,
+          "security": null,
+          "customfield_10003": null,
+          "customfield_10245": null,
+          "customfield_10008": null,
+          "customfield_10159": null,
+          "duedate": null,
+          "customfield_10014": null,
+          "customfield_10153": null,
+          "customfield_10002": [],
+          "customfield_10006": null,
+          "customfield_10249": null,
+          "statusCategory": {
+            "colorName": "blue-gray",
+            "id": 2,
+            "key": "new",
+            "name": "To Do",
+            "self": "https://example.atlassian.net/rest/api/3/statuscategory/2"
+          },
+          "reporter": {
+            "accountId": "account-1",
+            "accountType": "atlassian",
+            "active": true,
+            "avatarUrls": {
+              "16x16": "16x16-2",
+              "24x24": "24x24-2",
+              "32x32": "32x32-2",
+              "48x48": "48x48-2"
+            },
+            "displayName": "Person 1",
+            "emailAddress": "person-1@example.com",
+            "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-1",
+            "timeZone": "Europe/Berlin"
+          },
+          "customfield_10344": null,
+          "customfield_10120": null,
+          "customfield_10743": null,
+          "customfield_10001": null,
+          "customfield_10150": null,
+          "customfield_10109": null,
+          "customfield_10544": null,
+          "timeoriginalestimate": null,
+          "customfield_10248": null,
+          "components": [],
+          "customfield_10168": null,
+          "labels": [],
+          "customfield_10017": null,
+          "customfield_10117": null,
+          "issuetype": {
+            "avatarId": 10318,
+            "description": "A task that needs to be done.",
+            "hierarchyLevel": 0,
+            "iconUrl": "https://example.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium",
+            "id": "10101",
+            "name": "Task",
+            "self": "https://example.atlassian.net/rest/api/3/issuetype/10101",
+            "subtask": false
+          },
+          "customfield_10151": null,
+          "updated": "2026-10-30T20:17:13.848+0100",
+          "customfield_10169": null,
+          "customfield_10108": null,
+          "customfield_10118": null,
+          "customfield_10742": [],
+          "workratio": -1,
+          "customfield_10254": null,
+          "customfield_10278": null,
+          "customfield_10252": null,
+          "aggregatetimeoriginalestimate": null,
+          "customfield_10114": [],
+          "customfield_10119": null,
+          "customfield_10251": null,
+          "customfield_10156": null,
+          "customfield_10124": null,
+          "issuelinks": [],
+          "customfield_10179": null,
+          "customfield_10744": null,
+          "statuscategorychangedate": "2026-10-30T20:17:14.038+0100",
+          "customfield_10104": null,
+          "aggregatetimeestimate": null,
+          "project": {
+            "avatarUrls": {
+              "16x16": "16x16-1",
+              "24x24": "24x24-1",
+              "32x32": "32x32-1",
+              "48x48": "48x48-1"
+            },
+            "id": "10882",
+            "key": "JCL",
+            "name": "Jido Connect Live",
+            "projectTypeKey": "software",
+            "self": "https://example.atlassian.net/rest/api/3/project/10882",
+            "simplified": false
+          },
+          "customfield_10121": null,
+          "customfield_10004": null
+        },
+        "id": "46098",
+        "key": "JCL-3",
+        "self": "https://example.atlassian.net/rest/api/3/issue/46098"
+      }
+    ],
+    "nextPageToken": "CjBpc3N1ZUtleSZpc3N1ZUtleSZPUkRFUl9BU0MjU3RyaW5nJlNrTk0lSW50Jk13PT0QARjBxvLdmTQiSXByb2plY3QgPSBKQ0wgQU5EIGFzc2lnbmVlIGlzIEVNUFRZIEFORCBkdWVkYXRlIGlzIEVNUFRZIE9SREVSIEJZIGtleSBBU0MqAltd"
+  },
+  "headers": {
+    "atl-request-id": [
+      "eaa07431-f8eb-49ea-a1bf-6bb2050cb1f8"
+    ],
+    "atl-traceid": [
+      "eaa07431f8eb49eaa1bf6bb2050cb1f8"
+    ],
+    "cache-control": [
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json;charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 10:09:53 GMT"
+    ],
+    "nel": [
+      "{\"failure_fraction\": 0.01, \"include_subdomains\": true, \"max_age\": 600, \"report_to\": \"endpoint-1\"}"
+    ],
+    "ratelimit": [
+      "\"jira-burst-based\";r=199;t=1"
+    ],
+    "ratelimit-policy": [
+      "\"jira-burst-based\";q=100;w=1"
+    ],
+    "report-to": [
+      "{\"endpoints\": [{\"url\": \"https://dz8aopenkvv6s.cloudfront.net\"}], \"group\": \"endpoint-1\", \"include_subdomains\": true, \"max_age\": 600}"
+    ],
+    "server": [
+      "AtlassianEdge"
+    ],
+    "server-timing": [
+      "cdn-upstream-layer;desc=\"EDGE\",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=61,cdn-upstream-fbl;dur=285,atl-edge;dur=203,atl-edge-internal;dur=24,atl-edge-upstream;dur=179,atl-edge-pop;desc=\"aws-eu-west-1\",cdn-cache-miss,cdn-pop;desc=\"FRA56-P6\",cdn-rid;desc=\"dhZUfMBKi_BeemK6BHiyYQXKtD19-MLhWS8Rz7O0MUZzfuOFbaqjtA==\",cdn-downstream-fbl;dur=289"
+    ],
+    "strict-transport-security": [
+      "max-age=63072000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding,Accept-Encoding"
+    ],
+    "via": [
+      "1.1 e016ea20838aeed1d878a5244c9e2552.cloudfront.net (CloudFront)"
+    ],
+    "x-aaccountid": [
+      "account-1"
+    ],
+    "x-amz-cf-id": [
+      "dhZUfMBKi_BeemK6BHiyYQXKtD19-MLhWS8Rz7O0MUZzfuOFbaqjtA=="
+    ],
+    "x-amz-cf-pop": [
+      "FRA56-P6"
+    ],
+    "x-arequestid": [
+      "3833fa57ead9a25afb9cd39a48a9aa49"
+    ],
+    "x-cache": [
+      "Miss from cloudfront"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-ratelimit-limit": [
+      "200"
+    ],
+    "x-ratelimit-remaining": [
+      "199"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/rest/api/3/search/jql"
+  },
+  "status": 200
+}

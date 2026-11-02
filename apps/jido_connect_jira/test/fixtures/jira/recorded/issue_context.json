@@ -1,0 +1,316 @@
+{
+  "body": {
+    "comments": [
+      {
+        "author": {
+          "accountId": "account-1",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-1",
+            "24x24": "24x24-1",
+            "32x32": "32x32-1",
+            "48x48": "48x48-1"
+          },
+          "displayName": "Person 1",
+          "emailAddress": "person-1@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-1",
+          "timeZone": "Europe/Berlin"
+        },
+        "body": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "body-1",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "attrs": {
+                "layout": "body-4"
+              },
+              "content": [
+                {
+                  "attrs": {
+                    "collection": "body-5",
+                    "height": 183,
+                    "id": "body-6",
+                    "type": "body-7",
+                    "width": 200
+                  },
+                  "type": "body-8"
+                }
+              ],
+              "type": "body-9"
+            }
+          ],
+          "type": "body-10",
+          "version": 1
+        },
+        "created": "2026-10-30T20:16:47.338+0100",
+        "id": "42675",
+        "jsdPublic": true,
+        "self": "https://example.atlassian.net/rest/api/3/issue/46096/comment/42675",
+        "updateAuthor": {
+          "accountId": "account-1",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-1",
+            "24x24": "24x24-1",
+            "32x32": "32x32-1",
+            "48x48": "48x48-1"
+          },
+          "displayName": "Person 1",
+          "emailAddress": "person-1@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-1",
+          "timeZone": "Europe/Berlin"
+        },
+        "updated": "2026-10-30T20:16:47.338+0100"
+      },
+      {
+        "author": {
+          "accountId": "account-2",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-2",
+            "24x24": "24x24-2",
+            "32x32": "32x32-2",
+            "48x48": "48x48-2"
+          },
+          "displayName": "Person 2",
+          "emailAddress": "person-2@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-2",
+          "timeZone": "Europe/Berlin"
+        },
+        "body": {
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "body-11",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "content": [
+                {
+                  "text": "body-12",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "content": [
+                {
+                  "text": "body-13",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "content": [
+                {
+                  "text": "body-14",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "content": [
+                {
+                  "text": "body-15",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "content": [
+                {
+                  "text": "body-16",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "content": [
+                {
+                  "text": "body-17",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "content": [
+                {
+                  "text": "body-18",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "content": [
+                {
+                  "text": "body-19",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "content": [
+                {
+                  "text": "body-20",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "content": [
+                {
+                  "text": "body-21",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            },
+            {
+              "content": [
+                {
+                  "text": "body-22",
+                  "type": "body-2"
+                }
+              ],
+              "type": "body-3"
+            }
+          ],
+          "type": "body-10",
+          "version": 1
+        },
+        "created": "2026-10-30T20:16:47.821+0100",
+        "id": "42676",
+        "jsdPublic": true,
+        "self": "https://example.atlassian.net/rest/api/3/issue/46096/comment/42676",
+        "updateAuthor": {
+          "accountId": "account-2",
+          "accountType": "atlassian",
+          "active": true,
+          "avatarUrls": {
+            "16x16": "16x16-2",
+            "24x24": "24x24-2",
+            "32x32": "32x32-2",
+            "48x48": "48x48-2"
+          },
+          "displayName": "Person 2",
+          "emailAddress": "person-2@example.com",
+          "self": "https://example.atlassian.net/rest/api/3/user?accountId=account-2",
+          "timeZone": "Europe/Berlin"
+        },
+        "updated": "2026-10-30T20:16:47.821+0100"
+      }
+    ],
+    "maxResults": 2,
+    "startAt": 2,
+    "total": 54
+  },
+  "headers": {
+    "atl-request-id": [
+      "7defce69-6cd1-46cf-8d6e-00c767ad916c"
+    ],
+    "atl-traceid": [
+      "7defce696cd146cf8d6e00c767ad916c"
+    ],
+    "cache-control": [
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json;charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 09:18:42 GMT"
+    ],
+    "nel": [
+      "{\"failure_fraction\": 0.01, \"include_subdomains\": true, \"max_age\": 600, \"report_to\": \"endpoint-1\"}"
+    ],
+    "ratelimit": [
+      "\"jira-burst-based\";r=349;t=1"
+    ],
+    "ratelimit-policy": [
+      "\"jira-burst-based\";q=100;w=1"
+    ],
+    "report-to": [
+      "{\"endpoints\": [{\"url\": \"https://dz8aopenkvv6s.cloudfront.net\"}], \"group\": \"endpoint-1\", \"include_subdomains\": true, \"max_age\": 600}"
+    ],
+    "server": [
+      "AtlassianEdge"
+    ],
+    "server-timing": [
+      "cdn-upstream-layer;desc=\"EDGE\",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=62,cdn-upstream-fbl;dur=239,atl-edge;dur=156,atl-edge-internal;dur=24,atl-edge-upstream;dur=132,atl-edge-pop;desc=\"aws-eu-west-1\",cdn-cache-miss,cdn-pop;desc=\"FRA56-P5\",cdn-rid;desc=\"1EQHJ12hSpb3FOdmzquEve6ykogkWb3jqrAAgnj5nck4E-dkg4T8XQ==\",cdn-downstream-fbl;dur=243"
+    ],
+    "strict-transport-security": [
+      "max-age=63072000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding,Accept-Encoding"
+    ],
+    "via": [
+      "1.1 5c14dc328191a14142654d833f772c6c.cloudfront.net (CloudFront)"
+    ],
+    "x-aaccountid": [
+      "account-1"
+    ],
+    "x-amz-cf-id": [
+      "1EQHJ12hSpb3FOdmzquEve6ykogkWb3jqrAAgnj5nck4E-dkg4T8XQ=="
+    ],
+    "x-amz-cf-pop": [
+      "FRA56-P5"
+    ],
+    "x-arequestid": [
+      "27a2439b5c5878ff07fd27c14c1c9974"
+    ],
+    "x-cache": [
+      "Miss from cloudfront"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-ratelimit-limit": [
+      "350"
+    ],
+    "x-ratelimit-remaining": [
+      "349"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/rest/api/3/issue/JCL-1/comment"
+  },
+  "status": 200
+}
