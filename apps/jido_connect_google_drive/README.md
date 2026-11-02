@@ -161,6 +161,26 @@ Jido.Connect.invoke(Jido.Connect.Google.Drive, "google.drive.file.get", target_i
 )
 ```
 
+## Starred Flag and Modification Time
+
+`google.drive.file.get` and `google.drive.files.list` return Drive's `starred`
+as `starred?` and `modifiedTime` as `modified_time`. The default projections,
+`Fields.file_metadata()` and `Fields.file_list()`, request both.
+
+`starred?` is the flag of the authorizing account, the account whose access
+token makes the request. Drive keeps the flag per user, so the same file can be
+starred for one account and not for another. When Drive omits `starred`,
+`starred?` is `false`. Drive omits it, for example, when a caller-supplied
+`fields` does not name it; that `false` does not say whether the file is
+starred.
+
+`modified_time` is Drive's `modifiedTime` string, unchanged. It is optional:
+when Drive omits `modifiedTime`, `modified_time` is `nil`, also when
+`created_time` is set. The value says when Drive last recorded a change to the
+file. It identifies neither the editor nor an immutable revision. Drive can
+leave `modifiedTime` unchanged after a Google Docs edit, so different contents
+can carry the same value.
+
 ## Listing Folder Contents
 
 `google.drive.files.list` sends `query` to Drive as `q`. A query such as

@@ -4,6 +4,11 @@ defmodule Jido.Connect.Google.DriveTest do
   alias Jido.Connect
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
   alias Jido.Connect.Google.Drive
+  alias Jido.Connect.TestSupport.LiveSmoke
+
+  @starred_file_id "1JphxvbpUOuOhN326OEz9UnJqtAy99n4l"
+  @unstarred_file_id "1cihn1Qw5ruqogYtAdjOkPWeA3f2KhwK-"
+  @selection_folder_id "18wQ5cSzJVV4Hpxmx_okyZi1-Oo1T10wy"
 
   @drive_action_modules [
     Jido.Connect.Google.Drive.Actions.GetAbout,
@@ -69,6 +74,19 @@ defmodule Jido.Connect.Google.DriveTest do
   ]
 
   defmodule FakeDriveClient do
+    alias Jido.Connect.Google.Drive.Client.Response
+
+    # The query the live test listed the starred file and its unstarred twin
+    # with, and their `files.get` recordings by file ID.
+    @selection_query "'18wQ5cSzJVV4Hpxmx_okyZi1-Oo1T10wy' in parents and trashed = false " <>
+                       "and (name = 'jcl-live starred.txt' or name = 'jcl-live unstarred.txt')"
+    @recorded_files %{
+      "1JphxvbpUOuOhN326OEz9UnJqtAy99n4l" => "file_get_starred",
+      "1cihn1Qw5ruqogYtAdjOkPWeA3f2KhwK-" => "file_get_unstarred"
+    }
+
+    def selection_query, do: @selection_query
+
     def get_about(%{}, "token") do
       {:ok,
        Drive.About.new!(%{
@@ -99,6 +117,41 @@ defmodule Jido.Connect.Google.DriveTest do
          ],
          next_page_token: "next"
        }}
+    end
+
+    # The two recorded pages of the starred file and its unstarred twin, one
+    # file per page, through the response handling of Client.list_files/2.
+    def list_files(
+          %{
+            query: @selection_query,
+            page_size: 1,
+            spaces: "drive",
+            include_items_from_all_drives: false,
+            supports_all_drives: false
+          } = params,
+          "token"
+        ) do
+      first_page = recorded("files_list_starred")
+      next_page_token = first_page["nextPageToken"]
+
+      page =
+        case Map.get(params, :page_token) do
+          nil -> first_page
+          ^next_page_token -> recorded("files_list_starred.2")
+        end
+
+      Response.handle_file_list_response(recorded_response(page))
+    end
+
+    # The starred file and its unstarred twin from their recorded `files.get`
+    # responses, through the response handling of Client.get_file/2.
+    def get_file(%{file_id: file_id, supports_all_drives: false}, "token")
+        when is_map_key(@recorded_files, file_id) do
+      @recorded_files
+      |> Map.fetch!(file_id)
+      |> recorded()
+      |> recorded_response()
+      |> Response.handle_file_response()
     end
 
     def get_file(
@@ -908,6 +961,11 @@ defmodule Jido.Connect.Google.DriveTest do
         ) do
       {:ok, %{changes: [], next_page_token: "loop-page"}}
     end
+
+    defp recorded(name), do: LiveSmoke.fixture!(:google_drive, name)
+
+    # Drive answered every recorded request used here with status 200.
+    defp recorded_response(body), do: {:ok, %{status: 200, body: body}}
   end
 
   test "declares Google Drive provider metadata" do
@@ -1364,26 +1422,42 @@ defmodule Jido.Connect.Google.DriveTest do
 
   test "invokes list files through injected client and lease" do
     {context, lease} = context_and_lease()
+    input = %{query: FakeDriveClient.selection_query(), page_size: 1}
 
-    assert {:ok,
-            %{
-              files: [
-                %{
-                  file_id: "file123",
-                  name: "Budget.pdf",
-                  mime_type: "application/pdf",
-                  parents: ["folder123"]
-                }
-              ],
-              next_page_token: "next"
-            }} =
-             Connect.invoke(
-               Drive.integration(),
-               "google.drive.files.list",
-               %{query: "mimeType = 'application/pdf'"},
+    assert {:ok, %{files: [unstarred], next_page_token: page_token}} =
+             Connect.invoke(Drive.integration(), "google.drive.files.list", input,
                context: context,
                credential_lease: lease
              )
+
+    assert {:ok, %{files: [starred]} = final} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.files.list",
+               Map.put(input, :page_token, page_token),
+               context: context,
+               credential_lease: lease
+             )
+
+    refute Map.has_key?(final, :next_page_token)
+
+    assert %{
+             file_id: @unstarred_file_id,
+             name: "jcl-live unstarred.txt",
+             mime_type: "text/plain",
+             parents: [@selection_folder_id],
+             starred?: false,
+             modified_time: "2026-10-30T15:29:47.460Z"
+           } = unstarred
+
+    assert %{
+             file_id: @starred_file_id,
+             name: "jcl-live starred.txt",
+             mime_type: "text/plain",
+             parents: [@selection_folder_id],
+             starred?: true,
+             modified_time: "2026-10-30T15:29:45.332Z"
+           } = starred
   end
 
   test "invokes Drive actions with service-account leases" do
@@ -1411,15 +1485,33 @@ defmodule Jido.Connect.Google.DriveTest do
     assert {:ok,
             %{
               file: %{
-                file_id: "file123",
-                name: "Budget.pdf",
-                mime_type: "application/pdf"
+                file_id: @starred_file_id,
+                name: "jcl-live starred.txt",
+                starred?: true,
+                modified_time: "2026-10-30T15:29:45.332Z"
               }
             }} =
              Connect.invoke(
                Drive.integration(),
                "google.drive.file.get",
-               %{file_id: "file123"},
+               %{file_id: @starred_file_id},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:ok,
+            %{
+              file: %{
+                file_id: @unstarred_file_id,
+                name: "jcl-live unstarred.txt",
+                starred?: false,
+                modified_time: "2026-10-30T15:29:47.460Z"
+              }
+            }} =
+             Connect.invoke(
+               Drive.integration(),
+               "google.drive.file.get",
+               %{file_id: @unstarred_file_id},
                context: context,
                credential_lease: lease
              )

@@ -19,6 +19,13 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
   alias Jido.Connect.Google.Drive.Client.Response
   alias Jido.Connect.TestSupport.LiveSmoke
 
+  # The starred file and its unstarred twin of the test account, and the query
+  # the live test listed them with, one file per page.
+  @starred_file_id "1JphxvbpUOuOhN326OEz9UnJqtAy99n4l"
+  @unstarred_file_id "1cihn1Qw5ruqogYtAdjOkPWeA3f2KhwK-"
+  @selection_query "'18wQ5cSzJVV4Hpxmx_okyZi1-Oo1T10wy' in parents and trashed = false " <>
+                     "and (name = 'jcl-live starred.txt' or name = 'jcl-live unstarred.txt')"
+
   setup {Req.Test, :verify_on_exit!}
 
   setup do
@@ -36,36 +43,58 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     end)
   end
 
+  # Drive sent `modifiedTime` for both files of the recorded listing. This test
+  # removes it from the unstarred file on the first page, so the first file has
+  # no modification time and the starred file on the second page keeps its own.
   test "lists files" do
-    Req.Test.stub(__MODULE__, fn conn ->
-      assert conn.method == "GET"
-      assert conn.request_path == "/v3/files"
-      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
-      assert conn.query_params["q"] == "mimeType = 'application/pdf'"
-      assert conn.query_params["pageSize"] == "10"
-      assert conn.query_params["spaces"] == "drive"
+    first_page =
+      update_in(
+        LiveSmoke.fixture!(:google_drive, "files_list_starred"),
+        ["files", Access.at(0)],
+        &Map.delete(&1, "modifiedTime")
+      )
 
-      Req.Test.json(conn, %{
-        "files" => [
-          %{
-            "id" => "file123",
-            "name" => "Budget.pdf",
-            "mimeType" => "application/pdf",
-            "parents" => ["folder123"]
-          }
-        ],
-        "nextPageToken" => "next"
-      })
-    end)
+    final_page = LiveSmoke.fixture!(:google_drive, "files_list_starred.2")
+    page_token = first_page["nextPageToken"]
 
-    assert {:ok, %{files: [%File{} = file], next_page_token: "next"}} =
-             Client.list_files(
-               %{query: "mimeType = 'application/pdf'", page_size: 10, spaces: "drive"},
-               "token"
-             )
+    for {body, expected_page_token} <- [{first_page, nil}, {final_page, page_token}] do
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert conn.method == "GET"
+        assert conn.request_path == "/v3/files"
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+        assert conn.query_params["q"] == @selection_query
+        assert conn.query_params["pageSize"] == "1"
+        assert conn.query_params["spaces"] == "drive"
+        assert conn.query_params["pageToken"] == expected_page_token
+        assert conn.query_params["fields"] == Fields.file_list()
+        refute Map.has_key?(conn.query_params, "alt")
 
-    assert file.file_id == "file123"
-    assert file.name == "Budget.pdf"
+        Req.Test.json(conn, body)
+      end)
+    end
+
+    input = %{query: @selection_query, page_size: 1, spaces: "drive"}
+
+    assert {:ok, %{files: [%File{} = unstarred], next_page_token: ^page_token}} =
+             Client.list_files(input, "token")
+
+    assert {:ok, %{files: [%File{} = starred]} = final} =
+             Client.list_files(Map.put(input, :page_token, page_token), "token")
+
+    refute Map.has_key?(final, :next_page_token)
+
+    assert %File{
+             file_id: @unstarred_file_id,
+             starred?: false,
+             created_time: "2026-10-30T15:29:47.460Z",
+             modified_time: nil
+           } = unstarred
+
+    assert %File{
+             file_id: @starred_file_id,
+             starred?: true,
+             modified_time: "2026-10-30T15:29:45.332Z"
+           } = starred
   end
 
   test "passes permission-aware file fields and normalizes embedded permissions" do
@@ -133,23 +162,25 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
   end
 
   test "gets file metadata" do
-    Req.Test.stub(__MODULE__, fn conn ->
-      assert conn.method == "GET"
-      assert conn.request_path == "/v3/files/file123"
-      assert conn.query_params["fields"] =~ "id,name,mimeType"
+    assert "starred" in String.split(Fields.file_metadata(), ",")
+    assert "modifiedTime" in String.split(Fields.file_metadata(), ",")
 
-      Req.Test.json(conn, %{
-        "id" => "file123",
-        "name" => "Budget.pdf",
-        "mimeType" => "application/pdf"
-      })
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/#{@starred_file_id}"
+      assert conn.query_params["fields"] == Fields.file_metadata()
+      refute Map.has_key?(conn.query_params, "alt")
+
+      Req.Test.json(conn, LiveSmoke.fixture!(:google_drive, "file_get_starred"))
     end)
 
     assert {:ok, %File{} = file} =
-             Client.get_file(%{file_id: "file123", supports_all_drives: false}, "token")
+             Client.get_file(%{file_id: @starred_file_id, supports_all_drives: false}, "token")
 
-    assert file.file_id == "file123"
-    assert file.name == "Budget.pdf"
+    assert file.file_id == @starred_file_id
+    assert file.name == "jcl-live starred.txt"
+    assert file.starred? == true
+    assert file.modified_time == "2026-10-30T15:29:45.332Z"
   end
 
   test "gets Drive about metadata" do
