@@ -6,10 +6,12 @@ defmodule Jido.Connect.Google.Meet.Handlers.Triggers.TranscriptCheckpoint do
   # further check, and the records still waiting for a generated transcript.
   # A record needs no further check once it is settled or has left the
   # pending set by age or count; such records are kept under `settled` with
-  # their end time. The watermark never passes a pending record, so a record
-  # that ends before a pending one but is listed later is still found.
+  # their end time. The watermark never passes the end time of a pending
+  # record, so a record that ends after a pending one is still found if it is
+  # listed before that record leaves the pending set.
   # Hosts persist the checkpoint as the JSON string `encode/1` returns. The
-  # package README documents the shape and the bounds.
+  # package README documents the shape, the bounds, and when a record listed
+  # late is missed.
 
   alias Jido.Connect.Error
   alias Jido.Connect.Google.Checkpoint

@@ -197,6 +197,60 @@ defmodule Jido.Connect.Google.Meet.TranscriptPollerTest do
 
       assert {:ok, %{signals: [], checkpoint: ^checkpoint}} = poll(checkpoint)
     end
+
+    test "a record ending between a pending and a settled record is emitted once when listed late" do
+      now = DateTime.utc_now()
+      [prepared, _earlier] = recorded_records()
+      watermark = DateTime.add(now, -4, :hour)
+      p = record_at(prepared, "p", DateTime.add(now, -3, :hour))
+      l = record_at(prepared, "l", DateTime.add(now, -2, :hour))
+      d = record_at(prepared, "d", DateTime.add(now, -1, :hour))
+      [p_transcript] = transcripts_for(p)["transcripts"]
+      [l_transcript] = transcripts_for(l)["transcripts"]
+      [d_transcript] = transcripts_for(d)["transcripts"]
+      p_pending = pending_entry(p["name"], p["endTime"])
+
+      # P's transcript is not generated yet; L's and D's are.
+      transcripts = %{
+        p["name"] => pages([with_state(transcripts_for(p), "ENDED")]),
+        l["name"] => pages([transcripts_for(l)]),
+        d["name"] => pages([transcripts_for(d)])
+      }
+
+      # P and D are listed; L, which ended between them, is not visible yet.
+      serve(records: {:window, [p, d]}, transcripts: transcripts)
+
+      assert {:ok, %{signals: [signal], checkpoint: checkpoint}} = poll(checkpoint(watermark))
+      assert signal == expected_signal(d, d_transcript)
+      assert {:ok, %{signals: [], checkpoint: ^checkpoint}} = poll(checkpoint)
+
+      # Pending P holds the watermark before L, so L is listed and emitted.
+      serve(records: {:window, [p, l, d]}, transcripts: transcripts)
+
+      assert {:ok, %{signals: [signal], checkpoint: checkpoint}} = poll(checkpoint)
+      assert signal == expected_signal(l, l_transcript)
+
+      assert JSON.decode!(checkpoint) ==
+               JSON.decode!(
+                 checkpoint(watermark, [settled_entry(l), settled_entry(d)], [p_pending])
+               )
+
+      assert {:ok, %{signals: [], checkpoint: ^checkpoint}} = poll(checkpoint)
+
+      # P's transcript is generated later; the watermark moves on to D.
+      serve(
+        records: {:window, [p, l, d]},
+        transcripts: Map.put(transcripts, p["name"], pages([transcripts_for(p)]))
+      )
+
+      assert {:ok, %{signals: [signal], checkpoint: checkpoint}} = poll(checkpoint)
+      assert signal == expected_signal(p, p_transcript)
+
+      assert JSON.decode!(checkpoint) ==
+               JSON.decode!(checkpoint(time!(d["endTime"]), [settled_entry(d)]))
+
+      assert {:ok, %{signals: [], checkpoint: ^checkpoint}} = poll(checkpoint)
+    end
   end
 
   describe "transcript readiness" do

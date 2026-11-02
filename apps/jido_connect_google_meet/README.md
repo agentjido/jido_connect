@@ -213,11 +213,13 @@ Checked live on 2026-11-02 against the test account:
   repeated record and stops at its page bound.
 
 Not verified live: the delay before a finished meeting shows its end time in
-the list. A pending record keeps the watermark before its end time, so an
-earlier conference that the list shows late is still found. A conference is
-missed when a later one of the same connection needs no further check the
-first time it is listed, usually because its transcript is already generated,
-and the earlier one appears in the list only after that poll.
+the list. The watermark does not pass the end time of a pending record, so a
+conference that ends after that record is still found if it appears in the
+list before the record leaves the pending set. A conference is missed when it
+appears in the list only after a later conference of the same connection needs
+no further check, usually because its transcripts are generated, and no
+pending record ends before that later conference. The later conference may
+have been pending at first.
 
 ## Workspace Events Spike
 
