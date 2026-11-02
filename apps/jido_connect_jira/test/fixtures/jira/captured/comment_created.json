@@ -1,0 +1,21 @@
+{
+  "body": "{\"comment\":{\"author\":{\"accountId\":\"account-1\",\"accountType\":\"atlassian\",\"active\":true,\"avatarUrls\":{\"16x16\":\"16x16-1\",\"24x24\":\"24x24-1\",\"32x32\":\"32x32-1\",\"48x48\":\"48x48-1\"},\"displayName\":\"Person 1\",\"self\":\"https://example.atlassian.net/rest/api/2/user?accountId=account-1\",\"timeZone\":\"Europe/Berlin\"},\"body\":\"Capture comment, first version.\",\"created\":\"2026-10-30T20:35:05.025+0100\",\"id\":\"42727\",\"jsdPublic\":true,\"self\":\"https://example.atlassian.net/rest/api/2/issue/46154/comment/42727\",\"updateAuthor\":{\"accountId\":\"account-1\",\"accountType\":\"atlassian\",\"active\":true,\"avatarUrls\":{\"16x16\":\"16x16-1\",\"24x24\":\"24x24-1\",\"32x32\":\"32x32-1\",\"48x48\":\"48x48-1\"},\"displayName\":\"Person 1\",\"self\":\"https://example.atlassian.net/rest/api/2/user?accountId=account-1\",\"timeZone\":\"Europe/Berlin\"},\"updated\":\"2026-10-30T20:35:05.025+0100\"},\"eventType\":\"primaryAction\",\"issue\":{\"fields\":{\"assignee\":{\"accountId\":\"account-1\",\"accountType\":\"atlassian\",\"active\":true,\"avatarUrls\":{\"16x16\":\"16x16-1\",\"24x24\":\"24x24-1\",\"32x32\":\"32x32-1\",\"48x48\":\"48x48-1\"},\"displayName\":\"Person 1\",\"self\":\"https://example.atlassian.net/rest/api/2/user?accountId=account-1\",\"timeZone\":\"Europe/Berlin\"},\"issuetype\":{\"avatarId\":10318,\"description\":\"A task that needs to be done.\",\"hierarchyLevel\":0,\"iconUrl\":\"https://example.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium\",\"id\":\"10101\",\"name\":\"Task\",\"self\":\"https://example.atlassian.net/rest/api/2/issuetype/10101\",\"subtask\":false},\"priority\":{\"iconUrl\":\"https://example.atlassian.net/images/icons/priorities/medium_new.svg\",\"id\":\"3\",\"name\":\"Medium\",\"self\":\"https://example.atlassian.net/rest/api/2/priority/3\"},\"project\":{\"avatarUrls\":{\"16x16\":\"16x16-2\",\"24x24\":\"24x24-2\",\"32x32\":\"32x32-2\",\"48x48\":\"48x48-2\"},\"id\":\"10882\",\"key\":\"JCL\",\"name\":\"Jido Connect Live\",\"projectTypeKey\":\"software\",\"self\":\"https://example.atlassian.net/rest/api/2/project/10882\",\"simplified\":false},\"status\":{\"description\":\"This issue is being actively worked on at the moment by the assignee.\",\"iconUrl\":\"https://example.atlassian.net/images/icons/statuses/inprogress.png\",\"id\":\"3\",\"name\":\"In Progress\",\"self\":\"https://example.atlassian.net/rest/api/2/status/3\",\"statusCategory\":{\"colorName\":\"yellow\",\"id\":4,\"key\":\"indeterminate\",\"name\":\"In Progress\",\"self\":\"https://example.atlassian.net/rest/api/2/statuscategory/4\"}},\"summary\":\"JCL capture run 2026-10-30 19:34 UTC\"},\"id\":\"46154\",\"key\":\"JCL-59\",\"self\":\"https://example.atlassian.net/rest/api/2/issue/46154\"},\"timestamp\":1793388905025,\"webhookEvent\":\"comment_created\"}",
+  "captured_at": 1793388905,
+  "headers": {
+    "accept": "*/*",
+    "accept-encoding": "gzip,deflate",
+    "content-length": "5021",
+    "content-type": "application/json; charset=UTF-8",
+    "host": "example.ngrok-free.dev",
+    "user-agent": "Atlassian Webhook HTTP Client",
+    "x-atlassian-webhook-flow": "Primary",
+    "x-atlassian-webhook-identifier": "256679846633297714",
+    "x-b3-sampled": "0",
+    "x-b3-spanid": "e9bcd71830559bdf",
+    "x-b3-traceid": "833912de313fc2f29ea6036f772d2701",
+    "x-hub-signature": "sha256=d91b09a87de9dfa5f0f442ec5e82378ae1be56336401069bafcd8bc263d6a017"
+  },
+  "method": "POST",
+  "path": "/integrations/jira/webhook",
+  "provider": "jira"
+}

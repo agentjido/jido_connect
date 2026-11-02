@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Jira.Webhook.VerificationTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Jira.Webhook
+  alias Jido.Connect.Jira.{CapturedDelivery, Webhook}
   alias Jido.Connect.Jira.Webhook.Verification
   alias Jido.Connect.WebhookDelivery
 
@@ -122,9 +122,9 @@ defmodule Jido.Connect.Jira.Webhook.VerificationTest do
       assert delivery.delivery_id == "7340912"
       assert delivery.event == "comment_created"
       assert delivery.duplicate? == false
-      assert delivery.payload["comment"]["id"] == "10001"
-      assert delivery.normalized_signal.comment_id == "10001"
-      assert delivery.normalized_signal.issue_key == "JCL-7"
+      assert delivery.payload["comment"]["id"] == "42727"
+      assert delivery.normalized_signal.comment_id == "42727"
+      assert delivery.normalized_signal.issue_key == "JCL-59"
     end
 
     test "rejects a changed body before decoding it" do
@@ -158,8 +158,12 @@ defmodule Jido.Connect.Jira.Webhook.VerificationTest do
     end
 
     test "keeps a verified delivery without signal for an event the triggers do not normalize" do
+      # Derived: the captured issue creation under an event name the triggers
+      # do not normalize.
       body =
-        Jason.encode!(%{"webhookEvent" => "jira:issue_deleted", "issue" => %{"key" => "JCL-7"}})
+        CapturedDelivery.payload!("issue_created")
+        |> Map.put("webhookEvent", "jira:issue_deleted")
+        |> Jason.encode!()
 
       headers = %{"x-hub-signature" => sign(body, @secret)}
 
@@ -181,20 +185,9 @@ defmodule Jido.Connect.Jira.Webhook.VerificationTest do
     end
   end
 
-  defp comment_delivery_body do
-    Jason.encode!(%{
-      "timestamp" => 1_793_388_905_000,
-      "webhookEvent" => "comment_created",
-      "comment" => %{
-        "id" => "10001",
-        "body" => "First version.",
-        "author" => %{"accountId" => "account-1", "displayName" => "Test User"},
-        "created" => "2026-10-30T20:15:05.000+0100",
-        "updated" => "2026-10-30T20:15:05.000+0100"
-      },
-      "issue" => %{"id" => "46100", "key" => "JCL-7", "fields" => %{"summary" => "Capture run"}}
-    })
-  end
+  # The raw body of a captured administrator delivery, signed again below
+  # with this test's secret.
+  defp comment_delivery_body, do: CapturedDelivery.capture!("comment_created")["body"]
 
   defp sign(body, secret) do
     "sha256=" <> (:hmac |> :crypto.mac(:sha256, secret, body) |> Base.encode16(case: :lower))

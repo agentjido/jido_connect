@@ -20,11 +20,14 @@ defmodule Jido.Connect.Jira.Webhook do
   - `jira:issue_updated` — an existing issue was updated
   - `comment_created` — a comment was added to an issue
   - `comment_updated` — a comment was updated
+
+  `Jido.Connect.Jira.Webhook.IssueSignal` and
+  `Jido.Connect.Jira.Webhook.CommentSignal` describe the signal fields and
+  their presence rules.
   """
 
-  alias Jido.Connect.{Data, Error}
-  alias Jido.Connect.Jira.ADFText
-  alias Jido.Connect.Jira.Webhook.Verification
+  alias Jido.Connect.Error
+  alias Jido.Connect.Jira.Webhook.{CommentSignal, IssueSignal, Payload, Verification}
 
   @supported_issue_events ~w(jira:issue_created jira:issue_updated)
   @supported_comment_events ~w(comment_created comment_updated)
@@ -89,101 +92,35 @@ defmodule Jido.Connect.Jira.Webhook do
 
   Jira webhook events carry a top-level `webhookEvent` field that
   identifies the event type (`jira:issue_created`, `jira:issue_updated`,
-  `comment_created`, `comment_updated`).
+  `comment_created`, `comment_updated`). Issue events become
+  `jira.issue.changed` signals through
+  `Jido.Connect.Jira.Webhook.IssueSignal`, comment events become
+  `jira.comment.changed` signals through
+  `Jido.Connect.Jira.Webhook.CommentSignal`.
 
-  The payload structure varies by event type:
+  Both signals carry `timestamp` as an ISO 8601 string and
+  `matched_webhook_ids` only when the delivery names them; administrator
+  webhooks do not.
 
-  - **Issue events**: contain an `issue` object with key, fields, and
-    optional `changelog`.
-  - **Comment events**: contain a `comment` object and an `issue` object
-    providing context.
-
-  `comment_body` comes from `Jido.Connect.Jira.ADFText`: an ADF body is
-  rendered with the shared projection in `:degrade` mode and
-  `comment_body_unsupported_nodes` lists the skipped node and mark types; a
-  plain-string body, as administrator webhooks send it, passes through with
-  an empty list. A comment body that is not valid ADF fails the event with
-  `:invalid_webhook_event`.
-
-  Returns `{:ok, signal_map}` on success, or `{:error, _}` on failure.
+  Returns `{:ok, signal_map}`, or `{:error, %Jido.Connect.Error.ProviderError{}}`:
+  `:unsupported_webhook_event` for another event name and
+  `:invalid_webhook_event` for a malformed payload. Malformed payloads never
+  raise, and error details never hold payload values.
   """
-  @spec normalize_event(map()) :: {:ok, map()} | {:error, Error.ProviderError.t()}
+  @spec normalize_event(term()) :: {:ok, map()} | {:error, Error.ProviderError.t()}
   def normalize_event(%{"webhookEvent" => event_type} = payload)
-      when event_type in @supported_issue_events do
-    issue_data = Data.get(payload, "issue")
-
-    if is_nil(issue_data) or not is_map(issue_data) do
-      {:error,
-       Error.provider("Jira webhook event missing issue payload",
-         provider: :jira,
-         reason: :invalid_webhook_event,
-         details: %{event_type: event_type}
-       )}
-    else
-      fields = Data.get(issue_data, "fields") || %{}
-
-      signal =
-        %{
-          event_type: event_type,
-          change_type: issue_change_type(event_type),
-          issue_id: Data.get(issue_data, "id"),
-          issue_key: Data.get(issue_data, "key"),
-          project_key: get_in(fields, ["project", "key"]),
-          project_name: get_in(fields, ["project", "name"]),
-          summary: Data.get(fields, "summary"),
-          issue_type_name: get_in(fields, ["issuetype", "name"]),
-          status_name: get_in(fields, ["status", "name"]),
-          priority_name: get_in(fields, ["priority", "name"]),
-          labels: Data.get(fields, "labels", []),
-          assignee_id: get_in(fields, ["assignee", "accountId"]),
-          assignee_name: get_in(fields, ["assignee", "displayName"]),
-          reporter_id: get_in(fields, ["reporter", "accountId"]),
-          reporter_name: get_in(fields, ["reporter", "displayName"]),
-          created_at: Data.get(fields, "created"),
-          updated_at: Data.get(fields, "updated"),
-          changelog: normalize_changelog(Data.get(payload, "changelog")),
-          webhook_id: Data.get(payload, "webhookID"),
-          timestamp: Data.get(payload, "timestamp")
-        }
-        |> Data.compact()
-
-      {:ok, signal}
-    end
-  end
+      when event_type in @supported_issue_events,
+      do: IssueSignal.normalize(event_type, payload)
 
   def normalize_event(%{"webhookEvent" => event_type} = payload)
-      when event_type in @supported_comment_events do
-    comment_data = Data.get(payload, "comment")
-    issue_data = Data.get(payload, "issue")
+      when event_type in @supported_comment_events,
+      do: CommentSignal.normalize(event_type, payload)
 
-    cond do
-      is_nil(comment_data) or not is_map(comment_data) ->
-        {:error,
-         Error.provider("Jira webhook event missing comment payload",
-           provider: :jira,
-           reason: :invalid_webhook_event,
-           details: %{event_type: event_type}
-         )}
-
-      is_nil(issue_data) or not is_map(issue_data) ->
-        {:error,
-         Error.provider("Jira webhook event missing issue context",
-           provider: :jira,
-           reason: :invalid_webhook_event,
-           details: %{event_type: event_type}
-         )}
-
-      true ->
-        comment_signal(event_type, payload, comment_data, issue_data)
-    end
-  end
-
-  def normalize_event(%{"webhookEvent" => event_type}) do
+  def normalize_event(%{"webhookEvent" => event_type}) when is_binary(event_type) do
     {:error,
      Error.provider("Unsupported Jira webhook event type",
        provider: :jira,
-       reason: :unsupported_webhook_event,
-       details: %{event_type: event_type}
+       reason: :unsupported_webhook_event
      )}
   end
 
@@ -231,83 +168,23 @@ defmodule Jido.Connect.Jira.Webhook do
 
   @doc "Returns the change type for an issue event type."
   @spec issue_change_type(String.t()) :: String.t()
-  def issue_change_type("jira:issue_created"), do: "created"
-  def issue_change_type("jira:issue_updated"), do: "updated"
-  def issue_change_type(_), do: "unknown"
+  defdelegate issue_change_type(event_type), to: IssueSignal, as: :change_type
 
   @doc "Returns the change type for a comment event type."
   @spec comment_change_type(String.t()) :: String.t()
-  def comment_change_type("comment_created"), do: "created"
-  def comment_change_type("comment_updated"), do: "updated"
-  def comment_change_type(_), do: "unknown"
+  defdelegate comment_change_type(event_type), to: CommentSignal, as: :change_type
 
-  @doc "Converts Jira epoch-millis `timestamp` to ISO 8601."
-  @spec timestamp_to_iso8601(integer() | String.t() | nil) :: String.t() | nil
-  def timestamp_to_iso8601(epoch) when is_integer(epoch) do
-    DateTime.from_unix!(epoch, :millisecond) |> DateTime.to_iso8601()
-  end
+  @doc """
+  Converts Jira epoch-millis `timestamp` to ISO 8601.
 
-  def timestamp_to_iso8601(epoch) when is_binary(epoch) do
-    case Integer.parse(epoch) do
-      {int, _} -> DateTime.from_unix!(int, :millisecond) |> DateTime.to_iso8601()
+  Returns `nil` for `nil`, for a value that is neither an integer nor a string
+  of digits, and for an epoch outside the range of `DateTime`.
+  """
+  @spec timestamp_to_iso8601(term()) :: String.t() | nil
+  def timestamp_to_iso8601(epoch) do
+    case Payload.epoch_to_iso8601(epoch) do
+      {:ok, iso8601} -> iso8601
       :error -> nil
-    end
-  end
-
-  def timestamp_to_iso8601(_), do: nil
-
-  defp normalize_changelog(nil), do: nil
-
-  defp normalize_changelog(%{"items" => items}) when is_list(items) do
-    %{
-      items:
-        Enum.map(items, fn item ->
-          %{
-            field: Data.get(item, "field"),
-            field_type: Data.get(item, "fieldtype"),
-            from: Data.get(item, "from"),
-            from_string: Data.get(item, "fromString"),
-            to: Data.get(item, "to"),
-            to_string: Data.get(item, "toString")
-          }
-          |> Data.compact()
-        end)
-    }
-    |> Data.compact()
-  end
-
-  defp normalize_changelog(_), do: nil
-
-  defp comment_signal(event_type, payload, comment_data, issue_data) do
-    case ADFText.project(Data.get(comment_data, "body")) do
-      {:ok, body} ->
-        signal =
-          %{
-            event_type: event_type,
-            change_type: comment_change_type(event_type),
-            comment_id: Data.get(comment_data, "id"),
-            comment_body: ADFText.text(body),
-            comment_body_unsupported_nodes: ADFText.unsupported_nodes(body),
-            comment_created_at: Data.get(comment_data, "created"),
-            comment_updated_at: Data.get(comment_data, "updated"),
-            comment_author_id: get_in(comment_data, ["author", "accountId"]),
-            comment_author_name: get_in(comment_data, ["author", "displayName"]),
-            issue_id: Data.get(issue_data, "id"),
-            issue_key: Data.get(issue_data, "key"),
-            webhook_id: Data.get(payload, "webhookID"),
-            timestamp: Data.get(payload, "timestamp")
-          }
-          |> Data.compact()
-
-        {:ok, signal}
-
-      {:error, %Error.ValidationError{reason: reason}} ->
-        {:error,
-         Error.provider("Jira webhook comment body is invalid",
-           provider: :jira,
-           reason: :invalid_webhook_event,
-           details: %{event_type: event_type, field: "comment.body", adf_reason: reason}
-         )}
     end
   end
 

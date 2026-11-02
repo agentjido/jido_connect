@@ -50,6 +50,27 @@
   malformed pages fail. The reader and editor packs include the action.
 - Add `url`, `body_adf` and `visibility` to `Comment`. A comment body that
   projects to `""` keeps `body: ""` instead of losing the field.
+- Add `issue_event_type_name`, `actor_id`, `actor_name` and `assigned` to
+  `jira.issue.changed`, and `actor_id` and `actor_name` to
+  `jira.comment.changed`. The comment actor is `comment.author` on creation
+  and `comment.updateAuthor` on edit. `assigned: false` marks an assignee
+  that Jira sent as `null`. Declare `project_name`, which the issue signal
+  already carried.
+- Keep the changelog `id`, each item's `fieldId` as `field_id`, and the
+  presence of `from`, `fromString`, `to` and `toString`, null values
+  included.
+- Replace the signal field `webhook_id`, read from the undocumented
+  `webhookID`, with `matched_webhook_ids` from `matchedWebhookIds`.
+  Administrator webhooks do not send it.
+- Emit `timestamp` as an ISO 8601 string on both webhook triggers.
+  Malformed payloads, including missing issue or comment IDs, non-object
+  nested values and invalid epochs, return `:invalid_webhook_event` with
+  details that name the path but hold no payload values; they no longer
+  raise. `timestamp_to_iso8601/1` returns `nil` for epochs out of range.
+  Unsupported event errors no longer repeat the event name in `details`.
+- Keep `comment_body: ""` on webhook comment signals whose body projects to
+  an empty text, so an empty comment stays apart from a delivery without a
+  body, as `Comment` keeps `body: ""`.
 
 ## 0.1.0
 

@@ -330,6 +330,164 @@ defmodule Jido.Connect.Jira.LiveSmokeTest do
     assert [_ | _] = deliveries
   end
 
+  # The changelog field each kind of change carries. The test fixes no event
+  # name per kind: `issue_event_type_name` names the Jira event that fired,
+  # which depends on the operation and the workflow transition, so the signal
+  # is compared with the delivery's own value.
+  @issue_kinds %{
+    issue_created: nil,
+    assignee_set: ["assignee"],
+    assignee_changed: ["assignee"],
+    assignee_cleared: ["assignee"],
+    status_changed: ["status"],
+    duedate_set: ["duedate"],
+    duedate_moved: ["duedate"],
+    duedate_cleared: ["duedate"],
+    multi_item_update: nil
+  }
+
+  @tag env!(["JIRA_WEBHOOK_SECRET", "JIRA_CAPTURE_DIR"])
+  test "captured issue and comment deliveries keep event names, actors, webhook IDs and changelog fields",
+       %{env: env} do
+    secret = env["JIRA_WEBHOOK_SECRET"]
+
+    deliveries =
+      for capture <- Enum.sort_by(captures(env["JIRA_CAPTURE_DIR"]), & &1["captured_at"]),
+          payload <- [Jason.decode!(capture["body"])],
+          kind <- [delivery_kind(payload)],
+          kind != nil,
+          do: {kind, capture, payload}
+
+    # With JIDO_CONNECT_RECORD=1 the oldest capture of each kind becomes the
+    # fixture `test/fixtures/jira/captured/<kind>.json`. An update with
+    # several items is checked but not recorded: the placeholders that hide
+    # a former assignee in `from` would also replace status IDs and dates.
+    if LiveSmoke.recording?() do
+      for {kind, capture, _payload} <- Enum.uniq_by(deliveries, &elem(&1, 0)),
+          kind != :multi_item_update do
+        LiveSmoke.write_capture!(
+          capture,
+          :jira,
+          Atom.to_string(kind),
+          [secret: secret] ++ capture_options(kind)
+        )
+      end
+    end
+
+    for {kind, capture, payload} <- deliveries do
+      assert {:ok, %{normalized_signal: %{} = signal}} =
+               LiveSmoke.replay(capture, webhook: Webhook, secret: secret)
+
+      # Administrator webhooks send neither `matchedWebhookIds` nor `webhookID`.
+      refute Map.has_key?(payload, "matchedWebhookIds")
+      refute Map.has_key?(payload, "webhookID")
+      refute Map.has_key?(signal, :matched_webhook_ids)
+
+      assert signal.timestamp ==
+               payload["timestamp"]
+               |> DateTime.from_unix!(:millisecond)
+               |> DateTime.to_iso8601()
+
+      assert_live_signal(kind, signal, payload)
+    end
+
+    kinds = MapSet.new(deliveries, &elem(&1, 0))
+    assert Enum.any?(~w(assignee_set assignee_changed assignee_cleared)a, &(&1 in kinds))
+    assert :status_changed in kinds
+    assert Enum.any?(~w(duedate_set duedate_moved duedate_cleared)a, &(&1 in kinds))
+    assert :comment_created in kinds
+    assert :comment_updated in kinds
+  end
+
+  defp assert_live_signal(kind, signal, payload) when is_map_key(@issue_kinds, kind) do
+    field_ids = Map.fetch!(@issue_kinds, kind)
+    items = get_in(payload, ["changelog", "items"])
+
+    assert signal.issue_event_type_name == payload["issue_event_type_name"]
+    assert signal.actor_id == get_in(payload, ["user", "accountId"])
+    assert signal.actor_name == get_in(payload, ["user", "displayName"])
+    assert signal.issue_id == get_in(payload, ["issue", "id"])
+
+    assert signal.change_type ==
+             if(kind == :issue_created, do: "created", else: "updated")
+
+    assert signal.changelog.id == get_in(payload, ["changelog", "id"])
+    assert Enum.map(signal.changelog.items, & &1.field_id) == Enum.map(items, & &1["fieldId"])
+    assert Enum.map(signal.changelog.items, &item_change/1) == Enum.map(items, &item_change/1)
+
+    if field_ids, do: assert(Enum.map(items, & &1["fieldId"]) == field_ids)
+  end
+
+  defp assert_live_signal(kind, signal, payload) do
+    comment = payload["comment"]
+    actor = if kind == :comment_created, do: comment["author"], else: comment["updateAuthor"]
+
+    refute Map.has_key?(payload, "user")
+    refute Map.has_key?(signal, :issue_event_type_name)
+    assert signal.change_type == if(kind == :comment_created, do: "created", else: "updated")
+    assert signal.actor_id == actor["accountId"]
+    assert signal.actor_name == actor["displayName"]
+    assert signal.comment_author_id == get_in(comment, ["author", "accountId"])
+    assert signal.comment_id == comment["id"]
+    assert signal.issue_id == get_in(payload, ["issue", "id"])
+    assert signal.issue_key == get_in(payload, ["issue", "key"])
+  end
+
+  # Whether an item states a previous and a new value, and which of them is null.
+  defp item_change(item) do
+    item = Map.new(item, fn {key, value} -> {to_string(key), value} end)
+
+    for key <- ["from", "to"] do
+      case Map.fetch(item, key) do
+        {:ok, nil} -> :null
+        {:ok, _value} -> :value
+        :error -> :absent
+      end
+    end
+  end
+
+  defp delivery_kind(%{"webhookEvent" => "jira:issue_created"}), do: :issue_created
+  defp delivery_kind(%{"webhookEvent" => "comment_created"}), do: :comment_created
+  defp delivery_kind(%{"webhookEvent" => "comment_updated"}), do: :comment_updated
+
+  defp delivery_kind(%{
+         "webhookEvent" => "jira:issue_updated",
+         "changelog" => %{"items" => [item]}
+       }),
+       do: update_kind(item["fieldId"], item["from"], item["to"])
+
+  defp delivery_kind(%{
+         "webhookEvent" => "jira:issue_updated",
+         "changelog" => %{"items" => [_first, _second | _rest]}
+       }),
+       do: :multi_item_update
+
+  defp delivery_kind(_payload), do: nil
+
+  defp update_kind("assignee", nil, _to), do: :assignee_set
+  defp update_kind("assignee", _from, nil), do: :assignee_cleared
+  defp update_kind("assignee", _from, _to), do: :assignee_changed
+  defp update_kind("status", _from, _to), do: :status_changed
+  defp update_kind("duedate", nil, _to), do: :duedate_set
+  defp update_kind("duedate", _from, nil), do: :duedate_cleared
+  defp update_kind("duedate", _from, _to), do: :duedate_moved
+  defp update_kind(_field_id, _from, _to), do: nil
+
+  # Avatar URLs carry e-mail hashes and initials, so they become placeholders.
+  # When an assignee is changed or cleared, the former assignee can appear
+  # only in the changelog item's `from`, `tmpFromAccountId` and `fromString`,
+  # for example when someone else made the change. The sanitizer learns
+  # account IDs and names only under keys such as `accountId` and
+  # `displayName`, so these values get placeholders as well. A new recording
+  # of `assignee_changed` therefore writes `from-<n>` where the fixture of
+  # 2026-10-30 has the actor's `account-1`.
+  @avatar_fields ~w(16x16 24x24 32x32 48x48)
+
+  defp capture_options(kind) when kind in [:assignee_changed, :assignee_cleared],
+    do: [fields: @avatar_fields ++ ~w(from tmpFromAccountId), name_keys: ~w(fromString)]
+
+  defp capture_options(_kind), do: [fields: @avatar_fields]
+
   defp request(env) do
     env
     |> runtime()

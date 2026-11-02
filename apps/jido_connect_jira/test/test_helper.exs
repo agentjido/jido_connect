@@ -50,6 +50,30 @@ defmodule Jido.Connect.Jira.TestRuntime do
   end
 end
 
+defmodule Jido.Connect.Jira.CapturedDelivery do
+  @moduledoc false
+
+  # Sanitized administrator webhook deliveries from the live test site, written
+  # to test/fixtures/jira/captured by the live smoke test with
+  # JIDO_CONNECT_RECORD=1. They are signed with `LiveSmoke.replay_secret/0`.
+
+  @dir Path.expand("fixtures/jira/captured", __DIR__)
+
+  def path(name), do: Path.join(@dir, "#{name}.json")
+
+  def capture!(name), do: name |> path() |> File.read!() |> Jason.decode!()
+
+  def payload!(name), do: name |> capture!() |> Map.fetch!("body") |> Jason.decode!()
+
+  def names do
+    @dir
+    |> Path.join("*.json")
+    |> Path.wildcard()
+    |> Enum.map(&Path.basename(&1, ".json"))
+    |> Enum.sort()
+  end
+end
+
 defmodule Jido.Connect.Jira.MockClient do
   @moduledoc false
 

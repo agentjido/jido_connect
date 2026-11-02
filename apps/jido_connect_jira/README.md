@@ -248,29 +248,92 @@ for a base64 digest and do not match the header Jira sends.
 
 ### Webhook Event Fields
 
-Issue events produce signals with:
+Issue events produce `jira.issue.changed` signals with:
 
 - `event_type`, `change_type` (`"created"` or `"updated"`)
-- `issue_id`, `issue_key`, `project_key`, `summary`, `status_name`
-- `assignee_id`, `assignee_name`, `reporter_id`, `reporter_name`
-- `labels`, `issue_type_name`, `priority_name`
-- `changelog` (updated events only, with field-level change items)
-- `webhook_id`, `timestamp`
+- `issue_event_type_name`: Jira's value, unchanged. It names the Jira event
+  that fired, which depends on the operation and on the workflow transition;
+  read status, assignee and due-date changes from the changelog items. In one
+  capture run on 2026-10-30, with a simplified workflow and fields changed by
+  REST edits, administrator webhooks sent a status change as `issue_generic`
+  and assignee and due-date changes as `issue_updated`. Other workflows and
+  the assign operation can send other names, such as `issue_assigned`,
+  `issue_resolved` or `issue_work_started`.
+- `actor_id`, `actor_name`: account ID and display name of the top-level `user`
+- `issue_id`, `issue_key`, `project_key`, `project_name`, `summary`,
+  `status_name`, `issue_type_name`, `priority_name`, `labels`
+- `assigned`, `assignee_id`, `assignee_name`, `reporter_id`, `reporter_name`
+- `created_at`, `updated_at`
+- `changelog`: `id` and `items` in Jira's order. Each item has `field`,
+  `field_id`, `field_type`, and the `from`, `from_string`, `to` and
+  `to_string` keys that Jira sent.
+- `matched_webhook_ids`, `timestamp`
 
-Comment events produce signals with:
+Comment events produce `jira.comment.changed` signals with:
 
 - `event_type`, `change_type` (`"created"` or `"updated"`)
+- `actor_id`, `actor_name`
 - `comment_id`, `comment_body`, `comment_body_unsupported_nodes`
 - `comment_author_id`, `comment_author_name`
 - `comment_created_at`, `comment_updated_at`
 - `issue_id`, `issue_key` (context)
-- `webhook_id`, `timestamp`
+- `matched_webhook_ids`, `timestamp`
+
+A field is absent when the delivery has no value for it. These fields follow
+stricter presence rules:
+
+- `assigned` is `true` when `fields.assignee` holds a user and `false` when
+  Jira sends `"assignee": null`. It is absent when the fields leave the
+  assignee out. `assignee_id` and `assignee_name` appear only with a user.
+- Changelog items keep `from`, `from_string`, `to` and `to_string` exactly as
+  present: a key sent as `null` stays `nil`, a key left out stays absent.
+  Values pass through unchanged, so status items keep their status IDs and
+  names, and due-date items keep date-only `YYYY-MM-DD` values.
+- Comment deliveries have no top-level `user`. Their actor is
+  `comment.author` for `comment_created` and `comment.updateAuthor` for
+  `comment_updated`; without that object the actor is absent.
+  `comment_author_id` always names the comment's author.
+- `matched_webhook_ids` lists the `matchedWebhookIds` of a delivery as
+  strings. Administrator webhooks do not send that key, so the field is
+  absent for them. The per-delivery identifier is the `delivery_id` that
+  `verify_delivery/4` reads from `X-Atlassian-Webhook-Identifier`. The
+  undocumented `webhookID` is no longer read, and the signal field
+  `webhook_id` is gone.
+- `timestamp` is the delivery's epoch-millisecond `timestamp` as an ISO 8601
+  string, such as `"2026-10-30T19:34:57.477Z"`.
 
 `comment_body` follows the rich-text rules below. Administrator webhooks send
 the body as a plain string, which passes through with an empty
-`comment_body_unsupported_nodes`. A comment body that is not valid ADF fails
-the event with `:invalid_webhook_event`; `verify_delivery/4` then returns the
-verified delivery without a normalized signal.
+`comment_body_unsupported_nodes`. A body that projects to an empty text keeps
+`comment_body: ""`, so an empty comment stays apart from a delivery without a
+body, which has neither body field.
+
+`normalize_event/1` never raises on a malformed payload. It returns a
+`Jido.Connect.Error.ProviderError` with reason `:invalid_webhook_event` for:
+
+- a missing issue or comment, and an issue or comment `id` that is not a
+  non-empty string;
+- in issue deliveries, `fields`, `user`, `changelog` or `fields.assignee`
+  that is neither an object nor `null`, `changelog.items` that is neither a
+  list nor `null`, and a `changelog.items` entry that is not an object, a
+  `null` entry included;
+- in comment deliveries, `comment.author` or `comment.updateAuthor` that is
+  neither an object nor `null`, and a comment body that is not valid ADF;
+- a malformed `timestamp` or `matchedWebhookIds`.
+
+Comment deliveries do not read `fields`, `user` or `changelog`. The error
+details name the event type and the payload path, such as `"issue.id"`, and
+for a comment body also the ADF reason; they hold no payload values. A
+payload without a string `webhookEvent` returns `:invalid_webhook_event`
+with empty details, and other event names return
+`:unsupported_webhook_event`. `verify_delivery/4` then returns the verified
+delivery without a normalized signal.
+
+The signal keeps full values. `Jido.Connect.WebhookDelivery.to_public_map/1`
+sanitizes `normalized_signal` like any transport payload: it cuts strings
+such as a long `comment_body` at 512 bytes and replaces values nested deeper
+than four levels, such as the values of changelog items, with
+`"[truncated]"`.
 
 ## Catalog Packs
 

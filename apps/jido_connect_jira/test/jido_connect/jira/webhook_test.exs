@@ -1,7 +1,9 @@
 defmodule Jido.Connect.Jira.WebhookTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Jira.Webhook
+  alias Jido.Connect.Jira.{CapturedDelivery, Webhook}
+  alias Jido.Connect.TestSupport.LiveSmoke
+  alias Jido.Connect.WebhookDelivery
 
   describe "verify_signature/2" do
     test "returns :ok when signatures match" do
@@ -34,138 +36,90 @@ defmodule Jido.Connect.Jira.WebhookTest do
   end
 
   describe "normalize_event/1 — issue events" do
-    test "normalizes issue created event" do
-      payload = fixture!("webhook_issue_created.json")
+    test "normalizes a captured issue creation" do
+      payload = CapturedDelivery.payload!("issue_created")
 
       assert {:ok, signal} = Webhook.normalize_event(payload)
       assert signal.event_type == "jira:issue_created"
       assert signal.change_type == "created"
-      assert signal.issue_id == "10001"
-      assert signal.issue_key == "PROJ-123"
-      assert signal.project_key == "PROJ"
-      assert signal.project_name == "Project Alpha"
-      assert signal.summary == "Implement user authentication flow"
+      assert signal.issue_event_type_name == "issue_created"
+      assert signal.actor_id == "account-1"
+      assert signal.actor_name == "Person 1"
+      assert signal.issue_id == "46154"
+      assert signal.issue_key == "JCL-59"
+      assert signal.project_key == "JCL"
+      assert signal.project_name == "Jido Connect Live"
+      assert signal.summary == "JCL capture run 2026-10-30 19:34 UTC"
       assert signal.issue_type_name == "Task"
-      assert signal.status_name == "To Do"
+      assert signal.status_name == "Backlog"
       assert signal.priority_name == "Medium"
-      assert signal.labels == ["backend", "auth"]
-      assert signal.assignee_id == "5f8a7b9c1d2e3f4a5b6c7d8e"
-      assert signal.assignee_name == "Alice Nakamura"
-      assert signal.reporter_id == "6g9b8c0d2e3f4a5b7c8d9e0f"
-      assert signal.reporter_name == "Bob Martinez"
-      assert signal.created_at == "2026-04-10T08:30:00.000+0000"
-      assert signal.updated_at == "2026-05-15T14:22:00.000+0000"
-      assert signal.webhook_id == "42"
-      assert signal.timestamp == 1_747_324_800_000
-      refute Map.has_key?(signal, :changelog)
-    end
+      assert signal.labels == []
+      assert signal.assigned == true
+      assert signal.assignee_id == "account-1"
+      assert signal.assignee_name == "Person 1"
+      assert signal.reporter_id == "account-1"
+      assert signal.reporter_name == "Person 1"
+      assert signal.created_at == "2026-10-30T20:34:46.505+0100"
+      assert signal.updated_at == "2026-10-30T20:34:46.505+0100"
+      assert signal.timestamp == "2026-10-30T19:34:47.074Z"
+      refute Map.has_key?(signal, :matched_webhook_ids)
+      refute Map.has_key?(signal, :webhook_id)
 
-    test "normalizes issue updated event with changelog" do
-      payload = fixture!("webhook_issue_updated.json")
+      assert %{id: "283376", items: items} = signal.changelog
 
-      assert {:ok, signal} = Webhook.normalize_event(payload)
-      assert signal.event_type == "jira:issue_updated"
-      assert signal.change_type == "updated"
-      assert signal.issue_key == "PROJ-123"
-      assert signal.status_name == "In Progress"
-      assert signal.priority_name == "High"
-      assert signal.labels == ["backend", "auth", "security"]
-
-      assert [%{field: "status"}, %{field: "priority"}] = signal.changelog.items
-
-      status_change = Enum.find(signal.changelog.items, &(&1.field == "status"))
-      assert status_change.from_string == "To Do"
-      assert status_change.to_string == "In Progress"
+      assert Enum.map(items, &{&1.field, &1.field_id}) == [
+               {"Status", "status"},
+               {"priority", "priority"},
+               {"summary", "summary"},
+               {"assignee", "assignee"},
+               {"reporter", "reporter"}
+             ]
     end
   end
 
-  describe "normalize_event/1 — comment events" do
-    test "normalizes comment created event" do
-      payload = fixture!("webhook_comment_created.json")
+  describe "captured deliveries" do
+    test "replay through verify_delivery/4 with the signal of normalize_event/1" do
+      assert [_, _, _, _, _, _, _, _, _] = names = CapturedDelivery.names()
 
-      assert {:ok, signal} = Webhook.normalize_event(payload)
-      assert signal.event_type == "comment_created"
-      assert signal.change_type == "created"
-      assert signal.comment_id == "20010"
-      assert signal.comment_body == "Investigated the OAuth2 flow. Ready to start implementation."
-      assert signal.comment_author_id == "5f8a7b9c1d2e3f4a5b6c7d8e"
-      assert signal.comment_author_name == "Alice Nakamura"
-      assert signal.comment_created_at == "2026-05-01T10:30:00.000+0000"
-      assert signal.issue_id == "10001"
-      assert signal.issue_key == "PROJ-123"
-      assert signal.webhook_id == "43"
-      assert signal.timestamp == 1_747_326_000_000
+      for name <- names do
+        payload = CapturedDelivery.payload!(name)
+        assert {:ok, signal} = Webhook.normalize_event(payload)
+
+        assert {:ok, %WebhookDelivery{event: event, delivery_id: id, normalized_signal: ^signal}} =
+                 LiveSmoke.replay(CapturedDelivery.path(name), webhook: Webhook)
+
+        assert event == payload["webhookEvent"]
+        assert id =~ ~r/^\d+$/
+      end
     end
 
-    test "normalizes comment updated event" do
-      payload = fixture!("webhook_comment_updated.json")
+    test "the signal keeps changelog values that the public delivery map cuts" do
+      assert {:ok, %WebhookDelivery{normalized_signal: signal} = delivery} =
+               LiveSmoke.replay(CapturedDelivery.path("status_changed"), webhook: Webhook)
 
-      assert {:ok, signal} = Webhook.normalize_event(payload)
-      assert signal.event_type == "comment_updated"
-      assert signal.change_type == "updated"
-      assert signal.comment_id == "20010"
+      assert [%{from: "10916", to: "3"}] = signal.changelog.items
 
-      assert signal.comment_body ==
-               "Updated: investigated the OAuth2 flow. Implementation complete."
-
-      assert signal.comment_updated_at == "2026-05-01T11:00:00.000+0000"
-    end
-  end
-
-  describe "normalize_event/1 — error cases" do
-    test "returns error for unsupported event type" do
-      payload = %{"webhookEvent" => "jira:worklog_created"}
-
-      assert {:error, %{reason: :unsupported_webhook_event}} =
-               Webhook.normalize_event(payload)
-    end
-
-    test "returns error for missing issue in issue event" do
-      payload = %{"webhookEvent" => "jira:issue_created"}
-
-      assert {:error, %{reason: :invalid_webhook_event}} = Webhook.normalize_event(payload)
-    end
-
-    test "returns error for missing comment in comment event" do
-      payload = %{"webhookEvent" => "comment_created", "issue" => %{"id" => "1"}}
-
-      assert {:error, %{reason: :invalid_webhook_event}} = Webhook.normalize_event(payload)
-    end
-
-    test "returns error for missing issue in comment event" do
-      payload = %{
-        "webhookEvent" => "comment_created",
-        "comment" => %{"id" => "1"}
-      }
-
-      assert {:error, %{reason: :invalid_webhook_event}} = Webhook.normalize_event(payload)
-    end
-
-    test "returns error for non-map payload" do
-      assert {:error, %{reason: :invalid_webhook_event}} = Webhook.normalize_event("not a map")
-    end
-
-    test "returns error for map without webhookEvent" do
-      assert {:error, %{reason: :invalid_webhook_event}} = Webhook.normalize_event(%{})
+      # `to_public_map/1` sanitizes the signal like any transport payload:
+      # values nested deeper than four levels become "[truncated]".
+      assert %{"items" => [%{"from" => "[truncated]", "to" => "[truncated]"}]} =
+               WebhookDelivery.to_public_map(delivery).normalized_signal["changelog"]
     end
   end
 
   describe "normalize_events/1" do
     test "normalizes a batch of events" do
-      events = fixture!("webhook_batch_events.json")
+      events = Enum.map(~w(issue_created comment_created), &CapturedDelivery.payload!/1)
 
-      assert {:ok, signals} = Webhook.normalize_events(events)
-      assert length(signals) == 2
-
-      types = Enum.map(signals, & &1.event_type) |> Enum.sort()
-      assert types == ["comment_created", "jira:issue_created"]
+      assert {:ok, [%{event_type: "jira:issue_created"}, %{event_type: "comment_created"}]} =
+               Webhook.normalize_events(events)
     end
 
     test "returns error for invalid event in batch" do
-      events = [%{"webhookEvent" => "unknown_event"}]
+      # Derived: the captured creation under an event name the triggers do not normalize.
+      event = Map.put(CapturedDelivery.payload!("issue_created"), "webhookEvent", "unknown_event")
 
       assert {:error, %{reason: :unsupported_webhook_event}} =
-               Webhook.normalize_events(events)
+               Webhook.normalize_events([event])
     end
 
     test "returns error for non-list payload" do
@@ -214,14 +168,11 @@ defmodule Jido.Connect.Jira.WebhookTest do
 
   describe "timestamp_to_iso8601/1" do
     test "converts epoch millis to ISO 8601" do
-      result = Webhook.timestamp_to_iso8601(1_747_324_800_000)
-      assert is_binary(result)
-      assert String.ends_with?(result, "Z")
+      assert Webhook.timestamp_to_iso8601(1_747_324_800_000) == "2025-05-15T16:00:00.000Z"
     end
 
     test "converts string epoch millis to ISO 8601" do
-      result = Webhook.timestamp_to_iso8601("1747324800000")
-      assert is_binary(result)
+      assert Webhook.timestamp_to_iso8601("1747324800000") == "2025-05-15T16:00:00.000Z"
     end
 
     test "returns nil for nil input" do
@@ -230,6 +181,17 @@ defmodule Jido.Connect.Jira.WebhookTest do
 
     test "returns nil for unparseable string" do
       assert Webhook.timestamp_to_iso8601("not-a-number") == nil
+      assert Webhook.timestamp_to_iso8601("1747324800000ms") == nil
+    end
+
+    test "returns nil for a signed string, which is not a string of digits" do
+      assert Webhook.timestamp_to_iso8601("-5") == nil
+      assert Webhook.timestamp_to_iso8601("+1747324800000") == nil
+    end
+
+    test "returns nil instead of raising for an epoch beyond the DateTime range" do
+      assert Webhook.timestamp_to_iso8601(10 ** 20) == nil
+      assert Webhook.timestamp_to_iso8601("100000000000000000000") == nil
     end
   end
 
@@ -242,12 +204,5 @@ defmodule Jido.Connect.Jira.WebhookTest do
       assert "comment_created" in events
       assert "comment_updated" in events
     end
-  end
-
-  defp fixture!(name) do
-    Path.join([__DIR__, "..", "..", "..", "test", "fixtures", "jira", name])
-    |> Path.expand()
-    |> File.read!()
-    |> Jason.decode!()
   end
 end

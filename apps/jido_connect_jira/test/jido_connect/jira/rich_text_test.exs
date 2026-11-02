@@ -3,7 +3,7 @@ defmodule Jido.Connect.Jira.RichTextTest do
 
   alias Jido.Connect.{Error, WebhookDelivery}
   alias Jido.Connect.Jira.Client.{Normalizer, Response}
-  alias Jido.Connect.Jira.Webhook
+  alias Jido.Connect.Jira.{CapturedDelivery, Webhook}
   alias Jido.Connect.TestSupport.LiveSmoke
 
   # An ADF document composed of examples from Atlassian's document format
@@ -218,7 +218,7 @@ defmodule Jido.Connect.Jira.RichTextTest do
 
   describe "comment webhook signals" do
     test "a comment_created delivery with an unsupported node yields its text and the skipped types" do
-      payload = put_in(fixture!("webhook_comment_created.json"), ["comment", "body"], @adf)
+      payload = put_in(CapturedDelivery.payload!("comment_created"), ["comment", "body"], @adf)
 
       assert {:ok, signal} = Webhook.normalize_event(payload)
       assert signal.change_type == "created"
@@ -238,7 +238,7 @@ defmodule Jido.Connect.Jira.RichTextTest do
     test "a plain-string body of an administrator webhook passes through" do
       payload =
         put_in(
-          fixture!("webhook_comment_created.json"),
+          CapturedDelivery.payload!("comment_created"),
           ["comment", "body"],
           "First version.\nSecond line"
         )
@@ -249,7 +249,8 @@ defmodule Jido.Connect.Jira.RichTextTest do
     end
 
     test "a malformed comment body fails the event explicitly" do
-      payload = put_in(fixture!("webhook_comment_updated.json"), ["comment", "body"], @malformed)
+      payload =
+        put_in(CapturedDelivery.payload!("comment_updated"), ["comment", "body"], @malformed)
 
       assert {:error, %Error.ProviderError{} = error} = Webhook.normalize_event(payload)
       assert error.reason == :invalid_webhook_event
