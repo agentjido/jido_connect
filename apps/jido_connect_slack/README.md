@@ -5,8 +5,8 @@
 It includes:
 
 - `Jido.Connect.Slack`, a Spark-authored provider that compiles into Jido tools
-- generated actions for listing conversations and posting, updating, and
-  deleting messages
+- generated actions for listing conversations, reading conversation history,
+  and posting, updating, and deleting messages
 - OAuth v2 helpers in `Jido.Connect.Slack.OAuth`
 - Slack Web API helpers in `Jido.Connect.Slack.Client`
 - signed request verification and Events API helpers in `Jido.Connect.Slack.Webhook`
@@ -58,6 +58,62 @@ url =
 
 Hosts turn the token response into a durable `Jido.Connect.Connection` and a
 short-lived `Jido.Connect.CredentialLease` before running generated actions.
+
+## Conversation history
+
+`slack.conversation.history` reads one page of a conversation through Slack
+`conversations.history`, newest message first, with the bot or the user
+profile.
+
+Inputs:
+
+- `channel` and `conversation_type` are required. `conversation_type` is one
+  of `public_channel`, `private_channel`, `im` and `mpim`. It selects the
+  required scope (`channels:history`, `groups:history`, `im:history` or
+  `mpim:history`) and is not sent to Slack. The package does not infer the
+  type from the channel ID, because Slack gives private channels and group
+  DMs IDs that start with `C`. A tool availability check without a
+  `conversation_type` offers the action to a connection with any one of these
+  scopes; each call still needs the scope of its type.
+- `cursor`, `oldest`, `latest` and `inclusive` (default `false`) go to Slack
+  unchanged.
+- `limit` defaults to 100 and must be from 1 through 100. The bound is a
+  package choice; Slack accepts larger pages.
+
+One call sends one request and returns one page: `messages`, `next_cursor`
+(an empty string on the last page), `has_more` and, only when Slack sends it,
+`is_limited`. Pass `next_cursor` as `cursor` to read the next page. The action
+does not retry, does not read further pages on its own and does not change
+read state.
+
+Each message is a map with the fields of `Jido.Connect.Slack.Message`:
+`channel`, `conversation_type`, `ts`, `thread_ts`, `user`, `bot_id`, `app_id`,
+`text`, `blocks`, `attachments`, `files`, `subtype` and `edited` (`user` and
+`ts` of the last edit). Timestamps stay Slack's strings, and `text` is the
+full text. An empty text stays `""`; a field Slack does not send is `nil`.
+Authors are the IDs Slack sends and are never derived. In
+`conversations.history`, an uploaded file arrives as a message with `files`,
+from a person or from the bot, without the `file_share` subtype. A record
+without `ts` or with a wrongly typed field makes the call fail with
+`:invalid_response`.
+
+`channel` and `conversation_type` repeat the input. Slack returns no
+conversation type, so `conversation_type` is the caller's unchecked
+declaration and only selects the scope check. A group DM declared as
+`public_channel` passes that check with `channels:history`; if the token also
+holds `mpim:history`, which Slack requires, the read succeeds and its messages
+say `public_channel`. Do not base visibility, indexing or policies on this
+field. The `is_private`, `is_im` and `is_mpim` flags of
+`slack.conversation.info` or the host's own record say what a conversation is.
+
+## Rate limits
+
+Slack answers a rate-limited call with HTTP 429 and an `ok: false` body. Every
+Slack action returns an `ok: false` response as a
+`Jido.Connect.Error.ProviderError` that keeps the `Retry-After` delay in
+seconds as `details.retry_after`. An HTTP failure without an `ok: false` body,
+such as a 503 with a text body, and a failed upload of file content carry no
+`retry_after`. The package does not retry.
 
 ## Message deletion
 

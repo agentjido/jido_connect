@@ -1420,6 +1420,7 @@ defmodule Jido.Connect.SlackTest do
     assert Jido.Connect.Slack.jido_action_modules() == [
              Jido.Connect.Slack.Actions.ListChannels,
              Jido.Connect.Slack.Actions.GetThreadReplies,
+             Jido.Connect.Slack.Actions.GetConversationHistory,
              Jido.Connect.Slack.Actions.GetConversationInfo,
              Jido.Connect.Slack.Actions.CreateChannel,
              Jido.Connect.Slack.Actions.ArchiveChannel,
@@ -1495,6 +1496,7 @@ defmodule Jido.Connect.SlackTest do
                actions: [
                  Jido.Connect.Slack.Actions.ListChannels,
                  Jido.Connect.Slack.Actions.GetThreadReplies,
+                 Jido.Connect.Slack.Actions.GetConversationHistory,
                  Jido.Connect.Slack.Actions.GetConversationInfo,
                  Jido.Connect.Slack.Actions.CreateChannel,
                  Jido.Connect.Slack.Actions.ArchiveChannel,
@@ -3833,6 +3835,7 @@ defmodule Jido.Connect.SlackTest do
     assert spec.actions == [
              Jido.Connect.Slack.Actions.ListChannels,
              Jido.Connect.Slack.Actions.GetThreadReplies,
+             Jido.Connect.Slack.Actions.GetConversationHistory,
              Jido.Connect.Slack.Actions.GetConversationInfo,
              Jido.Connect.Slack.Actions.CreateChannel,
              Jido.Connect.Slack.Actions.ArchiveChannel,
