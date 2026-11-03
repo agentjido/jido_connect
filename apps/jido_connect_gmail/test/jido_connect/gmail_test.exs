@@ -553,6 +553,23 @@ defmodule Jido.Connect.GmailTest do
     end
   end
 
+  defmodule ComposeSpyGmailClient do
+    def send_message(params, "token") do
+      send(self(), {:gmail_client_called, :send_message, params})
+      {:error, Connect.Error.provider("not served", provider: :google)}
+    end
+
+    def create_draft(params, "token") do
+      send(self(), {:gmail_client_called, :create_draft, params})
+      {:error, Connect.Error.provider("not served", provider: :google)}
+    end
+
+    def update_draft(params, "token") do
+      send(self(), {:gmail_client_called, :update_draft, params})
+      {:error, Connect.Error.provider("not served", provider: :google)}
+    end
+  end
+
   defmodule RecordedContentGmailClient do
     # Serves format=full responses recorded from the live test account and
     # reports each call to the test process.
@@ -1463,6 +1480,50 @@ defmodule Jido.Connect.GmailTest do
                context: context,
                credential_lease: lease
              )
+  end
+
+  test "send and draft actions reject a line break in a header value before the client call" do
+    # gmail.compose satisfies send as well as the draft writes.
+    {context, lease} =
+      context_and_lease(scopes: compose_scopes(), gmail_client: ComposeSpyGmailClient)
+
+    message = %{to: ["to@example.com"], subject: "Hello", body_text: "Body"}
+
+    actions = [
+      {"google.gmail.message.send", :send_message, message},
+      {"google.gmail.draft.create", :create_draft, message},
+      {"google.gmail.draft.update", :update_draft, Map.put(message, :draft_id, "draft123")}
+    ]
+
+    for {action_id, _function, input} <- actions,
+        {field, value} <- [
+          subject: "Hi\r\nBcc: x@example.com",
+          in_reply_to: "<a@example.com>\n",
+          references: "<a@example.com>\r<b@example.com>"
+        ] do
+      assert {:error,
+              %Connect.Error.ValidationError{
+                reason: :invalid_header_value,
+                details: %{field: ^field}
+              }} =
+               Connect.invoke(Gmail.integration(), action_id, Map.put(input, field, value),
+                 context: context,
+                 credential_lease: lease
+               )
+    end
+
+    refute_received {:gmail_client_called, _function, _params}
+
+    # The same inputs without the break reach the client.
+    for {action_id, function, input} <- actions do
+      assert {:error, %Connect.Error.ProviderError{}} =
+               Connect.invoke(Gmail.integration(), action_id, input,
+                 context: context,
+                 credential_lease: lease
+               )
+
+      assert_received {:gmail_client_called, ^function, _params}
+    end
   end
 
   test "send action requires dynamic send-capable scope" do

@@ -109,6 +109,23 @@ parts behind an `attachmentId` and returned unnamed ISO-8859-1, Windows-1252
 and UTF-16LE text converted; the UTF-16LE text kept its length, so only its
 charset shows the conversion.
 
+## Outgoing Messages
+
+`google.gmail.message.send`, `google.gmail.draft.create` and
+`google.gmail.draft.update` build their message with
+`Jido.Connect.Gmail.MIME.build_raw/1`. It trims recipients, the subject and
+the body and emits one UTF-8 body part, HTML when both bodies are given.
+
+Header values stay on one line. After trimming, a CR or LF in `subject`,
+`in_reply_to` or `references` returns a validation error with reason
+`:invalid_header_value` and the field, so the value cannot add a header such
+as `Bcc:`. `in_reply_to` and `references` are not trimmed, so a trailing break
+fails too. They must be `nil` or a string; `nil` and `""` leave the header out,
+and any other value, such as a list, fails with the same reason. A recipient
+with a break inside fails the address pattern with `:invalid_recipient`.
+Either way the action makes no provider call, and the header error does not
+repeat the value.
+
 ## Actions
 
 - `google.gmail.profile.get`

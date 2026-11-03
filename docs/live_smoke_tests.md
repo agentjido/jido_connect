@@ -55,9 +55,22 @@ family: `discovery_live_smoke_test.exs` for inbox and archive discovery,
 `content_live_smoke_test.exs` for message and thread content and forwards,
 `attachments_live_smoke_test.exs` for attachment content,
 `history_live_smoke_test.exs` for the new-message and change polls and Trash,
-and `labels_live_smoke_test.exs` for labels and archiving. Their shared helpers
+`labels_live_smoke_test.exs` for labels and archiving, and
+`send_live_smoke_test.exs` for sending mail and drafts. Their shared helpers
 are in `test/support/live_gmail.ex`, which the package's `test_helper.exs`
 loads.
+
+The send check is the one Gmail check that mails another mailbox. With
+`GOOGLE_LIVE_DESTRUCTIVE=true` it sends a new mail and a reply in the same
+thread to `GOOGLE_GMAIL_RECIPIENT`, so each run puts two mails there, and
+those copies stay. Keep such runs few. The draft check addresses its draft to
+the same mailbox and sends nothing. Both tests read back what Gmail stores in
+`format=raw`, outside the connector and the recorder, and delete the
+sender's copies, the draft and an inserted message when they exit. Gmail
+answered 500 to deleting a message right after sending it, so
+`LiveGmail.delete_message!/2` and `LiveGmail.delete_draft!/2` retry transient
+failures. The recordings `message_send.json`, `message_send_reply.json`,
+`draft_create.json` and `draft_update.json` each hold the answer to one write.
 
 ## Writing a Live Test
 
@@ -137,7 +150,7 @@ as seed input belong to the scripts that create the test data.
 | `GOOGLE_GMAIL_LABEL_ID` | setting | Test label |
 | `GOOGLE_GMAIL_DISPOSABLE_MESSAGE_ID` | setting | Message that a write test may delete |
 | `GOOGLE_GMAIL_ARCHIVE_MESSAGE_ID` | setting | One message of the two-message archive and label thread |
-| `GOOGLE_GMAIL_RECIPIENT` | setting | Second mailbox for sent mail |
+| `GOOGLE_GMAIL_RECIPIENT` | setting | Second mailbox, controlled by the owner of the test data, that receives the mail of the send check |
 | `GOOGLE_CALENDAR_ID` | setting | Test calendar with six prepared `jcl-live` events from 2026-11-09 to 2026-11-15, timed in three zones, across midnight, all-day and multi-day, and a weekly series of six Monday occurrences from 2026-11-09 whose second one is moved |
 | `GOOGLE_CALENDAR_EVENT_ID` | setting | Meeting with a 963-byte description, the test user and `GOOGLE_SEED_ATTENDEES` as attendees, an agenda and a handout attachment, and Meet data |
 | `GOOGLE_CALENDAR_AGENDA_FILE_ID` | setting | Google Docs agenda attached to that event |

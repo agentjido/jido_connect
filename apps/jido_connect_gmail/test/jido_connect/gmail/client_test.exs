@@ -360,18 +360,6 @@ defmodule Jido.Connect.Gmail.ClientTest do
             "message" => message_payload()
           })
 
-        {"PUT", "/gmail/v1/users/me/drafts/draft123"} ->
-          {:ok, body, conn} = Plug.Conn.read_body(conn)
-
-          assert Jason.decode!(body) == %{
-                   "message" => %{"raw" => "updated-message", "threadId" => "thread123"}
-                 }
-
-          Req.Test.json(conn, %{
-            "id" => "draft123",
-            "message" => %{"id" => "draft-message456", "threadId" => "thread123"}
-          })
-
         {"DELETE", "/gmail/v1/users/me/drafts/draft123"} ->
           Req.Test.json(conn, %{})
       end
@@ -396,14 +384,6 @@ defmodule Jido.Connect.Gmail.ClientTest do
 
     assert draft.draft_id == "draft123"
     refute inspect(draft) =~ "body-bytes"
-
-    assert {:ok, %Draft{} = draft} =
-             Client.update_draft(
-               %{draft_id: "draft123", raw: "updated-message", thread_id: "thread123"},
-               "token"
-             )
-
-    assert draft.message.message_id == "draft-message456"
 
     assert {:ok, %{deleted?: true, draft_id: "draft123"}} =
              Client.delete_draft(%{draft_id: "draft123"}, "token")
@@ -663,54 +643,98 @@ defmodule Jido.Connect.Gmail.ClientTest do
     assert {:ok, %{stopped?: true}} = Client.stop_watch(%{}, "token")
   end
 
-  test "sends Gmail messages" do
-    Req.Test.stub(__MODULE__, fn conn ->
-      assert conn.method == "POST"
-      assert conn.request_path == "/gmail/v1/users/me/messages/send"
+  # The send and draft answers below are the live run of
+  # send_live_smoke_test.exs: a new mail and its reply in the same thread,
+  # and a reply draft created and then replaced under the same draft ID.
 
-      {:ok, body, conn} = Plug.Conn.read_body(conn)
+  test "sends Gmail messages, with the thread ID of a reply beside its raw message" do
+    original = RecordedBodyAdapter.recording!("message_send")
+    reply = RecordedBodyAdapter.recording!("message_send_reply")
+    thread_id = original["body"]["threadId"]
+    assert reply["body"]["threadId"] == thread_id
 
-      assert Jason.decode!(body) == %{
-               "raw" => "encoded-message",
-               "threadId" => "thread123"
-             }
+    for {recording, request_body} <- [
+          {original, %{"raw" => "encoded-message"}},
+          {reply, %{"raw" => "encoded-reply", "threadId" => thread_id}}
+        ] do
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert %{"method" => conn.method, "path" => conn.request_path} == recording["request"]
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+        assert Jason.decode!(body) == request_body
+        Req.Test.json(conn, recording["body"])
+      end)
+    end
 
-      Req.Test.json(conn, %{
-        "id" => "sent123",
-        "threadId" => "thread123",
-        "labelIds" => ["SENT"]
-      })
-    end)
+    assert {:ok, %Message{} = message} = Client.send_message(%{raw: "encoded-message"}, "token")
+    assert message.message_id == original["body"]["id"]
+    assert message.thread_id == thread_id
+    assert message.label_ids == ["SENT"]
 
     assert {:ok, %Message{} = message} =
-             Client.send_message(%{raw: "encoded-message", thread_id: "thread123"}, "token")
+             Client.send_message(%{raw: "encoded-reply", thread_id: thread_id}, "token")
 
-    assert message.message_id == "sent123"
+    assert message.message_id == reply["body"]["id"]
+    assert message.thread_id == thread_id
     assert message.label_ids == ["SENT"]
   end
 
   test "creates Gmail drafts" do
-    Req.Test.stub(__MODULE__, fn conn ->
-      assert conn.method == "POST"
-      assert conn.request_path == "/gmail/v1/users/me/drafts"
+    recording = RecordedBodyAdapter.recording!("draft_create")
 
+    %{"id" => draft_id, "message" => %{"id" => message_id, "threadId" => thread_id}} =
+      recording["body"]
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert %{"method" => conn.method, "path" => conn.request_path} == recording["request"]
       {:ok, body, conn} = Plug.Conn.read_body(conn)
 
       assert Jason.decode!(body) == %{
-               "message" => %{"raw" => "encoded-message", "threadId" => "thread123"}
+               "message" => %{"raw" => "encoded-message", "threadId" => thread_id}
              }
 
-      Req.Test.json(conn, %{
-        "id" => "draft123",
-        "message" => %{"id" => "draft-message123", "threadId" => "thread123"}
-      })
+      Req.Test.json(conn, recording["body"])
     end)
 
-    assert {:ok, draft} =
-             Client.create_draft(%{raw: "encoded-message", thread_id: "thread123"}, "token")
+    assert {:ok, %Draft{} = draft} =
+             Client.create_draft(%{raw: "encoded-message", thread_id: thread_id}, "token")
 
-    assert draft.draft_id == "draft123"
-    assert draft.message.message_id == "draft-message123"
+    assert draft.draft_id == draft_id
+    assert draft.message.message_id == message_id
+    assert draft.message.thread_id == thread_id
+    assert draft.message.label_ids == ["DRAFT"]
+  end
+
+  test "replaces a Gmail draft under its draft ID with a new message" do
+    created = RecordedBodyAdapter.recording!("draft_create")
+    recording = RecordedBodyAdapter.recording!("draft_update")
+
+    %{"id" => draft_id, "message" => %{"id" => message_id, "threadId" => thread_id}} =
+      recording["body"]
+
+    assert created["body"]["id"] == draft_id
+    assert created["body"]["message"]["id"] != message_id
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert %{"method" => conn.method, "path" => conn.request_path} == recording["request"]
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "message" => %{"raw" => "updated-message", "threadId" => thread_id}
+             }
+
+      Req.Test.json(conn, recording["body"])
+    end)
+
+    assert {:ok, %Draft{} = draft} =
+             Client.update_draft(
+               %{draft_id: draft_id, raw: "updated-message", thread_id: thread_id},
+               "token"
+             )
+
+    assert draft.draft_id == draft_id
+    assert draft.message.message_id == message_id
+    assert draft.message.thread_id == thread_id
+    assert draft.message.label_ids == ["DRAFT"]
   end
 
   test "sends Gmail drafts" do

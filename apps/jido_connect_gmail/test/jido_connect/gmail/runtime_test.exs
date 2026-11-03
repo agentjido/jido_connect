@@ -1,11 +1,11 @@
 defmodule Jido.Connect.Gmail.RuntimeTest do
   @moduledoc """
   Polls `google.gmail.message.received` through `Jido.Connect.poll/4` and
-  invokes `google.gmail.message.labels.apply` through `Jido.Connect.invoke/4`
-  with the real Gmail client against `Req.Test`. The lease carries no
-  `gmail_client`, and every answer is a response that
-  `history_live_smoke_test.exs` or `labels_live_smoke_test.exs` recorded from
-  the Google Workspace test account.
+  invokes `google.gmail.message.labels.apply` and `google.gmail.message.send`
+  through `Jido.Connect.invoke/4` with the real Gmail client against
+  `Req.Test`. The lease carries no `gmail_client`, and every answer is a
+  response that `history_live_smoke_test.exs`, `labels_live_smoke_test.exs` or
+  `send_live_smoke_test.exs` recorded from the Google Workspace test account.
   """
 
   use ExUnit.Case, async: false
@@ -18,6 +18,7 @@ defmodule Jido.Connect.Gmail.RuntimeTest do
   @history_path "/gmail/v1/users/me/history"
   @metadata_scope "https://www.googleapis.com/auth/gmail.metadata"
   @modify_scope "https://www.googleapis.com/auth/gmail.modify"
+  @send_scope "https://www.googleapis.com/auth/gmail.send"
 
   # A history ID before every recorded history record. The recordings keep
   # the request path without its query, so the checkpoints of the live runs
@@ -212,6 +213,45 @@ defmodule Jido.Connect.Gmail.RuntimeTest do
     end
   end
 
+  describe "google.gmail.message.send" do
+    # message_send_reply is Gmail's answer to the reply that
+    # send_live_smoke_test.exs sends in the thread of its first mail.
+
+    test "a reply carries In-Reply-To and References in raw and the thread ID beside it" do
+      %{"request" => request, "body" => sent} = recording!("message_send_reply")
+      %{"id" => reply_id, "threadId" => thread_id} = sent
+      original_header_id = "<original-1@example.org>"
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert %{"method" => conn.method, "path" => conn.request_path} == request
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+        assert %{"raw" => raw, "threadId" => ^thread_id} = body = Jason.decode!(body)
+        assert map_size(body) == 2
+
+        assert [head, "Thanks."] =
+                 raw |> Base.url_decode64!(padding: false) |> :binary.split("\r\n\r\n")
+
+        lines = String.split(head, "\r\n")
+        assert "Subject: Re: Hello" in lines
+        assert "In-Reply-To: #{original_header_id}" in lines
+        assert "References: #{original_header_id}" in lines
+        Req.Test.json(conn, sent)
+      end)
+
+      assert {:ok, %{message: %{message_id: ^reply_id, thread_id: ^thread_id} = message}} =
+               invoke_send(%{
+                 to: ["to@example.com"],
+                 subject: "Re: Hello",
+                 body_text: "Thanks.",
+                 thread_id: thread_id,
+                 in_reply_to: original_header_id,
+                 references: original_header_id
+               })
+
+      assert message.label_ids == ["SENT"]
+    end
+  end
+
   # A whole recording: the request, the status, the headers and the body.
   defp recording!(name) do
     ["test", "fixtures", "gmail", "recorded", "#{name}.json"]
@@ -244,6 +284,15 @@ defmodule Jido.Connect.Gmail.RuntimeTest do
     {context, lease} = context_and_lease([@modify_scope])
 
     Connect.invoke(Gmail.integration(), "google.gmail.message.labels.apply", input,
+      context: context,
+      credential_lease: lease
+    )
+  end
+
+  defp invoke_send(input) do
+    {context, lease} = context_and_lease([@send_scope])
+
+    Connect.invoke(Gmail.integration(), "google.gmail.message.send", input,
       context: context,
       credential_lease: lease
     )

@@ -51,9 +51,39 @@ defmodule Jido.Connect.Gmail.ScopeResolverTest do
         expected: @compose_scope
       },
       %{
+        label: "send action is not satisfied by a read-only grant",
+        operation: "google.gmail.message.send",
+        granted: [@readonly_scope],
+        expected: @send_scope
+      },
+      %{
         label: "draft mutation uses compose scope",
         operation: "google.gmail.draft.create",
         granted: [],
+        expected: @compose_scope
+      },
+      %{
+        label: "draft create is not satisfied by a read-only grant",
+        operation: "google.gmail.draft.create",
+        granted: [@readonly_scope],
+        expected: @compose_scope
+      },
+      %{
+        label: "draft create is not satisfied by a send-only grant",
+        operation: "google.gmail.draft.create",
+        granted: [@send_scope],
+        expected: @compose_scope
+      },
+      %{
+        label: "draft update is not satisfied by a read-only grant",
+        operation: "google.gmail.draft.update",
+        granted: [@readonly_scope],
+        expected: @compose_scope
+      },
+      %{
+        label: "draft update is not satisfied by a send-only grant",
+        operation: "google.gmail.draft.update",
+        granted: [@send_scope],
         expected: @compose_scope
       },
       %{
