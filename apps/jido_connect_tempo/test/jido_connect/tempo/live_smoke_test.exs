@@ -49,9 +49,22 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
   use ExUnit.Case, async: false
   use Jido.Connect.TestSupport.LiveSmoke
 
-  alias Jido.Connect.{Connection, Context, CredentialLease, Error}
+  import Jido.Connect.Tempo.TestSupport.LiveTempo,
+    only: [
+      account_id!: 1,
+      context!: 2,
+      context!: 3,
+      invoke: 4,
+      invoke: 5,
+      ok!: 2,
+      raw_worklogs!: 3,
+      request!: 3,
+      request!: 4
+    ]
+
+  alias Jido.Connect.{Context, CredentialLease, Error}
   alias Jido.Connect.Tempo
-  alias Jido.Connect.Tempo.Client.{Pagination, Request, Transport}
+  alias Jido.Connect.Tempo.Client.{Pagination, Transport}
   alias Jido.Connect.Tempo.{Client, OAuth, ScopeResolver}
 
   @recorder {:jido_connect_tempo, :tempo_req_options}
@@ -712,26 +725,6 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
     refute leaked?, "the normalized error contains the token"
   end
 
-  defp invoke(
-         %Context{connection: connection} = context,
-         profile,
-         token,
-         input,
-         action \\ "tempo.worklogs.list_own"
-       ) do
-    field = if profile == :api_token, do: :api_token, else: :access_token
-
-    lease =
-      CredentialLease.from_connection!(connection, %{field => token},
-        expires_at: DateTime.add(DateTime.utc_now(), 300, :second)
-      )
-
-    Jido.Connect.invoke(Tempo, action, input,
-      context: context,
-      credential_lease: lease
-    )
-  end
-
   # Prepares and commits the worklog create with direct calls denied. The
   # host evidence names the prepared action, and the validator accepts only
   # that one.
@@ -777,14 +770,6 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
   defp error_summary({:ok, _value}), do: "a success"
   defp error_summary(_other), do: "an unexpected result"
 
-  defp ok!({:ok, value}, _step), do: value
-
-  defp ok!({:error, error}, step),
-    do:
-      flunk(
-        "#{step} failed: #{inspect(Map.get(error, :reason))}, status #{inspect(Map.get(error, :status))}"
-      )
-
   # The compared fields, without the author, whose account ID the output
   # of a failing comparison would show. A description that Tempo left out
   # is nil on both sides.
@@ -804,25 +789,6 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
     worklogs
     |> Enum.group_by(&Map.drop(&1, [:tempo_worklog_id, :self, :created_at, :updated_at]))
     |> Enum.any?(fn {_shape, group} -> length(group) > 1 end)
-  end
-
-  # Reads the Tempo records directly, outside the package and the recorder,
-  # in one page.
-  defp raw_worklogs!(env, token, %{from: from, to: to}) do
-    path = "/4/worklogs/user/" <> URI.encode(account_id!(env), &URI.char_unreserved?/1)
-
-    case Req.get(env["TEMPO_API_ORIGIN"] <> path,
-           auth: {:bearer, token},
-           params: [from: from, to: to, offset: 0, limit: 1000],
-           retry: false
-         ) do
-      {:ok, %{status: 200, body: %{"results" => results, "metadata" => metadata}}}
-      when not is_map_key(metadata, "next") ->
-        results
-
-      _other ->
-        flunk("the direct Tempo read did not return one complete page")
-    end
   end
 
   # Reads one approval directly, outside the package and the recorder: the
@@ -848,47 +814,4 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
        do: message
 
   defp error_message(_result), do: ""
-
-  defp context!(env, profile, scopes \\ ["tempo.worklogs.read"]) do
-    Context.new!(%{
-      tenant_id: "live",
-      actor: %{id: "live", type: :app_user},
-      connection: connection!(env, profile, env["TEMPO_API_ORIGIN"], scopes)
-    })
-  end
-
-  defp connection!(env, profile, origin, scopes) do
-    Connection.new!(%{
-      id: "tempo_live_#{profile}",
-      provider: :tempo,
-      profile: profile,
-      tenant_id: "live",
-      owner_type: :app_user,
-      owner_id: "live",
-      subject: %{account_id: account_id!(env)},
-      status: :connected,
-      scopes: scopes,
-      metadata: %{api_origin: origin}
-    })
-  end
-
-  defp request!(env, profile, token, origin \\ nil) do
-    field = if profile == :api_token, do: :api_token, else: :access_token
-    connection = connection!(env, profile, origin || env["TEMPO_API_ORIGIN"], [])
-
-    case Request.new(connection, %{field => token}) do
-      {:ok, request} -> request
-      {:error, error} -> flunk("Tempo request rejected: #{inspect(error.reason)}")
-    end
-  end
-
-  defp account_id!(env) do
-    case Req.get(env["JIRA_SITE"] <> "/rest/api/3/myself",
-           auth: {:basic, "#{env["JIRA_EMAIL"]}:#{env["JIRA_API_TOKEN"]}"},
-           retry: false
-         ) do
-      {:ok, %{status: 200, body: %{"accountId" => id}}} when is_binary(id) -> id
-      _other -> flunk("Jira /rest/api/3/myself did not return an account ID")
-    end
-  end
 end

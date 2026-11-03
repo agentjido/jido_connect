@@ -576,6 +576,103 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
       assert envelope["body_sha256"] == Base.encode16(:crypto.hash(:sha256, bytes), case: :lower)
     end
 
+    test "a transform changes or skips what is recorded, not what the caller gets", %{tmp: tmp} do
+      page = %{
+        "results" => [%{"key" => "OWN-1"}, %{"key" => "OTHER-1", "name" => "Other site data"}],
+        "metadata" => %{"count" => 2}
+      }
+
+      other = %{"key" => "OTHER-1", "name" => "Other site data"}
+      own = %{"key" => "OWN-1"}
+      base_url = start_stub([{200, page}, {200, other}, {200, own}])
+
+      transform = fn
+        "/v1/items/other 1", _body ->
+          :skip
+
+        _path, %{"results" => results} = body ->
+          kept = Enum.filter(results, &(&1["key"] == "OWN-1"))
+          %{body | "results" => kept, "metadata" => %{"count" => length(kept)}}
+
+        _path, body ->
+          body
+      end
+
+      with_env(%{"JIDO_CONNECT_RECORD" => "1"}, fn ->
+        put_req_options(retry: false)
+
+        :ok =
+          LiveSmoke.record({:jido_connect, @req_key}, :stub, "items",
+            root: tmp,
+            transform: transform
+          )
+
+        assert {:ok, %Req.Response{body: ^page}} = get(base_url, "/v1/items")
+        assert {:ok, %Req.Response{body: ^other}} = get(base_url, "/v1/items/other%201")
+        assert {:ok, %Req.Response{body: ^own}} = get(base_url, "/v1/items/own-1")
+      end)
+
+      assert LiveSmoke.fixture!(:stub, "items", root: tmp) == %{
+               "results" => [%{"key" => "OWN-1"}],
+               "metadata" => %{"count" => 1}
+             }
+
+      # The skipped response takes no number, so the next one is items.2.
+      assert LiveSmoke.fixture!(:stub, "items.2", root: tmp) == own
+
+      dir = Path.join(tmp, "test/fixtures/stub/recorded")
+      assert dir |> File.ls!() |> Enum.sort() == ["items.2.json", "items.json"]
+
+      for file <- File.ls!(dir) do
+        refute dir |> Path.join(file) |> File.read!() =~ "Other site data"
+      end
+    end
+
+    test "sanitizes and leak-checks the transformed body", %{tmp: tmp} do
+      token = "ya29.live-smoke-transform-leak"
+      base_url = start_stub([{200, %{"ok" => true}}, {200, %{"ok" => true}}])
+
+      with_env(%{"JIDO_CONNECT_RECORD" => "1", "GOOGLE_ACCESS_TOKEN" => token}, fn ->
+        put_req_options(retry: false)
+
+        :ok =
+          LiveSmoke.record({:jido_connect, @req_key}, :stub, "owner",
+            root: tmp,
+            transform: fn _path, body -> Map.put(body, "owner", "ada@corp.test") end
+          )
+
+        assert {:ok, %Req.Response{body: %{"ok" => true}}} = get(base_url, "/v1/owner")
+
+        :ok =
+          LiveSmoke.record({:jido_connect, @req_key}, :stub, "leak",
+            root: tmp,
+            transform: fn _path, body -> Map.put(body, "echo", token) end
+          )
+
+        assert_raise LeakError, fn -> get(base_url, "/v1/echo") end
+      end)
+
+      assert LiveSmoke.fixture!(:stub, "owner", root: tmp) == %{
+               "ok" => true,
+               "owner" => "person-1@example.com"
+             }
+
+      refute File.exists?(Path.join(tmp, "test/fixtures/stub/recorded/leak.json"))
+    end
+
+    test "rejects a transform that is not a function of path and body", %{tmp: tmp} do
+      with_env(%{"JIDO_CONNECT_RECORD" => "1"}, fn ->
+        put_req_options(retry: false)
+
+        assert_raise ArgumentError, ~r/:transform/, fn ->
+          LiveSmoke.record({:jido_connect, @req_key}, :stub, "bad",
+            root: tmp,
+            transform: fn body -> body end
+          )
+        end
+      end)
+    end
+
     test "leaves the Req options alone unless JIDO_CONNECT_RECORD=1", %{tmp: tmp} do
       with_env(%{"JIDO_CONNECT_RECORD" => nil}, fn ->
         put_req_options(retry: false)

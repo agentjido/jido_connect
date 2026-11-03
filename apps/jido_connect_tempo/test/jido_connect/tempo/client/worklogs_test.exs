@@ -323,18 +323,40 @@ defmodule Jido.Connect.Tempo.Client.WorklogsTest do
              } = List.last(worklogs)
     end
 
-    # The test site has work attributes only around a work-attribute run, so
-    # no recording holds a value; the pairs follow Tempo's OpenAPI shape.
+    # Recorded in a work-attribute window on 2026-11-03: the seeded worklog
+    # 79097 of October 1 with a value for each test attribute, in Tempo's
+    # order, the first one a stored value of the static list `_JclPhase_`.
+    # The value without a string is derived from it.
     test "work attribute values keep their key and value" do
-      values = [%{"key" => "_JclPhase_", "value" => "Build"}, %{"key" => "_JclHours_"}]
-      expect_pages(@pages, last: &put_in(&1, ["attributes", "values"], values))
+      Req.Test.expect(__MODULE__, &Fixture.respond(&1, "work_attribute_values"))
 
-      assert {:ok, worklogs} = Client.list_own_worklogs(request(), @periods)
+      assert {:ok, [worklog | others]} =
+               Client.list_own_worklogs(request(), from: "2026-10-01", to: "2026-10-01")
 
-      assert List.last(worklogs).work_attributes == [
-               %{key: "_JclPhase_", value: "Build"},
-               %{key: "_JclHours_", value: nil}
+      assert worklog.tempo_worklog_id == 79_097
+
+      assert worklog.work_attributes == [
+               %{key: "_JclPhase_", value: "0be722c9-c4de-452b-a6bd-0a59e1b03c80"},
+               %{key: "_JclNote_", value: "JCL live note"},
+               %{key: "_JclHours_", value: "1.5"},
+               %{key: "_JclBillable_", value: "true"},
+               %{key: "_JclAccount_", value: "JCL-PROJECT"}
              ]
+
+      assert Enum.all?(others, &(&1.work_attributes == []))
+
+      Req.Test.expect(__MODULE__, fn conn ->
+        Fixture.respond(conn, "work_attribute_values",
+          body: fn body ->
+            update_in(body, ["results"], fn [first | rest] ->
+              [update_in(first, ["attributes", "values"], &[Map.delete(hd(&1), "value")]) | rest]
+            end)
+          end
+        )
+      end)
+
+      assert {:ok, [%{work_attributes: [%{key: "_JclPhase_", value: nil}]} | _others]} =
+               Client.list_own_worklogs(request(), from: "2026-10-01", to: "2026-10-01")
     end
   end
 

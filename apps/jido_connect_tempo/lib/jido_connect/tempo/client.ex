@@ -8,7 +8,15 @@ defmodule Jido.Connect.Tempo.Client do
   inject its own module as `provider_client`.
   """
 
-  alias Jido.Connect.Tempo.Client.{Periods, Request, TimesheetApprovals, WorklogCreate, Worklogs}
+  alias Jido.Connect.Tempo.Client.{
+    Accounts,
+    Periods,
+    Request,
+    TimesheetApprovals,
+    WorkAttributes,
+    WorklogCreate,
+    Worklogs
+  }
 
   @doc "Builds a request from the provider handler runtime."
   defdelegate request_context(runtime), to: Request, as: :from_runtime
@@ -42,4 +50,19 @@ defmodule Jido.Connect.Tempo.Client do
   `from` to `to`. See `Jido.Connect.Tempo.Client.TimesheetApprovals.get/3`.
   """
   defdelegate get_timesheet_approval(request, from, to), to: TimesheetApprovals, as: :get
+
+  @doc """
+  Reads every work attribute of the site. See
+  `Jido.Connect.Tempo.Client.WorkAttributes.list/2`.
+  """
+  defdelegate list_work_attributes(request, opts \\ []), to: WorkAttributes, as: :list
+
+  @doc """
+  Reads the account candidates of the Jira project `project_id` with
+  their link evidence. See
+  `Jido.Connect.Tempo.Client.Accounts.list_for_project/3`.
+  """
+  defdelegate list_accounts_for_project(request, project_id, opts \\ []),
+    to: Accounts,
+    as: :list_for_project
 end

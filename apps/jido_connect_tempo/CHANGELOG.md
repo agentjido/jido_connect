@@ -58,3 +58,22 @@
   attribute value or the author's account ID, the error holds `[redacted]`
   instead.
 - Add the writer catalog pack `:tempo_writer`; the read packs are unchanged.
+- Add the read action `tempo.work_attribute.list`, which returns every work
+  attribute of the site with key, name, raw type, required flag, self and,
+  for `STATIC_LIST`, each stored value with its label. A required attribute
+  of a type other than `ACCOUNT`, `CHECKBOX`, `INPUT_FIELD`, `INPUT_NUMERIC`
+  and `STATIC_LIST`, and a required static list without a choice list, set
+  `complete: false` and are listed in `incomplete`. It requires
+  `tempo.worklogs.read`; a failed, looping or malformed page fails the
+  whole read.
+- Add the read action `tempo.account.list_for_project`, which returns the
+  linked and global accounts of a Jira project with key, status, global
+  flag and the evidence of each link. It requires `tempo.accounts.read`,
+  takes each account ID from a link's `account.self` only on a Tempo origin
+  and the exact path `/4/accounts/{id}`, reads the details at the
+  connection's origin and fails as a whole on a failed account read or
+  more than 100 candidate accounts.
+- Add `Jido.Connect.Tempo.Client.list_work_attributes/2`,
+  `Jido.Connect.Tempo.Client.list_accounts_for_project/3`, the normalized
+  `Jido.Connect.Tempo.WorkAttribute` and `Jido.Connect.Tempo.Account` and
+  the read-only catalog pack `:tempo_booking_lookup`.

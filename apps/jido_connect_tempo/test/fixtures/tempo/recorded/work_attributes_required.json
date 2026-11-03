@@ -1,0 +1,107 @@
+{
+  "body": {
+    "metadata": {
+      "count": 8,
+      "limit": 50,
+      "offset": 0
+    },
+    "results": [
+      {
+        "key": "_Other1_",
+        "name": "Other attribute 1",
+        "required": false,
+        "self": "https://api.tempo.io/4/work-attributes/_Other1_",
+        "type": "INPUT_FIELD"
+      },
+      {
+        "key": "_Other2_",
+        "name": "Other attribute 2",
+        "required": false,
+        "self": "https://api.tempo.io/4/work-attributes/_Other2_",
+        "type": "INPUT_FIELD"
+      },
+      {
+        "key": "_Other3_",
+        "name": "Other attribute 3",
+        "required": false,
+        "self": "https://api.tempo.io/4/work-attributes/_Other3_",
+        "type": "INPUT_FIELD"
+      },
+      {
+        "key": "_JclPhase_",
+        "name": "JCL live: phase",
+        "names": {
+          "342a73c2-dc6d-4b3d-8a2d-a4ddc2199b7e": "review",
+          "bd1f09ac-29df-4899-aeb2-12f3a4dea6f3": "build",
+          "ebe26b07-f5d3-4550-91d9-7deb2fadaa3f": "analysis"
+        },
+        "required": true,
+        "self": "https://api.tempo.io/4/work-attributes/_JclPhase_",
+        "type": "STATIC_LIST",
+        "values": [
+          "ebe26b07-f5d3-4550-91d9-7deb2fadaa3f",
+          "bd1f09ac-29df-4899-aeb2-12f3a4dea6f3",
+          "342a73c2-dc6d-4b3d-8a2d-a4ddc2199b7e"
+        ]
+      },
+      {
+        "key": "_JclBillable_",
+        "name": "JCL live: billable",
+        "required": true,
+        "self": "https://api.tempo.io/4/work-attributes/_JclBillable_",
+        "type": "CHECKBOX"
+      },
+      {
+        "key": "_JclHours_",
+        "name": "JCL live: estimate hours",
+        "required": true,
+        "self": "https://api.tempo.io/4/work-attributes/_JclHours_",
+        "type": "INPUT_NUMERIC"
+      },
+      {
+        "key": "_JclAccount_",
+        "name": "JCL live: account",
+        "required": true,
+        "self": "https://api.tempo.io/4/work-attributes/_JclAccount_",
+        "type": "ACCOUNT"
+      },
+      {
+        "key": "_JclNote_",
+        "name": "JCL live: note",
+        "required": false,
+        "self": "https://api.tempo.io/4/work-attributes/_JclNote_",
+        "type": "INPUT_FIELD"
+      }
+    ],
+    "self": "https://api.tempo.io/4/work-attributes?offset=0&limit=50"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "1621"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Tue, 03 Nov 2026 12:21:52 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "ec4fa933d7106be522fcab0c0597de22"
+    ]
+  },
+  "recorded_at": "2026-11-03",
+  "request": {
+    "method": "GET",
+    "path": "/4/work-attributes"
+  },
+  "status": 200
+}

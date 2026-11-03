@@ -31,6 +31,16 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Recorder do
 
   defp write_response({request, response}) do
     session = Agent.get(__MODULE__, & &1)
+
+    case transform(session, request, response.body) do
+      :skip -> :ok
+      body -> write_fixture(session, request, %{response | body: body})
+    end
+
+    {request, response}
+  end
+
+  defp write_fixture(session, request, response) do
     count = session.count + 1
     {fixture, sanitizer} = fixture(request, response, session.sanitizer)
     Sanitize.check_leaks!(fixture, sanitizer)
@@ -40,8 +50,14 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Recorder do
     File.write!(path, [Jason.encode_to_iodata!(fixture, pretty: true), "\n"])
 
     Agent.update(__MODULE__, &%{&1 | count: count, sanitizer: sanitizer})
-    {request, response}
   end
+
+  # The transform sees the decoded path and the body before sanitizing; the
+  # caller keeps the original response.
+  defp transform(%{transform: transform}, request, body) when is_function(transform, 2),
+    do: transform.(URI.decode(request.url.path || "/"), body)
+
+  defp transform(_session, _request, body), do: body
 
   # The body goes first so that names found in it are known when headers and
   # the path are sanitized. The path is decoded so `%40` addresses are found.

@@ -1,0 +1,39 @@
+{
+  "body": {
+    "errors": [
+      {
+        "message": "Invalid account"
+      }
+    ]
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store",
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "42"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Tue, 03 Nov 2026 10:00:15 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "06a6115ae664a2059f02ef395f9b5dce"
+    ]
+  },
+  "recorded_at": "2026-11-03",
+  "request": {
+    "method": "GET",
+    "path": "/4/accounts/999999"
+  },
+  "status": 404
+}

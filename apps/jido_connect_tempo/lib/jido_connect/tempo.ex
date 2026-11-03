@@ -3,7 +3,7 @@ defmodule Jido.Connect.Tempo do
   Tempo Cloud integration authored with the `Jido.Connect` Spark DSL.
 
   This module declares the provider, its two auth profiles, the five local
-  labels that Tempo actions require, the two read actions, the write action
+  labels that Tempo actions require, the four read actions, the write action
   and its host policy. The client modules under `Jido.Connect.Tempo.Client`
   hold the connection contract, the transport and the provider calls.
 
@@ -30,6 +30,23 @@ defmodule Jido.Connect.Tempo do
   `Jido.Connect.Tempo.PeriodBookability` for the evidence, `complete` and
   the derivation. The result is neither a reservation nor a write
   guarantee.
+
+  ## Booking Lookup
+
+  `tempo.work_attribute.list` returns every work attribute of the site as
+  `Jido.Connect.Tempo.WorkAttribute` maps, with `complete: false` and the
+  `incomplete` list when a required attribute has a type outside the five
+  supported ones or is a static list without a choice list. It takes no
+  input and requires `tempo.worklogs.read`, the connector's choice, since
+  Tempo has no token area for work attributes.
+
+  `tempo.account.list_for_project` returns the account candidates of a Jira
+  project, `project_id`, as `Jido.Connect.Tempo.Account` maps with the
+  evidence of each link. It requires `tempo.accounts.read`, reads each
+  account at the connection's origin after checking the link's reference,
+  and fails as a whole instead of returning an account without its details.
+  See `Jido.Connect.Tempo.Client.Accounts`. Both reads form the pack
+  `:tempo_booking_lookup`; neither calls Jira.
 
   ## Worklog Creation
 
@@ -67,7 +84,12 @@ defmodule Jido.Connect.Tempo do
   """
 
   use Jido.Connect,
-    fragments: [Jido.Connect.Tempo.Actions.Worklogs, Jido.Connect.Tempo.Actions.Periods]
+    fragments: [
+      Jido.Connect.Tempo.Actions.Worklogs,
+      Jido.Connect.Tempo.Actions.Periods,
+      Jido.Connect.Tempo.Actions.WorkAttributes,
+      Jido.Connect.Tempo.Actions.Accounts
+    ]
 
   defdelegate catalog_packs, to: Jido.Connect.Tempo.CatalogPacks, as: :all
 

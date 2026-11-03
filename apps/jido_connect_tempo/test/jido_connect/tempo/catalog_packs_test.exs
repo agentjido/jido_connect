@@ -5,22 +5,29 @@ defmodule Jido.Connect.Tempo.CatalogPacksTest do
   alias Jido.Connect.Catalog
   alias Jido.Connect.Tempo
 
-  test "catalog_packs returns the two read packs and the writer pack" do
+  test "catalog_packs returns the three read packs and the writer pack" do
     assert [
              %{id: :tempo_reader} = reader,
              %{id: :tempo_period_lookup} = lookup,
+             %{id: :tempo_booking_lookup} = booking,
              %{id: :tempo_writer} = writer
            ] = Tempo.catalog_packs()
 
     assert Tempo.catalog_packs() == Tempo.CatalogPacks.all()
 
-    for pack <- [reader, lookup] do
+    for pack <- [reader, lookup, booking] do
       assert pack.filters == %{provider: :tempo}
       assert pack.metadata == %{package: :jido_connect_tempo, risk: :read}
     end
 
     assert reader.allowed_tools == ["tempo.worklogs.list_own"]
     assert lookup.allowed_tools == ["tempo.period.bookability.get"]
+
+    assert booking.allowed_tools == [
+             "tempo.work_attribute.list",
+             "tempo.account.list_for_project"
+           ]
+
     assert writer.filters == %{provider: :tempo}
     assert writer.metadata == %{package: :jido_connect_tempo, risk: :write}
   end
@@ -40,8 +47,8 @@ defmodule Jido.Connect.Tempo.CatalogPacksTest do
              Catalog.reviewed_items(Tempo, Tempo.CatalogPacks.writer())
   end
 
-  test "neither read pack offers the worklog create" do
-    for pack <- [:tempo_reader, :tempo_period_lookup] do
+  test "no read pack offers the worklog create" do
+    for pack <- [:tempo_reader, :tempo_period_lookup, :tempo_booking_lookup] do
       ids =
         "worklog create"
         |> Catalog.search_tools(modules: [Tempo], packs: Tempo.catalog_packs(), pack: pack)
@@ -87,9 +94,38 @@ defmodule Jido.Connect.Tempo.CatalogPacksTest do
              Jido.Connect.action(Tempo.integration(), "tempo.period.bookability.get")
   end
 
+  test "the booking lookup pack selects the work attribute and account reads and no mutation" do
+    results =
+      Catalog.search_tools("tempo",
+        modules: [Tempo],
+        packs: Tempo.catalog_packs(),
+        pack: :tempo_booking_lookup
+      )
+
+    assert results |> Enum.map(& &1.tool.id) |> Enum.sort() == [
+             "tempo.account.list_for_project",
+             "tempo.work_attribute.list"
+           ]
+
+    assert Enum.map(results, & &1.tool.risk) == [:read, :read]
+
+    assert {:ok, items} = Catalog.reviewed_items(Tempo, Tempo.CatalogPacks.booking_lookup())
+
+    assert items |> Enum.map(&{&1.id, &1.risk}) |> Enum.sort() == [
+             {"tempo.account.list_for_project", :read},
+             {"tempo.work_attribute.list", :read}
+           ]
+
+    for id <- ["tempo.work_attribute.list", "tempo.account.list_for_project"] do
+      assert {:ok, %{mutation?: false, risk: :read}} =
+               Jido.Connect.action(Tempo.integration(), id)
+    end
+  end
+
   test "the read packs can become AI tool sources, the writer pack cannot" do
     assert {:ok, _source} = CatalogToolSource.new(Tempo, Tempo.CatalogPacks.reader())
     assert {:ok, _source} = CatalogToolSource.new(Tempo, Tempo.CatalogPacks.period_lookup())
+    assert {:ok, _source} = CatalogToolSource.new(Tempo, Tempo.CatalogPacks.booking_lookup())
 
     # The core offers no mutation as a direct AI tool; it goes through
     # prepare/4 and commit/4.

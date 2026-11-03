@@ -44,7 +44,9 @@ defmodule Jido.Connect.Tempo.ScopeResolver do
   @operations %{
     "tempo.worklogs.list_own" => ["tempo.worklogs.read"],
     "tempo.worklog.create" => ["tempo.worklogs.write"],
-    "tempo.period.bookability.get" => ["tempo.periods.read", "tempo.approvals.read"]
+    "tempo.period.bookability.get" => ["tempo.periods.read", "tempo.approvals.read"],
+    "tempo.work_attribute.list" => ["tempo.worklogs.read"],
+    "tempo.account.list_for_project" => ["tempo.accounts.read"]
   }
 
   @doc "Returns the five local labels in declaration order."

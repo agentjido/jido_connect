@@ -4,15 +4,18 @@
 It includes:
 
 - `Jido.Connect.Tempo`, the provider declaration with two auth profiles,
-  five local labels, the read actions `tempo.worklogs.list_own` and
-  `tempo.period.bookability.get`, and the confirmation-gated write action
+  five local labels, the read actions `tempo.worklogs.list_own`,
+  `tempo.period.bookability.get`, `tempo.work_attribute.list` and
+  `tempo.account.list_for_project`, and the confirmation-gated write action
   `tempo.worklog.create`
-- the worklog, period and timesheet approval reads and the worklog create
-  in `Jido.Connect.Tempo.Client`, the normalized `Jido.Connect.Tempo.Worklog`
-  and `Jido.Connect.Tempo.TimesheetApproval`, and the result
-  `Jido.Connect.Tempo.PeriodBookability`
-- the read-only catalog packs `:tempo_reader` and `:tempo_period_lookup` and
-  the writer pack `:tempo_writer` in `Jido.Connect.Tempo.CatalogPacks`
+- the worklog, period, timesheet approval, work attribute and account reads
+  and the worklog create in `Jido.Connect.Tempo.Client`, the normalized
+  `Jido.Connect.Tempo.Worklog`, `Jido.Connect.Tempo.TimesheetApproval`,
+  `Jido.Connect.Tempo.WorkAttribute` and `Jido.Connect.Tempo.Account`, and
+  the result `Jido.Connect.Tempo.PeriodBookability`
+- the read-only catalog packs `:tempo_reader`, `:tempo_period_lookup` and
+  `:tempo_booking_lookup` and the writer pack `:tempo_writer` in
+  `Jido.Connect.Tempo.CatalogPacks`
 - OAuth 2.0 helpers in `Jido.Connect.Tempo.OAuth`
 - the connection contract in `Jido.Connect.Tempo.Client.Request`
 - the Bearer transport in `Jido.Connect.Tempo.Client.Transport`
@@ -106,6 +109,11 @@ The effective rights stay bounded by the user's Tempo permissions.
 `ScopeResolver.required_scopes/3` resolves each operation through an
 operation map that each Tempo action extends. An operation without an entry
 fails closed with a `Jido.Connect.Error.ConfigError`.
+
+`tempo.work_attribute.list` requires `tempo.worklogs.read`. This is the
+connector's choice: Tempo grants token rights per area and has no area for
+work attributes, which belong to the worklog form. On the test site both
+the API token and the OAuth access token of the test user read them.
 
 ## Own Worklogs
 
@@ -309,6 +317,132 @@ The result is neither a reservation nor a write guarantee. It reports what
 Tempo answered after `checked_at`; Tempo can change an approval or close a
 period at any time afterwards, and a write into a closed period is rejected
 only when it is made.
+
+## Booking Lookup
+
+The read-only pack `:tempo_booking_lookup` holds two reads for a booking
+target that the host has already resolved: the work attributes Tempo
+requires and the account candidates of the target's Jira project. Neither
+calls Jira. The host finds the issue and its project ID with
+`jira.issue.search` of `jido_connect_jira`, requesting the `project` field.
+Jira returns that ID as a string, such as `"10882"`; the host converts it
+to an integer, since `project_id` takes a positive integer and rejects a
+string with a `Jido.Connect.Error.ValidationError`. Choosing a target, an
+account or attribute values is the host's task.
+
+### Work Attributes
+
+`tempo.work_attribute.list` takes no input and returns every work attribute
+of the Tempo site, read through [Pagination](#pagination) from
+`GET /4/work-attributes`. Tempo lists the site's attributes, not those of
+one project. The action requires `tempo.worklogs.read`; see
+[Labels](#labels).
+
+| Output | Meaning |
+| --- | --- |
+| `attributes` | every attribute in Tempo's order, as maps |
+| `complete` | `true` when the value of every required attribute can be described |
+| `incomplete` | the required attributes that make `complete` false, each with `key` and `reason` |
+
+| Attribute key | Tempo field |
+| --- | --- |
+| `key` | `key`, an opaque string such as `_JclPhase_` |
+| `name` | `name` |
+| `type` | `type`, kept raw |
+| `required` | `required` |
+| `self` | `self`, `nil` when absent |
+| `values` | for `STATIC_LIST`: `values` as `%{value: value, label: label}` maps, the label from `names`; `nil` when Tempo sent no `values`, and for every other type |
+
+Tempo stores each attribute value of a worklog as a string. On the test site
+on 2026-11-03 the seeded worklog stored, per type:
+
+| Type | Stored value |
+| --- | --- |
+| `ACCOUNT` | the account key, `JCL-PROJECT`, not its name or numeric ID; the keys come from `tempo.account.list_for_project` |
+| `CHECKBOX` | `"true"` |
+| `INPUT_FIELD` | the free text as entered, `"JCL live note"` |
+| `INPUT_NUMERIC` | `"1.5"` |
+| `STATIC_LIST` | one of the stored `values`, a UUID that Tempo assigns, not its label |
+
+A stored value of a static list is immutable, while its label can be
+renamed and two labels can be equal; the stored value identifies the
+choice. The package never assumes that an `ACCOUNT` attribute is called
+`_Account_` and never turns a key or a type into an atom.
+
+Any type other than these five, such as `DYNAMIC_DROPDOWN`, stays the raw
+string. A required attribute of such a type is listed in `incomplete` with
+reason `:unsupported_type`, and a required `STATIC_LIST` without a `values`
+list with reason `:missing_choices`; an empty `values` list is a known empty
+choice list, not a missing one. `complete: false` marks such a requirement,
+not a failed read. A failed, looping or malformed page and a malformed
+attribute fail the whole read; the attribute error has reason
+`:invalid_work_attribute` and details `index` and `field`.
+
+### Account Candidates
+
+`tempo.account.list_for_project` takes `project_id`, the Jira project ID
+as a positive integer, and returns the accounts the project offers for
+booking. It requires `tempo.accounts.read`:
+
+```elixir
+Jido.Connect.invoke(
+  Jido.Connect.Tempo,
+  "tempo.account.list_for_project",
+  %{project_id: 10_001},
+  context: context,
+  credential_lease: lease
+)
+```
+
+The read calls `GET /4/account-links/project/{projectId}` with
+`includeGlobalAccounts=true` once, then `GET /4/accounts/{id}` once per
+candidate account, in link order. The account ID comes from each link's
+`account.self` only after two checks: the reference names a Tempo origin
+under the rule of [Pagination](#pagination), so the `https://api.tempo.io`
+links of a regional site pass, and its path is exactly `/4/accounts/{id}`
+with a positive decimal ID, without query or fragment. The reference is
+never requested; the details are read at the connection's origin. Every
+link is checked before the first account read.
+
+A link is a candidate when its scope is `PROJECT` with the requested ID. A
+link of another project is left out, and its account is read only when
+another link makes it a candidate.
+
+| Output | Meaning |
+| --- | --- |
+| `project_id` | the project ID as supplied |
+| `accounts` | the candidates in the order of their first link, as maps |
+
+| Account key | Meaning |
+| --- | --- |
+| `id`, `key`, `name` | Tempo's account ID, key and name; the key is the value of an `ACCOUNT` attribute |
+| `status` | `OPEN`, `CLOSED`, `ARCHIVED` or another raw string |
+| `global` | Tempo's `global` flag |
+| `self` | Tempo's link to the account |
+| `links` | one map per link of the project to this account: `id`, `default`, `scope_type`, `scope_id` |
+
+On the test site Tempo reports a global account as a link with ID 0 on the
+requested project, and exactly one link of the project is `default: true`.
+An account with two links keeps both. A closed or archived account stays a
+candidate with its status. The lead, contact, customer, category and budget
+of an account are not returned.
+
+The read fails as a whole; no account is returned without its details.
+Besides the errors of [Errors](#errors), such as Tempo's 404 `Invalid
+account` for an account read, these are `Jido.Connect.Error.ProviderError`s
+with `delivery: :response_received`:
+
+| Reason | Cause | Details |
+| --- | --- | --- |
+| `:invalid_account_links` | an answer without a `results` list | |
+| `:invalid_account_link` | a missing or malformed link field | `index`, `field` |
+| `:foreign_account_reference` | an `account.self` on another origin or path | `index`, `link_id` |
+| `:account_limit_exceeded` | more candidate accounts than `:max_accounts` (100), before the first account read | `max_accounts`, `accounts` |
+| `:invalid_account` | malformed account details | `account_id`, `field` |
+| `:account_mismatch` | details of another account than the one requested | `account_id`, `returned_id` |
+
+`Jido.Connect.Tempo.Client.list_accounts_for_project/3` offers the same read
+with another `:max_accounts`; the action uses the default.
 
 ## Worklog Creation
 
@@ -586,8 +720,9 @@ of [Errors and Delivery](#errors-and-delivery).
 
 ## Limits Owned by the Host
 
-The package bounds the number of pages and results per read, and the
-approval reads of one period bookability read to 20 periods. It does not
+The package bounds the number of pages and results per read, the approval
+reads of one period bookability read to 20 periods, and the account reads
+of one account candidate read to 100 accounts. It does not
 limit bytes: response size, the size of results passed to an agent and
 storage quotas are host policy.
 
@@ -645,6 +780,22 @@ the invalid start time cannot create one; if Tempo accepted either, the test
 stops at once and names the new ID. The 401 of a create with an invented
 token is recorded in `worklog_create_unauthorized` without the write gate,
 since that token cannot create anything.
+
+The booking lookup checks are in `booking_lookup_live_smoke_test.exs`:
+
+| Check | Path | Recording |
+| --- | --- | --- |
+| the account candidates of `TEMPO_JIRA_PROJECT_ID`: the four test accounts with name, status, global flag and one link each, `TEMPO_ACCOUNT_ID` as the only default link, each compared with a direct read | action, OAuth access token | `accounts_for_project` |
+| an unknown account ID gets Tempo's 404 `Invalid account` | transport, API token | `account_not_found` |
+| the five test work attributes with type, name, required flag, stored values and labels, compared with a direct read; the free-text `_JclNote_` is optional in both modes | action, OAuth access token | `work_attributes_required` or `work_attributes_optional` |
+| the seeded worklog of October 1 stores a stored value labelled build, `"true"`, `"1.5"`, the account key `JCL-PROJECT` and the text `"JCL live note"` | action, API token | `work_attribute_values`, in the optional mode only |
+
+The work attribute checks need the test attributes, which exist on the test
+site only around a run. They run only with `TEMPO_WORK_ATTRIBUTES` set to
+`required` or `optional`, the mode in which the attributes were created.
+`work_attribute_values` and `work_attributes_optional` come from the same
+optional run, since the offline tests match the stored value of the static
+list against that page; see the Tempo section of `docs/live_smoke_tests.md`.
 
 The successful code exchange and refresh are recorded in
 `oauth_exchange.json` and `oauth_refresh.json`, the rejections in

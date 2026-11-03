@@ -1,0 +1,91 @@
+{
+  "body": {
+    "metadata": {
+      "count": 4
+    },
+    "results": [
+      {
+        "account": {
+          "self": "https://api.tempo.io/4/accounts/26"
+        },
+        "default": true,
+        "id": 24,
+        "scope": {
+          "id": 10882,
+          "self": "https://example.atlassian.net/rest/api/2/project/10882",
+          "type": "PROJECT"
+        },
+        "self": "https://api.tempo.io/4/account-links/24"
+      },
+      {
+        "account": {
+          "self": "https://api.tempo.io/4/accounts/27"
+        },
+        "default": false,
+        "id": 25,
+        "scope": {
+          "id": 10882,
+          "self": "https://example.atlassian.net/rest/api/2/project/10882",
+          "type": "PROJECT"
+        },
+        "self": "https://api.tempo.io/4/account-links/25"
+      },
+      {
+        "account": {
+          "self": "https://api.tempo.io/4/accounts/28"
+        },
+        "default": false,
+        "id": 26,
+        "scope": {
+          "id": 10882,
+          "self": "https://example.atlassian.net/rest/api/2/project/10882",
+          "type": "PROJECT"
+        },
+        "self": "https://api.tempo.io/4/account-links/26"
+      },
+      {
+        "account": {
+          "self": "https://api.tempo.io/4/accounts/29"
+        },
+        "default": false,
+        "id": 0,
+        "scope": {
+          "id": 10882,
+          "self": "https://example.atlassian.net/rest/api/2/project/10882",
+          "type": "PROJECT"
+        },
+        "self": "https://api.tempo.io/4/account-links/0"
+      }
+    ],
+    "self": "https://api.tempo.io/4/account-links/project/10882"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "1473"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Tue, 03 Nov 2026 10:00:18 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "885958008ea38b3ed0367f7123b0b8d9"
+    ]
+  },
+  "recorded_at": "2026-11-03",
+  "request": {
+    "method": "GET",
+    "path": "/4/account-links/project/10882"
+  },
+  "status": 200
+}

@@ -1,0 +1,46 @@
+{
+  "body": {
+    "global": false,
+    "id": 26,
+    "key": "JCL-PROJECT",
+    "lead": {
+      "accountId": "account-1",
+      "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+    },
+    "links": {
+      "self": "https://api.tempo.io/4/accounts/JCL-PROJECT/links"
+    },
+    "name": "JCL live: project account",
+    "self": "https://api.tempo.io/4/accounts/26",
+    "status": "OPEN"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "344"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Tue, 03 Nov 2026 10:00:18 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "612f36134cc657b832a153cce8867e36"
+    ]
+  },
+  "recorded_at": "2026-11-03",
+  "request": {
+    "method": "GET",
+    "path": "/4/accounts/26"
+  },
+  "status": 200
+}

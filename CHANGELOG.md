@@ -32,6 +32,13 @@
 - Add the confirmation-gated Tempo write action `tempo.worklog.create` for
   one own worklog, sent once as `POST /4/worklogs` and never retried, and
   the Tempo catalog pack `:tempo_writer`.
+- Add the Tempo read actions `tempo.work_attribute.list` for the work
+  attributes of a site and their value contracts, and
+  `tempo.account.list_for_project` for the account candidates of a Jira
+  project, and the read-only Tempo catalog pack `:tempo_booking_lookup`.
+- Add the `:transform` option of `LiveSmoke.record/4`, which leaves out or
+  neutralizes data of other users that a shared test account returns,
+  before the sanitizer and its leak guard run.
 
 ## 0.9.0 - 2026-08-25
 

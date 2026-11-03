@@ -73,7 +73,8 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
                       TEMPO_OAUTH_REFRESH_TOKEN TEMPO_OAUTH_CODE SEED_TEMPO_API_TOKEN),
       settings: ~w(TEMPO_OAUTH_CLIENT_ID TEMPO_OAUTH_REDIRECT_URI TEMPO_API_ORIGIN
                    TEMPO_ACCOUNT_ID TEMPO_JIRA_ISSUE_ID TEMPO_JIRA_PROJECT_ID
-                   TEMPO_OAUTH_ACCESS_TOKEN_EXPIRES_AT TEMPO_OAUTH_TOKEN_FILE)
+                   TEMPO_OAUTH_ACCESS_TOKEN_EXPIRES_AT TEMPO_OAUTH_TOKEN_FILE
+                   TEMPO_WORK_ATTRIBUTES)
     },
     confluence: %{
       credentials: ~w(CONFLUENCE_API_TOKEN),
@@ -182,18 +183,30 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
   `test/fixtures/<provider>/recorded/<name>.json`; later responses of the same
   test go to `<name>.2.json`, `<name>.3.json` and so on.
 
-  Options are `:root` (default: the current directory) and the sanitizer
-  options of `sanitize/2`. Without `JIDO_CONNECT_RECORD=1` this does nothing.
+  Options are `:root` (default: the current directory), `:transform` and the
+  sanitizer options of `sanitize/2`. Without `JIDO_CONNECT_RECORD=1` this
+  does nothing.
+
+  `:transform` is a function of the decoded request path and the decoded
+  response body. It returns the body to record, or `:skip` to write no
+  fixture for that response; a skipped response takes no number. It runs
+  before the sanitizer, whose leak guard checks its result, and it changes
+  only the fixture, never the response the caller gets. Use it to leave out
+  or neutralize data that a shared test account returns besides the test
+  data, such as other users' entries, and say in the test what it changes.
   """
   @spec record({atom(), atom()}, atom() | String.t(), String.t(), keyword()) :: :ok
   def record({app, key}, provider, name, opts \\ []) when is_atom(app) and is_atom(key) do
     if recording?() do
+      {transform, opts} = Keyword.pop(opts, :transform)
+      check_transform!(transform)
       patch_req_options!(app, key)
 
       session = %{
         dir: fixture_dir(provider, :recorded, opts),
         name: name,
         count: 0,
+        transform: transform,
         sanitizer: sanitizer(opts)
       }
 
@@ -368,6 +381,13 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
 
   defp check_write_gate!(_tag) do
     raise ArgumentError, "tag live writes with write!/1 so the provider's gate applies"
+  end
+
+  defp check_transform!(nil), do: :ok
+  defp check_transform!(transform) when is_function(transform, 2), do: :ok
+
+  defp check_transform!(_transform) do
+    raise ArgumentError, ":transform must be a function of the request path and the body"
   end
 
   defp patch_req_options!(app, key) do

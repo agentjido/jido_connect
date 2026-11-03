@@ -233,6 +233,7 @@ as seed input belong to the scripts that create the test data.
 | `TEMPO_ACCOUNT_ID` | setting | Tempo account linked to the test project |
 | `TEMPO_JIRA_ISSUE_ID` | setting | Jira issue for worklogs |
 | `TEMPO_JIRA_PROJECT_ID` | setting | Jira project for worklogs |
+| `TEMPO_WORK_ATTRIBUTES` | setting | `required` or `optional`: the mode in which the test work attributes exist for this run; unset when they do not exist |
 | `TEMPO_LIVE_DESTRUCTIVE` | gate | `true` allows tests that create worklogs |
 
 The Tempo exchange test runs only when `TEMPO_OAUTH_CODE` is set, taken from
@@ -292,6 +293,48 @@ for a range across two periods. That 400 names no account in its body, so
 it is recorded after the October approval, from whose `user` the sanitizer
 learns the account ID before it writes the request path.
 
+The Tempo booking lookup checks are in `booking_lookup_live_smoke_test.exs`.
+The account check relies on the seeded accounts alone: JCL-PROJECT
+(`TEMPO_ACCOUNT_ID`, the default link), JCL-SECONDARY and the closed
+JCL-CLOSED, linked to `TEMPO_JIRA_PROJECT_ID`, and the global JCL-GLOBAL.
+The work attribute checks need the five test attributes `_JclPhase_`,
+`_JclBillable_`, `_JclHours_`, `_JclAccount_` and `_JclNote_`, which exist
+on the shared site only around a run, since every user's time-entry form
+shows them.
+`~/.config/jido_connect/live/seed/atlassian/tempo_attributes.py up` creates
+them, required unless `--optional`, with the free-text `_JclNote_` optional
+in both modes, and gives the seeded worklog of October 1, 2026 a value for
+each; `down` deletes them and their values.
+Those checks run only with `TEMPO_WORK_ATTRIBUTES` set to the mode of the
+run, `required` or `optional`, and are skipped without it. The attribute
+check compares every test attribute's required flag with that mode and
+names its recording after it, `work_attributes_required` or
+`work_attributes_optional`. The value check records `work_attribute_values`
+in the optional mode only, so a required run never overwrites it. Tempo
+assigns new stored values each time `up` creates `_JclPhase_`, and the
+offline tests match the stored value in `work_attribute_values` against
+`work_attributes_optional`: record those two in the same optional run.
+`work_attributes_required` needs a required run of its own.
+
+While the test attributes exist, run only the booking lookup checks, and
+run `down` at once after them, also when a check fails or the run is
+interrupted. In a required run Tempo rejects every new worklog without a
+value for each required attribute, so the worklog create check fails
+there, and every other user of the site must fill them in for as long as
+they stay. Run the rest of the Tempo suite after `down`.
+
+The site is shared with real users, and Tempo returns their data in the
+same responses: every work attribute of the site and every global account
+with each project's links. The recordings leave it out with the
+`:transform` option that `LiveTempo.site_data/2` in
+`apps/jido_connect_tempo/test/support/live_tempo.ex` builds: other
+attributes keep Tempo's structure, with a neutral key `_Other1_` and
+onward, name, link, stored values and labels, and their type and required
+flag; links of other accounts are left out with `metadata.count` adjusted,
+reads of those accounts are not recorded, and worklog values of other
+attributes are left out. The live assertions check only the test data and
+pass whatever else the site holds.
+
 ### Confluence
 
 | Variable | Kind | Meaning |
@@ -326,6 +369,27 @@ A new recording overwrites files of the same name; delete numbered files that
 a shorter run no longer writes. Without `JIDO_CONNECT_RECORD=1` the call does
 nothing, so live tests keep the call in place. Recording refuses to start while
 the Req options contain `:plug`, because a plug replaces the network.
+
+A test account on a site that real users share returns their data next to the
+test data, and the sanitizer does not know which is which. The `:transform`
+option of `record/4` takes a function of the decoded request path and the
+decoded response body that returns the body to record, or `:skip` to write no
+fixture for that response:
+
+```elixir
+LiveSmoke.record({:jido_connect_tempo, :tempo_req_options}, :tempo, "accounts",
+  transform: fn
+    "/4/accounts/" <> id, body -> if id in test_ids, do: body, else: :skip
+    _path, body -> body
+  end
+)
+```
+
+The transform runs before the sanitizer, so the leak guard checks its result.
+It changes only the fixture; the caller still gets the response as the provider
+sent it. A skipped response takes no number. Use it only to leave out or
+neutralize data that must not be committed, and say in the test what it
+changes, since the fixture then differs from the provider's answer.
 
 A fixture file holds the recording date, the request method and the decoded
 path without query, the status, the sanitized response headers and the

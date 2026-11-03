@@ -11,9 +11,10 @@ defmodule Jido.Connect.Tempo.CatalogPacks do
   |------|------|-------|
   | `:tempo_reader` | read | the connected account's own worklogs |
   | `:tempo_period_lookup` | read | the connected account's period approval evidence |
+  | `:tempo_booking_lookup` | read | the site's work attributes and a Jira project's account candidates |
   | `:tempo_writer` | write | the confirmation-gated create of the connected account's own worklog |
 
-  The two read packs hold no mutation. The writer pack holds only
+  The three read packs hold no mutation. The writer pack holds only
   `tempo.worklog.create`, which requires confirmation; a host commits it
   through `Jido.Connect.prepare/4` and `Jido.Connect.commit/4`.
   """
@@ -22,10 +23,11 @@ defmodule Jido.Connect.Tempo.CatalogPacks do
 
   @reader_tools ["tempo.worklogs.list_own"]
   @period_lookup_tools ["tempo.period.bookability.get"]
+  @booking_lookup_tools ["tempo.work_attribute.list", "tempo.account.list_for_project"]
   @writer_tools ["tempo.worklog.create"]
 
   @doc "Returns all built-in Tempo catalog packs."
-  def all, do: [reader(), period_lookup(), writer()]
+  def all, do: [reader(), period_lookup(), booking_lookup(), writer()]
 
   @doc "Read-only Tempo pack."
   def reader do
@@ -48,6 +50,20 @@ defmodule Jido.Connect.Tempo.CatalogPacks do
         "Read the connected account's approval evidence for Tempo periods without mutation tools.",
       filters: %{provider: :tempo},
       allowed_tools: @period_lookup_tools,
+      metadata: %{package: :jido_connect_tempo, risk: :read}
+    })
+  end
+
+  @doc "Read-only Tempo pack for the work attributes and account candidates of a booking target."
+  def booking_lookup do
+    Pack.new!(%{
+      id: :tempo_booking_lookup,
+      label: "Tempo booking lookup",
+      description:
+        "Read the work attributes Tempo requires and the account candidates of a Jira " <>
+          "project without mutation tools.",
+      filters: %{provider: :tempo},
+      allowed_tools: @booking_lookup_tools,
       metadata: %{package: :jido_connect_tempo, risk: :read}
     })
   end
