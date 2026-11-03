@@ -209,6 +209,7 @@ defmodule Jido.Connect.Google.TestSupport.ConnectorContracts do
   def assert_scope_resolver_shape(resolver, expected_default_scopes) do
     expected_default_scopes = List.wrap(expected_default_scopes)
 
+    assert {:module, ^resolver} = Code.ensure_loaded(resolver)
     assert function_exported?(resolver, :required_scopes, 3)
     assert resolver.required_scopes(%{}, %{}, %{}) == expected_default_scopes
     assert Enum.all?(expected_default_scopes, &is_binary/1)
