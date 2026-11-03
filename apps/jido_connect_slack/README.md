@@ -47,7 +47,8 @@ url =
     client_id: "123.456",
     redirect_uri: "https://example.ngrok-free.app/integrations/slack/oauth/callback",
     state: "csrf-state",
-    scopes: ["channels:read", "chat:write"]
+    scopes: ["channels:read", "chat:write"],
+    user_scope: ["channels:history", "groups:history", "im:history", "mpim:history"]
   )
 
 {:ok, token} =
@@ -58,8 +59,47 @@ url =
   )
 ```
 
-Hosts turn the token response into a durable `Jido.Connect.Connection` and a
-short-lived `Jido.Connect.CredentialLease` before running generated actions.
+`scopes` are the bot scopes and go to Slack as `scope`. `user_scope` is
+optional: it asks the person who authorizes for a user token with these
+scopes, for the [user view](#bot-view-and-user-view). Without it the URL
+has no `user_scope` and Slack returns no user token.
+
+`exchange_code/2` keeps the bot credential at the top of the result:
+`access_token`, `token_type`, `scope` as a list, `bot_user_id`, `app_id`,
+`team` and `enterprise`. When the flow asked for `user_scope`,
+`authed_user` holds the authorizing user's credential: `id`, `access_token`,
+`token_type`, `scope` and, with token rotation, `refresh_token`,
+`expires_in` and `expires_at`. Without a user token the result has no
+`authed_user`. A response with only a user token, such as one from a flow
+with only `user_scope` in a workspace where the app is installed, yields
+`app_id`, `team`, `enterprise` and `authed_user`, without the bot fields.
+
+Hosts store both credentials, turn them into durable `Jido.Connect.Connection`
+records and mint a short-lived `Jido.Connect.CredentialLease` before
+running generated actions. `bot_credential_lease/3` leases the bot token
+for the `:bot` profile. `user_credential_lease/3` leases the user token for
+the `:user` profile: the lease is owned by the person (`owner_type: :user`,
+`owner_id` the Slack user ID), holds the user token as `access_token` and
+never the refresh token, and expires after an hour or at `:expires_at`,
+but never after the token's own `expires_at`. Both functions also take the
+result as a host reads it back from JSON, with string keys and
+`expires_at` as an ISO 8601 string; an `expires_at` in another form
+returns a `Jido.Connect.Error.AuthError` with reason
+`:invalid_user_credential`. Pass `connection:` to bind a lease to the
+host's connection. A result without the token of the profile
+returns a `Jido.Connect.Error.AuthError` with reason
+`:missing_bot_credential` or `:missing_user_credential`. A connection of
+another provider returns one with reason `:credential_connection_mismatch`.
+A connection of the other profile, or a `profile:` option other than the
+lease's, returns one with reason `:unsupported_auth_profile`: a bot lease
+never carries the user token, and a user lease never the bot token.
+Refreshing a rotating token and storing it stay with the host.
+
+`Jido.Connect.Slack.AppManifest.build/2` adds the user view to a manifest on
+request: `user_scopes:` under `oauth_config.scopes.user` and `user_events:`
+under `settings.event_subscriptions.user_events`. User events need
+`include_events?: true`, which adds the events request URL. Manifests
+without these options stay as they were.
 
 ## Conversation history
 
@@ -244,7 +284,8 @@ returns the reason, for example `:unsupported_message_subtype`,
 The bot receives messages only from conversations it belongs to: public and
 private channels it is a member of, its own DM, which needs the Messages tab
 of the app's App Home, and group DMs that include it. A channel the bot has
-left sends it nothing. Subscribe the app's bot events to:
+left sends it nothing; the [user view](#bot-view-and-user-view) covers what
+the person who authorized the app sees. Subscribe the app's bot events to:
 
 | Slack subscription | Scope | Trigger |
 | --- | --- | --- |
@@ -297,6 +338,51 @@ or `source_team`). The DMs captured from the test workspace carried neither,
 so `sender` held only the ID; the package does not take the event's `team`
 instead.
 
+### Bot view and user view
+
+The bot view covers the conversations the bot belongs to. The user view
+adds what a person who authorized the app sees. With the user scopes
+`channels:history`, `groups:history`, `im:history` and `mpim:history`, and
+`message.channels`, `message.groups`, `message.im` and `message.mpim`
+subscribed as user events as well, Slack also delivers messages, edits and
+deletions from channels the bot is not in and from that person's DMs and
+group DMs without the bot. They come to the same request URL, signed with
+the same secret, and reach the same triggers:
+`slack.event.message.{channels,groups,im,mpim}`,
+`slack.event.message.thread_reply` and the eight edit and deletion
+triggers. The triggers keep their bot profile; the package adds no trigger
+for user events.
+
+Slack sends one delivery per event and workspace, even when the bot and
+several people can see it, and names one of them in the payload's
+`authorizations`. The message and change signals carry that choice:
+
+- `view` is `"bot"` when Slack names the bot's installation
+  (`is_bot: true`) and `"user"` when it names a person's user token
+  (`is_bot: false`).
+- `viewer` is that authorization's `user_id`: the bot user in the bot view,
+  the authorizing person in the user view.
+
+A delivery without `authorizations`, or whose first entry has no boolean
+`is_bot`, has neither field. `viewer` names one person who sees the message,
+not all of them; Slack's `apps.event.authorizations.list` returns the full
+list for the event's `event_context`. Slack does not document whether it
+names the bot when the bot can see an event. In the test workspace, where
+the authorizing person also belongs to every conversation of the bot, all
+129 deliveries from those conversations named the bot. The 8 deliveries
+that named the person came only from a public channel the bot has left,
+from a public channel the bot never joined and from a DM of that person
+without the bot.
+
+`app_mention` stays with the bot. A mention of the app in a channel without
+the bot arrived only as a user-view message, without an `app_mention`.
+
+A user-view message from a private channel or a DM is visible to the person
+named as `viewer`; the host decides who else may see or index it. To read
+such a conversation, `slack.conversation.history` and `slack.thread.replies`
+take a lease from `Jido.Connect.Slack.OAuth.user_credential_lease/3`. In a
+channel the bot has left, a bot lease gets `not_in_channel`.
+
 ### Handing a message over
 
 A person hands a message to the app by sharing it into the bot DM with
@@ -311,6 +397,20 @@ attachment:
 - `user`, its author, when Slack names one,
 - `text`, its text,
 - `from_url`, Slack's link to it.
+
+A handover is a share into the bot DM: a `message.im` signal with
+`shared_messages` from the bot's own DM. `view: "bot"` proves that, since
+the bot can see no other DM. With user events, a share in a DM between the
+authorizing person and a colleague arrives as `message.im` as well and
+keeps `shared_messages`, but says `view: "user"`; it hands nothing to the
+app. `view: "user"` does not rule out the bot DM, though: the person sees
+it too, and Slack does not document which of the two it names. All 18
+message deliveries captured from the bot DM named the bot. A host that acts
+on handovers takes a share with `view: "bot"`, and one with `view: "user"`
+only when `conversation.id` is the bot DM it knows, such as the `channel`
+that `slack.conversation.open` returns for the person under a bot lease. No
+share into a DM without the bot was captured; the tests derive one from
+the captured share into the bot DM.
 
 The app sees only the shared message, not the rest of its conversation or
 thread. An entry has no `thread_ts`: the package reads no thread from the
@@ -347,7 +447,10 @@ They need no further subscription, scope or manifest event. Like the
 message triggers, each takes only its own `channel_type`, and the public
 channel triggers also take an event without one. The generic `message`
 event and `normalize_event/1` take edits and deletions of every class; the
-message triggers reject both subtypes.
+message triggers reject both subtypes. With user events subscribed, these
+triggers also receive edits and deletions in the
+[user view](#bot-view-and-user-view), and their signals carry `view` and
+`viewer` like the message signals.
 
 Only a `message_changed` event whose `message` carries a new `edited` is an
 edit. Slack sends the same subtype when it unfurls a link, when a thread
@@ -407,7 +510,10 @@ replies was captured for two bot messages deleted through `chat.delete`,
 one of them after an edit, and the removal of both tombstones. An
 edit by another person than the author, a deletion without
 `previous_message`, a change that repeats an earlier edit and a person's
-deletion of a thread parent with replies were not captured.
+deletion of a thread parent with replies were not captured. All of these
+came in the bot view. The only change captured in the user view was a link
+unfurl in a DM without the bot, which is no edit; the tests derive a
+user-view edit from it.
 
 ## Interactivity
 

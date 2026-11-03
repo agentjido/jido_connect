@@ -19,6 +19,9 @@ defmodule Jido.Connect.Slack.Triggers.Events.MessageChanges do
   @source_ts "ts of the edited or deleted message, from message.ts of an edit or a tombstone and deleted_ts of a deletion. With channel it names the original message; it is not the ts of this notification."
   @notification_ts "ts of this notification. Slack gives every edit and deletion a new one."
   @event_ts "Slack's event_ts of this notification."
+  @views Jido.Connect.Slack.Webhook.View.views()
+  @view "Whose view the delivery comes from: bot when Slack names the bot's installation in the delivery's authorizations, user when it names the user token of a person who authorized the app. Absent when the delivery names no authorization."
+  @viewer "User ID of that authorization: the bot user in the bot view, the authorizing person in the user view. Slack names one installation even when several can see the change."
   @changed_subtype "Always message_changed: an edit, marked by a new message.edited."
   @changed_thread_ts "thread_ts of the edited message, for a thread reply or a thread parent."
   @changed_user "Author of the edited message."
@@ -70,6 +73,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.MessageChanges do
         field :text, :string, description: @text
         field :notification_ts, :string, description: @notification_ts
         field :event_ts, :string, description: @event_ts
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -110,6 +115,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.MessageChanges do
         field :app_id, :string
         field :notification_ts, :string, description: @notification_ts
         field :event_ts, :string, description: @event_ts
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -153,6 +160,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.MessageChanges do
         field :text, :string, description: @text
         field :notification_ts, :string, description: @notification_ts
         field :event_ts, :string, description: @event_ts
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -193,6 +202,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.MessageChanges do
         field :app_id, :string
         field :notification_ts, :string, description: @notification_ts
         field :event_ts, :string, description: @event_ts
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -236,6 +247,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.MessageChanges do
         field :text, :string, description: @text
         field :notification_ts, :string, description: @notification_ts
         field :event_ts, :string, description: @event_ts
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -276,6 +289,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.MessageChanges do
         field :app_id, :string
         field :notification_ts, :string, description: @notification_ts
         field :event_ts, :string, description: @event_ts
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -319,6 +334,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.MessageChanges do
         field :text, :string, description: @text
         field :notification_ts, :string, description: @notification_ts
         field :event_ts, :string, description: @event_ts
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -359,6 +376,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.MessageChanges do
         field :app_id, :string
         field :notification_ts, :string, description: @notification_ts
         field :event_ts, :string, description: @event_ts
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
   end

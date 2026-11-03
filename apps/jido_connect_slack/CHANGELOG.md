@@ -66,6 +66,42 @@
   author. The generic `message` event and `normalize_event/1` now normalize
   both subtypes, so a verified edit or deletion carries a signal; the
   message triggers still reject them.
+- Add the authorizing user's view. `OAuth.authorize_url/1` takes
+  `:user_scope` and sends it as Slack's `user_scope`; without it the URL is
+  unchanged. `OAuth.exchange_code/2` keeps the bot credential and adds
+  `authed_user` when Slack returns a user token: `id`, `access_token`,
+  `token_type`, `scope` and, with token rotation, `refresh_token`,
+  `expires_in` and `expires_at`. A response with only a user token now
+  yields `authed_user` without the bot fields instead of
+  `:invalid_response`. `OAuth.user_credential_lease/3` leases the user
+  token for the `:user` profile, never past the token's `expires_at` and
+  without the refresh token.
+- `OAuth.bot_credential_lease/3` returns an `AuthError` with reason
+  `:missing_bot_credential` for a token without a bot token instead of
+  raising, and a lease bound to `:connection` now takes that connection's
+  ID instead of `slack-team-<team>`, so it matches the connection.
+- Both lease functions refuse a `:connection` of another provider with
+  reason `:credential_connection_mismatch`, and a `:connection` or
+  `:profile` of the other profile with reason `:unsupported_auth_profile`.
+  Before, `bot_credential_lease/3` took the profile of any connection or
+  `:profile`, so a lease could carry one token under the other profile.
+- Both lease functions read a token result with string keys, as from a
+  JSON column, and the user token's `expires_at` as an ISO 8601 string.
+  Any other `expires_at` returns `:invalid_user_credential` instead of
+  being ignored. `connection_id: nil` and `expires_at: nil` mean the
+  defaults.
+- `AppManifest.build/2` takes `:user_scopes` for
+  `oauth_config.scopes.user` and `:user_events` for
+  `settings.event_subscriptions.user_events`; user events need
+  `include_events?: true`. Manifests without the options are unchanged.
+- Message signals of `slack.event.message.{channels,groups,im,mpim,thread_reply}`
+  and the signals of the eight edit and deletion triggers carry `view`
+  (`"bot"` or `"user"`) and `viewer` from the delivery's `authorizations`,
+  and `MessageChange` has both fields. `shared_messages` stays in both
+  views. A share with `view: "bot"` comes from the bot DM and hands the
+  message to the app; one with `view: "user"` does so only when its
+  `conversation.id` is the bot DM, since Slack does not document which
+  view it names there.
 
 ## 0.1.0
 

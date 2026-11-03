@@ -235,7 +235,9 @@ defmodule Jido.Connect.Slack.WebhookTest do
                      team_id: "T0CEE692400",
                      user: "U0CDPFT1RDJ",
                      text: payload!(name)["event"]["text"],
-                     event_ts: ids.ts
+                     event_ts: ids.ts,
+                     view: "bot",
+                     viewer: "U0CDHUEBVEJ"
                    },
                    ids
                  ),
@@ -375,7 +377,9 @@ defmodule Jido.Connect.Slack.WebhookTest do
                ts: "1793628005.878859",
                event_ts: "1793628005.878859",
                subtype: "file_share",
-               file_ids: ["F0CE8HZ718U"]
+               file_ids: ["F0CE8HZ718U"],
+               view: "bot",
+               viewer: "U0CDHUEBVEJ"
              }
 
       assert {:ok, ^signal} = Webhook.normalize_signal("message.channels", payload)
@@ -432,7 +436,9 @@ defmodule Jido.Connect.Slack.WebhookTest do
                ts: "1793627849.603099",
                thread_ts: "1793627736.679599",
                event_ts: "1793627849.603099",
-               subtype: "thread_broadcast"
+               subtype: "thread_broadcast",
+               view: "bot",
+               viewer: "U0CDHUEBVEJ"
              }
 
       for event <- ["message.channels", "message.thread_reply"] do
@@ -478,7 +484,9 @@ defmodule Jido.Connect.Slack.WebhookTest do
                  event_ts: ts,
                  sender: %{id: "U0CDPFT1RDJ"},
                  conversation: %{id: "D0CD4G48UFR", type: "im"},
-                 shared_messages: [shared]
+                 shared_messages: [shared],
+                 view: "bot",
+                 viewer: "U0CDHUEBVEJ"
                }
       end
 

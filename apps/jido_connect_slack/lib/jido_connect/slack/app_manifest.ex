@@ -6,6 +6,16 @@ defmodule Jido.Connect.Slack.AppManifest do
   URLs, and the scopes required by the first generated Slack actions. Event and
   interactivity URLs are opt-in so hosts can enable them after local routes are
   ready to answer Slack's verification requests.
+
+  The user view is opt-in as well. `:user_scopes` lists the scopes of the
+  user token that the person who installs the app grants, under
+  `oauth_config.scopes.user`, and `:user_events` the events the app receives
+  through those user tokens, under `settings.event_subscriptions.user_events`.
+  For the authorizing user's messages these are `channels:history`,
+  `groups:history`, `im:history` and `mpim:history`, and `message.channels`,
+  `message.groups`, `message.im` and `message.mpim`. User events need
+  `include_events?: true`, which adds the events request URL. Without the two
+  options the manifest has neither key.
   """
 
   @default_scopes [
@@ -38,6 +48,8 @@ defmodule Jido.Connect.Slack.AppManifest do
           | {:scopes, [String.t()]}
           | {:include_events?, boolean()}
           | {:include_interactivity?, boolean()}
+          | {:user_scopes, [String.t()]}
+          | {:user_events, [String.t()]}
 
   @doc """
   Builds a Slack manifest map for a public host URL.
@@ -75,6 +87,8 @@ defmodule Jido.Connect.Slack.AppManifest do
     }
     |> maybe_put_event_subscriptions(base_url, include_events?)
     |> maybe_put_interactivity(base_url, include_interactivity?)
+    |> maybe_put_user_scopes(Keyword.get(opts, :user_scopes, []))
+    |> maybe_put_user_events(Keyword.get(opts, :user_events, []), include_events?)
   end
 
   @doc """
@@ -148,6 +162,21 @@ defmodule Jido.Connect.Slack.AppManifest do
         "reaction_removed"
       ]
     })
+  end
+
+  defp maybe_put_user_scopes(manifest, []), do: manifest
+
+  defp maybe_put_user_scopes(manifest, scopes),
+    do: put_in(manifest, [:oauth_config, :scopes, :user], scopes)
+
+  defp maybe_put_user_events(manifest, [], _include_events?), do: manifest
+
+  defp maybe_put_user_events(manifest, events, true),
+    do: put_in(manifest, [:settings, :event_subscriptions, :user_events], events)
+
+  defp maybe_put_user_events(_manifest, _events, false) do
+    raise ArgumentError,
+          "user_events need include_events?: true, which adds the events request URL"
   end
 
   defp maybe_put_interactivity(manifest, _base_url, false), do: manifest

@@ -1,0 +1,204 @@
+{
+  "body": {
+    "channel_actions_count": 0,
+    "channel_actions_ts": null,
+    "has_more": false,
+    "messages": [
+      {
+        "blocks": [
+          {
+            "block_id": "Z79j7",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "text-1",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "client_msg_id": "6e4741f5-3113-4335-81a6-78f35052efb7",
+        "team": "T0CEE692400",
+        "text": "text-1",
+        "ts": "1793628631.312089",
+        "type": "message",
+        "user": "U0CDPFT1RDJ"
+      },
+      {
+        "blocks": [
+          {
+            "block_id": "rQnSy",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "text-2",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "client_msg_id": "1685b364-f612-4a68-86fd-f611cf676b24",
+        "team": "T0CEE692400",
+        "text": "text-2",
+        "ts": "1793373088.930839",
+        "type": "message",
+        "user": "U0CDPFT1RDJ"
+      },
+      {
+        "app_id": "A0CDHUBBHRC",
+        "blocks": [
+          {
+            "block_id": "yKFE3",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "text-3",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "bot_id": "B0CDHUEB8MC",
+        "bot_profile": {
+          "app_id": "A0CDHUBBHRC",
+          "deleted": false,
+          "icons": {
+            "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+            "image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+            "image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+          },
+          "id": "B0CDHUEB8MC",
+          "name": "Jido Connect Live Tests",
+          "team_id": "T0CEE692400",
+          "updated": 1793370597,
+          "user_id": "U0CDHUEBVEJ"
+        },
+        "team": "T0CEE692400",
+        "text": "text-3",
+        "ts": "1793371066.236829",
+        "type": "message",
+        "user": "U0CDHUEBVEJ"
+      },
+      {
+        "inviter": "U0CDHUEBVEJ",
+        "subtype": "channel_join",
+        "text": "text-4",
+        "ts": "1793371065.992009",
+        "type": "message",
+        "user": "U0CDEL6734M"
+      },
+      {
+        "inviter": "U0CDHUEBVEJ",
+        "subtype": "channel_join",
+        "text": "text-5",
+        "ts": "1793371065.908029",
+        "type": "message",
+        "user": "U0CDPFT1RDJ"
+      },
+      {
+        "subtype": "channel_join",
+        "text": "text-6",
+        "ts": "1793371065.507269",
+        "type": "message",
+        "user": "U0CDHUEBVEJ"
+      }
+    ],
+    "ok": true,
+    "pin_count": 0
+  },
+  "headers": {
+    "access-control-allow-headers": [
+      "slack-route, x-slack-version-ts, x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-b3-flags, x-background"
+    ],
+    "access-control-allow-origin": [
+      "*"
+    ],
+    "access-control-expose-headers": [
+      "x-slack-req-id, retry-after"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, quic=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, no-cache, no-store, must-revalidate"
+    ],
+    "content-length": [
+      "3515"
+    ],
+    "content-type": [
+      "application/json; charset=utf-8"
+    ],
+    "date": [
+      "Tue, 03 Nov 2026 09:43:13 GMT"
+    ],
+    "expires": [
+      "Sat, 26 Jul 1997 05:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "referrer-policy": [
+      "no-referrer"
+    ],
+    "server": [
+      "Apache"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-0337ca35b4bad9b21,ingress-edge-fra-prod-0545eeea8a47d6bd4"
+    ],
+    "x-backend": [
+      "api_normal"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-edge-backend": [
+      "envoy-www"
+    ],
+    "x-envoy-upstream-service-time": [
+      "112"
+    ],
+    "x-server": [
+      "slack-www-hhvm-api-iad-4xmb514zs7pn"
+    ],
+    "x-slack-req-id": [
+      "62e31930ce0c6bff26989c89bd56c50f"
+    ],
+    "x-slack-unique-id": [
+      "a2ef65a0-8b2b-4970-8d57-a3a1e0207440"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-03",
+  "request": {
+    "method": "GET",
+    "path": "/api/conversations.history"
+  },
+  "status": 200
+}

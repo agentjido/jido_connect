@@ -34,6 +34,12 @@ defmodule Jido.Connect.Slack.MessageChange do
   `previous_message` is the tombstone; that second deletion of the same
   `ts` names no author.
 
+  `view` says whose view the notification comes from: `"bot"` when Slack
+  names the bot's installation in the delivery's `authorizations`, `"user"`
+  when it names the user token of a person who authorized the app.
+  `viewer` is that authorization's user ID, the bot user or the person.
+  Both are `nil` when the delivery names no authorization.
+
   IDs and timestamps stay Slack's exact strings. `team_id`, `event_id`,
   `channel` and `ts` must be non-empty strings; every other field is a
   string or `nil`.
@@ -41,6 +47,7 @@ defmodule Jido.Connect.Slack.MessageChange do
 
   @subtypes ["message_changed", "message_deleted"]
   @channel_types ["channel", "group", "im", "mpim"]
+  @views Jido.Connect.Slack.Webhook.View.views()
 
   # `coerce: true` lets a plain map become the struct; field types stay
   # strict, so a number never turns into a string.
@@ -61,7 +68,9 @@ defmodule Jido.Connect.Slack.MessageChange do
               edited_ts: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               text: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               notification_ts: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
-              event_ts: Zoi.string() |> Zoi.nullish() |> Zoi.optional()
+              event_ts: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              view: Zoi.enum(@views) |> Zoi.nullish() |> Zoi.optional(),
+              viewer: Zoi.string() |> Zoi.nullish() |> Zoi.optional()
             },
             coerce: true
           )

@@ -3,7 +3,7 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
 
   alias Jido.Connect.{Data, Error, WebhookDelivery}
   alias Jido.Connect.Slack.MessageChange
-  alias Jido.Connect.Slack.Webhook.{MessageChanges, SharedMessages}
+  alias Jido.Connect.Slack.Webhook.{MessageChanges, SharedMessages, View}
 
   @human_message_subtypes ["file_share", "thread_broadcast"]
   @change_subtypes MessageChange.subtypes()
@@ -242,6 +242,7 @@ defmodule Jido.Connect.Slack.Webhook.Normalizer do
         subtype: Data.get(event, "subtype"),
         file_ids: file_ids(event)
       })
+      |> Map.merge(View.from_payload(payload))
 
     case Data.get(event, "channel_type") do
       channel_type when channel_type in ["im", "mpim"] ->

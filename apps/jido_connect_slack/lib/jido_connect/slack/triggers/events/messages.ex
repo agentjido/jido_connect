@@ -9,6 +9,9 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
   @subtype "Slack's subtype of a new message a person writes: file_share for a message with files, thread_broadcast for a thread reply also sent to the channel. Plain messages have none."
   @shared_messages "Messages shared natively into a direct message, one per attachment with is_share: channel and ts of the shared message, its author as user, its text and from_url. The person who shared them is the signal's user."
   @file_ids "IDs of the files of a file_share message. File content and links are not part of the signal."
+  @views Jido.Connect.Slack.Webhook.View.views()
+  @view "Whose view the delivery comes from: bot when Slack names the bot's installation in the delivery's authorizations, user when it names the user token of a person who authorized the app. Absent when the delivery names no authorization."
+  @viewer "User ID of that authorization: the bot user in the bot view, the authorizing person in the user view. Slack names one installation even when several can see the message."
 
   triggers do
     webhook :app_mention do
@@ -81,6 +84,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
         field :event_ts, :string
         field :subtype, :string, enum: @human_message_subtypes, description: @subtype
         field :file_ids, {:array, :string}, description: @file_ids
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -120,6 +125,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
         field :event_ts, :string
         field :subtype, :string, enum: @human_message_subtypes, description: @subtype
         field :file_ids, {:array, :string}, description: @file_ids
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -164,6 +171,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
         field :subtype, :string, enum: @human_message_subtypes, description: @subtype
         field :file_ids, {:array, :string}, description: @file_ids
         field :shared_messages, {:array, :map}, description: @shared_messages
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -208,6 +217,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
         field :subtype, :string, enum: @human_message_subtypes, description: @subtype
         field :file_ids, {:array, :string}, description: @file_ids
         field :shared_messages, {:array, :map}, description: @shared_messages
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -252,6 +263,8 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
         field :subtype, :string, enum: @human_message_subtypes, description: @subtype
         field :file_ids, {:array, :string}, description: @file_ids
         field :shared_messages, {:array, :map}, description: @shared_messages
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
   end

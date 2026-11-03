@@ -88,6 +88,54 @@ defmodule Jido.Connect.Slack.AppManifestTest do
            }
   end
 
+  test "adds user scopes and user events only when a host opts in" do
+    user_scopes = ["channels:history", "groups:history", "im:history", "mpim:history"]
+    user_events = ["message.channels", "message.groups", "message.im", "message.mpim"]
+    base = [name: "Jido Connect Test", include_events?: true, include_interactivity?: true]
+
+    default = AppManifest.build("https://demo.ngrok-free.app", base)
+
+    manifest =
+      AppManifest.build(
+        "https://demo.ngrok-free.app",
+        base ++ [user_scopes: user_scopes, user_events: user_events]
+      )
+
+    refute Map.has_key?(default.oauth_config.scopes, :user)
+    refute Map.has_key?(default.settings.event_subscriptions, :user_events)
+
+    assert manifest.oauth_config.scopes == %{
+             bot: default.oauth_config.scopes.bot,
+             user: user_scopes
+           }
+
+    assert manifest.settings.event_subscriptions ==
+             Map.put(default.settings.event_subscriptions, :user_events, user_events)
+
+    assert Map.delete(manifest, :oauth_config) |> Map.delete(:settings) ==
+             Map.delete(default, :oauth_config) |> Map.delete(:settings)
+  end
+
+  test "user scopes need no event subscription, user events need the events URL" do
+    manifest =
+      AppManifest.build("https://demo.ngrok-free.app",
+        user_scopes: ["channels:history"],
+        user_events: []
+      )
+
+    assert manifest.oauth_config.scopes.user == ["channels:history"]
+    refute get_in(manifest, [:settings, :event_subscriptions])
+
+    refute Map.has_key?(
+             AppManifest.build("https://demo.ngrok-free.app", user_scopes: []).oauth_config.scopes,
+             :user
+           )
+
+    assert_raise ArgumentError, ~r/include_events\?/, fn ->
+      AppManifest.build("https://demo.ngrok-free.app", user_events: ["message.channels"])
+    end
+  end
+
   test "encodes a Slack app creation URL" do
     manifest = AppManifest.build("https://demo.ngrok-free.app", name: "Jido Connect Test")
     url = AppManifest.creation_url(manifest)

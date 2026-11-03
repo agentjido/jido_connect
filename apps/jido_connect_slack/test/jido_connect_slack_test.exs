@@ -1098,7 +1098,9 @@ defmodule Jido.Connect.SlackTest do
              :thread_ts,
              :event_ts,
              :subtype,
-             :file_ids
+             :file_ids,
+             :view,
+             :viewer
            ]
 
     assert {:ok,
@@ -1128,7 +1130,9 @@ defmodule Jido.Connect.SlackTest do
              :thread_ts,
              :event_ts,
              :subtype,
-             :file_ids
+             :file_ids,
+             :view,
+             :viewer
            ]
 
     assert {:ok,
@@ -1163,7 +1167,9 @@ defmodule Jido.Connect.SlackTest do
              :conversation,
              :subtype,
              :file_ids,
-             :shared_messages
+             :shared_messages,
+             :view,
+             :viewer
            ]
 
     assert {:ok,
@@ -1198,7 +1204,9 @@ defmodule Jido.Connect.SlackTest do
              :conversation,
              :subtype,
              :file_ids,
-             :shared_messages
+             :shared_messages,
+             :view,
+             :viewer
            ]
 
     assert {:ok,
@@ -1233,8 +1241,15 @@ defmodule Jido.Connect.SlackTest do
              :conversation,
              :subtype,
              :file_ids,
-             :shared_messages
+             :shared_messages,
+             :view,
+             :viewer
            ]
+
+    for family <- ["channels", "groups", "im", "mpim", "thread_reply"] do
+      assert {:ok, trigger} = Connect.trigger(spec, "slack.event.message.#{family}")
+      assert %{enum: ["bot", "user"]} = Enum.find(trigger.signal, &(&1.name == :view))
+    end
 
     assert {:ok,
             %{
@@ -1408,12 +1423,13 @@ defmodule Jido.Connect.SlackTest do
     identity = [:team_id, :event_id, :channel, :channel_type, :subtype, :ts, :thread_ts]
     authors = [:user, :bot_id, :app_id]
     timestamps = [:notification_ts, :event_ts]
+    view = [:view, :viewer]
 
     for {family, scope, _channel_type} <- rows,
         {action, subtype, fields} <- [
           {"changed", "message_changed",
-           identity ++ authors ++ [:editor, :edited_ts, :text] ++ timestamps},
-          {"deleted", "message_deleted", identity ++ authors ++ timestamps}
+           identity ++ authors ++ [:editor, :edited_ts, :text] ++ timestamps ++ view},
+          {"deleted", "message_deleted", identity ++ authors ++ timestamps ++ view}
         ] do
       id = "slack.event.message.#{family}.#{action}"
 
@@ -1440,6 +1456,7 @@ defmodule Jido.Connect.SlackTest do
       assert required == [:team_id, :event_id, :channel, :subtype, :ts], id
 
       assert %{enum: [^subtype]} = Enum.find(trigger.signal, &(&1.name == :subtype))
+      assert %{enum: ["bot", "user"]} = Enum.find(trigger.signal, &(&1.name == :view))
     end
 
     # The bot's default grants stay without the private history scopes.

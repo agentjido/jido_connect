@@ -21,6 +21,7 @@ defmodule Jido.Connect.Slack.Webhook.MessageChanges do
 
   alias Jido.Connect.{Data, Error}
   alias Jido.Connect.Slack.MessageChange
+  alias Jido.Connect.Slack.Webhook.View
 
   @channel_types [nil, "channel", "group", "im", "mpim"]
 
@@ -113,7 +114,11 @@ defmodule Jido.Connect.Slack.Webhook.MessageChanges do
          :ok <- require_edit(payload, kind),
          fields = fields(kind, event),
          {:ok, attrs} <- attrs(payload, fields),
-         {:ok, change} <- build(Map.put(attrs, :subtype, signal_subtype(kind)), fields),
+         attrs =
+           attrs
+           |> Map.put(:subtype, signal_subtype(kind))
+           |> Map.merge(View.from_payload(payload)),
+         {:ok, change} <- build(attrs, fields),
          :ok <- require_same_source(payload, change, fields) do
       {:ok, to_signal(change)}
     end

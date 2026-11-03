@@ -11,3 +11,7 @@ end
 unless Code.ensure_loaded?(Jido.Connect.Slack.TestSupport.CapturedDelivery) do
   Code.require_file("support/captured_delivery.ex", __DIR__)
 end
+
+unless Code.ensure_loaded?(Jido.Connect.Slack.TestSupport.SyntheticFixture) do
+  Code.require_file("support/synthetic_fixture.ex", __DIR__)
+end

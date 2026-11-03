@@ -40,7 +40,9 @@ defmodule Jido.Connect.Slack.MessageChangesTest do
                edited_ts: "1793628168.000000",
                text: payload["event"]["message"]["text"],
                notification_ts: "1793628168.004800",
-               event_ts: "1793628168.004800"
+               event_ts: "1793628168.004800",
+               view: "bot",
+               viewer: "U0CDHUEBVEJ"
              }
 
       assert byte_size(signal.text) == 683
@@ -64,7 +66,9 @@ defmodule Jido.Connect.Slack.MessageChangesTest do
                edited_ts: "1793634988.000000",
                text: payload!("message_changed_bot")["event"]["message"]["text"],
                notification_ts: "1793634988.000100",
-               event_ts: "1793634988.000100"
+               event_ts: "1793634988.000100",
+               view: "bot",
+               viewer: "U0CDHUEBVEJ"
              }
     end
 
@@ -114,7 +118,9 @@ defmodule Jido.Connect.Slack.MessageChangesTest do
                thread_ts: "1793627736.679599",
                user: "U0CDPFT1RDJ",
                notification_ts: "1793628616.005400",
-               event_ts: "1793628616.005400"
+               event_ts: "1793628616.005400",
+               view: "bot",
+               viewer: "U0CDHUEBVEJ"
              }
 
       assert String.starts_with?(previous["text"], "edit-thread ")
@@ -135,7 +141,9 @@ defmodule Jido.Connect.Slack.MessageChangesTest do
                bot_id: "B0CDHUEB8MC",
                app_id: "A0CDHUBBHRC",
                notification_ts: "1793635005.000300",
-               event_ts: "1793635005.000300"
+               event_ts: "1793635005.000300",
+               view: "bot",
+               viewer: "U0CDHUEBVEJ"
              }
     end
 
@@ -160,7 +168,9 @@ defmodule Jido.Connect.Slack.MessageChangesTest do
                subtype: "message_deleted",
                ts: "1793628275.471009",
                notification_ts: "1793628616.005400",
-               event_ts: "1793628616.005400"
+               event_ts: "1793628616.005400",
+               view: "bot",
+               viewer: "U0CDHUEBVEJ"
              }
     end
   end
@@ -194,7 +204,9 @@ defmodule Jido.Connect.Slack.MessageChangesTest do
                bot_id: "B0CDHUEB8MC",
                app_id: "A0CDHUBBHRC",
                notification_ts: "1793637527.000200",
-               event_ts: "1793637527.000200"
+               event_ts: "1793637527.000200",
+               view: "bot",
+               viewer: "U0CDHUEBVEJ"
              }
 
       for event <- ["message", "message.channels.deleted"] do
@@ -225,7 +237,9 @@ defmodule Jido.Connect.Slack.MessageChangesTest do
                bot_id: "B0CDHUEB8MC",
                app_id: "A0CDHUBBHRC",
                notification_ts: "1793637605.000700",
-               event_ts: "1793637605.000700"
+               event_ts: "1793637605.000700",
+               view: "bot",
+               viewer: "U0CDHUEBVEJ"
              }
     end
 
@@ -275,7 +289,9 @@ defmodule Jido.Connect.Slack.MessageChangesTest do
                ts: "1793637515.439379",
                thread_ts: "1793637515.439379",
                notification_ts: "1793637559.000400",
-               event_ts: "1793637559.000400"
+               event_ts: "1793637559.000400",
+               view: "bot",
+               viewer: "U0CDHUEBVEJ"
              }
 
       assert {:ok, ^signal} = Webhook.normalize_event(payload)
