@@ -9,8 +9,9 @@ defmodule Jido.Connect.Gmail.ContentLiveSmokeTest do
   equal that of its recording, and `attachments.get` must return the original
   ISO-8859-15 bytes of a text attachment, which decode to the expected text.
   The content actions must return the three-message conversation, an inline
-  forward, a forward with attached originals and a forward of empty originals
-  like their recordings; for the first three, the bytes that
+  forward, a forward with attached originals, a forward of empty originals and
+  forwards in the shapes that Outlook Web and Gmail Web build like their
+  recordings; for all but the empty originals, the bytes that
   `google.gmail.message.attachment.get` returns for each manifest entry must
   match the recorded ones. `google.gmail.message.content.get` must fetch the
   3 MB windows-1252 body that Gmail keeps behind an `attachmentId`, and Gmail
@@ -20,8 +21,9 @@ defmodule Jido.Connect.Gmail.ContentLiveSmokeTest do
   `GOOGLE_GMAIL_ARCHIVE_MESSAGE_ID`, `GOOGLE_GMAIL_ATTACHMENT_MESSAGE_ID`,
   `GOOGLE_GMAIL_CHARSET_MESSAGE_ID`, `GOOGLE_GMAIL_LARGE_BODY_ID`,
   `GOOGLE_GMAIL_UNNAMED_ATTACHMENT_MESSAGE_ID`,
-  `GOOGLE_GMAIL_FORWARD_INLINE_ID`, `GOOGLE_GMAIL_FORWARD_ATTACHED_ID` and
-  `GOOGLE_GMAIL_FORWARD_OPAQUE_ID`; see `docs/live_smoke_tests.md` for the
+  `GOOGLE_GMAIL_FORWARD_INLINE_ID`, `GOOGLE_GMAIL_FORWARD_ATTACHED_ID`,
+  `GOOGLE_GMAIL_FORWARD_OPAQUE_ID`, `GOOGLE_GMAIL_FORWARD_RELATED_ID` and
+  `GOOGLE_GMAIL_FORWARD_UNTITLED_ID`; see `docs/live_smoke_tests.md` for the
   variables and the recording mode.
   """
 
@@ -185,7 +187,8 @@ defmodule Jido.Connect.Gmail.ContentLiveSmokeTest do
     alias Jido.Connect.TestSupport.LiveSmoke
 
     @messages ~w(message_full_forward_inline message_full_forward_attached
-                 message_full_forward_opaque)
+                 message_full_forward_opaque message_full_forward_related
+                 message_full_forward_untitled)
     @threads ~w(thread_full_conversation)
 
     def get_message_content(%{message_id: id}, _access_token), do: recording(@messages, id)
@@ -295,6 +298,55 @@ defmodule Jido.Connect.Gmail.ContentLiveSmokeTest do
            ] = live.messages
 
     assert digest_view(live) == digest_view(recorded)
+  end
+
+  # The shapes of the forwards that Outlook Web and Gmail Web built, rebuilt by
+  # the seed with synthetic content; content_client_forwards_live_smoke_test.exs
+  # reads the client forwards themselves without recording them.
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_GMAIL_FORWARD_RELATED_ID"])
+  test "message.content.get returns the forward in Outlook Web's shape like its recording",
+       %{env: env} do
+    access_token = env["GOOGLE_ACCESS_TOKEN"]
+    input = %{message_id: env["GOOGLE_GMAIL_FORWARD_RELATED_ID"]}
+
+    LiveGmail.record("message_full_forward_related")
+
+    live = invoke_content!("google.gmail.message.content.get", input, access_token, :message)
+    recorded = recorded_content!("google.gmail.message.content.get", input, :message)
+
+    # The HTML and its inline images sit in a multipart/related inside the
+    # multipart/alternative, outside and in the enclosed forward. Gmail names
+    # the rfc822 part, whose disposition names no file, after the enclosed
+    # subject, not the outer one.
+    assert Enum.map(live.text_parts, & &1.part_id) == ["0.0", "0.1.0"]
+    assert Enum.map(live.attachments, & &1.part_id) == ["0.1.1", "0.1.2"]
+    assert live.subject == "WG: WG: jcl-live related original"
+    assert [%{filename: "WG: jcl-live related original.eml"} = enclosed] = live.messages
+    assert Enum.map(enclosed.text_parts, & &1.part_id) == ["1.0.0.0", "1.0.0.1.0"]
+    assert Enum.map(enclosed.attachments, & &1.part_id) == ["1.0.0.1.1", "1.0.1"]
+    assert digest_view(live) == digest_view(recorded)
+
+    assert_attachment_digests([live], access_token, "attachments_forward_related")
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_GMAIL_FORWARD_UNTITLED_ID"])
+  test "message.content.get returns the forward without a subject like its recording",
+       %{env: env} do
+    access_token = env["GOOGLE_ACCESS_TOKEN"]
+    input = %{message_id: env["GOOGLE_GMAIL_FORWARD_UNTITLED_ID"]}
+
+    LiveGmail.record("message_full_forward_untitled")
+
+    live = invoke_content!("google.gmail.message.content.get", input, access_token, :message)
+    recorded = recorded_content!("google.gmail.message.content.get", input, :message)
+
+    assert live.subject == ""
+    assert [%{content_id: "<f_jcl_untitled_eml>"} = enclosed] = live.messages
+    assert [%{filename: "untitled-note.txt"}] = enclosed.attachments
+    assert digest_view(live) == digest_view(recorded)
+
+    assert_attachment_digests([live], access_token, "attachments_forward_untitled")
   end
 
   @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_GMAIL_LARGE_BODY_ID"])

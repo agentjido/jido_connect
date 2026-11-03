@@ -165,6 +165,144 @@ defmodule Jido.Connect.Gmail.ContentTest do
                ])
     end
 
+    test "a forward in Outlook Web's shape keeps text, inline images and the enclosed forward apart" do
+      # The seed rebuilds the shape of a forward that Outlook Web attached:
+      # outer and enclosed text in multipart/alternative, the HTML with its
+      # inline images in a multipart/related inside it, and an rfc822 part
+      # whose disposition names no file.
+      recorded = LiveSmoke.fixture!(:gmail, "message_full_forward_related")
+      expect_full("/gmail/v1/users/me/messages/#{recorded["id"]}", recorded)
+
+      assert {:ok, %{message: message}} = read_message(recorded["id"])
+      assert message.subject == "WG: WG: jcl-live related original"
+
+      assert Enum.map(message.text_parts, &{&1.part_id, &1.mime_type}) == [
+               {"0.0", "text/plain"},
+               {"0.1.0", "text/html"}
+             ]
+
+      assert hd(message.text_parts).content ==
+               "Siehe Anlage, marker jcl-marker-forward-related.\r\n\r\nViele Grüße\r\n"
+
+      # Outlook gives an inline image the Content-ID <file@hex.hex>, which
+      # the recorder does not take for an address: its last label starts
+      # with a digit.
+      assert Enum.map(message.attachments, &Map.delete(&1, :attachment_id)) == [
+               %{
+                 part_id: "0.1.1",
+                 filename: "jcl-logo-1.png",
+                 mime_type: "image/png",
+                 size: 73,
+                 disposition: "inline",
+                 content_id: "<jcl-logo-1.png@01DD4C2A.5B6E7F80>"
+               },
+               %{
+                 part_id: "0.1.2",
+                 filename: "jcl-logo-2.png",
+                 mime_type: "image/png",
+                 size: 73,
+                 disposition: "inline",
+                 content_id: "<jcl-logo-2.png@01DD4C2A.5B6E7F80>"
+               }
+             ]
+
+      assert Enum.all?(message.attachments, &is_binary(&1.attachment_id))
+      assert cid_references(message) == [{"0.1.0", [1, 1]}]
+
+      # Gmail names the rfc822 part, whose disposition names no file, after
+      # the enclosed subject and not the outer one.
+      assert [
+               %{
+                 part_id: "1",
+                 filename: "WG: jcl-live related original.eml",
+                 mime_type: "message/rfc822",
+                 disposition: "attachment",
+                 messages: []
+               } = enclosed
+             ] = message.messages
+
+      assert_enclosed_headers(recorded, message, enclosed, ~w(From Date Subject))
+      assert header(enclosed, "Subject") == "WG: jcl-live related original"
+      assert enclosed.filename == header(enclosed, "Subject") <> ".eml"
+      refute enclosed.filename == message.subject <> ".eml"
+
+      assert Enum.map(enclosed.text_parts, &{&1.part_id, &1.mime_type}) == [
+               {"1.0.0.0", "text/plain"},
+               {"1.0.0.1.0", "text/html"}
+             ]
+
+      assert hd(enclosed.text_parts).content ==
+               "Grüße aus Köln, Maß und Größe.\r\n" <>
+                 "Enclosed forward with marker jcl-marker-related-enclosed.\r\n"
+
+      assert Enum.map(enclosed.attachments, &{&1.part_id, &1.filename, &1.disposition, &1.size}) ==
+               [
+                 {"1.0.0.1.1", "jcl-enclosed.png", "inline", 73},
+                 {"1.0.1", "related-note.txt", "attachment", 36}
+               ]
+
+      assert Enum.map(enclosed.attachments, & &1.content_id) ==
+               ["<jcl-enclosed.png@01DD4C29.7C8D9E10>", nil]
+
+      assert cid_references(enclosed) == [{"1.0.0.1.0", [1]}]
+    end
+
+    test "a forward without a subject in Gmail Web's shape keeps the empty subject and Content-IDs" do
+      # The seed rebuilds the shape of a forward that Gmail Web attached
+      # without a subject: an empty Subject header, and a Content-ID on the
+      # rfc822 part and on the file attachment of the enclosed inline forward.
+      recorded = LiveSmoke.fixture!(:gmail, "message_full_forward_untitled")
+      expect_full("/gmail/v1/users/me/messages/#{recorded["id"]}", recorded)
+
+      assert {:ok, %{message: message}} = read_message(recorded["id"])
+
+      assert message.subject == ""
+      assert header(message, "Subject") == ""
+
+      assert Enum.map(message.text_parts, &{&1.part_id, &1.mime_type, &1.content}) == [
+               {"0.0", "text/plain", "Siehe Anhang, marker jcl-marker-forward-untitled.\r\n"},
+               {"0.1", "text/html",
+                ~s(<div dir="ltr">Siehe Anhang, marker jcl-marker-forward-untitled.</div>\r\n)}
+             ]
+
+      assert message.attachments == []
+
+      assert [
+               %{
+                 part_id: "1",
+                 filename: "jcl-live untitled original.eml",
+                 mime_type: "message/rfc822",
+                 disposition: "attachment",
+                 content_id: "<f_jcl_untitled_eml>",
+                 messages: []
+               } = enclosed
+             ] = message.messages
+
+      # The seed gives the outer and the enclosed message the same sender.
+      assert_enclosed_headers(recorded, message, enclosed, ~w(Date Subject))
+      assert header(enclosed, "Subject") == "Fwd: jcl-live untitled original"
+
+      assert [%{part_id: "1.0.0.0", mime_type: "text/plain"} = plain, %{part_id: "1.0.0.1"}] =
+               enclosed.text_parts
+
+      assert plain.content =~ "---------- Forwarded message ---------\r\n"
+      assert plain.content =~ "Grüße aus Köln, Maß und Größe.\r\n"
+
+      assert [
+               %{
+                 part_id: "1.0.1",
+                 filename: "untitled-note.txt",
+                 mime_type: "text/plain",
+                 size: 37,
+                 disposition: "attachment",
+                 content_id: "<f_jcl_untitled_note>",
+                 attachment_id: note_id
+               }
+             ] = enclosed.attachments
+
+      assert is_binary(note_id)
+    end
+
     test "rfc822 parts with empty content become nested messages with empty text" do
       # Gmail split the empty and the header-only message/rfc822 part of this
       # forward into nested parts with empty bodies.
@@ -793,6 +931,45 @@ defmodule Jido.Connect.Gmail.ContentTest do
 
   defp header(%{headers: headers}, name) do
     Enum.find_value(headers, fn header -> if header.name == name, do: header.value end)
+  end
+
+  # For each HTML part of `content`, by part ID, how many inline manifest
+  # entries beside it in its multipart/related carry the Content-ID that each
+  # of its cid: references names (RFC 2392); a host resolves the images of
+  # the HTML that way.
+  defp cid_references(content) do
+    for %{mime_type: "text/html", part_id: part_id, content: html} <- content.text_parts do
+      inline =
+        Enum.filter(
+          content.attachments,
+          &(&1.disposition == "inline" and parent_part_id(&1.part_id) == parent_part_id(part_id))
+        )
+
+      counts =
+        for [cid] <- Regex.scan(~r/cid:([^"'\s>]+)/, html, capture: :all_but_first) do
+          Enum.count(inline, &(&1.content_id == "<#{cid}>"))
+        end
+
+      {part_id, counts}
+    end
+  end
+
+  defp parent_part_id(part_id),
+    do: part_id |> String.split(".") |> Enum.drop(-1) |> Enum.join(".")
+
+  # The nested message carries the headers that Gmail recorded on the root
+  # part inside its message/rfc822 part, not the outer ones: each header that
+  # `differing` names has a value that differs from the outer message's.
+  defp assert_enclosed_headers(recorded, message, enclosed, differing) do
+    assert [%{"parts" => [root | _rest]}] = get_in(recorded, part_path([enclosed.part_id]))
+
+    assert enclosed.headers ==
+             Enum.map(root["headers"], &%{name: &1["name"], value: &1["value"]})
+
+    for name <- differing do
+      assert is_binary(header(enclosed, name))
+      refute header(enclosed, name) == header(message, name)
+    end
   end
 
   defp context_and_lease do

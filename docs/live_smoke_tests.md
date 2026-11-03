@@ -53,12 +53,26 @@ Gmail keeps its capability checks beside `live_smoke_test.exs` in
 `apps/jido_connect_gmail/test/jido_connect/gmail/`, one file per capability
 family: `discovery_live_smoke_test.exs` for inbox and archive discovery,
 `content_live_smoke_test.exs` for message and thread content and forwards,
-`attachments_live_smoke_test.exs` for attachment content,
+`content_client_forwards_live_smoke_test.exs` for forwards that Outlook Web
+and Gmail Web built, `attachments_live_smoke_test.exs` for attachment content,
 `history_live_smoke_test.exs` for the new-message and change polls and Trash,
 `labels_live_smoke_test.exs` for labels and archiving, and
 `send_live_smoke_test.exs` for sending mail and drafts. Their shared helpers
 are in `test/support/live_gmail.ex`, which the package's `test_helper.exs`
 loads.
+
+The four client forwards in `GOOGLE_GMAIL_CLIENT_FORWARD_*` are real mail
+with a person's name, signature, addresses and images. Their check reads them
+through the content and attachment actions and records nothing, also when the
+run sets `JIDO_CONNECT_RECORD=1`, because it never calls `LiveGmail.record/1`,
+the only way a live test records. It looks at text only for the marker lines,
+the `JCL Quelle` subject and signs of wrong decoding, and its assertions name
+the forward and the check instead of printing text. The shapes these forwards
+showed that no other recording had are rebuilt with synthetic content in the
+messages of `GOOGLE_GMAIL_FORWARD_RELATED_ID` and
+`GOOGLE_GMAIL_FORWARD_UNTITLED_ID`, which `content_live_smoke_test.exs`
+records as `message_full_forward_related` and `message_full_forward_untitled`
+with the attachment bytes of each.
 
 The send check is the one Gmail check that mails another mailbox. With
 `GOOGLE_LIVE_DESTRUCTIVE=true` it sends a new mail and a reply in the same
@@ -148,9 +162,15 @@ as seed input belong to the scripts that create the test data.
 | `GOOGLE_GMAIL_FORWARD_INLINE_ID` | setting | Inline forward |
 | `GOOGLE_GMAIL_FORWARD_ATTACHED_ID` | setting | Forward as attachment |
 | `GOOGLE_GMAIL_FORWARD_OPAQUE_ID` | setting | Forward with an empty and a header-only `message/rfc822` part, both of which Gmail splits into nested parts |
+| `GOOGLE_GMAIL_FORWARD_RELATED_ID` | setting | Forward as attachment in the shape Outlook Web builds: outer and enclosed text in `multipart/alternative`, the HTML with two and one inline images in a `multipart/related` inside it, each image with a `Content-ID` in Outlook's form, an rfc822 part whose disposition names no file, an outer subject other than the enclosed one, and a file attachment in the enclosed forward |
+| `GOOGLE_GMAIL_FORWARD_UNTITLED_ID` | setting | Forward as attachment in the shape Gmail Web builds, with an empty subject and a `Content-ID` on the rfc822 part and on the file attachment of the enclosed inline forward |
 | `GOOGLE_GMAIL_CHARSET_MESSAGE_ID` | setting | Message with ISO-8859-15, US-ASCII and invalid UTF-8 text parts and a base64 `message/rfc822` part |
 | `GOOGLE_GMAIL_LARGE_BODY_ID` | setting | Message with a 3 MB windows-1252 `text/plain` part, which Gmail keeps behind an `attachmentId`, and a short HTML alternative |
 | `GOOGLE_GMAIL_UNNAMED_ATTACHMENT_MESSAGE_ID` | setting | Message with attachments without a filename: three binary parts that Gmail keeps behind an `attachmentId`, and six text parts that it returns inline, four of them converted to UTF-8 from ISO-8859-1, Windows-1252 and UTF-16LE |
+| `GOOGLE_GMAIL_CLIENT_FORWARD_OUTLOOK_INLINE_ID` | setting | Inline forward that Outlook Web built: text, HTML with inline images and `test.txt`, without a comment line or a quoted original. Real mail, never recorded |
+| `GOOGLE_GMAIL_CLIENT_FORWARD_OUTLOOK_ATTACHED_ID` | setting | Forward as attachment that Outlook Web built: the comment line `Kommentar Outlook Anlage` and the Outlook inline forward as a `message/rfc822` part. Real mail, never recorded |
+| `GOOGLE_GMAIL_CLIENT_FORWARD_GMAIL_INLINE_ID` | setting | Inline forward that Gmail Web built: the comment line `Kommentar Gmail inline`, the forwarded original with a `JCL Quelle` subject and an umlaut line, and `test.txt`. Real mail, never recorded |
+| `GOOGLE_GMAIL_CLIENT_FORWARD_GMAIL_ATTACHED_ID` | setting | Forward as attachment that Gmail Web built, with an empty subject: the comment line `Kommentar Gmail Anhang` and the Gmail inline forward as a `message/rfc822` part. Real mail, never recorded |
 | `GOOGLE_GMAIL_LABEL_ID` | setting | Test label |
 | `GOOGLE_GMAIL_DISPOSABLE_MESSAGE_ID` | setting | Message that a write test may delete |
 | `GOOGLE_GMAIL_ARCHIVE_MESSAGE_ID` | setting | One message of the two-message archive and label thread |
