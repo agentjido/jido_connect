@@ -771,6 +771,11 @@ defmodule Jido.Connect.GmailTest do
     assert send_action.risk == :external_write
     assert send_action.confirmation == :required_for_ai
 
+    for id <- ["google.gmail.draft.create", "google.gmail.draft.update"] do
+      assert %{risk: :write, confirmation: :required_for_ai} =
+               Enum.find(spec.actions, &(&1.id == id))
+    end
+
     assert {:ok,
             %{
               id: "google.gmail.message.received",

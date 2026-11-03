@@ -737,6 +737,34 @@ defmodule Jido.Connect.Gmail.ClientTest do
     assert draft.message.label_ids == ["DRAFT"]
   end
 
+  test "sends a draft ID with a slash, a space and a question mark as one encoded path segment" do
+    %{"body" => draft} = RecordedBodyAdapter.recording!("draft_update")
+    path = "/gmail/v1/users/me/drafts/a%2Fb%20c%3F"
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert {conn.method, conn.request_path} == {"PUT", path}
+      Req.Test.json(conn, draft)
+    end)
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert {conn.method, conn.request_path} == {"GET", path}
+      Req.Test.json(conn, draft)
+    end)
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert {conn.method, conn.request_path} == {"DELETE", path}
+      Req.Test.json(conn, %{})
+    end)
+
+    assert {:ok, %Draft{}} =
+             Client.update_draft(%{draft_id: "a/b c?", raw: "updated-message"}, "token")
+
+    assert {:ok, %Draft{}} = Client.get_draft(%{draft_id: "a/b c?"}, "token")
+
+    assert {:ok, %{deleted?: true, draft_id: "a/b c?"}} =
+             Client.delete_draft(%{draft_id: "a/b c?"}, "token")
+  end
+
   test "sends Gmail drafts" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "POST"

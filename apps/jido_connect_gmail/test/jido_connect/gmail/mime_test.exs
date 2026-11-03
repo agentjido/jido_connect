@@ -34,6 +34,88 @@ defmodule Jido.Connect.Gmail.MIMETest do
     assert message =~ "<p>Body</p>"
   end
 
+  describe "non-ASCII text" do
+    # When the live test created a draft with a raw UTF-8 subject, Gmail
+    # stored the subject garbled, so a non-ASCII subject goes out as RFC 2047
+    # encoded words. The body keeps its UTF-8 bytes under the declared
+    # charset.
+    test "encodes the subject as UTF-8 B encoded words and keeps the body bytes" do
+      assert {:ok, raw} =
+               MIME.build_raw(%{
+                 to: ["to@example.com"],
+                 subject: "Grüße aus Köln",
+                 body_text: "Grüße: äöü ÄÖÜ ß"
+               })
+
+      assert Base.url_decode64!(raw, padding: false) ==
+               "To: to@example.com\r\n" <>
+                 "Subject: =?UTF-8?B?R3LDvMOfZSBhdXMgS8O2bG4=?=\r\n" <>
+                 "MIME-Version: 1.0\r\n" <>
+                 "Content-Type: text/plain; charset=UTF-8\r\n" <>
+                 "Content-Transfer-Encoding: 8bit\r\n" <>
+                 "\r\n" <>
+                 <<"Gr", 0xC3, 0xBC, 0xC3, 0x9F, "e: ", 0xC3, 0xA4, 0xC3, 0xB6, 0xC3, 0xBC, " ",
+                   0xC3, 0x84, 0xC3, 0x96, 0xC3, 0x9C, " ", 0xC3, 0x9F>>
+    end
+
+    # One ASCII byte before 80 two-byte characters puts every character
+    # boundary after the first at an odd offset, so a split every n bytes,
+    # n up to 80, cuts a character at n or at 2n.
+    test "folds a long subject into encoded words of whole characters and lines of at most 76" do
+      subject = "x" <> String.duplicate("ä", 80)
+
+      assert {:ok, raw} =
+               MIME.build_raw(%{to: ["to@example.com"], subject: subject, body_text: "Body"})
+
+      [first | continuations] = lines = subject_lines(raw)
+      word = ~S"=\?UTF-8\?B\?[A-Za-z0-9+/=]+\?="
+      assert first =~ ~r/\ASubject: #{word}\z/
+      assert continuations != []
+      assert Enum.all?(continuations, &(&1 =~ ~r/\A #{word}\z/))
+
+      # RFC 2047, section 2: a header line that holds an encoded word is
+      # limited to 76 characters.
+      assert Enum.all?(lines, &(byte_size(&1) <= 76))
+
+      decoded =
+        for line <- lines,
+            [data] <- Regex.scan(~r/=\?UTF-8\?B\?([^?]+)\?=/, line, capture: :all_but_first) do
+          assert byte_size(data) + 12 <= 75
+          Base.decode64!(data)
+        end
+
+      assert Enum.all?(decoded, &String.valid?/1)
+      assert Enum.join(decoded) == subject
+    end
+
+    # 21 two-byte characters are 42 bytes. As one encoded word of 68
+    # characters they would make a first line of 77 with "Subject: ". Words
+    # of at most 39 bytes put 19 of them on a first line of 73 and 2 on a
+    # continuation line of 21.
+    test "splits 21 two-byte characters into two words so the first line stays within 76" do
+      assert {:ok, raw} =
+               MIME.build_raw(%{
+                 to: ["to@example.com"],
+                 subject: String.duplicate("ä", 21),
+                 body_text: "Body"
+               })
+
+      assert subject_lines(raw) == [
+               "Subject: =?UTF-8?B?w6TDpMOkw6TDpMOkw6TDpMOkw6TDpMOkw6TDpMOkw6TDpMOkw6Q=?=",
+               " =?UTF-8?B?w6TDpA==?="
+             ]
+    end
+  end
+
+  # The Subject header of a raw message as a list of its lines, the first
+  # starting with "Subject: " and each continuation line with a space.
+  defp subject_lines(raw) do
+    [_match, folded] =
+      Regex.run(~r/\r\n(Subject: .*?)\r\n(?![ \t])/s, Base.url_decode64!(raw, padding: false))
+
+    String.split(folded, "\r\n")
+  end
+
   test "rejects invalid recipients" do
     assert {:error,
             %Connect.Error.ValidationError{

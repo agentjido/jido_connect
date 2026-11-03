@@ -114,12 +114,20 @@ charset shows the conversion.
 `google.gmail.message.send`, `google.gmail.draft.create` and
 `google.gmail.draft.update` build their message with
 `Jido.Connect.Gmail.MIME.build_raw/1`. It trims recipients, the subject and
-the body and emits one UTF-8 body part, HTML when both bodies are given.
+the body and emits one UTF-8 body part, HTML when both bodies are given. The
+body goes out as `8bit` under `charset=UTF-8`.
 
-Header values stay on one line. After trimming, a CR or LF in `subject`,
-`in_reply_to` or `references` returns a validation error with reason
-`:invalid_header_value` and the field, so the value cannot add a header such
-as `Bcc:`. `in_reply_to` and `references` are not trimmed, so a trailing break
+A subject with a character outside ASCII goes out as RFC 2047 encoded words,
+`=?UTF-8?B?...?=`, each holding at most 39 bytes of whole UTF-8 code points,
+folded so that no line of the `Subject` header exceeds 76 characters. An
+ASCII subject goes out unchanged, on one line. When the live test created a
+draft with a raw UTF-8 subject, Gmail stored the subject garbled and the
+`8bit` body with its bytes; sending was not tried with a raw subject.
+
+A header value in the input must not break the line. After trimming, a CR or
+LF in `subject`, `in_reply_to` or `references` returns a validation error with
+reason `:invalid_header_value` and the field, so the value cannot add a header
+such as `Bcc:`. `in_reply_to` and `references` are not trimmed, so a trailing break
 fails too. They must be `nil` or a string; `nil` and `""` leave the header out,
 and any other value, such as a list, fails with the same reason. A recipient
 with a break inside fails the address pattern with `:invalid_recipient`.

@@ -64,13 +64,17 @@ The send check is the one Gmail check that mails another mailbox. With
 `GOOGLE_LIVE_DESTRUCTIVE=true` it sends a new mail and a reply in the same
 thread to `GOOGLE_GMAIL_RECIPIENT`, so each run puts two mails there, and
 those copies stay. Keep such runs few. The draft check addresses its draft to
-the same mailbox and sends nothing. Both tests read back what Gmail stores in
-`format=raw`, outside the connector and the recorder, and delete the
-sender's copies, the draft and an inserted message when they exit. Gmail
-answered 500 to deleting a message right after sending it, so
-`LiveGmail.delete_message!/2` and `LiveGmail.delete_draft!/2` retry transient
-failures. The recordings `message_send.json`, `message_send_reply.json`,
-`draft_create.json` and `draft_update.json` each hold the answer to one write.
+the same mailbox and sends nothing. Subjects and bodies hold umlauts. Both
+tests read back what Gmail stores in `format=raw`, outside the connector and
+the recorder, and the subject and body through
+`google.gmail.message.content.get`, and delete the sender's copies, the draft
+and an inserted message when they exit. Gmail answered 500 to deleting a
+message right after sending it, so `LiveGmail.delete_message!/2` and
+`LiveGmail.delete_draft!/2` retry transient failures. The recordings
+`message_send.json`, `message_send_reply.json`, `draft_create.json` and
+`draft_update.json` each hold the answer to one write. The content reads
+record as `message_content_sent` and `message_content_draft`, which no offline
+test uses and which are not committed.
 
 ## Writing a Live Test
 
