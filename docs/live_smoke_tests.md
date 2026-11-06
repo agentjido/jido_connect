@@ -214,6 +214,9 @@ as seed input belong to the scripts that create the test data.
 | `SLACK_MPIM_CHANNEL_ID` | setting | Group direct message |
 | `SLACK_NO_ACCESS_CHANNEL_ID` | setting | Channel the bot is not in |
 | `SLACK_THREAD_TS` | setting | Thread with replies over more than one page |
+| `SLACK_PRIVATE_THREAD_TS` | setting | Thread with seven bot replies in `SLACK_PRIVATE_CHANNEL_ID` |
+| `SLACK_DM_THREAD_TS` | setting | Thread with seven bot replies in `SLACK_DM_CHANNEL_ID` |
+| `SLACK_MPIM_THREAD_TS` | setting | Thread with seven bot replies in `SLACK_MPIM_CHANNEL_ID` |
 | `SLACK_SECOND_USER_ID` | setting | Second human user |
 | `SLACK_CAPTURE_DIR` | setting | Capture directory of the demo host |
 | `SLACK_APP_ID` | setting | ID of the test app |

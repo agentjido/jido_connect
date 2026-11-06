@@ -2,6 +2,7 @@ defmodule Jido.Connect.SlackTest do
   use ExUnit.Case
 
   alias Jido.Connect
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   defmodule FakeSlackClient do
     def list_channels(%{types: "public_channel"}, "token") do
@@ -63,20 +64,6 @@ defmodule Jido.Connect.SlackTest do
          ],
          next_cursor: "next",
          has_more: true
-       }}
-    end
-
-    def get_thread_replies(
-          %{channel: "G123", ts: "1700000000.000100"},
-          "token"
-        ) do
-      {:ok,
-       %{
-         channel: "G123",
-         thread_ts: "1700000000.000100",
-         messages: [],
-         next_cursor: "",
-         has_more: false
        }}
     end
 
@@ -3170,8 +3157,16 @@ defmodule Jido.Connect.SlackTest do
              )
   end
 
+  # Legacy private channels carry G IDs. Slack's answer does not name the
+  # channel, so the recorded first page of the private channel's thread
+  # stands in for the answer from such a channel. The stub stands before the
+  # denied read, so a read that the scope check let through would fail at
+  # the stub instead of reaching Slack.
   test "get thread replies resolves history scopes from conversation type" do
     {context, lease} = context_and_lease()
+    lease = without_fake_client(lease)
+    stub_slack_api()
+    parent = "1793975621.272189"
 
     assert {:error,
             %Connect.Error.AuthError{
@@ -3179,7 +3174,7 @@ defmodule Jido.Connect.SlackTest do
               missing_scopes: ["groups:history"]
             }} =
              Jido.Connect.Slack.Actions.GetThreadReplies.run(
-               %{channel: "G123", ts: "1700000000.000100"},
+               %{channel: "G123", ts: parent},
                %{integration_context: context, credential_lease: lease}
              )
 
@@ -3191,43 +3186,61 @@ defmodule Jido.Connect.SlackTest do
         }
     }
 
-    assert {:ok, %{channel: "G123", thread_ts: "1700000000.000100"}} =
+    expect_thread_page("thread_replies_private_channel", "G123", parent)
+
+    assert {:ok, %{channel: "G123", thread_ts: ^parent, messages: [%{ts: ^parent} | _replies]}} =
              Jido.Connect.Slack.Actions.GetThreadReplies.run(
-               %{channel: "G123", ts: "1700000000.000100"},
+               %{channel: "G123", ts: parent},
                %{integration_context: private_context, credential_lease: lease}
              )
   end
 
   # Slack gives private channels and group DMs C IDs too, so an explicit
-  # conversation_type decides the scope even for a C channel.
+  # conversation_type decides the scope even for a C channel. A granted read
+  # runs the default client under Req.Test on the recorded first page of a
+  # thread in each conversation of the test workspace: the prepared thread
+  # in the public channel, and the bot-only threads in the private channel
+  # and the group DM, both with C IDs, and in the bot DM.
   test "get thread replies needs the history scope of an explicit conversation type" do
     {context, lease} = context_and_lease()
+    lease = without_fake_client(lease)
+    stub_slack_api()
 
-    history_scopes = %{
-      "public_channel" => "channels:history",
-      "private_channel" => "groups:history",
-      "im" => "im:history",
-      "mpim" => "mpim:history"
-    }
+    threads = [
+      {"public_channel", "channels:history", "C0CEEB41FU0", "1793371034.447499",
+       "thread_replies_pages"},
+      {"private_channel", "groups:history", "C0CD4JEJ9V5", "1793975621.272189",
+       "thread_replies_private_channel"},
+      {"im", "im:history", "D0CD4G48UFR", "1793975633.560959", "thread_replies_im"},
+      {"mpim", "mpim:history", "C0CDELYPYKF", "1793975646.078169", "thread_replies_mpim"}
+    ]
 
-    other_scopes = context.connection.scopes -- Map.values(history_scopes)
+    history_scopes = Enum.map(threads, &elem(&1, 1))
+    other_scopes = context.connection.scopes -- history_scopes
 
-    run = fn type, scopes ->
-      Jido.Connect.Slack.Actions.GetThreadReplies.run(
-        %{channel: "C123", ts: "1700000000.000100", conversation_type: type},
-        %{
-          integration_context: %{context | connection: %{context.connection | scopes: scopes}},
-          credential_lease: lease
-        }
-      )
-    end
+    for {type, scope, channel, parent, fixture} <- threads do
+      run = fn scopes ->
+        Jido.Connect.Slack.Actions.GetThreadReplies.run(
+          %{channel: channel, ts: parent, conversation_type: type},
+          %{
+            integration_context: %{context | connection: %{context.connection | scopes: scopes}},
+            credential_lease: lease
+          }
+        )
+      end
 
-    for {type, scope} <- history_scopes do
       assert {:error, %Connect.Error.AuthError{reason: :missing_scopes, missing_scopes: [^scope]}} =
-               run.(type, other_scopes ++ (Map.values(history_scopes) -- [scope]))
+               run.(other_scopes ++ (history_scopes -- [scope]))
 
-      assert {:ok, %{channel: "C123", thread_ts: "1700000000.000100"}} =
-               run.(type, other_scopes ++ [scope])
+      expect_thread_page(fixture, channel, parent)
+
+      assert {:ok,
+              %{
+                channel: ^channel,
+                thread_ts: ^parent,
+                messages: [%{ts: ^parent} | _replies],
+                has_more: true
+              }} = run.(other_scopes ++ [scope])
     end
   end
 
@@ -4177,5 +4190,31 @@ defmodule Jido.Connect.SlackTest do
       })
 
     {context, lease}
+  end
+
+  # Without `slack_client` in the lease the action uses the package's default
+  # client.
+  defp without_fake_client(lease) do
+    %{lease | fields: Map.delete(lease.fields, :slack_client)}
+  end
+
+  # Points the package's Req options at a Req.Test stub until the test exits
+  # and checks then that every expected request came.
+  defp stub_slack_api do
+    Application.put_env(:jido_connect_slack, :slack_req_options, plug: {Req.Test, __MODULE__})
+    on_exit(fn -> Application.delete_env(:jido_connect_slack, :slack_req_options) end)
+    Req.Test.verify_on_exit!()
+  end
+
+  # Answers one conversations.replies request for `channel` and `ts` with the
+  # recorded page `fixture`.
+  defp expect_thread_page(fixture, channel, ts) do
+    page = LiveSmoke.fixture!(:slack, fixture)
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.request_path == "/api/conversations.replies"
+      assert %{"channel" => ^channel, "ts" => ^ts} = URI.decode_query(conn.query_string)
+      Req.Test.json(conn, page)
+    end)
   end
 end

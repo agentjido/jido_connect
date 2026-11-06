@@ -19,6 +19,19 @@ defmodule Jido.Connect.Slack.ThreadRepliesLiveSmokeTest do
   replies. The package copies a page's `channel` and `thread_ts` from the
   request, so the check does not compare them.
 
+  The same check runs once each in the private channel, the bot DM and the
+  group DM, on a thread that the seed script prepared there with seven bot
+  replies: `SLACK_PRIVATE_THREAD_TS`, `SLACK_DM_THREAD_TS` and
+  `SLACK_MPIM_THREAD_TS`. The action reads it with the conversation's
+  `conversation_type` and its history scope alone, `groups:history`,
+  `im:history` or `mpim:history`, in pages of three, so every read spans at
+  least two pages. Both tokens must return the same pages, each token's
+  replies must equal its unpaged reference, every reply must carry the
+  parent's `ts` as `thread_ts`, and a page with the parent must report the
+  reference root's `reply_count` and `latest_reply`. The user token cannot
+  post, so these threads hold no reply of the authorizing user, and the
+  check does not look for one.
+
   Each read prints the page count, the reply count and the SHA-256 prefix of
   the thread's `ts` list, parent first, then the replies in ascending order,
   one `ts` per line with a trailing newline; for the prepared thread that is
@@ -35,7 +48,11 @@ defmodule Jido.Connect.Slack.ThreadRepliesLiveSmokeTest do
   before the prepared thread that has no subtype, thread, files or edit.
   Slack answers it with the parent alone and an unknown `ts` with
   `thread_not_found`, not with an empty page. The third test records such a
-  parent in the private channel, read with `groups:history`.
+  parent in the private channel, read with `groups:history`. In the private
+  channel, the DM and the group DM only the first page of the bot token's
+  read is recorded, as `thread_replies_private_channel.json`,
+  `thread_replies_im.json` and `thread_replies_mpim.json`, which the offline
+  scope tests replay.
 
   The write test records `thread_replies_message_kinds.json`, one page of
   the prepared thread that holds a human reply, a bot reply, a reply over 512
@@ -63,8 +80,20 @@ defmodule Jido.Connect.Slack.ThreadRepliesLiveSmokeTest do
   @scopes ["channels:history"]
   @page_limit 10
 
-  # The prepared thread has three pages of ten; a longer chain means the
-  # cursor does not advance.
+  # The threads seeded beside the public one, by conversation: label,
+  # conversation type, history scope, channel variable and thread variable.
+  @conversation_threads [
+    {"private channel", "private_channel", "groups:history", "SLACK_PRIVATE_CHANNEL_ID",
+     "SLACK_PRIVATE_THREAD_TS"},
+    {"DM", "im", "im:history", "SLACK_DM_CHANNEL_ID", "SLACK_DM_THREAD_TS"},
+    {"group DM", "mpim", "mpim:history", "SLACK_MPIM_CHANNEL_ID", "SLACK_MPIM_THREAD_TS"}
+  ]
+
+  # Seven replies in pages of three: three pages.
+  @conversation_page_limit 3
+
+  # Each prepared thread has three pages; a longer chain means the cursor
+  # does not advance.
   @max_pages 10
 
   # File previews hold file content, and file links name the workspace or
@@ -90,16 +119,23 @@ defmodule Jido.Connect.Slack.ThreadRepliesLiveSmokeTest do
     user_token = env["SLACK_USER_TOKEN"]
     authorizing_user = LiveSlack.user_id!(user_token)
 
+    params = %{
+      channel: channel,
+      ts: parent,
+      conversation_type: "public_channel",
+      limit: @page_limit
+    }
+
     bot_reference = reference_thread!(bot_token, channel, parent)
     user_reference = reference_thread!(user_token, channel, parent)
     report("reference conversations.replies with the bot token", bot_reference, parent)
     report("reference conversations.replies with the user token", user_reference, parent)
 
     record("thread_replies_pages")
-    bot_pages = read_thread(:bot, bot_token, channel, parent)
+    bot_pages = read_thread(:bot, bot_token, params, @scopes)
 
     LiveSlack.skip_recording()
-    user_pages = read_thread(:user, user_token, channel, parent)
+    user_pages = read_thread(:user, user_token, params, @scopes)
 
     assert length(bot_pages) >= 2
 
@@ -113,8 +149,15 @@ defmodule Jido.Connect.Slack.ThreadRepliesLiveSmokeTest do
     assert sorted_ts(user_replies) == sorted_ts(replies(user_reference, parent))
     assert Enum.all?(bot_replies ++ user_replies, &(&1.thread_ts == parent))
 
-    report("slack.thread.replies with the bot token", bot_pages, bot_replies, parent)
-    report("slack.thread.replies with the user token", user_pages, user_replies, parent)
+    report("slack.thread.replies with the bot token", bot_pages, bot_replies, parent, @page_limit)
+
+    report(
+      "slack.thread.replies with the user token",
+      user_pages,
+      user_replies,
+      parent,
+      @page_limit
+    )
 
     authorizing_replies =
       user_replies
@@ -225,6 +268,83 @@ defmodule Jido.Connect.Slack.ThreadRepliesLiveSmokeTest do
              )
 
     IO.puts("live_smoke slack: private channel parent without replies: #{lone_ts}")
+  end
+
+  for {label, type, scope, channel_variable, thread_variable} <- @conversation_threads do
+    @tag env!(["SLACK_BOT_TOKEN", "SLACK_USER_TOKEN", channel_variable, thread_variable])
+    test "the bot and the user token read the #{label} thread over several pages with the same replies",
+         %{env: env} do
+      channel = env[unquote(channel_variable)]
+      parent = env[unquote(thread_variable)]
+      bot_token = env["SLACK_BOT_TOKEN"]
+      user_token = env["SLACK_USER_TOKEN"]
+      scopes = [unquote(scope)]
+      place = "in the #{unquote(label)}"
+
+      params = %{
+        channel: channel,
+        ts: parent,
+        conversation_type: unquote(type),
+        limit: @conversation_page_limit
+      }
+
+      bot_reference = reference_thread!(bot_token, channel, parent)
+      user_reference = reference_thread!(user_token, channel, parent)
+      report("reference conversations.replies #{place} with the bot token", bot_reference, parent)
+
+      report(
+        "reference conversations.replies #{place} with the user token",
+        user_reference,
+        parent
+      )
+
+      # The offline scope tests replay the first page only.
+      record("thread_replies_#{unquote(type)}")
+      assert {:ok, first_page} = thread_replies(:bot, bot_token, params, scopes)
+
+      LiveSlack.skip_recording()
+      bot_pages = follow_pages(:bot, bot_token, params, scopes, [first_page])
+      user_pages = read_thread(:user, user_token, params, scopes)
+
+      assert length(bot_pages) >= 2
+
+      assert Enum.map(bot_pages, &page_ts(&1, parent)) ==
+               Enum.map(user_pages, &page_ts(&1, parent))
+
+      bot_replies = Enum.flat_map(bot_pages, &replies(&1, parent))
+      user_replies = Enum.flat_map(user_pages, &replies(&1, parent))
+
+      assert sorted_ts(bot_replies) == sorted_ts(replies(bot_reference, parent))
+      assert sorted_ts(user_replies) == sorted_ts(replies(user_reference, parent))
+      assert Enum.all?(bot_replies ++ user_replies, &(&1.thread_ts == parent))
+
+      report(
+        "slack.thread.replies #{place} with the bot token",
+        bot_pages,
+        bot_replies,
+        parent,
+        @conversation_page_limit
+      )
+
+      report(
+        "slack.thread.replies #{place} with the user token",
+        user_pages,
+        user_replies,
+        parent,
+        @conversation_page_limit
+      )
+
+      for {pages, reference} <- [{bot_pages, bot_reference}, {user_pages, user_reference}] do
+        root = root!(reference, parent)
+        with_parent = Enum.filter(pages, &match?([%{ts: ^parent} | _], &1.messages))
+        assert with_parent != []
+
+        for page <- with_parent do
+          assert {page.reply_count, page.latest_reply} ==
+                   {root["reply_count"], root["latest_reply"]}
+        end
+      end
+    end
   end
 
   @tag env!(["SLACK_BOT_TOKEN", "SLACK_USER_TOKEN", "SLACK_PUBLIC_CHANNEL_ID", "SLACK_THREAD_TS"])
@@ -441,34 +561,30 @@ defmodule Jido.Connect.Slack.ThreadRepliesLiveSmokeTest do
     report("thread after cleanup", thread, parent)
   end
 
-  defp thread_replies(profile, token, input) do
-    LiveSlack.invoke("slack.thread.replies", input, token, @scopes, profile)
+  defp thread_replies(profile, token, input, scopes \\ @scopes) do
+    LiveSlack.invoke("slack.thread.replies", input, token, scopes, profile)
   end
 
-  # Follows next_cursor from the first page until has_more is false.
-  defp read_thread(profile, token, channel, parent) do
-    params = %{
-      channel: channel,
-      ts: parent,
-      conversation_type: "public_channel",
-      limit: @page_limit
-    }
-
-    read_pages(profile, token, params, nil, [])
+  # Reads the first page of `params` and follows next_cursor from it.
+  defp read_thread(profile, token, params, scopes) do
+    assert {:ok, first_page} = thread_replies(profile, token, params, scopes)
+    follow_pages(profile, token, params, scopes, [first_page])
   end
 
-  defp read_pages(profile, token, params, cursor, pages) do
-    assert length(pages) < @max_pages, "#{profile} token: more than #{@max_pages} pages"
-    input = if cursor, do: Map.put(params, :cursor, cursor), else: params
-
-    assert {:ok, page} = thread_replies(profile, token, input)
-
-    case page do
+  # Follows next_cursor from the newest page read, the head of `pages`, until
+  # has_more is false, and returns the pages in reading order.
+  defp follow_pages(profile, token, params, scopes, [last | _read] = pages) do
+    case last do
       %{has_more: true, next_cursor: next} when next != "" ->
-        read_pages(profile, token, params, next, [page | pages])
+        assert length(pages) < @max_pages, "#{profile} token: more than #{@max_pages} pages"
+
+        assert {:ok, page} =
+                 thread_replies(profile, token, Map.put(params, :cursor, next), scopes)
+
+        follow_pages(profile, token, params, scopes, [page | pages])
 
       %{has_more: false} ->
-        Enum.reverse([page | pages])
+        Enum.reverse(pages)
     end
   end
 
@@ -495,10 +611,10 @@ defmodule Jido.Connect.Slack.ThreadRepliesLiveSmokeTest do
     )
   end
 
-  defp report(label, pages, replies, parent) do
+  defp report(label, pages, replies, parent, limit) do
     IO.puts(
       "live_smoke slack: #{label}: #{length(replies)} replies of #{parent} " <>
-        "in #{length(pages)} pages of #{@page_limit}, ts list sha256 #{digest(parent, replies)}"
+        "in #{length(pages)} pages of #{limit}, ts list sha256 #{digest(parent, replies)}"
     )
   end
 
