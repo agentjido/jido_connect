@@ -60,6 +60,14 @@
   attribute value or the author's account ID, the error holds `[redacted]`
   instead.
 - Add the writer catalog pack `:tempo_writer`; the read packs are unchanged.
+- Document the worklog create on a site that requires work attributes, as
+  observed on the test site: the attribute values as sent and the order in
+  which Tempo returns them, Tempo's 404 `Account not found` for an unknown
+  account key, which stays `:not_found` with `delivery: :rejected`, the
+  start time `00:00:00` that Tempo books when `start_time` is left out, the
+  Jira remaining estimate going down by the booked time because the create
+  never sends `remainingEstimateSeconds`, and a create through the OAuth
+  grant `worklogs:manage`.
 - Add the read action `tempo.work_attribute.list`, which returns every work
   attribute of the site with key, name, raw type, required flag, self and,
   for `STATIC_LIST`, each stored value with its label. A required attribute

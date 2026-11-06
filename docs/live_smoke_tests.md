@@ -444,7 +444,9 @@ cannot learn the account ID from it: the empty range is recorded after a
 seeded day, and the October 31 test stops in recording mode when that day
 has no worklog.
 
-The Tempo worklog create is the one Tempo check that creates data. With
+The Tempo worklog create in `live_smoke_test.exs` is the Tempo check that
+creates data outside a work-attribute window; the attribute booking checks
+below create data inside one. With
 `TEMPO_LIVE_DESTRUCTIVE=true` it creates one worklog of the test user on
 `TEMPO_JIRA_ISSUE_ID` on 2026-10-29, in the open October period, reads it
 back and books the same input into the approved August period, which Tempo
@@ -494,12 +496,73 @@ offline tests match the stored value in `work_attribute_values` against
 `work_attributes_optional`: record those two in the same optional run.
 `work_attributes_required` needs a required run of its own.
 
-While the test attributes exist, run only the booking lookup checks, and
-run `down` at once after them, also when a check fails or the run is
-interrupted. In a required run Tempo lists four of them as required, for
-the whole site. The worklog create check sends no attribute values; how
-Tempo answers it inside a required window was not tried, so do not run it
-there. Run the rest of the Tempo suite after `down`.
+While the test attributes exist, run only the booking lookup checks and,
+in a required run, the attribute booking checks, and run `down` at once
+after them, also when a check fails or the run is interrupted. In a
+required run Tempo lists four of them as required, for the whole site. The
+two write checks of `live_smoke_test.exs`, the worklog create and the
+invalid start time, send no attribute values; how Tempo answers them inside
+a required window was not tried, so each fails before it sends anything
+while `TEMPO_WORK_ATTRIBUTES` is set. Run the rest of the Tempo suite after
+`down`, with `TEMPO_WORK_ATTRIBUTES` unset.
+
+The Tempo attribute booking checks are in
+`attribute_booking_live_smoke_test.exs`. They need
+`TEMPO_WORK_ATTRIBUTES=required` and `TEMPO_LIVE_DESTRUCTIVE=true`, and each
+fails before its first write unless Tempo lists `_JclPhase_`,
+`_JclBillable_`, `_JclHours_` and `_JclAccount_` as required, so they never
+write outside a required window. Run the file inside one, as a command of
+its own:
+
+```sh
+MIX_ENV=test TEMPO_WORK_ATTRIBUTES=required TEMPO_LIVE_DESTRUCTIVE=true \
+  mix do --app jido_connect_tempo test --include live_smoke \
+  test/jido_connect/tempo/attribute_booking_live_smoke_test.exs
+```
+
+Every booking carries a value for each of the four, read first through
+`tempo.work_attribute.list` and `tempo.account.list_for_project`: the
+stored value of the label build, `"true"`, `"1.5"` and the key of
+`TEMPO_ACCOUNT_ID`. Each run leaves three worklogs of the test user on
+`TEMPO_JIRA_ISSUE_ID` on 2026-10-27, in the open October period: a seed
+worklog of 60 seconds, which the first check posts through the client
+transport, outside the actions and before the recording starts, with
+`remainingEstimateSeconds` 7200; the booking of 1800 seconds through
+`prepare/4` and `commit/4` with the API token; and the booking of 900
+seconds with the OAuth access token. The OAuth check takes its
+connection's labels from the `scope` recorded in `oauth_refresh.json`.
+Before it writes, it fails unless that scope grants `worklogs:manage` and
+not `write`, and unless `TEMPO_OAUTH_ACCESS_TOKEN_EXPIRES_AT` lies within
+10 seconds of that response's `date` plus its `expires_in`, which shows
+that the recorded response issued the stored pair. A pair rotated without
+recording therefore stops the check with a message that names the
+variable, not with Tempo's 403. A further check books the same values with
+the unknown account key `JCL-UNKNOWN`, which Tempo rejects with a 404; if
+Tempo accepted it, the check would stop at once and name the new ID. Each
+run also changes the Jira remaining estimate of `TEMPO_JIRA_ISSUE_ID`: the
+seed sets it to 7200 seconds, and each booking lowers it by its time, which
+the first check reads from Jira and expects.
+
+The first check waits for Jira after the seed and after its booking, the
+OAuth check after its booking, each time until Jira lists the new worklog,
+at most 30 reads 2 seconds apart; the file allows each check 5 minutes.
+Since the OAuth check ends only once Jira lists its booking, the first
+check starts with no worklog of the run still on its way to Jira, in
+whichever order ExUnit runs the checks. Each check prints a worklog's ID as
+soon as Tempo returns it, before it waits.
+The recording run on 2026-11-06 created 79266 (seed), 79267 and 79268; the
+proof run after it created 79269, 79270 and 79271.
+
+The checks record `worklog_create_attributes`,
+`worklog_create_invalid_attribute` and `worklog_create_oauth`, each with
+the test user's account ID as `accounts:`, and the read-backs of the two
+bookings as `worklog_create_attributes.2.json` and
+`worklog_create_oauth.2.json`, through `LiveTempo.site_data/2`; none of
+them carries `"transformed": true`. The offline tests pin the stored value
+of `_JclPhase_` that Tempo assigned in that window, as sent in the
+recorded bookings. A re-recording in a later window gets another stored
+value, so the `@build` value of `worklog_create_test.exs` and
+`create_worklog_action_test.exs` changes with it.
 
 The site is shared with real users, and Tempo returns their data in the
 same responses: every work attribute of the site and every global account

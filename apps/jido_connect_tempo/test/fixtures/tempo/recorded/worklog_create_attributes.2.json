@@ -1,0 +1,147 @@
+{
+  "body": {
+    "metadata": {
+      "count": 3,
+      "limit": 50,
+      "offset": 0
+    },
+    "results": [
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79267/work-attribute-values",
+          "values": [
+            {
+              "key": "_JclPhase_",
+              "value": "891b3db6-c452-456c-ae2c-7b53a06899fd"
+            },
+            {
+              "key": "_JclHours_",
+              "value": "1.5"
+            },
+            {
+              "key": "_JclBillable_",
+              "value": "true"
+            },
+            {
+              "key": "_JclAccount_",
+              "value": "JCL-PROJECT"
+            }
+          ]
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 1800,
+        "createdAt": "2026-11-06T17:39:15Z",
+        "description": "JCL live attribute booking. Part 1: the description stays whole, with umlauts ä, ö, ü and ß. Part 2: the description stays whole, with umlauts ä, ö, ü and ß. Part 3: the description stays whole, with umlauts ä, ö, ü and ß. Part 4: the description stays whole, with umlauts ä, ö, ü and ß. Part 5: the description stays whole, with umlauts ä, ö, ü and ß. Part 6: the description stays whole, with umlauts ä, ö, ü and ß. Part 7: the description stays whole, with umlauts ä, ö, ü and ß. Part 8: the description stays whole, with umlauts ä, ö, ü and ß. Part 9: the description stays whole, with umlauts ä, ö, ü and ß. Part 10: the description stays whole, with umlauts ä, ö, ü and ß. Part 11: the description stays whole, with umlauts ä, ö, ü and ß. Part 12: the description stays whole, with umlauts ä, ö, ü and ß.",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79267",
+        "startDate": "2026-10-27",
+        "startDateTimeUtc": "2026-10-26T23:00:00Z",
+        "startTime": "00:00:00",
+        "tempoWorklogId": 79267,
+        "timeSpentSeconds": 1800,
+        "updatedAt": "2026-11-06T17:39:15Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79266/work-attribute-values",
+          "values": [
+            {
+              "key": "_JclPhase_",
+              "value": "891b3db6-c452-456c-ae2c-7b53a06899fd"
+            },
+            {
+              "key": "_JclHours_",
+              "value": "1.5"
+            },
+            {
+              "key": "_JclBillable_",
+              "value": "true"
+            },
+            {
+              "key": "_JclAccount_",
+              "value": "JCL-PROJECT"
+            }
+          ]
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 60,
+        "createdAt": "2026-11-06T17:39:13Z",
+        "description": "JCL live estimate seed",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79266",
+        "startDate": "2026-10-27",
+        "startDateTimeUtc": "2026-10-27T06:00:00Z",
+        "startTime": "07:00:00",
+        "tempoWorklogId": 79266,
+        "timeSpentSeconds": 60,
+        "updatedAt": "2026-11-06T17:39:13Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79127/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 326,
+        "createdAt": "2026-10-30T19:19:26Z",
+        "description": "JCL live seed worklog: filler 26",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79127",
+        "startDate": "2026-10-27",
+        "startDateTimeUtc": "2026-10-27T08:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79127,
+        "timeSpentSeconds": 326,
+        "updatedAt": "2026-10-30T19:19:26Z"
+      }
+    ],
+    "self": "https://api.tempo.io/4/worklogs/user/account-1?from=2026-10-27&to=2026-10-27&offset=0&limit=50"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "3421"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 17:39:16 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "21a5571b78badd0ca0c49044961d0353"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "GET",
+    "path": "/4/worklogs/user/account-1"
+  },
+  "status": 200
+}

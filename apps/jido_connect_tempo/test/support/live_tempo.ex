@@ -3,7 +3,9 @@ defmodule Jido.Connect.Tempo.TestSupport.LiveTempo do
 
   # Shared by the Tempo live smoke tests: builds connections, contexts and
   # requests for the test user, runs Tempo actions through `Jido.Connect`
-  # with a credential lease around a live token, reads Tempo directly with
+  # with a credential lease around a live token, prepares and commits the
+  # worklog create and stops a test when Tempo created a worklog it should
+  # have refused, reads Tempo directly with
   # Req outside the connector and the recorder, and filters what the shared
   # test site returns besides the test data out of the recordings. A helper
   # that one test file uses stays in that file.
@@ -36,6 +38,58 @@ defmodule Jido.Connect.Tempo.TestSupport.LiveTempo do
 
     Jido.Connect.invoke(Tempo, action, input, context: context, credential_lease: lease)
   end
+
+  @doc """
+  Prepares and commits `tempo.worklog.create` with direct calls denied and a
+  five-minute lease that holds `token` in the profile's token field. The host
+  evidence names the prepared action, and the validator accepts only that
+  one.
+  """
+  def commit(%Context{connection: connection} = context, profile, token, input) do
+    lease =
+      CredentialLease.from_connection!(connection, %{token_field(profile) => token},
+        expires_at: DateTime.add(DateTime.utc_now(), 300, :second)
+      )
+
+    opts = [context: context, credential_lease: lease, direct_mutation_mode: :deny]
+
+    with {:ok, prepared} <- Jido.Connect.prepare(Tempo, "tempo.worklog.create", input, opts) do
+      Jido.Connect.commit(
+        Tempo,
+        prepared,
+        input,
+        opts ++
+          [
+            execution_authorization: %{prepared_action_id: prepared.id},
+            authorization_validator: fn evidence, prepared, _context ->
+              evidence.prepared_action_id == prepared.id
+            end
+          ]
+      )
+    end
+  end
+
+  @doc """
+  Stops the test with the new ID when Tempo created a worklog for a booking
+  it should have refused, so the test sends nothing more.
+  """
+  def stop_if_created!({:ok, %{worklog: %{tempo_worklog_id: id}}}, what),
+    do: flunk("STOP: Tempo created worklog #{id} for #{what}")
+
+  def stop_if_created!({:ok, %{"tempoWorklogId" => id}}, what),
+    do: flunk("STOP: Tempo created worklog #{id} for #{what}")
+
+  def stop_if_created!(_result, _what), do: :ok
+
+  @doc """
+  Names the reason and status of a result, never Tempo's text, which may
+  quote the booking, including the test user's account ID.
+  """
+  def error_summary({:error, error}),
+    do: "reason #{inspect(Map.get(error, :reason))}, status #{inspect(Map.get(error, :status))}"
+
+  def error_summary({:ok, _value}), do: "a success"
+  def error_summary(_other), do: "an unexpected result"
 
   @doc "Returns the value of a success, or fails with the step, reason and status."
   def ok!({:ok, value}, _step), do: value

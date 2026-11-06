@@ -508,7 +508,7 @@ Core does not lock a prepared action: the host claims `prepared.id` before
 | `start_date` | required; the booking day as `YYYY-MM-DD` |
 | `time_spent_seconds` | required; whole seconds, at least 1 |
 | `description` | optional string |
-| `attributes` | optional list of maps with exactly a `key` and a `value`, both strings; keys unique |
+| `attributes` | optional list of maps with exactly a `key` and a `value`, both strings; keys unique; see [Work Attribute Values](#work-attribute-values) |
 | `start_time` | optional time of day as `HH:mm:ss` |
 | `billable_seconds` | optional whole seconds, at least 0 |
 
@@ -540,6 +540,40 @@ The POST is sent once. `Transport.post/3` sets `retry: false` after it has
 merged the Req options of `:tempo_req_options` and of the caller, so even
 `retry: :transient` cannot resend it.
 
+### Work Attribute Values
+
+`attributes` go into the body as Tempo's `attributes`, one object with
+`key` and `value` per input map, in input order. Each value is a string in
+the form Tempo stores; see [Work Attributes](#work-attributes). On the test
+site on 2026-11-06, while Tempo required four test attributes, this part of
+the body booked a worklog:
+
+```json
+"attributes": [
+  {"key": "_JclAccount_", "value": "JCL-PROJECT"},
+  {"key": "_JclPhase_", "value": "891b3db6-c452-456c-ae2c-7b53a06899fd"},
+  {"key": "_JclBillable_", "value": "true"},
+  {"key": "_JclHours_", "value": "1.5"}
+]
+```
+
+| Type | Value sent |
+| --- | --- |
+| `ACCOUNT` | the account key from `tempo.account.list_for_project` |
+| `STATIC_LIST` | the stored value of the chosen label from `tempo.work_attribute.list`, here the UUID of `build`, which Tempo assigns anew each time the attribute is created |
+| `CHECKBOX` | `"true"` |
+| `INPUT_NUMERIC` | `"1.5"` |
+
+The optional free-text attribute of the test site was left out, and Tempo
+did not ask for it. Tempo answered with the four values in
+`attributes.values`, each as sent, in the order `_JclPhase_`, `_JclHours_`,
+`_JclBillable_`, `_JclAccount_`. The result keeps them in that order as
+`work_attributes`; compare them as a set. Whether Tempo accepts other forms,
+such as `"false"`, an integer or another decimal notation, was not tried.
+
+The same values with the unknown account key `JCL-UNKNOWN` got a 404; see
+[Errors and Delivery](#errors-and-delivery).
+
 ### Result
 
 A 2xx answer counts as a created worklog only when it normalizes through
@@ -551,8 +585,25 @@ the attribute values.
 On the test site, a create at `08:15:00` on 2026-10-29 came back with
 `start_date_time_utc` `2026-10-29T07:15:00Z`, the worker's time zone being
 Europe/Berlin. Without `billable_seconds`, Tempo set the billable seconds to
-the time spent. Whether an omitted `remainingEstimateSeconds` changes the
-Jira remaining estimate was not checked.
+the time spent. A description of 858 bytes with umlauts came back whole.
+
+Without `start_time`, Tempo starts the worklog at midnight of the booking
+day in the worker's time zone: on 2026-11-06, a create for 2026-10-27
+without it came back with `start_time` `00:00:00` and
+`start_date_time_utc` `2026-10-26T23:00:00Z`.
+
+The create never sends `remainingEstimateSeconds`. Without it, the Jira
+remaining estimate of the issue goes down by the booked time. On the test
+site on 2026-11-06, the issue's remaining estimate was 7200 seconds, set by
+a worklog posted outside the connector with `remainingEstimateSeconds`; a
+create of 1800 seconds lowered it to 5400, and a following create of 900
+seconds to 4500. The action cannot leave the estimate unchanged or set it.
+
+A create through the `:oauth2_user` profile ran on a connection whose
+labels were `ScopeResolver.granted_labels/1` of the stored token's `scope`.
+That `scope` names `worklogs:manage`, which grants `tempo.worklogs.write`;
+no token response of the test site held the coarse `write` of Tempo's
+OpenAPI example, so that grant was never used for a create.
 
 ### Errors and Delivery
 
@@ -575,6 +626,13 @@ created the worklog:
 site for a booking into the approved August 2026 period. Only this text gets
 the label; an unknown 400 or another 403 keeps its status reason.
 
+Tempo answered a booking whose `ACCOUNT` value named no account, the
+unknown key `JCL-UNKNOWN`, with 404 `Account not found` (2026-11-06). It
+keeps the status reason `:not_found` with `delivery: :rejected` and
+`:do_not_retry`, and Tempo created no worklog. A `:not_found` from the
+create can therefore mean a rejected attribute value; `details.message`
+holds Tempo's text. Other invalid attribute values were not tried.
+
 [Period Bookability](#period-bookability) marks in advance where it expects
 such a rejection: an `APPROVED` or `IN_REVIEW` period is a `:blocked`
 segment. On the test site on 2026-11-02 it reported the approved August
@@ -595,7 +653,8 @@ After `:sent_outcome_unknown` the worklog may exist; read the day back with
 Errors hold neither the description nor the attribute values. Tempo quotes
 rejected input in its error text, as in `Non valid time '25:00:00'`; where
 that text quotes the description, an attribute value or the author's account
-ID, `details.message` shows `[redacted]` in its place.
+ID, `details.message` shows `[redacted]` in its place. Its answer to the
+unknown account key quoted no input.
 
 ## OAuth Flow
 
@@ -778,7 +837,8 @@ same user:
 | August 15 to October 15: three segments, `blocked`, `blocked`, `unknown`, aggregate `blocked` | action, API token | `period_bookability` |
 | October as one period, then August 1 to September 30 as a range across periods, which gets Tempo's 400 | client, OAuth access token | `timesheet_approval` |
 
-Two tests write and run only with `TEMPO_LIVE_DESTRUCTIVE=true`:
+Two tests of `live_smoke_test.exs` write and run only with
+`TEMPO_LIVE_DESTRUCTIVE=true`:
 
 | Check | Path | Recording |
 | --- | --- | --- |
@@ -788,7 +848,9 @@ Two tests write and run only with `TEMPO_LIVE_DESTRUCTIVE=true`:
 Each run of the first test leaves one worklog of the test user on
 2026-10-29; the package cannot delete it. The approved-period booking and
 the invalid start time cannot create one; if Tempo accepted either, the test
-stops at once and names the new ID. The 401 of a create with an invented
+stops at once and names the new ID. Both tests send no work attribute
+values, so each fails before it sends anything while
+`TEMPO_WORK_ATTRIBUTES` is set. The 401 of a create with an invented
 token is recorded in `worklog_create_unauthorized` without the write gate,
 since that token cannot create anything.
 
@@ -807,6 +869,35 @@ site only around a run. They run only with `TEMPO_WORK_ATTRIBUTES` set to
 `work_attribute_values` and `work_attributes_optional` come from the same
 optional run, since the offline tests match the stored value of the static
 list against that page; see the Tempo section of `docs/live_smoke_tests.md`.
+
+The attribute booking checks are in `attribute_booking_live_smoke_test.exs`.
+They write, so they run only with `TEMPO_LIVE_DESTRUCTIVE=true`, and only
+with `TEMPO_WORK_ATTRIBUTES=required`. Each fails before its first write
+unless Tempo lists `_JclPhase_`, `_JclBillable_`, `_JclHours_` and
+`_JclAccount_` as required. Every booking carries a value for each of the
+four, read first through `tempo.work_attribute.list` and
+`tempo.account.list_for_project` without recording:
+
+| Check | Path | Recording |
+| --- | --- | --- |
+| book 1800 seconds on 2026-10-27 without start time, with a description of 858 bytes, through `prepare/4` and `commit/4`, and read it back; expect the four values, the start time `00:00:00` and the Jira remaining estimate lowered from the 7200 seconds of a seed worklog to 5400 | action, API token | `worklog_create_attributes`, the read-back as `.2` |
+| the same values with the unknown account key `JCL-UNKNOWN` get the 404 `Account not found`, `:not_found` with `delivery: :rejected`, and no worklog | action, API token | `worklog_create_invalid_attribute` |
+| book 900 seconds at 10:30 on 2026-10-27 on a connection whose labels are `ScopeResolver.granted_labels/1` of the `scope` recorded in `oauth_refresh`, and read it back | action, OAuth access token | `worklog_create_oauth`, the read-back as `.2` |
+
+The first check posts the seed worklog itself, through the client
+transport, outside the actions and before the recording starts, with
+`remainingEstimateSeconds` 7200, and reads the issue's worklog total and
+remaining estimate from Jira before the seed, after it and after the
+booking. The OAuth check fails before it writes unless
+`TEMPO_OAUTH_ACCESS_TOKEN_EXPIRES_AT` lies within 10 seconds of the `date`
+of `oauth_refresh` plus its `expires_in`, so that the recorded scope
+belongs to the stored pair, and it ends only once Jira lists its booking, so the
+first check never starts while that booking is on its way to Jira. Each
+run leaves three worklogs of the test user on 2026-10-27, the seed and the
+two bookings, and changes the remaining estimate of
+`TEMPO_JIRA_ISSUE_ID`. Run the file only inside a required work-attribute
+window; while the window is open, run nothing but this file and the
+booking lookup checks. See the Tempo section of `docs/live_smoke_tests.md`.
 
 The successful code exchange and refresh are recorded in
 `oauth_exchange.json` and `oauth_refresh.json`, the rejections in

@@ -9,7 +9,16 @@ defmodule Jido.Connect.Tempo.Client.WorklogCreateTest do
   # - `worklog_create.3`: the 403 for the same booking in the approved
   #   August period;
   # - `worklog_create_invalid_time`: the 400 for a start time of 25:00:00;
-  # - `worklog_create_unauthorized`: the 401 for an invented token.
+  # - `worklog_create_unauthorized`: the 401 for an invented token;
+  #
+  # and on 2026-11-06, inside a window in which Tempo required four work
+  # attributes:
+  #
+  # - `worklog_create_attributes`: the 200 for worklog 79267, booked on
+  #   2026-10-27 without start time for 1800 seconds, with a description of
+  #   858 bytes and a value for each required attribute;
+  # - `worklog_create_invalid_attribute`: the 404 for the same values with
+  #   the unknown account key `JCL-UNKNOWN`.
   #
   # The sanitizer recorded the test user as `account-1`, so the request
   # account here is `account-1` too.
@@ -22,6 +31,17 @@ defmodule Jido.Connect.Tempo.Client.WorklogCreateTest do
   @account "account-1"
   @token "tempo-api-token-275-secret"
   @marker "JCL live create test"
+
+  # The values of the attribute booking as it sent them: the stored value
+  # that Tempo assigned to the label build of the static list `_JclPhase_`
+  # in that window, `"true"`, `"1.5"` and an account key.
+  @build "891b3db6-c452-456c-ae2c-7b53a06899fd"
+  @attributes [
+    %{key: "_JclAccount_", value: "JCL-PROJECT"},
+    %{key: "_JclPhase_", value: @build},
+    %{key: "_JclBillable_", value: "true"},
+    %{key: "_JclHours_", value: "1.5"}
+  ]
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -56,6 +76,7 @@ defmodule Jido.Connect.Tempo.Client.WorklogCreateTest do
              }
     end
 
+    # The attributes in the form of the recorded attribute booking.
     test "adds the given optional fields as sent, attributes as key and value pairs" do
       test_pid = self()
 
@@ -74,8 +95,10 @@ defmodule Jido.Connect.Tempo.Client.WorklogCreateTest do
                  start_time: "08:15:00",
                  billable_seconds: 0,
                  attributes: [
-                   %{key: "_Phase_", value: "build"},
-                   %{"key" => "_Billable_", "value" => "true"}
+                   %{key: "_JclAccount_", value: "JCL-PROJECT"},
+                   %{"key" => "_JclPhase_", "value" => @build},
+                   %{key: "_JclBillable_", value: "true"},
+                   %{"key" => "_JclHours_", "value" => "1.5"}
                  ]
                })
 
@@ -90,8 +113,10 @@ defmodule Jido.Connect.Tempo.Client.WorklogCreateTest do
                "startTime" => "08:15:00",
                "billableSeconds" => 0,
                "attributes" => [
-                 %{"key" => "_Phase_", "value" => "build"},
-                 %{"key" => "_Billable_", "value" => "true"}
+                 %{"key" => "_JclAccount_", "value" => "JCL-PROJECT"},
+                 %{"key" => "_JclPhase_", "value" => @build},
+                 %{"key" => "_JclBillable_", "value" => "true"},
+                 %{"key" => "_JclHours_", "value" => "1.5"}
                ]
              }
     end
@@ -236,35 +261,51 @@ defmodule Jido.Connect.Tempo.Client.WorklogCreateTest do
              }
     end
 
-    # The test site has work attributes only around an attribute run, so the
-    # recorded worklog carries none; this is the recorded 200 with the long
-    # description of worklog 79166 and two attribute values in Tempo's form.
+    # The recorded attribute booking: Tempo kept the description of 858
+    # bytes with its umlauts, returned the four values as sent in an order
+    # of its own, and booked the omitted start time at the start of the day
+    # in the worker's time zone, Europe/Berlin.
     test "keeps a long description and the attribute values whole" do
-      long =
-        Fixture.recorded!("worklogs_own_day")["body"]["results"] |> hd() |> Map.get("description")
+      Req.Test.expect(__MODULE__, &Fixture.respond(&1, "worklog_create_attributes"))
+      description = Fixture.recorded!("worklog_create_attributes")["body"]["description"]
 
-      pairs = [
-        %{"key" => "_Phase_", "value" => "build"},
-        %{"key" => "_Billable_", "value" => "true"}
-      ]
+      input =
+        Map.merge(valid(), %{
+          start_date: "2026-10-27",
+          time_spent_seconds: 1800,
+          description: description,
+          attributes: @attributes
+        })
 
-      Req.Test.expect(__MODULE__, fn conn ->
-        Fixture.respond(conn, "worklog_create",
-          body: fn body ->
-            body |> Map.put("description", long) |> put_in(["attributes", "values"], pairs)
-          end
-        )
-      end)
+      assert {:ok, worklog} = Client.create_worklog(request(), input)
 
-      assert {:ok, %Worklog{description: ^long, work_attributes: attributes}} =
-               Client.create_worklog(request(), valid())
+      assert byte_size(worklog.description) == 858
+      assert worklog.description == description
 
-      assert byte_size(long) == 778
+      assert String.ends_with?(
+               worklog.description,
+               "Part 12: the description stays whole, with umlauts ä, ö, ü and ß."
+             )
 
-      assert attributes == [
-               %{key: "_Phase_", value: "build"},
-               %{key: "_Billable_", value: "true"}
-             ]
+      assert worklog |> Worklog.to_map() |> Map.delete(:description) == %{
+               tempo_worklog_id: 79_267,
+               author_account_id: @account,
+               start_date: "2026-10-27",
+               time_spent_seconds: 1800,
+               issue_id: 46_097,
+               work_attributes: [
+                 %{key: "_JclPhase_", value: @build},
+                 %{key: "_JclHours_", value: "1.5"},
+                 %{key: "_JclBillable_", value: "true"},
+                 %{key: "_JclAccount_", value: "JCL-PROJECT"}
+               ],
+               start_time: "00:00:00",
+               start_date_time_utc: "2026-10-26T23:00:00Z",
+               billable_seconds: 1800,
+               created_at: "2026-11-06T17:39:15Z",
+               updated_at: "2026-11-06T17:39:15Z",
+               self: "https://api.tempo.io/4/worklogs/79267"
+             }
     end
   end
 
@@ -326,10 +367,10 @@ defmodule Jido.Connect.Tempo.Client.WorklogCreateTest do
   end
 
   describe "errors" do
-    # 400, 401 and the 403 of a locked period are recorded POST answers. The
-    # account produces no other 403 and no 404 on this POST, so these are
-    # the recorded 403 and 404 bodies of two reads. 429 and 5xx are the
-    # recorded 400 with only the status (and a Retry-After) changed; the
+    # 400, 401, the 403 of a locked period and the 404 of an unknown account
+    # key are recorded POST answers. The account produces no other 403 on
+    # this POST, so that is the recorded 403 body of a read. 429 and 5xx are
+    # the recorded 400 with only the status (and a Retry-After) changed; the
     # transport failures come from Req.Test.transport_error/2.
     test "each failure is a distinct normalized error with its delivery and retry guidance" do
       cases = [
@@ -337,7 +378,7 @@ defmodule Jido.Connect.Tempo.Client.WorklogCreateTest do
         {"401", &Fixture.respond(&1, "worklog_create_unauthorized")},
         {"403 period", &Fixture.respond(&1, "worklog_create.3")},
         {"403", &Fixture.respond(&1, "forbidden")},
-        {"404", &Fixture.respond(&1, "not_found")},
+        {"404", &Fixture.respond(&1, "worklog_create_invalid_attribute")},
         {"429",
          &Fixture.respond(&1, "worklog_create_invalid_time",
            status: 429,
@@ -392,6 +433,30 @@ defmodule Jido.Connect.Tempo.Client.WorklogCreateTest do
       assert details.retry_after == nil
     end
 
+    # Tempo's text names the missing account and quotes no input.
+    test "the 404 of an unknown account key is a rejection with Tempo's text" do
+      Req.Test.expect(__MODULE__, &Fixture.respond(&1, "worklog_create_invalid_attribute"))
+
+      unknown =
+        Enum.map(@attributes, fn
+          %{key: "_JclAccount_"} = attribute -> %{attribute | value: "JCL-UNKNOWN"}
+          attribute -> attribute
+        end)
+
+      assert {:error,
+              %Error.ProviderError{
+                reason: :not_found,
+                status: 404,
+                delivery: :rejected,
+                mutation?: true,
+                details: details
+              } = error} =
+               Client.create_worklog(request(), Map.put(valid(), :attributes, unknown))
+
+      assert details.message == "Account not found"
+      assert Error.retry_guidance(error) == :do_not_retry
+    end
+
     test "a 400 or another 403 that names no locked period is not labelled a period lock" do
       for {status, message} <- [
             {400, "The timesheet status must be open for the period"},
@@ -412,10 +477,11 @@ defmodule Jido.Connect.Tempo.Client.WorklogCreateTest do
     end
 
     # Tempo quotes rejected input, as in the recorded `Non valid time
-    # '25:00:00'`. This is that recorded 400 with only its errors changed to
-    # quote the description, an attribute value and the author. The
-    # attribute value `create` is part of the description, so the longer
-    # value has to be replaced first.
+    # '25:00:00'`. Its recorded answer to an unknown account key quotes
+    # nothing, and no answer that quotes the description, an attribute value
+    # or the author was observed, so this is derived: the recorded 400 with
+    # only its errors changed to quote them. The attribute value `create` is
+    # part of the description, so the longer value has to be replaced first.
     test "a 400 that quotes the description, an attribute value or the author redacts them" do
       Req.Test.expect(__MODULE__, fn conn ->
         Fixture.respond(conn, "worklog_create_invalid_time",
@@ -443,9 +509,10 @@ defmodule Jido.Connect.Tempo.Client.WorklogCreateTest do
       end
     end
 
-    # The recorded 403 of a locked period with the echo of the description
-    # appended. The attribute value `open` occurs in the lock text, so the
-    # label has to come from Tempo's text before it is redacted.
+    # The recorded 403 of a locked period with an echo of the description
+    # appended, which is derived like the one above. The attribute value
+    # `open` occurs in the lock text, so the label has to come from Tempo's
+    # text before it is redacted.
     test "a 403 of a locked period that quotes the input stays :period_locked" do
       Req.Test.expect(__MODULE__, fn conn ->
         Fixture.respond(conn, "worklog_create.3",

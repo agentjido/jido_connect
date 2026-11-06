@@ -5,8 +5,14 @@ defmodule Jido.Connect.Tempo.CreateWorklogActionTest do
   # generated Jido action, against the POST answers that the live tests
   # recorded on 2026-11-02: `worklog_create` (the 200 for worklog 79177 on
   # 2026-10-29, 08:15:00, 3661 seconds, issue 46097) and `worklog_create.3`
-  # (the 403 for the same booking in the approved August period). The
-  # sanitizer recorded the test user as `account-1`.
+  # (the 403 for the same booking in the approved August period), and on
+  # 2026-11-06, while Tempo required four work attributes:
+  # `worklog_create_attributes` (the 200 for worklog 79267 on 2026-10-27,
+  # without start time, 1800 seconds, a description of 858 bytes and a
+  # value for each required attribute), `worklog_create_invalid_attribute`
+  # (the 404 for an unknown account key) and `worklog_create_oauth` (the 200
+  # for worklog 79268, booked through the OAuth access token). The sanitizer
+  # recorded the test user as `account-1`.
 
   import ExUnit.CaptureLog
 
@@ -21,6 +27,25 @@ defmodule Jido.Connect.Tempo.CreateWorklogActionTest do
   @access_token "tempo-oauth-token-275-secret"
   @marker "JCL live create test"
   @write ["tempo.worklogs.write"]
+
+  # The values of the recorded attribute bookings as they were sent: the
+  # stored value of the label build of `_JclPhase_` in that window,
+  # `"true"`, `"1.5"` and the account key.
+  @build "891b3db6-c452-456c-ae2c-7b53a06899fd"
+  @attributes [
+    %{key: "_JclAccount_", value: "JCL-PROJECT"},
+    %{key: "_JclPhase_", value: @build},
+    %{key: "_JclBillable_", value: "true"},
+    %{key: "_JclHours_", value: "1.5"}
+  ]
+  # Tempo returned them in this order.
+  @returned [
+    %{key: "_JclPhase_", value: @build},
+    %{key: "_JclHours_", value: "1.5"},
+    %{key: "_JclBillable_", value: "true"},
+    %{key: "_JclAccount_", value: "JCL-PROJECT"}
+  ]
+  @unknown_account "JCL-UNKNOWN"
 
   @input %{
     author_account_id: @account,
@@ -172,39 +197,32 @@ defmodule Jido.Connect.Tempo.CreateWorklogActionTest do
       assert {:ok, _json} = Jason.encode(result)
     end
 
-    # The recorded 200 with the long description of worklog 79166 and two
-    # attribute values in Tempo's form; the test site has work attributes
-    # only around an attribute run.
+    # The recorded attribute booking with the input it was sent with.
     test "the result keeps the full description and the attribute values" do
-      long =
-        Fixture.recorded!("worklogs_own_day")["body"]["results"] |> hd() |> Map.get("description")
+      description = Fixture.recorded!("worklog_create_attributes")["body"]["description"]
+      Req.Test.stub(__MODULE__, &Fixture.respond(&1, "worklog_create_attributes"))
 
-      pairs = [
-        %{"key" => "_Phase_", "value" => "build"},
-        %{"key" => "_Billable_", "value" => "true"}
-      ]
+      input = %{
+        author_account_id: @account,
+        issue_id: 46_097,
+        start_date: "2026-10-27",
+        time_spent_seconds: 1800,
+        description: description,
+        attributes: @attributes
+      }
 
-      Req.Test.stub(__MODULE__, fn conn ->
-        Fixture.respond(conn, "worklog_create",
-          body: &(&1 |> Map.put("description", long) |> put_in(["attributes", "values"], pairs))
-        )
-      end)
-
-      input = Map.merge(@input, %{description: long, attributes: pairs})
       context = context(:api_token)
       {:ok, prepared} = prepare(context, input)
 
-      assert prepared.preview["description_bytes"] == 778
-      assert prepared.preview["attribute_count"] == 2
-      refute inspect(prepared.preview) =~ "build"
+      assert prepared.preview["description_bytes"] == 858
+      assert prepared.preview["attribute_count"] == 4
+      refute inspect(prepared.preview) =~ "JCL-PROJECT"
+      refute inspect(prepared.preview) =~ @build
 
-      assert {:ok, %{worklog: %{description: ^long, work_attributes: attributes}}} =
+      assert {:ok, %{worklog: %{description: ^description} = worklog}} =
                commit(context, prepared, input)
 
-      assert attributes == [
-               %{key: "_Phase_", value: "build"},
-               %{key: "_Billable_", value: "true"}
-             ]
+      assert {worklog.work_attributes, worklog.start_time} == {@returned, "00:00:00"}
     end
   end
 
@@ -293,6 +311,8 @@ defmodule Jido.Connect.Tempo.CreateWorklogActionTest do
 
     # The recorded token response with only `scope` changed to the coarse
     # grants of Tempo's OpenAPI example; the host records granted_labels/1.
+    # This stays derived: the token responses of the test site never held
+    # a coarse grant (see the next test).
     test "a recorded OAuth token with scope read write may create, one with read only may not" do
       for {scope, outcome} <- [{"read write", :posted}, {"read", :missing_scopes}] do
         token = put_in(Fixture.recorded!("oauth_exchange")["body"], ["scope"], scope)
@@ -312,6 +332,50 @@ defmodule Jido.Connect.Tempo.CreateWorklogActionTest do
             refute_received :posted
         end
       end
+    end
+
+    # The recorded OAuth booking on a connection whose labels come from the
+    # scope that the stored token pair was issued with, recorded in
+    # `oauth_refresh`: `worklogs:manage` grants the write label.
+    test "the recorded OAuth booking commits with the labels of the recorded token scope" do
+      scope = Fixture.recorded!("oauth_refresh")["body"]["scope"]
+      grants = Jido.Connect.Scope.parse(scope)
+      assert "worklogs:manage" in grants
+      refute Enum.any?(["read", "write"], &(&1 in grants))
+
+      test_pid = self()
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        send(test_pid, :posted)
+        Fixture.respond(conn, "worklog_create_oauth")
+      end)
+
+      input = %{
+        author_account_id: @account,
+        issue_id: 46_097,
+        start_date: "2026-10-27",
+        start_time: "10:30:00",
+        time_spent_seconds: 900,
+        description: "JCL live OAuth booking",
+        attributes: @attributes
+      }
+
+      context = context(:oauth2_user, scopes: ScopeResolver.granted_labels(scope))
+      {:ok, prepared} = prepare(context, input)
+
+      assert {:ok, %{worklog: worklog}} = commit(context, prepared, input)
+      assert_received :posted
+      refute_received :posted
+
+      assert %{
+               tempo_worklog_id: 79_268,
+               start_date: "2026-10-27",
+               start_time: "10:30:00",
+               time_spent_seconds: 900,
+               billable_seconds: 900,
+               description: "JCL live OAuth booking",
+               work_attributes: @returned
+             } = worklog
     end
 
     test "an expired lease, a lease of another connection or without the token stops the call" do
@@ -366,18 +430,31 @@ defmodule Jido.Connect.Tempo.CreateWorklogActionTest do
 
       on_exit(fn -> :telemetry.detach(handler) end)
 
-      # The recorded 403 of a locked period with an echo of the description
-      # and the attribute value appended, as Tempo quotes rejected input.
-      input = Map.put(@input, :attributes, [%{"key" => "_Phase_", "value" => "build-275"}])
+      # The recorded 404 for an unknown account key with an echo of the
+      # description and the attribute value appended. Tempo's recorded text,
+      # `Account not found`, quotes neither, so the echo is derived from the
+      # recorded `Non valid time '25:00:00'`.
+      input =
+        Map.put(
+          @input,
+          :attributes,
+          Enum.map(@attributes, fn
+            %{key: "_JclAccount_"} = attribute -> %{attribute | value: @unknown_account}
+            attribute -> attribute
+          end)
+        )
 
       Req.Test.stub(__MODULE__, fn conn ->
-        Fixture.respond(conn, "worklog_create.3",
+        Fixture.respond(conn, "worklog_create_invalid_attribute",
           body:
             &update_in(&1, ["errors"], fn errors ->
               errors ++
                 [
                   %{"message" => "Non valid description '#{@marker}'"},
-                  %{"message" => "Non valid value 'build-275' for work attribute '_Phase_'"}
+                  %{
+                    "message" =>
+                      "Non valid value '#{@unknown_account}' for work attribute '_JclAccount_'"
+                  }
                 ]
             end)
         )
@@ -389,7 +466,7 @@ defmodule Jido.Connect.Tempo.CreateWorklogActionTest do
         capture_log(fn ->
           {:ok, prepared} = prepare(context, input)
 
-          assert {:error, %Error.ProviderError{reason: :period_locked} = error} =
+          assert {:error, %Error.ProviderError{reason: :not_found, status: 404} = error} =
                    commit(context, prepared, input)
 
           send(test_pid, {:error, error})
@@ -408,7 +485,7 @@ defmodule Jido.Connect.Tempo.CreateWorklogActionTest do
       assert log =~ "Direct mutation invocation is deprecated"
 
       for text <- [log, inspect(events), inspect(error), inspect(Error.to_map(error))],
-          secret <- [@api_token, @marker, "build-275"] do
+          secret <- [@api_token, @marker, @unknown_account, @build] do
         refute text =~ secret
       end
     end

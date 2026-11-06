@@ -1,0 +1,72 @@
+{
+  "body": {
+    "attributes": {
+      "self": "https://api.tempo.io/4/worklogs/79267/work-attribute-values",
+      "values": [
+        {
+          "key": "_JclPhase_",
+          "value": "891b3db6-c452-456c-ae2c-7b53a06899fd"
+        },
+        {
+          "key": "_JclHours_",
+          "value": "1.5"
+        },
+        {
+          "key": "_JclBillable_",
+          "value": "true"
+        },
+        {
+          "key": "_JclAccount_",
+          "value": "JCL-PROJECT"
+        }
+      ]
+    },
+    "author": {
+      "accountId": "account-1",
+      "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+    },
+    "billableSeconds": 1800,
+    "createdAt": "2026-11-06T17:39:15Z",
+    "description": "JCL live attribute booking. Part 1: the description stays whole, with umlauts ä, ö, ü and ß. Part 2: the description stays whole, with umlauts ä, ö, ü and ß. Part 3: the description stays whole, with umlauts ä, ö, ü and ß. Part 4: the description stays whole, with umlauts ä, ö, ü and ß. Part 5: the description stays whole, with umlauts ä, ö, ü and ß. Part 6: the description stays whole, with umlauts ä, ö, ü and ß. Part 7: the description stays whole, with umlauts ä, ö, ü and ß. Part 8: the description stays whole, with umlauts ä, ö, ü and ß. Part 9: the description stays whole, with umlauts ä, ö, ü and ß. Part 10: the description stays whole, with umlauts ä, ö, ü and ß. Part 11: the description stays whole, with umlauts ä, ö, ü and ß. Part 12: the description stays whole, with umlauts ä, ö, ü and ß.",
+    "issue": {
+      "id": 46097,
+      "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+    },
+    "self": "https://api.tempo.io/4/worklogs/79267",
+    "startDate": "2026-10-27",
+    "startDateTimeUtc": "2026-10-26T23:00:00Z",
+    "startTime": "00:00:00",
+    "tempoWorklogId": 79267,
+    "timeSpentSeconds": 1800,
+    "updatedAt": "2026-11-06T17:39:15Z"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "1692"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 17:39:15 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "58e6fe7cfca54684ba77cf5da687cb96"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "POST",
+    "path": "/4/worklogs"
+  },
+  "status": 200
+}
