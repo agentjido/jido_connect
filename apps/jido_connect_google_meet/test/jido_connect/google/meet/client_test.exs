@@ -65,25 +65,29 @@ defmodule Jido.Connect.Google.Meet.ClientTest do
   end
 
   test "gets a Meet space" do
+    # Recorded through the meeting code with this field projection: Google
+    # accepts `spaces/<meeting code>` and names the space by its own ID.
+    %{"meetingCode" => meeting_code} =
+      recorded = LiveSmoke.fixture!(:google_meet, "space_get_by_meeting_code")
+
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
-      assert conn.request_path == "/v2/spaces/abc-mnop-xyz"
+      assert conn.request_path == "/v2/spaces/#{meeting_code}"
       assert conn.query_params["fields"] == "name,meetingUri,meetingCode"
 
-      Req.Test.json(conn, %{
-        "name" => "spaces/abc-mnop-xyz",
-        "meetingUri" => "https://meet.google.com/abc-mnop-xyz",
-        "meetingCode" => "abc-mnop-xyz"
-      })
+      Req.Test.json(conn, recorded)
     end)
 
     assert {:ok, %Space{} = space} =
              Client.get_space(
-               %{space_name: "spaces/abc-mnop-xyz", fields: "name,meetingUri,meetingCode"},
+               %{space_name: "spaces/#{meeting_code}", fields: "name,meetingUri,meetingCode"},
                "token"
              )
 
-    assert space.meeting_uri == "https://meet.google.com/abc-mnop-xyz"
+    assert space.space_name == recorded["name"]
+    assert space.meeting_code == meeting_code
+    assert space.meeting_uri == recorded["meetingUri"]
+    refute space.space_name == "spaces/#{meeting_code}"
   end
 
   test "lists Meet conference records" do
@@ -185,6 +189,16 @@ defmodule Jido.Connect.Google.Meet.ClientTest do
   end
 
   test "lists Meet recording metadata" do
+    # Derived from recordings_untimed, the live list under the projection
+    # `recordings(name,state,driveDestination)`. The prepared conference has
+    # one recording, so Google sends no nextPageToken for it: the unprojected
+    # list in `recordings.json` has none, and adding `nextPageToken` to the
+    # projection cannot add one. The token below is the one field added to
+    # the recorded page, so the test can check that the client returns it.
+    recorded = LiveSmoke.fixture!(:google_meet, "recordings_untimed")
+    [recorded_recording] = recorded["recordings"]
+    page = Map.put(recorded, "nextPageToken", "derived-next-page")
+
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
       assert conn.request_path == "/v2/conferenceRecords/abc/recordings"
@@ -194,22 +208,10 @@ defmodule Jido.Connect.Google.Meet.ClientTest do
       assert conn.query_params["fields"] ==
                "recordings(name,state,driveDestination),nextPageToken"
 
-      Req.Test.json(conn, %{
-        "recordings" => [
-          %{
-            "name" => "conferenceRecords/abc/recordings/def",
-            "state" => "FILE_GENERATED",
-            "driveDestination" => %{
-              "file" => "drive-file-1",
-              "exportUri" => "https://drive.google.com/file/d/drive-file-1/view"
-            }
-          }
-        ],
-        "nextPageToken" => "next"
-      })
+      Req.Test.json(conn, page)
     end)
 
-    assert {:ok, %{recordings: [%Recording{} = recording], next_page_token: "next"}} =
+    assert {:ok, %{recordings: [%Recording{} = recording], next_page_token: "derived-next-page"}} =
              Client.list_recordings(
                %{
                  conference_record_name: "conferenceRecords/abc",
@@ -220,21 +222,20 @@ defmodule Jido.Connect.Google.Meet.ClientTest do
                "token"
              )
 
-    assert recording.recording_name == "conferenceRecords/abc/recordings/def"
-    assert recording.drive_file_id == "drive-file-1"
+    assert recording.recording_name == recorded_recording["name"]
+    assert recording.drive_file_id == recorded_recording["driveDestination"]["file"]
   end
 
   test "gets Meet recording metadata" do
+    # Recorded under the same field projection.
+    recorded = LiveSmoke.fixture!(:google_meet, "recording_get_untimed")
+
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
       assert conn.request_path == "/v2/conferenceRecords/abc/recordings/def"
       assert conn.query_params["fields"] == "name,state,driveDestination"
 
-      Req.Test.json(conn, %{
-        "name" => "conferenceRecords/abc/recordings/def",
-        "state" => "FILE_GENERATED",
-        "driveDestination" => %{"file" => "drive-file-1"}
-      })
+      Req.Test.json(conn, recorded)
     end)
 
     assert {:ok, %Recording{} = recording} =

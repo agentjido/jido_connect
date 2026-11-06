@@ -269,21 +269,34 @@ defmodule Jido.Connect.Gmail.ClientTest do
   end
 
   test "gets Gmail message metadata without body data" do
+    # Recorded with this request under gmail.metadata: Gmail sends the
+    # requested header, the IDs, labels, history ID, date and size, and no
+    # snippet and no part of the body.
+    %{
+      "id" => message_id,
+      "payload" => %{"headers" => [%{"name" => "Subject", "value" => subject}]}
+    } =
+      recorded = LiveSmoke.fixture!(:gmail, "message_metadata_subject")
+
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
-      assert conn.request_path == "/gmail/v1/users/me/messages/msg123"
+      assert conn.request_path == "/gmail/v1/users/me/messages/#{message_id}"
       assert conn.query_params["format"] == "metadata"
       assert conn.query_params["metadataHeaders"] == "Subject"
 
-      Req.Test.json(conn, message_payload())
+      Req.Test.json(conn, recorded)
     end)
 
     assert {:ok, %Message{} = message} =
-             Client.get_message(%{message_id: "msg123", metadata_headers: ["Subject"]}, "token")
+             Client.get_message(%{message_id: message_id, metadata_headers: ["Subject"]}, "token")
 
-    assert message.message_id == "msg123"
-    assert [%{name: "Subject", value: "Budget"}] = message.headers
-    refute inspect(message) =~ "body-bytes"
+    assert message.message_id == message_id
+    assert [%{name: "Subject", value: ^subject}] = message.headers
+
+    assert {message.history_id, message.internal_date, message.size_estimate} ==
+             {recorded["historyId"], recorded["internalDate"], recorded["sizeEstimate"]}
+
+    refute Map.has_key?(message.payload_summary, :body_size)
   end
 
   test "lists Gmail threads" do
@@ -310,28 +323,49 @@ defmodule Jido.Connect.Gmail.ClientTest do
   end
 
   test "gets Gmail thread metadata without body data" do
+    # Recorded with this request under gmail.metadata: the two messages of
+    # the archive pair, each with the requested header only.
+    %{"id" => thread_id, "messages" => [%{"id" => first_id}, %{"id" => reply_id}]} =
+      recorded = LiveSmoke.fixture!(:gmail, "thread_metadata_subject")
+
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
-      assert conn.request_path == "/gmail/v1/users/me/threads/thread123"
+      assert conn.request_path == "/gmail/v1/users/me/threads/#{thread_id}"
       assert conn.query_params["format"] == "metadata"
       assert conn.query_params["metadataHeaders"] == "Subject"
 
-      Req.Test.json(conn, %{
-        "id" => "thread123",
-        "historyId" => "456",
-        "messages" => [message_payload()]
-      })
+      Req.Test.json(conn, recorded)
     end)
 
     assert {:ok, %Thread{} = thread} =
-             Client.get_thread(%{thread_id: "thread123", metadata_headers: ["Subject"]}, "token")
+             Client.get_thread(%{thread_id: thread_id, metadata_headers: ["Subject"]}, "token")
 
-    assert thread.thread_id == "thread123"
-    assert [%Message{message_id: "msg123"}] = thread.messages
-    refute inspect(thread) =~ "body-bytes"
+    assert thread.thread_id == thread_id
+    assert thread.history_id == recorded["historyId"]
+
+    assert [%Message{message_id: ^first_id} = first, %Message{message_id: ^reply_id} = reply] =
+             thread.messages
+
+    for message <- [first, reply] do
+      assert [%{name: "Subject"}] = message.headers
+      refute Map.has_key?(message.payload_summary, :body_size)
+    end
   end
 
   test "handles Gmail draft lifecycle endpoints" do
+    # No drafts.get was recorded. Gmail answers it with the draft ID and the
+    # draft's message in the form messages.get returns for the same format
+    # and headers, so the draft here wraps message_metadata_subject, the
+    # metadata read of an inbox message. That read ran under gmail.metadata,
+    # which ScopeResolver never grants drafts.get; it asks for gmail.compose,
+    # gmail.modify, gmail.readonly or the full mail scope. Under such a grant
+    # Gmail's format=metadata answer also carries a snippet and a payload
+    # mimeType and no empty partId, as message_metadata_archived shows, and a
+    # real draft's message carries the DRAFT label. The test asserts none of
+    # these fields.
+    %{"id" => draft_message_id} =
+      draft_message = LiveSmoke.fixture!(:gmail, "message_metadata_subject")
+
     Req.Test.stub(__MODULE__, fn conn ->
       case {conn.method, conn.request_path} do
         {"GET", "/gmail/v1/users/me/drafts"} ->
@@ -355,10 +389,7 @@ defmodule Jido.Connect.Gmail.ClientTest do
           assert conn.query_params["format"] == "metadata"
           assert conn.query_params["metadataHeaders"] == "Subject"
 
-          Req.Test.json(conn, %{
-            "id" => "draft123",
-            "message" => message_payload()
-          })
+          Req.Test.json(conn, %{"id" => "draft123", "message" => draft_message})
 
         {"DELETE", "/gmail/v1/users/me/drafts/draft123"} ->
           Req.Test.json(conn, %{})
@@ -383,7 +414,7 @@ defmodule Jido.Connect.Gmail.ClientTest do
              Client.get_draft(%{draft_id: "draft123", metadata_headers: ["Subject"]}, "token")
 
     assert draft.draft_id == "draft123"
-    refute inspect(draft) =~ "body-bytes"
+    assert %Message{message_id: ^draft_message_id, headers: [%{name: "Subject"}]} = draft.message
 
     assert {:ok, %{deleted?: true, draft_id: "draft123"}} =
              Client.delete_draft(%{draft_id: "draft123"}, "token")
@@ -410,6 +441,16 @@ defmodule Jido.Connect.Gmail.ClientTest do
   end
 
   test "lists Gmail history message additions without body data" do
+    # message_received_history is the live poll of an inserted message and
+    # its reply. Gmail lists each addition with its ID, thread and labels
+    # only, beside the record's `messages` entry. The label and deletion
+    # records come from the change poll's recording, message_changed_history:
+    # the next test reads the labelsRemoved record of its first page, and
+    # only the message changed poll tests in gmail_test.exs read labelsAdded
+    # and messagesDeleted, from its later pages.
+    %{"history" => recorded_records, "historyId" => history_id} =
+      page = LiveSmoke.fixture!(:gmail, "message_received_history")
+
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
       assert conn.request_path == "/gmail/v1/users/me/history"
@@ -419,64 +460,10 @@ defmodule Jido.Connect.Gmail.ClientTest do
       assert conn.query_params["pageToken"] == "page-2"
       assert conn.query_params["historyTypes"] == "messageAdded"
 
-      Req.Test.json(conn, %{
-        "history" => [
-          %{
-            "id" => "124",
-            "messages" => [
-              %{"id" => "msg-summary", "threadId" => "thread-summary"}
-            ],
-            "messagesAdded" => [
-              %{
-                "message" => message_payload()
-              }
-            ],
-            "messagesDeleted" => [
-              %{
-                "message" => %{"id" => "msg-deleted", "threadId" => "thread-deleted"}
-              }
-            ],
-            "labelsAdded" => [
-              %{
-                "message" => %{"id" => "msg-labeled", "threadId" => "thread-labeled"},
-                "labelIds" => ["STARRED"]
-              }
-            ],
-            "labelsRemoved" => [
-              %{
-                "message" => %{"id" => "msg-unlabeled", "threadId" => "thread-unlabeled"},
-                "labelIds" => ["UNREAD"]
-              }
-            ]
-          }
-        ],
-        "historyId" => "125"
-      })
+      Req.Test.json(conn, page)
     end)
 
-    assert {:ok,
-            %{
-              history: [
-                %{
-                  history_id: "124",
-                  messages: [%Message{message_id: "msg-summary"}],
-                  messages_added: [%Message{} = message],
-                  messages_deleted: [%Message{message_id: "msg-deleted"}],
-                  labels_added: [
-                    %{
-                      message: %Message{message_id: "msg-labeled"},
-                      label_ids: ["STARRED"]
-                    }
-                  ],
-                  labels_removed: [
-                    %{
-                      message: %Message{message_id: "msg-unlabeled"},
-                      label_ids: ["UNREAD"]
-                    }
-                  ]
-                }
-              ]
-            }} =
+    assert {:ok, %{history: [_original, _reply] = records, history_id: ^history_id} = result} =
              Client.list_history(
                %{
                  start_history_id: "123",
@@ -488,13 +475,37 @@ defmodule Jido.Connect.Gmail.ClientTest do
                "token"
              )
 
-    assert message.message_id == "msg123"
-    refute inspect(message) =~ "body-bytes"
+    refute Map.has_key?(result, :next_page_token)
+
+    for {record, recorded} <- Enum.zip(records, recorded_records) do
+      %{
+        "id" => record_id,
+        "messages" => [%{"id" => message_id}],
+        "messagesAdded" => [%{"message" => added}]
+      } = recorded
+
+      assert %{
+               history_id: ^record_id,
+               messages: [%Message{message_id: ^message_id}],
+               messages_added: [%Message{} = message]
+             } = record
+
+      assert record |> Map.keys() |> Enum.sort() == [:history_id, :messages, :messages_added]
+
+      assert {message.message_id, message.thread_id, message.label_ids} ==
+               {added["id"], added["threadId"], added["labelIds"]}
+
+      assert {message.snippet, message.headers} == {nil, []}
+    end
   end
 
   test "requests the three change types as repeated historyTypes without a label filter" do
-    %{"history" => [_only, _archive], "nextPageToken" => next_page_token} =
-      page = LiveSmoke.fixture!(:gmail, "message_changed_history")
+    %{
+      "history" => [_only, %{"id" => archive_id, "labelsRemoved" => [archived]}],
+      "nextPageToken" => next_page_token
+    } = page = LiveSmoke.fixture!(:gmail, "message_changed_history")
+
+    %{"message" => %{"id" => archived_id}, "labelIds" => removed_label_ids} = archived
 
     Req.Test.expect(__MODULE__, fn conn ->
       assert conn.request_path == "/gmail/v1/users/me/history"
@@ -510,7 +521,19 @@ defmodule Jido.Connect.Gmail.ClientTest do
       Req.Test.json(conn, page)
     end)
 
-    assert {:ok, %{history: [_only, _archive], next_page_token: ^next_page_token}} =
+    assert {:ok,
+            %{
+              history: [
+                _only,
+                %{
+                  history_id: ^archive_id,
+                  labels_removed: [
+                    %{message: %Message{message_id: ^archived_id}, label_ids: ^removed_label_ids}
+                  ]
+                }
+              ],
+              next_page_token: ^next_page_token
+            }} =
              Client.list_history(
                %{
                  start_history_id: "15659",
@@ -1172,19 +1195,5 @@ defmodule Jido.Connect.Gmail.ClientTest do
       assert {:error, %Jido.Connect.Error.ProviderError{reason: :invalid_response}} =
                Client.get_thread_content(%{thread_id: "thread"}, "token")
     end
-  end
-
-  defp message_payload do
-    %{
-      "id" => "msg123",
-      "threadId" => "thread123",
-      "labelIds" => ["INBOX"],
-      "snippet" => "Budget update",
-      "payload" => %{
-        "mimeType" => "text/plain",
-        "headers" => [%{"name" => "Subject", "value" => "Budget"}],
-        "body" => %{"size" => 12, "data" => "body-bytes"}
-      }
-    }
   end
 end

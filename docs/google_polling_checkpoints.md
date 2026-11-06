@@ -22,9 +22,11 @@ Pollers share the same offline contract:
 6. Expired provider checkpoints return `reason: :checkpoint_expired` with reset
    guidance and the original provider reason/details.
 7. A Calendar poll whose final page has no `nextSyncToken` returns an
-   invalid-response error with reset guidance instead of a checkpoint. Only
-   the Calendar poller applies this rule; when no page carries a new cursor,
-   the Drive and Gmail pollers return the last token they have.
+   invalid-response error with reset guidance instead of a checkpoint. A
+   `google.drive.collection.changes` poll does the same when no page carries
+   a `newStartPageToken`. When no page carries a new cursor,
+   `google.drive.file.changed` returns the page token of its last request,
+   and the Gmail pollers return the history ID they started from.
 
 Reset guidance has this shape:
 
