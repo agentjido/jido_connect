@@ -18,7 +18,12 @@ defmodule Jido.Connect.Google.Meet.LiveMeetingLookupTest do
   and the scheduled window excludes the conference. The window is the host's
   choice; a host that needs every conference of an event widens it or allows
   a tolerance around the scheduled times. Google deletes a conference record
-  30 days after the conference ended.
+  30 days after the conference ended; every check here reads the prepared
+  record or its transcript and carries `LiveMeet.prepared!/1`, which skips it
+  with a reason once Google answers that the data is gone. The meeting code
+  check expects the earlier conference among the space's records and lists
+  it as `:earlier_conference_record`. See "Prepared Meet data" in
+  `docs/live_smoke_tests.md`.
 
   The Drive live tests download `GOOGLE_MEET_RECORDING_FILE_ID` and export
   `GOOGLE_MEET_NOTES_DOCUMENT_ID`; the checks here tie both IDs to the
@@ -42,6 +47,9 @@ defmodule Jido.Connect.Google.Meet.LiveMeetingLookupTest do
 
   alias Jido.Connect
   alias Jido.Connect.Google.Meet
+  alias Jido.Connect.Google.Meet.TestSupport.LiveMeet
+
+  require LiveMeet
 
   @req_options {:jido_connect_google, :google_req_options}
   @readonly_scope "https://www.googleapis.com/auth/meetings.space.readonly"
@@ -63,6 +71,7 @@ defmodule Jido.Connect.Google.Meet.LiveMeetingLookupTest do
            "GOOGLE_CALENDAR_CONFERENCE_ID",
            "GOOGLE_MEET_CONFERENCE_RECORD"
          ])
+    @tag LiveMeet.prepared!(["GOOGLE_MEET_CONFERENCE_RECORD", :earlier_conference_record])
     test "finds the prepared record by the event's conference ID, its space's meeting code", %{
       env: env
     } do
@@ -121,6 +130,7 @@ defmodule Jido.Connect.Google.Meet.LiveMeetingLookupTest do
 
   describe "google.meet.conference_record.get" do
     @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_MEET_CONFERENCE_RECORD"])
+    @tag LiveMeet.prepared!(["GOOGLE_MEET_CONFERENCE_RECORD"])
     test "a field projection leaves the prepared record's end and expire times out", %{
       env: env
     } do
@@ -149,6 +159,7 @@ defmodule Jido.Connect.Google.Meet.LiveMeetingLookupTest do
            "GOOGLE_MEET_RECORDING",
            "GOOGLE_MEET_RECORDING_FILE_ID"
          ])
+    @tag LiveMeet.prepared!(["GOOGLE_MEET_CONFERENCE_RECORD"])
     test "read the prepared recording's state, times and Drive file", %{env: env} do
       token = env["GOOGLE_ACCESS_TOKEN"]
 
@@ -187,6 +198,7 @@ defmodule Jido.Connect.Google.Meet.LiveMeetingLookupTest do
            "GOOGLE_MEET_RECORDING",
            "GOOGLE_MEET_RECORDING_FILE_ID"
          ])
+    @tag LiveMeet.prepared!(["GOOGLE_MEET_CONFERENCE_RECORD"])
     test "a field projection leaves the prepared recording's times out", %{env: env} do
       token = env["GOOGLE_ACCESS_TOKEN"]
 
@@ -225,6 +237,7 @@ defmodule Jido.Connect.Google.Meet.LiveMeetingLookupTest do
 
   describe "google.meet.transcript.get" do
     @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_MEET_TRANSCRIPT", "GOOGLE_MEET_NOTES_DOCUMENT_ID"])
+    @tag LiveMeet.prepared!(["GOOGLE_MEET_TRANSCRIPT"])
     test "the prepared transcript is written to the notes document", %{env: env} do
       assert {:ok, %{transcript: transcript}} =
                invoke(

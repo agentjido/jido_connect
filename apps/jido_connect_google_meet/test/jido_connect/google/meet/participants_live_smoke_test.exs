@@ -12,10 +12,10 @@ defmodule Jido.Connect.Google.Meet.ParticipantsLiveSmokeTest do
   has two participants. Google deletes a record 30 days after its conference
   ended; from then on `LiveMeet.prepared!/1` skips the checks that need the
   prepared record or transcript. The earlier record is found through the
-  window and has no variable of its own, so its check is skipped on the
-  prepared record's answer. It expires first, on 2026-11-29 at 16:54:56 UTC,
-  the prepared record at 17:19:37 UTC; a run in those 25 minutes fails the
-  check of the earlier record instead of skipping it. See
+  window and has no variable of its own, so its check lists
+  `:earlier_conference_record` as well. The earlier record expires first, on
+  2026-11-29 at 16:54:56 UTC, the prepared record at 17:19:37 UTC; in those
+  25 minutes the check is skipped on the earlier record's answer. See
   `docs/live_smoke_tests.md` for the variables and the recording mode.
 
   The earlier record's participants include a person outside the test
@@ -98,7 +98,7 @@ defmodule Jido.Connect.Google.Meet.ParticipantsLiveSmokeTest do
   end
 
   @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_MEET_CONFERENCE_RECORD"])
-  @tag LiveMeet.prepared!(["GOOGLE_MEET_CONFERENCE_RECORD"])
+  @tag LiveMeet.prepared!(["GOOGLE_MEET_CONFERENCE_RECORD", :earlier_conference_record])
   @tag timeout: :timer.minutes(2)
   test "pages through the participants of the earlier prepared conference record", %{env: env} do
     token = env["GOOGLE_ACCESS_TOKEN"]

@@ -111,6 +111,21 @@ The transcript document stays readable through the Drive package:
 route needs the `drive.readonly` grant; `drive.file` covers only files the app
 created or opened, which a Meet transcript document is not.
 
+A comparison of transcript entries with that export on the test account on
+2026-11-06 found differences beyond edits. For a transcript of two entries, the
+`text/plain` export of its document held the date, a title line, the end of
+transcription and a disclaimer, but neither entry's text nor a speaker label,
+and the Docs API showed the same. Drive kept no revision that tells whether
+text was removed after generation. For a transcript of three entries whose
+document was never edited, the export held each entry's text verbatim. It
+joined two adjoining entries into one paragraph, opened each paragraph with the
+participant's display name, where an entry names only the participant resource,
+and added a time mark, blank lines, a byte order mark and CRLF line ends. It
+then repeated the time mark and both paragraphs; in that copy the joined
+paragraph differed from the entries at two places. Only the entries carry each
+text with its participant and times, so they are the source of attributable
+text within Google's 30 days.
+
 ## Transcript Poll Trigger
 
 `google.meet.transcript.available` is a poll trigger with one generated

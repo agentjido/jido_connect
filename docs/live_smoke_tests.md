@@ -99,39 +99,11 @@ message right after sending it, so `LiveGmail.delete_message!/2` and
 record as `message_content_sent` and `message_content_draft`, which no offline
 test uses and which are not committed.
 
-The Meet checks read the meeting data prepared on 2026-10-30, which Google
-deletes 30 days after the conferences ended, on 2026-11-29. The participant
-checks in
-`apps/jido_connect_google_meet/test/jido_connect/google/meet/participants_live_smoke_test.exs`
-that read this data carry a `LiveMeet.prepared!/1` tag from
-`test/support/live_meet.ex` after their `env!/1` tag. In a run that can
-include them, through `--only live_smoke`, `--include live_smoke` or a
-location in the file, it asks Google with `GOOGLE_ACCESS_TOKEN` while the
-file compiles:
-`conferenceRecords.get` with `fields=name` for
-`GOOGLE_MEET_CONFERENCE_RECORD`, and one transcript entry name without text
-for `GOOGLE_MEET_TRANSCRIPT`. Two answers skip the test:
-
-- 404 with `error.status` `NOT_FOUND`, Google's answer for a missing
-  transcript, recorded as `transcript_entries_not_found`;
-- 403 with `error.status` `PERMISSION_DENIED`, no ErrorInfo reason and the
-  message `Permission denied on resource Conference (or it might not exist)`,
-  Google's answer for a conference record that does not exist. The answer
-  for the prepared record cannot be seen before Google deletes it, so the
-  recording `conference_record_unknown` stands in: it was taken on 2026-11-06
-  for a well-formed record ID that names no conference the test user can
-  see.
-
-The skip reason names the variable, the preparation date, the status,
-Google's `error.status` and the ErrorInfo reason or else Google's message.
-Every other answer lets the test run, so it fails on a 403 with the
-ErrorInfo reason `ACCESS_TOKEN_SCOPE_INSUFFICIENT`, recorded as
-`conference_record_scope_insufficient`, on 401, on 400 for an ID Google
-cannot parse, and on 5xx. Google gives the two skipping answers also for a
-well-formed ID that never named data of the test user, such as a mistyped
-transcript ID, so such an ID is skipped as expired instead of failing.
-Google's page token for participants encodes the next participant's user ID
-in Base64, so `participants.json` keeps the placeholder `nextPageToken-1`.
+The Meet checks read meeting data prepared on 2026-10-30, which Google
+deletes on 2026-11-29; "Prepared Meet data" under Google Workspace says how
+they are skipped from then on. Google's page token for participants encodes
+the next participant's user ID in Base64, so `participants.json` keeps the
+placeholder `nextPageToken-1`.
 
 ## Writing a Live Test
 
@@ -244,6 +216,126 @@ as seed input belong to the scripts that create the test data.
 | `GOOGLE_CLOUD_PROJECT` | setting | Seed input: the test Cloud project |
 | `GOOGLE_SEED_ATTENDEES` | setting | Seed input: attendees for seeded events |
 | `GOOGLE_LIVE_DESTRUCTIVE` | gate | `true` allows write tests |
+
+#### Prepared Meet data
+
+The Meet live tests read a meeting held on 2026-10-30 in the Meet space of
+`GOOGLE_CALENDAR_EVENT_ID`: its conference record
+`GOOGLE_MEET_CONFERENCE_RECORD`, its transcript `GOOGLE_MEET_TRANSCRIPT` and
+its recording `GOOGLE_MEET_RECORDING`. The window, transcript list, meeting
+code and earlier participants checks also expect the conference that began
+about 26 minutes earlier in the same space,
+`conferenceRecords/6EMiOc40YJH2mjvfx8U6DxIUOBEQAjIGCIoCIAAYAwg`; no variable
+names it. Google deletes a conference record 30 days after the
+conference ends
+([`expireTime`](https://developers.google.com/workspace/meet/api/reference/rest/v2/conferenceRecords)),
+and transcript entries after the same 30 days
+([Meet artifacts](https://developers.google.com/workspace/meet/api/guides/artifacts)).
+The recorded `expireTime` is 2026-11-29T16:54:56Z for the earlier record and
+2026-11-29T17:19:37Z for `GOOGLE_MEET_CONFERENCE_RECORD`. From then on, the
+Meet live tests that read them are skipped with a reason instead of failing.
+
+Those tests carry `LiveMeet.prepared!/1` from
+`apps/jido_connect_google_meet/test/support/live_meet.ex` after their `env!/1`
+tag. The tag lists the prepared items a test reads: the variables
+`GOOGLE_MEET_CONFERENCE_RECORD` and `GOOGLE_MEET_TRANSCRIPT`, and
+`:earlier_conference_record` for the earlier record, whose name is
+`@earlier_conference_record` in `LiveMeet`. Like `env!/1`, the tag runs when
+the test file compiles, before ExUnit knows the test's name and describe. It
+therefore asks Google in every run with an include filter, because each one
+overrides the `:live_smoke` exclude for the tests it selects:
+`--only live_smoke`, `--include live_smoke`, `--only test:"..."`,
+`--only describe:"..."` or a location such as `mix test <file>:<line>`. It
+asks once per record or transcript and VM, so such a run costs at most one
+request per item and value. With `GOOGLE_ACCESS_TOKEN` it sends
+`conferenceRecords.get` with `fields=name` for `GOOGLE_MEET_CONFERENCE_RECORD`
+and the earlier record, and one page of `transcripts.entries.list` without
+entry text for `GOOGLE_MEET_TRANSCRIPT`. A plain `mix test` has no include
+filter and asks nothing. Two answers count as deleted data:
+
+- 404 with `error.status` `NOT_FOUND`, Google's answer for a missing
+  transcript under a living record, recorded with the ErrorInfo reason
+  `TRANSCRIPT_NOT_FOUND` as `transcript_entries_not_found`;
+- 403 with `error.status` `PERMISSION_DENIED`, no ErrorInfo reason and the
+  message `Permission denied on resource Conference (or it might not exist)`,
+  Google's answer for a conference record that does not exist.
+
+The answer for the prepared record cannot be seen before Google deletes it,
+so the 403 is derived. On 2026-11-06 Google gave it for a well-formed record
+ID that names no conference visible to the test user, both for the record and
+for the transcript entries under it; `live_prepared_data_test.exs` records it
+as `conference_record_unknown` and `transcript_entries_unknown_record`. A
+deleted record no longer exists, so its tests get the same answer. Every
+other answer leaves the test to run and fail: success, 401, a 403 with the
+ErrorInfo reason `ACCESS_TOKEN_SCOPE_INSUFFICIENT` (recorded as
+`conference_record_scope_insufficient`), 400, 5xx and transport errors. The
+tag checks the items in the given order and skips on the first one whose data
+is gone. The skip reason names the variable, or the earlier record as such,
+the preparation date, the status, Google's `error.status` and the ErrorInfo
+reason or else Google's message, and the run prints it like an `env!/1` skip:
+
+```text
+live_smoke skip test/jido_connect/google/meet/live_smoke_test.exs:72: GOOGLE_MEET_CONFERENCE_RECORD, prepared on 2026-10-30, has expired: Google answered 403 PERMISSION_DENIED "Permission denied on resource Conference (or it might not exist)"; see "Prepared Meet data" in docs/live_smoke_tests.md
+live_smoke skip test/jido_connect/google/meet/live_smoke_test.exs:152: conferenceRecords/6EMiOc40YJH2mjvfx8U6DxIUOBEQAjIGCIoCIAAYAwg, the earlier conference prepared on 2026-10-30 in the space of GOOGLE_MEET_CONFERENCE_RECORD, has expired: Google answered 403 PERMISSION_DENIED "Permission denied on resource Conference (or it might not exist)"; see "Prepared Meet data" in docs/live_smoke_tests.md
+```
+
+Neither answer is unique to expired data. Google gives the 403 also for a
+record that exists but that the account of `GOOGLE_ACCESS_TOKEN` cannot see,
+and the 404 also for a transcript ID that never existed, as in
+`transcript_entries_not_found`. A skip before 2026-11-29 therefore points at
+the configuration, such as a wrong ID or a token of another account; the skip
+line prints Google's answer for the check that skipped. The 404 rule still
+holds for `GOOGLE_MEET_TRANSCRIPT`: a transcript that the variable names and
+that no longer exists is gone data, and Google deletes transcript entries 30
+days after the conference ends.
+
+Another Meet live test that reads prepared data adopts the tag with the
+prepared items it reads. Anything under the conference record, such as a
+recording or participants, counts as `GOOGLE_MEET_CONFERENCE_RECORD`; other
+items fail when the file compiles. A test that also expects the earlier
+record lists `:earlier_conference_record` after
+`GOOGLE_MEET_CONFERENCE_RECORD`: Google deletes the earlier record about 25
+minutes before the prepared one, which skips the test in between, and once
+both are gone the skip names the variable. A test without prepared data stays
+untagged.
+
+```elixir
+alias Jido.Connect.Google.Meet.TestSupport.LiveMeet
+require LiveMeet
+
+@tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_MEET_CONFERENCE_RECORD"])
+@tag LiveMeet.prepared!(["GOOGLE_MEET_CONFERENCE_RECORD"])
+test "lists the participants of the prepared conference", %{env: env} do
+  # ...
+end
+```
+
+Fresh data needs a person who holds a new meeting.
+`~/.config/jido_connect/live/seed/google/meeting-wizard.sh` walks through a
+recorded, transcribed meeting with Gemini notes in the Meet space of
+`GOOGLE_CALENDAR_EVENT_ID`. Its last stage, `seed.py meet-collect`, rewrites
+`GOOGLE_MEET_CONFERENCE_RECORD`, `GOOGLE_MEET_TRANSCRIPT` and
+`GOOGLE_MEET_RECORDING`; set `GOOGLE_MEET_RECORDING_FILE_ID` and
+`GOOGLE_MEET_NOTES_DOCUMENT_ID` by hand. The wizard walks through one
+meeting, but four checks assume two conferences in the prepared space: the
+window and transcript list checks in the Meet `live_smoke_test.exs` and the
+earlier participants check in `participants_live_smoke_test.exs` expect
+exactly two in the window, and the meeting code check in
+`live_meeting_lookup_test.exs` at least two in the space
+(`assert length(names) >= 2`). With one fresh conference these checks fail.
+Fresh data therefore needs a second, earlier conference in the same space and
+window, or these checks change with it. With the new meetings, change the
+preparation date `@prepared_on` and the earlier record
+`@earlier_conference_record` in `LiveMeet`, the window
+`@prepared_window_start` and `@prepared_window_end` in the Meet
+`live_smoke_test.exs`, and the occurrence `@scheduled_start` and
+`@scheduled_end` in the Meet `live_meeting_lookup_test.exs` and the Calendar
+`live_meet_association_test.exs`. Then record the Meet live tests again with
+`JIDO_CONNECT_RECORD=1` and adjust the offline tests that pin recorded
+counts: the check in `client_test.exs` that the second page of
+`transcript_entries` is the last one, and the two conferences in the window
+that the Meet live checks and the poll tests in `transcript_poller_test.exs`
+expect.
 
 ### Slack
 

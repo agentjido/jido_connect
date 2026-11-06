@@ -20,6 +20,14 @@ defmodule Jido.Connect.Google.Meet.LiveSmokeTest do
   window check records the fixtures of the offline poll tests and fails while
   a conference that ended after the prepared window is still listed; Google
   deletes a conference record 30 days after the conference ended.
+
+  The checks that read the prepared records or transcript carry
+  `LiveMeet.prepared!/1`. Once Google answers that this data is gone, they
+  are skipped with a reason instead of failing; see "Prepared Meet data" in
+  `docs/live_smoke_tests.md`. The window check and the transcript list check
+  expect the earlier record as well and list it as
+  `:earlier_conference_record`. The two checks without prepared data keep
+  running.
   """
 
   use ExUnit.Case, async: false
@@ -30,6 +38,9 @@ defmodule Jido.Connect.Google.Meet.LiveSmokeTest do
   alias Jido.Connect.Google.Meet
   alias Jido.Connect.Google.Meet.Client
   alias Jido.Connect.Google.Meet.Handlers.Triggers.TranscriptCheckpoint
+  alias Jido.Connect.Google.Meet.TestSupport.LiveMeet
+
+  require LiveMeet
 
   # Google returns at most 100 transcript entries per page.
   @reference_page_size 100
@@ -58,6 +69,7 @@ defmodule Jido.Connect.Google.Meet.LiveSmokeTest do
   end
 
   @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_MEET_CONFERENCE_RECORD", "GOOGLE_MEET_TRANSCRIPT"])
+  @tag LiveMeet.prepared!(["GOOGLE_MEET_CONFERENCE_RECORD", "GOOGLE_MEET_TRANSCRIPT"])
   @tag timeout: :timer.minutes(3)
   test "pages through transcript entries in meeting order", %{env: env} do
     token = env["GOOGLE_ACCESS_TOKEN"]
@@ -117,6 +129,7 @@ defmodule Jido.Connect.Google.Meet.LiveSmokeTest do
   end
 
   @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_MEET_CONFERENCE_RECORD"])
+  @tag LiveMeet.prepared!(["GOOGLE_MEET_CONFERENCE_RECORD"])
   test "rejects the entries of a missing transcript", %{env: env} do
     missing =
       env["GOOGLE_MEET_CONFERENCE_RECORD"] <>
@@ -136,6 +149,7 @@ defmodule Jido.Connect.Google.Meet.LiveSmokeTest do
   end
 
   @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_MEET_CONFERENCE_RECORD"])
+  @tag LiveMeet.prepared!(["GOOGLE_MEET_CONFERENCE_RECORD", :earlier_conference_record])
   test "pages through the conference records of an end time window", %{env: env} do
     LiveSmoke.record(
       {:jido_connect_google, :google_req_options},
@@ -188,6 +202,11 @@ defmodule Jido.Connect.Google.Meet.LiveSmokeTest do
   end
 
   @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_MEET_CONFERENCE_RECORD", "GOOGLE_MEET_TRANSCRIPT"])
+  @tag LiveMeet.prepared!([
+         "GOOGLE_MEET_CONFERENCE_RECORD",
+         "GOOGLE_MEET_TRANSCRIPT",
+         :earlier_conference_record
+       ])
   test "lists the generated transcript of each prepared conference record", %{env: env} do
     token = env["GOOGLE_ACCESS_TOKEN"]
     prepared = env["GOOGLE_MEET_CONFERENCE_RECORD"]
@@ -224,6 +243,7 @@ defmodule Jido.Connect.Google.Meet.LiveSmokeTest do
   end
 
   @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_MEET_CONFERENCE_RECORD", "GOOGLE_MEET_TRANSCRIPT"])
+  @tag LiveMeet.prepared!(["GOOGLE_MEET_CONFERENCE_RECORD", "GOOGLE_MEET_TRANSCRIPT"])
   @tag timeout: :timer.minutes(2)
   test "polls the prepared transcript once and nothing on the repeat", %{env: env} do
     checkpoint =
