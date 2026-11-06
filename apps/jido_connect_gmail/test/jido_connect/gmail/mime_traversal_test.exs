@@ -101,7 +101,7 @@ defmodule Jido.Connect.Gmail.MIME.TraversalTest do
 
       assert text(conversation, "0") ==
                {"utf-8", true,
-                "Hallo,\r\n\r\nkönnen wir den jcl-live Termin bestätigen?\r\n\r\nGruß\r\nJcl Recipient\r\n"}
+                "Hallo,\r\n\r\nkönnen wir den jcl-live Termin bestätigen?\r\n\r\nGruß\r\nPerson 1\r\n"}
 
       assert text(attachments, "0.0.0") ==
                {"iso-8859-1", true,
@@ -217,8 +217,10 @@ defmodule Jido.Connect.Gmail.MIME.TraversalTest do
       charsets = traverse!(payload("message_full_charsets"))
       conversation = traverse!(hd(thread_payloads()))
 
+      # The sanitizer replaced the sender's name in the recorded conversation
+      # text, which is therefore 75 bytes long; Gmail's body.size says 80.
       for {traversal, part_id, data, gmail_size} <- [
-            {conversation, "0", :as_recorded, 80},
+            {conversation, "0", :as_recorded, 75},
             {attachments, "0.0.0", @latin1, 77},
             {attachments, "0.0.1", @windows_1252, 78},
             {charsets, "0", @latin9, 79},

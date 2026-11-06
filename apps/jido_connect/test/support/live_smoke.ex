@@ -195,6 +195,13 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
   sanitizer options of `sanitize/2`. Without `JIDO_CONNECT_RECORD=1` this
   does nothing.
 
+  `:accounts` takes the Atlassian account IDs that the test already knows,
+  such as the test user's. They get their placeholders before the first
+  response is read, so they are replaced in request paths and `self` links
+  even when no response names them under an account key, as with an empty
+  first page of `GET /4/worklogs/user/{accountId}`. `:users` does the same
+  for Google user IDs, numbers of eight or more digits.
+
   `:transform` is a function of the decoded request path and the decoded
   response body. It returns the body to record, or `:skip` to write no
   fixture for that response; a skipped response takes no number. It runs
@@ -253,9 +260,10 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
   display names, site and tunnel hosts, Atlassian account IDs, Google user IDs
   and the Google project number with stable placeholders, and replaces the
   values under `:fields` with `<field>-<n>`. `:name_keys` adds keys that hold
-  display names. Raises `LeakError` when a credential value, a configured host
-  or email address, the Google project number, or a replaced host, account ID
-  or Google user ID remains.
+  display names; `:accounts` and `:users` list account IDs and Google user
+  IDs to replace even where nothing names them as such. Raises `LeakError`
+  when a credential value, a configured host or email address, the Google
+  project number, or a replaced host, account ID or Google user ID remains.
   """
   @spec sanitize(term(), keyword()) :: term()
   def sanitize(value, opts \\ []) do
@@ -264,7 +272,38 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
     sanitized
   end
 
-  @doc "Drops auth, cookie, signature and forwarding headers and sanitizes the rest."
+  @doc """
+  Sanitizes a recorded fixture again, as the recorder sanitized it.
+
+  `fixture` is the decoded content of a file that `record/4` wrote. The
+  body, the headers and the request path pass through the sanitizer in the
+  recorder's order; the rest stays. Options are those of `sanitize/2`. A
+  committed fixture that comes out changed, or raises `LeakError`, holds
+  something the current sanitizer would not have written.
+  """
+  @spec sanitize_fixture(map(), keyword()) :: map()
+  def sanitize_fixture(fixture, opts \\ []) do
+    {sanitized, state} = Sanitize.fixture(fixture, sanitizer(opts))
+    Sanitize.check_leaks!(sanitized, state)
+    sanitized
+  end
+
+  @doc """
+  Raises `LeakError` when `value`, as it is, holds a credential value, a
+  configured host or email address, the Google project number, or an account
+  ID or Google user ID given as `:accounts` or `:users`.
+
+  Nothing is sanitized or learned first, so values under keys that the
+  sanitizer redacts are checked too. Use it for fixtures written by hand.
+  Options are those of `sanitize/2`.
+  """
+  @spec check_leaks!(term(), keyword()) :: :ok
+  def check_leaks!(value, opts \\ []), do: Sanitize.check_leaks!(value, sanitizer(opts))
+
+  @doc """
+  Drops auth, cookie, signature, forwarding and CloudFront edge headers and
+  sanitizes the rest.
+  """
   @spec sanitize_headers(map() | [{String.t(), term()}], keyword()) :: map()
   def sanitize_headers(headers, opts \\ []) do
     {sanitized, state} = Sanitize.headers(headers, sanitizer(opts))
@@ -288,7 +327,13 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
     capture = load_capture(capture)
     {secret, opts} = Keyword.pop(opts, :secret)
     verify_capture!(capture, secret)
-    state = sanitizer(opts, capture_hosts(capture))
+
+    state =
+      opts
+      |> sanitizer(capture_hosts(capture))
+      |> then(&Sanitize.reserve(capture, &1))
+      |> then(&Sanitize.learn_headers(capture["headers"], &1))
+
     content_type = Sanitize.header_value_of(capture["headers"], "content-type")
 
     {body, state} = Sanitize.body(capture["body"], content_type, state)
@@ -457,14 +502,18 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
         do: {name, host}
   end
 
-  # The demo host receives captures through a tunnel, so the Host header names it.
+  # The demo host receives captures through a tunnel, so the Host header names
+  # it. A sanitized capture names the placeholder instead, which needs neither
+  # a placeholder nor the leak guard.
   defp capture_hosts(capture) do
     host =
       capture["headers"]
       |> Sanitize.header_value_of("host")
       |> String.replace(~r/:\d+$/, "")
 
-    if blank?(host) or host in @loopback_hosts, do: [], else: [{"the capture host", host}]
+    if blank?(host) or host in @loopback_hosts or Sanitize.host_placeholder?(host),
+      do: [],
+      else: [{"the capture host", host}]
   end
 
   # Listed credentials plus every set variable whose name looks like one, so a

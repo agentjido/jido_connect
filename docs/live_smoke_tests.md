@@ -555,6 +555,26 @@ a shorter run no longer writes. Without `JIDO_CONNECT_RECORD=1` the call does
 nothing, so live tests keep the call in place. Recording refuses to start while
 the Req options contain `:plug`, because a plug replaces the network.
 
+The recorder's step runs after the response steps that the package attached
+when it built the request, Req's body decoding among them. Redaction by key
+needs that decoded body. A package that sets `decode_body: false`, or decodes
+in a step of its own that runs later, hands the recorder a string: then only
+the rules for free text apply, and token fields such as `access_token` and
+account IDs under `accountId` stay in clear text. The leak guard catches only
+the credentials it knows, not a token the provider has just issued. Keep
+decoding in a step that is attached when the request is built.
+
+A test that knows an Atlassian account ID before the first response, such as
+the test user's, passes it as `accounts:`, and a Google user ID as `users:`.
+The ID then gets its placeholder before any response is read, so it is
+replaced in request paths and `self` links even when the first page is empty:
+
+```elixir
+LiveSmoke.record({:jido_connect_tempo, :tempo_req_options}, :tempo, "own_worklogs",
+  accounts: [account_id]
+)
+```
+
 A test account on a site that real users share returns their data next to the
 test data, and the sanitizer does not know which is which. The `:transform`
 option of `record/4` takes a function of the decoded request path and the
@@ -604,14 +624,40 @@ Req.Test.stub(MyStub, &Req.Test.json(&1, LiveSmoke.fixture!(:gmail, "profile")))
 Default test runs do not play recordings back on their own; each build ticket
 wires its fixtures into its offline tests.
 
+`LiveSmoke.sanitize_fixture/2` sanitizes a fixture file's content again, in
+the recorder's order; keys other than the body, the headers and the request
+path, such as `transformed`, stay as they are. `apps/jido_connect/test/jido_connect/test_support/live_smoke_fixtures_test.exs`
+runs it over every committed recording of the umbrella, and
+`sanitize_capture/2` with the replay secret over every capture: a fixture that
+the current sanitizer would change, or that holds a guarded value, fails the
+test, which names the file and the changed keys but no value. The test passes
+no options; `sanitize_fixture/2` with a recording's own options, such as
+`fields:`, checks it the way it was recorded. Synthetic fixtures, written by
+hand, go through `LiveSmoke.check_leaks!/2`, which runs the leak guard on the
+file as it is, so a credential under a key the sanitizer would redact is found
+too. Without credentials in the environment the guard knows only the values
+it learns. Before committing new fixtures, run the test once with the env
+files loaded:
+
+```sh
+(set -a; for f in google slack atlassian ngrok; do . ~/.config/jido_connect/live/$f.env; done; set +a
+ cd apps/jido_connect && mix test test/jido_connect/test_support/live_smoke_fixtures_test.exs)
+```
+
+A second run sees only what the fixture still holds. It does not know a value
+that the first run learned from a part it then replaced, such as a sender's
+name from the mail headers, and so cannot find that value where the first run
+left it, such as in the Base64 text of the same message.
+
 ## Sanitizing
 
 Recordings and captures pass through the same sanitizer, also available as
-`LiveSmoke.sanitize/2`, `LiveSmoke.sanitize_headers/2` and
-`LiveSmoke.sanitize_capture/2`:
+`LiveSmoke.sanitize/2`, `LiveSmoke.sanitize_headers/2`,
+`LiveSmoke.sanitize_fixture/2` and `LiveSmoke.sanitize_capture/2`:
 
 - Headers whose names contain `auth`, `cookie`, `token`, `secret` or
-  `signature`, the forwarding headers, and every header that
+  `signature`, the forwarding headers, `x-amz-cf-pop`, which names the
+  CloudFront edge that served the response, and every header that
   `Jido.Connect.Sanitizer.sensitive_key?/1` reports are dropped.
 - Values under the sensitive keys of `Jido.Connect.Sanitizer` become
   `"[redacted]"`, in JSON and in form bodies. `fields` is kept by default
@@ -625,8 +671,17 @@ Recordings and captures pass through the same sanitizer, also available as
   `JIDO_PUBLIC_URL`, and the `Host` header of a capture, become
   `host-<n>.example.com` when they are not under such a domain.
 - Atlassian account IDs under `accountId`, `authorAccountId`,
-  `leadAccountId`, `authorId`, `ownerId` and `lastOwnerId` become
-  `account-<n>` wherever they appear, also percent-encoded in links.
+  `leadAccountId`, `authorId`, `ownerId`, `lastOwnerId` and the
+  `tmpFromAccountId` and `tmpToAccountId` of Jira changelog items, in
+  `attrs.id` of ADF mentions, in the `x-aaccountid` response header and in
+  the `accounts:` option become `account-<n>` wherever they appear, also
+  percent-encoded in links. The header is read before the body and
+  percent-decoded, as Atlassian encodes the colon of `<prefix>:<uuid>` IDs
+  there, so an ID that only the header names is replaced in the body as well.
+  A string that holds a JSON document, such as the ADF that Confluence returns
+  under `body.atlas_doc_format.value`, is read for these keys and mentions
+  too and then replaced as text. A value shorter than eight bytes, such as a
+  mentioned collection, is not taken for an account ID.
 - The Google project number, the numeric prefix of `GOOGLE_CLIENT_ID`, becomes
   `000000000000` wherever it appears as a whole number, as in the `Received`
   headers of Gmail messages.
@@ -634,9 +689,9 @@ Recordings and captures pass through the same sanitizer, also available as
   in values, map keys and the request path. They are taken from values such as
   `users/<id>`, as in a Meet participant's `signedinUser.user`, and from the
   participant segment of `conferenceRecords/<record>/participants/<id>`, as
-  in a participant's or a transcript entry's resource name. Only a segment of
-  eight or more digits counts, so `users/me` and a participant segment such as
-  a UUID stay as they are.
+  in a participant's or a transcript entry's resource name, and from the
+  `users:` option. Only a segment of eight or more digits counts, so
+  `users/me` and a participant segment such as a UUID stay as they are.
 - Display names become `Person <n>`. They are taken from keys such as
   `displayName`, `real_name`, `publicName` and `username`, and from address
   lists such as `Ada Lovelace <ada@example.org>, bob@example.org`. Once known,
@@ -644,26 +699,70 @@ Recordings and captures pass through the same sanitizer, also available as
   `name_keys:` for more keys, such as Slack's `name`.
 - Values under the keys given as `fields:` become `<field>-<n>`, for message
   text or other content a fixture does not need.
+- A string under `data` or `raw` that is Base64 in the standard or the
+  URL-safe alphabet and decodes to UTF-8 text, such as Gmail's
+  `payload.body.data`, is learned from and sanitized as that text, then
+  encoded again with the same alphabet and padding. Content whose text stays
+  the same keeps its original bytes. Inside such content, addresses under
+  example.com, example.net, example.org and the `.example` and `.invalid`
+  names stay, as seed data and message IDs use them, and so do the names that
+  the recording knows only next to such addresses: they identify nobody, and
+  rewriting them would change the decoded length. Any other string under
+  `data` or `raw`, plain text or Base64 that does not decode to UTF-8, is
+  sanitized as text.
 - Placeholders are stable within one recording or capture: the same input gets
-  the same placeholder.
+  the same placeholder. Sanitizing sanitized output again keeps its
+  placeholders, also the `user-<n>` ones and the `<field>-<n>` ones, with or
+  without the recording's `fields:`, and a value learned on that run gets a
+  number that no placeholder in the input holds.
 - If the value of any credential variable listed above, eight bytes or longer,
   still appears in the output, raw or JSON-, percent- or Base64-encoded, the
-  sanitizer raises `LiveSmoke.LeakError`. The same holds for the hosts above,
-  for the Google project number, also inside a longer number, for email
-  addresses in listed settings and in variables ending in `_EMAIL`, and for
-  every tenant host, account ID and Google user ID the sanitizer replaced
-  elsewhere; a Google user ID also inside a longer number.
-  The message names the variable or the kind of value, not the value, and
-  nothing is written.
+  last also at any position inside longer Base64 content, such as the `eid` of
+  a Calendar `htmlLink`, the sanitizer raises `LiveSmoke.LeakError`. The same
+  holds for the hosts above, for the Google project number, also inside a
+  longer number, for email addresses in listed settings and in variables
+  ending in `_EMAIL`, and for every tenant host, account ID and Google user
+  ID the sanitizer replaced elsewhere; a Google user ID also inside a longer
+  number. A configured host in the shape of a placeholder, such as
+  `example-3.atlassian.net`, is not replaced, so the guard refuses every
+  output that names it. The message names the variable or the kind of value,
+  not the value, and nothing is written.
 
-The sanitizer does not look inside encoded content. Base64 message bodies,
-such as Gmail's `payload.body.data` and `raw`, keep whatever they contain; list
-such keys in `fields:` or check them by hand. The leak guard finds a guarded
-value there only when the encoding of the value itself appears. Free text
-keeps names that never appear under a name key or in an address list, and
-names shorter than three bytes stay as they are. Content such as issue
-summaries, comments and page bodies stays unless listed in `fields:`. Review
-every recording and capture before committing it.
+Remaining limits:
+
+- Base64 content is decoded only under `data` and `raw`, and only when the
+  whole value is one Base64 string. Line-wrapped Base64 and Base64 inside the
+  decoded text, such as an encoded part of an enclosed message, stay as they
+  are. The leak guard finds a guarded value there only when its own encoding
+  appears unbroken, not across a line break and not when it is encoded twice.
+- Sanitizing Base64 content changes its decoded length when a value is
+  replaced. A size the provider states next to it, such as Gmail's
+  `body.size`, keeps the provider's value, and a connector that checks the
+  two rejects the fixture. Seed attachments whose size is checked with
+  addresses under the documentation domains and with names that appear only
+  next to such addresses; a real address, or a name that the recording also
+  knows from a real address, is replaced.
+- Base64 that does not decode to UTF-8, such as a binary attachment, is
+  sanitized as text, since a word under `data` can look like Base64 and names
+  are not guarded. A learned value that happens to appear in its encoding, a
+  name as a whole word, is replaced, and the attachment then no longer
+  matches its size or digest.
+- A JSON document inside a string is replaced as text only: its sensitive
+  keys are not redacted and its `fields:` keys are not replaced.
+- An account ID that appears only in free text, never under one of the keys
+  above, in a mention, in `x-aaccountid` or in `accounts:`, stays. So does a
+  Google user ID that appears only as a bare number, never after `users/`, as
+  a participant segment or in `users:`. The display text of a mention,
+  `attrs.text`, is replaced only when the name is known from a name key or an
+  address list.
+- Free text keeps names that never appear under a name key or in an address
+  list, and names shorter than three bytes stay as they are. Content such as
+  issue summaries, comments and page bodies stays unless listed in `fields:`.
+- Other response headers still name the serving edge or region, such as
+  Atlassian's `server-timing` (`cdn-pop`, `atl-edge-pop`) and Slack's
+  `x-server`.
+
+Review every recording and capture before committing it.
 
 ## Capturing Inbound Deliveries
 

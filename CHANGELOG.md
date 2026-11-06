@@ -40,6 +40,16 @@
   neutralizes data of other users that a shared test account returns,
   before the sanitizer and its leak guard run. A fixture whose body it
   changed carries `"transformed": true`.
+- Close gaps of the live smoke sanitizer: it learns Atlassian account IDs from
+  Jira changelog items, ADF mentions, also inside JSON strings such as
+  Confluence's ADF, and the percent-decoded `x-aaccountid` header, takes known
+  account IDs as `accounts:` and Google user IDs as `users:`, sanitizes Base64
+  content under `data` and `raw`, drops `x-amz-cf-pop` and keeps its
+  placeholders, `<field>-<n>` and `user-<n>` included, on a second run. The
+  leak guard finds Base64-encoded values at any offset. A test checks every
+  committed recording and capture with `LiveSmoke.sanitize_fixture/2` and
+  `sanitize_capture/2`, and every synthetic fixture as it is with the new
+  `LiveSmoke.check_leaks!/2`.
 
 ## 0.9.0 - 2026-08-25
 

@@ -155,6 +155,15 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
       assert LiveSmoke.sanitize_headers(headers) == %{"content-type" => ["application/json"]}
     end
 
+    test "drops the CloudFront edge location header" do
+      headers = %{"X-Amz-Cf-Pop" => ["FRA56-P5"], "x-amz-cf-id" => ["abc"], "via" => ["1.1 x"]}
+
+      assert LiveSmoke.sanitize_headers(headers) == %{
+               "x-amz-cf-id" => ["abc"],
+               "via" => ["1.1 x"]
+             }
+    end
+
     test "redacts token fields and keeps Jira issue fields" do
       body = %{
         "access_token" => "ya29.secret",
@@ -308,6 +317,21 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
       end)
     end
 
+    test "fails when a configured host in the shape of a placeholder appears" do
+      # Such a host is not replaced, since it looks like a placeholder, and
+      # so must not pass the leak guard either.
+      for {variable, host} <- [
+            {"JIRA_SITE", "example-3.atlassian.net"},
+            {"JIDO_PUBLIC_URL", "example.acme-dev.test"}
+          ] do
+        with_env(Map.put(@no_sites, variable, "https://#{host}"), fn ->
+          assert_raise LeakError, ~r/#{variable}/, fn ->
+            LiveSmoke.sanitize(%{"self" => "https://#{host}/rest/api/3/myself"})
+          end
+        end)
+      end
+    end
+
     test "replaces Atlassian account IDs with stable placeholders, also inside URLs" do
       admin = "5d0000000000000000000001"
       user = "557058:00000000-0000-4000-8000-000000000002"
@@ -333,6 +357,141 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
                "ownerId" => "account-2",
                "version" => %{"authorId" => "account-1", "number" => 3}
              }
+    end
+
+    test "learns account IDs from the user fields of Jira changelog items" do
+      former = "5d0000000000000000000006"
+      new = "557058:00000000-0000-4000-8000-000000000007"
+
+      item = %{
+        "fieldId" => "assignee",
+        "from" => former,
+        "tmpFromAccountId" => former,
+        "to" => new,
+        "tmpToAccountId" => new
+      }
+
+      assert LiveSmoke.sanitize(%{"changelog" => %{"items" => [item]}}) == %{
+               "changelog" => %{
+                 "items" => [
+                   %{
+                     "fieldId" => "assignee",
+                     "from" => "account-1",
+                     "tmpFromAccountId" => "account-1",
+                     "to" => "account-2",
+                     "tmpToAccountId" => "account-2"
+                   }
+                 ]
+               }
+             }
+    end
+
+    test "learns account IDs from ADF mentions" do
+      id = "557058:00000000-0000-4000-8000-000000000008"
+
+      # https://developer.atlassian.com/cloud/jira/platform/apis/document/nodes/mention/
+      mention = %{
+        "type" => "mention",
+        "attrs" => %{"id" => id, "text" => "@Person 1", "accessLevel" => ""}
+      }
+
+      # The ID of a mentioned collection is too short to be an account ID; it
+      # stays, and so does the text that contains it.
+      collection = %{"type" => "mention", "attrs" => %{"id" => "all", "text" => "@all"}}
+      install = %{"type" => "text", "text" => "Install it for all"}
+
+      body = %{
+        "description" => %{
+          "type" => "doc",
+          "version" => 1,
+          "content" => [%{"type" => "paragraph", "content" => [mention, collection, install]}]
+        },
+        "self" => "https://example.test/rest/api/3/user?accountId=#{URI.encode_www_form(id)}"
+      }
+
+      sanitized = LiveSmoke.sanitize(body)
+
+      assert get_in(sanitized, ["description", "content", Access.at(0), "content"]) == [
+               %{
+                 "type" => "mention",
+                 "attrs" => %{"id" => "account-1", "text" => "@Person 1", "accessLevel" => ""}
+               },
+               collection,
+               install
+             ]
+
+      assert sanitized["self"] == "https://example.test/rest/api/3/user?accountId=account-1"
+    end
+
+    test "learns account IDs from ADF mentions inside a JSON string, as Confluence returns ADF" do
+      id = "557058:00000000-0000-4000-8000-000000000015"
+
+      adf = %{
+        "type" => "doc",
+        "version" => 1,
+        "content" => [
+          %{
+            "type" => "paragraph",
+            "content" => [
+              %{"type" => "mention", "attrs" => %{"id" => id, "text" => "@Person 1"}},
+              %{"type" => "text", "text" => " please review"}
+            ]
+          }
+        ]
+      }
+
+      # `GET /api/v2/pages/{id}?body-format=atlas_doc_format`
+      body = %{
+        "id" => "98305",
+        "body" => %{
+          "atlas_doc_format" => %{
+            "representation" => "atlas_doc_format",
+            "value" => Jason.encode!(adf)
+          }
+        }
+      }
+
+      sanitized = with_env(@no_sites, fn -> LiveSmoke.sanitize(body) end)
+
+      value = sanitized["body"]["atlas_doc_format"]["value"]
+      refute value =~ id
+      assert value == Jason.encode!(adf) |> String.replace(id, "account-1")
+      assert LiveSmoke.sanitize(sanitized) == sanitized
+    end
+
+    test "learns the account ID of the x-aaccountid response header" do
+      id = "5d0000000000000000000009"
+
+      assert LiveSmoke.sanitize_headers(%{"x-aaccountid" => [id], "x-arequestid" => ["abc"]}) ==
+               %{"x-aaccountid" => ["account-1"], "x-arequestid" => ["abc"]}
+    end
+
+    test "decodes a percent-encoded x-aaccountid header before learning its account ID" do
+      # Atlassian sends `<prefix>:<uuid>` IDs in this header with the colon
+      # percent-encoded. The user is the same person as the body's accountId.
+      id = "712020:00000000-0000-4000-8000-0000000000aa"
+      encoded = "712020%3A00000000-0000-4000-8000-0000000000aa"
+
+      fixture = %{
+        "request" => %{"method" => "GET", "path" => "/rest/api/3/myself"},
+        "status" => 200,
+        "headers" => %{"x-aaccountid" => [encoded]},
+        "body" => %{
+          "accountId" => id,
+          "self" => "https://example.atlassian.net/rest/api/3/user?accountId=#{encoded}"
+        }
+      }
+
+      with_env(@no_sites, fn ->
+        assert LiveSmoke.sanitize_fixture(fixture) == %{
+                 fixture
+                 | "headers" => %{"x-aaccountid" => ["account-1"]},
+                   "body" => %{
+                     "accountId" => "account-1",
+                     "self" => "https://example.atlassian.net/rest/api/3/user?accountId=account-1"
+                   }
+               }
+      end)
     end
 
     test "fails when a site host, a configured email or an account ID survives encoded" do
@@ -363,6 +522,143 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
       end)
     end
 
+    test "fails when a guarded value is Base64-encoded at any offset of a longer value" do
+      # With `~~~` each value encodes with `+` or `/` at every offset, so the
+      # standard and the URL-safe encodings of the value differ.
+      calendar = "tester~~~@acme.test"
+      token = "ya29.live-smoke~~~offset-check"
+
+      env =
+        Map.merge(@no_sites, %{"GOOGLE_CALENDAR_ID" => calendar, "GOOGLE_ACCESS_TOKEN" => token})
+
+      with_env(env, fn ->
+        # The `eid` of a Calendar `htmlLink` is base64url of "<event ID> <calendar ID>".
+        for event_id <- ["e", "ev", "evt", "evt0"],
+            encode <- [&Base.url_encode64(&1, padding: false), &Base.encode64/1] do
+          eid = encode.("#{event_id} #{calendar}")
+          link = "https://www.google.com/calendar/event?eid=#{eid}"
+
+          assert_raise LeakError, ~r/GOOGLE_CALENDAR_ID/, fn ->
+            LiveSmoke.sanitize(%{"htmlLink" => link})
+          end
+
+          blob = encode.("#{event_id}:#{token}:#{event_id}")
+
+          assert_raise LeakError, ~r/GOOGLE_ACCESS_TOKEN/, fn ->
+            LiveSmoke.sanitize(%{"state" => blob})
+          end
+        end
+      end)
+    end
+
+    test "sanitizes Base64 content under data and raw and encodes it the same way again" do
+      # The leading "???" encodes as "Pz8/" in the standard alphabet and as
+      # "Pz8_" in the URL-safe one, and both lengths leave padding.
+      text = "??? Hello Ada Lovelace,\r\nplease write to ada@corp.test."
+      clean = "??? Hello Person 1,\r\nplease write to person-1@example.com."
+      # A non-canonical encoding of "Hello": its last character carries bits
+      # that decoding drops, so only an unchanged original keeps it.
+      untouched = "SGVsbG9="
+      binary = Base.url_encode64(<<0xFF, 0xD8, 0xFF, 0x00>> <> "ada@corp.test")
+      unpadded = Base.url_encode64("Reply to ada@corp.test", padding: false)
+
+      body = %{
+        "payload" => %{
+          "headers" => [%{"name" => "From", "value" => "Ada Lovelace <ada@corp.test>"}],
+          "parts" => [
+            %{"body" => %{"size" => 55, "data" => Base.url_encode64(text)}},
+            %{"body" => %{"size" => 5, "data" => untouched}},
+            %{"body" => %{"attachmentId" => "ANGjdJ8", "size" => 17, "data" => binary}},
+            %{"body" => %{"size" => 22, "data" => unpadded}}
+          ]
+        },
+        "raw" => Base.encode64(text),
+        "data" => %{"note" => "write to ada@corp.test"},
+        "items" => [%{"data" => "plain text, not Base64"}]
+      }
+
+      sanitized = LiveSmoke.sanitize(body)
+
+      assert [
+               %{"body" => %{"size" => 55, "data" => data}},
+               %{"body" => %{"size" => 5, "data" => ^untouched}},
+               %{"body" => %{"data" => ^binary}},
+               %{"body" => %{"data" => short}}
+             ] = sanitized["payload"]["parts"]
+
+      assert data == Base.url_encode64(clean)
+      assert short == Base.url_encode64("Reply to person-1@example.com", padding: false)
+      assert sanitized["raw"] == Base.encode64(clean)
+      assert sanitized["data"] == %{"note" => "write to person-1@example.com"}
+      assert sanitized["items"] == [%{"data" => "plain text, not Base64"}]
+      assert LiveSmoke.sanitize(sanitized) == sanitized
+    end
+
+    test "takes the alphabet and the padding of Base64 content from the original" do
+      # Neither original holds a character that only one alphabet has, so both
+      # count as URL-safe, Gmail's alphabet: "Person 1?" encodes as
+      # "UGVyc29uIDE_" there and as "UGVyc29uIDE/" in the standard one. The
+      # second original has no `=` but a length that padding would give, so
+      # its sanitized text is padded again.
+      body = %{
+        "payload" => %{
+          "headers" => [%{"name" => "From", "value" => "Ada Lovelace <ada@corp.test>"}],
+          "parts" => [
+            %{"body" => %{"data" => "QWRhIExvdmVsYWNlPw=="}},
+            %{"body" => %{"data" => "SGkgQWRhIExvdmVsYWNl"}}
+          ]
+        }
+      }
+
+      assert [
+               %{"body" => %{"data" => "UGVyc29uIDE_"}},
+               %{"body" => %{"data" => "SGkgUGVyc29uIDE="}}
+             ] = LiveSmoke.sanitize(body)["payload"]["parts"]
+    end
+
+    test "sanitizes a string under data or raw that is not Base64 as plain text" do
+      body = %{
+        "headers" => [%{"name" => "From", "value" => "Ada Lovelace <ada@corp.test>"}],
+        "items" => [
+          %{"data" => "Ada Lovelace wrote from ada@corp.test"},
+          %{"raw" => "From: Ada Lovelace <ada@corp.test>"}
+        ]
+      }
+
+      assert LiveSmoke.sanitize(body)["items"] == [
+               %{"data" => "Person 1 wrote from person-1@example.com"},
+               %{"raw" => "From: Person 1 <person-1@example.com>"}
+             ]
+    end
+
+    test "keeps documentation addresses inside Base64 content, whose size the provider states" do
+      # A seeded original names only addresses under reserved example names.
+      # Rewriting them would change the content's length, which Gmail states
+      # in `size` and checks when the content is fetched.
+      original =
+        "From: Opaque Sender <opaque.sender@example.org>\r\n" <>
+          "To: ada@corp.test\r\nMessage-ID: <seed-1@jcl-live.invalid>\r\n"
+
+      body = %{
+        "headers" => [%{"name" => "Cc", "value" => "opaque.sender@example.org"}],
+        "attachment" => %{"size" => byte_size(original), "data" => Base.url_encode64(original)}
+      }
+
+      sanitized = LiveSmoke.sanitize(body)
+
+      assert sanitized["headers"] == [%{"name" => "Cc", "value" => "person-1@example.com"}]
+
+      assert Base.url_decode64!(sanitized["attachment"]["data"]) ==
+               "From: Opaque Sender <opaque.sender@example.org>\r\n" <>
+                 "To: person-2@example.com\r\nMessage-ID: <seed-1@jcl-live.invalid>\r\n"
+
+      documentation_only = %{
+        "data" => Base.url_encode64(String.replace(original, "ada@corp.test", "x@example.net"))
+      }
+
+      assert LiveSmoke.sanitize(documentation_only) == documentation_only
+    end
+
     test "leaves an already sanitized value unchanged" do
       body = %{
         "self" => "https://acme-live.atlassian.net/rest/api/3/issue/1",
@@ -375,6 +671,70 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
         once = LiveSmoke.sanitize(body)
         assert LiveSmoke.sanitize(once) == once
       end)
+    end
+
+    test "keeps its own placeholders and gives new values numbers no placeholder holds" do
+      # The second fixture of a recording continues the numbering of the
+      # first, so its placeholders need not start at 1. The changelog item
+      # holds the placeholder of `fields: ["tmpFromAccountId"]`.
+      body = %{
+        "a" => %{
+          "displayName" => "Person 2",
+          "emailAddress" => "person-2@example.com",
+          "accountId" => "account-2",
+          "self" => "https://example-2.atlassian.net/rest/api/3/user?accountId=account-2"
+        },
+        "b" => %{"displayName" => "Person 1", "emailAddress" => "person-1@example.com"},
+        "c" => %{
+          "displayName" => "Grace Hopper",
+          "emailAddress" => "grace@corp.test",
+          "accountId" => "5d0000000000000000000011",
+          "self" => "https://grace-site.atlassian.net/rest/api/3/myself"
+        },
+        "items" => [%{"from" => "from-1", "tmpFromAccountId" => "tmpFromAccountId-1"}]
+      }
+
+      with_env(@no_sites, fn ->
+        assert LiveSmoke.sanitize(body) == %{
+                 body
+                 | "c" => %{
+                     "displayName" => "Person 3",
+                     "emailAddress" => "person-3@example.com",
+                     "accountId" => "account-1",
+                     "self" => "https://example.atlassian.net/rest/api/3/myself"
+                   }
+               }
+      end)
+    end
+
+    test "keeps the <field>-<n> placeholders of fields: and numbers new values around them" do
+      # The second page of a recording with `fields: ["htmlLink"]` continues
+      # the numbering of the first.
+      link = "https://www.google.com/calendar/event?eid=ZXZ0MCBjYWw"
+
+      body = %{
+        "items" => [
+          %{"htmlLink" => "htmlLink-6"},
+          %{"htmlLink" => link},
+          %{"htmlLink" => "htmlLink-7"},
+          %{"htmlLink" => link}
+        ]
+      }
+
+      assert LiveSmoke.sanitize(body, fields: ["htmlLink"]) == %{
+               "items" => [
+                 %{"htmlLink" => "htmlLink-6"},
+                 %{"htmlLink" => "htmlLink-1"},
+                 %{"htmlLink" => "htmlLink-7"},
+                 %{"htmlLink" => "htmlLink-1"}
+               ]
+             }
+
+      sanitized = %{"items" => [%{"htmlLink" => "htmlLink-1"}, %{"htmlLink" => link}]}
+
+      assert LiveSmoke.sanitize(sanitized, fields: ["htmlLink"]) == %{
+               "items" => [%{"htmlLink" => "htmlLink-1"}, %{"htmlLink" => "htmlLink-2"}]
+             }
     end
 
     test "replaces the Google project number of GOOGLE_CLIENT_ID wherever it is a whole number" do
@@ -522,6 +882,55 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
       refute Exception.message(error) =~ id
     end
 
+    test "keeps user-<n> placeholders and gives new Google user IDs numbers none of them holds" do
+      # A later fixture of a Meet recording names user-1 already.
+      id = "123456789012345678901"
+
+      body = %{
+        "first" => "conferenceRecords/rec-1/participants/user-1",
+        "second" => %{"signedinUser" => %{"user" => "users/#{id}"}}
+      }
+
+      with_env(@no_sites, fn ->
+        assert LiveSmoke.sanitize(body) == %{
+                 "first" => "conferenceRecords/rec-1/participants/user-1",
+                 "second" => %{"signedinUser" => %{"user" => "users/user-2"}}
+               }
+      end)
+    end
+
+    test "treats Google user IDs in Base64 content and in users: like account IDs" do
+      id = "123456789012345678901"
+      known = "109876543210987654321"
+
+      body = %{
+        "payload" => %{
+          "parts" => [
+            %{"body" => %{"data" => Base.url_encode64("Joined as users/#{id} today")}},
+            %{"body" => %{"data" => Base.url_encode64("Organizer #{known}")}}
+          ]
+        },
+        "path" => "/v2/conferenceRecords/rec-1/participants/#{known}"
+      }
+
+      with_env(@no_sites, fn ->
+        sanitized = LiveSmoke.sanitize(body, users: [known])
+
+        assert [first, second] = sanitized["payload"]["parts"]
+        assert Base.url_decode64!(first["body"]["data"]) == "Joined as users/user-2 today"
+        assert Base.url_decode64!(second["body"]["data"]) == "Organizer user-1"
+        assert sanitized["path"] == "/v2/conferenceRecords/rec-1/participants/user-1"
+
+        for blob <- [Base.encode64("x#{known}"), Base.url_encode64("xy:#{known}")] do
+          assert_raise LeakError, ~r/a Google user ID/, fn ->
+            LiveSmoke.check_leaks!(%{"note" => blob}, users: [known])
+          end
+        end
+
+        assert LiveSmoke.check_leaks!(sanitized, users: [known]) == :ok
+      end)
+    end
+
     test "guards credential-shaped variables that the convention does not list" do
       secret = "seed-only-secret-value"
 
@@ -558,6 +967,37 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
             LiveSmoke.sanitize(%{"next" => "https://example.test/?t=#{encoded}"})
           end
         end
+      end)
+    end
+
+    test "check_leaks!/2 finds guarded values in a value as it is, also under redacted keys" do
+      # A synthetic fixture is written by hand; sanitizing it first would
+      # redact the token and replace the host and the address.
+      token = "ya29.live-smoke-synthetic-check"
+
+      env =
+        Map.merge(@no_sites, %{
+          "GOOGLE_ACCESS_TOKEN" => token,
+          "JIRA_SITE" => "https://acme-live.atlassian.net",
+          "JIRA_EMAIL" => "tester@acme.test"
+        })
+
+      with_env(env, fn ->
+        for {fixture, source} <- [
+              {%{"access_token" => token}, "GOOGLE_ACCESS_TOKEN"},
+              {%{"self" => "https://acme-live.atlassian.net/rest/api/3/myself"}, "JIRA_SITE"},
+              {%{"emailAddress" => "tester@acme.test"}, "JIRA_EMAIL"}
+            ] do
+          assert_raise LeakError, ~r/#{source}/, fn -> LiveSmoke.check_leaks!(fixture) end
+        end
+
+        clean = %{
+          "access_token" => "stub-access-token",
+          "self" => "https://example.atlassian.net/rest/api/3/myself",
+          "emailAddress" => "person-1@example.com"
+        }
+
+        assert LiveSmoke.check_leaks!(clean) == :ok
       end)
     end
   end
@@ -666,6 +1106,159 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
       assert LiveSmoke.fixture!(:stub, "participant.2", root: tmp) == %{"user" => "users/user-1"}
     end
 
+    test "replaces an account ID that only the x-aaccountid header names, also in the body",
+         %{tmp: tmp} do
+      # Atlassian percent-encodes the colon of such an ID in the header.
+      id = "712020:00000000-0000-4000-8000-0000000000aa"
+      body = %{"issues" => [], "query" => "assignee = \"#{id}\""}
+      base_url = start_stub([{200, body, [{"x-aaccountid", URI.encode_www_form(id)}]}])
+
+      with_env(Map.put(@no_sites, "JIDO_CONNECT_RECORD", "1"), fn ->
+        put_req_options(retry: false)
+        :ok = LiveSmoke.record({:jido_connect, @req_key}, :stub, "search", root: tmp)
+
+        assert {:ok, %Req.Response{status: 200, body: ^body}} =
+                 get(base_url, "/rest/api/3/search")
+      end)
+
+      envelope =
+        Path.join(tmp, "test/fixtures/stub/recorded/search.json")
+        |> File.read!()
+        |> Jason.decode!()
+
+      assert envelope["body"] == %{"issues" => [], "query" => "assignee = \"account-1\""}
+      assert envelope["headers"]["x-aaccountid"] == ["account-1"]
+    end
+
+    test "replaces known account IDs in path and links even when the first page is empty",
+         %{tmp: tmp} do
+      id = "557058:00000000-0000-4000-8000-000000000012"
+      encoded = URI.encode_www_form(id)
+
+      page = %{
+        "self" => "https://api.tempo.io/4/worklogs/user/#{encoded}?from=2026-11-02&to=2026-11-02",
+        "metadata" => %{"count" => 0, "offset" => 0, "limit" => 50},
+        "results" => []
+      }
+
+      base_url = start_stub([{200, page}])
+
+      with_env(Map.put(@no_sites, "JIDO_CONNECT_RECORD", "1"), fn ->
+        put_req_options(retry: false)
+
+        :ok =
+          LiveSmoke.record({:jido_connect, @req_key}, :stub, "own_worklogs",
+            root: tmp,
+            accounts: [id]
+          )
+
+        assert {:ok, %Req.Response{body: ^page}} = get(base_url, "/4/worklogs/user/#{encoded}")
+      end)
+
+      envelope =
+        Path.join(tmp, "test/fixtures/stub/recorded/own_worklogs.json")
+        |> File.read!()
+        |> Jason.decode!()
+
+      assert envelope["request"]["path"] == "/4/worklogs/user/account-1"
+
+      assert envelope["body"]["self"] ==
+               "https://api.tempo.io/4/worklogs/user/account-1?from=2026-11-02&to=2026-11-02"
+    end
+
+    test "sanitize_fixture/2 leaves every file of a recording unchanged", %{tmp: tmp} do
+      ada = %{"accountId" => "5d0000000000000000000013", "displayName" => "Ada Lovelace"}
+      grace = %{"accountId" => "5d0000000000000000000014", "displayName" => "Grace Hopper"}
+
+      base_url =
+        start_stub([
+          {200, %{"author" => ada, "note" => "ada@corp.test"},
+           [{"x-aaccountid", ada["accountId"]}]},
+          {200,
+           %{"author" => grace, "watchers" => [ada], "note" => "grace@corp.test, ada@corp.test"},
+           [{"x-aaccountid", ada["accountId"]}]}
+        ])
+
+      with_env(Map.put(@no_sites, "JIDO_CONNECT_RECORD", "1"), fn ->
+        put_req_options(retry: false)
+        :ok = LiveSmoke.record({:jido_connect, @req_key}, :stub, "people", root: tmp)
+        assert {:ok, %Req.Response{status: 200}} = get(base_url, "/rest/api/3/issue/1")
+        assert {:ok, %Req.Response{status: 200}} = get(base_url, "/rest/api/3/issue/2")
+      end)
+
+      for name <- ["people.json", "people.2.json"] do
+        fixture =
+          Path.join([tmp, "test/fixtures/stub/recorded", name]) |> File.read!() |> Jason.decode!()
+
+        assert LiveSmoke.sanitize_fixture(fixture) == fixture
+      end
+
+      assert %{"author" => %{"accountId" => "account-2", "displayName" => "Person 2"}} =
+               LiveSmoke.fixture!(:stub, "people.2", root: tmp)
+    end
+
+    test "keeps names known only with documentation addresses inside Base64 content",
+         %{tmp: tmp} do
+      # messages.get, then attachments.get for the enclosed seed message, as in
+      # one Gmail recording. The seed names synthetic senders under
+      # example.org; Gmail states the attachment's size in the first response.
+      original =
+        "From: Opaque Sender <opaque.sender@example.org>\r\n" <>
+          "To: Opaque Recipient <opaque.recipient@example.org>\r\n\r\n"
+
+      message = %{
+        "payload" => %{
+          "headers" => [
+            %{"name" => "From", "value" => "Ada Lovelace <ada@corp.test>"},
+            %{"name" => "To", "value" => "Opaque Recipient <opaque.recipient@example.org>"},
+            %{"name" => "Cc", "value" => "Grace Hopper <grace@example.net>"},
+            %{"name" => "Reply-To", "value" => "Grace Hopper <grace@corp.test>"}
+          ],
+          "parts" => [
+            %{
+              "partId" => "0",
+              "body" => %{
+                "data" =>
+                  Base.url_encode64("Hi Opaque Recipient,\r\nAda Lovelace, Grace Hopper\r\n")
+              }
+            },
+            %{
+              "partId" => "1",
+              "headers" => [
+                %{"name" => "From", "value" => "Opaque Sender <opaque.sender@example.org>"}
+              ],
+              "body" => %{"attachmentId" => "ANGjdJ8", "size" => byte_size(original)}
+            }
+          ]
+        }
+      }
+
+      attachment = %{"size" => byte_size(original), "data" => Base.url_encode64(original)}
+      base_url = start_stub([{200, message}, {200, attachment}])
+
+      with_env(Map.put(@no_sites, "JIDO_CONNECT_RECORD", "1"), fn ->
+        put_req_options(retry: false)
+        :ok = LiveSmoke.record({:jido_connect, @req_key}, :stub, "opaque", root: tmp)
+        assert {:ok, %Req.Response{status: 200}} = get(base_url, "/gmail/v1/users/me/messages/1")
+
+        assert {:ok, %Req.Response{status: 200}} =
+                 get(base_url, "/gmail/v1/users/me/messages/1/attachments/ANGjdJ8")
+      end)
+
+      recorded = LiveSmoke.fixture!(:stub, "opaque", root: tmp)
+      [text, enclosed] = recorded["payload"]["parts"]
+
+      # Outside Base64 content every name is replaced. Inside it, a name stays
+      # only when the recording knows it with documentation addresses alone.
+      refute inspect(recorded["payload"]["headers"]) =~ ~r/Opaque|Ada|Grace/
+      refute inspect(enclosed["headers"]) =~ "Opaque"
+
+      assert Base.url_decode64!(text["body"]["data"]) ==
+               "Hi Opaque Recipient,\r\nPerson 1, Person 3\r\n"
+
+      assert LiveSmoke.fixture!(:stub, "opaque.2", root: tmp) == attachment
+    end
+
     test "stores size and digest instead of a body that is not UTF-8", %{tmp: tmp} do
       bytes = <<0xFF, 0xD8, 0xFF, 0x00>>
       base_url = start_stub([{200, {:raw, "image/jpeg", bytes}}])
@@ -768,6 +1361,7 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
 
       assert changed["transformed"] == true
       refute Map.has_key?(unchanged, "transformed")
+      assert LiveSmoke.sanitize_fixture(changed) == changed
       assert LiveSmoke.fixture!(:stub, "marked", root: tmp) == %{"results" => [1]}
     end
 
@@ -867,6 +1461,21 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
       assert sanitized["headers"]["host"] == "host-1.example.com:443"
       assert sanitized["body"] =~ "https://host-1.example.com/integrations/slack/events"
       refute inspect(sanitized) =~ "tunnel.test"
+    end
+
+    test "sanitizing a sanitized capture again with the replay secret changes nothing" do
+      body = ~s({"user":{"email":"ada@corp.test","link":"https://demo.tunnel.test/u/1"}})
+
+      raw =
+        body
+        |> slack_capture("secret")
+        |> put_in(["headers", "host"], "demo.tunnel.test")
+
+      with_env(@no_sites, fn ->
+        once = LiveSmoke.sanitize_capture(raw, secret: "secret")
+
+        assert LiveSmoke.sanitize_capture(once, secret: LiveSmoke.replay_secret()) == once
+      end)
     end
 
     test "sanitizing refuses a capture whose original signature does not verify" do
@@ -975,7 +1584,10 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
 
   defp serve(_listen, []), do: :ok
 
-  defp serve(listen, [{status, body} | responses]) do
+  defp serve(listen, [{status, body} | responses]),
+    do: serve(listen, [{status, body, []} | responses])
+
+  defp serve(listen, [{status, body, headers} | responses]) do
     {:ok, socket} = :gen_tcp.accept(listen)
     :ok = read_head(socket, "")
 
@@ -990,6 +1602,7 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
         "HTTP/1.1 #{status} OK\r\n",
         "content-type: #{content_type}\r\n",
         "set-cookie: sid=stub\r\n",
+        Enum.map(headers, fn {name, value} -> "#{name}: #{value}\r\n" end),
         "content-length: #{byte_size(payload)}\r\n",
         "connection: close\r\n\r\n",
         payload

@@ -61,43 +61,35 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Recorder do
 
   defp transform(_session, _request, body), do: body
 
-  # The body goes first so that names found in it are known when headers and
-  # the path are sanitized. The path is decoded so `%40` addresses are found.
+  # The fixture holds the decoded path, so `%40` addresses are found; the
+  # sanitizer decides the order in which its parts are read.
   defp fixture(request, response, sanitizer) do
-    {body, sanitizer} = body(response.body, sanitizer)
-    {headers, sanitizer} = Sanitize.headers(response.headers, sanitizer)
-    {path, sanitizer} = Sanitize.text(URI.decode(request.url.path || "/"), sanitizer)
-
-    fixture =
-      Map.merge(body, %{
-        "recorded_at" => Date.to_iso8601(Date.utc_today()),
-        "request" => %{
-          "method" => request.method |> to_string() |> String.upcase(),
-          "path" => path
-        },
-        "status" => response.status,
-        "headers" => headers
-      })
-
-    {fixture, sanitizer}
+    response.body
+    |> body()
+    |> Map.merge(%{
+      "recorded_at" => Date.to_iso8601(Date.utc_today()),
+      "request" => %{
+        "method" => request.method |> to_string() |> String.upcase(),
+        "path" => URI.decode(request.url.path || "/")
+      },
+      "status" => response.status,
+      "headers" => response.headers
+    })
+    |> Sanitize.fixture(sanitizer)
   end
 
-  defp body(body, sanitizer) when is_map(body) or is_list(body) do
-    {body, sanitizer} = Sanitize.value(body, sanitizer)
-    {%{"body" => body}, sanitizer}
-  end
+  defp body(body) when is_map(body) or is_list(body), do: %{"body" => body}
 
-  defp body(body, sanitizer) when is_binary(body) do
+  defp body(body) when is_binary(body) do
     if String.valid?(body) do
-      {body, sanitizer} = Sanitize.text(body, sanitizer)
-      {%{"body" => body}, sanitizer}
+      %{"body" => body}
     else
       digest = :sha256 |> :crypto.hash(body) |> Base.encode16(case: :lower)
-      {%{"body" => nil, "body_bytes" => byte_size(body), "body_sha256" => digest}, sanitizer}
+      %{"body" => nil, "body_bytes" => byte_size(body), "body_sha256" => digest}
     end
   end
 
-  defp body(_body, sanitizer), do: {%{"body" => nil}, sanitizer}
+  defp body(_body), do: %{"body" => nil}
 
   defp file_name(name, 1), do: "#{name}.json"
   defp file_name(name, count), do: "#{name}.#{count}.json"
