@@ -34,7 +34,7 @@ defmodule Jido.Connect.Tempo.Actions.Accounts do
           example: 10_001,
           description:
             "Jira project ID of the booking target as a positive integer, not the project " <>
-              "key. Jira returns the ID as a string such as \"10882\"; the host converts it."
+              "key. Jira returns the ID as a string such as \"10001\"; the host converts it."
         )
       end
 

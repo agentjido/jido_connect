@@ -38,7 +38,8 @@
   project, and the read-only Tempo catalog pack `:tempo_booking_lookup`.
 - Add the `:transform` option of `LiveSmoke.record/4`, which leaves out or
   neutralizes data of other users that a shared test account returns,
-  before the sanitizer and its leak guard run.
+  before the sanitizer and its leak guard run. A fixture whose body it
+  changed carries `"transformed": true`.
 
 ## 0.9.0 - 2026-08-25
 

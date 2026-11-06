@@ -34,9 +34,10 @@ defmodule Jido.Connect.Tempo.PeriodBookability do
   403, retry_after: nil}`, `%{reason: :rate_limited, status: 429,
   retry_after: 30}` or `%{reason: :foreign_approval_user, status: nil,
   retry_after: nil}`. Any other error, such as one of an injected client or
-  a provider error without an atom reason, is `%{reason:
-  :approval_read_failed, status: nil, retry_after: nil}`. The error's
-  message, details and Tempo's body are never kept.
+  a provider error without an atom reason or with a `status` that is
+  neither an integer nor `nil`, is `%{reason: :approval_read_failed,
+  status: nil, retry_after: nil}`. The error's message, details and Tempo's
+  body are never kept.
 
   ## Derived State
 
@@ -205,7 +206,7 @@ defmodule Jido.Connect.Tempo.PeriodBookability do
   defp evidence({:error, error}), do: {nil, nil, approval_error(error)}
 
   defp approval_error(%Error.ProviderError{reason: reason, status: status, details: details})
-       when is_atom(reason) and not is_nil(reason) do
+       when is_atom(reason) and not is_nil(reason) and (is_integer(status) or is_nil(status)) do
     %{reason: reason, status: status, retry_after: retry_after(details)}
   end
 

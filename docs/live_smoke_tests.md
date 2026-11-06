@@ -272,10 +272,13 @@ token responses to `oauth_exchange.json` and `oauth_refresh.json`, with the
 token fields redacted, and deletes a file that still holds a token or the
 code.
 
-The Tempo own worklog checks rely only on the test user's seeded worklogs
-and compare each read with a direct Tempo read, so further own worklogs do
-not break them. Three recordings also hold worklogs that the test user
-created on JCL-2 on 2026-11-02, outside the seeded data:
+The Tempo own worklog checks are the five tests that record `worklogs_own`,
+`worklogs_own_small_page`, `worklogs_own_day`, `worklogs_own_empty` and
+`worklogs_own_jira`. They rely only on the test user's seeded worklogs.
+Each read except the empty July range is compared with a direct Tempo read,
+so further own worklogs from August to October do not break them; the July
+read must return no worklogs. Three recordings also hold worklogs that the
+test user created on JCL-2 on 2026-11-02, outside the seeded data:
 `worklogs_own.2.json` and `worklogs_own_day.json` hold 79166, booked at
 00:30 Europe/Berlin on 2026-10-31 with a description of 778 bytes, and
 `worklogs_own_jira.json` holds 79167 and 79168, created through Jira's
@@ -338,10 +341,10 @@ offline tests match the stored value in `work_attribute_values` against
 
 While the test attributes exist, run only the booking lookup checks, and
 run `down` at once after them, also when a check fails or the run is
-interrupted. In a required run Tempo rejects every new worklog without a
-value for each required attribute, so the worklog create check fails
-there, and every other user of the site must fill them in for as long as
-they stay. Run the rest of the Tempo suite after `down`.
+interrupted. In a required run Tempo lists four of them as required, for
+the whole site. The worklog create check sends no attribute values; how
+Tempo answers it inside a required window was not tried, so do not run it
+there. Run the rest of the Tempo suite after `down`.
 
 The site is shared with real users, and Tempo returns their data in the
 same responses: every work attribute of the site and every global account
@@ -354,6 +357,16 @@ flag; links of other accounts are left out with `metadata.count` adjusted,
 reads of those accounts are not recorded, and worklog values of other
 attributes are left out. The live assertions check only the test data and
 pass whatever else the site holds.
+
+Of the current recordings, `work_attributes_required.json`,
+`work_attributes_optional.json` and `accounts_for_project.json` were
+changed this way. They carry `"transformed": true`, added by hand after the
+recording; a re-recording writes it itself. The account details
+`accounts_for_project.2.json` to `.5.json` are those of test accounts,
+which the transform keeps as sent. `work_attribute_values.json` carries no
+marker: its recorded `content-length` matches its body once the
+sanitizer's replacements of the account ID and the site host are counted
+back, so the transform removed no value there.
 
 ### Confluence
 
@@ -413,8 +426,11 @@ changes, since the fixture then differs from the provider's answer.
 
 A fixture file holds the recording date, the request method and the decoded
 path without query, the status, the sanitized response headers and the
-sanitized body. A body that is not UTF-8, such as a file download, is stored as
-`"body": null` with `body_bytes` and `body_sha256`:
+sanitized body. When the transform returned a body other than the provider's,
+the file also holds `"transformed": true`; its headers, such as
+`content-length`, still describe the provider's response. A body that is not
+UTF-8, such as a file download, is stored as `"body": null` with `body_bytes`
+and `body_sha256`:
 
 ```json
 {

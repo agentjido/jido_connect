@@ -8,7 +8,7 @@ defmodule Jido.Connect.Tempo.PeriodBookability.Segment do
   | `period_from`, `period_to` | the full period as Tempo reports it |
   | `approval_status` | Tempo's approval `status.key` as sent, or `nil` when no status was read |
   | `approval_updated_at` | Tempo's `status.updatedAt` as sent, or `nil` |
-  | `approval_error` | `nil` when the approval read returned an approval, else the `reason`, `status` and `retry_after` of the failed read |
+  | `approval_error` | `nil` when the approval read returned an approval, else the `reason`, `status` and `retry_after` of the failed read; `reason: :approval_read_failed` with `status` and `retry_after` `nil` for any other error, also a provider error whose `status` is neither an integer nor `nil` |
   | `closure_evidence` | always `:unknown` |
   | `state` | `:blocked` or `:unknown`, derived from `approval_status` |
 

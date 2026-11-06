@@ -34,15 +34,16 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Recorder do
 
     case transform(session, request, response.body) do
       :skip -> :ok
-      body -> write_fixture(session, request, %{response | body: body})
+      body -> write_fixture(session, request, %{response | body: body}, body !== response.body)
     end
 
     {request, response}
   end
 
-  defp write_fixture(session, request, response) do
+  defp write_fixture(session, request, response, transformed?) do
     count = session.count + 1
     {fixture, sanitizer} = fixture(request, response, session.sanitizer)
+    fixture = if transformed?, do: Map.put(fixture, "transformed", true), else: fixture
     Sanitize.check_leaks!(fixture, sanitizer)
 
     path = Path.join(session.dir, file_name(session.name, count))
@@ -53,7 +54,8 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Recorder do
   end
 
   # The transform sees the decoded path and the body before sanitizing; the
-  # caller keeps the original response.
+  # caller keeps the original response. A fixture whose body it changed gets
+  # "transformed": true, since its headers still describe the original.
   defp transform(%{transform: transform}, request, body) when is_function(transform, 2),
     do: transform.(URI.decode(request.url.path || "/"), body)
 

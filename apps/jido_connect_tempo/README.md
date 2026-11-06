@@ -287,9 +287,9 @@ may read periods but not approvals gives `%{reason: :forbidden, status:
 gives `%{reason: :rate_limited, status: 429, retry_after: 30}`, and an
 approval of another user gives `%{reason: :foreign_approval_user, status:
 nil, retry_after: nil}`. Any other error, such as one of an injected
-provider client, is `:approval_read_failed` with `status` and
-`retry_after` `nil`. Tempo's error text and the error details are not
-kept.
+provider client or a provider error whose `status` is neither an integer
+nor `nil`, is `:approval_read_failed` with `status` and `retry_after`
+`nil`. Tempo's error text and the error details are not kept.
 
 `complete` is `false` when Tempo's periods leave a day of the range
 uncovered or cover it twice, and when a segment has no `approval_status`.
@@ -325,7 +325,7 @@ target that the host has already resolved: the work attributes Tempo
 requires and the account candidates of the target's Jira project. Neither
 calls Jira. The host finds the issue and its project ID with
 `jira.issue.search` of `jido_connect_jira`, requesting the `project` field.
-Jira returns that ID as a string, such as `"10882"`; the host converts it
+Jira returns that ID as a string, such as `"10001"`; the host converts it
 to an integer, since `project_id` takes a positive integer and rejects a
 string with a `Jido.Connect.Error.ValidationError`. Choosing a target, an
 account or attribute values is the host's task.
@@ -572,14 +572,25 @@ created the worklog:
 | refused connection, foreign origin | `:request_error` | `:not_sent` | `:safe_to_retry` |
 
 `:period_locked` is Tempo's 403 with the recorded text, observed on the test
-site for a booking into the approved August 2026 period. It is the signal
-that [Period Bookability](#period-bookability) cannot read in advance. Only
-this text gets the label; an unknown 400 or another 403 keeps its status
-reason. A booking into a period in review or into one closed in Period
-Management was not tried. Its answer may arrive as `:forbidden` or
-`:bad_request`, which are `:rejected` with `:do_not_retry` like
-`:period_locked`. After `:sent_outcome_unknown` the worklog may exist; read
-the day back with `tempo.worklogs.list_own` before booking it again.
+site for a booking into the approved August 2026 period. Only this text gets
+the label; an unknown 400 or another 403 keeps its status reason.
+
+[Period Bookability](#period-bookability) marks in advance where it expects
+such a rejection: an `APPROVED` or `IN_REVIEW` period is a `:blocked`
+segment. On the test site on 2026-11-02 it reported the approved August
+period and the September period in review as `:blocked`, but a booking was
+tried only into the approved one. Tempo's answer for a period in review is
+therefore unknown. It gets `:period_locked` only as the same 403 with the
+same text, and may instead arrive as `:forbidden` or `:bad_request`, which
+are `:rejected` with `:do_not_retry` like `:period_locked`.
+
+Period Bookability cannot see a period closed in Period Management in
+advance, since every segment's `closure_evidence` is `:unknown`; see
+[Derived State](#derived-state). No booking into such a period was tried,
+so its answer, too, may arrive as `:forbidden` or `:bad_request`.
+
+After `:sent_outcome_unknown` the worklog may exist; read the day back with
+`tempo.worklogs.list_own` before booking it again.
 
 Errors hold neither the description nor the attribute values. Tempo quotes
 rejected input in its error text, as in `Non valid time '25:00:00'`; where

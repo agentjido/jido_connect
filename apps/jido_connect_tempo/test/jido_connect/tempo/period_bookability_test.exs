@@ -59,6 +59,35 @@ defmodule Jido.Connect.Tempo.PeriodBookabilityTest do
     end
   end
 
+  describe "approval_error" do
+    # Tempo's own client sets an integer status or nil; an injected
+    # provider client may not.
+    test "a provider error with a status that is not an integer is a read failure" do
+      for status <- ["403", 403.0, :forbidden] do
+        error = Error.provider("Host text", provider: :tempo, reason: :forbidden, status: status)
+        read = fn _period -> {:error, error} end
+
+        assert {:ok,
+                %PeriodBookability{
+                  complete: false,
+                  state: :unknown,
+                  segments: [_, _, _] = segments
+                }} =
+                 PeriodBookability.build(@attrs, @periods, read)
+
+        for segment <- segments do
+          assert {segment.approval_status, segment.state} == {nil, :unknown}
+
+          assert segment.approval_error == %{
+                   reason: :approval_read_failed,
+                   status: nil,
+                   retry_after: nil
+                 }
+        end
+      end
+    end
+  end
+
   defp reader do
     test_pid = self()
 

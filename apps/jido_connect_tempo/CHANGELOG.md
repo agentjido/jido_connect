@@ -30,8 +30,10 @@
   `APPROVED`, else `:unknown`. It requires `tempo.periods.read` and
   `tempo.approvals.read`. A gap in period coverage, a failed approval read
   or an approval of another user or period sets `complete: false` and keeps
-  the other segments' evidence; a failed approval read names its reason,
-  status and `retry_after` in the segment's `approval_error`. A range of
+  the other segments' evidence; a failed approval read names the reason,
+  status and `retry_after` of its provider error in the segment's
+  `approval_error`, or `:approval_read_failed` for any other error, also a
+  provider error whose status is neither an integer nor `nil`. A range of
   more than 20 periods fails with `:period_limit_exceeded` before the first
   approval read.
 - Add `Jido.Connect.Tempo.Client.list_periods/2`,

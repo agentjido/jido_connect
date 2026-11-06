@@ -199,6 +199,9 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
   only the fixture, never the response the caller gets. Use it to leave out
   or neutralize data that a shared test account returns besides the test
   data, such as other users' entries, and say in the test what it changes.
+  A fixture whose body the transform changed carries `"transformed": true`;
+  its headers, such as `content-length`, still describe the provider's
+  response.
   """
   @spec record({atom(), atom()}, atom() | String.t(), String.t(), keyword()) :: :ok
   def record({app, key}, provider, name, opts \\ []) when is_atom(app) and is_atom(key) do

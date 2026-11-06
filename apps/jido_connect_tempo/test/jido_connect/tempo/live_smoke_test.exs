@@ -10,15 +10,18 @@ defmodule Jido.Connect.Tempo.LiveSmokeTest do
   the direct Tempo reads that the own worklog and period checks compare
   against.
 
-  The own worklog checks hold on the test user's seeded worklogs on
+  The own worklog checks are the five tests that record `worklogs_own`,
+  `worklogs_own_small_page`, `worklogs_own_day`, `worklogs_own_empty` and
+  `worklogs_own_jira`. They hold on the test user's seeded worklogs on
   `TEMPO_JIRA_ISSUE_ID` alone: one on the first and one on the last day of
   each period (August 1 and 31, September 1 and 30, October 1 and 30); five
   on October 1, among them two that differ only in their IDs and one with
   zero billable seconds; and fillers across October, among them one on
   October 28 and one on October 30. The test user has no worklog in July
-  2026. Each read compares every worklog with a direct Tempo read and
-  counts only minimums, so further own worklogs from August to October do
-  not break the checks.
+  2026. Each read except the empty July range compares every worklog with
+  a direct Tempo read and counts only minimums, so further own worklogs
+  from August to October do not break the checks; the July read must
+  return no worklogs.
 
   Three recordings also hold worklogs that the seeded data lacks. The test
   user created them on JCL-2 on 2026-11-02: 79166, booked at 00:30

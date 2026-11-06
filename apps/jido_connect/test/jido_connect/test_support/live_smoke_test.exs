@@ -628,6 +628,39 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
       end
     end
 
+    test "marks a fixture whose body the transform changed", %{tmp: tmp} do
+      base_url = start_stub([{200, %{"results" => [1, 2]}}, {200, %{"results" => [1]}}])
+
+      transform = fn
+        "/v1/changed", %{"results" => results} = body ->
+          %{body | "results" => Enum.take(results, 1)}
+
+        _path, body ->
+          body
+      end
+
+      with_env(%{"JIDO_CONNECT_RECORD" => "1"}, fn ->
+        put_req_options(retry: false)
+
+        :ok =
+          LiveSmoke.record({:jido_connect, @req_key}, :stub, "marked",
+            root: tmp,
+            transform: transform
+          )
+
+        assert {:ok, %Req.Response{body: %{"results" => [1, 2]}}} = get(base_url, "/v1/changed")
+        assert {:ok, %Req.Response{body: %{"results" => [1]}}} = get(base_url, "/v1/same")
+      end)
+
+      dir = Path.join(tmp, "test/fixtures/stub/recorded")
+      changed = dir |> Path.join("marked.json") |> File.read!() |> Jason.decode!()
+      unchanged = dir |> Path.join("marked.2.json") |> File.read!() |> Jason.decode!()
+
+      assert changed["transformed"] == true
+      refute Map.has_key?(unchanged, "transformed")
+      assert LiveSmoke.fixture!(:stub, "marked", root: tmp) == %{"results" => [1]}
+    end
+
     test "sanitizes and leak-checks the transformed body", %{tmp: tmp} do
       token = "ya29.live-smoke-transform-leak"
       base_url = start_stub([{200, %{"ok" => true}}, {200, %{"ok" => true}}])

@@ -103,5 +103,6 @@
     "method": "GET",
     "path": "/4/work-attributes"
   },
-  "status": 200
+  "status": 200,
+  "transformed": true
 }
