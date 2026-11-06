@@ -2438,6 +2438,7 @@ defmodule Jido.Connect.SlackTest do
     assert Enum.map(open_conversation_projection.input, & &1.name) == [
              :users,
              :channel,
+             :conversation_type,
              :return_im,
              :prevent_creation
            ]

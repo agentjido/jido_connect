@@ -90,10 +90,11 @@ defmodule Jido.Connect.Slack.OAuth do
   Pass `:connection` to bind the lease to the host's bot connection; the
   lease then takes that connection's ID, tenant and owner. A connection of
   another provider returns an `AuthError` with reason
-  `:credential_connection_mismatch`. A connection of another profile, or a
-  `:profile` other than `:bot`, returns one with reason
-  `:unsupported_auth_profile`, since the lease would carry the bot token
-  under another profile.
+  `:credential_connection_mismatch`. A connection of another profile
+  returns one with reason `:unsupported_auth_profile`, since the lease
+  would carry the bot token under another profile. Without `:connection`,
+  so does a `:profile` other than `:bot`; together with `:connection`,
+  `:profile` is ignored and the connection's profile decides.
 
   Returns an `AuthError` with reason `:missing_bot_credential` for a result
   without a bot token, such as one from a flow with only `user_scope`.
@@ -147,10 +148,11 @@ defmodule Jido.Connect.Slack.OAuth do
   lease then takes that connection's ID, tenant and owner. The connection's
   `owner_id` is the host's and is not compared with the Slack user ID. A
   connection of another provider returns an `AuthError` with reason
-  `:credential_connection_mismatch`. A connection of another profile, or a
-  `:profile` other than `:user`, returns one with reason
-  `:unsupported_auth_profile`, since the lease would carry the user token
-  under another profile.
+  `:credential_connection_mismatch`. A connection of another profile
+  returns one with reason `:unsupported_auth_profile`, since the lease
+  would carry the user token under another profile. Without `:connection`,
+  so does a `:profile` other than `:user`; together with `:connection`,
+  `:profile` is ignored and the connection's profile decides.
 
   Returns an `AuthError` with reason `:missing_user_credential` when the
   result holds no user token, as after a flow without `user_scope`.

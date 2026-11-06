@@ -3,13 +3,15 @@ defmodule Jido.Connect.Slack.TestSupport.LiveSlack do
 
   # Shared by the Slack live smoke tests: runs Slack actions through
   # `Jido.Connect` with a connection and a credential lease around a live
-  # token, records responses, and reads, posts and deletes messages with Req
-  # outside the package as the reference.
+  # token, records responses, reads, posts and deletes messages with Req
+  # outside the package as the reference, and has Slack validate app
+  # manifests.
 
   import ExUnit.Assertions
 
   alias Jido.Connect
   alias Jido.Connect.Slack.Client
+  alias Jido.Connect.Slack.Client.Transport
   alias Jido.Connect.TestSupport.LiveSmoke
 
   @slack_api "https://slack.com/api"
@@ -143,6 +145,36 @@ defmodule Jido.Connect.Slack.TestSupport.LiveSlack do
     end
   end
 
+  @doc """
+  Checks `manifest` with Slack's `apps.manifest.validate` and the app
+  configuration token `token`.
+
+  The call goes through the package's transport, with its Slack API base
+  URL and without retries. It passes no `app_id`, so Slack only checks the
+  manifest. A rejection fails the test with the HTTP status, Slack's error
+  code and the pointer and message of each manifest error.
+  """
+  def validate_manifest!(token, manifest) do
+    response =
+      token
+      |> Transport.request()
+      |> Req.post(url: "/apps.manifest.validate", form: [manifest: Jason.encode!(manifest)])
+
+    case response do
+      {:ok, %{status: 200, body: %{"ok" => true}}} ->
+        :ok
+
+      {:ok, %{status: status, body: body}} ->
+        flunk(
+          "apps.manifest.validate rejected the manifest: HTTP #{status}, " <>
+            slack_error(body) <> manifest_errors(body)
+        )
+
+      {:error, exception} ->
+        flunk("apps.manifest.validate failed: #{Exception.message(exception)}")
+    end
+  end
+
   @doc "Calls the Slack Web API directly, without the package's client and Req options."
   def reference_request(token, method, path, options) do
     [method: method, url: "#{@slack_api}/#{path}", auth: {:bearer, token}, retry: false]
@@ -152,4 +184,12 @@ defmodule Jido.Connect.Slack.TestSupport.LiveSlack do
 
   defp slack_error(%{"error" => error}) when is_binary(error), do: error
   defp slack_error(_body), do: "no Slack error code"
+
+  defp manifest_errors(%{"errors" => [_ | _] = errors}) do
+    Enum.map_join(errors, fn error ->
+      "\n  #{Map.get(error, "pointer", "(no pointer)")}: #{Map.get(error, "message")}"
+    end)
+  end
+
+  defp manifest_errors(_body), do: ""
 end

@@ -250,10 +250,15 @@ defmodule Jido.Connect.Slack.ScopeResolver do
     Map.get(input, :is_private, Map.get(input, "is_private", false)) == true
   end
 
+  # The declared type can only raise the check: `mpim` needs `mpim:write`
+  # also for a C ID, while `im` cannot lower what several users or a G ID
+  # need.
   defp requested_open_conversation_type(input) do
-    case Map.get(input, :conversation_type, Map.get(input, "conversation_type")) do
-      nil -> open_type_from_input(input)
-      type -> type |> to_string() |> String.trim()
+    declared = Map.get(input, :conversation_type, Map.get(input, "conversation_type"))
+
+    case declared |> to_string() |> String.trim() do
+      "mpim" -> "mpim"
+      _im_or_none -> open_type_from_input(input)
     end
   end
 

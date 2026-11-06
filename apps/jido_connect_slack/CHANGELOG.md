@@ -102,6 +102,19 @@
   message to the app; one with `view: "user"` does so only when its
   `conversation.id` is the bot DM, since Slack does not document which
   view it names there.
+- Every manifest from `AppManifest.build/2` turns on the Messages tab of
+  the App Home and keeps it writable (`features.app_home`), so people can
+  DM the bot and share messages into its DM; the Home tab stays off. The
+  bot events no longer include `scope_denied`, which belonged to the
+  workspace apps that Slack retired.
+- `mix jido.connect.slack.app.manifest_url` takes `--user-scopes` and
+  `--user-events`, each a comma-separated list, for the user view.
+  `--user-events` without `--events` ends in a Mix error.
+- `slack.conversation.open` takes `conversation_type`, `im` or `mpim`,
+  for the scope check; it is not sent to Slack. A group DM resumed by its
+  `C` ID with `conversation_type: "mpim"` needs `mpim:write`. The field can
+  only raise the check: with `im`, several users or a `G` ID still need
+  `mpim:write`, as without the field. Other values fail input validation.
 
 ## 0.1.0
 

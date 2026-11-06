@@ -480,6 +480,10 @@ defmodule Jido.Connect.Slack.OAuthTest do
 
       assert {:ok, %{profile: ^profile}} =
                lease_fun.(token, context, connection: connection(profile))
+
+      # With a connection, its profile decides and :profile is ignored.
+      assert {:ok, %{profile: ^profile}} =
+               lease_fun.(token, context, connection: connection(profile), profile: other)
     end
   end
 

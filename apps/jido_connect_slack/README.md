@@ -26,13 +26,12 @@ def deps do
 end
 ```
 
-## OAuth
+## App manifest
 
-Slack apps use OAuth v2. Hosts own state, installation storage, and credential
-storage. This package builds authorize URLs and exchanges callback codes:
-
-For local development, generate a Slack app creation URL from the current ngrok
-tunnel:
+For local development, `mix jido.connect.slack.app.manifest_url` writes a
+Slack app manifest and the URL that creates the app from it, for the current
+ngrok tunnel or `--url`. `Jido.Connect.Slack.AppManifest.build/2` builds the
+same manifest as a map.
 
 ```sh
 mix jido.connect.slack.app.manifest_url
@@ -40,6 +39,49 @@ mix jido.connect.slack.app.manifest_url
 
 Pass `--events` and `--interactivity` only after the host exposes routes that
 can answer Slack verification requests.
+
+Every manifest turns on the Messages tab of the app's App Home and keeps it
+writable, so people can send the bot direct messages and share messages into
+its DM. The Home tab stays off, since the package publishes no Home view. The
+default bot scopes include `im:write`, `mpim:write` and `chat:write`, which
+`slack.conversation.open` and `slack.message.post` need to open a DM or group
+DM and post there. `build/2` with `scopes:` replaces the default list, so a
+list of its own needs these three for the same actions.
+
+An app that also receives direct messages and shares into the bot DM needs the
+events request URL:
+
+```sh
+mix jido.connect.slack.app.manifest_url --events --interactivity
+```
+
+`--events` (`include_events?: true`) adds the events request URL and the bot
+events, among them `message.im` and `message.mpim` with `im:history` and
+`mpim:history`. `--interactivity` (`include_interactivity?: true`) adds the
+request URL for button clicks.
+
+An app with the [user view](#bot-view-and-user-view) also needs user scopes
+and user events:
+
+```sh
+mix jido.connect.slack.app.manifest_url --events --interactivity \
+  --user-scopes channels:history,groups:history,im:history,mpim:history \
+  --user-events message.channels,message.groups,message.im,message.mpim
+```
+
+`--user-scopes` and `--user-events` take comma-separated lists, `build/2` the
+options `user_scopes:` and `user_events:`. The scopes go under
+`oauth_config.scopes.user`, the events under
+`settings.event_subscriptions.user_events`. User events need `--events`,
+which adds the events request URL, and the user scope of each event: Slack's
+`apps.manifest.validate` rejects `message.channels` as a user event without
+`channels:history` as a user scope. Without these options the manifest has
+neither key. The OAuth flow asks for the same scopes with `user_scope`.
+
+## OAuth
+
+Slack apps use OAuth v2. Hosts own state, installation storage, and credential
+storage. This package builds authorize URLs and exchanges callback codes:
 
 ```elixir
 url =
@@ -82,24 +124,22 @@ the `:user` profile: the lease is owned by the person (`owner_type: :user`,
 `owner_id` the Slack user ID), holds the user token as `access_token` and
 never the refresh token, and expires after an hour or at `:expires_at`,
 but never after the token's own `expires_at`. Both functions also take the
-result as a host reads it back from JSON, with string keys and
-`expires_at` as an ISO 8601 string; an `expires_at` in another form
-returns a `Jido.Connect.Error.AuthError` with reason
+result as a host reads it back from JSON, with string keys. Only
+`user_credential_lease/3` reads an `expires_at`, the one of the user token
+in `authed_user`: a `DateTime` or an ISO 8601 string with offset, such as
+`"2026-11-06T15:00:00Z"`. Any other form, also an ISO 8601 string without
+offset, returns a `Jido.Connect.Error.AuthError` with reason
 `:invalid_user_credential`. Pass `connection:` to bind a lease to the
 host's connection. A result without the token of the profile
 returns a `Jido.Connect.Error.AuthError` with reason
 `:missing_bot_credential` or `:missing_user_credential`. A connection of
 another provider returns one with reason `:credential_connection_mismatch`.
-A connection of the other profile, or a `profile:` option other than the
-lease's, returns one with reason `:unsupported_auth_profile`: a bot lease
-never carries the user token, and a user lease never the bot token.
-Refreshing a rotating token and storing it stay with the host.
-
-`Jido.Connect.Slack.AppManifest.build/2` adds the user view to a manifest on
-request: `user_scopes:` under `oauth_config.scopes.user` and `user_events:`
-under `settings.event_subscriptions.user_events`. User events need
-`include_events?: true`, which adds the events request URL. Manifests
-without these options stay as they were.
+A connection of the other profile returns one with reason
+`:unsupported_auth_profile`, and so does a `profile:` option other than the
+lease's when no `connection:` is given: a bot lease never carries the user
+token, and a user lease never the bot token. Together with `connection:`,
+`profile:` is ignored and the connection's profile decides. Refreshing a
+rotating token and storing it stay with the host.
 
 ## Conversation history
 
@@ -215,14 +255,16 @@ no `blocks` key.
 `slack.conversation.open` sends `users` to Slack `conversations.open` as a
 comma-separated list and returns the conversation ID as `channel`, the target
 for `slack.message.post`. One user opens the DM with the bot and needs
-`im:write`; several users open a group DM and need `mpim:write`. To resume a
-conversation by `channel`, the scope check reads only the ID: a `G` ID needs
-`mpim:write`, every other ID `im:write`. Group DMs can also carry a `C` ID,
-like the one in this package's recordings, and are then checked against
-`im:write`; a token that resumes group DMs by `channel` should hold both
-scopes. The action takes its client from a context `provider_client`, then
-from the lease's `slack_client`, then `Jido.Connect.Slack.Client`, so a lease
-with only an `access_token` works.
+`im:write`; several users open a group DM and need `mpim:write`. A
+conversation resumed by `channel` needs `mpim:write` for a `G` ID and
+`im:write` for any other ID. Slack gives group DMs `C` IDs too, like the one
+in this package's recordings, so resume such a group DM with
+`conversation_type: "mpim"`, which needs `mpim:write`. `conversation_type`
+takes `im` or `mpim`, is not sent to Slack and can only raise the check:
+with `im`, several `users` or a `G` ID still need `mpim:write`. The action
+takes its client from a context `provider_client`, then from the lease's
+`slack_client`, then `Jido.Connect.Slack.Client`, so a lease with only an
+`access_token` works.
 
 The package makes no delivery guarantee beyond Slack's answer:
 
@@ -283,9 +325,10 @@ returns the reason, for example `:unsupported_message_subtype`,
 
 The bot receives messages only from conversations it belongs to: public and
 private channels it is a member of, its own DM, which needs the Messages tab
-of the app's App Home, and group DMs that include it. A channel the bot has
-left sends it nothing; the [user view](#bot-view-and-user-view) covers what
-the person who authorized the app sees. Subscribe the app's bot events to:
+of the app's App Home that every [app manifest](#app-manifest) turns on, and
+group DMs that include it. A channel the bot has left sends it nothing; the
+[user view](#bot-view-and-user-view) covers what the person who authorized
+the app sees. Subscribe the app's bot events to:
 
 | Slack subscription | Scope | Trigger |
 | --- | --- | --- |

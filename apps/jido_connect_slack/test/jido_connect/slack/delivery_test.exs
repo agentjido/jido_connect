@@ -146,6 +146,80 @@ defmodule Jido.Connect.Slack.DeliveryTest do
                "prevent_creation" => false
              }
     end
+
+    # Slack's answer to resuming by channel was not recorded; the recording of
+    # opening the same group DM by its users stands in for it, since the test
+    # checks the scope and the request.
+    test "a group DM resumed by its C ID with conversation_type mpim needs mpim:write, not im:write" do
+      input = %{channel: @mpim, conversation_type: "mpim"}
+
+      assert {:error,
+              %Connect.Error.AuthError{reason: :missing_scopes, missing_scopes: ["mpim:write"]}} =
+               Connect.invoke(
+                 Jido.Connect.Slack,
+                 "slack.conversation.open",
+                 input,
+                 runtime(["im:write"])
+               )
+
+      refute_received {:slack_request, _method, _path, _body}
+
+      stub_fixture("conversations_open_mpim")
+
+      assert {:ok, %{channel: @mpim}} =
+               Connect.invoke(
+                 Jido.Connect.Slack,
+                 "slack.conversation.open",
+                 input,
+                 runtime(["mpim:write"])
+               )
+
+      assert_received {:slack_request, "POST", "/api/conversations.open", body}
+
+      assert body == %{
+               "channel" => @mpim,
+               "return_im" => false,
+               "prevent_creation" => false
+             }
+    end
+
+    # conversation_type can only raise the check: several users or a G ID
+    # mean a group DM, whatever type the caller declares.
+    test "conversation_type im does not lower the scope that several users or a G ID need" do
+      cases = [
+        {%{users: [@authorizing_user, @second_user], conversation_type: "im"}, "mpim:write"},
+        {%{channel: "G0CDELYPYKF", conversation_type: "im"}, "mpim:write"},
+        {%{channel: "G0CDELYPYKF"}, "mpim:write"},
+        {%{users: [@authorizing_user], conversation_type: "im"}, "im:write"},
+        {%{channel: @mpim}, "im:write"}
+      ]
+
+      for {input, scope} <- cases do
+        assert {:error,
+                %Connect.Error.AuthError{reason: :missing_scopes, missing_scopes: missing}} =
+                 Connect.invoke(Jido.Connect.Slack, "slack.conversation.open", input, runtime([]))
+
+        assert {input, missing} == {input, [scope]}
+      end
+
+      refute_received {:slack_request, _method, _path, _body}
+    end
+
+    test "conversation_type takes only im or mpim" do
+      assert {:error,
+              %Connect.Error.ValidationError{
+                reason: :input,
+                details: %{errors: [%Zoi.Error{code: :not_in_values, path: [:conversation_type]}]}
+              }} =
+               Connect.invoke(
+                 Jido.Connect.Slack,
+                 "slack.conversation.open",
+                 %{channel: @mpim, conversation_type: "private_channel"},
+                 runtime(["im:write", "mpim:write"])
+               )
+
+      refute_received {:slack_request, _method, _path, _body}
+    end
   end
 
   describe "slack.message.post" do

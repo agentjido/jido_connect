@@ -218,6 +218,8 @@ as seed input belong to the scripts that create the test data.
 | `SLACK_BOT_TOKEN` | credential | Bot token of the test app |
 | `SLACK_SIGNING_SECRET` | credential | Signing secret of the test app |
 | `SLACK_USER_TOKEN` | credential | User token of the test user |
+| `SLACK_CONFIG_TOKEN` | credential | App configuration token of the test workspace, for `apps.manifest.validate`; expires 12 hours after it is issued |
+| `SLACK_CONFIG_REFRESH_TOKEN` | credential | Refresh token of that configuration token; `tooling.tokens.rotate` replaces both |
 | `SLACK_PUBLIC_CHANNEL_ID` | setting | Public channel |
 | `SLACK_PRIVATE_CHANNEL_ID` | setting | Private channel |
 | `SLACK_DM_CHANNEL_ID` | setting | Direct message |
@@ -230,7 +232,18 @@ as seed input belong to the scripts that create the test data.
 | `SLACK_SECOND_USER_ID` | setting | Second human user |
 | `SLACK_CAPTURE_DIR` | setting | Capture directory of the demo host |
 | `SLACK_APP_ID` | setting | ID of the test app |
+| `JIDO_PUBLIC_URL` | setting | Public base URL of the demo host, the tunnel of `mix jido.connect.ngrok`; the request URLs of the validated manifests start with it |
 | `SLACK_LIVE_DESTRUCTIVE` | gate | `true` allows write tests |
+
+The manifest check in `app_manifest_live_smoke_test.exs` runs
+`mix jido.connect.slack.app.manifest_url` for `JIDO_PUBLIC_URL` and has
+Slack's `apps.manifest.validate` check the default manifest, the manifest
+with events and interactivity, and that one with the user view. It passes no
+`app_id`, so no app is created, changed or installed, and it needs no running
+tunnel. When Slack answers `token_expired`, renew the pair with
+`tooling.tokens.rotate` and `SLACK_CONFIG_REFRESH_TOKEN` and store both new
+values at once, since the old refresh token stops working; the tests do not
+rotate.
 
 ### Jira
 

@@ -29,6 +29,30 @@ defmodule Jido.Connect.Slack.AppManifestTest do
     refute get_in(manifest, [:settings, :interactivity])
   end
 
+  test "every manifest turns on a writable Messages tab, so people can DM the bot" do
+    user_view = [
+      user_scopes: ["channels:history", "groups:history", "im:history", "mpim:history"],
+      user_events: ["message.channels", "message.groups", "message.im", "message.mpim"]
+    ]
+
+    for opts <- [
+          [],
+          [include_events?: true, include_interactivity?: true],
+          [include_events?: true, include_interactivity?: true] ++ user_view
+        ] do
+      manifest = AppManifest.build("https://demo.ngrok-free.app", opts)
+
+      assert manifest.features == %{
+               bot_user: %{display_name: "Jido Connect", always_online: false},
+               app_home: %{
+                 home_tab_enabled: false,
+                 messages_tab_enabled: true,
+                 messages_tab_read_only_enabled: false
+               }
+             }
+    end
+  end
+
   test "can include events and interactivity routes" do
     manifest =
       AppManifest.build("https://demo.ngrok-free.app",
@@ -76,7 +100,6 @@ defmodule Jido.Connect.Slack.AppManifestTest do
                "file_change",
                "app_uninstalled",
                "tokens_revoked",
-               "scope_denied",
                "reaction_added",
                "reaction_removed"
              ]
