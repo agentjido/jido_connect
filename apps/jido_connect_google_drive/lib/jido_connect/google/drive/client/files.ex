@@ -1,7 +1,7 @@
 defmodule Jido.Connect.Google.Drive.Client.Files do
   @moduledoc "Google Drive files API boundary."
 
-  alias Jido.Connect.Google.Drive.Client.{Params, Response, Transport}
+  alias Jido.Connect.Google.Drive.Client.{ContentLimit, Params, Response, Transport}
 
   def list_files(params, access_token) when is_map(params) and is_binary(access_token) do
     access_token
@@ -91,29 +91,36 @@ defmodule Jido.Connect.Google.Drive.Client.Files do
 
   def export_file(%{file_id: file_id, mime_type: mime_type} = params, access_token)
       when is_binary(file_id) and is_binary(mime_type) and is_binary(access_token) do
-    with {:ok, resource_key_headers} <- Params.resource_key_headers(params) do
+    with {:ok, max_bytes} <- ContentLimit.max_bytes(params),
+         {:ok, resource_key_headers} <- Params.resource_key_headers(params) do
       access_token
       |> Transport.request()
       |> Req.get(
-        url: "/v3/files/#{encode_id(file_id)}/export",
-        params: Params.file_export_params(params),
-        headers: [{"accept", mime_type} | resource_key_headers]
+        [
+          url: "/v3/files/#{encode_id(file_id)}/export",
+          params: Params.file_export_params(params),
+          headers: [{"accept", mime_type} | resource_key_headers]
+        ] ++ ContentLimit.receive_options(max_bytes)
       )
-      |> Response.handle_file_content_response(params)
+      |> handle_content_response(params)
     end
   end
 
   def download_file(%{file_id: file_id} = params, access_token)
       when is_binary(file_id) and is_binary(access_token) do
-    with {:ok, resource_key_headers} <- Params.resource_key_headers(params) do
+    with {:ok, max_bytes} <- ContentLimit.max_bytes(params),
+         {:ok, resource_key_headers} <- Params.resource_key_headers(params),
+         :ok <- check_declared_size(params, resource_key_headers, max_bytes, access_token) do
       access_token
       |> Transport.media_request()
       |> Req.get(
-        url: "/v3/files/#{encode_id(file_id)}",
-        params: Params.file_download_params(params),
-        headers: [{"accept", "*/*"} | resource_key_headers]
+        [
+          url: "/v3/files/#{encode_id(file_id)}",
+          params: Params.file_download_params(params),
+          headers: [{"accept", "*/*"} | resource_key_headers]
+        ] ++ ContentLimit.receive_options(max_bytes)
       )
-      |> Response.handle_file_content_response(params)
+      |> handle_content_response(params)
     end
   end
 
@@ -138,6 +145,28 @@ defmodule Jido.Connect.Google.Drive.Client.Files do
       json: Params.watch_channel_body(params)
     )
     |> Response.handle_channel_response()
+  end
+
+  # With `max_bytes`, a download first reads the file's declared size with the
+  # same resource key and shared-drive settings, so a file Drive declares
+  # larger than the limit fails before its content is requested.
+  defp check_declared_size(_params, _resource_key_headers, nil, _access_token), do: :ok
+
+  defp check_declared_size(%{file_id: file_id} = params, resource_key_headers, max_bytes, token) do
+    token
+    |> Transport.request()
+    |> Req.get(
+      url: "/v3/files/#{encode_id(file_id)}",
+      params: Params.file_size_params(params),
+      headers: resource_key_headers
+    )
+    |> ContentLimit.check_declared_size(max_bytes)
+  end
+
+  defp handle_content_response(result, params) do
+    with :ok <- ContentLimit.check_received(result) do
+      Response.handle_file_content_response(result, params)
+    end
   end
 
   defp encode_id(file_id), do: URI.encode(file_id, &URI.char_unreserved?/1)

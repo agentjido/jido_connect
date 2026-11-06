@@ -1,0 +1,61 @@
+{
+  "body": {
+    "error": {
+      "code": 403,
+      "errors": [
+        {
+          "domain": "global",
+          "location": "alt",
+          "locationType": "parameter",
+          "message": "Only files with binary content can be downloaded. Use Export with Docs Editors files.",
+          "reason": "fileNotDownloadable"
+        }
+      ],
+      "message": "Only files with binary content can be downloaded. Use Export with Docs Editors files."
+    }
+  },
+  "headers": {
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0"
+    ],
+    "content-length": [
+      "420"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 14:50:18 GMT"
+    ],
+    "expires": [
+      "Fri, 06 Nov 2026 14:50:18 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "vary": [
+      "Origin, X-Origin"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-guploader-uploadid": [
+      "AFy3sg2wKMizMSNxTC8-AnXgBK0PIXASqoLLox47t70hWwXMT8aC3wMjJItVyrPDILxzpiI9MoI5p0g"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/1Ej83l690dmUeDhX90Suxdef_SR97A-Kleilmdg5G9_E"
+  },
+  "status": 403
+}

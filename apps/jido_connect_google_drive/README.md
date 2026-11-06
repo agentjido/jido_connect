@@ -17,9 +17,11 @@ schemas, normalized structs, and tests in this package.
   [Uploading Files](#uploading-files)
 - `google.drive.file.copy`
 - `google.drive.file.update`
-- `google.drive.file.export`
+- `google.drive.file.export`, see
+  [Limiting Content Bytes](#limiting-content-bytes)
 - `google.drive.file.download`, the stored bytes unparsed, see
-  [Downloading Files](#downloading-files)
+  [Downloading Files](#downloading-files) and
+  [Limiting Content Bytes](#limiting-content-bytes)
 - `google.drive.file.delete`
 - `google.drive.permissions.list`
 - `google.drive.permission.create`
@@ -383,6 +385,55 @@ map or a list. Valid UTF-8 without NUL bytes comes back as `content` with
 `mime_type` is the media type of the response without parameters, such as
 `application/json`. Google Workspace documents need
 `google.drive.file.export`, which converts them to a requested format.
+
+## Limiting Content Bytes
+
+`google.drive.file.export` and `google.drive.file.download` hold the whole
+content in memory before they return it. Both take an optional `max_bytes`, a
+non-negative integer, that bounds the bytes they read. Without it they read
+the whole body; there is no default limit.
+
+With `max_bytes`, the connector counts the content's bytes while they arrive
+and stops reading before it collects the byte that would exceed the limit. A
+`content-length` above the limit stops the read at the first chunk. Content
+of exactly `max_bytes` bytes passes and comes back as it would without a
+limit, with `size` at most `max_bytes`.
+
+```elixir
+Jido.Connect.invoke(
+  Jido.Connect.Google.Drive,
+  "google.drive.file.export",
+  %{file_id: file_id, mime_type: "text/plain", max_bytes: 1_048_576},
+  context: context,
+  credential_lease: lease
+)
+```
+
+Drive declares no size for an export: it converts the document while it
+sends it, and the `size` it reports for a Google Docs document describes no
+export of it. In the test account a document with a `size` of 1,024 exported
+77 bytes as plain text. An export is therefore stopped only while it
+arrives.
+
+A download with `max_bytes` first reads the file's `size` through `files.get`
+with `fields=size,mimeType`, the same `resource_key` and the same
+`supports_all_drives`. When Drive declares more bytes than `max_bytes`, the
+action fails without requesting the content. A file without a `size` goes on
+to the content request, and so does a Google Workspace document, whose
+download Drive refuses with 403. The count applies there as well, so content
+longer than Drive declared is stopped too. The size read is one more request
+for every download with `max_bytes`.
+
+Content over the limit returns a `Jido.Connect.Error.ProviderError` with
+`reason: :limit_exceeded` and `details.max_bytes`. The error holds no part of
+the content, and `Jido.Connect.Error.retryable?/1` returns `false`, because a
+repeated read meets the same limit. A negative `max_bytes` returns a
+`ValidationError` before any request.
+
+The count covers the bytes Drive sends. With `max_bytes`, Req neither asks
+for a compressed body nor decompresses one, so these are the bytes the action
+returns. Error responses, such as Google's JSON errors, do not count against
+`max_bytes`.
 
 ## Permission-Aware Field Projections
 

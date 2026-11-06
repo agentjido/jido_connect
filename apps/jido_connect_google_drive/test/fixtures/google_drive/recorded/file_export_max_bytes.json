@@ -1,0 +1,50 @@
+{
+  "body": "﻿jcl-marker-tab-first\r\n\r\n\r\njcl-marker-tab-second\r\n\r\n\r\njcl-marker-tab-nested",
+  "headers": {
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate"
+    ],
+    "content-disposition": [
+      "attachment"
+    ],
+    "content-length": [
+      "77"
+    ],
+    "content-type": [
+      "text/plain"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 14:50:16 GMT"
+    ],
+    "expires": [
+      "Fri, 06 Nov 2026 14:50:16 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "vary": [
+      "Origin, X-Origin"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-guploader-uploadid": [
+      "AFy3sg0jaHZICJfzZSoG4hB05LO4AZH5_BXeShaXrCiDnqYEdctCFBp5C4JmzWsjm81LWmc"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/1Ej83l690dmUeDhX90Suxdef_SR97A-Kleilmdg5G9_E/export"
+  },
+  "status": 200
+}

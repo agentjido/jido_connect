@@ -50,6 +50,12 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
 
   @upload_limit 5_242_880
 
+  # Byte limits for the export of GOOGLE_DOCS_TABBED_DOCUMENT_ID, whose plain
+  # text holds this seed marker of its first tab.
+  @small_limit 16
+  @large_limit 1_048_576
+  @tab_marker "jcl-marker-tab-first"
+
   # Two small JSON files whose bytes change when they are decoded and encoded
   # again: spacing, key order, a trailing zero, an escaped slash, and "ä", two
   # bytes but one character.
@@ -244,6 +250,81 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
                %{file_id: file_id, mime_type: "text/plain"},
                env["GOOGLE_ACCESS_TOKEN"]
              )
+  end
+
+  # Drive declares no size for an export, so only the bytes it sends can stop
+  # one. The exports under the small limit, under the large limit and one
+  # byte below the export's length run before recording starts; only the
+  # export at exactly its length is recorded.
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DOCS_TABBED_DOCUMENT_ID"])
+  test "exports the tabbed document within max_bytes and stops below its length", %{env: env} do
+    token = env["GOOGLE_ACCESS_TOKEN"]
+    input = %{file_id: env["GOOGLE_DOCS_TABBED_DOCUMENT_ID"], mime_type: "text/plain"}
+
+    assert {:error, %Connect.Error.ProviderError{reason: :limit_exceeded} = small} =
+             invoke("google.drive.file.export", Map.put(input, :max_bytes, @small_limit), token)
+
+    assert small.details.max_bytes == @small_limit
+    refute Connect.Error.retryable?(small)
+    refute inspect(small) =~ @tab_marker
+
+    assert {:ok, %{file_content: %{size: size} = content}} =
+             invoke("google.drive.file.export", Map.put(input, :max_bytes, @large_limit), token)
+
+    assert size > @small_limit
+    assert content.content =~ @tab_marker
+
+    assert {:error, %Connect.Error.ProviderError{reason: :limit_exceeded}} =
+             invoke("google.drive.file.export", Map.put(input, :max_bytes, size - 1), token)
+
+    LiveSmoke.record(@req_options, :google_drive, "file_export_max_bytes", @masked)
+
+    assert {:ok, %{file_content: ^content}} =
+             invoke("google.drive.file.export", Map.put(input, :max_bytes, size), token)
+  end
+
+  # The size read of a download with max_bytes is the only request when
+  # Drive declares more bytes than the limit; Finch's request events show it.
+  # Neither the size taken from `google.drive.file.get` nor that stopped
+  # download is recorded, only the download at the limit: its size read and
+  # its content.
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DRIVE_SHARED_LINK_URL"])
+  test "downloads the link-shared file at its declared size and stops one byte lower without a content request",
+       %{env: env} do
+    token = env["GOOGLE_ACCESS_TOKEN"]
+    assert {:ok, %{file_id: file_id} = link} = Link.parse(env["GOOGLE_DRIVE_SHARED_LINK_URL"])
+    assert {:ok, %{file: %{size: size}}} = invoke("google.drive.file.get", link, token)
+    assert is_integer(size) and size > 0
+
+    {result, requests} =
+      with_finch_requests(fn ->
+        invoke("google.drive.file.download", Map.put(link, :max_bytes, size - 1), token)
+      end)
+
+    assert {:error, %Connect.Error.ProviderError{reason: :limit_exceeded}} = result
+    assert [{"/drive/v3/files/" <> ^file_id, query}] = requests
+    assert URI.decode_query(query)["fields"] == "size,mimeType"
+
+    LiveSmoke.record(@req_options, :google_drive, "file_download_max_bytes", @masked)
+
+    assert {:ok, %{file_content: %{file_id: ^file_id, size: ^size}}} =
+             invoke("google.drive.file.download", Map.put(link, :max_bytes, size), token)
+  end
+
+  # Drive declares a size for a Google Doc, which has no bytes to download.
+  # That size does not stop the download; Drive refuses it instead.
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DOCS_TABBED_DOCUMENT_ID"])
+  test "a Google Doc's declared size does not stop a download with max_bytes", %{env: env} do
+    LiveSmoke.record(@req_options, :google_drive, "file_download_max_bytes_google_doc", @masked)
+
+    assert {:error, %Connect.Error.ProviderError{status: 403} = error} =
+             invoke(
+               "google.drive.file.download",
+               %{file_id: env["GOOGLE_DOCS_TABBED_DOCUMENT_ID"], max_bytes: 1},
+               env["GOOGLE_ACCESS_TOKEN"]
+             )
+
+    assert error.reason == :http_error
   end
 
   @tag env!(["GOOGLE_ACCESS_TOKEN"])
@@ -597,6 +678,34 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
 
   defp hex_digest(algorithm, content),
     do: algorithm |> :crypto.hash(content) |> Base.encode16(case: :lower)
+
+  # Runs `fun` and returns its result with the path and query of every
+  # request that Finch started in this process meanwhile.
+  defp with_finch_requests(fun) do
+    handler_id = {__MODULE__, make_ref()}
+    event = [:finch, :request, :start]
+    :ok = :telemetry.attach(handler_id, event, &__MODULE__.forward_finch_request/4, self())
+
+    try do
+      result = fun.()
+      {result, receive_finch_requests([])}
+    after
+      :telemetry.detach(handler_id)
+    end
+  end
+
+  @doc false
+  def forward_finch_request(_event, _measurements, %{request: request}, pid) do
+    if self() == pid, do: send(pid, {:finch_request, request.path, request.query})
+  end
+
+  defp receive_finch_requests(requests) do
+    receive do
+      {:finch_request, path, query} -> receive_finch_requests([{path, query} | requests])
+    after
+      0 -> Enum.reverse(requests)
+    end
+  end
 
   defp delete_uploads_named(access_token, folder_id, name) do
     assert %{status: 200, body: %{"files" => files}} =

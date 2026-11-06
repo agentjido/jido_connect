@@ -266,6 +266,15 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     |> Data.compact()
   end
 
+  @doc "Builds query params for the size read that precedes a download with `max_bytes`."
+  def file_size_params(params) do
+    %{
+      fields: "size,mimeType",
+      supportsAllDrives: Data.get(params, :supports_all_drives)
+    }
+    |> Data.compact()
+  end
+
   @doc """
   Builds the `X-Goog-Drive-Resource-Keys` header for a request on one file.
 

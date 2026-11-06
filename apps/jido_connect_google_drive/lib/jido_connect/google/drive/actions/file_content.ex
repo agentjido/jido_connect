@@ -7,6 +7,7 @@ defmodule Jido.Connect.Google.Drive.Actions.FileContent do
   @readonly_scope "https://www.googleapis.com/auth/drive.readonly"
   @scope_resolver Jido.Connect.Google.Drive.ScopeResolver
   @auth_profiles [:user, :service_account, :domain_delegated_service_account]
+  @max_bytes_description "Most content bytes to read. A longer body fails with reason :limit_exceeded and no content; unset reads the whole body."
 
   actions do
     action :export_file do
@@ -32,6 +33,12 @@ defmodule Jido.Connect.Google.Drive.Actions.FileContent do
           description:
             "Resource key of a link-shared file, sent as the X-Goog-Drive-Resource-Keys header.",
           example: "0-AbCdEf..."
+        )
+
+        field(:max_bytes, :integer,
+          minimum: 0,
+          description: @max_bytes_description,
+          example: 10_485_760
         )
       end
 
@@ -63,6 +70,12 @@ defmodule Jido.Connect.Google.Drive.Actions.FileContent do
           description:
             "Resource key of a link-shared file, sent as the X-Goog-Drive-Resource-Keys header.",
           example: "0-AbCdEf..."
+        )
+
+        field(:max_bytes, :integer,
+          minimum: 0,
+          description: @max_bytes_description,
+          example: 10_485_760
         )
       end
 

@@ -60,6 +60,12 @@ created or opened. The action buffers the whole file in memory and returns
 recording base64-encoded as `content_base64`, with the byte count of the file
 as `size`. Neither package transcodes or otherwise processes media.
 
+The optional `max_bytes` input of `google.drive.file.download` bounds that
+buffer for a long recording. A recording with more bytes than `max_bytes`
+fails with `reason: :limit_exceeded` and no content. The limit counts the
+bytes of the file, not of its base64 text. "Limiting Content Bytes" in
+`../jido_connect_google_drive/README.md` describes it.
+
 `google.meet.transcript.entry.list` returns transcript text entry by entry.
 Each entry carries its `entry_name`, the speaking `participant` as a
 conference participant resource name, `text`, `language_code`, `start_time`
