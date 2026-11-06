@@ -19,6 +19,11 @@ defmodule Jido.Connect.Google.Docs.LiveSmokeTest do
   # so the connection and the lease declare the scope the token carries.
   @documents_scope "https://www.googleapis.com/auth/documents"
 
+  # GOOGLE_DRIVE_ONLY_ACCESS_TOKEN is minted from the same refresh token,
+  # narrowed to this scope; see docs/live_smoke_tests.md.
+  @drive_scope "https://www.googleapis.com/auth/drive"
+  @tokeninfo "https://oauth2.googleapis.com/tokeninfo"
+
   # The prepared document has the top-level tabs First and Second and the
   # child tab Nested under Second, each holding one seed marker.
   @first_marker "jcl-marker-tab-first"
@@ -96,25 +101,29 @@ defmodule Jido.Connect.Google.Docs.LiveSmokeTest do
                env["GOOGLE_ACCESS_TOKEN"]
              )
 
-    assert [
-             %{tab_id: first_id, title: "First", body: first_body, child_tabs: []},
-             %{
-               tab_id: second_id,
-               title: "Second",
-               body: second_body,
-               child_tabs: [
-                 %{tab_id: nested_id, title: "Nested", body: nested_body, child_tabs: []}
-               ]
-             }
-           ] = document.tabs
+    assert_every_tab_with_its_marker(document)
+  end
 
-    tab_ids = [first_id, second_id, nested_id]
-    assert Enum.all?(tab_ids, &(is_binary(&1) and &1 != ""))
-    assert Enum.uniq(tab_ids) == tab_ids
+  # The connection and the lease hold only drive, and Google's tokeninfo
+  # endpoint confirms, outside the recorder, that the token holds nothing
+  # else. A pass therefore shows that Google answers a Docs read under drive.
+  @tag env!(["GOOGLE_DRIVE_ONLY_ACCESS_TOKEN", "GOOGLE_DOCS_TABBED_DOCUMENT_ID"])
+  test "reads every tab body of the tabbed document under a drive-only grant", %{env: env} do
+    token = env["GOOGLE_DRIVE_ONLY_ACCESS_TOKEN"]
 
-    assert text(first_body) =~ @first_marker
-    assert text(second_body) =~ @second_marker
-    assert text(nested_body) =~ @nested_marker
+    assert token_scopes(token) == [@drive_scope]
+
+    LiveSmoke.record(@req_options, :google_docs, "document_with_tabs_content_drive_grant")
+
+    assert {:ok, %{document: document}} =
+             invoke(
+               "google.docs.document.get",
+               %{document_id: env["GOOGLE_DOCS_TABBED_DOCUMENT_ID"], include_tabs_content: true},
+               token,
+               [@drive_scope]
+             )
+
+    assert_every_tab_with_its_marker(document)
   end
 
   @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DOCS_TABBED_DOCUMENT_ID"])
@@ -127,10 +136,22 @@ defmodule Jido.Connect.Google.Docs.LiveSmokeTest do
                env["GOOGLE_ACCESS_TOKEN"]
              )
 
-    assert document.tabs == []
-    assert text(document.body) =~ @first_marker
-    refute text(document.body) =~ @second_marker
-    refute text(document.body) =~ @nested_marker
+    assert_only_first_tab_in_legacy_body(document)
+  end
+
+  # The client sends includeTabsContent only when the input sets it, so this
+  # request carries no such parameter.
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DOCS_TABBED_DOCUMENT_ID"])
+  test "an omitted include_tabs_content returns what false returns", %{env: env} do
+    LiveSmoke.record(@req_options, :google_docs, "document_tabs_content_omitted")
+
+    assert {:ok, %{document: document}} =
+             get_document(
+               %{document_id: env["GOOGLE_DOCS_TABBED_DOCUMENT_ID"]},
+               env["GOOGLE_ACCESS_TOKEN"]
+             )
+
+    assert_only_first_tab_in_legacy_body(document)
   end
 
   @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DOCS_SCRATCH_DOCUMENT_ID"])
@@ -210,6 +231,44 @@ defmodule Jido.Connect.Google.Docs.LiveSmokeTest do
     assert read_scratch(token, document_id).text == @text_after_replacement
   end
 
+  defp assert_every_tab_with_its_marker(document) do
+    assert [
+             %{tab_id: first_id, title: "First", body: first_body, child_tabs: []},
+             %{
+               tab_id: second_id,
+               title: "Second",
+               body: second_body,
+               child_tabs: [
+                 %{tab_id: nested_id, title: "Nested", body: nested_body, child_tabs: []}
+               ]
+             }
+           ] = document.tabs
+
+    tab_ids = [first_id, second_id, nested_id]
+    assert Enum.all?(tab_ids, &(is_binary(&1) and &1 != ""))
+    assert Enum.uniq(tab_ids) == tab_ids
+
+    assert text(first_body) =~ @first_marker
+    assert text(second_body) =~ @second_marker
+    assert text(nested_body) =~ @nested_marker
+  end
+
+  defp assert_only_first_tab_in_legacy_body(document) do
+    assert document.tabs == []
+    assert text(document.body) =~ @first_marker
+    refute text(document.body) =~ @second_marker
+    refute text(document.body) =~ @nested_marker
+  end
+
+  # The token goes in the form body, not the URL, and a failure names only
+  # the status: Google's answer also carries the OAuth client ID.
+  defp token_scopes(access_token) do
+    case Req.post!(@tokeninfo, form: [access_token: access_token], retry: false) do
+      %{status: 200, body: %{"scope" => scope}} -> String.split(scope)
+      %{status: status} -> flunk("tokeninfo answered HTTP #{status}")
+    end
+  end
+
   defp text(%{"content" => content}) do
     for %{"paragraph" => %{"elements" => elements}} <- content,
         %{"textRun" => %{"content" => run}} <- elements,
@@ -271,7 +330,7 @@ defmodule Jido.Connect.Google.Docs.LiveSmokeTest do
     invoke("google.docs.document.get", input, access_token)
   end
 
-  defp invoke(action_id, input, access_token) do
+  defp invoke(action_id, input, access_token, scopes \\ [@documents_scope]) do
     connection =
       Connect.Connection.new!(%{
         id: "live_smoke",
@@ -281,7 +340,7 @@ defmodule Jido.Connect.Google.Docs.LiveSmokeTest do
         owner_type: :app_user,
         owner_id: "live_smoke",
         status: :connected,
-        scopes: [@documents_scope]
+        scopes: scopes
       })
 
     context =
@@ -298,7 +357,7 @@ defmodule Jido.Connect.Google.Docs.LiveSmokeTest do
         profile: :user,
         expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
         fields: %{access_token: access_token},
-        scopes: [@documents_scope]
+        scopes: scopes
       })
 
     Connect.invoke(Docs.integration(), action_id, input,

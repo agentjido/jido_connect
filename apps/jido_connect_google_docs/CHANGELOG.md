@@ -27,6 +27,19 @@
 - The README states that requests use snake_case names, which Google
   accepts as sent, and describes the response fields and revision
   conflicts.
+- Document reads accept a connection that holds `drive` and neither
+  `documents.readonly` nor `documents`. Before, such a connection failed
+  with missing scopes, although Google answers a Docs read under `drive`.
+  `drive.readonly` and `drive.file` still satisfy no read, and writes still
+  require `documents`.
+- The `:user` profile lists `drive` in `scopes` and `optional_scopes`, not
+  in `default_scopes`. Before, the resolver accepted `drive` for reads, but
+  catalog discovery and filtering by `drive` returned no Docs entry.
+  `drive.readonly` and `drive.file` are not declared.
+- The `include_tabs_content` description and the README state that an
+  omitted value returns the same as `false`, checked live, and the README
+  states that a Drive `text/plain` export holds every tab, nested tabs
+  included, without tab titles.
 
 ## 0.1.0
 

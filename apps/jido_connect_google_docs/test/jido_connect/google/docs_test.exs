@@ -17,6 +17,7 @@ defmodule Jido.Connect.Google.DocsTest do
 
   @readonly_scope "https://www.googleapis.com/auth/documents.readonly"
   @write_scope "https://www.googleapis.com/auth/documents"
+  @drive_scope "https://www.googleapis.com/auth/drive"
 
   defmodule FakeDocsClient do
     def get_document(%{document_id: "doc_abc123"}, "token") do
@@ -75,11 +76,22 @@ defmodule Jido.Connect.Google.DocsTest do
     assert @readonly_scope in profile.optional_scopes
     assert @write_scope in profile.optional_scopes
 
+    # Reads resolve to `drive` when it is the only Docs-capable grant, so the
+    # profile declares it as optional and never requests it by default.
+    assert @drive_scope in profile.scopes
+    assert @drive_scope in profile.optional_scopes
+    refute @drive_scope in profile.default_scopes
+
     ConnectorContracts.assert_google_naming_and_catalog_conventions(Docs,
       id_prefix: "google.docs.",
       pack_id_prefix: "google_docs_",
       module_namespace: Jido.Connect.Google.Docs
     )
+  end
+
+  test "catalog discovery by the drive scope finds Docs" do
+    assert [%Connect.Catalog.Entry{id: :google_docs}] =
+             Connect.Catalog.discover(modules: [Docs], scope: @drive_scope)
   end
 
   test "compiles generated Jido plugin surface" do

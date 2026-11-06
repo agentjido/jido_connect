@@ -9,6 +9,7 @@ defmodule Jido.Connect.Google.Docs.DocumentTabsTest do
   # and Second and the child tab Nested under Second.
   @document_id "1Ej83l690dmUeDhX90Suxdef_SR97A-Kleilmdg5G9_E"
   @readonly_scope "https://www.googleapis.com/auth/documents.readonly"
+  @drive_scope "https://www.googleapis.com/auth/drive"
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -78,6 +79,64 @@ defmodule Jido.Connect.Google.Docs.DocumentTabsTest do
     assert indexes(document.body) == [{nil, 1}, {1, 22}, {22, 23}]
   end
 
+  test "an omitted include_tabs_content sends no parameter and returns the legacy body" do
+    recorded = LiveSmoke.fixture!(:google_docs, "document_tabs_content_omitted")
+    refute Map.has_key?(recorded, "tabs")
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      refute Map.has_key?(conn.query_params, "includeTabsContent")
+      Req.Test.json(conn, recorded)
+    end)
+
+    assert {:ok, %{document: document}} = get_document(%{document_id: @document_id})
+
+    assert document.tabs == []
+    assert document.body == recorded["body"]
+    assert indexes(document.body) == [{nil, 1}, {1, 22}, {22, 23}]
+  end
+
+  # Recorded with an access token that held only drive.
+  test "a connection and lease holding only drive read every tab" do
+    recorded = LiveSmoke.fixture!(:google_docs, "document_with_tabs_content_drive_grant")
+    %{"tabs" => [first, %{"childTabs" => [nested]} = second]} = recorded
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.request_path == "/v1/documents/#{@document_id}"
+      assert conn.query_params["includeTabsContent"] == "true"
+      Req.Test.json(conn, recorded)
+    end)
+
+    input = %{document_id: @document_id, include_tabs_content: true}
+    assert {:ok, %{document: document}} = get_document(input, [@drive_scope])
+
+    assert [
+             %{tab_id: "t.0", title: "First", body: first_body, child_tabs: []},
+             %{
+               tab_id: "t.1mzp8ctna0b6",
+               title: "Second",
+               body: second_body,
+               child_tabs: [
+                 %{tab_id: "t.xii08ty2ttum", title: "Nested", body: nested_body, child_tabs: []}
+               ]
+             }
+           ] = document.tabs
+
+    assert first_body == first["documentTab"]["body"]
+    assert second_body == second["documentTab"]["body"]
+    assert nested_body == nested["documentTab"]["body"]
+  end
+
+  # No Req.Test expectation: a request would fail the test.
+  for scope <- ["drive.readonly", "drive.file"] do
+    test "a connection and lease holding only #{scope} are refused before any request" do
+      granted = "https://www.googleapis.com/auth/" <> unquote(scope)
+
+      assert {:error,
+              %Connect.Error.AuthError{reason: :missing_scopes, missing_scopes: [@readonly_scope]}} =
+               get_document(%{document_id: @document_id, include_tabs_content: true}, [granted])
+    end
+  end
+
   # Each case edits the recorded tabbed response so that one tab, or the list
   # holding it, no longer has the provider's shape.
   for {edit, description} <- [
@@ -145,7 +204,7 @@ defmodule Jido.Connect.Google.Docs.DocumentTabsTest do
   defp indexes(%{"content" => content}),
     do: Enum.map(content, &{&1["startIndex"], &1["endIndex"]})
 
-  defp get_document(input) do
+  defp get_document(input, scopes \\ [@readonly_scope]) do
     connection =
       Connect.Connection.new!(%{
         id: "conn_1",
@@ -155,7 +214,7 @@ defmodule Jido.Connect.Google.Docs.DocumentTabsTest do
         owner_type: :app_user,
         owner_id: "user_1",
         status: :connected,
-        scopes: [@readonly_scope]
+        scopes: scopes
       })
 
     context =
@@ -172,7 +231,7 @@ defmodule Jido.Connect.Google.Docs.DocumentTabsTest do
         profile: :user,
         expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
         fields: %{access_token: "token"},
-        scopes: [@readonly_scope]
+        scopes: scopes
       })
 
     Connect.invoke(Docs.integration(), "google.docs.document.get", input,

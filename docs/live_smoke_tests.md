@@ -24,7 +24,16 @@ mix test --only live_smoke
 The env files hold plain `NAME=value` lines, so `set -a` exports them to
 `mix`. Google access tokens expire after an hour and are not stored: mint
 `GOOGLE_ACCESS_TOKEN` and `GOOGLE_GMAIL_METADATA_ACCESS_TOKEN` from the refresh
-tokens before each run.
+tokens before each run. The Docs and Drive checks of a Drive-only grant also
+need `GOOGLE_DRIVE_ONLY_ACCESS_TOKEN`. A refresh of `GOOGLE_REFRESH_TOKEN`
+that adds `scope=https://www.googleapis.com/auth/drive` to the token request
+returns a token narrowed to that scope; Google reports the granted scopes in
+the `scope` field of the response, and a run uses the token only when that
+field is exactly the Drive scope. These checks, in
+`apps/jido_connect_google_docs/test/jido_connect/google/docs/live_smoke_test.exs`
+and `apps/jido_connect_google_drive/test/jido_connect/google/drive/live_tabbed_export_test.exs`,
+ask Google's `tokeninfo` endpoint again before they read, so a run with a
+broader token fails.
 
 The Slack, Jira, Confluence and Tempo packages declare `plug` as a test-only
 dependency, which conflicts with a transitive dependency when Mix runs inside
@@ -156,6 +165,7 @@ as seed input belong to the scripts that create the test data.
 | `GOOGLE_ACCESS_TOKEN` | credential | Access token minted per run from the refresh token |
 | `GOOGLE_GMAIL_METADATA_REFRESH_TOKEN` | credential | Refresh token with `gmail.metadata` only |
 | `GOOGLE_GMAIL_METADATA_ACCESS_TOKEN` | credential | Access token minted from it |
+| `GOOGLE_DRIVE_ONLY_ACCESS_TOKEN` | credential | Access token narrowed to `drive`, minted per run from `GOOGLE_REFRESH_TOKEN` by a refresh with `scope=https://www.googleapis.com/auth/drive`; use it only when the `scope` field of the refresh response is exactly that scope |
 | `GOOGLE_GMAIL_QUERY` | setting | Query matching exactly five prepared messages, two of them archived |
 | `GOOGLE_GMAIL_THREAD_ID` | setting | Three-message conversation |
 | `GOOGLE_GMAIL_ATTACHMENT_MESSAGE_ID` | setting | Message with attachments and nested parts |

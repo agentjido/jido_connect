@@ -40,7 +40,8 @@ defmodule Jido.Connect.Google.Docs.Actions.Documents do
           description:
             "true returns every tab in tabs, with nested tabs in child_tabs, and no legacy body. " <>
               "false returns only the first tab in the legacy body, with tabs empty. " <>
-              "No default: the request carries includeTabsContent only when this is set."
+              "No default: the request carries includeTabsContent only when this is set, " <>
+              "and unset returns the same as false."
         )
       end
 
