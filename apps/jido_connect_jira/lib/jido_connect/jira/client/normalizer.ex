@@ -25,7 +25,10 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
 
   The description is rendered with `Jido.Connect.Jira.ADFText`:
   `description_unsupported_nodes` lists the ADF node and mark types skipped
-  while rendering it. A malformed ADF description returns the projection's
+  while rendering it. A description that renders to an empty text, such as a
+  document without content, keeps `description: ""`; a description that is
+  `null` or missing stays `nil`, and `missing_fields` tells the two apart. A
+  malformed ADF description returns the projection's
   `Jido.Connect.Error.ValidationError`.
 
   Pass the request's field list as `requested_fields:` to fill
@@ -50,7 +53,6 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
         id: Data.get(payload, "id"),
         url: Data.get(payload, "self"),
         summary: Data.get(fields, "summary"),
-        description: ADFText.text(description),
         description_unsupported_nodes: ADFText.unsupported_nodes(description),
         status: normalize_status(Data.get(fields, "status")),
         issue_type: normalize_issue_type(Data.get(fields, "issuetype")),
@@ -68,6 +70,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
         updated_at: Data.get(fields, "updated")
       }
       |> Data.compact()
+      |> put_text(:description, ADFText.text(description))
       |> Map.put(:missing_fields, IssueFields.missing(fields, opts[:requested_fields]))
       |> Issue.new()
     end

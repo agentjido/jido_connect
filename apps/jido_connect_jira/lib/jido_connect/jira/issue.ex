@@ -2,10 +2,11 @@ defmodule Jido.Connect.Jira.Issue do
   @moduledoc """
   Normalized Jira issue.
 
-  A field that Jira returns as `null` stays `nil`. `missing_fields` lists the
-  requested Jira field keys, such as `"duedate"`, that the payload's `fields`
-  object does not contain at all, so a `nil` value can be told apart from a
-  field that Jira did not return.
+  A field that Jira returns as `null` stays `nil`. A description that renders
+  to an empty text stays `""`, apart from a `null` one. `missing_fields`
+  lists the requested Jira field keys, such as `"duedate"`, that the payload's
+  `fields` object does not contain at all, so a `nil` value can be told apart
+  from a field that Jira did not return.
   """
 
   alias Jido.Connect.Jira.{Status, User}

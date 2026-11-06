@@ -79,6 +79,11 @@ mutation actions are needed.
 | `jira.issue.comment.create` | create | external_write | Add comment to issue |
 | `jira.issue.comment.list` | list | read | List an issue's comments, one page per call |
 
+Every action with an `issue_key` input sends the key or numeric ID as one
+percent-encoded path segment, so `/`, `?` and `#` stay inside it. An empty
+key, `.` and `..` fail with a `Jido.Connect.Error.ValidationError` before a
+request is sent.
+
 ### Issue Reads and Search
 
 `jira.issue.get` calls `GET /rest/api/3/issue/{issueIdOrKey}`. The
@@ -88,6 +93,9 @@ output carries `id`, `key`, `url` (the API `self` URL), `project`,
 `assignee`, `status`, `priority`, `labels`, the plain-text `description` with
 `description_unsupported_nodes`, the date-only `due_date` and the
 timestamps. A field that Jira returns as `null` is absent from the output.
+A description that renders to an empty text, such as a document without
+content, keeps `description: ""` in `jira.issue.get` and in the issues of
+`jira.issue.search`, apart from a `null` description.
 `missing_fields` lists the requested Jira field keys, such as `parent` on a
 top-level issue or a field that the site's field configuration hides, that the
 response does not contain at all, so an empty field and an unavailable one
@@ -330,10 +338,13 @@ with empty details, and other event names return
 delivery without a normalized signal.
 
 The signal keeps full values. `Jido.Connect.WebhookDelivery.to_public_map/1`
-sanitizes `normalized_signal` like any transport payload: it cuts strings
-such as a long `comment_body` at 512 bytes and replaces values nested deeper
-than four levels, such as the values of changelog items, with
-`"[truncated]"`.
+sanitizes `normalized_signal` for transport and keeps the values of
+changelog items: `field`, `field_id`, `field_type`, `from`, `from_string`,
+`to` and `to_string`. It cuts strings, such as a long `comment_body` or a
+long changelog value, at 512 bytes, and lists, such as `changelog.items`,
+at 50 entries. The raw `payload` in the same map keeps one level less, so it
+shows the values of changelog items as `"[truncated]"`; read them from
+`normalized_signal`.
 
 ## Catalog Packs
 

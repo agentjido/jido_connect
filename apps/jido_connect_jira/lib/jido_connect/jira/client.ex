@@ -119,46 +119,76 @@ defmodule Jido.Connect.Jira.Client do
     |> Response.handle_project_response()
   end
 
-  @doc "Updates an existing Jira issue."
+  @doc """
+  Updates the fields of a Jira issue, given by key or numeric ID.
+
+  The identifier is percent-encoded as one path segment, as in
+  `get_issue/3`. An empty identifier, `.` and `..` fail with a
+  `Jido.Connect.Error.ValidationError` before a request is sent.
+  """
   def update_issue(issue_key, fields, %Request{} = request)
       when is_binary(issue_key) and is_map(fields) do
-    request
-    |> Transport.request()
-    |> Req.put(
-      url: Request.url(request, "/rest/api/3/issue/#{issue_key}"),
-      json: %{fields: fields}
-    )
-    |> Response.handle_update_response()
+    with {:ok, segment} <- Request.issue_segment(issue_key) do
+      request
+      |> Transport.request()
+      |> Req.put(
+        url: Request.url(request, "/rest/api/3/issue/" <> segment),
+        json: %{fields: fields}
+      )
+      |> Response.handle_update_response()
+    end
   end
 
-  @doc "Transitions a Jira issue to a new status."
+  @doc """
+  Transitions a Jira issue, given by key or numeric ID, to a new status.
+
+  The identifier is percent-encoded as one path segment, as in
+  `get_issue/3`. An empty identifier, `.` and `..` fail with a
+  `Jido.Connect.Error.ValidationError` before a request is sent.
+  """
   def transition_issue(issue_key, transition_id, %Request{} = request, opts \\ [])
       when is_binary(issue_key) and is_binary(transition_id) do
     body = %{transition: %{id: transition_id}}
     body = if fields = Keyword.get(opts, :fields), do: Map.put(body, :fields, fields), else: body
 
-    request
-    |> Transport.request()
-    |> Req.post(
-      url: Request.url(request, "/rest/api/3/issue/#{issue_key}/transitions"),
-      json: body
-    )
-    |> Response.handle_transition_response()
+    with {:ok, segment} <- Request.issue_segment(issue_key) do
+      request
+      |> Transport.request()
+      |> Req.post(
+        url: Request.url(request, "/rest/api/3/issue/#{segment}/transitions"),
+        json: body
+      )
+      |> Response.handle_transition_response()
+    end
   end
 
-  @doc "Assigns a Jira issue to a user by account ID."
+  @doc """
+  Assigns a Jira issue, given by key or numeric ID, to a user by account ID.
+
+  The identifier is percent-encoded as one path segment, as in
+  `get_issue/3`. An empty identifier, `.` and `..` fail with a
+  `Jido.Connect.Error.ValidationError` before a request is sent.
+  """
   def assign_issue(issue_key, account_id, %Request{} = request)
       when is_binary(issue_key) and is_binary(account_id) do
-    request
-    |> Transport.request()
-    |> Req.put(
-      url: Request.url(request, "/rest/api/3/issue/#{issue_key}/assignee"),
-      json: %{accountId: account_id}
-    )
-    |> Response.handle_assign_response()
+    with {:ok, segment} <- Request.issue_segment(issue_key) do
+      request
+      |> Transport.request()
+      |> Req.put(
+        url: Request.url(request, "/rest/api/3/issue/#{segment}/assignee"),
+        json: %{accountId: account_id}
+      )
+      |> Response.handle_assign_response()
+    end
   end
 
-  @doc "Adds a comment to a Jira issue."
+  @doc """
+  Adds a plain-text comment to a Jira issue, given by key or numeric ID.
+
+  The identifier is percent-encoded as one path segment, as in
+  `get_issue/3`. An empty identifier, `.` and `..` fail with a
+  `Jido.Connect.Error.ValidationError` before a request is sent.
+  """
   def add_comment(issue_key, body_text, %Request{} = request)
       when is_binary(issue_key) and is_binary(body_text) do
     body = %{
@@ -169,13 +199,15 @@ defmodule Jido.Connect.Jira.Client do
       }
     }
 
-    request
-    |> Transport.request()
-    |> Req.post(
-      url: Request.url(request, "/rest/api/3/issue/#{issue_key}/comment"),
-      json: body
-    )
-    |> Response.handle_comment_response()
+    with {:ok, segment} <- Request.issue_segment(issue_key) do
+      request
+      |> Transport.request()
+      |> Req.post(
+        url: Request.url(request, "/rest/api/3/issue/#{segment}/comment"),
+        json: body
+      )
+      |> Response.handle_comment_response()
+    end
   end
 
   @doc "Lists all Jira field schemas."

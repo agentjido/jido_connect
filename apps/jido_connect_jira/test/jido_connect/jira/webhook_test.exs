@@ -92,17 +92,66 @@ defmodule Jido.Connect.Jira.WebhookTest do
         assert id =~ ~r/^\d+$/
       end
     end
+  end
 
-    test "the signal keeps changelog values that the public delivery map cuts" do
-      assert {:ok, %WebhookDelivery{normalized_signal: signal} = delivery} =
+  describe "public delivery map" do
+    test "keeps the from and to values of assignment, status and due-date changes" do
+      # Compared with each delivery's own changelog rather than literals, so
+      # the test holds when the captures are sanitized again; the test below
+      # and issue_signal_test.exs pin the values.
+      for name <- ~w(assignee_set assignee_changed assignee_cleared status_changed
+                     duedate_moved duedate_cleared) do
+        %{"changelog" => changelog} = CapturedDelivery.payload!(name)
+
+        assert {:ok, delivery} = LiveSmoke.replay(CapturedDelivery.path(name), webhook: Webhook)
+
+        assert WebhookDelivery.to_public_map(delivery).normalized_signal["changelog"] == %{
+                 "id" => changelog["id"],
+                 "items" => Enum.map(changelog["items"], &public_item/1)
+               }
+      end
+    end
+
+    test "shows a status change with its status IDs and names" do
+      assert {:ok, delivery} =
                LiveSmoke.replay(CapturedDelivery.path("status_changed"), webhook: Webhook)
 
-      assert [%{from: "10916", to: "3"}] = signal.changelog.items
+      assert %{
+               "id" => "283380",
+               "items" => [
+                 %{
+                   "field_id" => "status",
+                   "from" => "10916",
+                   "from_string" => "Backlog",
+                   "to" => "3",
+                   "to_string" => "In Progress"
+                 }
+               ]
+             } = WebhookDelivery.to_public_map(delivery).normalized_signal["changelog"]
+    end
 
-      # `to_public_map/1` sanitizes the signal like any transport payload:
-      # values nested deeper than four levels become "[truncated]".
-      assert %{"items" => [%{"from" => "[truncated]", "to" => "[truncated]"}]} =
+    test "cuts a changelog value over 512 bytes, which the signal keeps whole" do
+      # Derived: the captured status change with `toString` repeated to 600 bytes.
+      long = String.duplicate("In Progress ", 50)
+
+      payload =
+        update_in(CapturedDelivery.payload!("status_changed"), ["changelog", "items"], fn [item] ->
+          [Map.put(item, "toString", long)]
+        end)
+
+      raw = Jason.encode!(payload)
+      headers = %{"x-hub-signature" => sign(raw, LiveSmoke.replay_secret())}
+
+      assert {:ok, %WebhookDelivery{normalized_signal: signal} = delivery} =
+               Webhook.verify_delivery(raw, headers, LiveSmoke.replay_secret())
+
+      assert [%{to_string: ^long}] = signal.changelog.items
+
+      assert %{"items" => [%{"to" => "3", "to_string" => public}]} =
                WebhookDelivery.to_public_map(delivery).normalized_signal["changelog"]
+
+      assert byte_size(long) == 600
+      assert public == binary_part(long, 0, 512) <> "...[truncated 88 bytes]"
     end
   end
 
@@ -205,4 +254,20 @@ defmodule Jido.Connect.Jira.WebhookTest do
       assert "comment_updated" in events
     end
   end
+
+  # The signal's names for the keys of a changelog item in a Jira delivery.
+  defp public_item(item) do
+    %{
+      "field" => item["field"],
+      "field_id" => item["fieldId"],
+      "field_type" => item["fieldtype"],
+      "from" => item["from"],
+      "from_string" => item["fromString"],
+      "to" => item["to"],
+      "to_string" => item["toString"]
+    }
+  end
+
+  defp sign(body, secret),
+    do: "sha256=" <> (:hmac |> :crypto.mac(:sha256, secret, body) |> Base.encode16(case: :lower))
 end

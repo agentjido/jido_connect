@@ -115,6 +115,17 @@ defmodule Jido.Connect.Jira.Client.IssueSearchTest do
     assert third.missing_fields == ["parent"]
   end
 
+  test "keeps an empty description as an empty text, apart from a null one" do
+    # Derived: the recorded first page with JCL-1's description emptied to a
+    # document without content. JCL-2's description is null in the recording.
+    expect_page(with_empty_first_description(page(4)))
+
+    assert {:ok, %{issues: [first, second]}} = Client.search_issues(@jql, api_token_request())
+
+    assert %{key: "JCL-1", description: "", description_unsupported_nodes: []} = first
+    assert %{key: "JCL-2", description: nil, description_unsupported_nodes: nil} = second
+  end
+
   test "lists a navigable field that the page leaves out, apart from one Jira returns as null" do
     # `issue_fields` answers `*navigable` for JCL-3, whose due date is null.
     # The copy without `duedate` stands for a site that hides the field.
@@ -329,6 +340,12 @@ defmodule Jido.Connect.Jira.Client.IssueSearchTest do
   defp without_fields(page, keys) do
     Map.update!(page, "issues", fn issues ->
       Enum.map(issues, &update_in(&1, ["fields"], fn fields -> Map.drop(fields, keys) end))
+    end)
+  end
+
+  defp with_empty_first_description(page) do
+    update_in(page, ["issues"], fn [first | rest] ->
+      [put_in(first, ["fields", "description", "content"], []) | rest]
     end)
   end
 

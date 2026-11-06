@@ -95,6 +95,42 @@ defmodule Jido.Connect.Jira.Client.IssueReadTest do
              } = issue
     end
 
+    test "keeps an empty description as an empty text, apart from a missing one" do
+      # Derived: the recorded JCL-1 read once with its description emptied to
+      # a document without content and once without `description`. The null
+      # description of JCL-3 is the test above.
+      Req.Test.expect(__MODULE__, &Req.Test.json(&1, with_empty_description("issue_context.2")))
+      Req.Test.expect(__MODULE__, &Req.Test.json(&1, without_description("issue_context.2")))
+
+      assert {:ok, empty} = Client.get_issue("JCL-1", api_token_request(), fields: @fields)
+      assert {:ok, missing} = Client.get_issue("JCL-1", api_token_request(), fields: @fields)
+
+      assert %{description: "", description_unsupported_nodes: [], missing_fields: ["parent"]} =
+               empty
+
+      assert %{
+               description: nil,
+               description_unsupported_nodes: nil,
+               missing_fields: ["description", "parent"]
+             } = missing
+    end
+
+    test "keeps an image-only description as an empty text and lists mediaSingle" do
+      # Derived: the recorded JCL-1 read with the body of the recorded image
+      # comment 42675 (`comment_list`) as its description, reduced to the
+      # body's `mediaSingle` node.
+      image_only = with_image_only_description("issue_context.2")
+      Req.Test.expect(__MODULE__, &Req.Test.json(&1, image_only))
+
+      assert {:ok, issue} = Client.get_issue("JCL-1", api_token_request(), fields: @fields)
+
+      assert %{
+               description: "",
+               description_unsupported_nodes: ["mediaSingle"],
+               missing_fields: ["parent"]
+             } = issue
+    end
+
     test "lists a requested context field that the payload leaves out" do
       # The test site cannot hide a system field without an administrator
       # change, so this response is the recorded JCL-3 read with `duedate`
@@ -205,6 +241,22 @@ defmodule Jido.Connect.Jira.Client.IssueReadTest do
       refute Map.has_key?(issue, :due_date)
     end
 
+    test "returns an empty description as an empty text and leaves out a missing one" do
+      # Derived: the recorded JCL-1 read once with its description emptied to
+      # a document without content and once without `description`.
+      Req.Test.expect(__MODULE__, &Req.Test.json(&1, with_empty_description("issue_context.2")))
+      Req.Test.expect(__MODULE__, &Req.Test.json(&1, without_description("issue_context.2")))
+
+      assert {:ok, %{key: "JCL-1", description: "", description_unsupported_nodes: []}} =
+               invoke(%{issue_key: "JCL-1", fields: @fields})
+
+      assert {:ok, %{key: "JCL-1", missing_fields: ["description", "parent"]} = missing} =
+               invoke(%{issue_key: "JCL-1", fields: @fields})
+
+      refute Map.has_key?(missing, :description)
+      refute Map.has_key?(missing, :description_unsupported_nodes)
+    end
+
     test "reads an issue by numeric ID" do
       expect_issue("/rest/api/3/issue/46096", "issue_context.3")
 
@@ -225,6 +277,26 @@ defmodule Jido.Connect.Jira.Client.IssueReadTest do
 
   defp without_duedate(fixture) do
     update_in(LiveSmoke.fixture!(:jira, fixture), ["fields"], &Map.delete(&1, "duedate"))
+  end
+
+  defp without_description(fixture) do
+    update_in(LiveSmoke.fixture!(:jira, fixture), ["fields"], &Map.delete(&1, "description"))
+  end
+
+  defp with_empty_description(fixture) do
+    put_in(LiveSmoke.fixture!(:jira, fixture), ["fields", "description", "content"], [])
+  end
+
+  defp with_image_only_description(fixture) do
+    %{"comments" => comments} = LiveSmoke.fixture!(:jira, "comment_list")
+    %{"body" => %{"content" => content} = body} = Enum.find(comments, &(&1["id"] == "42675"))
+    [image] = Enum.filter(content, &(&1["type"] == "mediaSingle"))
+
+    put_in(
+      LiveSmoke.fixture!(:jira, fixture),
+      ["fields", "description"],
+      %{body | "content" => [image]}
+    )
   end
 
   defp expect_issue(path, fixture, check \\ fn _conn -> :ok end) do

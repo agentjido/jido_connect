@@ -75,6 +75,21 @@ defmodule Jido.Connect.Jira.IssueSearchContractTest do
     refute Map.has_key?(result, :start_at)
   end
 
+  test "returns an empty description as an empty text in the issues" do
+    # Derived: the recorded first page with JCL-1's description emptied to a
+    # document without content. JCL-2's description is null in the recording.
+    empty =
+      update_in(page(4), ["issues"], fn [first | rest] ->
+        [put_in(first, ["fields", "description", "content"], []) | rest]
+      end)
+
+    Req.Test.expect(__MODULE__, &Req.Test.json(&1, empty))
+
+    assert {:ok, %{issues: [first, second]}} = invoke(%{jql: @jql, max_results: 2})
+    assert %{key: "JCL-1", description: "", description_unsupported_nodes: []} = first
+    assert %{key: "JCL-2", description: nil} = second
+  end
+
   test "rejects start_at other than 0 before any request" do
     test = self()
 

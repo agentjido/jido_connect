@@ -43,7 +43,8 @@ defmodule Jido.Connect.Jira.Actions.Issues do
 
         field(:description, :string,
           description:
-            "Plain-text rendering of the ADF description. Absent when Jira returns null."
+            "Plain-text rendering of the ADF description. An empty description is \"\"; " <>
+              "absent when Jira returns null or leaves the field out."
         )
 
         field(:description_unsupported_nodes, {:array, :string},
