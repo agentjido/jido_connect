@@ -17,10 +17,11 @@ schemas, normalized structs, and tests in this package.
   [Uploading Files](#uploading-files)
 - `google.drive.file.copy`
 - `google.drive.file.update`
-- `google.drive.file.export`, see
+- `google.drive.file.export`, the converted bytes unparsed, see
+  [Downloading and Exporting Files](#downloading-and-exporting-files) and
   [Limiting Content Bytes](#limiting-content-bytes)
 - `google.drive.file.download`, the stored bytes unparsed, see
-  [Downloading Files](#downloading-files) and
+  [Downloading and Exporting Files](#downloading-and-exporting-files) and
   [Limiting Content Bytes](#limiting-content-bytes)
 - `google.drive.file.delete`
 - `google.drive.permissions.list`
@@ -66,7 +67,8 @@ history, then advance checkpoints through `nextPageToken` or
 change log it reads; `google.drive.collection.changes` returns file changes
 with their relation to one folder, as described in
 [Listing Folder Contents](#listing-folder-contents) and
-[Added Files](#added-files).
+[Added Files](#added-files). Drive can log a change late, in the live checks
+up to about 150 s after it happened; see [Change Log Delay](#change-log-delay).
 
 The push triggers normalize Google Drive `X-Goog-*` channel headers.
 `google.drive.file.changed.push` covers notifications of channels created with
@@ -183,6 +185,16 @@ when Drive omits `modifiedTime`, `modified_time` is `nil`, also when
 file. It identifies neither the editor nor an immutable revision. Drive can
 leave `modifiedTime` unchanged after a Google Docs edit, so different contents
 can carry the same value.
+
+## Caller-Supplied Fields Without Name
+
+`name` is optional in `Jido.Connect.Google.Drive.File` and
+`Jido.Connect.Google.Drive.Folder`. Drive returns only the fields a request
+names, so a caller-supplied `fields` that leaves out `name` returns the file
+or folder with `name: nil`, for example from `google.drive.file.get`, in the
+`file` of a `google.drive.file.changed` signal whose `fields` leaves `name`
+out of `file(...)`, and from `google.drive.folder.create`. That `nil` says
+nothing about the file's name. The default projections request `name`.
 
 ## Listing Folder Contents
 
@@ -301,11 +313,13 @@ every folder view that holds it.
 
 When a poll repeats a checkpoint, Drive merges a file's changes in that range
 into one, so a removal can carry the `time` of an update the host already
-received. The declared dedupe key of `google.drive.file.changed`,
-`[:change_type, :file_id, :drive_id, :time]`, is then the same for both
-signals. A host that deduplicates its signals across polls includes `removed`
-in the key. `google.drive.collection.changes` tells the two apart by
-`change_type`.
+received. The declared dedupe key of `google.drive.file.changed` is
+`[:change_type, :file_id, :drive_id, :removed, :time]`; `removed` keeps such a
+removal apart from the update, so a host that deduplicates its signals across
+polls by that key does not drop it. `change_type` there is Drive's `"file"` or
+`"drive"`. The key of `google.drive.collection.changes`,
+`[:collection_id, :change_type, :provider_record_id, :changed_at]`, tells the
+two apart by `change_type`, `"updated"` or `"deleted"`.
 
 `google.drive.collection.changes` reads the folder in `collection_id` before
 it reads the change log. Once that folder is deleted for good or the user can
@@ -336,6 +350,23 @@ names no file. Drive marks it with `changeType: "drive"` and sends it only when
 `removed` and `time`, without `file_id` and `file`.
 `google.drive.collection.changes` leaves drive-level changes out.
 
+## Change Log Delay
+
+Drive writes a change to its change log with a delay. In the live checks of
+2026-11-02, edits through the Google Docs API appeared between 3 and about
+150 s after the edit. Read from a checkpoint taken before the edit, the change
+appeared once Drive had logged it; earlier reads from that checkpoint did not
+contain it. The live checks did not poll inside that window and go on from
+the checkpoint such a poll returns, so whether a later poll from that
+checkpoint returns the change is not verified.
+
+A host that waits for the signal of a change it made can match it only by
+`file_id`. The signal names the file, not the edit: Drive merges a file's
+changes between two polls into one, and it does not advance `modifiedTime`
+for every Docs edit, so a change that Drive logs late for an earlier edit
+looks the same. To see the content after a given edit, the host reads the
+file again, for example with `google.drive.file.export`.
+
 ## Uploading Files
 
 `google.drive.file.upload` creates a new file from bytes in one multipart
@@ -352,9 +383,12 @@ with reason `:upload_too_large` before any request. Its message names the
 limit and contains no file content. Larger files are not supported, because
 the package has no resumable upload. The action also does not convert uploads
 into native Google formats such as Google Docs or Sheets. `mime_type` takes the
-media type of the bytes; Google Workspace types
-(`application/vnd.google-apps.*`) are not supported values. The action does
-not reject them before the request, and how Drive handles them is untested.
+media type of the bytes. A Google Workspace type
+(`application/vnd.google-apps.*`, in any case) returns a `ValidationError`
+with reason `:unsupported_mime_type` before any request. In the live check of
+2026-11-06, Drive answered uploads typed as a Google Docs document, a Sheets
+spreadsheet or Apps Script JSON with 400 and turned one typed as a folder into
+an empty folder without the bytes.
 
 The scope resolver requires `drive.file` unless the connection holds `drive`.
 According to Google, `drive.file` reaches only files and folders that the app
@@ -374,7 +408,7 @@ its execution claim and looks for the file in the folder before it prepares a
 new upload. Claims and replay rules are described under "Replay And Retry
 Safety" in the `jido_connect` README.
 
-## Downloading Files
+## Downloading and Exporting Files
 
 `google.drive.file.download` returns the bytes Drive stores for a file that is
 not a Google Workspace document, as `file_content`. The package does not parse
@@ -385,6 +419,17 @@ map or a list. Valid UTF-8 without NUL bytes comes back as `content` with
 `mime_type` is the media type of the response without parameters, such as
 `application/json`. Google Workspace documents need
 `google.drive.file.export`, which converts them to a requested format.
+
+`google.drive.file.export` returns the converted bytes in the same form,
+unparsed, with the requested format as `mime_type`. An Apps Script project
+exported as `application/vnd.google-apps.script+json` comes back as its JSON
+text in `content`.
+
+A failed download or export returns a `Jido.Connect.Error.ProviderError` with
+the response status. When the error's media type is `application/json` or ends
+in `+json`, in any case, its `details` carry Google's message. Any other error
+body, including one that does not decode and one typed
+`application/x-ndjson`, is summarized as raw bytes in `details.body_summary`.
 
 ## Limiting Content Bytes
 

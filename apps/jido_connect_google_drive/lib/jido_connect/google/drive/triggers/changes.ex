@@ -17,7 +17,7 @@ defmodule Jido.Connect.Google.Drive.Triggers.Changes do
       description("Poll Google Drive changes for file metadata updates and removals.")
       interval_ms(300_000)
       checkpoint(:page_token)
-      dedupe(%{key: [:change_type, :file_id, :drive_id, :time]})
+      dedupe(%{key: [:change_type, :file_id, :drive_id, :removed, :time]})
       handler(Jido.Connect.Google.Drive.Handlers.Triggers.FileChangedPoller)
 
       access do

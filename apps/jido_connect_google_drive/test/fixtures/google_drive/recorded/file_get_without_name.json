@@ -1,0 +1,58 @@
+{
+  "body": {
+    "id": "1JphxvbpUOuOhN326OEz9UnJqtAy99n4l",
+    "mimeType": "text/plain",
+    "modifiedTime": "2026-10-30T15:29:45.332Z",
+    "parents": [
+      "18wQ5cSzJVV4Hpxmx_okyZi1-Oo1T10wy"
+    ],
+    "starred": true
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "no-cache, no-store, max-age=0, must-revalidate"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 14:45:55 GMT"
+    ],
+    "expires": [
+      "Mon, 01 Jan 1990 00:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Origin, X-Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/1JphxvbpUOuOhN326OEz9UnJqtAy99n4l"
+  },
+  "status": 200
+}

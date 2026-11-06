@@ -5,7 +5,7 @@ defmodule Jido.Connect.Google.Drive.File do
             __MODULE__,
             %{
               file_id: Zoi.string(),
-              name: Zoi.string(),
+              name: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               mime_type: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               description: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               web_view_link: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),

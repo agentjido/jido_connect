@@ -10,11 +10,12 @@ defmodule Jido.Connect.Google.Drive.Client.Transport do
   end
 
   @doc """
-  Builds a request for a file's stored bytes, as `files.get` with `alt=media`
-  returns them.
+  Builds a request for file content: a file's stored bytes, as `files.get`
+  with `alt=media` returns them, or an export.
 
   Req's body decoding is off, so a successful response keeps the bytes Drive
-  sent, whatever their content type: a JSON file stays its text instead of
+  sent, whatever their content type: a JSON file or an Apps Script export as
+  `application/vnd.google-apps.script+json` stays its text instead of
   becoming a map or a list. Google's errors are JSON, so a response step
   decodes the body of a non-2xx response with a JSON content type, and the
   error keeps Google's message. The step is attached here, before the live

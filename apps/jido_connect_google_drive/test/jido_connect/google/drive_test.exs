@@ -1263,7 +1263,7 @@ defmodule Jido.Connect.Google.DriveTest do
               id: "google.drive.file.changed",
               kind: :poll,
               checkpoint: :page_token,
-              dedupe: %{key: [:change_type, :file_id, :drive_id, :time]},
+              dedupe: %{key: [:change_type, :file_id, :drive_id, :removed, :time]},
               scope_resolver: Jido.Connect.Google.Drive.ScopeResolver
             }} =
              Connect.trigger(spec, "google.drive.file.changed")

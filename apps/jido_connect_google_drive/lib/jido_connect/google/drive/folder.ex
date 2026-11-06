@@ -5,7 +5,7 @@ defmodule Jido.Connect.Google.Drive.Folder do
             __MODULE__,
             %{
               folder_id: Zoi.string(),
-              name: Zoi.string(),
+              name: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               web_view_link: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               created_time: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               modified_time: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),

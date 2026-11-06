@@ -94,7 +94,7 @@ defmodule Jido.Connect.Google.Drive.Client.Files do
     with {:ok, max_bytes} <- ContentLimit.max_bytes(params),
          {:ok, resource_key_headers} <- Params.resource_key_headers(params) do
       access_token
-      |> Transport.request()
+      |> Transport.media_request()
       |> Req.get(
         [
           url: "/v3/files/#{encode_id(file_id)}/export",

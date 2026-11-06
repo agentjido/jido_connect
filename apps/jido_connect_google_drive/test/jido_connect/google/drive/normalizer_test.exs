@@ -258,7 +258,7 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
     assert {:error, _error} =
              Normalizer.change(%{
                "fileId" => "file123",
-               "file" => %{"id" => "file123"}
+               "file" => %{"name" => "Budget.pdf"}
              })
   end
 

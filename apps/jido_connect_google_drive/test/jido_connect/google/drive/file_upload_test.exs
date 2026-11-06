@@ -65,6 +65,43 @@ defmodule Jido.Connect.Google.Drive.FileUploadTest do
     end
   end
 
+  # The live check of 2026-11-06 sent these types in both multipart parts:
+  # Drive answered 400 for Docs, Sheets, Apps Script JSON and an upper-case
+  # Docs type, and turned the folder type into an empty folder. No Req.Test
+  # expectation: a request would fail the test.
+  test "rejects Google Workspace MIME types before any request" do
+    for mime_type <- [
+          "application/vnd.google-apps.document",
+          "application/vnd.google-apps.spreadsheet",
+          "application/vnd.google-apps.script+json",
+          "application/vnd.google-apps.folder",
+          "Application/VND.Google-Apps.Document"
+        ] do
+      assert {:error,
+              %Connect.Error.ValidationError{
+                reason: :unsupported_mime_type,
+                subject: :mime_type
+              } = error} = upload(%{content: "jcl upload", mime_type: mime_type})
+
+      assert error.message ==
+               "Google Drive file uploads do not accept Google Workspace MIME types " <>
+                 "(application/vnd.google-apps.*); pass the media type of the bytes"
+    end
+  end
+
+  test "accepts other vendor MIME types, such as an Office document" do
+    mime_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      assert body =~ "\r\nContent-Type: #{mime_type}\r\n\r\njcl upload\r\n"
+
+      Req.Test.json(conn, LiveSmoke.fixture!(:google_drive, "file_upload"))
+    end)
+
+    assert {:ok, %{file: _file}} = upload(%{content: "jcl upload", mime_type: mime_type})
+  end
+
   # 5,242,896 bytes: the encoding is longer than any encoding of 5,242,880 bytes.
   test "rejects content_base64 too long for the limit before decoding it" do
     content_base64 = Base.encode64(:binary.copy(@marker, div(@limit, byte_size(@marker)) + 1))

@@ -13,6 +13,7 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
   alias Jido.Connect
   alias Jido.Connect.Google.Drive
   alias Jido.Connect.Google.Drive.{Client, Link}
+  alias Jido.Connect.Google.Drive.Client.Params
 
   @req_options {:jido_connect_google, :google_req_options}
   @drive_scope "https://www.googleapis.com/auth/drive"
@@ -85,6 +86,17 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
   # 150 s after the edit in the runs of 2026-11-02. Reads for such an edit wait
   # up to 5 minutes.
   @docs_change_log_reads 150
+
+  # Caller projections without `name`, for a file and for a change page.
+  @fields_without_name "id,mimeType,parents,starred,modifiedTime"
+  @change_fields_without_name "nextPageToken,newStartPageToken," <>
+                                "changes(fileId,removed,time,changeType,driveId," <>
+                                "file(id,mimeType,parents,trashed))"
+
+  @google_sheet_mime_type "application/vnd.google-apps.spreadsheet"
+  @apps_script_mime_type "application/vnd.google-apps.script"
+  @apps_script_json "application/vnd.google-apps.script+json"
+  @upload_api "https://www.googleapis.com/upload/drive/v3"
 
   @tag env!(["GOOGLE_ACCESS_TOKEN"])
   test "reads the Drive about resource", %{env: env} do
@@ -673,6 +685,214 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
     assert error.details.message == "File not found: #{@missing_file_id}."
   end
 
+  @tag env!(["GOOGLE_ACCESS_TOKEN"])
+  test "a missing file's export error carries Google's message", %{env: env} do
+    LiveSmoke.record(@req_options, :google_drive, "file_export_not_found", @masked)
+
+    assert {:error, %Connect.Error.ProviderError{status: 404} = error} =
+             invoke(
+               "google.drive.file.export",
+               %{file_id: @missing_file_id, mime_type: "text/plain"},
+               env["GOOGLE_ACCESS_TOKEN"]
+             )
+
+    assert error.details.message == "File not found: #{@missing_file_id}."
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DRIVE_STARRED_FILE_ID"])
+  test "reads a file with caller fields that leave out name", %{env: env} do
+    file_id = env["GOOGLE_DRIVE_STARRED_FILE_ID"]
+
+    LiveSmoke.record(@req_options, :google_drive, "file_get_without_name", @masked)
+
+    assert {:ok, %{file: file}} =
+             invoke(
+               "google.drive.file.get",
+               %{file_id: file_id, fields: @fields_without_name},
+               env["GOOGLE_ACCESS_TOKEN"]
+             )
+
+    assert %{file_id: ^file_id, name: nil, starred?: true, parents: [_folder_id]} = file
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DRIVE_UPLOAD_FOLDER_ID"])
+  @tag write!(:google)
+  test "polls a change with caller fields that leave out name", %{env: env} do
+    token = env["GOOGLE_ACCESS_TOKEN"]
+    folder_id = env["GOOGLE_DRIVE_UPLOAD_FOLDER_ID"]
+    run = Base.encode16(:crypto.strong_rand_bytes(6), case: :lower)
+
+    assert {:ok, %{signals: [], checkpoint: checkpoint}} =
+             poll("google.drive.file.changed", %{}, nil, token)
+
+    file_id = create_externally(token, "jcl-live unnamed #{run}.txt", "text/plain", folder_id)
+
+    await_change_log(token, checkpoint, [], &change_for(&1, file_id))
+
+    LiveSmoke.record(@req_options, :google_drive, "file_changed_without_name", @masked)
+
+    assert {:ok, %{signals: signals}} =
+             poll(
+               "google.drive.file.changed",
+               %{fields: @change_fields_without_name},
+               checkpoint,
+               token
+             )
+
+    assert %{removed: false, change_type: "file", file: file} = file_signal(signals, file_id)
+    assert %{file_id: ^file_id, name: nil, parents: [^folder_id]} = file
+  end
+
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DRIVE_UPLOAD_FOLDER_ID"])
+  @tag write!(:google)
+  test "creates a folder with caller fields that leave out name", %{env: env} do
+    token = env["GOOGLE_ACCESS_TOKEN"]
+    folder_id = env["GOOGLE_DRIVE_UPLOAD_FOLDER_ID"]
+
+    # The response leaves the name out; the cleanup finds the folder by it
+    # when the response is lost.
+    name = "jcl-live unnamed folder #{Base.encode16(:crypto.strong_rand_bytes(6), case: :lower)}"
+    on_exit(fn -> delete_uploads_named(token, folder_id, name) end)
+
+    LiveSmoke.record(@req_options, :google_drive, "folder_create_without_name", @masked)
+
+    assert {:ok, %{folder: folder}} =
+             invoke(
+               "google.drive.folder.create",
+               %{name: name, parents: [folder_id], fields: "id,mimeType,parents"},
+               token
+             )
+
+    created_id = folder.folder_id
+    on_exit(fn -> delete_leftover(token, "/files/#{created_id}") end)
+
+    assert %{name: nil, parents: [^folder_id]} = folder
+  end
+
+  # Drive refuses most of these types and turns a folder-typed upload into an
+  # empty folder, so the upload action rejects every one of them before the
+  # request. The checks below send the multipart body the package builds,
+  # outside the action, to watch what Drive does with it.
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DRIVE_UPLOAD_FOLDER_ID"])
+  @tag write!(:google)
+  test "rejects uploads typed as Google Workspace types, which Drive refuses or empties",
+       %{env: env} do
+    token = env["GOOGLE_ACCESS_TOKEN"]
+    folder_id = env["GOOGLE_DRIVE_UPLOAD_FOLDER_ID"]
+    run = Base.encode16(:crypto.strong_rand_bytes(6), case: :lower)
+    content = "jcl-live typed upload #{run}\n"
+
+    answers =
+      for mime_type <- [
+            @google_doc_mime_type,
+            @google_sheet_mime_type,
+            @apps_script_json,
+            "Application/VND.Google-Apps.Document",
+            @folder_mime_type
+          ] do
+        name = "jcl-live typed upload #{run} #{mime_type}"
+        on_exit(fn -> delete_uploads_named(token, folder_id, name) end)
+
+        upload = %{name: name, content: content, mime_type: mime_type, parents: [folder_id]}
+
+        assert {:error,
+                %Connect.Error.ValidationError{
+                  reason: :unsupported_mime_type,
+                  subject: :mime_type
+                }} = invoke("google.drive.file.upload", upload, token)
+
+        case external_upload(token, upload) do
+          %{status: 200, body: %{"id" => id} = created} ->
+            on_exit(fn -> delete_leftover(token, "/files/#{id}") end)
+            {mime_type, 200, Map.take(created, ["mimeType", "quotaBytesUsed", "size"])}
+
+          %{status: status, body: body} ->
+            {mime_type, status, get_in(body, ["error", "message"])}
+        end
+      end
+
+    # Drive refuses the lower-case document types as a bad request and the
+    # upper-case Docs type as an invalid media type. The folder answer has no
+    # `size`: Drive stored none of the bytes.
+    assert answers == [
+             {@google_doc_mime_type, 400, "Bad Request"},
+             {@google_sheet_mime_type, 400, "Bad Request"},
+             {@apps_script_json, 400, "Bad Request"},
+             {"Application/VND.Google-Apps.Document", 400,
+              "Invalid MIME type provided for the uploaded content."},
+             {@folder_mime_type, 200, %{"mimeType" => @folder_mime_type, "quotaBytesUsed" => "0"}}
+           ]
+  end
+
+  # Drive imports an Apps Script project from its JSON form into My Drive,
+  # whatever `parents` names, so the test moves it into the upload folder
+  # right away.
+  @tag env!(["GOOGLE_ACCESS_TOKEN", "GOOGLE_DRIVE_UPLOAD_FOLDER_ID"])
+  @tag write!(:google)
+  test "exports an Apps Script project as the JSON bytes Drive sends", %{env: env} do
+    token = env["GOOGLE_ACCESS_TOKEN"]
+    folder_id = env["GOOGLE_DRIVE_UPLOAD_FOLDER_ID"]
+    run = Base.encode16(:crypto.strong_rand_bytes(6), case: :lower)
+    name = "jcl-live script #{run}"
+
+    project =
+      Jason.encode!(%{
+        files: [
+          %{
+            name: "Code",
+            type: "server_js",
+            source: "function jclLive() {\n  return \"#{run}\";\n}\n"
+          },
+          %{name: "appsscript", type: "json", source: ~S({"exceptionLogging":"STACKDRIVER"})}
+        ]
+      })
+
+    metadata = %{name: name, mimeType: @apps_script_mime_type, parents: [folder_id]}
+
+    # The cleanup by name in My Drive covers an import whose response is lost
+    # and that returns no ID.
+    on_exit(fn -> delete_uploads_named(token, "root", name) end)
+
+    assert %{status: 200, body: %{"id" => file_id, "parents" => [import_parent]}} =
+             external_import(token, metadata, @apps_script_json, project)
+
+    on_exit(fn -> delete_leftover(token, "/files/#{file_id}") end)
+
+    assert %{status: 200, body: %{"parents" => [^folder_id]}} =
+             external(:patch, "/files/#{file_id}", token,
+               params: [addParents: folder_id, removeParents: import_parent, fields: "parents"],
+               json: %{}
+             )
+
+    # The bytes Drive sends, read outside the package without decoding.
+    assert %{status: 200, body: sent} =
+             external(:get, "/files/#{file_id}/export", token,
+               params: [mimeType: @apps_script_json],
+               decode_body: false
+             )
+
+    assert String.contains?(sent, run)
+
+    LiveSmoke.record(@req_options, :google_drive, "file_export_apps_script", @masked)
+
+    assert {:ok, %{file_content: exported}} =
+             invoke(
+               "google.drive.file.export",
+               %{file_id: file_id, mime_type: @apps_script_json},
+               token
+             )
+
+    assert %{
+             file_id: ^file_id,
+             mime_type: @apps_script_json,
+             encoding: "utf-8",
+             binary: false
+           } = exported
+
+    assert exported.size == byte_size(sent)
+    assert hex_digest(:sha256, exported.content) == hex_digest(:sha256, sent)
+  end
+
   # Every byte value, 20,480 times: exactly the multipart limit.
   defp upload_limit_content, do: :binary.copy(:binary.list_to_bin(Enum.to_list(0..255)), 20_480)
 
@@ -831,6 +1051,41 @@ defmodule Jido.Connect.Google.Drive.LiveSmokeTest do
     Req.request!(
       [method: method, url: @drive_api <> path, auth: {:bearer, access_token}, retry: false] ++
         opts
+    )
+  end
+
+  # The multipart body the upload action builds, sent outside the action.
+  defp external_upload(access_token, upload) do
+    {body, content_type} = Params.file_upload_multipart_body(upload)
+    post_upload(access_token, body, content_type)
+  end
+
+  # A multipart upload whose metadata and media name different types, the
+  # form of an import into a Google Workspace type.
+  defp external_import(access_token, metadata, media_type, content) do
+    boundary = "jcl-live-" <> Base.encode16(:crypto.strong_rand_bytes(6), case: :lower)
+
+    body =
+      IO.iodata_to_binary([
+        "--#{boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n",
+        Jason.encode!(metadata),
+        "\r\n--#{boundary}\r\nContent-Type: #{media_type}\r\n\r\n",
+        content,
+        "\r\n--#{boundary}--\r\n"
+      ])
+
+    post_upload(access_token, body, "multipart/related; boundary=#{boundary}")
+  end
+
+  defp post_upload(access_token, body, content_type) do
+    Req.request!(
+      method: :post,
+      url: @upload_api <> "/files",
+      params: [uploadType: "multipart", fields: "id,mimeType,parents,size,quotaBytesUsed"],
+      headers: [{"content-type", content_type}],
+      body: body,
+      auth: {:bearer, access_token},
+      retry: false
     )
   end
 
