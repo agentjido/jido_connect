@@ -1,9 +1,12 @@
 defmodule Jido.Connect.Google.Meet.ClientTest do
   use ExUnit.Case, async: false
 
+  alias Jido.Connect.Error.ProviderError
+
   alias Jido.Connect.Google.Meet.{
     Client,
     ConferenceRecord,
+    Participant,
     Recording,
     Space,
     Transcript,
@@ -506,6 +509,224 @@ defmodule Jido.Connect.Google.Meet.ClientTest do
             }} = Client.list_transcript_entries(%{transcript_name: @transcript_name}, "token")
   end
 
+  describe "participants" do
+    @record_name "conferenceRecords/abc"
+
+    test "lists the participants of a conference record page by page" do
+      first = LiveSmoke.fixture!(:google_meet, "participants")
+      last = LiveSmoke.fixture!(:google_meet, "participants.2")
+      token = first["nextPageToken"]
+
+      Req.Test.expect(__MODULE__, 2, fn conn ->
+        assert conn.method == "GET"
+        assert conn.request_path == "/v2/conferenceRecords/abc/participants"
+        assert conn.query_params["pageSize"] == "1"
+        assert conn.query_params["fields"] == "participants,nextPageToken"
+
+        case conn.query_params["pageToken"] do
+          nil -> Req.Test.json(conn, first)
+          ^token -> Req.Test.json(conn, last)
+        end
+      end)
+
+      params = %{
+        conference_record_name: @record_name,
+        page_size: 1,
+        fields: "participants,nextPageToken"
+      }
+
+      assert {:ok, %{participants: [%Participant{} = one], next_page_token: ^token}} =
+               Client.list_participants(params, "token")
+
+      assert {:ok, %{participants: [%Participant{} = two]} = page} =
+               Client.list_participants(Map.put(params, :page_token, token), "token")
+
+      refute Map.has_key?(page, :next_page_token)
+
+      for {participant, [recorded]} <- [
+            {one, first["participants"]},
+            {two, last["participants"]}
+          ] do
+        assert_signed_in_participant(participant, recorded)
+      end
+    end
+
+    test "lists no participants when the body has none" do
+      recorded = LiveSmoke.fixture!(:google_meet, "participants.2")
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert conn.request_path == "/v2/conferenceRecords/abc/participants"
+        Req.Test.json(conn, Map.delete(recorded, "participants"))
+      end)
+
+      assert {:ok, %{participants: []} = result} =
+               Client.list_participants(%{conference_record_name: @record_name}, "token")
+
+      refute Map.has_key?(result, :next_page_token)
+    end
+
+    test "gets the participant that a transcript entry names as its speaker" do
+      recorded = LiveSmoke.fixture!(:google_meet, "participant_get")
+      [entry] = LiveSmoke.fixture!(:google_meet, "transcript_entries")["transcriptEntries"]
+      speaker = entry["participant"]
+      assert speaker == recorded["name"]
+      [_record, segment] = String.split(speaker, "/participants/")
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert conn.method == "GET"
+        assert conn.request_path == "/v2/conferenceRecords/abc/participants/#{segment}"
+        assert conn.query_params == %{"fields" => "name,signedinUser"}
+        Req.Test.json(conn, recorded)
+      end)
+
+      assert {:ok, %Participant{} = participant} =
+               Client.get_participant(
+                 %{
+                   participant_name: "#{@record_name}/participants/#{segment}",
+                   fields: "name,signedinUser"
+                 },
+                 "token"
+               )
+
+      assert_signed_in_participant(participant, recorded)
+    end
+
+    test "keeps a participant without user kind from a field projection" do
+      # Recorded with the field projection "name".
+      recorded = LiveSmoke.fixture!(:google_meet, "participant_get_name_only")
+      assert Map.keys(recorded) == ["name"]
+
+      Req.Test.stub(__MODULE__, &Req.Test.json(&1, recorded))
+
+      assert {:ok, %Participant{} = participant} =
+               Client.get_participant(
+                 %{participant_name: recorded["name"], fields: "name"},
+                 "token"
+               )
+
+      assert participant.participant_name == recorded["name"]
+
+      assert {participant.user_type, participant.user, participant.display_name} ==
+               {nil, nil, nil}
+    end
+
+    test "percent-encodes reserved characters in the participant name segments" do
+      Req.Test.expect(__MODULE__, 2, fn conn ->
+        case conn.request_path do
+          "/v2/conferenceRecords/a%3Fb%23c/participants" ->
+            Req.Test.json(conn, LiveSmoke.fixture!(:google_meet, "participants.2"))
+
+          "/v2/conferenceRecords/abc/participants/d%3Fe%23f" ->
+            Req.Test.json(conn, LiveSmoke.fixture!(:google_meet, "participant_get"))
+        end
+      end)
+
+      assert {:ok, %{participants: [%Participant{}]}} =
+               Client.list_participants(
+                 %{conference_record_name: "conferenceRecords/a?b#c"},
+                 "token"
+               )
+
+      assert {:ok, %Participant{}} =
+               Client.get_participant(
+                 %{participant_name: "conferenceRecords/abc/participants/d?e#f"},
+                 "token"
+               )
+    end
+
+    test "returns provider errors for malformed participant responses" do
+      [recorded] = LiveSmoke.fixture!(:google_meet, "participants")["participants"]
+      page = LiveSmoke.fixture!(:google_meet, "participants")
+
+      malformed = [
+        Map.delete(recorded, "name"),
+        Map.put(recorded, "name", 42),
+        Map.put(recorded, "signedinUser", "users/1"),
+        Map.put(recorded, "anonymousUser", %{"displayName" => "Person 9"})
+      ]
+
+      for participant <- malformed do
+        Req.Test.stub(__MODULE__, fn conn ->
+          case conn.request_path do
+            "/v2/conferenceRecords/abc/participants" ->
+              Req.Test.json(conn, Map.put(page, "participants", [participant]))
+
+            "/v2/conferenceRecords/abc/participants/p" ->
+              Req.Test.json(conn, participant)
+          end
+        end)
+
+        assert {:error, %ProviderError{provider: :google, reason: :invalid_response}} =
+                 Client.list_participants(%{conference_record_name: @record_name}, "token")
+
+        assert {:error, %ProviderError{provider: :google, reason: :invalid_response}} =
+                 Client.get_participant(
+                   %{participant_name: "#{@record_name}/participants/p"},
+                   "token"
+                 )
+      end
+
+      Req.Test.stub(__MODULE__, &Req.Test.json(&1, Map.put(page, "participants", recorded)))
+
+      assert {:error, %ProviderError{reason: :invalid_response}} =
+               Client.list_participants(%{conference_record_name: @record_name}, "token")
+
+      Req.Test.stub(__MODULE__, &Req.Test.json(&1, page["participants"]))
+
+      assert {:error, %ProviderError{reason: :invalid_response, status: nil}} =
+               Client.list_participants(%{conference_record_name: @record_name}, "token")
+
+      assert {:error, %ProviderError{reason: :invalid_response, status: nil}} =
+               Client.get_participant(
+                 %{participant_name: "#{@record_name}/participants/p"},
+                 "token"
+               )
+    end
+
+    test "returns a provider error when a transcript entry name stands in for its speaker" do
+      # Recorded for the entry name of the prepared transcript's first entry.
+      entry = LiveSmoke.fixture!(:google_meet, "participant_get_transcript_entry")
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert conn.request_path == "/v2/" <> entry["name"]
+        Req.Test.json(conn, entry)
+      end)
+
+      assert {:error, %ProviderError{provider: :google, reason: :invalid_response, status: nil}} =
+               Client.get_participant(%{participant_name: entry["name"]}, "token")
+    end
+
+    test "returns a provider error for a missing participant" do
+      not_found = LiveSmoke.fixture!(:google_meet, "participant_not_found")
+      respond_with_recorded_error(not_found)
+
+      assert {:error,
+              %ProviderError{
+                provider: :google,
+                reason: :http_error,
+                status: 404,
+                details: %{message: "Participant not found"}
+              }} =
+               Client.get_participant(
+                 %{participant_name: "#{@record_name}/participants/p"},
+                 "token"
+               )
+    end
+
+    test "returns a provider error for the participants of an invalid conference record" do
+      invalid = LiveSmoke.fixture!(:google_meet, "participants_invalid_record")
+      respond_with_recorded_error(invalid)
+
+      assert {:error,
+              %ProviderError{
+                provider: :google,
+                reason: :http_error,
+                status: 400,
+                details: %{message: "Invalid conference id"}
+              }} = Client.list_participants(%{conference_record_name: @record_name}, "token")
+    end
+  end
+
   test "returns provider errors for malformed space responses" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
@@ -572,6 +793,27 @@ defmodule Jido.Connect.Google.Meet.ClientTest do
                %{transcript_name: "conferenceRecords/abc/transcripts/ghi"},
                "token"
              )
+  end
+
+  defp assert_signed_in_participant(participant, recorded) do
+    signed_in = recorded["signedinUser"]
+
+    assert participant.participant_name == recorded["name"]
+    assert participant.user_type == "signed_in_user"
+    assert participant.user == signed_in["user"]
+    assert participant.display_name == signed_in["displayName"]
+    assert participant.signed_in_user == signed_in
+    assert {participant.anonymous_user, participant.phone_user} == {nil, nil}
+    assert participant.earliest_start_time == recorded["earliestStartTime"]
+    assert participant.latest_end_time == recorded["latestEndTime"]
+  end
+
+  defp respond_with_recorded_error(body) do
+    Req.Test.stub(__MODULE__, fn conn ->
+      conn
+      |> Plug.Conn.put_status(body["error"]["code"])
+      |> Req.Test.json(body)
+    end)
   end
 
   defp assert_recording(recording, recorded) do

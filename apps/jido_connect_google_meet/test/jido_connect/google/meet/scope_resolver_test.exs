@@ -81,6 +81,29 @@ defmodule Jido.Connect.Google.Meet.ScopeResolverTest do
     assert ScopeResolver.required_scopes(operation, %{}, nil) == [@readonly_scope]
   end
 
+  test "resolves participant reads like the conference record reads" do
+    for action_id <- ["google.meet.participant.list", "google.meet.participant.get"] do
+      operation = %{action_id: action_id}
+
+      assert ScopeResolver.required_scopes(operation, %{}, %{scopes: [@readonly_scope]}) ==
+               [@readonly_scope]
+
+      assert ScopeResolver.required_scopes(operation, %{}, %{scopes: [@created_scope]}) ==
+               [@created_scope]
+
+      assert ScopeResolver.required_scopes(
+               operation,
+               %{},
+               %{scopes: [@readonly_scope, @created_scope]}
+             ) == [@created_scope]
+
+      assert ScopeResolver.required_scopes(operation, %{}, %{scopes: [@settings_scope]}) ==
+               [@readonly_scope]
+
+      assert ScopeResolver.required_scopes(operation, %{}, nil) == [@readonly_scope]
+    end
+  end
+
   test "resolves the transcript poll trigger like a conference record and artifact read" do
     trigger = %{id: "google.meet.transcript.available"}
 

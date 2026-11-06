@@ -4,6 +4,7 @@ defmodule Jido.Connect.Google.Meet.NormalizerTest do
   alias Jido.Connect.Google.Meet.{
     ConferenceRecord,
     Normalizer,
+    Participant,
     Recording,
     Space,
     Transcript,
@@ -173,6 +174,89 @@ defmodule Jido.Connect.Google.Meet.NormalizerTest do
              Normalizer.transcript_entry(Map.put(recorded_entry(), "text", %{"value" => "x"}))
 
     assert {:error, :invalid_transcript_entry_payload} = Normalizer.transcript_entry(nil)
+  end
+
+  test "normalizes a recorded signed-in Meet participant" do
+    recorded = LiveSmoke.fixture!(:google_meet, "participant_get")
+    signed_in = recorded["signedinUser"]
+
+    assert {:ok, %Participant{} = participant} = Normalizer.participant(recorded)
+
+    assert participant.participant_name == recorded["name"]
+    assert participant.user_type == "signed_in_user"
+    assert participant.user == signed_in["user"]
+    assert participant.display_name == signed_in["displayName"]
+    assert participant.signed_in_user == signed_in
+    assert {participant.anonymous_user, participant.phone_user} == {nil, nil}
+    assert participant.earliest_start_time == recorded["earliestStartTime"]
+    assert participant.latest_end_time == recorded["latestEndTime"]
+    assert participant.metadata == %{}
+  end
+
+  test "names anonymous and phone participants by their user kind" do
+    # Derived from the recorded participant: the prepared meeting had only
+    # signed-in participants, so the other two user kinds replace its own.
+    recorded = LiveSmoke.fixture!(:google_meet, "participant_get")
+
+    for {key, user_type, field} <- [
+          {"anonymousUser", "anonymous_user", :anonymous_user},
+          {"phoneUser", "phone_user", :phone_user}
+        ] do
+      kind = %{"displayName" => "Person 2"}
+      payload = recorded |> Map.delete("signedinUser") |> Map.put(key, kind)
+
+      assert {:ok, %Participant{} = participant} = Normalizer.participant(payload)
+
+      assert participant.participant_name == recorded["name"]
+      assert participant.user_type == user_type
+      assert participant.display_name == "Person 2"
+      assert participant.user == nil
+      assert Map.fetch!(participant, field) == kind
+      assert participant.signed_in_user == nil
+    end
+  end
+
+  test "keeps a Meet participant without user kind as returned for a field projection" do
+    # Recorded with the field projection "name".
+    recorded = LiveSmoke.fixture!(:google_meet, "participant_get_name_only")
+
+    assert {:ok, %Participant{} = participant} = Normalizer.participant(recorded)
+
+    assert participant.participant_name == recorded["name"]
+    assert {participant.user_type, participant.user, participant.display_name} == {nil, nil, nil}
+
+    assert {participant.signed_in_user, participant.anonymous_user, participant.phone_user} ==
+             {nil, nil, nil}
+
+    assert {participant.earliest_start_time, participant.latest_end_time} == {nil, nil}
+  end
+
+  test "rejects another Meet resource in place of a participant" do
+    for fixture <- ["participant_get_transcript_entry", "conference_record_get_start_only"] do
+      assert {:error, :not_a_participant} =
+               Normalizer.participant(LiveSmoke.fixture!(:google_meet, fixture))
+    end
+  end
+
+  test "rejects malformed Meet participant payloads" do
+    recorded = LiveSmoke.fixture!(:google_meet, "participant_get")
+
+    for payload <- [
+          Map.delete(recorded, "name"),
+          Map.put(recorded, "name", ["conferenceRecords/abc/participants/1"]),
+          Map.put(recorded, "signedinUser", "users/1"),
+          put_in(recorded, ["signedinUser", "displayName"], %{"text" => "Person 1"}),
+          put_in(recorded, ["signedinUser", "user"], 42)
+        ] do
+      assert {:error, _error} = Normalizer.participant(payload)
+    end
+
+    assert {:error, :ambiguous_participant_user} =
+             Normalizer.participant(
+               Map.put(recorded, "phoneUser", %{"displayName" => "Person 2"})
+             )
+
+    assert {:error, :invalid_participant_payload} = Normalizer.participant(nil)
   end
 
   defp recorded_entry do

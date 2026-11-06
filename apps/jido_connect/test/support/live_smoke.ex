@@ -250,12 +250,12 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
 
   Redacts the sensitive keys of `Jido.Connect.Sanitizer` except `:keep_keys`
   (default `["fields"]`, the issue payload of Jira), replaces email addresses,
-  display names, site and tunnel hosts, Atlassian account IDs and the Google
-  project number with stable placeholders, and replaces the values under
-  `:fields` with `<field>-<n>`. `:name_keys` adds keys that hold display names.
-  Raises `LeakError` when a credential value, a configured host or email
-  address, the Google project number, or a replaced host or account ID
-  remains.
+  display names, site and tunnel hosts, Atlassian account IDs, Google user IDs
+  and the Google project number with stable placeholders, and replaces the
+  values under `:fields` with `<field>-<n>`. `:name_keys` adds keys that hold
+  display names. Raises `LeakError` when a credential value, a configured host
+  or email address, the Google project number, or a replaced host, account ID
+  or Google user ID remains.
   """
   @spec sanitize(term(), keyword()) :: term()
   def sanitize(value, opts \\ []) do

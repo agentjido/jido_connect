@@ -40,6 +40,8 @@ scopes:
 - `google.meet.space.get`
 - `google.meet.conference_record.list`
 - `google.meet.conference_record.get`
+- `google.meet.participant.list`
+- `google.meet.participant.get`
 - `google.meet.recording.list`
 - `google.meet.recording.get`
 - `google.meet.transcript.list`
@@ -77,6 +79,31 @@ page) and `page_token`, and resolves `meetings.space.readonly`, or
 Google deletes transcript entries 30 days after the conference ends. Entries
 come from the transcription itself and can differ from the transcript document
 when someone has edited that document.
+
+`google.meet.participant.get` resolves the speaker of an entry: it takes the
+entry's `participant` as `participant_name` and returns the participant with
+its display name and user identity. Google answers the name of another
+resource, such as the entry's own `entry_name`, with that resource, and the
+action returns a provider error with reason `:invalid_response` for it.
+`google.meet.participant.list` returns all participants of a conference
+record, paged with `page_size` (default 10) and `page_token`; both actions
+take `fields`. Each participant carries:
+
+- `participant_name`, the resource name that transcript entries use
+- `user_type`: `signed_in_user`, `anonymous_user` or `phone_user`, after the
+  one user kind Google returns for the participant
+- `display_name` of that user kind
+- `user`, the Google user resource name `users/<id>`, for a signed-in user
+  only
+- the raw user kind under `signed_in_user`, `anonymous_user` or `phone_user`
+- `earliest_start_time` and `latest_end_time`, the first join and the last
+  leave
+
+Meet returns no email address for a participant. Turning `users/<id>` into
+more than the display name needs a directory lookup outside this package.
+Participant sessions are not exposed. Both actions resolve
+`meetings.space.readonly`, or `meetings.space.created` when the connection
+holds it, like the conference record reads.
 
 The transcript document stays readable through the Drive package:
 `google.meet.transcript.get` returns its `document_id`, and
@@ -238,8 +265,10 @@ host-owned durable state. The design spike for that work lives in
 - `:google_meet_reader` exposes metadata-first read actions for spaces,
   conference records, recordings, and transcripts.
 - `:google_meet_transcript_reader` is opt-in and adds
-  `google.meet.transcript.entry.list`, which returns transcript text, to the
-  reader surface. `:google_meet_reader` stays metadata-only.
+  `google.meet.transcript.entry.list`, which returns transcript text, and
+  `google.meet.participant.list` and `google.meet.participant.get`, which
+  resolve the speakers of its entries, to the reader surface.
+  `:google_meet_reader` stays metadata-only.
 - `:google_meet_scheduler` adds meeting-space creation to the reader surface.
 
 All packs select actions only. `pack.metadata.triggers` names the poll

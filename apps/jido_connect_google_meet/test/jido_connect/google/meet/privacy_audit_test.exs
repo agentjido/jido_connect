@@ -12,6 +12,12 @@ defmodule Jido.Connect.Google.Meet.PrivacyAuditTest do
         action("google.meet.space.get", :personal_data, :read, :none),
         action("google.meet.conference_record.list", :personal_data, :read, :none),
         action("google.meet.conference_record.get", :personal_data, :read, :none),
+        action("google.meet.participant.list", :personal_data, :read, :none,
+          text_includes: ["participants"]
+        ),
+        action("google.meet.participant.get", :personal_data, :read, :none,
+          text_includes: ["participant"]
+        ),
         action("google.meet.recording.list", :personal_data, :read, :none),
         action("google.meet.recording.get", :personal_data, :read, :none),
         action("google.meet.transcript.list", :personal_data, :read, :none,

@@ -436,6 +436,92 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
       end)
     end
 
+    test "replaces Google user IDs of Meet participants wherever they are whole numbers" do
+      # Invented numbers in the shape of Google user IDs.
+      signed_in = "123456789012345678901"
+      other = "109876543210987654321"
+      record = "conferenceRecords/rec-1"
+
+      body = %{
+        "participants" => [
+          %{
+            "name" => "#{record}/participants/#{signed_in}",
+            "signedinUser" => %{"user" => "users/#{signed_in}", "displayName" => "Ada Lovelace"}
+          },
+          %{
+            "name" => "#{record}/participants/#{other}",
+            "anonymousUser" => %{"displayName" => "Grace Hopper"}
+          },
+          %{
+            "name" => "#{record}/participants/caller-1",
+            "phoneUser" => %{"displayName" => "Charles Babbage"}
+          }
+        ],
+        "transcriptEntry" => %{
+          "participant" => "#{record}/participants/#{other}",
+          "note" => other
+        },
+        signed_in => "keyed by the ID",
+        "longer" => "1#{signed_in}0"
+      }
+
+      with_env(@no_sites, fn ->
+        # The longer number keeps the ID, so the guard reports it.
+        assert_raise LeakError, ~r/a Google user ID/, fn -> LiveSmoke.sanitize(body) end
+
+        sanitized = LiveSmoke.sanitize(Map.delete(body, "longer"))
+
+        assert sanitized == %{
+                 "participants" => [
+                   %{
+                     "name" => "#{record}/participants/user-1",
+                     "signedinUser" => %{"user" => "users/user-1", "displayName" => "Person 1"}
+                   },
+                   %{
+                     "name" => "#{record}/participants/user-2",
+                     "anonymousUser" => %{"displayName" => "Person 2"}
+                   },
+                   %{
+                     "name" => "#{record}/participants/caller-1",
+                     "phoneUser" => %{"displayName" => "Person 3"}
+                   }
+                 ],
+                 "transcriptEntry" => %{
+                   "participant" => "#{record}/participants/user-2",
+                   "note" => "user-2"
+                 },
+                 "user-1" => "keyed by the ID"
+               }
+
+        assert LiveSmoke.sanitize(sanitized) == sanitized
+      end)
+    end
+
+    test "learns Google user IDs only from whole numeric user and participant segments" do
+      body = %{
+        "missing" => "conferenceRecords/rec-1/participants/00000000-0000-0000-0000-000000000000",
+        "short" => "users/1234567",
+        "gmail" => "/gmail/v1/users/me/messages/1a18d3805a1eca34",
+        "suffixed" => "users/12345678901234567890abc",
+        "embedded" => "superusers/12345678901234567890",
+        "id" => "12345678901234567890"
+      }
+
+      with_env(@no_sites, fn -> assert LiveSmoke.sanitize(body) == body end)
+    end
+
+    test "fails when a Google user ID survives encoded, naming only the kind of value" do
+      id = "123456789012345678901"
+
+      error =
+        assert_raise LeakError, fn ->
+          LiveSmoke.sanitize(%{"user" => "users/#{id}", "blob" => Base.encode64(id)})
+        end
+
+      assert Exception.message(error) =~ "a Google user ID"
+      refute Exception.message(error) =~ id
+    end
+
     test "guards credential-shaped variables that the convention does not list" do
       secret = "seed-only-secret-value"
 
@@ -554,6 +640,30 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
                "self" => "https://example.atlassian.net/rest/api/3/issue/10001",
                "fields" => %{"assignee" => %{"accountId" => "account-1"}}
              }
+    end
+
+    test "records a Google user ID of the request path as a placeholder", %{tmp: tmp} do
+      id = "123456789012345678901"
+      path = "/v2/conferenceRecords/rec-1/participants/#{id}"
+      not_found = %{"error" => %{"code" => 404, "status" => "NOT_FOUND"}}
+      base_url = start_stub([{404, not_found}, {200, %{"user" => "users/#{id}"}}])
+
+      with_env(Map.put(@no_sites, "JIDO_CONNECT_RECORD", "1"), fn ->
+        put_req_options(retry: false)
+        :ok = LiveSmoke.record({:jido_connect, @req_key}, :stub, "participant", root: tmp)
+        assert {:ok, %Req.Response{status: 404}} = get(base_url, path)
+        assert {:ok, %Req.Response{status: 200}} = get(base_url, path)
+      end)
+
+      dir = Path.join(tmp, "test/fixtures/stub/recorded")
+
+      for file <- ["participant.json", "participant.2.json"] do
+        envelope = dir |> Path.join(file) |> File.read!() |> Jason.decode!()
+        assert envelope["request"]["path"] == "/v2/conferenceRecords/rec-1/participants/user-1"
+        refute Jason.encode!(envelope) =~ id
+      end
+
+      assert LiveSmoke.fixture!(:stub, "participant.2", root: tmp) == %{"user" => "users/user-1"}
     end
 
     test "stores size and digest instead of a body that is not UTF-8", %{tmp: tmp} do

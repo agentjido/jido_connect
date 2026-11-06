@@ -18,7 +18,9 @@ defmodule Jido.Connect.Google.Meet.ScopeResolver do
   ]
   @conference_record_read_actions [
     "google.meet.conference_record.list",
-    "google.meet.conference_record.get"
+    "google.meet.conference_record.get",
+    "google.meet.participant.list",
+    "google.meet.participant.get"
   ]
   # The transcript poll trigger lists conference records and then transcripts.
   # Both reads resolve the same way, so the trigger joins the artifact reads.

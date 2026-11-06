@@ -10,3 +10,7 @@ unless Code.ensure_loaded?(Jido.Connect.Google.TestSupport.ConnectorContracts) d
     __DIR__
   )
 end
+
+unless Code.ensure_loaded?(Jido.Connect.Google.Meet.TestSupport.LiveMeet) do
+  Code.require_file("support/live_meet.ex", __DIR__)
+end

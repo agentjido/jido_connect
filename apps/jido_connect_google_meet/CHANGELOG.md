@@ -12,6 +12,10 @@
   `Jido.Connect.Google.Meet.TranscriptEntry` struct, and the opt-in
   `:google_meet_transcript_reader` catalog pack. `:google_meet_reader` stays
   metadata-only.
+- Add `google.meet.participant.list` and `google.meet.participant.get`, which
+  resolve the participant that a transcript entry names as its speaker into
+  `Jido.Connect.Google.Meet.Participant` with `user_type`, `display_name` and,
+  for a signed-in user, `user`. Both join `:google_meet_transcript_reader`.
 
 ## 0.1.0
 

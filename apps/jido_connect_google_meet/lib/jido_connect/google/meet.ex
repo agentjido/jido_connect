@@ -7,6 +7,7 @@ defmodule Jido.Connect.Google.Meet do
     fragments: [
       Jido.Connect.Google.Meet.Actions.Spaces,
       Jido.Connect.Google.Meet.Actions.ConferenceRecords,
+      Jido.Connect.Google.Meet.Actions.Participants,
       Jido.Connect.Google.Meet.Actions.Recordings,
       Jido.Connect.Google.Meet.Actions.Transcripts,
       Jido.Connect.Google.Meet.Triggers.Transcripts

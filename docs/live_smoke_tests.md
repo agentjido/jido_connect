@@ -99,6 +99,40 @@ message right after sending it, so `LiveGmail.delete_message!/2` and
 record as `message_content_sent` and `message_content_draft`, which no offline
 test uses and which are not committed.
 
+The Meet checks read the meeting data prepared on 2026-10-30, which Google
+deletes 30 days after the conferences ended, on 2026-11-29. The participant
+checks in
+`apps/jido_connect_google_meet/test/jido_connect/google/meet/participants_live_smoke_test.exs`
+that read this data carry a `LiveMeet.prepared!/1` tag from
+`test/support/live_meet.ex` after their `env!/1` tag. In a run that can
+include them, through `--only live_smoke`, `--include live_smoke` or a
+location in the file, it asks Google with `GOOGLE_ACCESS_TOKEN` while the
+file compiles:
+`conferenceRecords.get` with `fields=name` for
+`GOOGLE_MEET_CONFERENCE_RECORD`, and one transcript entry name without text
+for `GOOGLE_MEET_TRANSCRIPT`. Two answers skip the test:
+
+- 404 with `error.status` `NOT_FOUND`, Google's answer for a missing
+  transcript, recorded as `transcript_entries_not_found`;
+- 403 with `error.status` `PERMISSION_DENIED`, no ErrorInfo reason and the
+  message `Permission denied on resource Conference (or it might not exist)`,
+  Google's answer for a conference record that does not exist. The answer
+  for the prepared record cannot be seen before Google deletes it, so the
+  recording `conference_record_unknown` stands in: it was taken on 2026-11-06
+  for a well-formed record ID that names no conference the test user can
+  see.
+
+The skip reason names the variable, the preparation date, the status,
+Google's `error.status` and the ErrorInfo reason or else Google's message.
+Every other answer lets the test run, so it fails on a 403 with the
+ErrorInfo reason `ACCESS_TOKEN_SCOPE_INSUFFICIENT`, recorded as
+`conference_record_scope_insufficient`, on 401, on 400 for an ID Google
+cannot parse, and on 5xx. Google gives the two skipping answers also for a
+well-formed ID that never named data of the test user, such as a mistyped
+transcript ID, so such an ID is skipped as expired instead of failing.
+Google's page token for participants encodes the next participant's user ID
+in Base64, so `participants.json` keeps the placeholder `nextPageToken-1`.
+
 ## Writing a Live Test
 
 ```elixir
@@ -504,6 +538,13 @@ Recordings and captures pass through the same sanitizer, also available as
 - The Google project number, the numeric prefix of `GOOGLE_CLIENT_ID`, becomes
   `000000000000` wherever it appears as a whole number, as in the `Received`
   headers of Gmail messages.
+- Google user IDs become `user-<n>` wherever they appear as a whole number,
+  in values, map keys and the request path. They are taken from values such as
+  `users/<id>`, as in a Meet participant's `signedinUser.user`, and from the
+  participant segment of `conferenceRecords/<record>/participants/<id>`, as
+  in a participant's or a transcript entry's resource name. Only a segment of
+  eight or more digits counts, so `users/me` and a participant segment such as
+  a UUID stay as they are.
 - Display names become `Person <n>`. They are taken from keys such as
   `displayName`, `real_name`, `publicName` and `username`, and from address
   lists such as `Ada Lovelace <ada@example.org>, bob@example.org`. Once known,
@@ -518,7 +559,8 @@ Recordings and captures pass through the same sanitizer, also available as
   sanitizer raises `LiveSmoke.LeakError`. The same holds for the hosts above,
   for the Google project number, also inside a longer number, for email
   addresses in listed settings and in variables ending in `_EMAIL`, and for
-  every tenant host and account ID the sanitizer replaced elsewhere.
+  every tenant host, account ID and Google user ID the sanitizer replaced
+  elsewhere; a Google user ID also inside a longer number.
   The message names the variable or the kind of value, not the value, and
   nothing is written.
 

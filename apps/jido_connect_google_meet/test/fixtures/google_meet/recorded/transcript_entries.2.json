@@ -5,7 +5,7 @@
         "endTime": "2026-10-30T17:19:07.136Z",
         "languageCode": "de-DE",
         "name": "conferenceRecords/tjT2Egxvkox7JrzCoRAODxIUOBEQAjIGCIoCIAAYAwg/transcripts/611a3327-9048-414c-ae74-bab9ecc3b02c/entries/CiRlOTIwMjc2ZC03ODFhLTQwNjctODliYS03OWUyMDMzYTNhZDQSH3NwYWNlcy80NUNTZ2dmbmhtd0IvZGV2aWNlcy8xMzEYgMX28p_ilwM",
-        "participant": "conferenceRecords/tjT2Egxvkox7JrzCoRAODxIUOBEQAjIGCIoCIAAYAwg/participants/100868264258498110778",
+        "participant": "conferenceRecords/tjT2Egxvkox7JrzCoRAODxIUOBEQAjIGCIoCIAAYAwg/participants/user-1",
         "startTime": "2026-10-30T17:19:06.896Z",
         "text": "text-2"
       }
@@ -22,13 +22,13 @@
       "application/json; charset=UTF-8"
     ],
     "date": [
-      "Mon, 02 Nov 2026 06:26:18 GMT"
+      "Fri, 06 Nov 2026 14:51:29 GMT"
     ],
     "server": [
       "ESF"
     ],
     "server-timing": [
-      "gfet4t7; dur=1626"
+      "gfet4t7; dur=1321"
     ],
     "transfer-encoding": [
       "chunked"
@@ -48,7 +48,7 @@
       "0"
     ]
   },
-  "recorded_at": "2026-11-02",
+  "recorded_at": "2026-11-06",
   "request": {
     "method": "GET",
     "path": "/v2/conferenceRecords/tjT2Egxvkox7JrzCoRAODxIUOBEQAjIGCIoCIAAYAwg/transcripts/611a3327-9048-414c-ae74-bab9ecc3b02c/entries"

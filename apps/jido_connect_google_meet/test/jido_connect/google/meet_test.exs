@@ -14,6 +14,8 @@ defmodule Jido.Connect.Google.MeetTest do
     Jido.Connect.Google.Meet.Actions.GetSpace,
     Jido.Connect.Google.Meet.Actions.ListConferenceRecords,
     Jido.Connect.Google.Meet.Actions.GetConferenceRecord,
+    Jido.Connect.Google.Meet.Actions.ListParticipants,
+    Jido.Connect.Google.Meet.Actions.GetParticipant,
     Jido.Connect.Google.Meet.Actions.ListRecordings,
     Jido.Connect.Google.Meet.Actions.GetRecording,
     Jido.Connect.Google.Meet.Actions.ListTranscripts,
@@ -24,6 +26,7 @@ defmodule Jido.Connect.Google.MeetTest do
   @meet_dsl_fragments [
     Jido.Connect.Google.Meet.Actions.Spaces,
     Jido.Connect.Google.Meet.Actions.ConferenceRecords,
+    Jido.Connect.Google.Meet.Actions.Participants,
     Jido.Connect.Google.Meet.Actions.Recordings,
     Jido.Connect.Google.Meet.Actions.Transcripts,
     Jido.Connect.Google.Meet.Triggers.Transcripts
@@ -76,6 +79,21 @@ defmodule Jido.Connect.Google.MeetTest do
          space: "spaces/abc",
          start_time: "2026-05-14T18:00:00Z"
        })}
+    end
+
+    def list_participants(
+          %{conference_record_name: "conferenceRecords/abc", page_size: 10},
+          "token"
+        ) do
+      Meet.Client.Response.handle_participant_list_response(
+        {:ok, %{status: 200, body: LiveSmoke.fixture!(:google_meet, "participants")}}
+      )
+    end
+
+    def get_participant(%{participant_name: "conferenceRecords/abc/participants/p"}, "token") do
+      Meet.Client.Response.handle_participant_response(
+        {:ok, %{status: 200, body: LiveSmoke.fixture!(:google_meet, "participant_get")}}
+      )
     end
 
     def list_recordings(
@@ -157,6 +175,8 @@ defmodule Jido.Connect.Google.MeetTest do
              "google.meet.space.get",
              "google.meet.conference_record.list",
              "google.meet.conference_record.get",
+             "google.meet.participant.list",
+             "google.meet.participant.get",
              "google.meet.recording.list",
              "google.meet.recording.get",
              "google.meet.transcript.list",
@@ -305,6 +325,107 @@ defmodule Jido.Connect.Google.MeetTest do
                context: context,
                credential_lease: lease
              )
+  end
+
+  test "invokes list participants through injected client and lease" do
+    recorded = LiveSmoke.fixture!(:google_meet, "participants")
+    [recorded_participant] = recorded["participants"]
+
+    for scope <- [@meet_readonly_scope, @meet_created_scope] do
+      {context, lease} = context_and_lease(scopes: [scope])
+
+      assert {:ok, %{participants: [participant], next_page_token: next_page_token}} =
+               Connect.invoke(
+                 Meet.integration(),
+                 "google.meet.participant.list",
+                 %{conference_record_name: " conferenceRecords/abc "},
+                 context: context,
+                 credential_lease: lease
+               )
+
+      refute is_struct(participant)
+      assert next_page_token == recorded["nextPageToken"]
+      assert participant.participant_name == recorded_participant["name"]
+      assert participant.user_type == "signed_in_user"
+      assert participant.user == recorded_participant["signedinUser"]["user"]
+      assert participant.display_name == recorded_participant["signedinUser"]["displayName"]
+    end
+  end
+
+  test "invokes get participant through injected client and lease" do
+    recorded = LiveSmoke.fixture!(:google_meet, "participant_get")
+
+    for scope <- [@meet_readonly_scope, @meet_created_scope] do
+      {context, lease} = context_and_lease(scopes: [scope])
+
+      assert {:ok, %{participant: participant}} =
+               Connect.invoke(
+                 Meet.integration(),
+                 "google.meet.participant.get",
+                 %{participant_name: " conferenceRecords/abc/participants/p "},
+                 context: context,
+                 credential_lease: lease
+               )
+
+      refute is_struct(participant)
+
+      assert %{
+               participant_name: participant_name,
+               user_type: "signed_in_user",
+               user: user,
+               display_name: display_name,
+               signed_in_user: signed_in_user,
+               earliest_start_time: earliest_start_time,
+               latest_end_time: latest_end_time
+             } = participant
+
+      assert {participant_name, user, display_name, signed_in_user} ==
+               {recorded["name"], recorded["signedinUser"]["user"],
+                recorded["signedinUser"]["displayName"], recorded["signedinUser"]}
+
+      assert {earliest_start_time, latest_end_time} ==
+               {recorded["earliestStartTime"], recorded["latestEndTime"]}
+    end
+  end
+
+  test "rejects participant reads without a Meet scope" do
+    {context, lease} = context_and_lease(scopes: ["openid", "email", "profile"])
+
+    for {action_id, input} <- [
+          {"google.meet.participant.list", %{conference_record_name: "conferenceRecords/abc"}},
+          {"google.meet.participant.get",
+           %{participant_name: "conferenceRecords/abc/participants/p"}}
+        ] do
+      assert {:error,
+              %Connect.Error.AuthError{
+                reason: :missing_scopes,
+                missing_scopes: [@meet_readonly_scope]
+              }} =
+               Connect.invoke(Meet.integration(), action_id, input,
+                 context: context,
+                 credential_lease: lease
+               )
+    end
+  end
+
+  test "rejects participant reads with a blank resource name" do
+    {context, lease} = context_and_lease(scopes: [@meet_readonly_scope])
+
+    for {action_id, field} <- [
+          {"google.meet.participant.list", :conference_record_name},
+          {"google.meet.participant.get", :participant_name}
+        ],
+        blank <- ["", "   "] do
+      assert {:error,
+              %Connect.Error.ValidationError{
+                reason: :invalid_conference_record_request,
+                details: %{field: ^field}
+              }} =
+               Connect.invoke(Meet.integration(), action_id, %{field => blank},
+                 context: context,
+                 credential_lease: lease
+               )
+    end
   end
 
   test "invokes list recordings through injected client and lease" do

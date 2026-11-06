@@ -29,9 +29,12 @@ defmodule Jido.Connect.Google.Meet.CatalogPacks do
     "google.meet.transcript.get"
   ]
 
+  # Entry text and the participants that transcript entries name as speakers.
   @transcript_reader_tools @reader_tools ++
                              [
-                               "google.meet.transcript.entry.list"
+                               "google.meet.transcript.entry.list",
+                               "google.meet.participant.list",
+                               "google.meet.participant.get"
                              ]
 
   @scheduler_tools @reader_tools ++
@@ -55,13 +58,16 @@ defmodule Jido.Connect.Google.Meet.CatalogPacks do
     })
   end
 
-  @doc "Opt-in Meet pack with the metadata reads plus transcript entry text."
+  @doc """
+  Opt-in Meet pack with the metadata reads plus transcript entry text and the
+  participants that the entries name as speakers.
+  """
   def transcript_reader do
     Pack.new!(%{
       id: :google_meet_transcript_reader,
       label: "Google Meet transcript reader",
       description:
-        "Read Meet metadata and transcript text entry by entry with participant, language, and times.",
+        "Read Meet metadata, transcript text entry by entry with participant, language, and times, and the speaking participants' display names and user identities.",
       filters: %{provider: :google_meet},
       allowed_tools: @transcript_reader_tools,
       metadata: metadata(:read)

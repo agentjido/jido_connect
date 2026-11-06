@@ -2,7 +2,7 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.LeakError do
   @moduledoc """
   Raised when sanitized live smoke output still holds a credential value or an
   identifying value: a site or tunnel host, a configured email address, an
-  account ID or the Google project number.
+  account ID, a Google user ID or the Google project number.
   """
 
   defexception [:variable]
@@ -18,8 +18,9 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
   @moduledoc false
 
   # Sanitizes recorded responses and captured deliveries. One state keeps the
-  # placeholders for email addresses, display names, tenant hosts and
-  # configured fields stable across all values of one recording or capture.
+  # placeholders for email addresses, display names, tenant hosts, account and
+  # Google user IDs and configured fields stable across all values of one
+  # recording or capture.
 
   alias Jido.Connect.Sanitizer
   alias Jido.Connect.TestSupport.LiveSmoke.LeakError
@@ -47,6 +48,13 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
   @account_placeholder ~r/^account-\d+$/
   @project_number_placeholder "000000000000"
   @min_credential_bytes 8
+  # Google user IDs, as in a Meet participant's `signedinUser.user` and in the
+  # participant segment of its resource name. Only whole numeric segments of
+  # guarded length count, so the `user-<n>` placeholder is never learned again.
+  @google_user Regex.compile!(
+                 "(?<![A-Za-z0-9_.~-])(?:users|conferenceRecords/[^/\\s\"?#]+/participants)/" <>
+                   "(\\d{#{@min_credential_bytes},})(?![A-Za-z0-9_.~-])"
+               )
 
   # `credentials` is a function returning `{variable, value}` pairs, so that
   # inspecting the state, as ExUnit does for failing calls, shows no values.
@@ -60,6 +68,7 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
             identifying: [],
             names: %{},
             project_numbers: [],
+            users: %{},
             values: %{}
 
   @doc """
@@ -130,15 +139,16 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
 
   @doc """
   Raises `LeakError` when the encoded value holds a credential value, a
-  configured identifying value, or a tenant host or account ID that sanitizing
-  replaced elsewhere.
+  configured identifying value, or a tenant host, account ID or Google user ID
+  that sanitizing replaced elsewhere.
   """
   def check_leaks!(value, %__MODULE__{} = state) do
     encoded = Jason.encode!(value)
 
     learned =
       Enum.map(state.hosts, fn {host, _placeholder} -> {"a tenant host", host} end) ++
-        Enum.map(state.accounts, fn {id, _placeholder} -> {"an account ID", id} end)
+        Enum.map(state.accounts, fn {id, _placeholder} -> {"an account ID", id} end) ++
+        Enum.map(state.users, fn {id, _placeholder} -> {"a Google user ID", id} end)
 
     guarded =
       Enum.filter(state.identifying ++ learned, fn {_source, value} ->
@@ -197,6 +207,12 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
       |> List.flatten()
       |> Enum.reduce(state, &add_email(&2, &1))
 
+    state =
+      @google_user
+      |> Regex.scan(text, capture: :all_but_first)
+      |> List.flatten()
+      |> Enum.reduce(state, &add_user(&2, &1))
+
     @tenant_host
     |> Regex.scan(text)
     |> List.flatten()
@@ -250,6 +266,14 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
       state
     else
       put_in(state.accounts[id], "account-#{map_size(state.accounts) + 1}")
+    end
+  end
+
+  defp add_user(state, id) do
+    if Map.has_key?(state.users, id) do
+      state
+    else
+      put_in(state.users[id], "user-#{map_size(state.users) + 1}")
     end
   end
 
@@ -314,6 +338,11 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
 
     # Whole numbers only, so a longer number that contains one stays intact and
     # the leak guard reports it instead.
+    text =
+      Enum.reduce(state.users, text, fn {id, placeholder}, text ->
+        Regex.replace(~r/(?<![0-9])#{id}(?![0-9])/, text, placeholder)
+      end)
+
     text =
       Enum.reduce(state.project_numbers, text, fn number, text ->
         Regex.replace(

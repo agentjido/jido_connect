@@ -61,6 +61,43 @@ defmodule Jido.Connect.Google.Meet.Client.Response do
 
   def handle_conference_record_response(response), do: Transport.handle_error_response(response)
 
+  def handle_participant_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    with {:ok, participants} <-
+           normalize_items(
+             body,
+             "participants",
+             &Normalizer.participant/1,
+             "Google Meet participant list response was invalid"
+           ) do
+      {:ok,
+       %{
+         participants: participants,
+         next_page_token: Data.get(body, "nextPageToken")
+       }
+       |> Data.compact()}
+    end
+  end
+
+  def handle_participant_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Meet participant list response was invalid", body)
+  end
+
+  def handle_participant_list_response(response), do: Transport.handle_error_response(response)
+
+  def handle_participant_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    normalize_one(body, &Normalizer.participant/1, "Google Meet participant response was invalid")
+  end
+
+  def handle_participant_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("Google Meet participant response was invalid", body)
+  end
+
+  def handle_participant_response(response), do: Transport.handle_error_response(response)
+
   def handle_recording_list_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
     with {:ok, recordings} <-

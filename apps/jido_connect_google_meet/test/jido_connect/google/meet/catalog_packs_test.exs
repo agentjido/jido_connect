@@ -29,6 +29,12 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
         {:ok, %{status: 200, body: LiveSmoke.fixture!(:google_meet, "transcript_entries")}}
       )
     end
+
+    def get_participant(%{participant_name: "conferenceRecords/abc/participants/p"}, "token") do
+      Meet.Client.Response.handle_participant_response(
+        {:ok, %{status: 200, body: LiveSmoke.fixture!(:google_meet, "participant_get")}}
+      )
+    end
   end
 
   @poll_triggers ["google.meet.transcript.available"]
@@ -44,6 +50,13 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
     "google.meet.transcript.started",
     "google.meet.transcript.ended",
     "google.meet.transcript.file_generated"
+  ]
+
+  # The transcript reader adds entry text and the participants its entries name.
+  @transcript_reads [
+    "google.meet.transcript.entry.list",
+    "google.meet.participant.list",
+    "google.meet.participant.get"
   ]
 
   @metadata_reads [
@@ -75,6 +88,8 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
     assert "google.meet.transcript.get" in ids
     refute "google.meet.space.create" in ids
     refute "google.meet.transcript.entry.list" in ids
+    refute "google.meet.participant.list" in ids
+    refute "google.meet.participant.get" in ids
     refute "google.meet.conference.started" in ids
 
     assert Enum.sort(Meet.reader_pack().allowed_tools) == Enum.sort(@metadata_reads)
@@ -107,7 +122,12 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
     end
 
     assert "google.meet.transcript.entry.list" in ids
+    assert "google.meet.participant.list" in ids
+    assert "google.meet.participant.get" in ids
     refute "google.meet.space.create" in ids
+
+    assert Enum.sort(Meet.transcript_reader_pack().allowed_tools) ==
+             Enum.sort(@metadata_reads ++ @transcript_reads)
 
     assert {:ok, descriptor} =
              Catalog.describe_tool("google.meet.transcript.entry.list",
@@ -218,6 +238,31 @@ defmodule Jido.Connect.Google.Meet.CatalogPacksTest do
                context: context,
                credential_lease: lease
              )
+  end
+
+  test "only the transcript reader pack resolves a transcript speaker" do
+    {context, lease} = context_and_lease(scopes: [@readonly_scope])
+    input = %{participant_name: "conferenceRecords/abc/participants/p"}
+
+    assert {:ok, %{participant: %{user_type: "signed_in_user"}}} =
+             Catalog.call_tool("google.meet.participant.get", input,
+               modules: [Meet],
+               packs: Meet.catalog_packs(),
+               pack: :google_meet_transcript_reader,
+               context: context,
+               credential_lease: lease
+             )
+
+    for pack <- [:google_meet_reader, :google_meet_scheduler] do
+      assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+               Catalog.call_tool("google.meet.participant.get", input,
+                 modules: [Meet],
+                 packs: Meet.catalog_packs(),
+                 pack: pack,
+                 context: context,
+                 credential_lease: lease
+               )
+    end
   end
 
   defp context_and_lease(opts) do
