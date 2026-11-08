@@ -1248,6 +1248,10 @@ defmodule Jido.Connect.GitHubTest do
            ]
 
     assert Jido.Connect.GitHub.jido_action_modules() == [
+             Jido.Connect.GitHub.Actions.GetUser,
+             Jido.Connect.GitHub.Actions.ListUserInstallations,
+             Jido.Connect.GitHub.Actions.ListUserInstallationRepositories,
+             Jido.Connect.GitHub.Actions.GetRateLimit,
              Jido.Connect.GitHub.Actions.ListRepositories,
              Jido.Connect.GitHub.Actions.SearchRepositories,
              Jido.Connect.GitHub.Actions.ListInstallationRepositories,
@@ -1280,6 +1284,12 @@ defmodule Jido.Connect.GitHubTest do
              Jido.Connect.GitHub.Actions.RequestPullRequestReviewers,
              Jido.Connect.GitHub.Actions.CreatePullRequestReviewComment,
              Jido.Connect.GitHub.Actions.MergePullRequest,
+             Jido.Connect.GitHub.Actions.ListPullRequestReviews,
+             Jido.Connect.GitHub.Actions.ListPullRequestRequestedReviewers,
+             Jido.Connect.GitHub.Actions.ListCheckRuns,
+             Jido.Connect.GitHub.Actions.GetCommit,
+             Jido.Connect.GitHub.Actions.GetGitTree,
+             Jido.Connect.GitHub.Actions.GetGitBlob,
              Jido.Connect.GitHub.Actions.UpdateIssue,
              Jido.Connect.GitHub.Actions.CreateIssueComment,
              Jido.Connect.GitHub.Actions.ListIssueComments
@@ -1298,6 +1308,10 @@ defmodule Jido.Connect.GitHubTest do
              package: :jido_connect_github,
              generated_modules: %{
                actions: [
+                 Jido.Connect.GitHub.Actions.GetUser,
+                 Jido.Connect.GitHub.Actions.ListUserInstallations,
+                 Jido.Connect.GitHub.Actions.ListUserInstallationRepositories,
+                 Jido.Connect.GitHub.Actions.GetRateLimit,
                  Jido.Connect.GitHub.Actions.ListRepositories,
                  Jido.Connect.GitHub.Actions.SearchRepositories,
                  Jido.Connect.GitHub.Actions.ListInstallationRepositories,
@@ -1330,6 +1344,12 @@ defmodule Jido.Connect.GitHubTest do
                  Jido.Connect.GitHub.Actions.RequestPullRequestReviewers,
                  Jido.Connect.GitHub.Actions.CreatePullRequestReviewComment,
                  Jido.Connect.GitHub.Actions.MergePullRequest,
+                 Jido.Connect.GitHub.Actions.ListPullRequestReviews,
+                 Jido.Connect.GitHub.Actions.ListPullRequestRequestedReviewers,
+                 Jido.Connect.GitHub.Actions.ListCheckRuns,
+                 Jido.Connect.GitHub.Actions.GetCommit,
+                 Jido.Connect.GitHub.Actions.GetGitTree,
+                 Jido.Connect.GitHub.Actions.GetGitBlob,
                  Jido.Connect.GitHub.Actions.UpdateIssue,
                  Jido.Connect.GitHub.Actions.CreateIssueComment,
                  Jido.Connect.GitHub.Actions.ListIssueComments
@@ -1479,6 +1499,34 @@ defmodule Jido.Connect.GitHubTest do
     assert function_exported?(Jido.Connect.GitHub.Sensors.UpdatedPullRequests, :init, 2)
     assert function_exported?(Jido.Connect.GitHub.Sensors.WorkflowRunUpdates, :init, 2)
     assert function_exported?(Jido.Connect.GitHub.Plugin, :plugin_spec, 1)
+  end
+
+  test "the Hozen collection catalog exists and every operation is read only" do
+    ids = [
+      "github.user.get",
+      "github.user_installation.list",
+      "github.user_installation_repository.list",
+      "github.rate_limit.get",
+      "github.repo.search",
+      "github.repo.get",
+      "github.issue.list",
+      "github.pull_request.list",
+      "github.pull_request.get",
+      "github.pull_request_review.list",
+      "github.pull_request_requested_reviewer.list",
+      "github.check_run.list",
+      "github.workflow_run.list",
+      "github.commit.get",
+      "github.git_tree.get",
+      "github.git_blob.get"
+    ]
+
+    assert {:ok, spec} = Connect.spec(Jido.Connect.GitHub)
+    actions = Map.new(spec.actions, &{&1.id, &1})
+
+    assert Enum.all?(ids, fn id ->
+             match?(%{risk: :read, mutation?: false}, Map.get(actions, id))
+           end)
   end
 
   test "generated action metadata tracks the DSL action" do
@@ -1641,7 +1689,7 @@ defmodule Jido.Connect.GitHubTest do
              :per_page
            ]
 
-    assert Enum.map(projection.output, & &1.name) == [:pull_requests]
+    assert Enum.map(projection.output, & &1.name) == [:pull_requests, :page]
     assert projection.risk == :read
     assert projection.resource == :pull_request
     assert projection.verb == :list
@@ -1870,7 +1918,7 @@ defmodule Jido.Connect.GitHubTest do
              :per_page
            ]
 
-    assert Enum.map(projection.output, & &1.name) == [:workflow_runs, :total_count]
+    assert Enum.map(projection.output, & &1.name) == [:workflow_runs, :total_count, :page]
     assert projection.risk == :read
     assert projection.resource == :workflow_run
     assert projection.verb == :list
@@ -3694,6 +3742,10 @@ defmodule Jido.Connect.GitHubTest do
     spec = Jido.Connect.GitHub.Plugin.plugin_spec(%{})
 
     assert spec.actions == [
+             Jido.Connect.GitHub.Actions.GetUser,
+             Jido.Connect.GitHub.Actions.ListUserInstallations,
+             Jido.Connect.GitHub.Actions.ListUserInstallationRepositories,
+             Jido.Connect.GitHub.Actions.GetRateLimit,
              Jido.Connect.GitHub.Actions.ListRepositories,
              Jido.Connect.GitHub.Actions.SearchRepositories,
              Jido.Connect.GitHub.Actions.ListInstallationRepositories,
@@ -3726,6 +3778,12 @@ defmodule Jido.Connect.GitHubTest do
              Jido.Connect.GitHub.Actions.RequestPullRequestReviewers,
              Jido.Connect.GitHub.Actions.CreatePullRequestReviewComment,
              Jido.Connect.GitHub.Actions.MergePullRequest,
+             Jido.Connect.GitHub.Actions.ListPullRequestReviews,
+             Jido.Connect.GitHub.Actions.ListPullRequestRequestedReviewers,
+             Jido.Connect.GitHub.Actions.ListCheckRuns,
+             Jido.Connect.GitHub.Actions.GetCommit,
+             Jido.Connect.GitHub.Actions.GetGitTree,
+             Jido.Connect.GitHub.Actions.GetGitBlob,
              Jido.Connect.GitHub.Actions.UpdateIssue,
              Jido.Connect.GitHub.Actions.CreateIssueComment,
              Jido.Connect.GitHub.Actions.ListIssueComments

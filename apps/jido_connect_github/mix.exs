@@ -44,7 +44,7 @@ defmodule JidoConnectGitHub.MixProject do
     [
       jido_connect_dep(),
       {:jason, "~> 1.4"},
-      {:plug, "~> 1.20", only: :test},
+      {:plug, "~> 1.20"},
       {:req, "~> 0.6"}
     ]
   end

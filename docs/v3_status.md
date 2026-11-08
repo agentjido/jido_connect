@@ -6,6 +6,20 @@ change with each deliberate upstream update.
 
 ## Dependency record
 
+Selected on 2026-11-08 for the Hozen GitHub collection candidate:
+
+| Package | Requirement | Source |
+| --- | --- | --- |
+| `jido` | `54fde0cf79aae9dcc2c00636d9846834abd06852` | `mikehostetler/new_jido` Git fork |
+| `arbor_mcp` | `== 2.0.0-rc.7` | Hex |
+| `arbor_rpc` | Locked to `1.0.0-rc.4` | Hex |
+| `zoi` | `2fff2a23e23e7ac0b26f62f49bbc1b12f7818ac9` | `mikehostetler/zoi` Git fork |
+
+The monolithic Jido v3 source replaces the separate `jido_action`, `jido_ai`,
+and `jido_signal` dependency entries. The umbrella lock contains one Jido
+source. The catalog host test uses the current Agent `plugins:` option and the
+current `Jido.Agent.Plugin.Preparation` fields.
+
 Selected on 2026-10-27:
 
 | Package | Requirement | Source |
@@ -67,6 +81,24 @@ not import the affected Cowlib encoders. `mix hex.audit` now runs without an
 exception list.
 
 ## Verification
+
+The Hozen GitHub collection candidate was checked locally on 2026-11-08:
+
+- Umbrella `mix q`: passed across all connector packages.
+- GitHub connector tests: passed, 209 tests.
+- GitHub App user connections use permission-derived scopes and do not claim
+  the broad OAuth `repo` scope.
+- The reviewed Hozen catalog contains 16 read actions for account checks,
+  repository discovery, portfolio evidence, and exact-commit source reads.
+- Unknown and write actions are denied by the Hozen host before credential
+  access or transport.
+- Live read checks collected source packages for seven repositories and full
+  evidence for six open pull requests. No GitHub mutation ran.
+- `mix hex.audit` reports `jsv` 0.25.0 advisory EEF-CVE-2026-117680 at low
+  severity. ArborMCP 2.0.0-rc.7 still requires `jsv ~> 0.25.0`. Hozen uses a
+  tested host override to JSV 0.27.0. The connector package still needs an
+  ArborMCP dependency update before this advisory can close without an
+  override.
 
 The ArborMCP `2.0.0-rc.6` update was checked locally on 2026-10-27:
 

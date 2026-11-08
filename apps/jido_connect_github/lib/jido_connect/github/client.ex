@@ -9,6 +9,14 @@ defmodule Jido.Connect.GitHub.Client do
 
   alias Jido.Connect.GitHub.Client
 
+  defdelegate get_user(access_token), to: Client.Account
+  defdelegate list_user_installations(params, access_token), to: Client.Account
+
+  defdelegate list_user_installation_repositories(installation_id, params, access_token),
+    to: Client.Account
+
+  defdelegate get_rate_limit(access_token), to: Client.Account
+
   defdelegate list_repositories(params, access_token), to: Client.Repositories
   defdelegate get_repository(owner, name, access_token), to: Client.Repositories
   defdelegate list_branches(params, access_token), to: Client.Repositories
@@ -20,6 +28,7 @@ defmodule Jido.Connect.GitHub.Client do
   defdelegate update_file(repo, path, attrs, access_token), to: Client.Contents
 
   defdelegate list_issues(repo, state, access_token), to: Client.Issues
+  defdelegate list_issues_page(params, access_token), to: Client.Issues
   defdelegate create_issue(repo, attrs, access_token), to: Client.Issues
   defdelegate update_issue(repo, issue_number, attrs, access_token), to: Client.Issues
   defdelegate add_issue_labels(repo, issue_number, labels, access_token), to: Client.Issues
@@ -44,6 +53,17 @@ defmodule Jido.Connect.GitHub.Client do
 
   defdelegate merge_pull_request(repo, pull_number, attrs, access_token), to: Client.PullRequests
   defdelegate list_updated_pull_requests(repo, checkpoint, access_token), to: Client.PullRequests
+
+  defdelegate list_pull_request_reviews(params, access_token), to: Client.Evidence
+
+  defdelegate list_pull_request_requested_reviewers(repo, pull_number, access_token),
+    to: Client.Evidence
+
+  defdelegate list_check_runs(params, access_token), to: Client.Evidence
+
+  defdelegate get_commit(repo, ref, access_token), to: Client.GitObjects
+  defdelegate get_tree(repo, sha, recursive, access_token), to: Client.GitObjects
+  defdelegate get_blob(repo, sha, access_token), to: Client.GitObjects
 
   defdelegate list_workflow_runs(params, access_token), to: Client.Actions
   defdelegate list_workflow_run_jobs(params, access_token), to: Client.Actions

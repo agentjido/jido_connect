@@ -6,12 +6,18 @@ defmodule Jido.Connect.GitHub.Client.Normalizer do
 
   def normalize_issue(issue) when is_map(issue) do
     %{
+      id: Data.get(issue, "id"),
       number: Data.get(issue, "number"),
       url: Data.get(issue, "html_url") || Data.get(issue, "url"),
       title: Data.get(issue, "title"),
       state: Data.get(issue, "state"),
-      updated_at: Data.get(issue, "updated_at")
+      user: normalize_user(Data.get(issue, "user")),
+      created_at: Data.get(issue, "created_at"),
+      updated_at: Data.get(issue, "updated_at"),
+      closed_at: Data.get(issue, "closed_at"),
+      pull_request: Data.get(issue, "pull_request")
     }
+    |> Data.compact()
   end
 
   def normalize_assigned_issue(issue) when is_map(issue) do
@@ -27,10 +33,15 @@ defmodule Jido.Connect.GitHub.Client.Normalizer do
       full_name: Data.get(repository, "full_name"),
       owner: normalize_repository_owner(Data.get(repository, "owner")),
       private: Data.get(repository, "private"),
+      visibility: Data.get(repository, "visibility"),
       default_branch: Data.get(repository, "default_branch"),
       permissions: Data.get(repository, "permissions"),
-      url: Data.get(repository, "html_url") || Data.get(repository, "url")
+      url: Data.get(repository, "html_url") || Data.get(repository, "url"),
+      archived: Data.get(repository, "archived"),
+      fork: Data.get(repository, "fork"),
+      updated_at: Data.get(repository, "updated_at")
     }
+    |> Data.compact()
   end
 
   def normalize_branch(branch) when is_map(branch) do
@@ -150,14 +161,21 @@ defmodule Jido.Connect.GitHub.Client.Normalizer do
 
   def normalize_pull_request(pull_request) when is_map(pull_request) do
     %{
+      id: Data.get(pull_request, "id"),
       number: Data.get(pull_request, "number"),
       url: Data.get(pull_request, "html_url") || Data.get(pull_request, "url"),
       title: Data.get(pull_request, "title"),
       state: Data.get(pull_request, "state"),
+      user: normalize_user(Data.get(pull_request, "user")),
+      draft: Data.get(pull_request, "draft"),
       head: normalize_pull_request_ref(Data.get(pull_request, "head")),
       base: normalize_pull_request_ref(Data.get(pull_request, "base")),
-      updated_at: Data.get(pull_request, "updated_at")
+      created_at: Data.get(pull_request, "created_at"),
+      updated_at: Data.get(pull_request, "updated_at"),
+      closed_at: Data.get(pull_request, "closed_at"),
+      merged_at: Data.get(pull_request, "merged_at")
     }
+    |> Data.compact()
   end
 
   def normalize_pull_request_search_result(pull_request) when is_map(pull_request) do
@@ -209,27 +227,105 @@ defmodule Jido.Connect.GitHub.Client.Normalizer do
   end
 
   def normalize_pull_request_details(pull_request) when is_map(pull_request) do
-    %{
-      number: Data.get(pull_request, "number"),
-      url: Data.get(pull_request, "html_url") || Data.get(pull_request, "url"),
-      title: Data.get(pull_request, "title"),
-      state: Data.get(pull_request, "state"),
+    pull_request
+    |> normalize_pull_request()
+    |> Map.merge(%{
       body: Data.get(pull_request, "body"),
-      draft: Data.get(pull_request, "draft"),
       maintainer_can_modify: Data.get(pull_request, "maintainer_can_modify"),
       merged: Data.get(pull_request, "merged"),
       mergeable: Data.get(pull_request, "mergeable"),
+      rebaseable: Data.get(pull_request, "rebaseable"),
       mergeable_state: Data.get(pull_request, "mergeable_state"),
       merge_commit_sha: Data.get(pull_request, "merge_commit_sha"),
       commits: Data.get(pull_request, "commits"),
       additions: Data.get(pull_request, "additions"),
       deletions: Data.get(pull_request, "deletions"),
       changed_files: Data.get(pull_request, "changed_files"),
-      head: normalize_pull_request_ref(Data.get(pull_request, "head")),
-      base: normalize_pull_request_ref(Data.get(pull_request, "base")),
-      user: normalize_user(Data.get(pull_request, "user")),
       labels: normalize_labels(Data.get(pull_request, "labels")),
-      updated_at: Data.get(pull_request, "updated_at")
+      issue: nil
+    })
+    |> Data.compact()
+  end
+
+  def normalize_authenticated_user(user) when is_map(user) do
+    %{
+      id: Data.get(user, "id"),
+      login: Data.get(user, "login"),
+      type: Data.get(user, "type"),
+      url: Data.get(user, "html_url") || Data.get(user, "url")
+    }
+    |> Data.compact()
+  end
+
+  def normalize_user_installation(installation) when is_map(installation) do
+    %{
+      id: Data.get(installation, "id"),
+      account: normalize_repository_owner(Data.get(installation, "account")),
+      repository_selection: Data.get(installation, "repository_selection"),
+      permissions: Data.get(installation, "permissions") || %{},
+      app_id: Data.get(installation, "app_id")
+    }
+    |> Data.compact()
+  end
+
+  def normalize_rate_resources(resources) when is_map(resources) do
+    resources
+    |> Enum.map(fn {name, value} -> {to_string(name), normalize_rate(value)} end)
+    |> Map.new()
+  end
+
+  def normalize_rate(rate) when is_map(rate) do
+    %{
+      limit: Data.get(rate, "limit"),
+      remaining: Data.get(rate, "remaining"),
+      reset: Data.get(rate, "reset"),
+      used: Data.get(rate, "used")
+    }
+    |> Data.compact()
+  end
+
+  def normalize_rate(_rate), do: %{}
+
+  def normalize_pull_request_review(review) when is_map(review) do
+    %{
+      id: Data.get(review, "id"),
+      user: normalize_user(Data.get(review, "user")),
+      state: Data.get(review, "state"),
+      submitted_at: Data.get(review, "submitted_at"),
+      commit_id: Data.get(review, "commit_id")
+    }
+    |> Data.compact()
+  end
+
+  def normalize_check_run(check_run) when is_map(check_run) do
+    %{
+      id: Data.get(check_run, "id"),
+      name: Data.get(check_run, "name"),
+      app: normalize_check_run_app(Data.get(check_run, "app")),
+      status: Data.get(check_run, "status"),
+      conclusion: Data.get(check_run, "conclusion"),
+      started_at: Data.get(check_run, "started_at"),
+      completed_at: Data.get(check_run, "completed_at"),
+      url: Data.get(check_run, "html_url") || Data.get(check_run, "url")
+    }
+    |> Data.compact()
+  end
+
+  def normalize_check_run_app(app) when is_map(app) do
+    %{id: Data.get(app, "id"), slug: Data.get(app, "slug")}
+    |> Data.compact()
+  end
+
+  def normalize_check_run_app(_app), do: nil
+
+  def normalize_git_tree_entry(entry) when is_map(entry) do
+    %{
+      path: Data.get(entry, "path"),
+      mode: Data.get(entry, "mode"),
+      type: Data.get(entry, "type"),
+      sha: Data.get(entry, "sha"),
+      size: Data.get(entry, "size"),
+      url: Data.get(entry, "url")
     }
     |> Data.compact()
   end
@@ -314,6 +410,7 @@ defmodule Jido.Connect.GitHub.Client.Normalizer do
       branch: Data.get(workflow_run, "head_branch"),
       sha: Data.get(workflow_run, "head_sha"),
       workflow_id: Data.get(workflow_run, "workflow_id"),
+      attempt: Data.get(workflow_run, "run_attempt"),
       url: Data.get(workflow_run, "html_url") || Data.get(workflow_run, "url"),
       created_at: Data.get(workflow_run, "created_at"),
       updated_at: Data.get(workflow_run, "updated_at")
