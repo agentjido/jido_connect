@@ -23,10 +23,13 @@ defmodule Jido.Connect.GitHub.Actions.Issues do
       input do
         field :repo, :string, required?: true, example: "org/repo"
         field :state, :string, enum: ["open", "closed", "all"], default: "open"
+        field :page, :integer, default: 1
+        field :per_page, :integer, default: 100
       end
 
       output do
         field :issues, {:array, :map}
+        field :page, :map
       end
     end
 

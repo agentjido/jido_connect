@@ -33,6 +33,7 @@ defmodule Jido.Connect.GitHub.Actions.WorkflowRuns do
       output do
         field :workflow_runs, {:array, :map}
         field :total_count, :integer
+        field :page, :map
       end
     end
   end

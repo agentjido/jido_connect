@@ -14,6 +14,29 @@ defmodule Jido.Connect.GitHub.Client.Issues do
     |> Response.handle_list_response()
   end
 
+  def list_issues_page(%{repo: repo} = params, access_token)
+      when is_binary(repo) and is_map(params) and is_binary(access_token) do
+    alias Jido.Connect.GitHub.Client.Pagination
+
+    with {:ok, page} <- Pagination.validate(params),
+         {:ok, issues} <-
+           access_token
+           |> Transport.request()
+           |> Req.get(
+             url: "/repos/#{repo}/issues",
+             params: [
+               state: Map.get(params, :state, "open"),
+               sort: "created",
+               direction: "desc",
+               page: page.page,
+               per_page: page.per_page
+             ]
+           )
+           |> Response.handle_list_response() do
+      {:ok, %{issues: issues, page: Pagination.metadata(page, length(issues))}}
+    end
+  end
+
   def create_issue(repo, attrs, access_token) when is_binary(access_token) do
     access_token
     |> Transport.request()

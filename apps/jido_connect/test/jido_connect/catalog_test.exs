@@ -44,20 +44,16 @@ defmodule Jido.Connect.CatalogTest do
   end
 
   defmodule CatalogHostAgent do
-    use Jido.Agent, name: "connect_catalog_host"
+    use Jido.Agent,
+      name: "connect_catalog_host",
+      plugins: [{Jido.Connect.Catalog.Plugin, %{modules: [Jido.Connect.MCP]}}]
 
     state do
       schema(
-        Zoi.object(%{
-          workspace: Zoi.string(),
-          catalog_results: Zoi.list(Zoi.any()) |> Zoi.default([])
+        Jido.Joi.object(%{
+          workspace: Jido.Joi.string(),
+          catalog_results: Jido.Joi.list(Jido.Joi.any()) |> Jido.Joi.default([])
         })
-      )
-    end
-
-    plugins do
-      plugin(Jido.Connect.Catalog.Plugin,
-        config: %{modules: [Jido.Connect.MCP]}
       )
     end
 
@@ -865,6 +861,7 @@ defmodule Jido.Connect.CatalogTest do
       agent_module: __MODULE__,
       agent_state: %{},
       plugin_state: nil,
+      route_candidates: [],
       signal: Jido.Signal.new!("connect.catalog.search", %{}, source: "/test")
     }
 
