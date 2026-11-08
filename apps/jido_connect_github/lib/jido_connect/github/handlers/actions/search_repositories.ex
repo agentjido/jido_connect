@@ -64,6 +64,7 @@ defmodule Jido.Connect.GitHub.Handlers.Actions.SearchRepositories do
       full_name: Map.fetch!(repository, :full_name),
       owner: Map.get(repository, :owner),
       private: Map.get(repository, :private),
+      visibility: Map.get(repository, :visibility),
       default_branch: Map.get(repository, :default_branch),
       permissions: Map.get(repository, :permissions),
       url: Map.get(repository, :url),

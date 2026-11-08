@@ -121,9 +121,13 @@ defmodule Jido.Connect.GitHub.Actions.Repositories do
         field :full_name, :string
         field :owner, :map
         field :private, :boolean
+        field :visibility, :string
         field :default_branch, :string
         field :permissions, :map
         field :url, :string
+        field :archived, :boolean
+        field :fork, :boolean
+        field :updated_at, :string
       end
     end
 

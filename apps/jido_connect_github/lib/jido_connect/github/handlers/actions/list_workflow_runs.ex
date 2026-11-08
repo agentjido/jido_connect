@@ -13,7 +13,13 @@ defmodule Jido.Connect.GitHub.Handlers.Actions.ListWorkflowRuns do
       {:ok,
        %{
          workflow_runs: Enum.map(workflow_runs, &normalize_workflow_run/1),
-         total_count: total_count
+         total_count: total_count,
+         page:
+           Jido.Connect.GitHub.Handlers.Actions.Support.page(
+             input,
+             length(workflow_runs),
+             total_count
+           )
        }}
     end
   end
@@ -47,6 +53,7 @@ defmodule Jido.Connect.GitHub.Handlers.Actions.ListWorkflowRuns do
       branch: Map.get(workflow_run, :branch),
       sha: Map.get(workflow_run, :sha),
       workflow_id: Map.get(workflow_run, :workflow_id),
+      attempt: Map.get(workflow_run, :attempt),
       url: Map.get(workflow_run, :url),
       created_at: Map.get(workflow_run, :created_at),
       updated_at: Map.get(workflow_run, :updated_at)

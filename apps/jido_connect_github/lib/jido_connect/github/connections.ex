@@ -55,6 +55,31 @@ defmodule Jido.Connect.GitHub.Connections do
   end
 
   @doc """
+  Builds a user connection for a host-owned GitHub App user access token.
+
+  GitHub App user tokens do not use the broad OAuth `repo` scope. The host
+  supplies the verified permissions for the exact installation, repository,
+  or public-read target that the action can access. The connection contains
+  only permission-derived scope names and public binding metadata. It never
+  contains the access token.
+  """
+  def github_app_user_connection(attrs, opts) when is_map(attrs) and is_list(opts) do
+    permissions = Keyword.get(opts, :permissions, Data.get(attrs, "permissions", %{}))
+
+    metadata =
+      opts
+      |> Keyword.get(:metadata, %{})
+      |> Map.put(:token_kind, :github_app_user)
+
+    opts =
+      opts
+      |> Keyword.put(:metadata, metadata)
+      |> Keyword.put(:scopes, github_app_user_scopes(permissions, metadata))
+
+    user_connection(attrs, opts)
+  end
+
+  @doc """
   Builds a GitHub App installation connection.
 
   Organization installations default to tenant-owned connections. User-account
@@ -198,6 +223,18 @@ defmodule Jido.Connect.GitHub.Connections do
   end
 
   defp permission_scopes(_permissions), do: []
+
+  defp github_app_user_scopes(permissions, metadata) do
+    permissions
+    |> permission_scopes()
+    |> maybe_add_public_read(metadata)
+  end
+
+  defp maybe_add_public_read(scopes, metadata) do
+    if Data.get(metadata, "public_read", false),
+      do: Enum.uniq(["public:read" | scopes]),
+      else: scopes
+  end
 
   defp permission_scope(permission, "write"), do: ["#{permission}:read", "#{permission}:write"]
   defp permission_scope(permission, "admin"), do: ["#{permission}:read", "#{permission}:write"]

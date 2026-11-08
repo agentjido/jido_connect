@@ -6,6 +6,44 @@ defmodule Jido.Connect.GitHub.Client.Response do
 
   import Normalizer
 
+  def handle_user_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    {:ok, normalize_authenticated_user(body)}
+  end
+
+  def handle_user_response({:ok, %{status: status, body: body}}) when status in 200..299 do
+    Transport.invalid_success_response("GitHub authenticated user response was invalid", body)
+  end
+
+  def handle_user_response(response), do: handle_error_response(response)
+
+  def handle_user_installation_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case {Data.get(body, "installations"), Data.get(body, "total_count")} do
+      {installations, total_count} when is_list(installations) and is_integer(total_count) ->
+        {:ok,
+         %{
+           installations: Enum.map(installations, &normalize_user_installation/1),
+           total_count: total_count
+         }}
+
+      _other ->
+        Transport.invalid_success_response("GitHub installation list response was invalid", body)
+    end
+  end
+
+  def handle_user_installation_list_response(response), do: handle_error_response(response)
+
+  def handle_rate_limit_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case Data.get(body, "resources") do
+      resources when is_map(resources) -> {:ok, %{resources: normalize_rate_resources(resources)}}
+      _other -> Transport.invalid_success_response("GitHub rate limit response was invalid", body)
+    end
+  end
+
+  def handle_rate_limit_response(response), do: handle_error_response(response)
+
   def handle_list_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_list(body) do
     {:ok, Enum.map(body, &normalize_issue/1)}
@@ -259,6 +297,99 @@ defmodule Jido.Connect.GitHub.Client.Response do
   end
 
   def handle_pull_request_response(response), do: handle_error_response(response)
+
+  def handle_pull_request_review_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_list(body) do
+    {:ok, Enum.map(body, &normalize_pull_request_review/1)}
+  end
+
+  def handle_pull_request_review_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 do
+    Transport.invalid_success_response("GitHub pull request review response was invalid", body)
+  end
+
+  def handle_pull_request_review_list_response(response), do: handle_error_response(response)
+
+  def handle_pull_request_requested_reviewer_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case {Data.get(body, "users"), Data.get(body, "teams")} do
+      {users, teams} when is_list(users) and is_list(teams) ->
+        {:ok,
+         %{
+           users: Enum.map(users, &normalize_user/1),
+           teams: Enum.map(teams, &normalize_team/1)
+         }}
+
+      _other ->
+        Transport.invalid_success_response("GitHub requested reviewer response was invalid", body)
+    end
+  end
+
+  def handle_pull_request_requested_reviewer_response(response),
+    do: handle_error_response(response)
+
+  def handle_check_run_list_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case {Data.get(body, "check_runs"), Data.get(body, "total_count")} do
+      {check_runs, total_count} when is_list(check_runs) and is_integer(total_count) ->
+        {:ok,
+         %{
+           check_runs: Enum.map(check_runs, &normalize_check_run/1),
+           total_count: total_count
+         }}
+
+      _other ->
+        Transport.invalid_success_response("GitHub check run response was invalid", body)
+    end
+  end
+
+  def handle_check_run_list_response(response), do: handle_error_response(response)
+
+  def handle_commit_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    {:ok, normalize_commit(body)}
+  end
+
+  def handle_commit_response({:ok, %{status: status, body: body}}) when status in 200..299 do
+    Transport.invalid_success_response("GitHub commit response was invalid", body)
+  end
+
+  def handle_commit_response(response), do: handle_error_response(response)
+
+  def handle_git_tree_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case {Data.get(body, "sha"), Data.get(body, "tree"), Data.get(body, "truncated")} do
+      {sha, entries, truncated}
+      when is_binary(sha) and is_list(entries) and is_boolean(truncated) ->
+        {:ok,
+         %{
+           sha: sha,
+           entries: Enum.map(entries, &normalize_git_tree_entry/1),
+           truncated: truncated
+         }}
+
+      _other ->
+        Transport.invalid_success_response("GitHub Git tree response was invalid", body)
+    end
+  end
+
+  def handle_git_tree_response(response), do: handle_error_response(response)
+
+  def handle_git_blob_response({:ok, %{status: status, body: body}})
+      when status in 200..299 and is_map(body) do
+    case {Data.get(body, "sha"), Data.get(body, "encoding"), Data.get(body, "size"),
+          Data.get(body, "content")} do
+      {sha, encoding, size, content}
+      when is_binary(sha) and is_binary(encoding) and is_integer(size) and size >= 0 and
+             is_binary(content) ->
+        {:ok, %{sha: sha, encoding: encoding, size: size, content: content}}
+
+      _other ->
+        Transport.invalid_success_response("GitHub Git blob response was invalid", body)
+    end
+  end
+
+  def handle_git_blob_response(response), do: handle_error_response(response)
 
   def handle_pull_request_file_list_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_list(body) do

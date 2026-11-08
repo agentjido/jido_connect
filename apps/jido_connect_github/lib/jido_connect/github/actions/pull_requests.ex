@@ -37,6 +37,7 @@ defmodule Jido.Connect.GitHub.Actions.PullRequests do
 
       output do
         field :pull_requests, {:array, :map}
+        field :page, :map
       end
     end
   end
