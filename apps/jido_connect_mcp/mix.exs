@@ -43,7 +43,8 @@ defmodule JidoConnectMCP.MixProject do
   defp deps do
     [
       jido_connect_dep(),
-      {:arbor_mcp, "== 2.0.0-rc.6"},
+      {:arbor_mcp, "== 2.0.0-rc.7"},
+      {:jsv, "~> 0.26.2", override: true},
       {:jason, "~> 1.4"},
       {:plug, "~> 1.20"},
       {:zoi, "~> 0.18.11"}
