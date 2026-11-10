@@ -46,7 +46,7 @@ defmodule Jido.Connect.Demo.MixProject do
     [
       {:jido, "~> 2.4"},
       {:phoenix, "~> 1.8.9"},
-      {:phoenix_html, "~> 4.3"},
+      {:phoenix_html, "~> 4.4"},
       {:phoenix_live_reload, "~> 1.6", only: :dev},
       {:phoenix_live_view, "~> 1.2"},
       {:lazy_html, "~> 0.1", only: :test},
@@ -63,7 +63,7 @@ defmodule Jido.Connect.Demo.MixProject do
       {:telemetry_poller, "~> 1.3"},
       {:jason, "~> 1.4"},
       {:dns_cluster, "~> 0.2.0"},
-      {:bandit, "~> 1.12"},
+      {:bandit, "~> 1.14 and >= 1.14.1"},
       {:jido_connect, path: "../../apps/jido_connect"},
       {:jido_connect_github, path: "../../apps/jido_connect_github"},
       {:jido_connect_google, path: "../../apps/jido_connect_google"},
