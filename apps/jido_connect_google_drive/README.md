@@ -165,3 +165,32 @@ The connector prefers narrow Drive scopes:
   mutations.
 - `drive` for shared-drive administration such as create/update/delete,
   hide, and unhide.
+
+## Streaming downloads and exports
+
+For large files, hosts can opt into the provider's synchronous streaming client:
+
+```elixir
+alias Jido.Connect.Google.Drive.Client
+
+result = Client.stream_download_file(%{file_id: file_id}, access_token,
+  max_bytes: remaining_budget,
+  collector: fn chunk -> IO.binwrite(destination, chunk) end
+)
+```
+
+Use `stream_export_file/3` with `file_id` and `mime_type` for exports. The
+collector returns `:ok` or `{:error, reason}` and runs before the next chunk is
+read. The host owns the destination and must discard partial output after any
+error or cancellation. Results contain the file ID, MIME type, status and bytes
+received, not the body. Errors use `Jido.Connect.Error` and collector error
+reasons are not exposed.
+
+The stream delivers identity-encoded raw bytes, including JSON and CSV; it does
+not apply the buffered API's body decoding or row normalization. The provider
+requests identity encoding and rejects other encodings. The limit covers those
+raw bytes, including when Content-Length is missing or inaccurate; a declared
+length above the limit is rejected early. Pass `declared_size:` when Drive
+metadata provides a size to reject it before opening a request. Retrying stops
+once a chunk has been delivered. The original buffered APIs are unchanged. See
+`Jido.Connect.Google.Drive.Client.Stream` for the full contract.
