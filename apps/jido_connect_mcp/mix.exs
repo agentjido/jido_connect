@@ -44,6 +44,8 @@ defmodule JidoConnectMCP.MixProject do
     [
       jido_connect_dep(),
       jido_mcp_dep(),
+      {:cowboy, "~> 2.21"},
+      {:cowlib, "~> 2.22"},
       {:jason, "~> 1.4"},
       {:plug, "~> 1.20"},
       {:zoi, "~> 0.18.11"}
