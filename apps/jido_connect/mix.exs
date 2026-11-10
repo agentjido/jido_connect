@@ -48,6 +48,7 @@ defmodule JidoConnectCore.MixProject do
        ref: "54fde0cf79aae9dcc2c00636d9846834abd06852",
        override: true},
       {:arbor_mcp, "== 2.0.0-rc.7"},
+      {:jsv, "~> 0.26.2", override: true},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false},
       {:jason, "~> 1.4"},
       {:req, "~> 0.6"},
