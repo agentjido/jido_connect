@@ -2,6 +2,7 @@ defmodule Jido.Connect.Jira.Client.ResponseTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect.Jira.Client.Response
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   describe "handle_project_response/1" do
     test "normalizes a successful project get response" do
@@ -118,50 +119,24 @@ defmodule Jido.Connect.Jira.Client.ResponseTest do
     end
   end
 
-  describe "handle_issue_search_response/1 with is_last" do
-    test "includes is_last in search results" do
-      body = %{
-        "startAt" => 0,
-        "maxResults" => 50,
-        "total" => 1,
-        "isLast" => true,
-        "issues" => [
-          %{
-            "key" => "PROJ-123",
-            "id" => "10001",
-            "fields" => %{
-              "summary" => "Test"
-            }
-          }
-        ]
-      }
+  describe "handle_issue_search_response/2" do
+    # Recorded enhanced-search pages; see `Client.IssueSearchTest`.
+    test "returns the page envelope without total or start_at" do
+      body = LiveSmoke.fixture!(:jira, "issue_context.4")
 
       assert {:ok, result} =
                Response.handle_issue_search_response({:ok, %{status: 200, body: body}})
 
-      assert result.is_last == true
-      assert result.start_at == 0
-      assert result.max_results == 50
+      assert Map.keys(result) |> Enum.sort() == [:is_last, :issues, :next_page_token]
+      assert %{is_last: false, issues: [%{key: "JCL-1"}, %{key: "JCL-2"}]} = result
+      assert result.next_page_token == body["nextPageToken"]
     end
 
-    test "returns nil is_last when not present" do
-      body = %{
-        "startAt" => 0,
-        "maxResults" => 50,
-        "total" => 1,
-        "issues" => [
-          %{
-            "key" => "PROJ-123",
-            "id" => "10001",
-            "fields" => %{}
-          }
-        ]
-      }
+    test "returns no token on the last page" do
+      body = LiveSmoke.fixture!(:jira, "issue_context.6")
 
-      assert {:ok, result} =
+      assert {:ok, %{is_last: true, next_page_token: nil, issues: [%{key: "JCL-5"}]}} =
                Response.handle_issue_search_response({:ok, %{status: 200, body: body}})
-
-      assert result.is_last == nil
     end
   end
 end

@@ -10,7 +10,8 @@ defmodule Jido.Connect.Google.Drive.Handlers.Actions.ListFiles do
       {:ok,
        %{
          files: Enum.map(Map.get(result, :files, []), &public_map/1),
-         next_page_token: Map.get(result, :next_page_token)
+         next_page_token: Map.get(result, :next_page_token),
+         incomplete_search: Map.get(result, :incomplete_search)
        }
        |> Enum.reject(fn {_key, value} -> is_nil(value) end)
        |> Map.new()}

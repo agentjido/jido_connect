@@ -1,0 +1,18 @@
+{
+  "source": {
+    "kind": "synthetic",
+    "url": "https://docs.slack.dev/reference/methods/oauth.v2.access",
+    "section": "Response: Typical error response",
+    "retrieved_on": "2026-11-03",
+    "note": "Not a recording. Slack's example unchanged. The HTTP status is not part of the example; Slack Web API errors use 200 with ok false."
+  },
+  "request": {
+    "method": "POST",
+    "path": "/api/oauth.v2.access"
+  },
+  "status": 200,
+  "body": {
+    "ok": false,
+    "error": "invalid_client_id"
+  }
+}

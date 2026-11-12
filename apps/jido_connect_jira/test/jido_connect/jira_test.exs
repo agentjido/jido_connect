@@ -21,6 +21,7 @@ defmodule Jido.Connect.JiraTest do
   end
 
   @jira_actions_fragment Jido.Connect.Jira.Actions.Issues
+  @jira_comments_fragment Jido.Connect.Jira.Actions.Comments
   @jira_projects_fragment Jido.Connect.Jira.Actions.Projects
   @jira_metadata_fragment Jido.Connect.Jira.Actions.Metadata
   @jira_boards_fragment Jido.Connect.Jira.Actions.Boards
@@ -37,6 +38,7 @@ defmodule Jido.Connect.JiraTest do
     Jido.Connect.Jira.Actions.DeleteIssue,
     Jido.Connect.Jira.Actions.AssignIssue,
     Jido.Connect.Jira.Actions.AddComment,
+    Jido.Connect.Jira.Actions.ListComments,
     Jido.Connect.Jira.Actions.ListProjects,
     Jido.Connect.Jira.Actions.GetProject,
     Jido.Connect.Jira.Actions.ListFieldSchemas,
@@ -68,6 +70,7 @@ defmodule Jido.Connect.JiraTest do
 
   @jira_dsl_fragments [
     @jira_actions_fragment,
+    @jira_comments_fragment,
     @jira_projects_fragment,
     @jira_metadata_fragment,
     @jira_boards_fragment,
@@ -96,6 +99,7 @@ defmodule Jido.Connect.JiraTest do
              "jira.issue.delete",
              "jira.issue.assign",
              "jira.issue.comment.create",
+             "jira.issue.comment.list",
              "jira.project.list",
              "jira.project.get",
              "jira.field_schema.list",
@@ -190,8 +194,8 @@ defmodule Jido.Connect.JiraTest do
 
     assert issue.key == "PROJ-123"
     assert issue.summary == "Test issue"
-    refute Map.has_key?(issue, :id)
-    refute Map.has_key?(issue, :url)
+    assert issue.id == "10001"
+    assert issue.url == "https://example.atlassian.net/rest/api/3/issue/10001"
     refute Map.has_key?(issue, :issue_type)
   end
 
@@ -401,6 +405,19 @@ defmodule Jido.Connect.JiraTest do
 
     assert {:ok,
             %{
+              id: "jira.issue.comment.list",
+              resource: :comment,
+              verb: :list,
+              mutation?: false,
+              risk: :read,
+              policies: [:project_access],
+              auth_profiles: [:api_token, :oauth2_user],
+              scope_resolver: Jido.Connect.Jira.ScopeResolver
+            }} =
+             Connect.action(spec, "jira.issue.comment.list")
+
+    assert {:ok,
+            %{
               id: "jira.project.list",
               resource: :project,
               verb: :list,
@@ -493,14 +510,20 @@ defmodule Jido.Connect.JiraTest do
 
     assert Enum.map(projection.output, & &1.name) == [
              :key,
+             :id,
+             :url,
              :summary,
+             :description,
+             :description_unsupported_nodes,
              :status,
              :project,
              :assignee,
              :priority,
              :labels,
+             :due_date,
              :created_at,
-             :updated_at
+             :updated_at,
+             :missing_fields
            ]
 
     assert projection.risk == :read

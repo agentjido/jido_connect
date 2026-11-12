@@ -1,0 +1,501 @@
+{
+  "body": {
+    "body": {
+      "content": [
+        {
+          "endIndex": 1,
+          "sectionBreak": {
+            "sectionStyle": {
+              "columnSeparatorStyle": "NONE",
+              "contentDirection": "LEFT_TO_RIGHT",
+              "sectionType": "CONTINUOUS"
+            }
+          }
+        },
+        {
+          "endIndex": 22,
+          "paragraph": {
+            "elements": [
+              {
+                "endIndex": 22,
+                "startIndex": 1,
+                "textRun": {
+                  "content": "jcl-marker-tab-first\n",
+                  "textStyle": {}
+                }
+              }
+            ],
+            "paragraphStyle": {
+              "direction": "LEFT_TO_RIGHT",
+              "namedStyleType": "NORMAL_TEXT"
+            }
+          },
+          "startIndex": 1
+        },
+        {
+          "endIndex": 23,
+          "paragraph": {
+            "elements": [
+              {
+                "endIndex": 23,
+                "startIndex": 22,
+                "textRun": {
+                  "content": "\n",
+                  "textStyle": {}
+                }
+              }
+            ],
+            "paragraphStyle": {
+              "direction": "LEFT_TO_RIGHT",
+              "namedStyleType": "NORMAL_TEXT"
+            }
+          },
+          "startIndex": 22
+        }
+      ]
+    },
+    "commentsViewMode": "COMMENTS_VIEW_MODE_OMITTED",
+    "documentId": "1Ej83l690dmUeDhX90Suxdef_SR97A-Kleilmdg5G9_E",
+    "documentStyle": {
+      "background": {
+        "color": {}
+      },
+      "documentFormat": {
+        "documentMode": "PAGES"
+      },
+      "marginBottom": {
+        "magnitude": 72,
+        "unit": "PT"
+      },
+      "marginFooter": {
+        "magnitude": 36,
+        "unit": "PT"
+      },
+      "marginHeader": {
+        "magnitude": 36,
+        "unit": "PT"
+      },
+      "marginLeft": {
+        "magnitude": 72,
+        "unit": "PT"
+      },
+      "marginRight": {
+        "magnitude": 72,
+        "unit": "PT"
+      },
+      "marginTop": {
+        "magnitude": 72,
+        "unit": "PT"
+      },
+      "pageNumberStart": 1,
+      "pageSize": {
+        "height": {
+          "magnitude": 841.8897637795277,
+          "unit": "PT"
+        },
+        "width": {
+          "magnitude": 595.2755905511812,
+          "unit": "PT"
+        }
+      },
+      "useCustomHeaderFooterMargins": true
+    },
+    "namedStyles": {
+      "styles": [
+        {
+          "namedStyleType": "NORMAL_TEXT",
+          "paragraphStyle": {
+            "alignment": "START",
+            "avoidWidowAndOrphan": true,
+            "borderBetween": {
+              "color": {},
+              "dashStyle": "SOLID",
+              "padding": {
+                "unit": "PT"
+              },
+              "width": {
+                "unit": "PT"
+              }
+            },
+            "borderBottom": {
+              "color": {},
+              "dashStyle": "SOLID",
+              "padding": {
+                "unit": "PT"
+              },
+              "width": {
+                "unit": "PT"
+              }
+            },
+            "borderLeft": {
+              "color": {},
+              "dashStyle": "SOLID",
+              "padding": {
+                "unit": "PT"
+              },
+              "width": {
+                "unit": "PT"
+              }
+            },
+            "borderRight": {
+              "color": {},
+              "dashStyle": "SOLID",
+              "padding": {
+                "unit": "PT"
+              },
+              "width": {
+                "unit": "PT"
+              }
+            },
+            "borderTop": {
+              "color": {},
+              "dashStyle": "SOLID",
+              "padding": {
+                "unit": "PT"
+              },
+              "width": {
+                "unit": "PT"
+              }
+            },
+            "direction": "LEFT_TO_RIGHT",
+            "indentEnd": {
+              "unit": "PT"
+            },
+            "indentFirstLine": {
+              "unit": "PT"
+            },
+            "indentStart": {
+              "unit": "PT"
+            },
+            "keepLinesTogether": false,
+            "keepWithNext": false,
+            "lineSpacing": 115,
+            "namedStyleType": "NORMAL_TEXT",
+            "pageBreakBefore": false,
+            "shading": {
+              "backgroundColor": {}
+            },
+            "spaceAbove": {
+              "unit": "PT"
+            },
+            "spaceBelow": {
+              "unit": "PT"
+            },
+            "spacingMode": "COLLAPSE_LISTS"
+          },
+          "textStyle": {
+            "backgroundColor": {},
+            "baselineOffset": "NONE",
+            "bold": false,
+            "fontSize": {
+              "magnitude": 11,
+              "unit": "PT"
+            },
+            "foregroundColor": {
+              "color": {
+                "rgbColor": {}
+              }
+            },
+            "italic": false,
+            "smallCaps": false,
+            "strikethrough": false,
+            "underline": false,
+            "weightedFontFamily": {
+              "fontFamily": "Arial",
+              "weight": 400
+            }
+          }
+        },
+        {
+          "namedStyleType": "HEADING_1",
+          "paragraphStyle": {
+            "direction": "LEFT_TO_RIGHT",
+            "keepLinesTogether": true,
+            "keepWithNext": true,
+            "namedStyleType": "NORMAL_TEXT",
+            "pageBreakBefore": false,
+            "spaceAbove": {
+              "magnitude": 20,
+              "unit": "PT"
+            },
+            "spaceBelow": {
+              "magnitude": 6,
+              "unit": "PT"
+            }
+          },
+          "textStyle": {
+            "fontSize": {
+              "magnitude": 20,
+              "unit": "PT"
+            }
+          }
+        },
+        {
+          "namedStyleType": "HEADING_2",
+          "paragraphStyle": {
+            "direction": "LEFT_TO_RIGHT",
+            "keepLinesTogether": true,
+            "keepWithNext": true,
+            "namedStyleType": "NORMAL_TEXT",
+            "pageBreakBefore": false,
+            "spaceAbove": {
+              "magnitude": 18,
+              "unit": "PT"
+            },
+            "spaceBelow": {
+              "magnitude": 6,
+              "unit": "PT"
+            }
+          },
+          "textStyle": {
+            "bold": false,
+            "fontSize": {
+              "magnitude": 16,
+              "unit": "PT"
+            }
+          }
+        },
+        {
+          "namedStyleType": "HEADING_3",
+          "paragraphStyle": {
+            "direction": "LEFT_TO_RIGHT",
+            "keepLinesTogether": true,
+            "keepWithNext": true,
+            "namedStyleType": "NORMAL_TEXT",
+            "pageBreakBefore": false,
+            "spaceAbove": {
+              "magnitude": 16,
+              "unit": "PT"
+            },
+            "spaceBelow": {
+              "magnitude": 4,
+              "unit": "PT"
+            }
+          },
+          "textStyle": {
+            "bold": false,
+            "fontSize": {
+              "magnitude": 14,
+              "unit": "PT"
+            },
+            "foregroundColor": {
+              "color": {
+                "rgbColor": {
+                  "blue": 0.2627451,
+                  "green": 0.2627451,
+                  "red": 0.2627451
+                }
+              }
+            }
+          }
+        },
+        {
+          "namedStyleType": "HEADING_4",
+          "paragraphStyle": {
+            "direction": "LEFT_TO_RIGHT",
+            "keepLinesTogether": true,
+            "keepWithNext": true,
+            "namedStyleType": "NORMAL_TEXT",
+            "pageBreakBefore": false,
+            "spaceAbove": {
+              "magnitude": 14,
+              "unit": "PT"
+            },
+            "spaceBelow": {
+              "magnitude": 4,
+              "unit": "PT"
+            }
+          },
+          "textStyle": {
+            "fontSize": {
+              "magnitude": 12,
+              "unit": "PT"
+            },
+            "foregroundColor": {
+              "color": {
+                "rgbColor": {
+                  "blue": 0.4,
+                  "green": 0.4,
+                  "red": 0.4
+                }
+              }
+            }
+          }
+        },
+        {
+          "namedStyleType": "HEADING_5",
+          "paragraphStyle": {
+            "direction": "LEFT_TO_RIGHT",
+            "keepLinesTogether": true,
+            "keepWithNext": true,
+            "namedStyleType": "NORMAL_TEXT",
+            "pageBreakBefore": false,
+            "spaceAbove": {
+              "magnitude": 12,
+              "unit": "PT"
+            },
+            "spaceBelow": {
+              "magnitude": 4,
+              "unit": "PT"
+            }
+          },
+          "textStyle": {
+            "fontSize": {
+              "magnitude": 11,
+              "unit": "PT"
+            },
+            "foregroundColor": {
+              "color": {
+                "rgbColor": {
+                  "blue": 0.4,
+                  "green": 0.4,
+                  "red": 0.4
+                }
+              }
+            }
+          }
+        },
+        {
+          "namedStyleType": "HEADING_6",
+          "paragraphStyle": {
+            "direction": "LEFT_TO_RIGHT",
+            "keepLinesTogether": true,
+            "keepWithNext": true,
+            "namedStyleType": "NORMAL_TEXT",
+            "pageBreakBefore": false,
+            "spaceAbove": {
+              "magnitude": 12,
+              "unit": "PT"
+            },
+            "spaceBelow": {
+              "magnitude": 4,
+              "unit": "PT"
+            }
+          },
+          "textStyle": {
+            "fontSize": {
+              "magnitude": 11,
+              "unit": "PT"
+            },
+            "foregroundColor": {
+              "color": {
+                "rgbColor": {
+                  "blue": 0.4,
+                  "green": 0.4,
+                  "red": 0.4
+                }
+              }
+            },
+            "italic": true
+          }
+        },
+        {
+          "namedStyleType": "TITLE",
+          "paragraphStyle": {
+            "direction": "LEFT_TO_RIGHT",
+            "keepLinesTogether": true,
+            "keepWithNext": true,
+            "namedStyleType": "NORMAL_TEXT",
+            "pageBreakBefore": false,
+            "spaceAbove": {
+              "unit": "PT"
+            },
+            "spaceBelow": {
+              "magnitude": 3,
+              "unit": "PT"
+            }
+          },
+          "textStyle": {
+            "fontSize": {
+              "magnitude": 26,
+              "unit": "PT"
+            }
+          }
+        },
+        {
+          "namedStyleType": "SUBTITLE",
+          "paragraphStyle": {
+            "direction": "LEFT_TO_RIGHT",
+            "keepLinesTogether": true,
+            "keepWithNext": true,
+            "namedStyleType": "NORMAL_TEXT",
+            "pageBreakBefore": false,
+            "spaceAbove": {
+              "unit": "PT"
+            },
+            "spaceBelow": {
+              "magnitude": 16,
+              "unit": "PT"
+            }
+          },
+          "textStyle": {
+            "fontSize": {
+              "magnitude": 15,
+              "unit": "PT"
+            },
+            "foregroundColor": {
+              "color": {
+                "rgbColor": {
+                  "blue": 0.4,
+                  "green": 0.4,
+                  "red": 0.4
+                }
+              }
+            },
+            "italic": false,
+            "weightedFontFamily": {
+              "fontFamily": "Arial",
+              "weight": 400
+            }
+          }
+        }
+      ]
+    },
+    "revisionId": "AHj4eMTcIdDD83M3i2cqmqXi5qtfcBxDD45zX5-pvDy9wR27KZbiOH22VNZi4UGYgh865Pt1w4gXtG8RNGNmxbSrbDmOGy9JyBzkyN76IZk",
+    "suggestionsViewMode": "SUGGESTIONS_INLINE",
+    "title": "jcl-live tabs"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 14:43:50 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-l2-request-path": [
+      "l2-managed-5"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "GET",
+    "path": "/v1/documents/1Ej83l690dmUeDhX90Suxdef_SR97A-Kleilmdg5G9_E"
+  },
+  "status": 200
+}

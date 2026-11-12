@@ -1,0 +1,131 @@
+{
+  "body": {
+    "channel_actions_count": 0,
+    "channel_actions_ts": null,
+    "has_more": false,
+    "latest": "1793604972.844269",
+    "messages": [
+      {
+        "app_id": "A0CDHUBBHRC",
+        "attachments": [
+          {
+            "fallback": "Live smoke attachment",
+            "fields": [
+              {
+                "short": true,
+                "title": "Kind",
+                "value": "attachment"
+              }
+            ],
+            "id": 1,
+            "text": "Legacy attachment posted by the conversation history live test.",
+            "title": "Live smoke attachment"
+          }
+        ],
+        "bot_id": "B0CDHUEB8MC",
+        "bot_profile": {
+          "app_id": "A0CDHUBBHRC",
+          "deleted": false,
+          "icons": {
+            "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+            "image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+            "image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+          },
+          "id": "B0CDHUEB8MC",
+          "name": "Jido Connect Live Tests",
+          "team_id": "T0CEE692400",
+          "updated": 1793370597,
+          "user_id": "U0CDHUEBVEJ"
+        },
+        "team": "T0CEE692400",
+        "text": "",
+        "ts": "1793604972.844269",
+        "type": "message",
+        "user": "U0CDHUEBVEJ"
+      }
+    ],
+    "ok": true,
+    "oldest": "1793604972.844269",
+    "pin_count": 0
+  },
+  "headers": {
+    "access-control-allow-headers": [
+      "slack-route, x-slack-version-ts, x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-b3-flags, x-background"
+    ],
+    "access-control-allow-origin": [
+      "*"
+    ],
+    "access-control-expose-headers": [
+      "x-slack-req-id, retry-after"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, quic=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, no-cache, no-store, must-revalidate"
+    ],
+    "content-length": [
+      "958"
+    ],
+    "content-type": [
+      "application/json; charset=utf-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 07:36:13 GMT"
+    ],
+    "expires": [
+      "Sat, 26 Jul 1997 05:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "referrer-policy": [
+      "no-referrer"
+    ],
+    "server": [
+      "Apache"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-0469a62fa9fb6a83b,ingress-edge-fra-prod-03070070274398155"
+    ],
+    "x-backend": [
+      "api_normal"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-edge-backend": [
+      "envoy-www"
+    ],
+    "x-envoy-upstream-service-time": [
+      "110"
+    ],
+    "x-server": [
+      "slack-www-hhvm-api-iad-mak8z6nxf54j"
+    ],
+    "x-slack-req-id": [
+      "90194ef5d5cfef57f5f7417df2129afc"
+    ],
+    "x-slack-unique-id": [
+      "96c89179-2a45-4cc3-835a-e30f51d90203"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/api/conversations.history"
+  },
+  "status": 200
+}

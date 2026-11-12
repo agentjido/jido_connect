@@ -1,4 +1,8 @@
-ExUnit.start()
+ExUnit.start(exclude: [:live_smoke])
+
+unless Code.ensure_loaded?(Jido.Connect.TestSupport.LiveSmoke) do
+  Code.require_file("../../jido_connect/test/support/live_smoke.ex", __DIR__)
+end
 
 defmodule Jido.Connect.Confluence.TestRuntime do
   @moduledoc false
@@ -33,6 +37,18 @@ defmodule Jido.Connect.Confluence.TestRuntime do
         api_token: Keyword.get(opts, :api_token, "api-token")
       }
     }
+  end
+
+  # Options for `Jido.Connect.invoke/4` with a short-lived lease of the runtime.
+  def invoke_opts(runtime) do
+    lease =
+      Jido.Connect.CredentialLease.from_connection!(
+        runtime.context.connection,
+        runtime.credentials,
+        expires_at: DateTime.add(DateTime.utc_now(), 60, :second)
+      )
+
+    [context: runtime.context, credential_lease: lease, provider_client: runtime.provider_client]
   end
 end
 

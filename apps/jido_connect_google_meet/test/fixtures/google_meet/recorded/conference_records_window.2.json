@@ -1,0 +1,56 @@
+{
+  "body": {
+    "conferenceRecords": [
+      {
+        "endTime": "2026-10-30T16:54:56.856863Z",
+        "expireTime": "2026-11-29T16:54:56.856863Z",
+        "name": "conferenceRecords/6EMiOc40YJH2mjvfx8U6DxIUOBEQAjIGCIoCIAAYAwg",
+        "space": "spaces/45CSggfnhmwB",
+        "startTime": "2026-10-30T16:52:10.733120Z"
+      }
+    ]
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:45:25 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "server-timing": [
+      "gfet4t7; dur=392"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/v2/conferenceRecords"
+  },
+  "status": 200
+}

@@ -1,0 +1,59 @@
+{
+  "body": {
+    "nextPageToken": "nextPageToken-1",
+    "participants": [
+      {
+        "earliestStartTime": "2026-10-30T16:52:53.077503Z",
+        "latestEndTime": "2026-10-30T16:54:11.099423Z",
+        "name": "conferenceRecords/6EMiOc40YJH2mjvfx8U6DxIUOBEQAjIGCIoCIAAYAwg/participants/user-1",
+        "signedinUser": {
+          "displayName": "Person 1",
+          "user": "users/user-1"
+        }
+      }
+    ]
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 14:49:27 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "server-timing": [
+      "gfet4t7; dur=390"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "GET",
+    "path": "/v2/conferenceRecords/6EMiOc40YJH2mjvfx8U6DxIUOBEQAjIGCIoCIAAYAwg/participants"
+  },
+  "status": 200
+}

@@ -1,0 +1,39 @@
+{
+  "body": {
+    "errors": [
+      {
+        "message": "Non valid time '25:00:00': format must be HH:MM:SS with values between [00:00:00 - 23:59:59]"
+      }
+    ]
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store",
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "119"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 18:52:46 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "2ee7b46c0c6d7ecf4f17137a4acfb0dd"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/4/worklogs"
+  },
+  "status": 400
+}

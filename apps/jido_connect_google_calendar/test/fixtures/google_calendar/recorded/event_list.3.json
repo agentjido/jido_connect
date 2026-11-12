@@ -1,0 +1,127 @@
+{
+  "body": {
+    "items": [
+      {
+        "created": "2026-10-30T15:30:52.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-12-07T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586748506855966\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-11",
+        "iCalUID": "person-2@example.com",
+        "id": "v5omtsjvsa9lrul21cen00t1fo_20261207T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2026-12-07T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "v5omtsjvsa9lrul21cen00t1fo",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-12-07T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live weekly",
+        "updated": "2026-10-30T15:30:53.427Z"
+      },
+      {
+        "created": "2026-10-30T15:30:52.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-12-14T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586748506855966\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-12",
+        "iCalUID": "person-2@example.com",
+        "id": "v5omtsjvsa9lrul21cen00t1fo_20261214T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2026-12-14T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "v5omtsjvsa9lrul21cen00t1fo",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-12-14T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live weekly",
+        "updated": "2026-10-30T15:30:53.427Z"
+      }
+    ]
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate, no-transform"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:18:08 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 08:18:08 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-l2-request-path": [
+      "l2-managed-14"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/calendar/v3/calendars/person-1@example.com/events"
+  },
+  "status": 200
+}

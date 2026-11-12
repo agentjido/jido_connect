@@ -1,0 +1,30 @@
+{
+  "source": {
+    "kind": "synthetic",
+    "url": "https://github.com/janfabian/offtopic-slack-bot/blob/e753644a3633f583b89c546637ff1a9e36886a88/package/backend/api/nocks/install.01.json",
+    "section": "Recorded oauth.v2.access response of an installation with bot scopes only, 2021-06-08",
+    "retrieved_on": "2026-11-03",
+    "note": "Not a recording and not a copy. Field names, nesting and types follow that public recording: authed_user holds only id, team only id, enterprise is null and is_enterprise_install false. The values are those of the bot and user example on https://docs.slack.dev/reference/methods/oauth.v2.access (Response, retrieved 2026-11-03); the token value is a placeholder."
+  },
+  "request": {
+    "method": "POST",
+    "path": "/api/oauth.v2.access"
+  },
+  "status": 200,
+  "body": {
+    "ok": true,
+    "app_id": "A0KRD7HC3",
+    "authed_user": {
+      "id": "U1234"
+    },
+    "scope": "commands,incoming-webhook",
+    "token_type": "bot",
+    "access_token": "xoxb-synthetic-bot",
+    "bot_user_id": "U0KRQLJ9H",
+    "team": {
+      "id": "T9TK3CUKW"
+    },
+    "enterprise": null,
+    "is_enterprise_install": false
+  }
+}

@@ -1,7 +1,28 @@
 defmodule Jido.Connect.Google.Docs.ClientTest do
   use ExUnit.Case, async: false
 
-  alias Jido.Connect.Google.Docs.{Client, Document}
+  alias Jido.Connect.Google.Docs.{Client, Document, Tab}
+  alias Jido.Connect.TestSupport.LiveSmoke
+
+  @tabbed_document_id "1Ej83l690dmUeDhX90Suxdef_SR97A-Kleilmdg5G9_E"
+  @scratch_document_id "1t47PcdwCWroHLmzucoB5YxoFZRyUD9a8dymU8ju-pwE"
+
+  # The two-request batch of the insert recording, in Google's camelCase
+  # spelling. The recorded response holds one empty reply per request.
+  @insert_batch [
+    %{
+      "insertText" => %{
+        "location" => %{"index" => 1, "tabId" => "t.0"},
+        "text" => "jcl-live-second\n"
+      }
+    },
+    %{
+      "insertText" => %{
+        "location" => %{"index" => 1, "tabId" => "t.0"},
+        "text" => "jcl-live-first\n"
+      }
+    }
+  ]
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -55,30 +76,30 @@ defmodule Jido.Connect.Google.Docs.ClientTest do
   end
 
   test "gets document with tab content" do
+    recorded = LiveSmoke.fixture!(:google_docs, "document_with_tabs_content")
+    %{"tabs" => [first, second]} = recorded
+
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
-      assert conn.request_path == "/v1/documents/doc_abc123"
+      assert conn.request_path == "/v1/documents/#{@tabbed_document_id}"
       assert conn.query_params["includeTabsContent"] == "true"
 
-      Req.Test.json(conn, %{
-        "documentId" => "doc_abc123",
-        "title" => "Project Plan",
-        "tabs" => [
-          %{
-            "tabProperties" => %{"id" => "tab_summary", "title" => "Summary"},
-            "documentTab" => %{"body" => %{"content" => []}}
-          }
-        ]
-      })
+      Req.Test.json(conn, recorded)
     end)
 
     assert {:ok, %Document{} = document} =
              Client.get_document(
-               %{document_id: "doc_abc123", include_tabs_content: true},
+               %{document_id: @tabbed_document_id, include_tabs_content: true},
                "token"
              )
 
-    assert [%{tab_id: "tab_summary", title: "Summary"}] = document.tabs
+    assert [
+             %Tab{tab_id: "t.0", title: "First", body: first_body},
+             %Tab{tab_id: "t.1mzp8ctna0b6", title: "Second", body: second_body}
+           ] = document.tabs
+
+    assert first_body == first["documentTab"]["body"]
+    assert second_body == second["documentTab"]["body"]
   end
 
   test "creates document" do
@@ -124,78 +145,87 @@ defmodule Jido.Connect.Google.Docs.ClientTest do
              Client.get_document(%{document_id: "nonexistent"}, "token")
   end
 
+  # The client passes request keys through unchanged, so camelCase input goes
+  # out as camelCase. The responses are the recordings of the scratch document.
   test "batch updates document" do
+    recorded = LiveSmoke.fixture!(:google_docs, "batch_update_insert")
+
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "POST"
-      assert conn.request_path == "/v1/documents/doc_abc123:batchUpdate"
+      assert conn.request_path == "/v1/documents/#{@scratch_document_id}:batchUpdate"
       assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
 
       {:ok, body, conn} = Plug.Conn.read_body(conn)
 
       decoded = Jason.decode!(body)
-      assert decoded["requests"] == [%{"insertText" => %{"text" => "Hello"}}]
+      assert decoded["requests"] == @insert_batch
       assert decoded["writeControl"] == %{"requiredRevisionId" => "rev001"}
 
-      Req.Test.json(conn, %{
-        "documentId" => "doc_abc123",
-        "replies" => [%{"insertText" => %{}}]
-      })
+      Req.Test.json(conn, recorded)
     end)
 
     assert {:ok, result} =
              Client.batch_update(
                %{
-                 document_id: "doc_abc123",
-                 requests: [%{insertText: %{text: "Hello"}}],
-                 write_control: %{requiredRevisionId: "rev001"}
+                 document_id: @scratch_document_id,
+                 requests: @insert_batch,
+                 write_control: %{"requiredRevisionId" => "rev001"}
                },
                "token"
              )
 
-    assert result.document_id == "doc_abc123"
-    assert length(result.replies) == 1
+    assert result == %{
+             document_id: @scratch_document_id,
+             replies: [%{}, %{}],
+             write_control: recorded["writeControl"]
+           }
   end
 
   test "batch updates document without write control" do
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "POST"
-      assert conn.request_path == "/v1/documents/doc_abc123:batchUpdate"
+      assert conn.request_path == "/v1/documents/#{@scratch_document_id}:batchUpdate"
 
       {:ok, body, conn} = Plug.Conn.read_body(conn)
 
       decoded = Jason.decode!(body)
-      assert decoded["requests"] == [%{"insertText" => %{"text" => "Hello"}}]
+      assert decoded["requests"] == @insert_batch
       refute Map.has_key?(decoded, "writeControl")
 
-      Req.Test.json(conn, %{
-        "documentId" => "doc_abc123",
-        "replies" => []
-      })
+      Req.Test.json(conn, LiveSmoke.fixture!(:google_docs, "batch_update_insert"))
     end)
 
-    assert {:ok, result} =
+    assert {:ok, %{document_id: @scratch_document_id, replies: replies}} =
+             Client.batch_update(
+               %{document_id: @scratch_document_id, requests: @insert_batch},
+               "token"
+             )
+
+    assert replies == [%{}, %{}]
+  end
+
+  # The recorded rejection answers one insert whose required revision is no
+  # longer the latest.
+  test "handles batch update API error response" do
+    recorded = LiveSmoke.fixture!(:google_docs, "batch_update_stale_revision")
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      conn
+      |> Plug.Conn.put_status(400)
+      |> Req.Test.json(recorded)
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 400} = error} =
              Client.batch_update(
                %{
-                 document_id: "doc_abc123",
-                 requests: [%{insertText: %{text: "Hello"}}]
+                 document_id: @scratch_document_id,
+                 requests: Enum.take(@insert_batch, 1),
+                 write_control: %{"requiredRevisionId" => "stale-revision"}
                },
                "token"
              )
 
-    assert result.document_id == "doc_abc123"
-    assert result.replies == []
-  end
-
-  test "handles batch update API error response" do
-    Req.Test.stub(__MODULE__, fn conn ->
-      Plug.Conn.send_resp(conn, 400, Jason.encode!(%{"error" => %{"message" => "bad request"}}))
-    end)
-
-    assert {:error, %Jido.Connect.Error.ProviderError{reason: :http_error, status: 400}} =
-             Client.batch_update(
-               %{document_id: "doc_abc123", requests: [%{insertText: %{}}]},
-               "token"
-             )
+    assert error.details.message == recorded["error"]["message"]
   end
 
   test "handles batch update malformed response" do

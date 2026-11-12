@@ -29,6 +29,30 @@ defmodule Jido.Connect.Slack.AppManifestTest do
     refute get_in(manifest, [:settings, :interactivity])
   end
 
+  test "every manifest turns on a writable Messages tab, so people can DM the bot" do
+    user_view = [
+      user_scopes: ["channels:history", "groups:history", "im:history", "mpim:history"],
+      user_events: ["message.channels", "message.groups", "message.im", "message.mpim"]
+    ]
+
+    for opts <- [
+          [],
+          [include_events?: true, include_interactivity?: true],
+          [include_events?: true, include_interactivity?: true] ++ user_view
+        ] do
+      manifest = AppManifest.build("https://demo.ngrok-free.app", opts)
+
+      assert manifest.features == %{
+               bot_user: %{display_name: "Jido Connect", always_online: false},
+               app_home: %{
+                 home_tab_enabled: false,
+                 messages_tab_enabled: true,
+                 messages_tab_read_only_enabled: false
+               }
+             }
+    end
+  end
+
   test "can include events and interactivity routes" do
     manifest =
       AppManifest.build("https://demo.ngrok-free.app",
@@ -76,7 +100,6 @@ defmodule Jido.Connect.Slack.AppManifestTest do
                "file_change",
                "app_uninstalled",
                "tokens_revoked",
-               "scope_denied",
                "reaction_added",
                "reaction_removed"
              ]
@@ -86,6 +109,54 @@ defmodule Jido.Connect.Slack.AppManifestTest do
              is_enabled: true,
              request_url: "https://demo.ngrok-free.app/integrations/slack/interactivity"
            }
+  end
+
+  test "adds user scopes and user events only when a host opts in" do
+    user_scopes = ["channels:history", "groups:history", "im:history", "mpim:history"]
+    user_events = ["message.channels", "message.groups", "message.im", "message.mpim"]
+    base = [name: "Jido Connect Test", include_events?: true, include_interactivity?: true]
+
+    default = AppManifest.build("https://demo.ngrok-free.app", base)
+
+    manifest =
+      AppManifest.build(
+        "https://demo.ngrok-free.app",
+        base ++ [user_scopes: user_scopes, user_events: user_events]
+      )
+
+    refute Map.has_key?(default.oauth_config.scopes, :user)
+    refute Map.has_key?(default.settings.event_subscriptions, :user_events)
+
+    assert manifest.oauth_config.scopes == %{
+             bot: default.oauth_config.scopes.bot,
+             user: user_scopes
+           }
+
+    assert manifest.settings.event_subscriptions ==
+             Map.put(default.settings.event_subscriptions, :user_events, user_events)
+
+    assert Map.delete(manifest, :oauth_config) |> Map.delete(:settings) ==
+             Map.delete(default, :oauth_config) |> Map.delete(:settings)
+  end
+
+  test "user scopes need no event subscription, user events need the events URL" do
+    manifest =
+      AppManifest.build("https://demo.ngrok-free.app",
+        user_scopes: ["channels:history"],
+        user_events: []
+      )
+
+    assert manifest.oauth_config.scopes.user == ["channels:history"]
+    refute get_in(manifest, [:settings, :event_subscriptions])
+
+    refute Map.has_key?(
+             AppManifest.build("https://demo.ngrok-free.app", user_scopes: []).oauth_config.scopes,
+             :user
+           )
+
+    assert_raise ArgumentError, ~r/include_events\?/, fn ->
+      AppManifest.build("https://demo.ngrok-free.app", user_events: ["message.channels"])
+    end
   end
 
   test "encodes a Slack app creation URL" do

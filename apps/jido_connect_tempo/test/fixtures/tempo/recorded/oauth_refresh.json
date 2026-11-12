@@ -1,0 +1,68 @@
+{
+  "body": {
+    "access_token": "[redacted]",
+    "expires_in": 2591999,
+    "refresh_token": "[redacted]",
+    "scope": "accounts:manage accounts:view activities:produce activities:view approvals:manage approvals:view audit:view papertrail:view periods:view plans:manage plans:view projects:manage projects:view rates:manage rates:view schemes:manage schemes:view teams:manage teams:view worklogs:manage worklogs:view",
+    "token_type": "Bearer"
+  },
+  "headers": {
+    "alt-svc": [
+      "h3=\":443\"; ma=86400"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 14:26:19 GMT"
+    ],
+    "referrer-policy": [
+      "strict-origin-when-cross-origin"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "aebd5ab56eb85ee76fa0f8d06cbe09b5"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 caf908c8115c6f7c9e78ce96ceb41e5a.cloudfront.net (CloudFront)"
+    ],
+    "x-amz-cf-id": [
+      "n5MWGG0aUweu3ymPt6QWUeK3PA_nZ-36fc5giEiB-P8yZ8FWuhktWQ=="
+    ],
+    "x-cache": [
+      "Miss from cloudfront"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-envoy-decorator-operation": [
+      "organization-public.default.svc.cluster.local:80/*"
+    ],
+    "x-envoy-upstream-service-time": [
+      "433"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/oauth/token/"
+  },
+  "status": 200
+}

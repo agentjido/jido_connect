@@ -1,0 +1,46 @@
+{
+  "body": {
+    "data": "QXR0YWNobWVudCBvZiB0aGUgb3JpZ2luYWwgbWVzc2FnZS4NCg==",
+    "size": 37
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 09:37:29 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/messages/1a1966b225f27d87/attachments/ANGjdJ8DZVwLsVwadaCdvRLCCx4JFA9XZz8Z5A1gWJew5Fio7zk2IU4zjPqnFrZXXyqtVvvkmDBEVsl9ORMaSsJskYod47IURXwPiPvLsFLxAzP2VWMypiDZgBrNyJHCMkRAbfPLVJ6nIOue-UFbSppE2Hm7x0Rg1pg-u1S9yJ6y5ZnDz2YgdRj3OKM_Q0v7wnJhlbL_khlVjGVVJSAAosEkNVwuqBf3xd3pkillRI0FAYYJNMT9sXYmEV-rsSf8zg_9SkA25Tf6uu1pLRnn-DiAV5eUFOZnTGBLk4P_iLtpyEYXoH-uSIue0rJQ9sMwGl-nQgP6FVNXvHmACvxTn7wSfLUGKYmDD-qjFRs9oXhjW9Uavy5txnAV_5Wyxm4"
+  },
+  "status": 200
+}

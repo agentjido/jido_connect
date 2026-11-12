@@ -67,11 +67,33 @@ defmodule Jido.Connect.ConfluenceTest do
     assert list_fields.limit.maximum == 250
     assert list_fields.limit.default == 25
 
-    get_fields = fields(actions["confluence.page.get"])
+    get_page = actions["confluence.page.get"]
+    get_fields = fields(get_page)
     assert_bound(get_fields.id, 1, 255)
     assert get_fields.max_characters.minimum == 1
     assert get_fields.max_characters.maximum == 100_000
     assert get_fields.max_characters.default == 20_000
+    refute get_fields.on_unsupported.required?
+    assert get_fields.on_unsupported.enum == ["fail", "degrade"]
+    assert get_fields.on_unsupported.default == "fail"
+    assert {get_page.risk, get_page.mutation?} == {:read, false}
+    assert get_page.scopes == ["read:page:confluence"]
+    assert {get_page.auth_profiles, get_page.auth_profile} == {[:api_token], :api_token}
+
+    assert Enum.map(get_page.output, & &1.name) == [
+             :kind,
+             :account,
+             :id,
+             :title,
+             :revision_id,
+             :version,
+             :space_id,
+             :url,
+             :text,
+             :character_count,
+             :truncated,
+             :unsupported_nodes
+           ]
 
     create_fields = fields(actions["confluence.page.create"])
     assert create_fields.title.required?
@@ -208,6 +230,7 @@ defmodule Jido.Connect.ConfluenceTest do
       {"confluence.page.list", %{space_key: "OPS", cursor: String.duplicate("c", 2049)}},
       {"confluence.page.get", %{id: "page-1", max_characters: 0}},
       {"confluence.page.get", %{id: "page-1", max_characters: 100_001}},
+      {"confluence.page.get", %{id: "page-1", on_unsupported: "skip"}},
       {"confluence.page.create",
        %{title: "Runbook", space_key: "OPS", markdown: String.duplicate("x", 100_001)}},
       {"confluence.page.update",

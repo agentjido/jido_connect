@@ -7,8 +7,10 @@ defmodule Jido.Connect.Google.Meet do
     fragments: [
       Jido.Connect.Google.Meet.Actions.Spaces,
       Jido.Connect.Google.Meet.Actions.ConferenceRecords,
+      Jido.Connect.Google.Meet.Actions.Participants,
       Jido.Connect.Google.Meet.Actions.Recordings,
-      Jido.Connect.Google.Meet.Actions.Transcripts
+      Jido.Connect.Google.Meet.Actions.Transcripts,
+      Jido.Connect.Google.Meet.Triggers.Transcripts
     ]
 
   integration do
@@ -28,6 +30,10 @@ defmodule Jido.Connect.Google.Meet do
   defdelegate catalog_packs, to: Jido.Connect.Google.Meet.CatalogPacks, as: :all
   defdelegate reader_pack, to: Jido.Connect.Google.Meet.CatalogPacks, as: :reader
   defdelegate scheduler_pack, to: Jido.Connect.Google.Meet.CatalogPacks, as: :scheduler
+
+  defdelegate transcript_reader_pack,
+    to: Jido.Connect.Google.Meet.CatalogPacks,
+    as: :transcript_reader
 
   auth do
     oauth2 :user do

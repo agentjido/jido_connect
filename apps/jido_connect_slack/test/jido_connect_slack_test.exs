@@ -2,6 +2,7 @@ defmodule Jido.Connect.SlackTest do
   use ExUnit.Case
 
   alias Jido.Connect
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   defmodule FakeSlackClient do
     def list_channels(%{types: "public_channel"}, "token") do
@@ -63,20 +64,6 @@ defmodule Jido.Connect.SlackTest do
          ],
          next_cursor: "next",
          has_more: true
-       }}
-    end
-
-    def get_thread_replies(
-          %{channel: "G123", ts: "1700000000.000100"},
-          "token"
-        ) do
-      {:ok,
-       %{
-         channel: "G123",
-         thread_ts: "1700000000.000100",
-         messages: [],
-         next_cursor: "",
-         has_more: false
        }}
     end
 
@@ -207,12 +194,12 @@ defmodule Jido.Connect.SlackTest do
        }}
     end
 
-    def get_conversation_info(%{channel: "GMP123"}, "token") do
+    def get_conversation_info(%{channel: "CMP123"}, "token") do
       {:ok,
        %{
-         channel: "GMP123",
+         channel: "CMP123",
          conversation: %{
-           "id" => "GMP123",
+           "id" => "CMP123",
            "is_mpim" => true,
            "name" => "mpdm-user-1--user-2-1"
          }
@@ -321,42 +308,23 @@ defmodule Jido.Connect.SlackTest do
       {:ok, %{channel: "G999", user: "U123"}}
     end
 
-    def open_conversation(%{users: ["U123"]}, "token") do
-      {:ok,
-       %{
-         channel: "D123",
-         conversation: %{
-           id: "D123",
-           is_im: true,
-           is_open: true,
-           user: "U123"
-         }
-       }}
+    # Shaped like the recordings conversations_open_im and conversations_open_mpim:
+    # without return_im Slack returns only the DM's ID, and a group DM carries a
+    # C ID and no member list.
+    def open_conversation(%{users: ["U123"], return_im: false}, "token") do
+      {:ok, %{channel: "D123", conversation: %{id: "D123"}}}
     end
 
-    def open_conversation(%{users: ["U123", "U456"]}, "token") do
+    def open_conversation(%{users: ["U123", "U456"], return_im: false}, "token") do
       {:ok,
        %{
-         channel: "GMP123",
+         channel: "C456",
          conversation: %{
-           id: "GMP123",
+           id: "C456",
+           is_im: false,
            is_mpim: true,
            is_private: true,
-           is_open: true,
-           users: ["U123", "U456"]
-         }
-       }}
-    end
-
-    def open_conversation(%{channel: "D123"}, "token") do
-      {:ok,
-       %{
-         channel: "D123",
-         conversation: %{
-           id: "D123",
-           is_im: true,
-           is_open: true,
-           user: "U123"
+           is_open: true
          }
        }}
     end
@@ -1115,7 +1083,11 @@ defmodule Jido.Connect.SlackTest do
              :text,
              :ts,
              :thread_ts,
-             :event_ts
+             :event_ts,
+             :subtype,
+             :file_ids,
+             :view,
+             :viewer
            ]
 
     assert {:ok,
@@ -1143,7 +1115,11 @@ defmodule Jido.Connect.SlackTest do
              :text,
              :ts,
              :thread_ts,
-             :event_ts
+             :event_ts,
+             :subtype,
+             :file_ids,
+             :view,
+             :viewer
            ]
 
     assert {:ok,
@@ -1175,7 +1151,12 @@ defmodule Jido.Connect.SlackTest do
              :thread_ts,
              :event_ts,
              :sender,
-             :conversation
+             :conversation,
+             :subtype,
+             :file_ids,
+             :shared_messages,
+             :view,
+             :viewer
            ]
 
     assert {:ok,
@@ -1207,7 +1188,12 @@ defmodule Jido.Connect.SlackTest do
              :thread_ts,
              :event_ts,
              :sender,
-             :conversation
+             :conversation,
+             :subtype,
+             :file_ids,
+             :shared_messages,
+             :view,
+             :viewer
            ]
 
     assert {:ok,
@@ -1239,8 +1225,18 @@ defmodule Jido.Connect.SlackTest do
              :thread_ts,
              :event_ts,
              :sender,
-             :conversation
+             :conversation,
+             :subtype,
+             :file_ids,
+             :shared_messages,
+             :view,
+             :viewer
            ]
+
+    for family <- ["channels", "groups", "im", "mpim", "thread_reply"] do
+      assert {:ok, trigger} = Connect.trigger(spec, "slack.event.message.#{family}")
+      assert %{enum: ["bot", "user"]} = Enum.find(trigger.signal, &(&1.name == :view))
+    end
 
     assert {:ok,
             %{
@@ -1401,6 +1397,77 @@ defmodule Jido.Connect.SlackTest do
            ]
   end
 
+  test "message change triggers declare one history scope, event dedupe and their signal" do
+    spec = Jido.Connect.Slack.integration()
+
+    rows = [
+      {"channels", "channels:history", "channel"},
+      {"groups", "groups:history", "group"},
+      {"im", "im:history", "im"},
+      {"mpim", "mpim:history", "mpim"}
+    ]
+
+    identity = [:team_id, :event_id, :channel, :channel_type, :subtype, :ts, :thread_ts]
+    authors = [:user, :bot_id, :app_id]
+    timestamps = [:notification_ts, :event_ts]
+    view = [:view, :viewer]
+
+    for {family, scope, _channel_type} <- rows,
+        {action, subtype, fields} <- [
+          {"changed", "message_changed",
+           identity ++ authors ++ [:editor, :edited_ts, :text] ++ timestamps ++ view},
+          {"deleted", "message_deleted", identity ++ authors ++ timestamps ++ view}
+        ] do
+      id = "slack.event.message.#{family}.#{action}"
+
+      assert {:ok,
+              %{
+                kind: :webhook,
+                resource: :message,
+                verb: :watch,
+                data_classification: :workspace_content,
+                auth_profile: :bot,
+                policies: [:workspace_access],
+                scopes: [^scope],
+                dedupe: %{key: [:team_id, :event_id]},
+                verification: %{
+                  kind: :slack_signed_request,
+                  signature_header: "x-slack-signature",
+                  timestamp_header: "x-slack-request-timestamp"
+                }
+              } = trigger} = Connect.trigger(spec, id)
+
+      assert Enum.map(trigger.signal, & &1.name) == fields, id
+
+      required = for field <- trigger.signal, field.required?, do: field.name
+      assert required == [:team_id, :event_id, :channel, :subtype, :ts], id
+
+      assert %{enum: [^subtype]} = Enum.find(trigger.signal, &(&1.name == :subtype))
+      assert %{enum: ["bot", "user"]} = Enum.find(trigger.signal, &(&1.name == :view))
+    end
+
+    # The bot's default grants stay without the private history scopes.
+    assert %{
+             default_scopes: [
+               "channels:read",
+               "channels:manage",
+               "channels:history",
+               "groups:write",
+               "im:write",
+               "mpim:write",
+               "app_mentions:read",
+               "chat:write",
+               "files:write",
+               "pins:read",
+               "pins:write",
+               "reactions:read",
+               "reactions:write",
+               "team:read",
+               "users:read"
+             ]
+           } = Enum.find(spec.auth_profiles, &(&1.id == :bot))
+  end
+
   test "Slack catalog entry exposes setup, auth, and runtime capabilities" do
     entry = Connect.Catalog.entry(Jido.Connect.Slack)
     features = entry.capabilities |> Enum.map(& &1.feature) |> MapSet.new()
@@ -1420,6 +1487,7 @@ defmodule Jido.Connect.SlackTest do
     assert Jido.Connect.Slack.jido_action_modules() == [
              Jido.Connect.Slack.Actions.ListChannels,
              Jido.Connect.Slack.Actions.GetThreadReplies,
+             Jido.Connect.Slack.Actions.GetConversationHistory,
              Jido.Connect.Slack.Actions.GetConversationInfo,
              Jido.Connect.Slack.Actions.CreateChannel,
              Jido.Connect.Slack.Actions.ArchiveChannel,
@@ -1467,6 +1535,14 @@ defmodule Jido.Connect.SlackTest do
              Jido.Connect.Slack.Sensors.DirectMessage,
              Jido.Connect.Slack.Sensors.MultiPersonDirectMessage,
              Jido.Connect.Slack.Sensors.ThreadReply,
+             Jido.Connect.Slack.Sensors.PublicChannelMessageChanged,
+             Jido.Connect.Slack.Sensors.PublicChannelMessageDeleted,
+             Jido.Connect.Slack.Sensors.PrivateChannelMessageChanged,
+             Jido.Connect.Slack.Sensors.PrivateChannelMessageDeleted,
+             Jido.Connect.Slack.Sensors.DirectMessageChanged,
+             Jido.Connect.Slack.Sensors.DirectMessageDeleted,
+             Jido.Connect.Slack.Sensors.MultiPersonDirectMessageChanged,
+             Jido.Connect.Slack.Sensors.MultiPersonDirectMessageDeleted,
              Jido.Connect.Slack.Sensors.ReactionAdded,
              Jido.Connect.Slack.Sensors.ReactionRemoved,
              Jido.Connect.Slack.Sensors.ChannelCreated,
@@ -1483,7 +1559,8 @@ defmodule Jido.Connect.SlackTest do
              Jido.Connect.Slack.Sensors.AppUninstalled,
              Jido.Connect.Slack.Sensors.TokensRevoked,
              Jido.Connect.Slack.Sensors.ScopeDenied,
-             Jido.Connect.Slack.Sensors.AppHomeOpened
+             Jido.Connect.Slack.Sensors.AppHomeOpened,
+             Jido.Connect.Slack.Sensors.BlockActions
            ]
 
     assert Jido.Connect.Slack.jido_plugin_module() == Jido.Connect.Slack.Plugin
@@ -1495,6 +1572,7 @@ defmodule Jido.Connect.SlackTest do
                actions: [
                  Jido.Connect.Slack.Actions.ListChannels,
                  Jido.Connect.Slack.Actions.GetThreadReplies,
+                 Jido.Connect.Slack.Actions.GetConversationHistory,
                  Jido.Connect.Slack.Actions.GetConversationInfo,
                  Jido.Connect.Slack.Actions.CreateChannel,
                  Jido.Connect.Slack.Actions.ArchiveChannel,
@@ -1541,6 +1619,14 @@ defmodule Jido.Connect.SlackTest do
                  Jido.Connect.Slack.Sensors.DirectMessage,
                  Jido.Connect.Slack.Sensors.MultiPersonDirectMessage,
                  Jido.Connect.Slack.Sensors.ThreadReply,
+                 Jido.Connect.Slack.Sensors.PublicChannelMessageChanged,
+                 Jido.Connect.Slack.Sensors.PublicChannelMessageDeleted,
+                 Jido.Connect.Slack.Sensors.PrivateChannelMessageChanged,
+                 Jido.Connect.Slack.Sensors.PrivateChannelMessageDeleted,
+                 Jido.Connect.Slack.Sensors.DirectMessageChanged,
+                 Jido.Connect.Slack.Sensors.DirectMessageDeleted,
+                 Jido.Connect.Slack.Sensors.MultiPersonDirectMessageChanged,
+                 Jido.Connect.Slack.Sensors.MultiPersonDirectMessageDeleted,
                  Jido.Connect.Slack.Sensors.ReactionAdded,
                  Jido.Connect.Slack.Sensors.ReactionRemoved,
                  Jido.Connect.Slack.Sensors.ChannelCreated,
@@ -1557,7 +1643,8 @@ defmodule Jido.Connect.SlackTest do
                  Jido.Connect.Slack.Sensors.AppUninstalled,
                  Jido.Connect.Slack.Sensors.TokensRevoked,
                  Jido.Connect.Slack.Sensors.ScopeDenied,
-                 Jido.Connect.Slack.Sensors.AppHomeOpened
+                 Jido.Connect.Slack.Sensors.AppHomeOpened,
+                 Jido.Connect.Slack.Sensors.BlockActions
                ],
                plugin: Jido.Connect.Slack.Plugin
              }
@@ -1703,7 +1790,8 @@ defmodule Jido.Connect.SlackTest do
              :channel,
              :text,
              :thread_ts,
-             :reply_broadcast
+             :reply_broadcast,
+             :blocks
            ]
 
     assert projection.risk == :write
@@ -2350,6 +2438,7 @@ defmodule Jido.Connect.SlackTest do
     assert Enum.map(open_conversation_projection.input, & &1.name) == [
              :users,
              :channel,
+             :conversation_type,
              :return_im,
              :prevent_creation
            ]
@@ -2566,7 +2655,7 @@ defmodule Jido.Connect.SlackTest do
               missing_scopes: ["mpim:read"]
             }} =
              Jido.Connect.Slack.Actions.GetConversationInfo.run(
-               %{channel: "GMP123", conversation_type: "mpim"},
+               %{channel: "CMP123", conversation_type: "mpim"},
                %{integration_context: context, credential_lease: lease}
              )
 
@@ -2590,9 +2679,9 @@ defmodule Jido.Connect.SlackTest do
                %{integration_context: expanded_context, credential_lease: lease}
              )
 
-    assert {:ok, %{channel: "GMP123", conversation: %{"is_mpim" => true}}} =
+    assert {:ok, %{channel: "CMP123", conversation: %{"is_mpim" => true}}} =
              Jido.Connect.Slack.Actions.GetConversationInfo.run(
-               %{channel: "GMP123", conversation_type: "mpim"},
+               %{channel: "CMP123", conversation_type: "mpim"},
                %{integration_context: expanded_context, credential_lease: lease}
              )
   end
@@ -2691,6 +2780,19 @@ defmodule Jido.Connect.SlackTest do
              Jido.Connect.Slack.Actions.ArchiveChannel.run(
                %{channel: "G999"},
                %{integration_context: no_manage_context, credential_lease: lease}
+             )
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: ["groups:write"]
+            }} =
+             Jido.Connect.Slack.Actions.ArchiveChannel.run(
+               %{channel: "G999", conversation_type: "public_channel"},
+               %{
+                 integration_context: context,
+                 credential_lease: %{lease | scopes: ["channels:manage"]}
+               }
              )
 
     assert {:ok, %{channel: "G999"}} =
@@ -2961,16 +3063,7 @@ defmodule Jido.Connect.SlackTest do
   test "generated open conversation action delegates through integration runtime" do
     {context, lease} = context_and_lease()
 
-    assert {:ok,
-            %{
-              channel: "D123",
-              conversation: %{
-                id: "D123",
-                is_im: true,
-                is_open: true,
-                user: "U123"
-              }
-            }} =
+    assert {:ok, %{channel: "D123", conversation: %{id: "D123"}}} ==
              Jido.Connect.Slack.Actions.OpenConversation.run(
                %{users: ["U123"]},
                %{integration_context: context, credential_lease: lease}
@@ -3008,7 +3101,7 @@ defmodule Jido.Connect.SlackTest do
                %{integration_context: no_write_context, credential_lease: lease}
              )
 
-    assert {:ok, %{channel: "GMP123", conversation: %{is_mpim: true}}} =
+    assert {:ok, %{channel: "C456", conversation: %{is_im: false, is_mpim: true}}} =
              Jido.Connect.Slack.Actions.OpenConversation.run(
                %{users: ["U123", "U456"]},
                %{integration_context: context, credential_lease: lease}
@@ -3078,8 +3171,16 @@ defmodule Jido.Connect.SlackTest do
              )
   end
 
+  # Legacy private channels carry G IDs. Slack's answer does not name the
+  # channel, so the recorded first page of the private channel's thread
+  # stands in for the answer from such a channel. The stub stands before the
+  # denied read, so a read that the scope check let through would fail at
+  # the stub instead of reaching Slack.
   test "get thread replies resolves history scopes from conversation type" do
     {context, lease} = context_and_lease()
+    lease = without_fake_client(lease)
+    stub_slack_api()
+    parent = "1793975621.272189"
 
     assert {:error,
             %Connect.Error.AuthError{
@@ -3087,7 +3188,7 @@ defmodule Jido.Connect.SlackTest do
               missing_scopes: ["groups:history"]
             }} =
              Jido.Connect.Slack.Actions.GetThreadReplies.run(
-               %{channel: "G123", ts: "1700000000.000100"},
+               %{channel: "G123", ts: parent},
                %{integration_context: context, credential_lease: lease}
              )
 
@@ -3099,11 +3200,62 @@ defmodule Jido.Connect.SlackTest do
         }
     }
 
-    assert {:ok, %{channel: "G123", thread_ts: "1700000000.000100"}} =
+    expect_thread_page("thread_replies_private_channel", "G123", parent)
+
+    assert {:ok, %{channel: "G123", thread_ts: ^parent, messages: [%{ts: ^parent} | _replies]}} =
              Jido.Connect.Slack.Actions.GetThreadReplies.run(
-               %{channel: "G123", ts: "1700000000.000100"},
+               %{channel: "G123", ts: parent},
                %{integration_context: private_context, credential_lease: lease}
              )
+  end
+
+  # Slack gives private channels and group DMs C IDs too, so an explicit
+  # conversation_type decides the scope even for a C channel. A granted read
+  # runs the default client under Req.Test on the recorded first page of a
+  # thread in each conversation of the test workspace: the prepared thread
+  # in the public channel, and the bot-only threads in the private channel
+  # and the group DM, both with C IDs, and in the bot DM.
+  test "get thread replies needs the history scope of an explicit conversation type" do
+    {context, lease} = context_and_lease()
+    lease = without_fake_client(lease)
+    stub_slack_api()
+
+    threads = [
+      {"public_channel", "channels:history", "C0CEEB41FU0", "1793371034.447499",
+       "thread_replies_pages"},
+      {"private_channel", "groups:history", "C0CD4JEJ9V5", "1793975621.272189",
+       "thread_replies_private_channel"},
+      {"im", "im:history", "D0CD4G48UFR", "1793975633.560959", "thread_replies_im"},
+      {"mpim", "mpim:history", "C0CDELYPYKF", "1793975646.078169", "thread_replies_mpim"}
+    ]
+
+    history_scopes = Enum.map(threads, &elem(&1, 1))
+    other_scopes = context.connection.scopes -- history_scopes
+
+    for {type, scope, channel, parent, fixture} <- threads do
+      run = fn scopes ->
+        Jido.Connect.Slack.Actions.GetThreadReplies.run(
+          %{channel: channel, ts: parent, conversation_type: type},
+          %{
+            integration_context: %{context | connection: %{context.connection | scopes: scopes}},
+            credential_lease: lease
+          }
+        )
+      end
+
+      assert {:error, %Connect.Error.AuthError{reason: :missing_scopes, missing_scopes: [^scope]}} =
+               run.(other_scopes ++ (history_scopes -- [scope]))
+
+      expect_thread_page(fixture, channel, parent)
+
+      assert {:ok,
+              %{
+                channel: ^channel,
+                thread_ts: ^parent,
+                messages: [%{ts: ^parent} | _replies],
+                has_more: true
+              }} = run.(other_scopes ++ [scope])
+    end
   end
 
   test "generated post message action delegates through integration runtime" do
@@ -3833,6 +3985,7 @@ defmodule Jido.Connect.SlackTest do
     assert spec.actions == [
              Jido.Connect.Slack.Actions.ListChannels,
              Jido.Connect.Slack.Actions.GetThreadReplies,
+             Jido.Connect.Slack.Actions.GetConversationHistory,
              Jido.Connect.Slack.Actions.GetConversationInfo,
              Jido.Connect.Slack.Actions.CreateChannel,
              Jido.Connect.Slack.Actions.ArchiveChannel,
@@ -3926,6 +4079,29 @@ defmodule Jido.Connect.SlackTest do
       Jido.Connect.Slack.Sensors.ThreadReply,
       "slack.event.message.thread_reply"
     )
+  end
+
+  test "generated message change sensors expose metadata-only runtime mode" do
+    sensors = [
+      {Jido.Connect.Slack.Sensors.PublicChannelMessageChanged,
+       "slack.event.message.channels.changed"},
+      {Jido.Connect.Slack.Sensors.PublicChannelMessageDeleted,
+       "slack.event.message.channels.deleted"},
+      {Jido.Connect.Slack.Sensors.PrivateChannelMessageChanged,
+       "slack.event.message.groups.changed"},
+      {Jido.Connect.Slack.Sensors.PrivateChannelMessageDeleted,
+       "slack.event.message.groups.deleted"},
+      {Jido.Connect.Slack.Sensors.DirectMessageChanged, "slack.event.message.im.changed"},
+      {Jido.Connect.Slack.Sensors.DirectMessageDeleted, "slack.event.message.im.deleted"},
+      {Jido.Connect.Slack.Sensors.MultiPersonDirectMessageChanged,
+       "slack.event.message.mpim.changed"},
+      {Jido.Connect.Slack.Sensors.MultiPersonDirectMessageDeleted,
+       "slack.event.message.mpim.deleted"}
+    ]
+
+    for {sensor, trigger_id} <- sensors do
+      assert_metadata_only_sensor(sensor, trigger_id)
+    end
   end
 
   test "generated reaction added sensor exposes metadata-only runtime mode" do
@@ -4028,5 +4204,31 @@ defmodule Jido.Connect.SlackTest do
       })
 
     {context, lease}
+  end
+
+  # Without `slack_client` in the lease the action uses the package's default
+  # client.
+  defp without_fake_client(lease) do
+    %{lease | fields: Map.delete(lease.fields, :slack_client)}
+  end
+
+  # Points the package's Req options at a Req.Test stub until the test exits
+  # and checks then that every expected request came.
+  defp stub_slack_api do
+    Application.put_env(:jido_connect_slack, :slack_req_options, plug: {Req.Test, __MODULE__})
+    on_exit(fn -> Application.delete_env(:jido_connect_slack, :slack_req_options) end)
+    Req.Test.verify_on_exit!()
+  end
+
+  # Answers one conversations.replies request for `channel` and `ts` with the
+  # recorded page `fixture`.
+  defp expect_thread_page(fixture, channel, ts) do
+    page = LiveSmoke.fixture!(:slack, fixture)
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.request_path == "/api/conversations.replies"
+      assert %{"channel" => ^channel, "ts" => ^ts} = URI.decode_query(conn.query_string)
+      Req.Test.json(conn, page)
+    end)
   end
 end

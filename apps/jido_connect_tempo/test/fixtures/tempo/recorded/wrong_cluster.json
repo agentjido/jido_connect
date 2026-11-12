@@ -1,0 +1,26 @@
+{
+  "body": "",
+  "headers": {
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "0"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 07:39:48 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "9934b3733dfc8446f461b73438bac02e"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/periods"
+  },
+  "status": 401
+}

@@ -1,0 +1,318 @@
+{
+  "body": {
+    "historyId": "13203",
+    "id": "1a1892450778f756",
+    "internalDate": "1793302221000",
+    "labelIds": [
+      "INBOX"
+    ],
+    "payload": {
+      "body": {
+        "size": 0
+      },
+      "filename": "",
+      "headers": [
+        {
+          "name": "Received",
+          "value": "from 000000000000 named unknown by gmailapi.google.com with HTTPREST; Fri, 30 Oct 2026 10:30:31 -0500"
+        },
+        {
+          "name": "From",
+          "value": "Person 1 <person-1@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "Person 2 <person-2@example.com>"
+        },
+        {
+          "name": "Subject",
+          "value": "Fwd: jcl-live attached originals"
+        },
+        {
+          "name": "Date",
+          "value": "Thu, 29 Oct 2026 19:30:21 +0000"
+        },
+        {
+          "name": "Message-ID",
+          "value": "<person-3@example.com>"
+        },
+        {
+          "name": "MIME-Version",
+          "value": "1.0"
+        },
+        {
+          "name": "Content-Type",
+          "value": "multipart/mixed; boundary=\"jcl-mixed-4511baed94\""
+        }
+      ],
+      "mimeType": "multipart/mixed",
+      "partId": "",
+      "parts": [
+        {
+          "body": {
+            "data": "VHdvIG9yaWdpbmFscyBhdHRhY2hlZCBhcyBtZXNzYWdlcy4NCg==",
+            "size": 37
+          },
+          "filename": "",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "text/plain; charset=\"utf-8\""
+            },
+            {
+              "name": "Content-Transfer-Encoding",
+              "value": "quoted-printable"
+            }
+          ],
+          "mimeType": "text/plain",
+          "partId": "0"
+        },
+        {
+          "body": {
+            "attachmentId": "ANGjdJ_L9EtDskweXcg4QF4VwKKF5XsRmxviaEvPGBou6aPIUhI67AX8YzdsWFT7ULUFVDQrhfFtTgv7PWrrirsbAkGAp2rqML4FlDWfpW4_KuzAGlwZ1SqBPNwLhMCNU1ALNGBrJwWqwpqoDH5QSzMc3LrK75JqtRb1r1l_PLCBrIMDAYN3jdQF_SgdQyGkO4IB6sQzSp2MDQim2E9IMwjTs55sLjAHisjEhj8EeXRtgetyywxTbAmcJhzc45VlPxHO8F35srnWLONUEGQFM1YgZHbkyNsgpwDkANAl7xtwOTNFzJtLYe_g8GvJK-e01k2WuTkDkQBYOqDoZ1CVO4eFl52dEDKWCEYraxBdWJnZDr_CdQpi_tDGt6Sdz1s",
+            "size": 1072
+          },
+          "filename": "original.eml",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "message/rfc822"
+            },
+            {
+              "name": "Content-Disposition",
+              "value": "attachment; filename=\"original.eml\""
+            }
+          ],
+          "mimeType": "message/rfc822",
+          "partId": "1",
+          "parts": [
+            {
+              "body": {
+                "size": 0
+              },
+              "filename": "",
+              "headers": [
+                {
+                  "name": "From",
+                  "value": "Person 3 <person-4@example.com>"
+                },
+                {
+                  "name": "To",
+                  "value": "Person 1 <person-1@example.com>"
+                },
+                {
+                  "name": "Subject",
+                  "value": "jcl-live attached original"
+                },
+                {
+                  "name": "Date",
+                  "value": "Mon, 26 Oct 2026 15:30:21 +0000"
+                },
+                {
+                  "name": "Message-ID",
+                  "value": "<person-5@example.com>"
+                },
+                {
+                  "name": "MIME-Version",
+                  "value": "1.0"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "multipart/mixed; boundary=\"jcl-mixed-4a69ffcbb1\""
+                }
+              ],
+              "mimeType": "multipart/mixed",
+              "partId": "1.0",
+              "parts": [
+                {
+                  "body": {
+                    "size": 0
+                  },
+                  "filename": "",
+                  "headers": [
+                    {
+                      "name": "Content-Type",
+                      "value": "multipart/alternative; boundary=\"jcl-alternative-12943cfbb8\""
+                    }
+                  ],
+                  "mimeType": "multipart/alternative",
+                  "partId": "1.0.0",
+                  "parts": [
+                    {
+                      "body": {
+                        "data": "QXR0YWNoZWQgb3JpZ2luYWwgd2l0aCBtYXJrZXIgamNsLW1hcmtlci1mb3J3YXJkLWF0dGFjaGVkLg0K",
+                        "size": 60
+                      },
+                      "filename": "",
+                      "headers": [
+                        {
+                          "name": "Content-Type",
+                          "value": "text/plain; charset=\"utf-8\""
+                        },
+                        {
+                          "name": "Content-Transfer-Encoding",
+                          "value": "quoted-printable"
+                        }
+                      ],
+                      "mimeType": "text/plain",
+                      "partId": "1.0.0.0"
+                    },
+                    {
+                      "body": {
+                        "data": "PHA-QXR0YWNoZWQgb3JpZ2luYWwgd2l0aCBtYXJrZXIgPGI-amNsLW1hcmtlci1mb3J3YXJkLWF0dGFjaGVkPC9iPi48L3A-",
+                        "size": 72
+                      },
+                      "filename": "",
+                      "headers": [
+                        {
+                          "name": "Content-Type",
+                          "value": "text/html; charset=\"utf-8\""
+                        },
+                        {
+                          "name": "Content-Transfer-Encoding",
+                          "value": "quoted-printable"
+                        }
+                      ],
+                      "mimeType": "text/html",
+                      "partId": "1.0.0.1"
+                    }
+                  ]
+                },
+                {
+                  "body": {
+                    "attachmentId": "ANGjdJ8jOwKu8u_9dSOKXpgmfGCjkpf6Ctc1DkNzLrpDETsIGqC04E6Zktz-la612Yrmi-oIZNXnOBiyYlQnLd6oXcpASB2FaRLavJkU2uWyw0D-rDelPrTECo3GVmvkjILelEtv83e5biFqzPig-bi9no1AA6E2g1Smjw7QydBiQ64A12UzgMInrPjnFQlgpR3n7bAbfll4wSUT1woLaUFfv1WyKqZMiXmEJtuSDEr2z2xOtJOaTLdOURA_8pLPEz5MZReO0RYrmGufdt5IdJrydNdprablvz27zQxx1ZQijX1jy2KgAn6hRsafIZRA23buh-HW2o4LfslLJ-DBAIz8Q41e8oRek5c64T5R7YcYqsPY2xBab85kJus_onU",
+                    "size": 19
+                  },
+                  "filename": "inner.txt",
+                  "headers": [
+                    {
+                      "name": "Content-Type",
+                      "value": "text/plain; charset=\"utf-8\"; name=\"inner.txt\""
+                    },
+                    {
+                      "name": "Content-Transfer-Encoding",
+                      "value": "quoted-printable"
+                    },
+                    {
+                      "name": "Content-Disposition",
+                      "value": "attachment; filename=\"inner.txt\""
+                    }
+                  ],
+                  "mimeType": "text/plain",
+                  "partId": "1.0.1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "body": {
+            "attachmentId": "ANGjdJ97TmBYILn-_IQudpFnm97TC75GsYHQfw4LwsFaHwBP_c9qJShrGmNRic0_iCTBfCVBQzCn0indl2cmLUOHm1fOZypDxJ-T2roZS1l7MLyIdlFmkTSdqjPXB6Zs00ltz4W4F2nnqZXqrxkj2iHSPBq29sTvb5K62pubdv47Qko2KSxRLu9LRwdzRdqc-lEqLtaXhHbfad2PXDSUo5gbAsLjoV7y205MnsTrFwYhP3lTkXDLhHD_NIi27pcsksE--91epAeym-Km8c-X_bVGLz6G7HLwMkURLloFUxXztjRqdKNSFeYs8fcPlsh_Ws625WN4wKnTlRrcPrcAvEVDkx248H8Xs0aO3_i2Rnjg4z79HY_EUX0tVSFhaY0",
+            "size": 402
+          },
+          "filename": "simple.eml",
+          "headers": [
+            {
+              "name": "Content-Type",
+              "value": "message/rfc822"
+            },
+            {
+              "name": "Content-Disposition",
+              "value": "attachment; filename=\"simple.eml\""
+            }
+          ],
+          "mimeType": "message/rfc822",
+          "partId": "2",
+          "parts": [
+            {
+              "body": {
+                "data": "QSBzaW5nbGUtcGFydCBvcmlnaW5hbCwgbWFya2VyIGpjbC1tYXJrZXItZm9yd2FyZC1zaW1wbGUuDQo=",
+                "size": 59
+              },
+              "filename": "",
+              "headers": [
+                {
+                  "name": "From",
+                  "value": "Person 4 <person-6@example.com>"
+                },
+                {
+                  "name": "To",
+                  "value": "Person 1 <person-1@example.com>"
+                },
+                {
+                  "name": "Subject",
+                  "value": "jcl-live simple original"
+                },
+                {
+                  "name": "Date",
+                  "value": "Mon, 26 Oct 2026 21:30:21 +0000"
+                },
+                {
+                  "name": "Message-ID",
+                  "value": "<person-7@example.com>"
+                },
+                {
+                  "name": "MIME-Version",
+                  "value": "1.0"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "text/plain; charset=\"utf-8\""
+                },
+                {
+                  "name": "Content-Transfer-Encoding",
+                  "value": "quoted-printable"
+                }
+              ],
+              "mimeType": "text/plain",
+              "partId": "2.0"
+            }
+          ]
+        }
+      ]
+    },
+    "sizeEstimate": 2321,
+    "snippet": "Two originals attached as messages.",
+    "threadId": "1a1892450778f756"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 10:56:57 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/messages/1a1892450778f756"
+  },
+  "status": 200
+}

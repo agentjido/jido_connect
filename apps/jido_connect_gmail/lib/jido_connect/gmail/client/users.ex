@@ -4,6 +4,10 @@ defmodule Jido.Connect.Gmail.Client.Users do
   alias Jido.Connect.Http
   alias Jido.Connect.Gmail.Client.{Params, Response, Transport}
 
+  # Trash and untrash take no request body. Mint sends Content-Length only
+  # with a body, and Google rejects a POST without one with 411.
+  @empty_body ""
+
   def get_profile(params, access_token) when is_map(params) and is_binary(access_token) do
     access_token
     |> Transport.request()
@@ -244,7 +248,10 @@ defmodule Jido.Connect.Gmail.Client.Users do
       when is_binary(message_id) and is_binary(access_token) do
     access_token
     |> Transport.request()
-    |> Req.post(url: "/gmail/v1/users/me/messages/#{encode_path_segment(message_id)}/trash")
+    |> Req.post(
+      url: "/gmail/v1/users/me/messages/#{encode_path_segment(message_id)}/trash",
+      body: @empty_body
+    )
     |> Response.handle_message_response()
   end
 
@@ -252,7 +259,10 @@ defmodule Jido.Connect.Gmail.Client.Users do
       when is_binary(message_id) and is_binary(access_token) do
     access_token
     |> Transport.request()
-    |> Req.post(url: "/gmail/v1/users/me/messages/#{encode_path_segment(message_id)}/untrash")
+    |> Req.post(
+      url: "/gmail/v1/users/me/messages/#{encode_path_segment(message_id)}/untrash",
+      body: @empty_body
+    )
     |> Response.handle_message_response()
   end
 
@@ -290,7 +300,10 @@ defmodule Jido.Connect.Gmail.Client.Users do
       when is_binary(thread_id) and is_binary(access_token) do
     access_token
     |> Transport.request()
-    |> Req.post(url: "/gmail/v1/users/me/threads/#{encode_path_segment(thread_id)}/trash")
+    |> Req.post(
+      url: "/gmail/v1/users/me/threads/#{encode_path_segment(thread_id)}/trash",
+      body: @empty_body
+    )
     |> Response.handle_thread_response()
   end
 
@@ -298,7 +311,10 @@ defmodule Jido.Connect.Gmail.Client.Users do
       when is_binary(thread_id) and is_binary(access_token) do
     access_token
     |> Transport.request()
-    |> Req.post(url: "/gmail/v1/users/me/threads/#{encode_path_segment(thread_id)}/untrash")
+    |> Req.post(
+      url: "/gmail/v1/users/me/threads/#{encode_path_segment(thread_id)}/untrash",
+      body: @empty_body
+    )
     |> Response.handle_thread_response()
   end
 

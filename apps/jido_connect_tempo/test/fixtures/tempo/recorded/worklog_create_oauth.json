@@ -1,0 +1,72 @@
+{
+  "body": {
+    "attributes": {
+      "self": "https://api.tempo.io/4/worklogs/79268/work-attribute-values",
+      "values": [
+        {
+          "key": "_JclPhase_",
+          "value": "891b3db6-c452-456c-ae2c-7b53a06899fd"
+        },
+        {
+          "key": "_JclHours_",
+          "value": "1.5"
+        },
+        {
+          "key": "_JclBillable_",
+          "value": "true"
+        },
+        {
+          "key": "_JclAccount_",
+          "value": "JCL-PROJECT"
+        }
+      ]
+    },
+    "author": {
+      "accountId": "account-1",
+      "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+    },
+    "billableSeconds": 900,
+    "createdAt": "2026-11-06T17:39:18Z",
+    "description": "JCL live OAuth booking",
+    "issue": {
+      "id": 46097,
+      "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+    },
+    "self": "https://api.tempo.io/4/worklogs/79268",
+    "startDate": "2026-10-27",
+    "startDateTimeUtc": "2026-10-27T09:30:00Z",
+    "startTime": "10:30:00",
+    "tempoWorklogId": 79268,
+    "timeSpentSeconds": 900,
+    "updatedAt": "2026-11-06T17:39:18Z"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "854"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 17:39:18 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "e753620c893256ed84c456c59e41a157"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "POST",
+    "path": "/4/worklogs"
+  },
+  "status": 200
+}

@@ -1,0 +1,67 @@
+{
+  "body": {
+    "actions": {
+      "recall": {
+        "self": "https://api.tempo.io/4/timesheet-approvals/user/account-2/recall?from=2026-09-01&to=2026-09-30"
+      }
+    },
+    "period": {
+      "from": "2026-09-01",
+      "to": "2026-09-30"
+    },
+    "requiredSeconds": 633600,
+    "reviewer": {
+      "accountId": "account-1",
+      "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+    },
+    "self": "https://api.tempo.io/4/timesheet-approvals/user/account-2?from=2026-09-01&to=2026-09-30",
+    "status": {
+      "actor": {
+        "accountId": "account-1",
+        "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+      },
+      "comment": "JCL live seed",
+      "key": "IN_REVIEW",
+      "requiredSecondsAtSubmit": 633600,
+      "timeSpentSecondsAtSubmit": 10800,
+      "updatedAt": "2026-10-30T19:19:43Z"
+    },
+    "timeSpentSeconds": 10800,
+    "user": {
+      "accountId": "account-2",
+      "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-2"
+    },
+    "worklogs": {
+      "self": "https://api.tempo.io/4/worklogs/user/account-2?from=2026-09-01&to=2026-09-30"
+    }
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "1132"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 17:29:23 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "9b6351e8ccc8da1009e153807d1b84e6"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/timesheet-approvals/user/account-2"
+  },
+  "status": 200
+}

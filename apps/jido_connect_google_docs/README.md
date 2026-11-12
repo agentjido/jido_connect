@@ -13,6 +13,123 @@ surfaces are added.
 - `google.docs.document.create` — Create a new Google Docs document with an optional title.
 - `google.docs.document.batch_update` — Run a validated batchUpdate request for text, style, table, and image operations.
 
+## Document Tabs
+
+`google.docs.document.get` has no default for `include_tabs_content`. The
+request carries Google's `includeTabsContent` only when the input sets it.
+
+- `include_tabs_content: true` returns every tab in `document.tabs`, in
+  Google's order, and no legacy `document.body`. Each tab is a map with
+  `tab_id` and `title` from `tabProperties`, `body` from `documentTab.body`,
+  and its nested tabs, in the same shape, in `child_tabs`.
+- `include_tabs_content: false` returns only the first tab, in the legacy
+  `document.body`, and `document.tabs` is empty.
+- Without `include_tabs_content`, the result is the same as with `false`.
+
+Google's reference describes only `true` and `false`. A live check on
+2026-11-06 read a document with two top-level tabs and one nested tab
+without the parameter and got the same top-level fields and the same legacy
+body as with `false`.
+
+The action result holds plain maps, not structs. `Client.get_document/2`
+returns the same fields as a `Document` struct whose tabs and child tabs are
+`Tab` structs. Other `documentTab` parts, such as headers, footers, lists and
+inline objects, are not part of `Tab`.
+
+A tab at any depth that is not a map, or whose fields do not have Google's
+shape, makes the action return a `Jido.Connect.Error.ProviderError` with
+reason `:invalid_response`.
+
+### Plain Text Export
+
+A Drive export as `text/plain`, through `google.drive.file.export`, holds
+the text of every tab, nested tabs included. The live check of 2026-11-06
+exported the same document, with the top-level tabs First and Second and the
+tab Nested under Second, and got their text in the order First, Second,
+Nested. Nested is also the document's last tab, so the check does not show
+whether a nested tab comes before a later sibling of its parent tab; that
+order is unchecked.
+
+The text starts with a byte order mark and ends lines with CRLF. Two empty
+lines stand between the texts of consecutive tabs. Each tab of that
+document ends with an empty paragraph, so the check does not tell which of
+these line breaks come from the tabs' own paragraphs and whether Google
+adds any between tabs. Nothing in the export names a tab or marks where one
+begins; read the document with `include_tabs_content: true` to tell tabs
+apart.
+
+## Batch Update
+
+`google.docs.document.batch_update` sends one `documents.batchUpdate` call.
+Google applies the requests in list order and all or none of them.
+
+### Request Naming
+
+Requests use the snake_case proto names of Google's request kinds and
+fields, such as `insert_text`, `location.tab_id`, `delete_content_range` and
+`range.start_index`. Google accepts these names as sent, at every nesting
+level, and rejects a name it does not know with HTTP 400. The client
+translates no keys: `requests` goes out unchanged, and `write_control` goes
+out as Google's `writeControl` with the given map inside.
+
+```elixir
+%{
+  document_id: "1abc...",
+  requests: [
+    %{"delete_content_range" => %{
+      "range" => %{"start_index" => 20, "end_index" => 39, "tab_id" => "t.0"}
+    }},
+    %{"insert_text" => %{
+      "location" => %{"index" => 20, "tab_id" => "t.0"},
+      "text" => "replacement"
+    }}
+  ],
+  write_control: %{"required_revision_id" => revision_id}
+}
+```
+
+The action takes 1 to 100 requests. Each request holds exactly one of these
+operations:
+
+- `insert_text`, `delete_content_range`, `replace_all_text`
+- `update_text_style`, `update_paragraph_style`
+- `create_paragraph_bullets`, `delete_paragraph_bullets`
+- `insert_table`, `update_table_cell_style`
+- `insert_inline_image`, `replace_image`
+
+Google has no request that deletes a table; delete its range with
+`delete_content_range`. An empty list, more than 100 requests, a request
+with no or several operations, or any other operation key, camelCase names
+such as `insertText` included, returns a `Jido.Connect.Error.ValidationError`
+before any request reaches Google. `Client.batch_update/2` does not validate
+and passes camelCase keys through unchanged as well.
+
+The action computes no indexes and no tab IDs. Read them with
+`google.docs.document.get`; indexes count UTF-16 code units.
+
+### Response Fields
+
+- `document_id`: the updated document.
+- `write_control`: Google's write control object as returned, such as
+  `%{"requiredRevisionId" => revision_id}`, with the revision after the
+  update. Google accepts it unchanged as the next request's `write_control`.
+- `replies`: one reply per request, in request order. Requests without a
+  reply, such as `insert_text` and `delete_content_range`, return an empty
+  map.
+- `document`: Google's batchUpdate response carries no document, so this
+  field is absent. A response whose inline document is not a map, or has a
+  tab without Google's shape, returns a `ProviderError` with reason
+  `:invalid_response`.
+
+### Revision Conflicts
+
+When `required_revision_id` is not the document's latest revision, Google
+answers HTTP 400 and applies nothing. The action returns a `ProviderError`
+with reason `:http_error`, status 400 and Google's message in
+`details.message`, "The required revision ID '…' does not match the latest
+revision." Google uses the same status for other invalid requests; only the
+message tells a revision conflict apart. The action does not retry.
+
 ## Auth Profiles
 
 Docs declares a user OAuth profile:
@@ -24,17 +141,30 @@ catalog.
 
 ## OAuth Scopes
 
-The provider declares the shared Google identity scopes plus Docs product
-scopes:
+The provider declares the shared Google identity scopes, the Docs product
+scopes and `drive`:
 
 - `openid`
 - `email`
 - `profile`
 - `https://www.googleapis.com/auth/documents.readonly`
 - `https://www.googleapis.com/auth/documents`
+- `https://www.googleapis.com/auth/drive`
+
+`openid`, `email` and `profile` are the default scopes. The two Docs scopes
+and `drive` are optional.
 
 Read-only operations should use `documents.readonly` when possible. Document
 creation and mutation should require `documents`.
+
+A connection that holds `drive` can also read documents. On 2026-11-06
+Google returned a multi-tab document to an access token that held only
+`drive`, and the scope resolver accepts it for reads. The provider declares
+`drive` as an optional scope so that catalog discovery and filtering by
+`drive` find Docs. Declaring it requests nothing: the host decides whether
+to ask for `drive`. `drive.readonly` and `drive.file` are neither declared
+nor accepted, and were not checked live. Finer Drive grants are left to the
+host.
 
 ## Data Classification
 
@@ -52,12 +182,15 @@ The Docs scope resolver maps operations to least-privilege scopes:
 
 | Operation | Default Scope | Notes |
 |---|---|---|
-| `google.docs.document.get` | `documents.readonly` | Read-only access |
+| `google.docs.document.get` | `documents.readonly` | Read-only access; accepts an existing `documents` or `drive` grant |
 | `google.docs.document.create` | `documents` | Write required |
 | `google.docs.document.batch_update` | `documents` | Write required |
 
-Write operations always require `documents`. The readonly scope never satisfies
-write operations.
+A read requires the first of `documents.readonly`, `documents` and `drive`
+that the connection holds, and `documents.readonly` when it holds none of
+them. Write operations always require `documents`; neither the readonly
+scope nor `drive` satisfies them. `drive.readonly` and `drive.file` satisfy
+no Docs operation.
 
 ## API Boundaries
 
@@ -154,9 +287,11 @@ Drive-powered workflows:
   `google.drive.file.changed.push` to detect when a Docs document is modified.
   The trigger payload includes the Drive file ID, which maps directly to the
   Docs document ID for follow-up reads via `google.docs.document.get`.
-- **Drive scopes**. Export and Drive metadata require Drive scopes in addition
-  to Docs scopes. Grant `drive.readonly` for export and metadata reads, or
-  `drive.file` for app-managed files.
+- **Drive scopes**. Export needs `drive`, `drive.readonly`, or `drive.file`
+  for app-managed files; Drive metadata reads also take
+  `drive.metadata.readonly`. A Docs read needs `documents.readonly` or
+  `documents` besides, unless the connection holds `drive`, which covers
+  export, metadata and Docs reads on its own.
 
 Example: export a Docs document to PDF after a Drive change trigger:
 

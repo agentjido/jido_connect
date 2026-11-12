@@ -61,4 +61,70 @@ defmodule Jido.Connect.Google.Meet.ScopeResolverTest do
              %{scopes: [@created_scope]}
            ) == [@created_scope]
   end
+
+  test "resolves Meet artifact read scopes for transcript entries" do
+    operation = %{action_id: "google.meet.transcript.entry.list"}
+
+    assert ScopeResolver.required_scopes(operation, %{}, %{scopes: [@readonly_scope]}) ==
+             [@readonly_scope]
+
+    assert ScopeResolver.required_scopes(operation, %{}, %{scopes: [@created_scope]}) ==
+             [@created_scope]
+
+    assert ScopeResolver.required_scopes(
+             operation,
+             %{},
+             %{scopes: [@readonly_scope, @created_scope]}
+           ) == [@created_scope]
+
+    assert ScopeResolver.required_scopes(operation, %{}, %{scopes: []}) == [@readonly_scope]
+    assert ScopeResolver.required_scopes(operation, %{}, nil) == [@readonly_scope]
+  end
+
+  test "resolves participant reads like the conference record reads" do
+    for action_id <- ["google.meet.participant.list", "google.meet.participant.get"] do
+      operation = %{action_id: action_id}
+
+      assert ScopeResolver.required_scopes(operation, %{}, %{scopes: [@readonly_scope]}) ==
+               [@readonly_scope]
+
+      assert ScopeResolver.required_scopes(operation, %{}, %{scopes: [@created_scope]}) ==
+               [@created_scope]
+
+      assert ScopeResolver.required_scopes(
+               operation,
+               %{},
+               %{scopes: [@readonly_scope, @created_scope]}
+             ) == [@created_scope]
+
+      assert ScopeResolver.required_scopes(operation, %{}, %{scopes: [@settings_scope]}) ==
+               [@readonly_scope]
+
+      assert ScopeResolver.required_scopes(operation, %{}, nil) == [@readonly_scope]
+    end
+  end
+
+  test "resolves the transcript poll trigger like a conference record and artifact read" do
+    trigger = %{id: "google.meet.transcript.available"}
+
+    assert ScopeResolver.required_scopes(trigger, %{}, %{scopes: [@readonly_scope]}) ==
+             [@readonly_scope]
+
+    assert ScopeResolver.required_scopes(trigger, %{}, %{scopes: [@created_scope]}) ==
+             [@created_scope]
+
+    assert ScopeResolver.required_scopes(trigger, %{}, %{scopes: [@settings_scope]}) ==
+             [@readonly_scope]
+
+    for granted <- [[@readonly_scope], [@created_scope], [@settings_scope], []] do
+      connection = %{scopes: granted}
+
+      assert ScopeResolver.required_scopes(trigger, %{}, connection) ==
+               ScopeResolver.required_scopes(
+                 %{action_id: "google.meet.conference_record.list"},
+                 %{},
+                 connection
+               )
+    end
+  end
 end

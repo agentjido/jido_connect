@@ -12,7 +12,7 @@ defmodule Jido.Connect.Jira.Actions.Issues do
       verb(:get)
       data_classification(:workspace_content)
       label("Get issue")
-      description("Fetch a Jira issue by key.")
+      description("Fetch a Jira issue by key or numeric issue ID.")
       handler(Jido.Connect.Jira.Handlers.Actions.GetIssue)
       effect(:read)
 
@@ -23,7 +23,11 @@ defmodule Jido.Connect.Jira.Actions.Issues do
       end
 
       input do
-        field(:issue_key, :string, required?: true, example: "PROJ-123")
+        field(:issue_key, :string,
+          required?: true,
+          example: "PROJ-123",
+          description: "Issue key, such as PROJ-123, or numeric issue ID, such as 10001."
+        )
 
         field(:fields, {:array, :string},
           default: nil,
@@ -33,14 +37,36 @@ defmodule Jido.Connect.Jira.Actions.Issues do
 
       output do
         field(:key, :string)
+        field(:id, :string, description: "Numeric issue ID as a string.")
+        field(:url, :string, description: "The issue's REST API URL (`self`).")
         field(:summary, :string)
+
+        field(:description, :string,
+          description:
+            "Plain-text rendering of the ADF description. An empty description is \"\"; " <>
+              "absent when Jira returns null or leaves the field out."
+        )
+
+        field(:description_unsupported_nodes, {:array, :string},
+          description: "ADF node and mark types skipped while rendering the description."
+        )
+
         field(:status, :map)
         field(:project, :map)
         field(:assignee, :map)
         field(:priority, :map)
         field(:labels, {:array, :string})
+        field(:due_date, :string, description: "Due date as YYYY-MM-DD.")
         field(:created_at, :string)
         field(:updated_at, :string)
+
+        field(:missing_fields, {:array, :string},
+          description:
+            "Requested Jira field keys that the response does not contain. A requested " <>
+              "field that Jira returns as null is absent from the output but not listed here. " <>
+              "*all, the default, and *navigable count only the issue fields this action " <>
+              "reads; custom fields behind them and other * selectors are not checked."
+        )
       end
     end
 
@@ -50,7 +76,12 @@ defmodule Jido.Connect.Jira.Actions.Issues do
       verb(:search)
       data_classification(:workspace_content)
       label("Search issues")
-      description("Search Jira issues using JQL.")
+
+      description(
+        "Search Jira issues with JQL through Jira's enhanced search, one page per call. " <>
+          "Continue with next_page_token until is_last is true."
+      )
+
       handler(Jido.Connect.Jira.Handlers.Actions.SearchIssues)
       effect(:read)
 
@@ -62,21 +93,70 @@ defmodule Jido.Connect.Jira.Actions.Issues do
 
       input do
         field(:jql, :string, required?: true, example: "project = PROJ ORDER BY updated DESC")
-        field(:max_results, :integer, default: 50)
-        field(:start_at, :integer, default: 0)
+
+        field(:max_results, :integer,
+          default: 50,
+          description: "Page size. Jira can return fewer issues; is_last marks the end."
+        )
+
+        field(:next_page_token, :string,
+          description: "Opaque token from the next_page_token of the previous page."
+        )
+
+        field(:start_at, :integer,
+          default: 0,
+          enum: [0],
+          description:
+            "Deprecated, removed in the next release: enhanced search has no offsets. " <>
+              "Only 0 is accepted; page with next_page_token.",
+          metadata: %{deprecated: true}
+        )
 
         field(:fields, {:array, :string},
-          default: ["summary", "status", "assignee", "updated"],
-          description: "List of field keys to return in each issue."
+          default: [
+            "summary",
+            "status",
+            "assignee",
+            "updated",
+            "description",
+            "project",
+            "duedate"
+          ],
+          description:
+            "List of field keys to return in each issue. A list that names only id " <>
+              "also requests key, which each issue needs."
         )
       end
 
       output do
-        field(:issues, {:array, :map})
-        field(:total, :integer)
-        field(:start_at, :integer)
-        field(:max_results, :integer)
-        field(:is_last, :boolean)
+        field(:issues, {:array, :map},
+          description: "Issues of this page. A page can be empty while is_last is false."
+        )
+
+        field(:next_page_token, :string,
+          description: "Token for the next page. Absent on the last page."
+        )
+
+        field(:is_last, :boolean, description: "True on the last page.")
+
+        field(:max_results, :integer,
+          description:
+            "Page size sent to Jira. Jira can return fewer issues; is_last marks the end."
+        )
+
+        field(:total, :integer,
+          description:
+            "Deprecated, removed in the next release: always absent, enhanced search " <>
+              "returns no total.",
+          metadata: %{deprecated: true}
+        )
+
+        field(:start_at, :integer,
+          description:
+            "Deprecated, removed in the next release: always absent, enhanced search " <>
+              "returns no offset.",
+          metadata: %{deprecated: true}
+        )
       end
     end
 

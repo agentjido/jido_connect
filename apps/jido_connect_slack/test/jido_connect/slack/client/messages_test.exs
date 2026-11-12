@@ -1,6 +1,8 @@
 defmodule Jido.Connect.Slack.Client.MessagesTest do
   use ExUnit.Case, async: false
-  alias Jido.Connect.Slack.Client
+  alias Jido.Connect
+  alias Jido.Connect.Slack.{CatalogPacks, Client}
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -17,63 +19,231 @@ defmodule Jido.Connect.Slack.Client.MessagesTest do
     end)
   end
 
-  test "get thread replies sends expected request" do
-    Req.Test.stub(__MODULE__, fn conn ->
+  # The thread recordings come from the test workspace: the prepared thread
+  # with 22 replies in the public channel, its oldest and fourth oldest
+  # reply, a parent without replies, and the authors' IDs.
+  @channel "C0CEEB41FU0"
+  @private_channel "C0CD4JEJ9V5"
+  @parent "1793371034.447499"
+  @window_oldest "1793371035.936349"
+  @window_latest "1793371040.433599"
+  @long_reply "1793371049.278489"
+  @lone_parent "1793371020.846869"
+  @unknown_ts "1000000000.000100"
+  @authorizing_user "U0CDPFT1RDJ"
+  @bot_user "U0CDHUEBVEJ"
+  @bot_id "B0CDHUEB8MC"
+  @app_id "A0CDHUBBHRC"
+
+  # Recorded: the second page of a read of the prepared thread with limit 2,
+  # inclusive, from its oldest to its fourth oldest reply, requested with the
+  # cursor of the first page.
+  test "get thread replies sends the time window, the cursor and the page size" do
+    cursor = next_cursor!("thread_replies_window")
+    %{"messages" => messages} = page = LiveSmoke.fixture!(:slack, "thread_replies_window.2")
+
+    Req.Test.expect(__MODULE__, fn conn ->
       assert conn.method == "GET"
       assert conn.request_path == "/api/conversations.replies"
-
-      assert %{
-               "channel" => "C123",
-               "cursor" => "page-1",
-               "inclusive" => "true",
-               "limit" => "50",
-               "ts" => "1700000000.000100"
-             } = URI.decode_query(conn.query_string)
-
       assert ["Bearer token"] = Plug.Conn.get_req_header(conn, "authorization")
 
-      Req.Test.json(conn, %{
-        ok: true,
-        messages: [
-          %{
-            type: "message",
-            user: "U123",
-            text: "Root",
-            ts: "1700000000.000100",
-            reply_count: 1,
-            latest_reply: "1700000001.000200"
-          },
-          %{
-            type: "message",
-            user: "U456",
-            text: "Reply",
-            ts: "1700000001.000200",
-            thread_ts: "1700000000.000100"
-          }
-        ],
-        has_more: true,
-        response_metadata: %{next_cursor: "page-2"}
-      })
+      assert URI.decode_query(conn.query_string) == %{
+               "channel" => @channel,
+               "ts" => @parent,
+               "cursor" => cursor,
+               "limit" => "2",
+               "inclusive" => "true",
+               "oldest" => @window_oldest,
+               "latest" => @window_latest
+             }
+
+      Req.Test.json(conn, page)
     end)
 
-    assert {:ok,
-            %{
-              channel: "C123",
-              thread_ts: "1700000000.000100",
-              messages: [%{"text" => "Root"}, %{"text" => "Reply"}],
-              next_cursor: "page-2",
-              has_more: true
+    assert Client.get_thread_replies(
+             %{
+               channel: @channel,
+               ts: @parent,
+               cursor: cursor,
+               limit: 2,
+               inclusive: true,
+               oldest: @window_oldest,
+               latest: @window_latest
+             },
+             "token"
+           ) ==
+             {:ok,
+              %{
+                channel: @channel,
+                thread_ts: @parent,
+                messages: messages,
+                next_cursor: "",
+                has_more: false
+              }}
+  end
+
+  # Recorded: Slack answers an unknown parent ts with HTTP 200 and ok: false.
+  # The client and the action both return it as an error.
+  test "get thread replies returns an unknown thread as a provider error, not as an empty page" do
+    not_found = LiveSmoke.fixture!(:slack, "thread_replies_thread_not_found")
+    expect_pages([not_found, not_found])
+
+    assert {:error,
+            %Jido.Connect.Error.ProviderError{
+              provider: :slack,
+              status: 200,
+              reason: "thread_not_found"
+            }} = Client.get_thread_replies(%{channel: @channel, ts: @unknown_ts}, "token")
+
+    assert {:error,
+            %Jido.Connect.Error.ProviderError{
+              provider: :slack,
+              status: 200,
+              reason: "thread_not_found"
             }} =
-             Client.get_thread_replies(
-               %{
-                 channel: "C123",
-                 ts: "1700000000.000100",
-                 limit: 50,
-                 cursor: "page-1",
+             invoke(%{channel: @channel, ts: @unknown_ts, conversation_type: "public_channel"})
+  end
+
+  describe "slack.thread.replies through Jido.Connect.invoke" do
+    # Recorded: a parent without replies in the private channel, read with
+    # groups:history.
+    test "a private channel read sends only channel, ts, limit and inclusive" do
+      %{"messages" => [%{"ts" => ts}]} =
+        page = LiveSmoke.fixture!(:slack, "thread_replies_private_no_replies")
+
+      expect_pages([page])
+
+      assert {:ok, %{messages: [%{ts: ^ts}]}} =
+               invoke(
+                 %{channel: @private_channel, ts: ts, conversation_type: "private_channel"},
+                 ["groups:history"]
+               )
+
+      assert_received {:slack_request, query}
+
+      assert query == %{
+               "channel" => @private_channel,
+               "ts" => ts,
+               "limit" => "100",
+               "inclusive" => "false"
+             }
+    end
+
+    # Recorded: the prepared thread from its reply over 512 bytes to the
+    # newest reply. For the recording the live test added two bot replies,
+    # one with a file and one with a legacy attachment and a reaction, and
+    # deleted them afterwards.
+    test "a page keeps authors, the long text, files, reactions, blocks and attachments as recorded" do
+      %{"messages" => recorded} =
+        page = LiveSmoke.fixture!(:slack, "thread_replies_message_kinds")
+
+      expect_pages([page])
+
+      assert {:ok, %{has_more: false, messages: messages} = result} =
+               invoke(%{
+                 channel: @channel,
+                 ts: @parent,
+                 conversation_type: "public_channel",
+                 oldest: @long_reply,
                  inclusive: true
-               },
-               "token"
-             )
+               })
+
+      assert_received {:slack_request,
+                       %{"oldest" => @long_reply, "inclusive" => "true", "limit" => "100"}}
+
+      refute Map.has_key?(result, :next_cursor)
+      assert length(messages) == length(recorded)
+
+      for {message, raw} <- Enum.zip(messages, recorded),
+          field <- [:ts, :thread_ts, :files, :reactions, :blocks, :attachments] do
+        assert Map.get(message, field) == raw[Atom.to_string(field)],
+               "#{field} of #{raw["ts"]} differs from the recording"
+      end
+
+      by_ts = Map.new(messages, &{&1.ts, &1})
+
+      assert %{user: @authorizing_user} = human = by_ts["1793373003.591279"]
+      refute Map.has_key?(human, :bot_id)
+      refute Map.has_key?(human, :app_id)
+
+      assert %{user: @bot_user, bot_id: @bot_id, app_id: @app_id} = by_ts["1793371050.775499"]
+
+      assert %{"text" => long_text} = Enum.find(recorded, &(&1["ts"] == @long_reply))
+      assert byte_size(long_text) > 512
+      assert by_ts[@long_reply].text === long_text
+
+      assert [%{files: [%{"id" => "F" <> _id}]}] =
+               Enum.filter(messages, &Map.has_key?(&1, :files))
+
+      assert [%{reactions: [%{"name" => "white_check_mark", "count" => 1}], attachments: [_]}] =
+               Enum.filter(messages, &Map.has_key?(&1, :reactions))
+    end
+
+    # Recorded: both pages of a read with limit 2, inclusive, from the
+    # thread's oldest to its fourth oldest reply. Slack puts the parent first
+    # on each page and the newer replies on the first page.
+    test "two pages of limit 2 hand on the cursor, and page one reports the parent's summary" do
+      first_page = LiveSmoke.fixture!(:slack, "thread_replies_window")
+      cursor = next_cursor!("thread_replies_window")
+      expect_pages([first_page, LiveSmoke.fixture!(:slack, "thread_replies_window.2")])
+
+      input = %{
+        channel: @channel,
+        ts: @parent,
+        conversation_type: "public_channel",
+        limit: 2,
+        oldest: @window_oldest,
+        latest: @window_latest,
+        inclusive: true
+      }
+
+      assert {:ok, %{has_more: true, next_cursor: ^cursor} = first} = invoke(input)
+      assert {:ok, %{has_more: false} = second} = invoke(Map.put(input, :cursor, cursor))
+      refute Map.has_key?(second, :next_cursor)
+
+      window_query = %{
+        "channel" => @channel,
+        "ts" => @parent,
+        "limit" => "2",
+        "inclusive" => "true",
+        "oldest" => @window_oldest,
+        "latest" => @window_latest
+      }
+
+      assert_received {:slack_request, ^window_query}
+      assert_received {:slack_request, second_query}
+      assert second_query == Map.put(window_query, "cursor", cursor)
+
+      # Page one holds two of the thread's 22 replies; the parent's summary
+      # names all 22 and the second user's reply as the latest.
+      assert [%{ts: @parent}, %{ts: "1793371038.970209"}, %{ts: @window_latest}] =
+               first.messages
+
+      assert %{"messages" => [%{"reply_count" => 22, "latest_reply" => latest} | _]} = first_page
+      assert latest == "1793373203.070489"
+      assert {first.reply_count, first.latest_reply} == {22, latest}
+      assert first.reply_count != length(first.messages) - 1
+      assert first.latest_reply != List.last(first.messages).ts
+
+      assert [%{ts: @parent}, %{ts: @window_oldest}, %{ts: "1793371037.472009"}] =
+               second.messages
+    end
+
+    # Recorded: Slack answers a parent without replies with the parent alone.
+    # Without a reply_count from Slack the summary is computed from the page,
+    # whose last ts is the parent's own.
+    test "a parent without replies returns its single message and reply_count 0" do
+      expect_pages([LiveSmoke.fixture!(:slack, "thread_replies_no_replies")])
+
+      assert {:ok,
+              %{
+                messages: [%{ts: @lone_parent}],
+                reply_count: 0,
+                latest_reply: @lone_parent,
+                has_more: false
+              }} =
+               invoke(%{channel: @channel, ts: @lone_parent, conversation_type: "public_channel"})
+    end
   end
 
   test "search messages sends expected request and normalizes pagination" do
@@ -140,25 +310,100 @@ defmodule Jido.Connect.Slack.Client.MessagesTest do
              )
   end
 
+  # Recorded from the test workspace: the bot posts a text with a link,
+  # longer than 512 bytes, to the public channel.
   test "post message sends expected request" do
-    Req.Test.stub(__MODULE__, fn conn ->
+    %{"ts" => ts, "message" => %{"text" => text} = message} =
+      fixture = LiveSmoke.fixture!(:slack, "chat_post_message_channel")
+
+    assert byte_size(text) > 512
+
+    Req.Test.expect(__MODULE__, fn conn ->
       assert conn.method == "POST"
       assert conn.request_path == "/api/chat.postMessage"
+      assert ["Bearer token"] = Plug.Conn.get_req_header(conn, "authorization")
 
       {:ok, body, conn} = Plug.Conn.read_body(conn)
 
-      assert %{"channel" => "C123", "text" => "Hello"} = Jason.decode!(body)
+      assert Jason.decode!(body) == %{"channel" => "C0CEEB41FU0", "text" => text}
 
-      Req.Test.json(conn, %{
-        ok: true,
-        channel: "C123",
-        ts: "1700000000.000100",
-        message: %{text: "Hello"}
-      })
+      Req.Test.json(conn, fixture)
     end)
 
-    assert {:ok, %{channel: "C123", ts: "1700000000.000100"}} =
-             Client.post_message(%{channel: "C123", text: "Hello"}, "token")
+    assert {:ok, %{channel: "C0CEEB41FU0", ts: ts, message: message}} ==
+             Client.post_message(%{channel: "C0CEEB41FU0", text: text}, "token")
+  end
+
+  describe "slack.message.post with Block Kit blocks through Jido.Connect.invoke" do
+    # Recorded: the block actions live test posts a section and an actions
+    # block with an Approve and a Reject button, with a fallback text, to the
+    # public channel and deletes the post again. The test sends the blocks
+    # as Slack stored them.
+    test "sends blocks and the fallback text to chat.postMessage unchanged" do
+      %{"ts" => ts, "message" => %{"text" => text, "blocks" => blocks} = message} =
+        fixture = LiveSmoke.fixture!(:slack, "chat_post_message_blocks")
+
+      assert [
+               %{"type" => "section"},
+               %{
+                 "type" => "actions",
+                 "elements" => [
+                   %{"type" => "button", "value" => "capture-1:approve"},
+                   %{"type" => "button", "value" => "capture-1:reject"}
+                 ]
+               }
+             ] = blocks
+
+      expect_post(fixture)
+
+      assert {:ok, %{channel: @channel, ts: ^ts, message: ^message}} =
+               post(%{channel: @channel, text: text, blocks: blocks})
+
+      assert_received {:slack_post, body}
+
+      assert body == %{
+               "channel" => @channel,
+               "text" => text,
+               "blocks" => blocks,
+               "reply_broadcast" => false
+             }
+    end
+
+    # Recorded: the text-only post of the delivery check.
+    test "a text-only post sends no blocks key" do
+      %{"ts" => ts, "message" => %{"text" => text}} =
+        fixture = LiveSmoke.fixture!(:slack, "chat_post_message_channel")
+
+      expect_post(fixture)
+
+      assert {:ok, %{channel: @channel, ts: ^ts}} = post(%{channel: @channel, text: text})
+      assert_received {:slack_post, body}
+      assert body == %{"channel" => @channel, "text" => text, "reply_broadcast" => false}
+    end
+
+    test "blocks are optional and leave scopes, confirmation and the pack allowlists as they were" do
+      assert {:ok, action} = Connect.action(Jido.Connect.Slack, "slack.message.post")
+
+      assert %{
+               scopes: ["chat:write"],
+               policies: [:workspace_access],
+               auth_profiles: [:bot, :user],
+               mutation?: true,
+               risk: :write,
+               confirmation: :required_for_ai
+             } = action
+
+      assert [
+               %{name: :channel, required?: true},
+               %{name: :text, required?: true},
+               %{name: :thread_ts, required?: false},
+               %{name: :reply_broadcast, required?: false},
+               %{name: :blocks, required?: false, type: {:array, :map}}
+             ] = action.input
+
+      assert "slack.message.post" in CatalogPacks.editor().allowed_tools
+      refute "slack.message.post" in CatalogPacks.reader().allowed_tools
+    end
   end
 
   test "schedule message sends expected request and normalizes output" do
@@ -273,5 +518,81 @@ defmodule Jido.Connect.Slack.Client.MessagesTest do
 
     assert {:ok, %{channel: "C123", ts: "1700000000.000100"}} =
              Client.delete_message(%{channel: "C123", ts: "1700000000.000100"}, "token")
+  end
+
+  defp next_cursor!(fixture) do
+    assert %{"response_metadata" => %{"next_cursor" => cursor}} =
+             LiveSmoke.fixture!(:slack, fixture)
+
+    assert is_binary(cursor) and cursor != ""
+    cursor
+  end
+
+  # Answers one conversations.replies request per page, in order, and sends
+  # each request's query to the test.
+  defp expect_pages(pages) do
+    test_pid = self()
+
+    for page <- pages do
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert conn.method == "GET"
+        assert conn.request_path == "/api/conversations.replies"
+        assert ["Bearer token"] = Plug.Conn.get_req_header(conn, "authorization")
+        send(test_pid, {:slack_request, URI.decode_query(conn.query_string)})
+        Req.Test.json(conn, page)
+      end)
+    end
+  end
+
+  # Answers one chat.postMessage request with `response` and sends the
+  # decoded request body to the test.
+  defp expect_post(response) do
+    test_pid = self()
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/api/chat.postMessage"
+      assert ["Bearer token"] = Plug.Conn.get_req_header(conn, "authorization")
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      send(test_pid, {:slack_post, Jason.decode!(body)})
+      Req.Test.json(conn, response)
+    end)
+  end
+
+  defp post(input), do: invoke("slack.message.post", input, ["chat:write"])
+
+  defp invoke(input, scopes \\ ["channels:history"]),
+    do: invoke("slack.thread.replies", input, scopes)
+
+  # The lease carries no `slack_client`, so the action uses `Client` and the
+  # stub above answers its request.
+  defp invoke(action_id, input, scopes) do
+    connection =
+      Connect.Connection.new!(%{
+        id: "slack-bot",
+        provider: :slack,
+        profile: :bot,
+        tenant_id: "tenant-1",
+        owner_type: :tenant,
+        owner_id: "owner-1",
+        status: :connected,
+        scopes: scopes
+      })
+
+    Connect.invoke(Jido.Connect.Slack, action_id, input,
+      context:
+        Connect.Context.new!(%{
+          tenant_id: "tenant-1",
+          actor: %{id: "user-1", type: :user},
+          connection: connection
+        }),
+      credential_lease:
+        Connect.CredentialLease.new!(%{
+          connection_id: connection.id,
+          expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
+          scopes: scopes,
+          fields: %{access_token: "token"}
+        })
+    )
   end
 end

@@ -64,12 +64,10 @@ defmodule Jido.Connect.Google.Calendar.Handlers.Triggers.EventChangedPoller do
 
       case Map.get(result, :next_page_token) do
         nil ->
-          checkpoint = latest_sync_token || Map.get(params, :sync_token)
-
-          if checkpoint in [nil, ""] do
+          if latest_sync_token in [nil, ""] do
             invalid_missing_sync_token()
           else
-            {:ok, %{signals: dedupe_signals(signals), checkpoint: checkpoint}}
+            {:ok, %{signals: dedupe_signals(signals), checkpoint: latest_sync_token}}
           end
 
         page_token ->

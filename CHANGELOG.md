@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add a shared live smoke test convention in `docs/live_smoke_tests.md`:
+  `:live_smoke` tagging and exclusion, credentials from environment variables,
+  sanitized recordings of provider responses as `Req.Test` fixtures, and
+  captured Slack and Jira deliveries from a demo host capture mode.
+- Add `Jido.Connect.Sanitizer.sensitive_key?/1`.
 - Add MCP client resources, templates, prompts, completion, ping, and status.
 - Add authorized modern and legacy notification sessions with lease checks,
   subscriber monitoring, stream cleanup, and sanitized events.
@@ -14,6 +19,37 @@
 
 - Add the experimental `jido_connect_things` package for guarded Things Cloud
   Inbox list, create, and update actions.
+- Add the experimental `jido_connect_tempo` package with Tempo API token and
+  OAuth profiles, OAuth helpers, the connection contract, a Bearer transport
+  with an origin guard, bounded pagination and the scope resolver.
+- Add the Tempo read action `tempo.worklogs.list_own` for the connected
+  account's worklogs in an inclusive date range, and the read-only Tempo
+  catalog pack `:tempo_reader`.
+- Add the Tempo read action `tempo.period.bookability.get` for the connected
+  account's approval evidence of every period in an inclusive date range,
+  with closure evidence `:unknown` and a derived state, and the read-only
+  Tempo catalog pack `:tempo_period_lookup`.
+- Add the confirmation-gated Tempo write action `tempo.worklog.create` for
+  one own worklog, sent once as `POST /4/worklogs` and never retried, and
+  the Tempo catalog pack `:tempo_writer`.
+- Add the Tempo read actions `tempo.work_attribute.list` for the work
+  attributes of a site and their value contracts, and
+  `tempo.account.list_for_project` for the account candidates of a Jira
+  project, and the read-only Tempo catalog pack `:tempo_booking_lookup`.
+- Add the `:transform` option of `LiveSmoke.record/4`, which leaves out or
+  neutralizes data of other users that a shared test account returns,
+  before the sanitizer and its leak guard run. A fixture whose body it
+  changed carries `"transformed": true`.
+- Close gaps of the live smoke sanitizer: it learns Atlassian account IDs from
+  Jira changelog items, ADF mentions, also inside JSON strings such as
+  Confluence's ADF, and the percent-decoded `x-aaccountid` header, takes known
+  account IDs as `accounts:` and Google user IDs as `users:`, sanitizes Base64
+  content under `data` and `raw`, drops `x-amz-cf-pop` and keeps its
+  placeholders, `<field>-<n>` and `user-<n>` included, on a second run. The
+  leak guard finds Base64-encoded values at any offset. A test checks every
+  committed recording and capture with `LiveSmoke.sanitize_fixture/2` and
+  `sanitize_capture/2`, and every synthetic fixture as it is with the new
+  `LiveSmoke.check_leaks!/2`.
 
 ## 0.9.0 - 2026-08-25
 

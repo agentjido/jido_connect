@@ -2,6 +2,27 @@ defmodule Jido.Connect.Slack.Client.Normalizer do
   @moduledoc "Slack Web API response normalization helpers."
 
   alias Jido.Connect.Data
+  alias Jido.Connect.Slack.Message
+
+  @history_message_keys ~w(ts thread_ts user bot_id app_id text blocks attachments files subtype edited)
+
+  @doc """
+  Builds a `Jido.Connect.Slack.Message` from a `conversations.history` record.
+
+  Values pass through as Slack sends them, without `Data.compact/1`, so an
+  empty `text` stays `""` and absent fields stay `nil`.
+  """
+  def normalize_history_message(message, params) when is_map(message) do
+    message
+    |> Map.take(@history_message_keys)
+    |> Map.merge(%{
+      "channel" => Map.get(params, :channel),
+      "conversation_type" => Map.get(params, :conversation_type)
+    })
+    |> Message.new()
+  end
+
+  def normalize_history_message(_message, _params), do: {:error, :invalid_message}
 
   def normalize_channel(channel) when is_map(channel) do
     %{

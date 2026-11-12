@@ -3,13 +3,16 @@ defmodule Jido.Connect.Gmail.NormalizerTest do
 
   alias Jido.Connect.Gmail.{
     Attachment,
+    AttachmentContent,
     Draft,
     Label,
     Message,
+    MessageContent,
     Normalizer,
     Privacy,
     Profile,
     Thread,
+    ThreadContent,
     Watch
   }
 
@@ -219,6 +222,43 @@ defmodule Jido.Connect.Gmail.NormalizerTest do
       size: 0,
       metadata: %{}
     )
+  end
+
+  test "content struct constructors expose schema defaults" do
+    ConnectorContracts.assert_struct_defaults(MessageContent, %{message_id: "msg123"},
+      label_ids: [],
+      headers: [],
+      from: nil,
+      references: nil,
+      text_parts: [],
+      attachments: [],
+      messages: [],
+      metadata: %{}
+    )
+
+    assert {:error, _error} = MessageContent.new(%{})
+
+    ConnectorContracts.assert_struct_defaults(ThreadContent, %{thread_id: "thread123"},
+      messages: [],
+      metadata: %{}
+    )
+
+    assert {:error, _error} = ThreadContent.new(%{})
+
+    ConnectorContracts.assert_struct_defaults(
+      AttachmentContent,
+      %{message_id: "msg123", part_id: "1", size: 0, data: ""},
+      thread_id: nil,
+      attachment_id: nil,
+      filename: nil,
+      content_id: nil,
+      metadata: %{}
+    )
+
+    for missing <- [:message_id, :part_id, :size, :data] do
+      attrs = Map.delete(%{message_id: "msg123", part_id: "1", size: 0, data: ""}, missing)
+      assert {:error, _error} = AttachmentContent.new(attrs), "without #{missing}"
+    end
   end
 
   defp message_payload do

@@ -1,0 +1,39 @@
+{
+  "body": {
+    "errors": [
+      {
+        "message": "This is not a valid period. Did you mean from '2026-08-01' to '2026-08-31'?"
+      }
+    ]
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store",
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "102"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 17:25:33 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "4f9f03d8aa9db0802ed8403a803f18b3"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/timesheet-approvals/user/account-1"
+  },
+  "status": 400
+}

@@ -1,0 +1,59 @@
+{
+  "body": {
+    "transcripts": [
+      {
+        "docsDestination": {
+          "document": "1FRWevyoWXcVrNX8KgkIRbt6CCtS1Jmck4DM95IAregM",
+          "exportUri": "https://docs.google.com/document/d/1FRWevyoWXcVrNX8KgkIRbt6CCtS1Jmck4DM95IAregM/edit?usp=drive_web"
+        },
+        "endTime": "2026-10-30T16:54:26.086127Z",
+        "name": "conferenceRecords/6EMiOc40YJH2mjvfx8U6DxIUOBEQAjIGCIoCIAAYAwg/transcripts/dd514d90-fc37-476f-87ca-c4d1987b7851",
+        "startTime": "2026-10-30T16:52:33.333967Z",
+        "state": "FILE_GENERATED"
+      }
+    ]
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:45:27 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "server-timing": [
+      "gfet4t7; dur=477"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/v2/conferenceRecords/6EMiOc40YJH2mjvfx8U6DxIUOBEQAjIGCIoCIAAYAwg/transcripts"
+  },
+  "status": 200
+}

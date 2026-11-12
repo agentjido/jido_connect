@@ -1,0 +1,94 @@
+{
+  "body": {
+    "changes": [
+      {
+        "changeType": "file",
+        "file": {
+          "createdTime": "2026-11-02T09:46:50.702Z",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/text/plain",
+          "id": "1wuBTBgKsmgGOL06HHHWxvFQgS16PuL-k",
+          "md5Checksum": "d41d8cd98f00b204e9800998ecf8427e",
+          "mimeType": "text/plain",
+          "modifiedTime": "2026-11-02T09:46:50.702Z",
+          "name": "jcl-live trashed",
+          "owners": [
+            {
+              "displayName": "Person 1",
+              "emailAddress": "person-1@example.com",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "permissionId-1",
+              "photoLink": "photoLink-1"
+            }
+          ],
+          "parents": [
+            "1WBlaIDsYb-vmynE8OnECx6l7vunVL0So"
+          ],
+          "shared": false,
+          "size": "0",
+          "starred": false,
+          "trashed": true,
+          "webContentLink": "https://drive.google.com/uc?id=1wuBTBgKsmgGOL06HHHWxvFQgS16PuL-k&export=download",
+          "webViewLink": "https://drive.google.com/file/d/1wuBTBgKsmgGOL06HHHWxvFQgS16PuL-k/view?usp=drivesdk"
+        },
+        "fileId": "1wuBTBgKsmgGOL06HHHWxvFQgS16PuL-k",
+        "removed": false,
+        "time": "2026-11-02T09:46:54.318Z"
+      },
+      {
+        "changeType": "file",
+        "fileId": "169L8tikOCrVn8N3aHI4ZPRnn0xY0Rr9C",
+        "removed": true,
+        "time": "2026-11-02T09:46:54.413Z"
+      }
+    ],
+    "nextPageToken": "112"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "no-cache, no-store, max-age=0, must-revalidate"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 09:46:57 GMT"
+    ],
+    "expires": [
+      "Mon, 01 Jan 1990 00:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Origin, X-Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/changes"
+  },
+  "status": 200
+}

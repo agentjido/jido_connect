@@ -1,0 +1,157 @@
+{
+  "body": {
+    "items": [
+      {
+        "created": "2026-11-02T08:18:10.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-05T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587214984484382\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-1",
+        "iCalUID": "person-2@example.com",
+        "id": "jcle2ssc61jcr6",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-05T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live removed sc61jcr6",
+        "updated": "2026-11-02T08:18:12.242Z"
+      },
+      {
+        "created": "2026-11-02T08:18:11.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-11T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587214985411070\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-2",
+        "iCalUID": "person-3@example.com",
+        "id": "jcle2rsc61jcr6",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "recurrence": [
+          "RRULE:FREQ=WEEKLY;COUNT=3"
+        ],
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live series sc61jcr6",
+        "updated": "2026-11-02T08:18:12.705Z"
+      },
+      {
+        "created": "2026-11-02T08:18:11.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-18T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587214985411070\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-3",
+        "iCalUID": "person-3@example.com",
+        "id": "jcle2rsc61jcr6_20270118T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rsc61jcr6",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series sc61jcr6",
+        "updated": "2026-11-02T08:18:12.705Z"
+      }
+    ],
+    "nextSyncToken": "CP-54Mvs6JcDEP-54Mvs6JcDGAUgnP_l4AMonP_l4AM="
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate, no-transform"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:18:13 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 08:18:13 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-l2-request-path": [
+      "l2-managed-14"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/calendar/v3/calendars/person-1@example.com/events"
+  },
+  "status": 200
+}

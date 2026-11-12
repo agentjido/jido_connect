@@ -2,8 +2,10 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   @moduledoc "Jira Cloud REST response normalization helpers."
 
   alias Jido.Connect.Data
+  alias Jido.Connect.Jira.Client.Normalizer.IssueFields
 
   alias Jido.Connect.Jira.{
+    ADFText,
     Comment,
     FieldSchema,
     Issue,
@@ -18,47 +20,98 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   # Issue
   # ---------------------------------------------------------------------------
 
-  @doc "Normalizes a Jira issue into a stable struct."
-  @spec issue(map()) :: {:ok, Issue.t()} | {:error, term()}
-  def issue(payload) when is_map(payload) do
+  @doc """
+  Normalizes a Jira issue into a stable struct.
+
+  The description is rendered with `Jido.Connect.Jira.ADFText`:
+  `description_unsupported_nodes` lists the ADF node and mark types skipped
+  while rendering it. A description that renders to an empty text, such as a
+  document without content, keeps `description: ""`; a description that is
+  `null` or missing stays `nil`, and `missing_fields` tells the two apart. A
+  malformed ADF description returns the projection's
+  `Jido.Connect.Error.ValidationError`.
+
+  Pass the request's field list as `requested_fields:` to fill
+  `missing_fields` with the requested keys that the payload leaves out; use
+  `["*all"]` when the request named no fields. Without the option the list
+  stays empty. `*all` and `*navigable` count as the fields this function
+  reads, `timetracking` only for `*all`; other fields behind them and other
+  `*` selectors are not checked. A list that names no field, such as
+  `["-description"]`, starts from `*all`, as an issue read does; pass
+  `["*navigable" | list]` for enhanced search, which starts it from
+  `*navigable`.
+  """
+  @spec issue(map(), keyword()) :: {:ok, Issue.t()} | {:error, term()}
+  def issue(payload, opts \\ [])
+
+  def issue(payload, opts) when is_map(payload) and is_list(opts) do
     fields = Data.get(payload, "fields") || %{}
 
-    %{
-      key: Data.get(payload, "key"),
-      id: Data.get(payload, "id"),
-      url: Data.get(payload, "self"),
-      summary: Data.get(fields, "summary"),
-      description: normalize_description(Data.get(fields, "description")),
-      status: normalize_status(Data.get(fields, "status")),
-      issue_type: normalize_issue_type(Data.get(fields, "issuetype")),
-      project: normalize_project_brief(Data.get(fields, "project")),
-      assignee: normalize_user(Data.get(fields, "assignee")),
-      reporter: normalize_user(Data.get(fields, "reporter")),
-      priority: normalize_priority(Data.get(fields, "priority")),
-      labels: Data.get(fields, "labels", []),
-      components: Data.get(fields, "components", []),
-      fix_versions: Data.get(fields, "fixVersions", []),
-      due_date: Data.get(fields, "duedate"),
-      resolution: Data.get(fields, "resolution"),
-      time_tracking: Data.get(fields, "timetracking"),
-      created_at: Data.get(fields, "created"),
-      updated_at: Data.get(fields, "updated")
-    }
-    |> Data.compact()
-    |> Issue.new()
+    with {:ok, description} <- ADFText.project(Data.get(fields, "description")) do
+      %{
+        key: Data.get(payload, "key"),
+        id: Data.get(payload, "id"),
+        url: Data.get(payload, "self"),
+        summary: Data.get(fields, "summary"),
+        description_unsupported_nodes: ADFText.unsupported_nodes(description),
+        status: normalize_status(Data.get(fields, "status")),
+        issue_type: normalize_issue_type(Data.get(fields, "issuetype")),
+        project: normalize_project_brief(Data.get(fields, "project")),
+        assignee: normalize_user(Data.get(fields, "assignee")),
+        reporter: normalize_user(Data.get(fields, "reporter")),
+        priority: normalize_priority(Data.get(fields, "priority")),
+        labels: Data.get(fields, "labels", []),
+        components: Data.get(fields, "components", []),
+        fix_versions: Data.get(fields, "fixVersions", []),
+        due_date: Data.get(fields, "duedate"),
+        resolution: Data.get(fields, "resolution"),
+        time_tracking: Data.get(fields, "timetracking"),
+        created_at: Data.get(fields, "created"),
+        updated_at: Data.get(fields, "updated")
+      }
+      |> Data.compact()
+      |> put_text(:description, ADFText.text(description))
+      |> Map.put(:missing_fields, IssueFields.missing(fields, opts[:requested_fields]))
+      |> Issue.new()
+    end
   end
 
-  def issue(_payload), do: {:error, :invalid_issue_payload}
+  def issue(_payload, _opts), do: {:error, :invalid_issue_payload}
 
-  @doc "Normalizes a Jira issue into a consistent map shape (legacy helper)."
+  @doc """
+  Normalizes a Jira issue into a consistent map shape (legacy helper).
+
+  Returns `nil` when `issue/1` fails, including for a malformed ADF
+  description.
+  """
   def normalize_issue(payload) when is_map(payload) do
     case issue(payload) do
-      {:ok, struct} -> Map.from_struct(struct) |> Map.drop([:metadata])
+      {:ok, struct} -> issue_map(struct)
       {:error, _} -> nil
     end
   end
 
   def normalize_issue(_payload), do: nil
+
+  @doc """
+  Returns the map shape of a normalized issue, without metadata.
+
+  The nested status, assignee and reporter become plain maps too, as the
+  `:map` outputs of the generated actions require.
+  """
+  @spec issue_map(Issue.t()) :: map()
+  def issue_map(%Issue{} = issue) do
+    issue
+    |> plain_map()
+    |> Map.update!(:status, &plain_map/1)
+    |> Map.update!(:assignee, &plain_map/1)
+    |> Map.update!(:reporter, &plain_map/1)
+  end
+
+  defp plain_map(nil), do: nil
+
+  defp plain_map(struct) when is_struct(struct),
+    do: struct |> Map.from_struct() |> Map.drop([:metadata])
 
   # ---------------------------------------------------------------------------
   # Project
@@ -112,24 +165,72 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   # Comment
   # ---------------------------------------------------------------------------
 
-  @doc "Normalizes a Jira comment into a stable struct."
+  @doc """
+  Normalizes a Jira comment into a stable struct.
+
+  The body is rendered with `Jido.Connect.Jira.ADFText`:
+  `body_unsupported_nodes` lists the ADF node and mark types skipped while
+  rendering it, and `body_adf` keeps the original ADF document. An empty
+  document keeps `body: ""`, so it stays apart from a comment without a body.
+  A malformed ADF body returns the projection's
+  `Jido.Connect.Error.ValidationError`.
+
+  `url` is Jira's `self`; `visibility` is Jira's visibility restriction,
+  unchanged.
+  """
   @spec comment(map()) :: {:ok, Comment.t()} | {:error, term()}
   def comment(payload) when is_map(payload) do
-    %{
-      id: Data.get(payload, "id"),
-      body: normalize_description(Data.get(payload, "body")),
-      rendered_body: Data.get(payload, "renderedBody"),
-      author: normalize_user(Data.get(payload, "author")),
-      update_author: normalize_user(Data.get(payload, "updateAuthor")),
-      created_at: Data.get(payload, "created"),
-      updated_at: Data.get(payload, "updated"),
-      jsd_public: Data.get(payload, "jsdPublic")
-    }
-    |> Data.compact()
-    |> Comment.new()
+    raw_body = Data.get(payload, "body")
+
+    with {:ok, body} <- ADFText.project(raw_body) do
+      %{
+        id: Data.get(payload, "id"),
+        url: Data.get(payload, "self"),
+        body_adf: if(is_map(raw_body), do: raw_body),
+        body_unsupported_nodes: ADFText.unsupported_nodes(body),
+        rendered_body: Data.get(payload, "renderedBody"),
+        author: normalize_user(Data.get(payload, "author")),
+        update_author: normalize_user(Data.get(payload, "updateAuthor")),
+        created_at: Data.get(payload, "created"),
+        updated_at: Data.get(payload, "updated"),
+        visibility: Data.get(payload, "visibility"),
+        jsd_public: Data.get(payload, "jsdPublic")
+      }
+      |> Data.compact()
+      |> put_text(:body, ADFText.text(body))
+      |> Comment.new()
+    end
   end
 
   def comment(_payload), do: {:error, :invalid_comment_payload}
+
+  @doc """
+  Returns the map shape of a normalized comment, without metadata.
+
+  Keys without a value are left out, also in the nested author and update
+  author, which become plain maps as the `:map` outputs of the generated
+  actions require.
+  """
+  @spec comment_map(Comment.t()) :: map()
+  def comment_map(%Comment{} = comment) do
+    comment
+    |> present_map()
+    |> Map.new(fn
+      {key, %User{} = user} -> {key, present_map(user)}
+      pair -> pair
+    end)
+  end
+
+  defp present_map(struct) when is_struct(struct) do
+    struct
+    |> Map.from_struct()
+    |> Map.drop([:metadata])
+    |> Map.reject(fn {_key, value} -> is_nil(value) end)
+  end
+
+  # `Data.compact/1` also drops "", the text of an empty document.
+  defp put_text(map, _key, nil), do: map
+  defp put_text(map, key, text), do: Map.put(map, key, text)
 
   # ---------------------------------------------------------------------------
   # Status
@@ -222,7 +323,9 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   # Private helpers
   # ---------------------------------------------------------------------------
 
-  defp normalize_status(nil), do: nil
+  # Each nested helper normalizes an object and passes `nil` or any other
+  # value through unchanged, so the struct rejects a value that is not an
+  # object instead of the helper raising.
 
   defp normalize_status(status) when is_map(status) do
     case status(status) do
@@ -231,7 +334,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     end
   end
 
-  defp normalize_user(nil), do: nil
+  defp normalize_status(other), do: other
 
   defp normalize_user(user) when is_map(user) do
     case user(user) do
@@ -240,7 +343,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     end
   end
 
-  defp normalize_project_brief(nil), do: nil
+  defp normalize_user(other), do: other
 
   defp normalize_project_brief(project) when is_map(project) do
     %{
@@ -251,7 +354,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     |> Data.compact()
   end
 
-  defp normalize_issue_type(nil), do: nil
+  defp normalize_project_brief(other), do: other
 
   defp normalize_issue_type(type) when is_map(type) do
     %{
@@ -262,7 +365,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     |> Data.compact()
   end
 
-  defp normalize_priority(nil), do: nil
+  defp normalize_issue_type(other), do: other
 
   defp normalize_priority(priority) when is_map(priority) do
     %{
@@ -272,24 +375,5 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     |> Data.compact()
   end
 
-  defp normalize_description(%{"type" => "doc", "content" => content} = _adf)
-       when is_list(content) do
-    content
-    |> extract_text_from_adf()
-    |> String.trim()
-  end
-
-  defp normalize_description(text) when is_binary(text), do: text
-  defp normalize_description(_), do: nil
-
-  defp extract_text_from_adf(nodes) when is_list(nodes) do
-    Enum.map_join(nodes, "", &extract_text_from_adf/1)
-  end
-
-  defp extract_text_from_adf(%{"content" => content}) when is_list(content) do
-    extract_text_from_adf(content)
-  end
-
-  defp extract_text_from_adf(%{"text" => text}) when is_binary(text), do: text
-  defp extract_text_from_adf(_), do: ""
+  defp normalize_priority(other), do: other
 end

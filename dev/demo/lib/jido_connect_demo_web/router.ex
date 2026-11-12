@@ -102,5 +102,6 @@ defmodule Jido.Connect.DemoWeb.Router do
     post("/integrations/github/webhook", IntegrationController, :github_webhook)
     post("/integrations/slack/events", IntegrationController, :slack_events)
     post("/integrations/slack/interactivity", IntegrationController, :slack_interactivity)
+    post("/integrations/jira/webhook", IntegrationController, :jira_webhook)
   end
 end

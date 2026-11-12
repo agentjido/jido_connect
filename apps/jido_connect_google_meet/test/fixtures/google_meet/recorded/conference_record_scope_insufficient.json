@@ -1,0 +1,63 @@
+{
+  "body": {
+    "error": {
+      "code": 403,
+      "details": [
+        {
+          "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+          "domain": "googleapis.com",
+          "metadata": {
+            "method": "google.apps.meet.v2.ConferenceRecordsService.GetConferenceRecord",
+            "service": "meet.googleapis.com"
+          },
+          "reason": "ACCESS_TOKEN_SCOPE_INSUFFICIENT"
+        }
+      ],
+      "message": "Request had insufficient authentication scopes.",
+      "status": "PERMISSION_DENIED"
+    }
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 14:56:54 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "server-timing": [
+      "gfet4t7; dur=10"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "GET",
+    "path": "/v2/conferenceRecords/tjT2Egxvkox7JrzCoRAODxIUOBEQAjIGCIoCIAAYAwg"
+  },
+  "status": 403
+}

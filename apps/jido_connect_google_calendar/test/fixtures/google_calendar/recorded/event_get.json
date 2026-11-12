@@ -1,0 +1,170 @@
+{
+  "body": {
+    "attachments": [
+      {
+        "fileUrl": "https://drive.google.com/file/d/1nez1Lc_Comf4uYXPg4ZAGpHuW0C8REQy/view?usp=drivesdk&jcl=a%20b",
+        "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/text/plain",
+        "mimeType": "text/plain",
+        "title": "jcl-live handout.txt"
+      },
+      {
+        "fileId": "1XXsU_Na3ZfzaeDj5OyYOLLV7SwyDYev3",
+        "fileUrl": "https://drive.google.com/file/d/1XXsU_Na3ZfzaeDj5OyYOLLV7SwyDYev3/view?usp=drive_web",
+        "iconLink": "https://drive-thirdparty.googleusercontent.com/32/type/video/mp4",
+        "mimeType": "video/mp4",
+        "title": "jcl-live meeting with transcript - 2026/10/30 18:18 CET – Recording"
+      },
+      {
+        "fileId": "1zzz7BZxoL4EsIUhh5W8ClPYNQsyjLd82Um9z0Vz4eYU",
+        "fileUrl": "https://docs.google.com/document/d/1zzz7BZxoL4EsIUhh5W8ClPYNQsyjLd82Um9z0Vz4eYU/edit?usp=meet_tnfm_calendar",
+        "iconLink": "https://drive-thirdparty.googleusercontent.com/32/type/application/vnd.google-apps.document",
+        "mimeType": "application/vnd.google-apps.document",
+        "title": "Notizen von Gemini"
+      },
+      {
+        "fileId": "1FRWevyoWXcVrNX8KgkIRbt6CCtS1Jmck4DM95IAregM",
+        "fileUrl": "https://docs.google.com/document/d/1FRWevyoWXcVrNX8KgkIRbt6CCtS1Jmck4DM95IAregM/edit?usp=meet_tnfm_calendar",
+        "iconLink": "https://drive-thirdparty.googleusercontent.com/32/type/application/vnd.google-apps.document",
+        "mimeType": "application/vnd.google-apps.document",
+        "title": "Notizen von Gemini"
+      },
+      {
+        "fileId": "1i5aMCLZPDfy6fwljuDgz0IJiPM_ZuEBzNO2d1eBDBxM",
+        "fileUrl": "https://docs.google.com/document/d/1i5aMCLZPDfy6fwljuDgz0IJiPM_ZuEBzNO2d1eBDBxM/edit?usp=drivesdk",
+        "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.document",
+        "mimeType": "application/vnd.google-apps.document",
+        "title": "jcl-live agenda"
+      }
+    ],
+    "attendees": [
+      {
+        "email": "person-1@example.com",
+        "organizer": true,
+        "responseStatus": "needsAction",
+        "self": true
+      },
+      {
+        "email": "person-2@example.com",
+        "responseStatus": "needsAction"
+      }
+    ],
+    "conferenceData": {
+      "conferenceId": "sof-qtak-vtd",
+      "conferenceSolution": {
+        "iconUri": "https://fonts.gstatic.com/s/i/productlogos/meet_2020q4/v6/web-512dp/logo_meet_2020q4_color_2x_web_512dp.png",
+        "key": {
+          "type": "hangoutsMeet"
+        },
+        "name": "Google Meet"
+      },
+      "createRequest": {
+        "conferenceSolutionKey": {
+          "type": "hangoutsMeet"
+        },
+        "requestId": "df9146719eed4d65980b5fdb51a23358",
+        "status": {
+          "statusCode": "success"
+        }
+      },
+      "entryPoints": [
+        {
+          "entryPointType": "video",
+          "label": "meet.google.com/sof-qtak-vtd",
+          "uri": "uri-1"
+        },
+        {
+          "entryPointType": "more",
+          "pin": "pin-1",
+          "uri": "uri-2"
+        },
+        {
+          "entryPointType": "phone",
+          "label": "+1 612-315-9773",
+          "pin": "pin-2",
+          "regionCode": "US",
+          "uri": "uri-3"
+        }
+      ]
+    },
+    "created": "2026-10-30T16:52:02.000Z",
+    "creator": {
+      "email": "person-1@example.com",
+      "self": true
+    },
+    "description": "<b>jcl-live Besprechung</b> mit Transkript, Aufnahme und Gemini-Notizen.<br>Grüße aus Köln: „Zitat“ – Maß, Größe, Übergabe; Treffpunkt 東京 Büro.<br><a href=\"https://example.org/jcl-live?a=1&b=2\">Link mit Query a=1&amp;b=2</a><br>1. Tagesordnungspunkt 1: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>2. Tagesordnungspunkt 2: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>3. Tagesordnungspunkt 3: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>4. Tagesordnungspunkt 4: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>5. Tagesordnungspunkt 5: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>6. Tagesordnungspunkt 6: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>7. Tagesordnungspunkt 7: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>Ende der Beschreibung, Marker jcl-marker-event-description.",
+    "end": {
+      "dateTime": "2026-10-30T18:40:00+01:00",
+      "timeZone": "Europe/Berlin"
+    },
+    "etag": "\"3586762208138590\"",
+    "eventType": "default",
+    "hangoutLink": "https://meet.google.com/sof-qtak-vtd",
+    "htmlLink": "htmlLink-1",
+    "iCalUID": "person-3@example.com",
+    "id": "ndvt3dobe2f7dac8l940ha6iug",
+    "organizer": {
+      "email": "person-1@example.com",
+      "self": true
+    },
+    "reminders": {
+      "useDefault": true
+    },
+    "sequence": 0,
+    "start": {
+      "dateTime": "2026-10-30T17:55:00+01:00",
+      "timeZone": "Europe/Berlin"
+    },
+    "status": "confirmed",
+    "summary": "jcl-live meeting with transcript",
+    "updated": "2026-10-30T17:25:04.069Z"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate, no-transform"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:18:08 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 08:18:08 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-l2-request-path": [
+      "l2-managed-14"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/calendar/v3/calendars/person-1@example.com/events/ndvt3dobe2f7dac8l940ha6iug"
+  },
+  "status": 200
+}

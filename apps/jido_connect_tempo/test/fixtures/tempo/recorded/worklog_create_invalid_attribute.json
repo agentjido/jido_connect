@@ -1,0 +1,39 @@
+{
+  "body": {
+    "errors": [
+      {
+        "message": "Account not found"
+      }
+    ]
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store",
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "44"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 17:39:11 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "a2dc1e130118c7032335c0f2a3f81f95"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "POST",
+    "path": "/4/worklogs"
+  },
+  "status": 404
+}

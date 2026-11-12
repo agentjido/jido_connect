@@ -1,0 +1,101 @@
+{
+  "body": {
+    "historyId": "13251",
+    "id": "1a18c255a2dc99b2",
+    "internalDate": "1793352621000",
+    "labelIds": [
+      "UNREAD",
+      "INBOX"
+    ],
+    "payload": {
+      "body": {
+        "data": "QXJjaGl2ZSBwYWlyIG1lc3NhZ2UgMSBvZiAyLg0K",
+        "size": 30
+      },
+      "filename": "",
+      "headers": [
+        {
+          "name": "Received",
+          "value": "from 000000000000 named unknown by gmailapi.google.com with HTTPREST; Fri, 30 Oct 2026 08:30:32 -0700"
+        },
+        {
+          "name": "From",
+          "value": "Person 1 <person-1@example.com>"
+        },
+        {
+          "name": "To",
+          "value": "Person 2 <person-2@example.com>"
+        },
+        {
+          "name": "Subject",
+          "value": "jcl-live archive pair"
+        },
+        {
+          "name": "Date",
+          "value": "Fri, 30 Oct 2026 09:30:21 +0000"
+        },
+        {
+          "name": "Message-ID",
+          "value": "<person-3@example.com>"
+        },
+        {
+          "name": "MIME-Version",
+          "value": "1.0"
+        },
+        {
+          "name": "Content-Type",
+          "value": "text/plain; charset=\"utf-8\""
+        },
+        {
+          "name": "Content-Transfer-Encoding",
+          "value": "quoted-printable"
+        }
+      ],
+      "mimeType": "text/plain",
+      "partId": ""
+    },
+    "sizeEstimate": 478,
+    "snippet": "Archive pair message 1 of 2.",
+    "threadId": "1a18c255a2dc99b2"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:12:55 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/messages/1a18c255a2dc99b2"
+  },
+  "status": 200
+}

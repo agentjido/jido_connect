@@ -11,7 +11,7 @@ defmodule Jido.Connect.CatalogPacksUmbrellaTest do
   test "every registered Action provider exposes AI-compatible CatalogPacks" do
     integrations = action_integrations()
 
-    assert length(integrations) == 36
+    assert length(integrations) == 37
 
     Enum.each(integrations, fn integration ->
       pack_module = Module.concat(integration, CatalogPacks)

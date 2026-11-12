@@ -210,7 +210,14 @@ defmodule Jido.Connect.Sanitizer do
   defp sanitize_key(key, :transport) when is_binary(key), do: safe_binary(key)
   defp sanitize_key(key, :transport), do: inspect(key)
 
-  defp sensitive_key?(key) when is_binary(key) do
+  @doc """
+  Returns whether `sanitize/3` redacts the value stored under `key`.
+
+  Matching ignores case and treats `-` like `_`, so header names and
+  struct fields share one key list.
+  """
+  @spec sensitive_key?(term()) :: boolean()
+  def sensitive_key?(key) when is_binary(key) do
     String.valid?(key) and
       (MapSet.member?(@sensitive_keys, key) or
          key
@@ -219,11 +226,11 @@ defmodule Jido.Connect.Sanitizer do
          |> then(&MapSet.member?(@sensitive_keys, &1)))
   end
 
-  defp sensitive_key?(key) when is_atom(key) do
+  def sensitive_key?(key) when is_atom(key) do
     MapSet.member?(@sensitive_keys, key) or sensitive_key?(Atom.to_string(key))
   end
 
-  defp sensitive_key?(_key), do: false
+  def sensitive_key?(_key), do: false
 
   defp truncate_binary(value, max_binary) do
     if String.valid?(value) do

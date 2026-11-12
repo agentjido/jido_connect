@@ -3,17 +3,36 @@ defmodule Jido.Connect.Google.Calendar.FixtureTest do
 
   alias Jido.Connect.Google.Calendar.Normalizer
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   test "normalizes common Google Calendar event fixture" do
-    payload = fixture!("event_common.json")
+    # events.get of the prepared meeting, recorded from the test account.
+    # The expected values come from the recording, so recording event_get
+    # again after fresh Meet data leaves this test unchanged.
+    %{
+      "start" => %{"dateTime" => start},
+      "end" => %{"dateTime" => finish},
+      "attendees" => [_ | _] = attendees
+    } = payload = LiveSmoke.fixture!(:google_calendar, "event_get")
 
     assert {:ok, event} = Normalizer.event(payload, calendar_id: "primary")
-    assert event.event_id == "event123"
+    assert event.event_id == payload["id"]
     assert event.calendar_id == "primary"
-    assert event.summary == "Planning"
-    assert event.start == "2026-05-06T09:00:00-05:00"
-    assert event.end == "2026-05-06T10:00:00-05:00"
-    assert [%{email: "guest@example.com", response_status: "accepted"}] = event.attendees
+    assert event.summary == payload["summary"]
+    assert {event.start, event.end} == {start, finish}
+
+    # Google sends the organizer and self flags only when they are true.
+    expected =
+      Enum.map(attendees, fn attendee ->
+        %{
+          email: attendee["email"],
+          response_status: attendee["responseStatus"],
+          organizer?: attendee["organizer"] == true,
+          self?: attendee["self"] == true
+        }
+      end)
+
+    assert Enum.map(event.attendees, &Map.take(&1, Map.keys(hd(expected)))) == expected
   end
 
   test "normalizes edge Google Calendar freebusy fixture" do

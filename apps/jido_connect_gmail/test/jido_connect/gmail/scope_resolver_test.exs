@@ -51,9 +51,39 @@ defmodule Jido.Connect.Gmail.ScopeResolverTest do
         expected: @compose_scope
       },
       %{
+        label: "send action is not satisfied by a read-only grant",
+        operation: "google.gmail.message.send",
+        granted: [@readonly_scope],
+        expected: @send_scope
+      },
+      %{
         label: "draft mutation uses compose scope",
         operation: "google.gmail.draft.create",
         granted: [],
+        expected: @compose_scope
+      },
+      %{
+        label: "draft create is not satisfied by a read-only grant",
+        operation: "google.gmail.draft.create",
+        granted: [@readonly_scope],
+        expected: @compose_scope
+      },
+      %{
+        label: "draft create is not satisfied by a send-only grant",
+        operation: "google.gmail.draft.create",
+        granted: [@send_scope],
+        expected: @compose_scope
+      },
+      %{
+        label: "draft update is not satisfied by a read-only grant",
+        operation: "google.gmail.draft.update",
+        granted: [@readonly_scope],
+        expected: @compose_scope
+      },
+      %{
+        label: "draft update is not satisfied by a send-only grant",
+        operation: "google.gmail.draft.update",
+        granted: [@send_scope],
         expected: @compose_scope
       },
       %{
@@ -78,6 +108,18 @@ defmodule Jido.Connect.Gmail.ScopeResolverTest do
         label: "message label mutation requires modify scope",
         operation: "google.gmail.message.labels.apply",
         granted: [@readonly_scope],
+        expected: @modify_scope
+      },
+      %{
+        label: "message label mutation accepts full Gmail mailbox scope",
+        operation: "google.gmail.message.labels.apply",
+        granted: [@mail_scope],
+        expected: @mail_scope
+      },
+      %{
+        label: "message label mutation is not satisfied by the label definition scope",
+        operation: "google.gmail.message.labels.apply",
+        granted: [@labels_scope],
         expected: @modify_scope
       },
       %{
@@ -111,5 +153,77 @@ defmodule Jido.Connect.Gmail.ScopeResolverTest do
         expected: @metadata_scope
       }
     ])
+  end
+
+  describe "message and thread content reads" do
+    test "require gmail.readonly and accept an already granted modify or full mailbox grant" do
+      for operation <- [
+            "google.gmail.message.content.get",
+            "google.gmail.thread.content.get",
+            "google.gmail.message.attachment.content.get"
+          ],
+          {connection, expected} <- [
+            {nil, [@readonly_scope]},
+            {%{scopes: []}, [@readonly_scope]},
+            {%{scopes: [@metadata_scope]}, [@readonly_scope]},
+            {%{scopes: [@compose_scope]}, [@readonly_scope]},
+            {%{scopes: [@send_scope]}, [@readonly_scope]},
+            {%{scopes: [@labels_scope]}, [@readonly_scope]},
+            {%{scopes: [@readonly_scope]}, [@readonly_scope]},
+            {%{scopes: [@modify_scope]}, [@modify_scope]},
+            {%{scopes: [@mail_scope]}, [@mail_scope]},
+            {%{scopes: [@metadata_scope, @readonly_scope]}, [@readonly_scope]}
+          ] do
+        assert ScopeResolver.required_scopes(%{id: operation}, %{}, connection) == expected,
+               "#{operation} with #{inspect(connection)}"
+      end
+    end
+  end
+
+  describe "message and thread list searches" do
+    @list_actions ["google.gmail.messages.list", "google.gmail.threads.list"]
+
+    test "a query requires a read grant beyond gmail.metadata" do
+      for operation <- @list_actions,
+          query <- ["subject:report", "  "],
+          {connection, expected} <- [
+            {nil, [@readonly_scope]},
+            {%{scopes: []}, [@readonly_scope]},
+            {%{scopes: [@metadata_scope]}, [@readonly_scope]},
+            {%{scopes: [@readonly_scope]}, [@readonly_scope]},
+            {%{scopes: [@modify_scope]}, [@modify_scope]},
+            {%{scopes: [@mail_scope]}, [@mail_scope]},
+            {%{scopes: [@metadata_scope, @modify_scope]}, [@modify_scope]}
+          ] do
+        assert ScopeResolver.required_scopes(
+                 %{id: operation},
+                 %{query: query},
+                 connection
+               ) == expected,
+               "#{operation} with #{inspect(query)} and #{inspect(connection)}"
+      end
+    end
+
+    test "a host-supplied string-keyed query requires the same read grant" do
+      for operation <- @list_actions do
+        assert ScopeResolver.required_scopes(
+                 %{id: operation},
+                 %{"query" => "subject:report"},
+                 %{scopes: [@metadata_scope]}
+               ) == [@readonly_scope]
+      end
+    end
+
+    test "without a query a metadata-only grant still suffices" do
+      for operation <- @list_actions,
+          input <- [%{}, %{query: nil}, %{query: ""}, %{label_ids: ["INBOX"]}] do
+        assert ScopeResolver.required_scopes(
+                 %{id: operation},
+                 input,
+                 %{scopes: [@metadata_scope]}
+               ) == [@metadata_scope],
+               "#{operation} with #{inspect(input)}"
+      end
+    end
   end
 end

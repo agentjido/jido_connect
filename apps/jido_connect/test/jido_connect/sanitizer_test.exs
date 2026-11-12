@@ -50,6 +50,17 @@ defmodule Jido.Connect.SanitizerTest do
            } = Sanitizer.sanitize(value, :transport)
   end
 
+  test "reports whether a key is redacted" do
+    assert Sanitizer.sensitive_key?(:access_token)
+    assert Sanitizer.sensitive_key?("Authorization")
+    assert Sanitizer.sensitive_key?("X-Slack-Signature")
+    assert Sanitizer.sensitive_key?("refresh-token")
+    refute Sanitizer.sensitive_key?("email")
+    refute Sanitizer.sensitive_key?(:ok)
+    refute Sanitizer.sensitive_key?(<<0xFF>>)
+    refute Sanitizer.sensitive_key?(42)
+  end
+
   test "redacts keyword and header pairs in both profiles" do
     value = [access_token: "secret-token", safe: "visible"]
     headers = [{"authorization", "Bearer secret-header"}]

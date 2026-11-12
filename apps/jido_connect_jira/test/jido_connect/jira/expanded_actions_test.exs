@@ -34,7 +34,7 @@ defmodule Jido.Connect.Jira.ExpandedActionsTest do
   test "adds the reviewed Jira actions without changing the existing action set" do
     actions = Map.new(Jira.integration().actions, &{&1.id, &1})
 
-    assert map_size(actions) == 29
+    assert map_size(actions) == 30
 
     for {id, {risk, confirmation, required_policies}} <- @new_actions do
       assert %{risk: ^risk, confirmation: ^confirmation} = action = Map.fetch!(actions, id)

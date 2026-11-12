@@ -3,6 +3,9 @@ defmodule Jido.Connect.Google.Meet.CatalogPacks do
 
   alias Jido.Connect.Catalog.Pack
 
+  @triggers ["google.meet.transcript.available"]
+
+  # Reserved for Google Workspace Events subscriptions.
   @future_triggers [
     "google.meet.conference.started",
     "google.meet.conference.ended",
@@ -26,13 +29,21 @@ defmodule Jido.Connect.Google.Meet.CatalogPacks do
     "google.meet.transcript.get"
   ]
 
+  # Entry text and the participants that transcript entries name as speakers.
+  @transcript_reader_tools @reader_tools ++
+                             [
+                               "google.meet.transcript.entry.list",
+                               "google.meet.participant.list",
+                               "google.meet.participant.get"
+                             ]
+
   @scheduler_tools @reader_tools ++
                      [
                        "google.meet.space.create"
                      ]
 
   @doc "Returns all built-in Google Meet catalog packs."
-  def all, do: [reader(), scheduler()]
+  def all, do: [reader(), transcript_reader(), scheduler()]
 
   @doc "Read-only Meet metadata pack for spaces, conferences, recordings, and transcripts."
   def reader do
@@ -47,12 +58,28 @@ defmodule Jido.Connect.Google.Meet.CatalogPacks do
     })
   end
 
+  @doc """
+  Opt-in Meet pack with the metadata reads plus transcript entry text and the
+  participants that the entries name as speakers.
+  """
+  def transcript_reader do
+    Pack.new!(%{
+      id: :google_meet_transcript_reader,
+      label: "Google Meet transcript reader",
+      description:
+        "Read Meet metadata, transcript text entry by entry with participant, language, and times, and the speaking participants' display names and user identities.",
+      filters: %{provider: :google_meet},
+      allowed_tools: @transcript_reader_tools,
+      metadata: metadata(:read)
+    })
+  end
+
   @doc "Meet scheduling pack with metadata reads and meeting-space creation."
   def scheduler do
     Pack.new!(%{
       id: :google_meet_scheduler,
       label: "Google Meet scheduler",
-      description: "Read Meet metadata and create meeting spaces. Triggers remain later work.",
+      description: "Read Meet metadata and create meeting spaces.",
       filters: %{provider: :google_meet},
       allowed_tools: @scheduler_tools,
       metadata: metadata(:write)
@@ -63,7 +90,7 @@ defmodule Jido.Connect.Google.Meet.CatalogPacks do
     %{
       package: :jido_connect_google_meet,
       risk: risk,
-      triggers: :later,
+      triggers: @triggers,
       future_triggers: @future_triggers
     }
   end

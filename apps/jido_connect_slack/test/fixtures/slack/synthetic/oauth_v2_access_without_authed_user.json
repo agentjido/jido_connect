@@ -1,0 +1,30 @@
+{
+  "source": {
+    "kind": "synthetic",
+    "url": "https://docs.slack.dev/reference/methods/oauth.v2.access",
+    "section": "Response: Successful token request with scopes for both a bot user and a user token.",
+    "retrieved_on": "2026-11-03",
+    "note": "Not a recording. Derived from oauth_v2_access_bot_and_user.json by removing authed_user, for a response that holds no user object at all. The token value is a placeholder."
+  },
+  "request": {
+    "method": "POST",
+    "path": "/api/oauth.v2.access"
+  },
+  "status": 200,
+  "body": {
+    "ok": true,
+    "access_token": "xoxb-synthetic-bot",
+    "token_type": "bot",
+    "scope": "commands,incoming-webhook",
+    "bot_user_id": "U0KRQLJ9H",
+    "app_id": "A0KRD7HC3",
+    "team": {
+      "name": "Slack Softball Team",
+      "id": "T9TK3CUKW"
+    },
+    "enterprise": {
+      "name": "slack-sports",
+      "id": "E12345678"
+    }
+  }
+}

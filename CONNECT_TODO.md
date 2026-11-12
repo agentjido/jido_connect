@@ -301,6 +301,7 @@ Discord currently at the end of the roadmap chain.
 - Finance-grade policy defaults for high-risk write actions.
 - Chat handoff conventions for work-management connectors that pair with
   `jido_chat`.
-- Provider test harness helpers for Req stubs, OAuth callbacks, app manifests,
-  and webhook fixtures.
+- Provider test harness helpers for OAuth callbacks and app manifests. Recorded
+  Req fixtures, captured webhook fixtures and `:live_smoke` runs follow
+  `docs/live_smoke_tests.md`.
 - Demo UI that can host many integrations without custom pages per provider.

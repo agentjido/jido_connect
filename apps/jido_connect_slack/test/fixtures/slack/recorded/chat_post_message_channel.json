@@ -1,0 +1,142 @@
+{
+  "body": {
+    "channel": "C0CEEB41FU0",
+    "message": {
+      "app_id": "A0CDHUBBHRC",
+      "blocks": [
+        {
+          "block_id": "+dgxY",
+          "elements": [
+            {
+              "elements": [
+                {
+                  "text": "Delivery check from the jido_connect_slack live test: ",
+                  "type": "text"
+                },
+                {
+                  "text": "open the delivery check",
+                  "type": "link",
+                  "url": "https://example.com/jido-connect/delivery-check"
+                },
+                {
+                  "text": " – This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes.",
+                  "type": "text"
+                }
+              ],
+              "type": "rich_text_section"
+            }
+          ],
+          "type": "rich_text"
+        }
+      ],
+      "bot_id": "B0CDHUEB8MC",
+      "bot_profile": {
+        "app_id": "A0CDHUBBHRC",
+        "deleted": false,
+        "icons": {
+          "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+          "image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+          "image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+        },
+        "id": "B0CDHUEB8MC",
+        "name": "Jido Connect Live Tests",
+        "team_id": "T0CEE692400",
+        "updated": 1793370597,
+        "user_id": "U0CDHUEBVEJ"
+      },
+      "team": "T0CEE692400",
+      "text": "Delivery check from the jido_connect_slack live test: <https://example.com/jido-connect/delivery-check|open the delivery check> – This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. This sentence pads the text past 512 bytes. ",
+      "ts": "1793614147.876189",
+      "type": "message",
+      "user": "U0CDHUEBVEJ"
+    },
+    "ok": true,
+    "response_metadata": {
+      "warnings": [
+        "missing_charset"
+      ]
+    },
+    "ts": "1793614147.876189",
+    "warning": "missing_charset"
+  },
+  "headers": {
+    "access-control-allow-headers": [
+      "slack-route, x-slack-version-ts, x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-b3-flags, x-background"
+    ],
+    "access-control-allow-origin": [
+      "*"
+    ],
+    "access-control-expose-headers": [
+      "x-slack-req-id, retry-after"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, quic=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, no-cache, no-store, must-revalidate"
+    ],
+    "content-length": [
+      "2240"
+    ],
+    "content-type": [
+      "application/json; charset=utf-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 10:09:07 GMT"
+    ],
+    "expires": [
+      "Sat, 26 Jul 1997 05:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "referrer-policy": [
+      "no-referrer"
+    ],
+    "server": [
+      "Apache"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-0ade82dffc4e8ddc7,ingress-edge-fra-prod-053c083214ea24361"
+    ],
+    "x-backend": [
+      "api_normal"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-edge-backend": [
+      "envoy-www"
+    ],
+    "x-envoy-upstream-service-time": [
+      "133"
+    ],
+    "x-server": [
+      "slack-www-hhvm-api-iad-3beo44o2pphc"
+    ],
+    "x-slack-req-id": [
+      "ea1675eed8e8010fa0ef97d86dd2f9a7"
+    ],
+    "x-slack-unique-id": [
+      "12a078c2-78b6-47cd-a507-1d3da4b0de4e"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/api/chat.postMessage"
+  },
+  "status": 200
+}

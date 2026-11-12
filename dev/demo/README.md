@@ -26,9 +26,16 @@ Useful routes:
 - `GET /integrations/github/oauth/start`
 - `GET /integrations/github/oauth/callback`
 - `POST /integrations/github/webhook`
+- `POST /integrations/slack/events`
+- `POST /integrations/slack/interactivity`
+- `POST /integrations/jira/webhook` (capture mode only)
 
 Pair it with ngrok from the repo root:
 
 ```sh
 mix jido.connect.ngrok --port 4000
 ```
+
+Set `SLACK_CAPTURE_DIR` or `JIRA_CAPTURE_DIR` to write the raw body and headers
+of Slack or Jira deliveries into that directory for live smoke tests. See
+[Live smoke tests](../../docs/live_smoke_tests.md).

@@ -1,5 +1,13 @@
 defmodule Jido.Connect.Jira.Issue do
-  @moduledoc "Normalized Jira issue."
+  @moduledoc """
+  Normalized Jira issue.
+
+  A field that Jira returns as `null` stays `nil`. A description that renders
+  to an empty text stays `""`, apart from a `null` one. `missing_fields`
+  lists the requested Jira field keys, such as `"duedate"`, that the payload's
+  `fields` object does not contain at all, so a `nil` value can be told apart
+  from a field that Jira did not return.
+  """
 
   alias Jido.Connect.Jira.{Status, User}
 
@@ -11,6 +19,8 @@ defmodule Jido.Connect.Jira.Issue do
               url: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               summary: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               description: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              description_unsupported_nodes:
+                Zoi.list(Zoi.string()) |> Zoi.nullish() |> Zoi.optional(),
               status: Status.schema() |> Zoi.nullish() |> Zoi.optional(),
               issue_type: Zoi.map() |> Zoi.nullish() |> Zoi.optional(),
               project: Zoi.map() |> Zoi.nullish() |> Zoi.optional(),
@@ -25,6 +35,7 @@ defmodule Jido.Connect.Jira.Issue do
               time_tracking: Zoi.map() |> Zoi.nullish() |> Zoi.optional(),
               created_at: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               updated_at: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              missing_fields: Zoi.list(Zoi.string()) |> Zoi.default([]),
               metadata: Zoi.map() |> Zoi.default(%{})
             },
             coerce: true

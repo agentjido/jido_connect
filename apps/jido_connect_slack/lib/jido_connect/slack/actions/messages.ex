@@ -22,9 +22,18 @@ defmodule Jido.Connect.Slack.Actions.Messages do
 
       input do
         field :channel, :string, required?: true, example: "C012AB3CD"
-        field :text, :string, required?: true
+
+        field :text, :string,
+          required?: true,
+          description:
+            "Message text. With blocks it is the fallback that notifications and clients without Block Kit show."
+
         field :thread_ts, :string
         field :reply_broadcast, :boolean, default: false
+
+        field :blocks, {:array, :map},
+          description:
+            "Optional Block Kit blocks, sent to chat.postMessage unchanged, such as an actions block with buttons."
       end
 
       output do

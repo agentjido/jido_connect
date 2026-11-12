@@ -57,8 +57,16 @@ defmodule Jido.Connect.Gmail.CatalogPacks do
                          "google.gmail.thread.delete"
                        ]
 
+  @content_tools @metadata_tools ++
+                   [
+                     "google.gmail.message.attachment.get",
+                     "google.gmail.message.content.get",
+                     "google.gmail.thread.content.get",
+                     "google.gmail.message.attachment.content.get"
+                   ]
+
   @doc "Returns all built-in Gmail catalog packs."
-  def all, do: [metadata(), triage(), send(), destructive()]
+  def all, do: [metadata(), triage(), send(), destructive(), content()]
 
   @doc "Read-only Gmail metadata pack."
   def metadata do
@@ -141,6 +149,25 @@ defmodule Jido.Connect.Gmail.CatalogPacks do
       filters: %{provider: :gmail},
       allowed_tools: @destructive_tools,
       metadata: %{package: :jido_connect_gmail, risk: :destructive}
+    })
+  end
+
+  @doc """
+  Opt-in Gmail content pack for reading message content.
+
+  Adds the actions that return message body text or attachment bytes to the
+  metadata tools: message and thread content reads and attachment reads.
+  Excludes send, draft, label mutation, watch, trash, and delete tools.
+  """
+  def content do
+    Pack.new!(%{
+      id: :google_gmail_content,
+      label: "Gmail content",
+      description:
+        "Read Gmail metadata and opt in to message content: full message and thread text and attachment bytes. Excludes send, draft, and mutation tools.",
+      filters: %{provider: :gmail},
+      allowed_tools: @content_tools,
+      metadata: %{package: :jido_connect_gmail, risk: :read}
     })
   end
 end

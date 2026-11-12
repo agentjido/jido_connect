@@ -1,0 +1,153 @@
+{
+  "body": {
+    "changes": [
+      {
+        "changeType": "file",
+        "file": {
+          "createdTime": "2026-11-02T09:46:00.962Z",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/text/plain",
+          "id": "16G0zkY3iWCmTdJGqvj3OyCTAPqU0fgU9",
+          "md5Checksum": "d41d8cd98f00b204e9800998ecf8427e",
+          "mimeType": "text/plain",
+          "modifiedTime": "2026-11-02T09:46:00.962Z",
+          "name": "jcl-live added",
+          "owners": [
+            {
+              "displayName": "Person 1",
+              "emailAddress": "person-1@example.com",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "permissionId-1",
+              "photoLink": "photoLink-1"
+            }
+          ],
+          "parents": [
+            "1WBlaIDsYb-vmynE8OnECx6l7vunVL0So"
+          ],
+          "shared": false,
+          "size": "0",
+          "starred": false,
+          "trashed": false,
+          "webContentLink": "https://drive.google.com/uc?id=16G0zkY3iWCmTdJGqvj3OyCTAPqU0fgU9&export=download",
+          "webViewLink": "https://drive.google.com/file/d/16G0zkY3iWCmTdJGqvj3OyCTAPqU0fgU9/view?usp=drivesdk"
+        },
+        "fileId": "16G0zkY3iWCmTdJGqvj3OyCTAPqU0fgU9",
+        "removed": false,
+        "time": "2026-11-02T09:46:01.724Z"
+      },
+      {
+        "changeType": "file",
+        "file": {
+          "createdTime": "2026-11-02T09:46:02.250Z",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/text/plain",
+          "id": "1A36l7QZp2EifPB3FQAMdg1r9SjUYbw3o",
+          "md5Checksum": "d41d8cd98f00b204e9800998ecf8427e",
+          "mimeType": "text/plain",
+          "modifiedTime": "2026-11-02T09:46:02.250Z",
+          "name": "jcl-live nested",
+          "owners": [
+            {
+              "displayName": "Person 1",
+              "emailAddress": "person-1@example.com",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "permissionId-1",
+              "photoLink": "photoLink-1"
+            }
+          ],
+          "parents": [
+            "1ZZhnM_eWX4wvZnoTS-LG1q5JiuG_6Wx1"
+          ],
+          "shared": false,
+          "size": "0",
+          "starred": false,
+          "trashed": false,
+          "webContentLink": "https://drive.google.com/uc?id=1A36l7QZp2EifPB3FQAMdg1r9SjUYbw3o&export=download",
+          "webViewLink": "https://drive.google.com/file/d/1A36l7QZp2EifPB3FQAMdg1r9SjUYbw3o/view?usp=drivesdk"
+        },
+        "fileId": "1A36l7QZp2EifPB3FQAMdg1r9SjUYbw3o",
+        "removed": false,
+        "time": "2026-11-02T09:46:04.711Z"
+      },
+      {
+        "changeType": "file",
+        "file": {
+          "createdTime": "2026-11-02T09:46:01.726Z",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.folder",
+          "id": "1ZZhnM_eWX4wvZnoTS-LG1q5JiuG_6Wx1",
+          "mimeType": "application/vnd.google-apps.folder",
+          "modifiedTime": "2026-11-02T09:46:01.726Z",
+          "name": "jcl-live subfolder",
+          "owners": [
+            {
+              "displayName": "Person 1",
+              "emailAddress": "person-1@example.com",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "permissionId-1",
+              "photoLink": "photoLink-1"
+            }
+          ],
+          "parents": [
+            "1WBlaIDsYb-vmynE8OnECx6l7vunVL0So"
+          ],
+          "shared": false,
+          "starred": false,
+          "trashed": false,
+          "webViewLink": "https://drive.google.com/drive/folders/1ZZhnM_eWX4wvZnoTS-LG1q5JiuG_6Wx1"
+        },
+        "fileId": "1ZZhnM_eWX4wvZnoTS-LG1q5JiuG_6Wx1",
+        "removed": false,
+        "time": "2026-11-02T09:46:04.711Z"
+      }
+    ],
+    "newStartPageToken": "105"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "no-cache, no-store, max-age=0, must-revalidate"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 09:46:05 GMT"
+    ],
+    "expires": [
+      "Mon, 01 Jan 1990 00:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Origin, X-Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/changes"
+  },
+  "status": 200
+}

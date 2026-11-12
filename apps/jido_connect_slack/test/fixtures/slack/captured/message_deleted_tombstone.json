@@ -1,0 +1,17 @@
+{
+  "body": "{\"api_app_id\":\"A0CDHUBBHRC\",\"authorizations\":[{\"enterprise_id\":null,\"is_bot\":true,\"is_enterprise_install\":false,\"team_id\":\"T0CEE692400\",\"user_id\":\"U0CDHUEBVEJ\"}],\"context_enterprise_id\":null,\"context_team_id\":\"T0CEE692400\",\"event\":{\"channel\":\"C0CEEB41FU0\",\"channel_type\":\"channel\",\"deleted_ts\":\"1793637515.439379\",\"event_ts\":\"1793637559.000400\",\"hidden\":true,\"previous_message\":{\"hidden\":true,\"is_locked\":false,\"latest_reply\":\"0000000000.000000\",\"parent_user_id\":\"USLACKBOT\",\"reply_count\":0,\"reply_users\":[],\"reply_users_count\":0,\"subscribed\":false,\"subtype\":\"tombstone\",\"text\":\"This message was deleted.\",\"thread_ts\":\"1793637515.439379\",\"ts\":\"1793637515.439379\",\"type\":\"message\",\"user\":\"USLACKBOT\"},\"subtype\":\"message_deleted\",\"ts\":\"1793637559.000400\",\"type\":\"message\"},\"event_context\":\"4-eyJldCI6Im1lc3NhZ2UiLCJ0aWQiOiJUMENFRTY5MjQwMCIsImFpZCI6IkEwQ0RIVUJCSFJDIiwiY2lkIjoiQzBDRUVCNDFGVTAifQ\",\"event_id\":\"Ev0CE0DCKK5Z\",\"event_time\":1793637559,\"is_ext_shared_channel\":false,\"team_id\":\"T0CEE692400\",\"token\":\"[redacted]\",\"type\":\"event_callback\"}",
+  "captured_at": 1793637559,
+  "headers": {
+    "accept": "*/*",
+    "accept-encoding": "gzip,deflate",
+    "content-length": "1057",
+    "content-type": "application/json",
+    "host": "example.ngrok-free.dev",
+    "user-agent": "Slackbot 1.0 (+https://api.slack.com/robots)",
+    "x-slack-request-timestamp": "1793637559",
+    "x-slack-signature": "v0=34b70565f8d3347f9fb1e94d7aae025f8d039675b3b094290b75e3b9c06178bc"
+  },
+  "method": "POST",
+  "path": "/integrations/slack/events",
+  "provider": "slack"
+}

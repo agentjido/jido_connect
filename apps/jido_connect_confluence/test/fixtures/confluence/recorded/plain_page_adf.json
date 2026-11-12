@@ -1,0 +1,104 @@
+{
+  "body": {
+    "_links": {
+      "base": "https://example.atlassian.net/wiki",
+      "editui": "/pages/resumedraft.action?draftId=3754688664",
+      "edituiv2": "/spaces/JCL/pages/edit-v2/3754688664",
+      "tinyui": "/x/mADM3w",
+      "webui": "/spaces/JCL/pages/3754688664/JCL+plain+page"
+    },
+    "authorId": "account-1",
+    "body": {
+      "atlas_doc_format": {
+        "representation": "atlas_doc_format",
+        "value": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"level\":2},\"content\":[{\"text\":\"Plain live-test page\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"This page holds only content the ADF projection supports: headings, paragraphs, \",\"type\":\"text\"},{\"text\":\"bold\",\"type\":\"text\",\"marks\":[{\"type\":\"strong\"}]},{\"text\":\", \",\"type\":\"text\"},{\"text\":\"italic\",\"type\":\"text\",\"marks\":[{\"type\":\"em\"}]},{\"text\":\", \",\"type\":\"text\"},{\"text\":\"code\",\"type\":\"text\",\"marks\":[{\"type\":\"code\"}]},{\"text\":\" and a \",\"type\":\"text\"},{\"text\":\"link\",\"type\":\"text\",\"marks\":[{\"type\":\"link\",\"attrs\":{\"href\":\"https://example.com/jcl\"}}]},{\"text\":\".\",\"type\":\"text\"}]},{\"type\":\"bulletList\",\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"First list item\",\"type\":\"text\"}]}]},{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"Second list item with Umlaute äöü\",\"type\":\"text\"}]}]}]},{\"type\":\"orderedList\",\"attrs\":{\"order\":1},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"Step one\",\"type\":\"text\"}]}]},{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"content\":[{\"text\":\"Step two\",\"type\":\"text\"}]}]}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 01 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 02 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 03 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 04 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 05 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 06 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 07 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 08 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 09 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 10 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 11 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]},{\"type\":\"paragraph\",\"content\":[{\"text\":\"Line 12 of the long live-test text for the plain page: Umlaute äöü ß, Euro €, Dash –.\",\"type\":\"text\"}]}],\"version\":1}"
+      }
+    },
+    "createdAt": "2026-10-30T19:18:25.645Z",
+    "id": "3754688664",
+    "lastOwnerId": null,
+    "ownerId": "account-1",
+    "parentId": "3754655880",
+    "parentType": "page",
+    "position": 199,
+    "spaceId": "3754655746",
+    "status": "current",
+    "title": "JCL plain page",
+    "version": {
+      "authorId": "account-1",
+      "createdAt": "2026-10-30T19:18:25.645Z",
+      "message": "",
+      "minorEdit": false,
+      "ncsStepVersion": "1",
+      "number": 1
+    }
+  },
+  "headers": {
+    "atl-request-id": [
+      "9242154f-5c2c-4c25-8a82-73880033278a"
+    ],
+    "atl-traceid": [
+      "9242154f5c2c4c258a8273880033278a"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 13:42:08 GMT"
+    ],
+    "link": [
+      "<https://example.atlassian.net/wiki>; rel=\"base\""
+    ],
+    "nel": [
+      "{\"failure_fraction\": 0.01, \"include_subdomains\": true, \"max_age\": 600, \"report_to\": \"endpoint-1\"}"
+    ],
+    "report-to": [
+      "{\"endpoints\": [{\"url\": \"https://dz8aopenkvv6s.cloudfront.net\"}], \"group\": \"endpoint-1\", \"include_subdomains\": true, \"max_age\": 600}"
+    ],
+    "reporting-endpoints": [
+      "default=\"https://dz8aopenkvv6s.cloudfront.net\""
+    ],
+    "server": [
+      "AtlassianEdge"
+    ],
+    "server-timing": [
+      "cdn-upstream-layer;desc=\"EDGE\",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=122,atl-edge;dur=101,atl-edge-internal;dur=15,atl-edge-upstream;dur=86,atl-edge-pop;desc=\"aws-eu-west-1\",cdn-cache-miss,cdn-pop;desc=\"FRA60-P2\",cdn-rid;desc=\"63KkoxXJRLJsi0OW5b8PSg_hbBTxlYQeqcXXx_tXtDp02CYFfKM-kQ==\",cdn-downstream-fbl;dur=127"
+    ],
+    "strict-transport-security": [
+      "max-age=63072000; includeSubDomains; preload"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Accept-Encoding,Accept-Encoding"
+    ],
+    "via": [
+      "1.1 b3bfeb8eb7405a05775de8861a4d117c.cloudfront.net (CloudFront)"
+    ],
+    "x-amz-cf-id": [
+      "63KkoxXJRLJsi0OW5b8PSg_hbBTxlYQeqcXXx_tXtDp02CYFfKM-kQ=="
+    ],
+    "x-cache": [
+      "Miss from cloudfront"
+    ],
+    "x-confluence-request-time": [
+      "1793626928464"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-xss-protection": [
+      "1; mode=block"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/wiki/api/v2/pages/3754688664"
+  },
+  "status": 200
+}

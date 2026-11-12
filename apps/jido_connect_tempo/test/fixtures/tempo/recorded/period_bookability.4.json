@@ -1,0 +1,55 @@
+{
+  "body": {
+    "actions": {
+      "submit": {
+        "self": "https://api.tempo.io/4/timesheet-approvals/user/account-2/submit?from=2026-10-01&to=2026-10-31"
+      }
+    },
+    "period": {
+      "from": "2026-10-01",
+      "to": "2026-10-31"
+    },
+    "requiredSeconds": 633600,
+    "self": "https://api.tempo.io/4/timesheet-approvals/user/account-2?from=2026-10-01&to=2026-10-31",
+    "status": {
+      "key": "OPEN"
+    },
+    "timeSpentSeconds": 33436,
+    "user": {
+      "accountId": "account-2",
+      "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-2"
+    },
+    "worklogs": {
+      "self": "https://api.tempo.io/4/worklogs/user/account-2?from=2026-10-01&to=2026-10-31"
+    }
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "723"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 17:29:23 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "d6d6db1a5889ce5257c5e35036751272"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/timesheet-approvals/user/account-2"
+  },
+  "status": 200
+}

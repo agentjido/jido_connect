@@ -1,4 +1,8 @@
-ExUnit.start()
+ExUnit.start(exclude: [:live_smoke])
+
+unless Code.ensure_loaded?(Jido.Connect.TestSupport.LiveSmoke) do
+  Code.require_file("../../jido_connect/test/support/live_smoke.ex", __DIR__)
+end
 
 defmodule Jido.Connect.Jira.TestRuntime do
   @moduledoc false
@@ -46,6 +50,30 @@ defmodule Jido.Connect.Jira.TestRuntime do
   end
 end
 
+defmodule Jido.Connect.Jira.CapturedDelivery do
+  @moduledoc false
+
+  # Sanitized administrator webhook deliveries from the live test site, written
+  # to test/fixtures/jira/captured by the live smoke test with
+  # JIDO_CONNECT_RECORD=1. They are signed with `LiveSmoke.replay_secret/0`.
+
+  @dir Path.expand("fixtures/jira/captured", __DIR__)
+
+  def path(name), do: Path.join(@dir, "#{name}.json")
+
+  def capture!(name), do: name |> path() |> File.read!() |> Jason.decode!()
+
+  def payload!(name), do: name |> capture!() |> Map.fetch!("body") |> Jason.decode!()
+
+  def names do
+    @dir
+    |> Path.join("*.json")
+    |> Path.wildcard()
+    |> Enum.map(&Path.basename(&1, ".json"))
+    |> Enum.sort()
+  end
+end
+
 defmodule Jido.Connect.Jira.MockClient do
   @moduledoc false
 
@@ -84,10 +112,9 @@ defmodule Jido.Connect.Jira.MockClient do
            updated_at: "2026-05-15T12:00:00.000+0000"
          }
        ],
-       total: 1,
-       start_at: Keyword.get(opts, :start_at, 0),
-       max_results: Keyword.get(opts, :max_results, 50),
-       is_last: true
+       next_page_token: if(Keyword.get(opts, :next_page_token), do: nil, else: "page-2"),
+       is_last: Keyword.get(opts, :next_page_token) != nil,
+       max_results: Keyword.get(opts, :max_results, 50)
      }}
   end
 

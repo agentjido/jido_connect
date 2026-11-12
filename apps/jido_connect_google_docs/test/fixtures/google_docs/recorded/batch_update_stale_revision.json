@@ -1,0 +1,52 @@
+{
+  "body": {
+    "error": {
+      "code": 400,
+      "message": "The required revision ID 'AHj4eMQUtoRaEePTo0G5Hk8twUBxjwhTk6wXnAgjZxml46gHjFEe26cE1qlQCqTO7Au0twNvcn2zqCL1I-xVIyk33acnT_bvvjdDcug7MQM' does not match the latest revision.",
+      "status": "INVALID_ARGUMENT"
+    }
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 12:40:58 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-l2-request-path": [
+      "l2-managed-5"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/v1/documents/1t47PcdwCWroHLmzucoB5YxoFZRyUD9a8dymU8ju-pwE:batchUpdate"
+  },
+  "status": 400
+}

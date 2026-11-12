@@ -15,6 +15,13 @@ defmodule Jido.Connect.Slack.Client.Params do
     |> Data.compact()
   end
 
+  # `conversation_type` selects the scope and the output; Slack never sees it.
+  def conversation_history_params(params) do
+    params
+    |> Map.take([:channel, :cursor, :oldest, :latest, :inclusive, :limit])
+    |> Data.compact()
+  end
+
   def search_messages_params(params) do
     search_params(params)
   end

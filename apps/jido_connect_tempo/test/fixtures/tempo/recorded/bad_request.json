@@ -1,0 +1,39 @@
+{
+  "body": {
+    "errors": [
+      {
+        "message": "Non valid date 'not-a-date': format must be yyyy-MM-dd"
+      }
+    ]
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store",
+      "no-cache, no-store, no-transform"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "81"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 07:39:47 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "d02b707c042602600c39d202ccdd714a"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/periods"
+  },
+  "status": 400
+}

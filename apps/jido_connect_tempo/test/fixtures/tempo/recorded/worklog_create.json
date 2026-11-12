@@ -1,0 +1,55 @@
+{
+  "body": {
+    "attributes": {
+      "self": "https://api.tempo.io/4/worklogs/79177/work-attribute-values",
+      "values": []
+    },
+    "author": {
+      "accountId": "account-1",
+      "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+    },
+    "billableSeconds": 3661,
+    "createdAt": "2026-11-02T18:51:30Z",
+    "description": "JCL live create test",
+    "issue": {
+      "id": 46097,
+      "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+    },
+    "self": "https://api.tempo.io/4/worklogs/79177",
+    "startDate": "2026-10-29",
+    "startDateTimeUtc": "2026-10-29T07:15:00Z",
+    "startTime": "08:15:00",
+    "tempoWorklogId": 79177,
+    "timeSpentSeconds": 3661,
+    "updatedAt": "2026-11-02T18:51:30Z"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "668"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 18:51:30 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "3f228c4210e1bd96d07c2159602555eb"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/4/worklogs"
+  },
+  "status": 200
+}

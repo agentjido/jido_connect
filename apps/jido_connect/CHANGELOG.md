@@ -25,6 +25,15 @@
   for the supported legacy lookup, search, and pack adapters.
 - Remove the unpublished `jido_connect_mcp` application after its replacement
   tests and behavior moved into this package.
+- Keep one nesting level more of `normalized_signal` in
+  `WebhookDelivery.to_public_map/1`: signal values on level 4, such as the
+  fields of an item in a list of the signal, stay instead of becoming
+  `"[truncated]"`. `headers`, `payload` and `metadata` keep four levels. The
+  512-byte and 50-entry limits and the redaction of sensitive keys apply on
+  every level. The extra level applies to the signals of all providers: a
+  GitHub push signal, for example, now shows the name and email of the author
+  and committer of each commit and the `added`, `modified` and `removed` file
+  lists, which a host that stores or logs the public map keeps too.
 
 ## 0.1.0
 

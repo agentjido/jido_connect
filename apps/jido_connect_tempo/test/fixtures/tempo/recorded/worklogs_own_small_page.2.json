@@ -1,0 +1,91 @@
+{
+  "body": {
+    "metadata": {
+      "count": 2,
+      "limit": 2,
+      "next": "https://api.tempo.io/4/worklogs/user/account-1?from=2026-10-01&to=2026-10-01&offset=4&limit=2",
+      "offset": 2,
+      "previous": "https://api.tempo.io/4/worklogs/user/account-1?from=2026-10-01&to=2026-10-01&offset=0&limit=2"
+    },
+    "results": [
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79100/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 600,
+        "createdAt": "2026-10-30T19:19:09Z",
+        "description": "Working on work item JCL-2",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79100",
+        "startDate": "2026-10-01",
+        "startDateTimeUtc": "2026-10-01T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79100,
+        "timeSpentSeconds": 600,
+        "updatedAt": "2026-10-30T19:19:09Z"
+      },
+      {
+        "attributes": {
+          "self": "https://api.tempo.io/4/worklogs/79101/work-attribute-values",
+          "values": []
+        },
+        "author": {
+          "accountId": "account-1",
+          "self": "https://example.atlassian.net/rest/api/2/user?accountId=account-1"
+        },
+        "billableSeconds": 0,
+        "createdAt": "2026-10-30T19:19:10Z",
+        "description": "JCL live seed worklog: zero billable seconds",
+        "issue": {
+          "id": 46097,
+          "self": "https://example.atlassian.net/rest/api/2/issue/46097"
+        },
+        "self": "https://api.tempo.io/4/worklogs/79101",
+        "startDate": "2026-10-01",
+        "startDateTimeUtc": "2026-10-01T07:00:00Z",
+        "startTime": "09:00:00",
+        "tempoWorklogId": 79101,
+        "timeSpentSeconds": 900,
+        "updatedAt": "2026-10-30T19:19:10Z"
+      }
+    ],
+    "self": "https://api.tempo.io/4/worklogs/user/account-1?from=2026-10-01&to=2026-10-01&offset=2&limit=2"
+  },
+  "headers": {
+    "cache-control": [
+      "no-cache, no-store"
+    ],
+    "connection": [
+      "keep-alive"
+    ],
+    "content-length": [
+      "1834"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 15:53:57 GMT"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubdomains"
+    ],
+    "tempo-request-id": [
+      "f458dac5393d0bebe22d08a141bdcf9a"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/4/worklogs/user/account-1"
+  },
+  "status": 200
+}

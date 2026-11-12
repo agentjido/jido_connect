@@ -77,6 +77,14 @@ defmodule Jido.Connect.Confluence.Actions.Pages do
           minimum: 1,
           maximum: @maximum_max_characters
         )
+
+        field(:on_unsupported, :string,
+          enum: ["fail", "degrade"],
+          default: "fail",
+          description:
+            "ADF content outside the supported subset: \"fail\" fails the read, " <>
+              "\"degrade\" returns the supported text and lists the skipped types."
+        )
       end
 
       output do
@@ -87,9 +95,15 @@ defmodule Jido.Connect.Confluence.Actions.Pages do
         field(:revision_id, :string)
         field(:version, :integer)
         field(:space_id, :string)
+        field(:url, :string, description: "Tenant URL of the page in the Confluence web UI.")
         field(:text, :string)
         field(:character_count, :integer)
         field(:truncated, :boolean)
+
+        field(:unsupported_nodes, {:array, :string},
+          description:
+            "ADF node and mark types skipped in degrade mode, each once, in document order."
+        )
       end
     end
 

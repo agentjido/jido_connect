@@ -6,7 +6,13 @@ defmodule Jido.Connect.Google.Docs.Client.Response do
 
   def handle_document_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
-    Normalizer.document(body)
+    case Normalizer.document(body) do
+      {:ok, document} ->
+        {:ok, document}
+
+      {:error, _error} ->
+        Transport.invalid_success_response("Google Docs document response was invalid", body)
+    end
   end
 
   def handle_document_response({:ok, %{status: status, body: body}})
@@ -18,7 +24,13 @@ defmodule Jido.Connect.Google.Docs.Client.Response do
 
   def handle_batch_update_response({:ok, %{status: status, body: body}})
       when status in 200..299 and is_map(body) do
-    Normalizer.batch_update_result(body)
+    case Normalizer.batch_update_result(body) do
+      {:ok, result} ->
+        {:ok, result}
+
+      {:error, _error} ->
+        Transport.invalid_success_response("Google Docs batch update response was invalid", body)
+    end
   end
 
   def handle_batch_update_response({:ok, %{status: status, body: body}})
