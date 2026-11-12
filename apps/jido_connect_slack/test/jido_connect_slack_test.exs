@@ -207,12 +207,12 @@ defmodule Jido.Connect.SlackTest do
        }}
     end
 
-    def get_conversation_info(%{channel: "GMP123"}, "token") do
+    def get_conversation_info(%{channel: "CMP123"}, "token") do
       {:ok,
        %{
-         channel: "GMP123",
+         channel: "CMP123",
          conversation: %{
-           "id" => "GMP123",
+           "id" => "CMP123",
            "is_mpim" => true,
            "name" => "mpdm-user-1--user-2-1"
          }
@@ -2566,7 +2566,7 @@ defmodule Jido.Connect.SlackTest do
               missing_scopes: ["mpim:read"]
             }} =
              Jido.Connect.Slack.Actions.GetConversationInfo.run(
-               %{channel: "GMP123", conversation_type: "mpim"},
+               %{channel: "CMP123", conversation_type: "mpim"},
                %{integration_context: context, credential_lease: lease}
              )
 
@@ -2590,9 +2590,9 @@ defmodule Jido.Connect.SlackTest do
                %{integration_context: expanded_context, credential_lease: lease}
              )
 
-    assert {:ok, %{channel: "GMP123", conversation: %{"is_mpim" => true}}} =
+    assert {:ok, %{channel: "CMP123", conversation: %{"is_mpim" => true}}} =
              Jido.Connect.Slack.Actions.GetConversationInfo.run(
-               %{channel: "GMP123", conversation_type: "mpim"},
+               %{channel: "CMP123", conversation_type: "mpim"},
                %{integration_context: expanded_context, credential_lease: lease}
              )
   end
@@ -2691,6 +2691,21 @@ defmodule Jido.Connect.SlackTest do
              Jido.Connect.Slack.Actions.ArchiveChannel.run(
                %{channel: "G999"},
                %{integration_context: no_manage_context, credential_lease: lease}
+             )
+
+    public_manage_context = %{
+      context
+      | connection: %{context.connection | scopes: context.connection.scopes -- ["groups:write"]}
+    }
+
+    assert {:error,
+            %Connect.Error.AuthError{
+              reason: :missing_scopes,
+              missing_scopes: ["groups:write"]
+            }} =
+             Jido.Connect.Slack.Actions.ArchiveChannel.run(
+               %{channel: "G999", conversation_type: "public_channel"},
+               %{integration_context: public_manage_context, credential_lease: lease}
              )
 
     assert {:ok, %{channel: "G999"}} =

@@ -6,6 +6,11 @@ defmodule Jido.Connect.Slack.ScopeResolver do
   conversation types, so the static DSL scopes represent the default public
   channel case and this resolver tightens checks for private channels, DMs, and
   multi-person DMs. Slack history reads use the same conversation distinctions.
+
+  A supplied `conversation_type` never lowers the scope that the channel ID or
+  the participant set requires. It decides only where they leave the
+  conversation type open: for `C` IDs, which Slack gives to public channels,
+  private channels and group DMs, and when no channel is given.
   """
 
   @conversation_type_scopes %{
@@ -212,9 +217,23 @@ defmodule Jido.Connect.Slack.ScopeResolver do
     end
   end
 
+  # A G ID is checked as a private channel, also when it belongs to a legacy
+  # group DM, and a D ID as a DM. A C ID is never a DM.
   defp requested_conversation_type(input) do
+    supplied = supplied_conversation_type(input)
+
+    case Map.get(input, :channel, Map.get(input, "channel")) do
+      "G" <> _rest -> "private_channel"
+      "D" <> _rest -> "im"
+      nil -> supplied || "public_channel"
+      _channel when supplied in ["private_channel", "mpim"] -> supplied
+      _channel -> "public_channel"
+    end
+  end
+
+  defp supplied_conversation_type(input) do
     case Map.get(input, :conversation_type, Map.get(input, "conversation_type")) do
-      nil -> type_from_channel(Map.get(input, :channel, Map.get(input, "channel")))
+      nil -> nil
       type -> type |> to_string() |> String.trim()
     end
   end
@@ -227,20 +246,15 @@ defmodule Jido.Connect.Slack.ScopeResolver do
     Map.get(input, :is_private, Map.get(input, "is_private", false)) == true
   end
 
+  # Several users or a G ID open a group DM, one user or a D ID a DM.
   defp requested_open_conversation_type(input) do
-    case Map.get(input, :conversation_type, Map.get(input, "conversation_type")) do
-      nil -> open_type_from_input(input)
-      type -> type |> to_string() |> String.trim()
-    end
-  end
-
-  defp open_type_from_input(input) do
-    users = Map.get(input, :users, Map.get(input, "users"))
+    users = user_count(Map.get(input, :users, Map.get(input, "users")))
     channel = Map.get(input, :channel, Map.get(input, "channel"))
 
     cond do
-      user_count(users) > 1 -> "mpim"
-      match?("G" <> _rest, channel) -> "mpim"
+      users > 1 or match?("G" <> _rest, channel) -> "mpim"
+      users == 1 or match?("D" <> _rest, channel) -> "im"
+      supplied_conversation_type(input) == "mpim" -> "mpim"
       true -> "im"
     end
   end
@@ -258,9 +272,4 @@ defmodule Jido.Connect.Slack.ScopeResolver do
   defp conversation_write_scope(type) do
     Map.get(@conversation_write_scopes, type, "im:write")
   end
-
-  defp type_from_channel("C" <> _rest), do: "public_channel"
-  defp type_from_channel("G" <> _rest), do: "private_channel"
-  defp type_from_channel("D" <> _rest), do: "im"
-  defp type_from_channel(_channel), do: "public_channel"
 end
