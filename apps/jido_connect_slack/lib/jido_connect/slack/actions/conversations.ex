@@ -103,7 +103,7 @@ defmodule Jido.Connect.Slack.Actions.Conversations do
           required?: true,
           enum: @conversation_types,
           description:
-            "Slack conversation type of the channel; selects the history scope and is not sent to Slack."
+            "Slack conversation type of the channel; selects the history scope where the channel ID leaves the type open, and is not sent to Slack."
 
         field :cursor, :string, description: "next_cursor of the previous page."
         field :oldest, :string, description: "Only messages after this Slack timestamp."
@@ -354,7 +354,7 @@ defmodule Jido.Connect.Slack.Actions.Conversations do
         field :conversation_type, :string,
           enum: ["im", "mpim"],
           description:
-            "Slack conversation type to open or resume, for the scope check only; not sent to Slack. mpim needs mpim:write, also for a C channel ID. Several users or a G channel ID need mpim:write even with im."
+            "Slack conversation type to open or resume, for the scope check only; not sent to Slack. A G channel ID needs mpim:write and a D channel ID im:write, whatever the users and the type. Otherwise several users need mpim:write and one user without a channel im:write; for a C channel ID or no target, mpim needs mpim:write."
 
         field :return_im, :boolean, default: false
         field :prevent_creation, :boolean, default: false

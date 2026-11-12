@@ -152,11 +152,14 @@ Inputs:
 - `channel` and `conversation_type` are required. `conversation_type` is one
   of `public_channel`, `private_channel`, `im` and `mpim`. It selects the
   required scope (`channels:history`, `groups:history`, `im:history` or
-  `mpim:history`) and is not sent to Slack. The package does not infer the
-  type from the channel ID, because Slack gives private channels and group
-  DMs IDs that start with `C`. A tool availability check without a
-  `conversation_type` offers the action to a connection with any one of these
-  scopes; each call still needs the scope of its type.
+  `mpim:history`) where the channel ID leaves the type open, and is not sent
+  to Slack. Slack gives private channels and group DMs IDs that start with
+  `C`, so for a `C` ID the type decides; `im` is checked as `public_channel`
+  there, since a DM never has a `C` ID. A `G` ID always needs
+  `groups:history` and a `D` ID `im:history`, whatever the type. A tool
+  availability check without `channel` and `conversation_type` offers the
+  action to a connection with any one of these scopes; each call still needs
+  the scope of its channel and type.
 - `cursor`, `oldest`, `latest` and `inclusive` (default `false`) go to Slack
   unchanged.
 - `limit` defaults to 100 and must be from 1 through 100. The bound is a
@@ -181,7 +184,8 @@ without `ts` or with a wrongly typed field makes the call fail with
 
 `channel` and `conversation_type` repeat the input. Slack returns no
 conversation type, so `conversation_type` is the caller's unchecked
-declaration and only selects the scope check. A group DM declared as
+declaration and only selects the scope check where the channel ID leaves the
+type open. A group DM declared as
 `public_channel` passes that check with `channels:history`; if the token also
 holds `mpim:history`, which Slack requires, the read succeeds and its messages
 say `public_channel`. Do not base visibility, indexing or policies on this
@@ -200,11 +204,11 @@ Inputs:
 - `conversation_type` is optional and takes `public_channel`,
   `private_channel`, `im` or `mpim`. It only selects the required scope
   (`channels:history`, `groups:history`, `im:history` or `mpim:history`) and
-  is not sent to Slack. The action does not reject other values; they fall
-  back to `channels:history`. Without it, the channel ID decides: a `G` ID
-  needs `groups:history`, a `D` ID `im:history` and every other ID
-  `channels:history`. Private channels and group DMs can carry `C` IDs, so
-  pass the type for them.
+  is not sent to Slack. The channel ID decides where it can: a `G` ID needs
+  `groups:history` and a `D` ID `im:history`, whatever the type. Any other ID
+  needs `channels:history` unless the type is `private_channel` or `mpim`.
+  Private channels and group DMs can carry `C` IDs, so pass the type for
+  them. The action does not reject other values; they count as no type.
 - `cursor`, `oldest`, `latest` and `inclusive` (default `false`) go to Slack
   unchanged. `limit` defaults to 100.
 
@@ -255,13 +259,18 @@ no `blocks` key.
 `slack.conversation.open` sends `users` to Slack `conversations.open` as a
 comma-separated list and returns the conversation ID as `channel`, the target
 for `slack.message.post`. One user opens the DM with the bot and needs
-`im:write`; several users open a group DM and need `mpim:write`. A
-conversation resumed by `channel` needs `mpim:write` for a `G` ID and
-`im:write` for any other ID. Slack gives group DMs `C` IDs too, like the one
+`im:write`; several users open a group DM and need `mpim:write`. Slack
+resumes `channel` when it is given, also next to `users`. A conversation
+resumed by `channel` needs `mpim:write` for a `G` ID, `im:write` for a `D` ID
+and, for any other ID, `im:write` unless several users are passed or
+`conversation_type` is `mpim`. Slack gives group DMs `C` IDs too, like the one
 in this package's recordings, so resume such a group DM with
 `conversation_type: "mpim"`, which needs `mpim:write`. `conversation_type`
-takes `im` or `mpim`, is not sent to Slack and can only raise the check:
-with `im`, several `users` or a `G` ID still need `mpim:write`. The action
+takes `im` or `mpim`, is not sent to Slack and cannot override the users or
+the channel ID: a `G` ID needs `mpim:write` and a `D` ID `im:write` whatever
+the users, and otherwise several users need `mpim:write` and one user without
+a channel `im:write`, whatever the type. An empty `channel` counts as none.
+The action
 takes its client from a context `provider_client`, then from the lease's
 `slack_client`, then `Jido.Connect.Slack.Client`, so a lease with only an
 `access_token` works.

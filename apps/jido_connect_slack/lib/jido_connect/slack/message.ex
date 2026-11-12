@@ -5,7 +5,8 @@ defmodule Jido.Connect.Slack.Message do
   `channel` is the channel ID the page was requested for. `conversation_type`
   is the type the caller declared in the request, copied unchecked: Slack
   returns no type, and the package uses the declared one only to choose the
-  history scope it checks before the call. It is not sent to Slack. A group
+  history scope it checks before the call, where the channel ID leaves the
+  type open. It is not sent to Slack. A group
   DM declared as `public_channel` passes that check with `channels:history`;
   if the token also holds `mpim:history`, which Slack requires, the read
   succeeds and each message carries `conversation_type: "public_channel"`.

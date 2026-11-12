@@ -183,14 +183,19 @@ defmodule Jido.Connect.Slack.DeliveryTest do
              }
     end
 
-    # conversation_type can only raise the check: several users or a G ID
-    # mean a group DM, whatever type the caller declares.
-    test "conversation_type im does not lower the scope that several users or a G ID need" do
+    # Several users or a G ID mean a group DM, one user or a D ID a DM,
+    # whatever type the caller declares.
+    test "conversation_type does not change the scope that the users or the channel ID need" do
       cases = [
         {%{users: [@authorizing_user, @second_user], conversation_type: "im"}, "mpim:write"},
+        {%{users: ["#{@authorizing_user},#{@second_user}"], conversation_type: "im"},
+         "mpim:write"},
         {%{channel: "G0CDELYPYKF", conversation_type: "im"}, "mpim:write"},
         {%{channel: "G0CDELYPYKF"}, "mpim:write"},
         {%{users: [@authorizing_user], conversation_type: "im"}, "im:write"},
+        {%{users: [@authorizing_user], conversation_type: "mpim"}, "im:write"},
+        {%{channel: "", users: [@authorizing_user], conversation_type: "mpim"}, "im:write"},
+        {%{channel: @dm, conversation_type: "mpim"}, "im:write"},
         {%{channel: @mpim}, "im:write"}
       ]
 

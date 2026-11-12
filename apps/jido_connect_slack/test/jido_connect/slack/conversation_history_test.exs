@@ -15,6 +15,15 @@ defmodule Jido.Connect.Slack.ConversationHistoryTest do
     "mpim" => "mpim:history"
   }
 
+  # A channel of each type in the test workspace: Slack gives the private
+  # channel and the group DM C IDs, the DM a D ID.
+  @channels %{
+    "public_channel" => @channel,
+    "private_channel" => "C0CD4JEJ9V5",
+    "im" => "D0CD4G48UFR",
+    "mpim" => "C0CDELYPYKF"
+  }
+
   setup {Req.Test, :verify_on_exit!}
 
   setup do
@@ -131,7 +140,7 @@ defmodule Jido.Connect.Slack.ConversationHistoryTest do
 
   test "each conversation type needs only its history scope, with either profile" do
     for profile <- [:bot, :user], {type, scope} <- @history_scopes do
-      input = %{channel: @channel, conversation_type: type}
+      input = %{channel: @channels[type], conversation_type: type}
 
       assert {:ok, %{messages: []}} =
                Connect.invoke(Jido.Connect.Slack, @action_id, input, runtime(profile, [scope]))
@@ -152,7 +161,7 @@ defmodule Jido.Connect.Slack.ConversationHistoryTest do
     end
   end
 
-  test "the scope resolver maps the declared type in both operation-ID forms" do
+  test "without a channel, the scope resolver maps the declared type in both operation-ID forms" do
     for {type, scope} <- @history_scopes, key <- [:id, :action_id] do
       assert ScopeResolver.required_scopes(%{key => @action_id}, %{conversation_type: type}, nil) ==
                [scope]
@@ -164,23 +173,40 @@ defmodule Jido.Connect.Slack.ConversationHistoryTest do
              ) == [scope]
     end
 
-    # The declared type decides, not the channel prefix: Slack gives private
-    # channels and group DMs C IDs, and G IDs can be either.
-    assert ScopeResolver.required_scopes(
-             %{id: @action_id},
-             %{channel: "C0CDELYPYKF", conversation_type: "mpim"},
-             nil
-           ) == ["mpim:history"]
-
-    assert ScopeResolver.required_scopes(
-             %{id: @action_id},
-             %{channel: "G123", conversation_type: "mpim"},
-             nil
-           ) == ["mpim:history"]
-
     # Availability checks run without input: without a connection, the static
     # scope applies.
     assert ScopeResolver.required_scopes(%{id: @action_id}, %{}, nil) == ["channels:history"]
+  end
+
+  test "a declared type does not change the scope that a G or D channel ID needs" do
+    input = %{channel: "D0CD4G48UFR", conversation_type: "public_channel"}
+
+    assert {:error,
+            %Connect.Error.AuthError{reason: :missing_scopes, missing_scopes: ["im:history"]}} =
+             Connect.invoke(
+               Jido.Connect.Slack,
+               @action_id,
+               input,
+               runtime(:bot, ["channels:history"])
+             )
+
+    refute_received {:slack_request, _query}
+  end
+
+  test "any held history scope is enough only without a channel and a type" do
+    connection = context(:user, ["im:history"]).connection
+
+    assert ScopeResolver.required_scopes(%{id: @action_id}, %{}, connection) == ["im:history"]
+
+    for {input, scope} <- [
+          {%{channel: @channel}, "channels:history"},
+          {%{channel: "G0123"}, "groups:history"},
+          {%{channel: "D0123"}, "im:history"},
+          {%{conversation_type: "mpim"}, "mpim:history"}
+        ] do
+      assert {input, ScopeResolver.required_scopes(%{id: @action_id}, input, connection)} ==
+               {input, [scope]}
+    end
   end
 
   test "the tool is offered to a connection with any one history scope" do
