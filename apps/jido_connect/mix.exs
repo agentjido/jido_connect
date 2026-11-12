@@ -94,10 +94,15 @@ defmodule JidoConnectCore.MixProject do
       main: "readme",
       extras: [
         "README.md",
-        "guides/mcp_bridge.md",
+        "guides/architecture.md",
         "guides/authoring_connector.md",
+        "guides/catalog_packs.md",
+        "guides/generated_jido_modules.md",
+        "guides/host_owned_storage.md",
+        "guides/mcp_bridge.md",
         "CHANGELOG.md"
       ],
+      groups_for_extras: [Guides: ~r/guides\//],
       source_ref: "release/3.0"
     ]
   end

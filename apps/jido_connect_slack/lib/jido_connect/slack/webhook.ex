@@ -5,9 +5,16 @@ defmodule Jido.Connect.Slack.Webhook do
 
   alias Jido.Connect.Slack.Webhook.{Normalizer, Verification}
 
+  @doc "Normalizes request headers into a lower-case map."
   defdelegate parse_headers(headers), to: Verification
+
+  @doc "Verifies a Slack request signature and timestamp."
   defdelegate verify_signature(body, headers, signing_secret, opts \\ []), to: Verification
+
+  @doc "Verifies and decodes a Slack request."
   defdelegate verify_request(body, headers, signing_secret, opts \\ []), to: Verification
+
+  @doc "Verifies a Slack request and returns a normalized delivery."
   defdelegate verify_delivery(body, headers, signing_secret, opts \\ []), to: Verification
 
   def url_verification_challenge(%{"type" => "url_verification", "challenge" => challenge})
@@ -23,7 +30,12 @@ defmodule Jido.Connect.Slack.Webhook do
      )}
   end
 
+  @doc "Normalizes a verified Slack delivery into a signal map."
   defdelegate normalize_signal(delivery), to: Normalizer
+
+  @doc "Normalizes a Slack event and payload into a signal map."
   defdelegate normalize_signal(event, payload), to: Normalizer
+
+  @doc "Normalizes a Slack event payload."
   defdelegate normalize_event(payload), to: Normalizer
 end

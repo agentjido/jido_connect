@@ -1,4 +1,4 @@
-# Slack Auth And Webhooks
+# Slack Authentication and Webhooks
 
 `jido_connect_slack` currently ships the provider package slice: generated Jido
 actions, OAuth helpers, Web API client helpers, and signed request helpers. The

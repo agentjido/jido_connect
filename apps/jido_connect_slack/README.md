@@ -14,6 +14,9 @@ It includes:
 The Spark DSL declaration lives in `lib/jido_connect/slack/integration.ex`.
 Provider handlers live under `lib/jido_connect/slack/handlers/`.
 
+See [Authentication and Webhooks](guides/auth_and_webhooks.md) for Slack app
+and host setup.
+
 ## Installation
 
 ```elixir

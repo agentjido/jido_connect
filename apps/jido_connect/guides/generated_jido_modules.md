@@ -19,12 +19,14 @@ them through `Jido.Exec.run/4`. Set an explicit timeout when the host requires
 one; Action v3 does not supply the old 30-second default.
 
 Generated `.Plugin` modules expose Connect discovery through `actions/1`,
-`subscriptions/2`, and `tool_availability/1`. `plugin_spec/1` returns a plain Connect map with `module`, `name`, and
-`actions`; it does not return `Jido.Plugin.Spec`. Do not register these metadata
-modules as v3 Agent Plugins. The host must declare its v3 Agent routes, schedule polling, and pass current execution
-context. `Jido.Connect.Catalog.Plugin` is the runtime Plugin for catalog
-configuration. It does not install routes or inject credentials. Catalog routes
-are available as suggestions from `Jido.Connect.Catalog.Plugin.signal_routes/1`.
+`subscriptions/2`, and `tool_availability/1`. `plugin_spec/1` returns a plain
+Connect map with `module`, `name`, and `actions`; it does not return the old
+Jido plugin specification. Do not register these metadata modules as v3 Agent
+Plugins. The host must declare its v3 Agent routes, schedule polling, and pass
+current execution context. `Jido.Connect.Catalog.Plugin` is the runtime Plugin
+for catalog configuration. It does not install routes or inject credentials.
+Catalog routes are available as suggestions from
+`Jido.Connect.Catalog.Plugin.signal_routes/1`.
 
 Sensor modules implement `Jido.Connect.Sensor`. They expose `init/2` and
 `handle_event/2` callbacks without starting a process. The host applies the

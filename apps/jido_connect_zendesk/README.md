@@ -60,8 +60,7 @@ Read scopes are included in both default scope sets. The `write` and
 `tickets:write` scopes are optional for the OAuth2 profile and should be
 requested only when mutation actions are needed.
 
-See [`docs/zendesk_scope_matrix.md`](../../docs/zendesk_scope_matrix.md) for the
-full action-to-scope mapping.
+See [Scopes](guides/scopes.md) for the full action-to-scope mapping.
 
 ## Actions
 

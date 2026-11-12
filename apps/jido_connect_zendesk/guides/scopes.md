@@ -1,4 +1,4 @@
-# Zendesk Scope Matrix
+# Zendesk Scopes
 
 The Zendesk connector treats OAuth scope coverage as action and trigger metadata,
 resolved at runtime by `Jido.Connect.Zendesk.ScopeResolver`.

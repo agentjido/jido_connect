@@ -1,4 +1,4 @@
-# GitHub Auth
+# GitHub Authentication
 
 `jido_connect_github` supports GitHub OAuth Apps and GitHub Apps.
 

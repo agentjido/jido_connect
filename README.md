@@ -4,7 +4,7 @@
 > **This branch is the v3 development line.**
 > `release/2.0` supports Jido v2. `release/3.0` is maintainer development for
 > Jido v3 and uses prerelease dependencies. Do not use the v3 line in a new
-> external application. See [Branch support](docs/branch_support.md).
+> external application.
 
 Jido Connect is an integration framework for Elixir and Jido. It turns service
 APIs into typed Jido actions, sensors, plugins, and catalog tools.
@@ -58,9 +58,9 @@ Every connector uses the same main flow:
 5. The provider handler calls the service API.
 6. The connector returns normalized data or a `Jido.Connect.Error`.
 
-For more detail, see [Architecture](docs/architecture.md),
-[Connector Authoring](docs/authoring_integrations.md),
-[Generated Modules](docs/generated_jido_modules.md), and the
+For more detail, see [Architecture](apps/jido_connect/guides/architecture.md),
+[Connector Authoring](apps/jido_connect/guides/authoring_connector.md),
+[Generated Modules](apps/jido_connect/guides/generated_jido_modules.md), and the
 [MCP Bridge Guide](apps/jido_connect/guides/mcp_bridge.md).
 
 ## Packages
@@ -233,7 +233,8 @@ event, or public payload. Use `Jido.Connect.CredentialLease` for short-lived
 credential material. Use `Jido.Connect.Sanitizer` before data leaves a private
 runtime boundary.
 
-See [Host-owned Storage](docs/host_owned_storage.md) for the full boundary.
+See [Host-owned Storage](apps/jido_connect/guides/host_owned_storage.md) for the
+full boundary.
 
 ## Generated Jido Modules
 
@@ -250,10 +251,10 @@ logic remains in capability-focused clients and handlers.
 
 Start with the authoring guide:
 
-- [Authoring Integrations](docs/authoring_integrations.md)
 - [Connector Authoring Guide](apps/jido_connect/guides/authoring_connector.md)
-- [Generated Jido Modules](docs/generated_jido_modules.md)
-- [Google Connector Conventions](docs/google_connector_conventions.md)
+- [Catalog Packs](apps/jido_connect/guides/catalog_packs.md)
+- [Generated Jido Modules](apps/jido_connect/guides/generated_jido_modules.md)
+- [Google Connector Conventions](apps/jido_connect_google/guides/connector_conventions.md)
 
 A connector normally defines:
 
@@ -312,12 +313,12 @@ the connector README before you run a live test.
 
 ## Dependency Maintenance
 
-GitHub Dependabot monitors Mix, demo, factory, and GitHub Actions dependencies.
+GitHub Dependabot monitors Mix, demo, and GitHub Actions dependencies.
 It opens grouped update pull requests against `main`. Security alerts and
 security update pull requests are enabled for the repository.
 
 Before a release candidate, review dependency advisories and run all quality
-gates. See [Release Checklist](docs/release_checklist.md).
+gates.
 
 ## Repository Layout
 
@@ -325,7 +326,6 @@ gates. See [Release Checklist](docs/release_checklist.md).
 apps/                   Core, foundation, bridge, and connector packages
 config/                 Umbrella configuration
 dev/demo/               Local Phoenix host
-docs/                   Architecture and operation guides
 ```
 
 ## Contributing

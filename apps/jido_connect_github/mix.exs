@@ -83,14 +83,15 @@ defmodule JidoConnectGitHub.MixProject do
         "GitHub" => "https://github.com/agentjido/jido_connect",
         "Docs" => "https://hexdocs.pm/jido_connect_github"
       },
-      files: ~w(lib mix.exs README.md LICENSE CHANGELOG.md)
+      files: ~w(lib guides mix.exs README.md LICENSE CHANGELOG.md)
     ]
   end
 
   defp docs do
     [
       main: "readme",
-      extras: ["README.md", "CHANGELOG.md"],
+      extras: ["README.md", "guides/auth.md", "guides/webhooks.md", "CHANGELOG.md"],
+      groups_for_extras: [Guides: ~r/guides\//],
       source_ref: "v0.8.0"
     ]
   end

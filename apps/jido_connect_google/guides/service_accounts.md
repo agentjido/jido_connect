@@ -1,4 +1,4 @@
-# ADR: Service Account and Domain-Wide Delegation Boundaries
+# Service Accounts and Domain-Wide Delegation
 
 ## Status
 
@@ -185,24 +185,19 @@ not attempt to automate them.
 - Adding a new auth profile (for example, Workload Identity Federation) follows
   the same pattern: the package adds profile metadata, a connection helper,
   and a lease minting function; the host adds storage and configuration.
-- The boundary is consistent with the existing user OAuth profile, the
-  `host_owned_storage.md` principle, and the watch/checkpoint persistence
-  design.
+- The boundary is consistent with the existing user OAuth profile and the
+  host-owned storage rule.
 
 ## References
 
-- `docs/host_owned_storage.md` — host-owned storage principle.
-- `docs/architecture.md` — package layers and core contracts.
-- `docs/google_connector_conventions.md` — product package conventions.
-- `docs/google_extension_patterns.md` — action and trigger extension guide.
-- `docs/google_watch_checkpoint_persistence.md` — watch/checkpoint design.
-- `apps/jido_connect_google/lib/jido_connect/google/service_account.ex` —
+- The Jido Connect architecture and host-owned storage guides.
+- [Connector Conventions](connector_conventions.md) — product package conventions.
+- [Extension Patterns](extension_patterns.md) — action and trigger extension guide.
+- [`service_account.ex`](../lib/jido_connect/google/service_account.ex) —
   service-account JWT bearer runtime.
-- `apps/jido_connect_google/lib/jido_connect/google/connections.ex` —
+- [`connections.ex`](../lib/jido_connect/google/connections.ex) —
   connection shaping helpers.
-- `apps/jido_connect_google/lib/jido_connect/google/auth_profiles.ex` —
+- [`auth_profiles.ex`](../lib/jido_connect/google/auth_profiles.ex) —
   auth profile metadata.
-- `apps/jido_connect/lib/jido_connect/contracts/credential_lease.ex` —
-  credential lease contract.
-- `apps/jido_connect/lib/jido_connect/contracts/connection.ex` —
-  connection contract.
+- `Jido.Connect.CredentialLease` — credential lease contract.
+- `Jido.Connect.Connection` — connection contract.

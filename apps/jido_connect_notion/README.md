@@ -142,8 +142,8 @@ changes to pages, databases, and blocks, use polling:
 4. **Poll interval**: Balance freshness against API rate limits. Notion
    recommends staying within 3 requests per second for integration tokens.
 
-See `docs/notion_scope_matrix.md` for the full scope/capability matrix and
-least-privilege guidance.
+See [Scopes and Capabilities](guides/scopes_and_capabilities.md) for the full
+scope matrix and least-privilege guidance.
 
 ## API Boundaries
 

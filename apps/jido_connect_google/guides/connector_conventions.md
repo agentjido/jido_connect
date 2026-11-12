@@ -73,5 +73,5 @@ When adding another Google product package:
    resolvers before adding handler tests.
 5. Reuse `Jido.Connect.Google.TestSupport.ConnectorContracts` in the package
    tests to enforce this contract offline.
-6. Follow `docs/google_extension_patterns.md` for client, handler,
+6. Follow [Extension Patterns](extension_patterns.md) for client, handler,
    normalization, scope, catalog, trigger, and checkpoint placement.

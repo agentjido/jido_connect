@@ -32,3 +32,6 @@ Pair it with ngrok from the repo root:
 ```sh
 mix jido.connect.ngrok --port 4000
 ```
+
+See [GitHub end-to-end setup](GITHUB.md) for OAuth, GitHub App, and webhook
+flows.

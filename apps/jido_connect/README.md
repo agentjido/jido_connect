@@ -1,9 +1,7 @@
 # Jido Connect
 
 > This is the `release/3.0` maintainer development line. It follows Jido v3
-> prereleases and is not ready for external adoption. See
-> [branch support](https://github.com/agentjido/jido_connect/blob/release/3.0/docs/branch_support.md)
-> and [the v3 dependency record](https://github.com/agentjido/jido_connect/blob/release/3.0/docs/v3_status.md).
+> prereleases and is not ready for external adoption.
 
 `jido_connect` is the core package for authoring integration providers with a
 Spark DSL and compiling them into concrete Jido actions, sensors, and plugins.
@@ -710,5 +708,5 @@ HTTP, idempotency, and persistence flow. Calling a metadata-only generated
 webhook sensor directly returns a structured execution error instead of silently
 pretending the event was handled.
 
-See the [generated-module contract](https://github.com/agentjido/jido_connect/blob/release/3.0/docs/generated_jido_modules.md)
+See the [generated-module contract](guides/generated_jido_modules.md)
 for the host-owned route, scheduling, and credential boundaries.

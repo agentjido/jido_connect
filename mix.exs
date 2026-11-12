@@ -8,7 +8,6 @@ defmodule JidoConnect.MixProject do
       start_permanent: Mix.env() == :prod,
       name: "Jido Connect",
       source_url: "https://github.com/agentjido/jido_connect",
-      docs: docs(),
       deps: deps(),
       aliases: aliases()
     ]
@@ -37,8 +36,7 @@ defmodule JidoConnect.MixProject do
       {:zoi,
        git: "https://github.com/mikehostetler/zoi.git",
        ref: "2fff2a23e23e7ac0b26f62f49bbc1b12f7818ac9",
-       override: true},
-      {:ex_doc, "~> 0.40", only: :docs, runtime: false}
+       override: true}
     ]
   end
 
@@ -49,39 +47,6 @@ defmodule JidoConnect.MixProject do
         "compile --warnings-as-errors",
         "format --check-formatted",
         "test"
-      ]
-    ]
-  end
-
-  defp docs do
-    [
-      main: "readme",
-      extras: [
-        "README.md",
-        "CHANGELOG.md",
-        "CONTRIBUTING.md",
-        "LICENSE",
-        "usage-rules.md",
-        "apps/jido_connect/guides/authoring_connector.md",
-        "apps/jido_connect/guides/mcp_bridge.md",
-        "docs/architecture.md",
-        "docs/authoring_integrations.md",
-        "docs/catalog_packs.md",
-        "docs/generated_jido_modules.md",
-        "docs/google_connector_conventions.md",
-        "docs/google_extension_patterns.md",
-        "docs/google_polling_checkpoints.md",
-        "docs/google_scope_audit.md",
-        "docs/host_owned_storage.md",
-        "docs/jido_connect_ecosystem_migration.md",
-        "docs/github_auth.md",
-        "docs/github_webhooks.md",
-        "docs/github_end_to_end.md",
-        "docs/slack_auth.md",
-        "docs/release_checklist.md"
-      ],
-      groups_for_extras: [
-        Guides: ~r/docs\/.*/
       ]
     ]
   end

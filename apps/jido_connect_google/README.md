@@ -40,6 +40,15 @@ Most host applications should depend on a product package instead. Pull this
 package directly only when building another Google provider package or custom
 Google connector.
 
+Package guides:
+
+- [Connector Conventions](guides/connector_conventions.md)
+- [Extension Patterns](guides/extension_patterns.md)
+- [Scopes](guides/scopes.md)
+- [Polling Checkpoints](guides/polling_checkpoints.md)
+- [Client Backend](guides/client_backend.md)
+- [Service Accounts](guides/service_accounts.md)
+
 ## Package Shape
 
 Google product packages should keep product-specific endpoint logic in their

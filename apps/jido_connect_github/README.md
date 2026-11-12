@@ -16,6 +16,9 @@ The Spark DSL declaration lives in
 `lib/jido_connect/github/integration.ex`. Provider handlers live under
 `lib/jido_connect/github/handlers/`.
 
+See the [authentication guide](guides/auth.md) and
+[webhook guide](guides/webhooks.md) for host setup.
+
 ## Installation
 
 ```elixir

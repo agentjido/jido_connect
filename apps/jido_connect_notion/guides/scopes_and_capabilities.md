@@ -1,4 +1,4 @@
-# Notion Scope Matrix
+# Notion Scopes and Capabilities
 
 The Notion connector treats OAuth and internal integration token scope coverage
 as action metadata, resolved at runtime by

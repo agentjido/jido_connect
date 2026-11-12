@@ -13,6 +13,10 @@
 # Temporary files, for example, from tests.
 /tmp/
 
+# Local editor and operating-system metadata.
+/.elixir_ls/
+.DS_Store
+
 # If the VM crashes, it generates a dump, let's ignore it too.
 erl_crash.dump
 

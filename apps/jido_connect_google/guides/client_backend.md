@@ -1,15 +1,7 @@
-# ADR: Google Product Client Backend
+# Google Product Client Backend
 
-## Status
-
-Accepted
-
-## Context
-
-Milestone 2 introduces a family of Google connectors. The shared Google
-foundation is intentionally small and provider-neutral within the Google
-ecosystem. Product packages still need HTTP clients for Sheets, Gmail, Drive,
-Calendar, Contacts, Meet, Analytics, and Search Console.
+Google product packages use handwritten Req clients. The shared Google
+foundation stays small and provider-neutral within the Google ecosystem.
 
 The first evaluation slice compared one Sheets read operation:
 
@@ -56,8 +48,3 @@ at a time.
 - Product package tests should assert method, path, query, body, sanitized
   errors, and normalized Zoi structs through Req fixtures.
 
-## Follow-Up
-
-- Completed for 0.8.0: remove the test-only `google_api_sheets` spike and its
-  `google_gax`, Tesla, and Poison dependencies.
-- Use this decision for the initial `jido_connect_google_sheets` package.

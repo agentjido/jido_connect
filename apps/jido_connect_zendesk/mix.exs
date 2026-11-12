@@ -43,9 +43,12 @@ defmodule JidoConnectZendesk.MixProject do
     [
       jido_connect_dep(),
       {:jason, "~> 1.4"},
-      {:plug, "~> 1.20", only: :test},
       {:req, "~> 0.6"}
-    ]
+    ] ++ test_deps()
+  end
+
+  defp test_deps do
+    if Mix.env() == :test, do: [{:plug, "~> 1.20"}], else: []
   end
 
   defp jido_connect_dep do
@@ -82,14 +85,15 @@ defmodule JidoConnectZendesk.MixProject do
         "GitHub" => "https://github.com/agentjido/jido_connect",
         "Docs" => "https://hexdocs.pm/jido_connect_zendesk"
       },
-      files: ~w(lib mix.exs README.md LICENSE CHANGELOG.md)
+      files: ~w(lib guides mix.exs README.md LICENSE CHANGELOG.md)
     ]
   end
 
   defp docs do
     [
       main: "readme",
-      extras: ["README.md", "CHANGELOG.md"],
+      extras: ["README.md", "guides/scopes.md", "CHANGELOG.md"],
+      groups_for_extras: [Guides: ~r/guides\//],
       source_ref: "v0.8.0"
     ]
   end

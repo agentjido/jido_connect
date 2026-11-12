@@ -1,4 +1,4 @@
-# Google Scope Audit
+# Google Scopes
 
 The Google connector family treats OAuth scope coverage as action metadata, not
 host-app convention.
@@ -19,25 +19,10 @@ enforces this for each Google provider metadata test. It checks every action in
 `provider.integration().actions`, and it checks trigger scope resolvers where a
 provider has triggers.
 
-## Current Audit
+## Verification
 
-As of the `jido_con-jxj.2` audit, the Google family has 189 actions with
-static scope metadata and dynamic resolvers:
-
-| Provider | Actions | Resolver |
-| --- | ---: | --- |
-| Google Sheets | 19 | `Jido.Connect.Google.Sheets.ScopeResolver` |
-| Gmail | 31 | `Jido.Connect.Gmail.ScopeResolver` |
-| Google Drive | 39 | `Jido.Connect.Google.Drive.ScopeResolver` |
-| Google Calendar | 32 | `Jido.Connect.Google.Calendar.ScopeResolver` |
-| Google Contacts | 22 | `Jido.Connect.Google.Contacts.ScopeResolver` |
-| Google Analytics | 5 | `Jido.Connect.Google.Analytics.ScopeResolver` |
-| Google Meet | 8 | `Jido.Connect.Google.Meet.ScopeResolver` |
-| Google Search Console | 6 | `Jido.Connect.Google.SearchConsole.ScopeResolver` |
-| Google Docs | 3 | `Jido.Connect.Google.Docs.ScopeResolver` |
-| Google Slides | 4 | `Jido.Connect.Google.Slides.ScopeResolver` |
-| Google Forms | 8 | `Jido.Connect.Google.Forms.ScopeResolver` |
-| Google Tasks | 12 | `Jido.Connect.Google.Tasks.ScopeResolver` |
+Each Google provider has a local scope resolver. The shared connector contract
+checks static scopes and dynamic resolver coverage without a network call.
 
 ## Adding Google Actions
 
