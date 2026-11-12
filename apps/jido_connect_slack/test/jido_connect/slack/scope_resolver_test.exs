@@ -58,8 +58,17 @@ defmodule Jido.Connect.Slack.ScopeResolverTest do
     "mpim" => "mpim"
   }
 
+  @no_channel_types %{
+    nil => "public_channel",
+    "public_channel" => "public_channel",
+    "private_channel" => "private_channel",
+    "im" => "im",
+    "mpim" => "mpim"
+  }
+
   # The conversation type whose scope is checked, by channel ID and supplied
-  # type. A G ID is a private channel and a D ID a DM.
+  # type. A G ID is a private channel and a D ID a DM. The client drops an
+  # empty channel, so it counts as none.
   @checked_type %{
     "C0123" => @c_id_types,
     "Z0123" => @c_id_types,
@@ -77,13 +86,8 @@ defmodule Jido.Connect.Slack.ScopeResolverTest do
       "im" => "im",
       "mpim" => "im"
     },
-    nil => %{
-      nil => "public_channel",
-      "public_channel" => "public_channel",
-      "private_channel" => "private_channel",
-      "im" => "im",
-      "mpim" => "mpim"
-    }
+    "" => @no_channel_types,
+    nil => @no_channel_types
   }
 
   describe "actions on one conversation" do
@@ -99,7 +103,7 @@ defmodule Jido.Connect.Slack.ScopeResolverTest do
     end
 
     test "slack.message.unread.list with a channel checks read and history of that type" do
-      for {channel, checked} <- Map.delete(@checked_type, nil), type <- @types do
+      for {channel, checked} <- Map.drop(@checked_type, [nil, ""]), type <- @types do
         input = input(channel, type)
         expected = Enum.sort([@read[checked[type]], @history[checked[type]]])
 
@@ -111,8 +115,8 @@ defmodule Jido.Connect.Slack.ScopeResolverTest do
     test "slack.message.unread.list without a channel needs every read and history scope" do
       all = Enum.sort(Map.values(@read) ++ Map.values(@history))
 
-      for type <- @types do
-        input = input(nil, type)
+      for channel <- [nil, ""], type <- @types do
+        input = input(channel, type)
         assert {input, ScopeResolver.required_scopes(%{id: @unread}, input, nil)} == {input, all}
       end
     end
@@ -152,7 +156,9 @@ defmodule Jido.Connect.Slack.ScopeResolverTest do
         {%{channel: "G0123"}, "mpim:write"},
         {%{channel: "G0123", users: ["U01"]}, "mpim:write"},
         {%{channel: "C0123", users: ["U01", "U02"]}, "mpim:write"},
+        {%{channel: "", users: ["U01", "U02"]}, "mpim:write"},
         {%{users: ["U01"]}, "im:write"},
+        {%{channel: "", users: ["U01"]}, "im:write"},
         {%{channel: "D0123"}, "im:write"},
         {%{channel: "D0123", users: ["U01", "U02"]}, "im:write"}
       ]

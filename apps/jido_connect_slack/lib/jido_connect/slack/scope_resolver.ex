@@ -173,7 +173,7 @@ defmodule Jido.Connect.Slack.ScopeResolver do
   end
 
   def required_scopes(%{id: "slack.message.unread.list"}, input, _connection) do
-    if Map.get(input, :channel, Map.get(input, "channel")) do
+    if channel(input) do
       type = requested_conversation_type(input)
 
       [
@@ -224,12 +224,20 @@ defmodule Jido.Connect.Slack.ScopeResolver do
   defp requested_conversation_type(input) do
     supplied = supplied_conversation_type(input)
 
-    case Map.get(input, :channel, Map.get(input, "channel")) do
+    case channel(input) do
       "G" <> _rest -> "private_channel"
       "D" <> _rest -> "im"
       nil -> supplied || "public_channel"
       _channel when supplied in ["private_channel", "mpim"] -> supplied
       _channel -> "public_channel"
+    end
+  end
+
+  # The client drops an empty `channel` before it calls Slack.
+  defp channel(input) do
+    case Map.get(input, :channel, Map.get(input, "channel")) do
+      "" -> nil
+      channel -> channel
     end
   end
 
@@ -254,7 +262,7 @@ defmodule Jido.Connect.Slack.ScopeResolver do
   defp requested_open_conversation_type(input) do
     users = user_count(Map.get(input, :users, Map.get(input, "users")))
 
-    case Map.get(input, :channel, Map.get(input, "channel")) do
+    case channel(input) do
       "G" <> _rest -> "mpim"
       "D" <> _rest -> "im"
       nil when users == 1 -> "im"
