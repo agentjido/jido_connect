@@ -2693,11 +2693,6 @@ defmodule Jido.Connect.SlackTest do
                %{integration_context: no_manage_context, credential_lease: lease}
              )
 
-    public_manage_context = %{
-      context
-      | connection: %{context.connection | scopes: context.connection.scopes -- ["groups:write"]}
-    }
-
     assert {:error,
             %Connect.Error.AuthError{
               reason: :missing_scopes,
@@ -2705,7 +2700,10 @@ defmodule Jido.Connect.SlackTest do
             }} =
              Jido.Connect.Slack.Actions.ArchiveChannel.run(
                %{channel: "G999", conversation_type: "public_channel"},
-               %{integration_context: public_manage_context, credential_lease: lease}
+               %{
+                 integration_context: context,
+                 credential_lease: %{lease | scopes: ["channels:manage"]}
+               }
              )
 
     assert {:ok, %{channel: "G999"}} =

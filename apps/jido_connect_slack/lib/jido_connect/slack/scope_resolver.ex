@@ -218,7 +218,9 @@ defmodule Jido.Connect.Slack.ScopeResolver do
   end
 
   # A G ID is checked as a private channel, also when it belongs to a legacy
-  # group DM, and a D ID as a DM. A C ID is never a DM.
+  # group DM, and a D ID as a DM. Any other ID, such as a C ID, is a public
+  # channel unless a private channel or group DM is supplied; Slack never
+  # gives a DM a C ID.
   defp requested_conversation_type(input) do
     supplied = supplied_conversation_type(input)
 
@@ -246,25 +248,26 @@ defmodule Jido.Connect.Slack.ScopeResolver do
     Map.get(input, :is_private, Map.get(input, "is_private", false)) == true
   end
 
-  # Several users or a G ID open a group DM, one user or a D ID a DM.
+  # Slack resumes `channel` when it is given, also next to `users`. A G ID is
+  # a group DM and a D ID a DM; for a C ID or no channel, several users mean a
+  # group DM, and one user without a channel a DM.
   defp requested_open_conversation_type(input) do
     users = user_count(Map.get(input, :users, Map.get(input, "users")))
-    channel = Map.get(input, :channel, Map.get(input, "channel"))
 
-    cond do
-      users > 1 or match?("G" <> _rest, channel) -> "mpim"
-      users == 1 or match?("D" <> _rest, channel) -> "im"
-      supplied_conversation_type(input) == "mpim" -> "mpim"
-      true -> "im"
+    case Map.get(input, :channel, Map.get(input, "channel")) do
+      "G" <> _rest -> "mpim"
+      "D" <> _rest -> "im"
+      nil when users == 1 -> "im"
+      _c_id_or_none when users > 1 -> "mpim"
+      _c_id_or_none -> if supplied_conversation_type(input) == "mpim", do: "mpim", else: "im"
     end
   end
 
-  defp user_count(users) when is_list(users), do: length(users)
+  # The client joins `users` with commas, so one entry can name several users.
+  defp user_count(users) when is_binary(users), do: user_count([users])
 
-  defp user_count(users) when is_binary(users) do
-    users
-    |> String.split(",", trim: true)
-    |> length()
+  defp user_count(users) when is_list(users) do
+    length(for user <- users, is_binary(user), id <- String.split(user, ",", trim: true), do: id)
   end
 
   defp user_count(_users), do: 0

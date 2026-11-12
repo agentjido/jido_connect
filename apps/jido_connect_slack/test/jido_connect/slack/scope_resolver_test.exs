@@ -48,17 +48,21 @@ defmodule Jido.Connect.Slack.ScopeResolverTest do
 
   @types [nil, "public_channel", "private_channel", "im", "mpim"]
 
+  # Slack gives C IDs to public channels, private channels and group DMs,
+  # never to DMs. IDs with another prefix are checked the same way.
+  @c_id_types %{
+    nil => "public_channel",
+    "public_channel" => "public_channel",
+    "private_channel" => "private_channel",
+    "im" => "public_channel",
+    "mpim" => "mpim"
+  }
+
   # The conversation type whose scope is checked, by channel ID and supplied
-  # type. A G ID is a private channel and a D ID a DM. Slack gives C IDs to
-  # public channels, private channels and group DMs, never to DMs.
+  # type. A G ID is a private channel and a D ID a DM.
   @checked_type %{
-    "C0123" => %{
-      nil => "public_channel",
-      "public_channel" => "public_channel",
-      "private_channel" => "private_channel",
-      "im" => "public_channel",
-      "mpim" => "mpim"
-    },
+    "C0123" => @c_id_types,
+    "Z0123" => @c_id_types,
     "G0123" => %{
       nil => "private_channel",
       "public_channel" => "private_channel",
@@ -137,14 +141,20 @@ defmodule Jido.Connect.Slack.ScopeResolverTest do
     end
   end
 
+  # Slack resumes `channel` when it is given, also next to `users`, and the
+  # client joins `users` with commas.
   describe "slack.conversation.open" do
     test "several users or a G ID need mpim:write, one user or a D ID im:write, whatever type is supplied" do
       targets = [
         {%{users: ["U01", "U02"]}, "mpim:write"},
+        {%{users: ["U01,U02"]}, "mpim:write"},
         {%{"users" => "U01,U02"}, "mpim:write"},
         {%{channel: "G0123"}, "mpim:write"},
+        {%{channel: "G0123", users: ["U01"]}, "mpim:write"},
+        {%{channel: "C0123", users: ["U01", "U02"]}, "mpim:write"},
         {%{users: ["U01"]}, "im:write"},
-        {%{channel: "D0123"}, "im:write"}
+        {%{channel: "D0123"}, "im:write"},
+        {%{channel: "D0123", users: ["U01", "U02"]}, "im:write"}
       ]
 
       for {target, scope} <- targets, type <- @types do
@@ -155,7 +165,8 @@ defmodule Jido.Connect.Slack.ScopeResolverTest do
 
     # Slack gives group DMs C IDs too, so only there the supplied type decides.
     test "for a C ID or no target, a supplied mpim selects mpim:write" do
-      for target <- [%{channel: "C0123"}, %{}], type <- @types do
+      for target <- [%{channel: "C0123"}, %{channel: "C0123", users: ["U01"]}, %{}],
+          type <- @types do
         input = put_type(target, type)
         scope = if type == "mpim", do: "mpim:write", else: "im:write"
 
