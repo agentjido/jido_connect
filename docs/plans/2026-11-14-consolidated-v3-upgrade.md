@@ -193,3 +193,35 @@ migration. CI and branch guidance now include `release/v3`. The core docs
 source ref also uses that branch. No force push, history rewrite, Hex release,
 or unrelated repository change is part of delivery. The final return must
 record the full commit and the result of GitHub sparse verification.
+
+
+## Checkpoint follow-up and cleanup — 2026-11-14
+
+The coordinator supplied the published core fix
+`047bf746330a2fbe7c3b25c045552e0303c97eaf`. It supersedes the original
+`05723b96c6ead47dec04fe69b1c34ad62f999c54` target in the historical plan.
+Both package pins and the Jido lock entry now use the new revision. No other
+dependency lock entry or public API is changed by this follow-up. Connect
+keeps strict checkpoint checks and existing stored data unchanged.
+
+The first delivered Connect commit was
+`17bd51aab9af98a898ac7185994cfdb4a7dbb92f` on `release/v3`. A fresh consumer
+fetched that exact GitHub commit with `sparse: "apps/jido_connect"`, resolved
+its exact core and registry Zoi, compiled with warnings as errors, and passed
+38 offline ToolSource, Plugin, MCP startup, and module ownership tests. The
+sparse checkout contained no other provider apps or split core dependencies.
+This evidence is retained here before its temporary consumer is removed.
+
+Cleanup inventory: only the primary Connect and Harness worktrees exist.
+The local task branch `codex/consolidated-v3-local` points to the first
+published commit. It can be removed after confirming that it is an ancestor
+of the final published `release/v3`. Preserve `main`, all release branches,
+the primary repositories, and their build/dependency/data directories.
+Harness source, lock, and branch remain unchanged.
+
+Task-only temporary consumers are `/tmp/u3-connect-standalone`,
+`/tmp/u3-connect-remote-sparse`, and `/tmp/u3-connect-checkpoint-sparse`.
+The remaining `/tmp/u3-*` entries are this assignment's logs, source
+snapshots, and two plan backup files. Their check results must be recorded
+here or in `docs/v3_status.md` before removal. No other temporary directory or
+worktree is in this cleanup scope. The root coordinator owns chat archival.

@@ -32,7 +32,7 @@ defmodule JidoConnect.MixProject do
     [
       {:jido,
        git: "https://github.com/agentjido/jido.git",
-       ref: "05723b96c6ead47dec04fe69b1c34ad62f999c54",
+       ref: "047bf746330a2fbe7c3b25c045552e0303c97eaf",
        override: true},
       {:zoi, "~> 0.19.0"},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false}

@@ -6,6 +6,39 @@ change with each deliberate upstream update.
 
 ## Dependency record
 
+Updated on 2026-11-14 for deterministic checkpoint schema fingerprints:
+
+- Current core: `agentjido/jido` revision
+  `047bf746330a2fbe7c3b25c045552e0303c97eaf` on `release/v3`.
+- Both root and core app pins use this revision. Dependency resolution changed
+  only the Jido lock entry. Hex Zoi 0.19.0, ReqLLM 1.30.0, Runic alpha.13,
+  Arbor MCP rc.7, and the JSV 0.26.2 override are unchanged.
+- The core owner reports deterministic Joi field order, independent rebuild
+  coverage, and continued rejection of real code changes. Connect does not
+  change checkpoint validation, data, or public API behavior.
+
+Follow-up checks use Elixir 1.19.5 / OTP 28.3. All 190 focused ToolSource,
+Plugin, generated Action/schema, authorization, and MCP tests passed with
+`ERL_FLAGS='+S 4:4' mix test --max-requires 1 --max-cases 4` and the focused
+paths in the package plan. Demo formatting, warnings-as-errors compilation,
+and 21 tests passed. `mix hex.audit` found no retired or advisory packages.
+The isolated `arbor_mcp_client_test.exs` file passed all eight tests under the
+same four-scheduler setting. Harness's 19 focused tests also passed with
+`--no-cover`; concurrent Harness manifest and Amp source work is unrelated
+and is preserved outside this delivery.
+
+The broad `mix quality` run did not pass on this follow-up. Its compile and
+format steps completed, but the Ngrok test's two-second local accept timed
+out and Arbor MCP's schema compilation exceeded five seconds at
+`test/jido_connect/mcp/arbor_mcp_client_test.exs:14`. A four-scheduler full
+repeat also reached the schema limit. The isolated file and the serial-load
+focused suite passed without changing either timeout or any assertion. The
+coordinator directed no further broad repeat while Jidoka's clean build used
+the host. This is a recorded broader-suite limit, not a claimed full pass.
+
+The entries below preserve earlier selections and their check evidence.
+
+
 Selected on 2026-11-14 for the local Jidoka consolidated V3 candidate:
 
 | Package | Requirement | Source |

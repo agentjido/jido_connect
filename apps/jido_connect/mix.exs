@@ -45,7 +45,7 @@ defmodule JidoConnectCore.MixProject do
     [
       {:jido,
        git: "https://github.com/agentjido/jido.git",
-       ref: "05723b96c6ead47dec04fe69b1c34ad62f999c54",
+       ref: "047bf746330a2fbe7c3b25c045552e0303c97eaf",
        override: true},
       {:arbor_mcp, "== 2.0.0-rc.7"},
       {:jsv, "~> 0.26.2", override: true},
