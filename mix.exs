@@ -31,13 +31,10 @@ defmodule JidoConnect.MixProject do
   defp deps do
     [
       {:jido,
-       git: "https://github.com/mikehostetler/new_jido.git",
-       ref: "54fde0cf79aae9dcc2c00636d9846834abd06852",
+       git: "https://github.com/agentjido/jido.git",
+       ref: "05723b96c6ead47dec04fe69b1c34ad62f999c54",
        override: true},
-      {:zoi,
-       git: "https://github.com/mikehostetler/zoi.git",
-       ref: "2fff2a23e23e7ac0b26f62f49bbc1b12f7818ac9",
-       override: true},
+      {:zoi, "~> 0.19.0"},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false}
     ]
   end

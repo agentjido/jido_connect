@@ -6,6 +6,69 @@ change with each deliberate upstream update.
 
 ## Dependency record
 
+Selected on 2026-11-14 for the local Jidoka consolidated V3 candidate:
+
+| Package | Requirement | Source |
+| --- | --- | --- |
+| `jido` | `05723b96c6ead47dec04fe69b1c34ad62f999c54` | `agentjido/jido`, consolidated V3 |
+| `zoi` | `~> 0.19.0`; locked 0.19.0 | Hex |
+| `req_llm` | Core requires `~> 1.30`; locked 1.30.0 | Hex |
+| `runic` | Core requires `~> 0.1.0-alpha.13`; locked alpha.13 | Hex |
+| `arbor_mcp` | `== 2.0.0-rc.7` | Hex, unchanged |
+| `jsv` | `~> 0.26.2`; locked 0.26.2 | Hex, existing override retained |
+
+This local candidate starts from release revision
+`f10cf3053466013f267f424a1a5dff36b6c18a74`. It removes the core and Zoi fork
+sources. No split core applications are declared. The JSV override remains
+because Arbor MCP rc.7 declares `~> 0.25.0`; tests and the audit must check the
+selected graph. Jidoka must use Arbor MCP rc.7 with this candidate.
+
+Public Agent Plugin declarations still use map configuration. Jido converts
+that map to callback keyword options. Keep the existing catalog host fixture.
+The target supports the current ToolSource and Plugin preparation callbacks;
+no source API change was needed for the checked focused contracts.
+
+Checks on this candidate used Elixir 1.19.5 and OTP 28.3:
+
+- `MIX_ENV=test mix compile --warnings-as-errors`: passed for all 41 apps.
+- Focused ToolSource, Plugin, generated Action/schema, prepare/commit, and MCP
+  tests: 190 tests, zero failures.
+- Umbrella `mix quality`: passed; 4,264 tests, zero failures. Live smoke tests
+  stayed excluded by the existing helpers.
+- Core coverage: 274 tests, zero failures; 82.48%, above the 80% threshold.
+  The provider inventory test ran in the passed umbrella suite. It cannot run
+  in core-only mode because that mode does not load the 36 provider modules.
+- `mix hex.audit`: passed; no retired packages or security advisories found.
+- Demo dependency resolution, formatting, warnings-as-errors compilation,
+  and tests: passed; 21 tests, zero failures.
+- Isolated core package export at `/tmp/u3-connect-standalone`: fresh consumer
+  resolution and compilation passed, with 38 tests and zero failures. The
+  consumer uses only the exported package files, not the umbrella config. It
+  checks ToolSource calls, Plugin attachment, host routes, MCP supervision,
+  and single ownership of core modules by `:jido`.
+- Unchanged Harness: compilation passed; 19 focused tests passed with
+  `--no-cover`. The first focused run passed its tests but failed the global
+  70% coverage threshold, as expected for a small test subset.
+
+A separate default-environment root format command failed when Spark could
+not load Sourceror. The required test-environment umbrella quality check
+passed. A separate core `mix quality` run failed only its umbrella provider
+inventory assertion; the same assertion passed with all providers present.
+No threshold or test expectation was reduced.
+
+At local verification, remote Git sparse verification was pending because
+the candidate had no commit or push. Local package export verification passed. No live provider,
+paid model, Hozen host, or Jidoka caller test ran in this package assignment.
+Jidoka integration remains the coordinator's gate. Harness source and lock
+are unchanged. No package was committed, pushed, or published in that phase.
+
+Delivery was later authorized for `release/v3`. The branch uses the approved
+`release/3.0` baseline and this scoped migration. CI also checks the new branch.
+Remote sparse resolution is a required delivery check after the commit is
+available on GitHub. No Hex publication or release tag is part of this work.
+
+The records below are historical dependency selections, not current pins.
+
 Selected on 2026-11-08 for the Hozen GitHub collection candidate:
 
 | Package | Requirement | Source |

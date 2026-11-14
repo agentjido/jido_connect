@@ -7,7 +7,8 @@ Each package version remains in its `mix.exs` file.
 | Branch | Dependencies | Purpose |
 | --- | --- | --- |
 | `release/2.0` | Jido v2, Action v2, Signal v2 | Maintenance for existing v2 users |
-| `release/3.0` | Jido v3, Action v3, Signal v3 | Active maintainer development |
+| `release/v3` | Consolidated Jido v3 (core, Action, Signal, AI) | Active maintainer development |
+| `release/3.0` | Earlier V3 development baseline | Historical source for the consolidated migration |
 | `main` | Existing v2 line until a separate default-branch decision | Repository entry point; select a release branch for work |
 
 ## Version 2
@@ -18,7 +19,7 @@ target. Do not add Action v3 overrides or v3 compatibility shims to this line.
 
 ## Version 3
 
-Start new v3 work from `release/3.0`. This line is for the maintainer who also
+Start new v3 work from `release/v3`. This line is for the maintainer who also
 owns Jido Action. Its APIs can change with upstream prereleases. It is not
 ready for external adoption and has no cross-prerelease compatibility promise.
 
