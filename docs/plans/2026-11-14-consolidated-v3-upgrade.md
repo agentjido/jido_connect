@@ -225,3 +225,51 @@ The remaining `/tmp/u3-*` entries are this assignment's logs, source
 snapshots, and two plan backup files. Their check results must be recorded
 here or in `docs/v3_status.md` before removal. No other temporary directory or
 worktree is in this cleanup scope. The root coordinator owns chat archival.
+
+
+## Final verification record before cleanup
+
+Implementation: `c8e12b724a8f6c045715a633fe3c7d01404720d9`, published on
+`agentjido/jido_connect` `release/v3`. No subsequent source edit was needed.
+Both pins and the lock use core `047bf746330a2fbe7c3b25c045552e0303c97eaf`.
+
+Checks used Elixir 1.19.5 / OTP 28.3 and four schedulers where noted:
+
+| Check | Exit and result |
+| --- | --- |
+| `MIX_ENV=test ERL_FLAGS='+S 4:4' mix compile --warnings-as-errors` | 0 |
+| Focused paths from this plan with `mix test --max-requires 1 --max-cases 4` and four schedulers | 0; 190 tests, zero failures |
+| Isolated `arbor_mcp_client_test.exs` with four schedulers | 0; eight tests, zero failures |
+| Demo `mix deps.get`, format check, warnings-as-errors compile, `mix test` | All 0; 21 tests, zero failures |
+| `mix hex.audit` | 0; no retired or advisory packages |
+| Harness focused command with `--no-cover` and four schedulers | 0; 19 tests, zero failures; concurrent unrelated work preserved |
+| Fresh GitHub sparse consumer `mix deps.get` | 0; exact implementation and core refs verified |
+| Fresh sparse consumer warnings-as-errors compile | 0 |
+| Fresh sparse consumer `mix test --max-requires 1 --max-cases 4` with four schedulers | 0; 46 tests, zero failures |
+
+The new sparse consumer was `/tmp/u3-connect-checkpoint-sparse`. Its manifest
+used the exact published implementation ref and `sparse: "apps/jido_connect"`,
+without a local package path or a core override. It checked ToolSource,
+Plugin/host execution, the MCP fixture, supervision, and one owner for core
+modules. It resolved Hex Zoi 0.19.0, Arbor MCP rc.7, and JSV 0.26.2.
+
+Broader limit: two full umbrella quality attempts stopped at Arbor MCP's
+five-second schema compilation limit at
+`apps/jido_connect/test/jido_connect/mcp/arbor_mcp_client_test.exs:14`.
+The first also hit the Ngrok test's two-second local accept limit. Compile
+and formatting completed. The isolated MCP file passed under the same four
+scheduler conditions; the serial-file focused suite also passed. The
+coordinator directed no further full repeat while Jidoka's clean build used
+the host. No timeout, assertion, schema check, or coverage gate was weakened.
+The earlier 4,264-test full pass belongs to the original core selection and
+is not claimed as a full pass for this follow-up.
+
+The current Harness working tree has unrelated README, migration guide,
+manifest, Amp, and integration work. It is outside this delivery and cleanup.
+No Harness file, branch, or data is to be removed or committed here.
+
+This record and `docs/v3_status.md` preserve the useful evidence from the task
+logs and temporary consumers. After this documentation is published, remove
+only the inventoried task artifacts and the local task branch whose commit
+is reachable from the published release branch. Keep the primary worktrees.
+The root coordinator owns chat archival.

@@ -36,6 +36,27 @@ focused suite passed without changing either timeout or any assertion. The
 coordinator directed no further broad repeat while Jidoka's clean build used
 the host. This is a recorded broader-suite limit, not a claimed full pass.
 
+Published implementation ref:
+`c8e12b724a8f6c045715a633fe3c7d01404720d9`
+(`fix(deps): use checkpoint-compatible Jido revision`).
+A new consumer fetched this exact commit from GitHub with
+`sparse: "apps/jido_connect"`. Fresh dependency resolution and
+`MIX_ENV=test mix compile --warnings-as-errors` passed. The consumer resolved
+core `047bf746330a2fbe7c3b25c045552e0303c97eaf`, Hex Zoi 0.19.0,
+Arbor MCP rc.7, and JSV 0.26.2. It passed all 46 offline tests with serial
+file loading and four cases. These include the eight MCP fixture tests,
+ToolSource invocation, Plugin attachment, MCP supervision startup, and
+single core module ownership. No source change was needed after this ref.
+A separate owning umbrella warnings-as-errors compile also passed.
+
+The plan retains the check results before cleanup. Only the three task
+consumer directories, this task's `/tmp/u3-*` logs/snapshots/backups, and the
+fully published local `codex/consolidated-v3-local` branch are in cleanup
+scope. Primary repositories and their build/dependency/data directories,
+`main`, release branches, and concurrent Harness work must remain.
+The result-record commit changes documentation only; Jidoka can keep the
+immutable implementation ref above.
+
 The entries below preserve earlier selections and their check evidence.
 
 
