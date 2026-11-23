@@ -34,6 +34,9 @@ defmodule Jido.Connect.Jira.Actions.Issues do
       output do
         field(:key, :string)
         field(:summary, :string)
+        field(:description, :string)
+        field(:description_unsupported_nodes, {:array, :string})
+        field(:description_adf_error, :string)
         field(:status, :map)
         field(:project, :map)
         field(:assignee, :map)
@@ -279,6 +282,8 @@ defmodule Jido.Connect.Jira.Actions.Issues do
       output do
         field(:id, :string)
         field(:body, :string)
+        field(:body_unsupported_nodes, {:array, :string})
+        field(:body_adf_error, :string)
         field(:created_at, :string)
       end
     end
