@@ -53,6 +53,11 @@ Create and update accept at most 100,000 Markdown characters. The converter
 emits a fixed ADF v1 subset for paragraphs, headings, lists, block quotes,
 fenced code, hard line breaks, horizontal rules, and HTTPS links.
 
+ADF conversion lives in the shared `jido_connect_atlassian` package.
+`Jido.Connect.Confluence.ADF` delegates `to_text/1` to its strict rendering and
+`from_markdown/1` to its Markdown conversion with the limit above. Page reads
+still fail closed on content outside the supported ADF subset.
+
 Update first gets the remote page. It checks the remote version and the resolved
 space before it sends the next version. `force: true` bypasses only the version
 equality check. It does not bypass the space check.
