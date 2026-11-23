@@ -1,6 +1,7 @@
 defmodule Jido.Connect.Jira.WebhookTest do
   use ExUnit.Case, async: true
 
+  alias Jido.Connect.WebhookDelivery
   alias Jido.Connect.Jira.Webhook
 
   describe "verify_signature/2" do
@@ -109,6 +110,56 @@ defmodule Jido.Connect.Jira.WebhookTest do
                "Updated: investigated the OAuth2 flow. Implementation complete."
 
       assert signal.comment_updated_at == "2026-05-01T11:00:00.000+0000"
+    end
+  end
+
+  describe "to_public_map/1" do
+    test "keeps standard status and priority values within the transport limits" do
+      payload = fixture!("webhook_issue_updated.json")
+      [status, priority] = payload["changelog"]["items"]
+      status = Map.put(status, "fromString", String.duplicate("a", 600))
+      priority = Map.put(priority, "from", %{"secret" => "nested-only"})
+      assignee = %{"fieldtype" => "jira", "field" => "assignee", "toString" => "private name"}
+
+      custom_status = %{
+        "fieldtype" => "custom",
+        "field" => "status",
+        "toString" => "private note"
+      }
+
+      items = [status, priority, assignee, custom_status] ++ List.duplicate(status, 50)
+      payload = put_in(payload, ["changelog", "items"], items)
+
+      assert {:ok, signal} = Webhook.normalize_event(payload)
+
+      delivery =
+        WebhookDelivery.verified!(:jira, event: "jira:issue_updated", payload: payload)
+        |> WebhookDelivery.put_signal(signal)
+
+      standard = WebhookDelivery.to_public_map(delivery)
+      public = Webhook.to_public_map(delivery)
+
+      assert [status_change, priority_change | _] = public.normalized_signal["changelog"]["items"]
+      assert length(public.normalized_signal["changelog"]["items"]) == 48
+      assert status_change["field"] == "status"
+      assert status_change["from"] == "1"
+
+      assert status_change["from_string"] ==
+               String.duplicate("a", 512) <> "...[truncated 88 bytes]"
+
+      assert status_change["to"] == "3"
+      assert status_change["to_string"] == "In Progress"
+      assert priority_change["field"] == "priority"
+      refute Map.has_key?(priority_change, "from")
+      assert priority_change["to_string"] == "High"
+
+      assert Jason.encode!(public) =~ "from_string"
+      refute inspect(public.normalized_signal["changelog"]) =~ "private"
+      assert public.payload == standard.payload
+      assert public.metadata == standard.metadata
+
+      assert Webhook.to_public_map(%{delivery | signature_state: :unverified}) ==
+               WebhookDelivery.to_public_map(%{delivery | signature_state: :unverified})
     end
   end
 

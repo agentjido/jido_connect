@@ -289,3 +289,12 @@ text and retains the rest of the issue, comment, or signal. The optional
 `description_adf_error`, `body_adf_error`, and `comment_body_adf_error` fields
 give the converter's reason, such as `invalid_adf` or
 `adf_depth_limit_exceeded`.
+
+## Public webhook changelogs
+
+After verifying a Jira issue update, attach the result of
+`Jido.Connect.Jira.Webhook.normalize_event/1` to the delivery with
+`Jido.Connect.WebhookDelivery.put_signal/2`. Use
+`Jido.Connect.Jira.Webhook.to_public_map/1` for a public map that includes the
+previous and new values of built-in status and priority changes. The transport
+sanitizer limits the values it returns.
