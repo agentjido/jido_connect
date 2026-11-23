@@ -273,3 +273,13 @@ Or from the umbrella root:
 ```sh
 mix test apps/jido_connect_jira/test --no-deps-check
 ```
+
+## Jira rich text
+
+Jira uses the shared Atlassian Document Format (ADF) converter for issue
+descriptions and comment bodies. The converter keeps supported text and
+reports the node and mark types it skips. The issue and comment results
+include `description_unsupported_nodes` and `body_unsupported_nodes`.
+Comment webhook signals include `comment_body_unsupported_nodes`.
+A malformed description fails an issue read or search. A malformed comment
+body fails webhook normalization.

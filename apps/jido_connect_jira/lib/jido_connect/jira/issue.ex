@@ -11,6 +11,8 @@ defmodule Jido.Connect.Jira.Issue do
               url: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               summary: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               description: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
+              description_unsupported_nodes:
+                Zoi.list(Zoi.string()) |> Zoi.nullish() |> Zoi.optional(),
               status: Status.schema() |> Zoi.nullish() |> Zoi.optional(),
               issue_type: Zoi.map() |> Zoi.nullish() |> Zoi.optional(),
               project: Zoi.map() |> Zoi.nullish() |> Zoi.optional(),

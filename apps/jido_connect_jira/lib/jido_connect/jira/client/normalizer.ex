@@ -4,6 +4,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   alias Jido.Connect.Data
 
   alias Jido.Connect.Jira.{
+    ADFText,
     Comment,
     FieldSchema,
     Issue,
@@ -18,47 +19,66 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   # Issue
   # ---------------------------------------------------------------------------
 
-  @doc "Normalizes a Jira issue into a stable struct."
+  @doc """
+  Normalizes a Jira issue into a stable struct.
+
+  The description is rendered with `Jido.Connect.Jira.ADFText`:
+  `description_unsupported_nodes` lists the ADF node and mark types skipped
+  while rendering it. A malformed ADF description returns the projection's
+  `Jido.Connect.Error.ValidationError`.
+  """
   @spec issue(map()) :: {:ok, Issue.t()} | {:error, term()}
   def issue(payload) when is_map(payload) do
     fields = Data.get(payload, "fields") || %{}
 
-    %{
-      key: Data.get(payload, "key"),
-      id: Data.get(payload, "id"),
-      url: Data.get(payload, "self"),
-      summary: Data.get(fields, "summary"),
-      description: normalize_description(Data.get(fields, "description")),
-      status: normalize_status(Data.get(fields, "status")),
-      issue_type: normalize_issue_type(Data.get(fields, "issuetype")),
-      project: normalize_project_brief(Data.get(fields, "project")),
-      assignee: normalize_user(Data.get(fields, "assignee")),
-      reporter: normalize_user(Data.get(fields, "reporter")),
-      priority: normalize_priority(Data.get(fields, "priority")),
-      labels: Data.get(fields, "labels", []),
-      components: Data.get(fields, "components", []),
-      fix_versions: Data.get(fields, "fixVersions", []),
-      due_date: Data.get(fields, "duedate"),
-      resolution: Data.get(fields, "resolution"),
-      time_tracking: Data.get(fields, "timetracking"),
-      created_at: Data.get(fields, "created"),
-      updated_at: Data.get(fields, "updated")
-    }
-    |> Data.compact()
-    |> Issue.new()
+    with {:ok, description} <- ADFText.project(Data.get(fields, "description")) do
+      %{
+        key: Data.get(payload, "key"),
+        id: Data.get(payload, "id"),
+        url: Data.get(payload, "self"),
+        summary: Data.get(fields, "summary"),
+        description: ADFText.text(description),
+        description_unsupported_nodes: ADFText.unsupported_nodes(description),
+        status: normalize_status(Data.get(fields, "status")),
+        issue_type: normalize_issue_type(Data.get(fields, "issuetype")),
+        project: normalize_project_brief(Data.get(fields, "project")),
+        assignee: normalize_user(Data.get(fields, "assignee")),
+        reporter: normalize_user(Data.get(fields, "reporter")),
+        priority: normalize_priority(Data.get(fields, "priority")),
+        labels: Data.get(fields, "labels", []),
+        components: Data.get(fields, "components", []),
+        fix_versions: Data.get(fields, "fixVersions", []),
+        due_date: Data.get(fields, "duedate"),
+        resolution: Data.get(fields, "resolution"),
+        time_tracking: Data.get(fields, "timetracking"),
+        created_at: Data.get(fields, "created"),
+        updated_at: Data.get(fields, "updated")
+      }
+      |> Data.compact()
+      |> Issue.new()
+    end
   end
 
   def issue(_payload), do: {:error, :invalid_issue_payload}
 
-  @doc "Normalizes a Jira issue into a consistent map shape (legacy helper)."
+  @doc """
+  Normalizes a Jira issue into a consistent map shape (legacy helper).
+
+  Returns `nil` when `issue/1` fails, including for a malformed ADF
+  description.
+  """
   def normalize_issue(payload) when is_map(payload) do
     case issue(payload) do
-      {:ok, struct} -> Map.from_struct(struct) |> Map.drop([:metadata])
+      {:ok, struct} -> issue_map(struct)
       {:error, _} -> nil
     end
   end
 
   def normalize_issue(_payload), do: nil
+
+  @doc "Returns the map shape of a normalized issue, without metadata."
+  @spec issue_map(Issue.t()) :: map()
+  def issue_map(%Issue{} = issue), do: issue |> Map.from_struct() |> Map.drop([:metadata])
 
   # ---------------------------------------------------------------------------
   # Project
@@ -112,21 +132,31 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   # Comment
   # ---------------------------------------------------------------------------
 
-  @doc "Normalizes a Jira comment into a stable struct."
+  @doc """
+  Normalizes a Jira comment into a stable struct.
+
+  The body is rendered with `Jido.Connect.Jira.ADFText`:
+  `body_unsupported_nodes` lists the ADF node and mark types skipped while
+  rendering it. A malformed ADF body returns the projection's
+  `Jido.Connect.Error.ValidationError`.
+  """
   @spec comment(map()) :: {:ok, Comment.t()} | {:error, term()}
   def comment(payload) when is_map(payload) do
-    %{
-      id: Data.get(payload, "id"),
-      body: normalize_description(Data.get(payload, "body")),
-      rendered_body: Data.get(payload, "renderedBody"),
-      author: normalize_user(Data.get(payload, "author")),
-      update_author: normalize_user(Data.get(payload, "updateAuthor")),
-      created_at: Data.get(payload, "created"),
-      updated_at: Data.get(payload, "updated"),
-      jsd_public: Data.get(payload, "jsdPublic")
-    }
-    |> Data.compact()
-    |> Comment.new()
+    with {:ok, body} <- ADFText.project(Data.get(payload, "body")) do
+      %{
+        id: Data.get(payload, "id"),
+        body: ADFText.text(body),
+        body_unsupported_nodes: ADFText.unsupported_nodes(body),
+        rendered_body: Data.get(payload, "renderedBody"),
+        author: normalize_user(Data.get(payload, "author")),
+        update_author: normalize_user(Data.get(payload, "updateAuthor")),
+        created_at: Data.get(payload, "created"),
+        updated_at: Data.get(payload, "updated"),
+        jsd_public: Data.get(payload, "jsdPublic")
+      }
+      |> Data.compact()
+      |> Comment.new()
+    end
   end
 
   def comment(_payload), do: {:error, :invalid_comment_payload}
@@ -271,25 +301,4 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     }
     |> Data.compact()
   end
-
-  defp normalize_description(%{"type" => "doc", "content" => content} = _adf)
-       when is_list(content) do
-    content
-    |> extract_text_from_adf()
-    |> String.trim()
-  end
-
-  defp normalize_description(text) when is_binary(text), do: text
-  defp normalize_description(_), do: nil
-
-  defp extract_text_from_adf(nodes) when is_list(nodes) do
-    Enum.map_join(nodes, "", &extract_text_from_adf/1)
-  end
-
-  defp extract_text_from_adf(%{"content" => content}) when is_list(content) do
-    extract_text_from_adf(content)
-  end
-
-  defp extract_text_from_adf(%{"text" => text}) when is_binary(text), do: text
-  defp extract_text_from_adf(_), do: ""
 end
