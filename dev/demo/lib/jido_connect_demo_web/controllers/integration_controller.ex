@@ -2,7 +2,7 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
   use Jido.Connect.DemoWeb, :controller
 
   alias Jido.Connect.{Data, Error}
-  alias Jido.Connect.Demo.{GitHubRuntime, GoogleRuntime, Ngrok, SlackRuntime, Store}
+  alias Jido.Connect.Demo.{Capture, GitHubRuntime, GoogleRuntime, Ngrok, SlackRuntime, Store}
   alias Jido.Connect.Google.OAuth, as: GoogleOAuth
   alias Jido.Connect.GitHub.{OAuth, Webhook}
   alias Jido.Connect.Slack.Webhook, as: SlackWebhook
@@ -517,6 +517,7 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
   end
 
   def slack_events(conn, _params) do
+    Capture.capture(conn, "slack")
     body = conn.assigns[:raw_body] || ""
 
     headers = %{
@@ -559,6 +560,7 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
   end
 
   def slack_interactivity(conn, _params) do
+    Capture.capture(conn, "slack")
     body = conn.assigns[:raw_body] || ""
 
     headers = %{
@@ -576,6 +578,18 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
         conn
         |> put_status(:unauthorized)
         |> json(%{ok: false, error: inspect(reason)})
+    end
+  end
+
+  def jira_webhook(conn, _params) do
+    case Capture.capture(conn, "jira") do
+      {:ok, _path} ->
+        json(conn, %{ok: true, captured: true})
+
+      :disabled ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{ok: false, error: "set JIRA_CAPTURE_DIR to capture Jira webhook deliveries"})
     end
   end
 
