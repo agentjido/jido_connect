@@ -31,8 +31,10 @@ Set `JIDO_CONNECT_RECORD=1` to enable recording. In the test, call
 The recorder installs a temporary Req adapter. Keep the test and the requests
 in each recording session serial. The recorder writes the response status,
 sanitized path, headers and body into `test/fixtures/<provider>/recorded`.
-Each subsequent response gets a numbered file name. The recorder can replace
-existing files with the same name. Keep only the files that tests use.
+Each subsequent response gets a numbered file name. A recording fails if the
+destination already exists. To refresh a fixture, record with `:root` set to
+a temporary directory. Review the new files before replacing the old ones.
+Keep only the files that tests use.
 
 Leave Req body decoding enabled for structured responses. The recorder can
 redact fields by key when it receives a decoded body. A test can use
@@ -43,7 +45,10 @@ transform that changes the fixture. Load the body in an offline test with
 For inbound delivery replay, pass a signed capture and the provider signing
 secret to `LiveSmoke.write_capture!/4`. It verifies the original Slack or Jira
 signature, sanitizes the capture and signs it with the fixture key. Pass the
-sanitized file and the provider verifier to `LiveSmoke.replay/2`.
+sanitized file and a provider that implements `verify_delivery/4` to
+`LiveSmoke.replay/2`. The Slack connector supplies this verifier.
+Use a fresh destination for each capture. Capture conversion also fails if
+the destination already exists.
 
 ## Fixture review
 

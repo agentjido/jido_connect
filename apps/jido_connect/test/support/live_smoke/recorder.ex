@@ -48,7 +48,7 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Recorder do
 
     path = Path.join(session.dir, file_name(session.name, count))
     File.mkdir_p!(session.dir)
-    File.write!(path, [Jason.encode_to_iodata!(fixture, pretty: true), "\n"])
+    File.write!(path, [Jason.encode_to_iodata!(fixture, pretty: true), "\n"], [:exclusive])
 
     Agent.update(__MODULE__, &%{&1 | count: count, sanitizer: sanitizer})
   end
