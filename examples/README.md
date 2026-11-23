@@ -1,13 +1,12 @@
 # Jido Connect examples
 
 Use these examples to compose a Jido v3 Agent with Connect bindings. The
-numbered lessons run with fixture clients by default. Pass `--live` to use the
-same Agents, Actions, and Flows with credentials from the host environment.
+numbered lessons run with fixture clients by default. Live demos accept
+`--live` and get credentials from the host environment.
 
 ## Start here
 
-Follow the [three Connect lessons](00_start_here/README.md) in order. Each
-lesson has an Agent, a test, and a runner.
+Follow the [Connect lessons](00_start_here/README.md) in order.
 
 ```sh
 mix deps.get

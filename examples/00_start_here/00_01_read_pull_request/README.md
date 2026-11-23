@@ -5,8 +5,8 @@ Ask a live Agent to read one GitHub pull request and save a short summary.
 ## What you will learn
 
 - Select a generated Action in a `connect do` binding.
-- Resolve the Action context from the host and execute the Action with
-  `Jido.Exec`.
+- Run the generated Action as a Flow step. Connect selects its binding and
+  uses the host context to check access and request a lease.
 
 ## Read the code
 

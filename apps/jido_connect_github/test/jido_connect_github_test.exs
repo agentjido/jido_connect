@@ -1226,6 +1226,13 @@ defmodule Jido.Connect.GitHubTest do
               scope_resolver: Jido.Connect.GitHub.ScopeResolver
             }} =
              Connect.trigger(spec, "github.workflow_run.updated")
+
+    assert {:ok,
+            %{
+              kind: :webhook,
+              verification: %{signature_header: "x-hub-signature-256"},
+              dedupe: %{key: [:delivery_id]}
+            }} = Connect.trigger(spec, "github.webhook.pull_request")
   end
 
   test "GitHub catalog entry exposes setup, auth, and runtime capabilities" do
@@ -1298,7 +1305,8 @@ defmodule Jido.Connect.GitHubTest do
     assert Jido.Connect.GitHub.jido_sensor_modules() == [
              Jido.Connect.GitHub.Sensors.NewIssues,
              Jido.Connect.GitHub.Sensors.UpdatedPullRequests,
-             Jido.Connect.GitHub.Sensors.WorkflowRunUpdates
+             Jido.Connect.GitHub.Sensors.WorkflowRunUpdates,
+             Jido.Connect.GitHub.Sensors.PullRequestWebhook
            ]
 
     assert Jido.Connect.GitHub.jido_plugin_module() == Jido.Connect.GitHub.Plugin
@@ -1357,7 +1365,8 @@ defmodule Jido.Connect.GitHubTest do
                sensors: [
                  Jido.Connect.GitHub.Sensors.NewIssues,
                  Jido.Connect.GitHub.Sensors.UpdatedPullRequests,
-                 Jido.Connect.GitHub.Sensors.WorkflowRunUpdates
+                 Jido.Connect.GitHub.Sensors.WorkflowRunUpdates,
+                 Jido.Connect.GitHub.Sensors.PullRequestWebhook
                ],
                plugin: Jido.Connect.GitHub.Plugin
              }

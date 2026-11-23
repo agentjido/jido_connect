@@ -40,28 +40,16 @@ defmodule Jido.Connect.Examples.StartHere.TriageWithSlack do
         })
 
     flow do
-      step "read_pr", [repo <- input(:repo), pull_number <- input(:pull_number)],
-        inline: [context: context] do
-        with {:ok, access} <- Plugin.action_context(context, :source, GetPullRequest) do
-          Jido.Exec.run(GetPullRequest, %{repo: repo, pull_number: pull_number}, access,
-            deadline_ms: 15_000
-          )
-        end
-      end
+      step("read_pr",
+        action: GetPullRequest,
+        params: %{repo: input(:repo), pull_number: input(:pull_number)}
+      )
 
-      step "read_channel",
-           channel <- input(:channel),
-           needs: ["read_pr"],
-           inline: [context: context] do
-        with {:ok, access} <- Plugin.action_context(context, :review_channel, GetConversationInfo) do
-          Jido.Exec.run(
-            GetConversationInfo,
-            %{channel: channel, conversation_type: "public_channel"},
-            access,
-            deadline_ms: 15_000
-          )
-        end
-      end
+      step("read_channel",
+        action: GetConversationInfo,
+        params: %{channel: input(:channel), conversation_type: "public_channel"},
+        needs: ["read_pr"]
+      )
 
       step "review",
            [

@@ -7,6 +7,8 @@ defmodule Jido.Connect.Jido.RuntimeContext do
   alias Jido.Connect.RuntimeControls
 
   @doc false
+  def integration_context(%Connect.Context{} = context), do: {:ok, context}
+
   def integration_context(%{integration_context: %Connect.Context{} = context}),
     do: {:ok, context}
 
@@ -40,7 +42,7 @@ defmodule Jido.Connect.Jido.RuntimeContext do
         projection,
         details
       ) do
-    resolver = Map.get(runtime_context, :connection_resolver)
+    resolver = Map.get(runtime_context, :connection_resolver, context.connection_resolver)
 
     case ConnectionSelector.resolve(selector, resolver, projection, runtime_context) do
       {:ok, %Connect.Connection{} = connection} ->
@@ -73,7 +75,12 @@ defmodule Jido.Connect.Jido.RuntimeContext do
     do: {:ok, context}
 
   @doc false
-  def runtime_opts(runtime_context, integration_context, extra \\ %{}) do
+  def runtime_opts(runtime_context, integration_context, extra \\ %{})
+
+  def runtime_opts(%Connect.Context{}, integration_context, extra),
+    do: runtime_opts(%{}, integration_context, extra)
+
+  def runtime_opts(runtime_context, integration_context, extra) do
     %{
       context: integration_context,
       policy_context: %{}

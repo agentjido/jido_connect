@@ -1,5 +1,14 @@
 defmodule Jido.Connect.Context do
-  @moduledoc "Host-provided tenant, actor, and connection selection context."
+  @moduledoc """
+  Host-provided context for connection selection and access.
+
+  A host can supply a resolved connection or a selector. Generated Actions
+  and Sensors can resolve a selector with a `{module, function}` callback.
+  The context can also name a policy and a credential resolver.
+
+  Keep credential material in the host's credential store. A connection
+  refers to it through `Jido.Connect.Connection.credential_ref`.
+  """
 
   alias Jido.Connect.{Connection, ConnectionSelector}
 
@@ -10,6 +19,10 @@ defmodule Jido.Connect.Context do
               actor: Zoi.map(),
               connection: Connection.schema() |> Zoi.nullish() |> Zoi.optional(),
               connection_selector: ConnectionSelector.schema() |> Zoi.nullish() |> Zoi.optional(),
+              policy: Zoi.module() |> Zoi.nullish() |> Zoi.optional(),
+              credential_resolver: Zoi.module() |> Zoi.nullish() |> Zoi.optional(),
+              connection_resolver:
+                Zoi.tuple({Zoi.module(), Zoi.atom()}) |> Zoi.nullish() |> Zoi.optional(),
               claims: Zoi.map() |> Zoi.default(%{}),
               metadata: Zoi.map() |> Zoi.default(%{})
             },

@@ -53,6 +53,46 @@ Generated modules carry projection metadata and delegate to core runtimes. They
 do not contain provider business logic, read raw credentials, or become a second
 authoring surface.
 
+## Agent Composition
+
+The Agent DSL adds a composition layer to the core. A single
+`Jido.Connect.Plugin` exposes `connect do`. One Agent can bind several
+providers and select a different set of Actions and Triggers from each one.
+
+| Layer | Owns |
+| --- | --- |
+| Provider DSL | Operation IDs, schemas, auth profiles, handlers, and generated modules. |
+| Agent DSL | Named bindings, selected operations, exact Signal filters, and an optional resolver module. |
+| Jido | Signal routes, Flow execution, and Agent state. |
+| Connect runtime | Binding selection, connection and policy checks, and lease validation. |
+| Host | Webhook ingress, poll scheduling, delivery records, grants, credential storage, and lease issuance. |
+
+An Agent can use a provider's existing Actions and Triggers by adding a binding
+and a route. The shared Action runtime reads the binding from live Plugin
+admission and uses the existing authorization path. The catalog and MCP use
+the provider contracts. GitHub now publishes a PR webhook Trigger so a host
+can use the same binding lookup for polling and webhooks.
+
+```mermaid
+sequenceDiagram
+    participant Host
+    participant Agent as Jido Agent
+    participant Connect as Connect Action runtime
+    participant Resolver as Host credential resolver
+    participant GitHub as GitHub client
+    Host->>Host: Look up Trigger and verify delivery
+    Host->>Agent: Send Signal with live binding context
+    Agent->>Connect: Run generated Action
+    Connect->>Connect: Select binding and check access
+    Connect->>Resolver: Request current lease
+    Resolver-->>Connect: Return scoped lease
+    Connect->>GitHub: Read pull request
+    GitHub-->>Agent: Return Action result through Flow
+```
+
+See the [signed webhook lesson](../examples/00_start_here/00_05_github_webhook/README.md)
+and [credential lease lesson](../examples/00_start_here/00_04_credential_leases/README.md).
+
 ## Authorization Flow
 
 Action and sensor execution use one shared authorization path:

@@ -251,7 +251,7 @@ defmodule Jido.Connect.Runtime do
   end
 
   defp fetch_execution_lease(opts, operation, input, context) do
-    case fetch_option(opts, :credential_resolver) do
+    case fetch_credential_resolver(opts, context) do
       {:ok, resolver} ->
         Authorization.resolve_lease(operation, input, context, resolver, auth_opts(opts))
 
@@ -260,6 +260,13 @@ defmodule Jido.Connect.Runtime do
              :ok <- Authorization.authorize(operation, input, context, lease, auth_opts(opts)) do
           {:ok, lease}
         end
+    end
+  end
+
+  defp fetch_credential_resolver(opts, %Context{credential_resolver: resolver}) do
+    case fetch_option(opts, :credential_resolver) do
+      :error when not is_nil(resolver) -> {:ok, resolver}
+      result -> result
     end
   end
 

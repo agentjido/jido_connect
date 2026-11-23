@@ -5,7 +5,8 @@ Read a GitHub pull request and its proposed review channel in one Agent Turn.
 ## What you will learn
 
 - Declare GitHub and Slack bindings in the same `connect do` block.
-- Select the matching binding at each Flow step.
+- Run each generated Action as a Flow step. Connect selects the matching
+  binding for each Action.
 - Commit one review summary after both reads succeed.
 
 ## Read the code
@@ -47,11 +48,5 @@ the last committed state. The runner stops its Agent when the call ends.
 The Flow reads review metadata only. For an example of posting after approval,
 see [PR triage with an approved Slack post](../../pr_triage/README.md).
 
-## Core Fit and Gaps
-
-One Connect plugin supports both bindings. Each generated Action still enters
-the same Connect authorization and credential resolver path. The inline steps
-bridge the named binding into the generated Action's execution context. This
-glue belongs in the Connect integration layer.
-
-Previous: [Watch pull requests](../00_02_watch_pull_requests/README.md)
+Previous: [Watch pull requests](../00_02_watch_pull_requests/README.md) |
+Next: [Issue credential leases](../00_04_credential_leases/README.md)

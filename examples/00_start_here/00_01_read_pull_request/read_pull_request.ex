@@ -19,17 +19,24 @@ defmodule Jido.Connect.Examples.StartHere.ReadPullRequest do
 
   routes do
     signal_source("/examples/connect/read-pr")
+    route("examples.connect.pr.read", __MODULE__.Read, as: :read_pr)
+  end
 
-    route "examples.connect.pr.read", as: :read_pr do
-      action input,
-        schema: Joi.object(%{repo: Joi.string(), pull_number: Joi.integer() |> Joi.min(1)}),
-        context: context do
-        with {:ok, access} <- Plugin.action_context(context, :source, GetPullRequest),
-             {:ok, %{pull_request: pr}} <-
-               Jido.Exec.run(GetPullRequest, input, access, deadline_ms: 15_000) do
-          {:ok, %{pull_request: Map.take(pr, [:number, :title, :state])}}
-        end
+  defmodule Read do
+    @moduledoc false
+
+    use Jido.Flow,
+      name: "connect_read_pr",
+      schema: Joi.object(%{repo: Joi.string(), pull_number: Joi.integer() |> Joi.min(1)})
+
+    flow do
+      step("read_pr", action: GetPullRequest, params: input())
+
+      step "summary", pr <- result("read_pr", :pull_request) do
+        {:ok, Map.take(pr, [:number, :title, :state])}
       end
+
+      output(%{pull_request: result("summary")})
     end
   end
 end

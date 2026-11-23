@@ -10,12 +10,9 @@ defmodule PRTriageExample.Flow do
     output_schema: Joi.object(%{slack_draft: Joi.map()})
 
   flow do
-    step "fetch_pr", [repo <- input(:repo), number <- input(:pull_number)],
-      inline: [context: context] do
-      with {:ok, access} <- Plugin.action_context(context, :source, GetPullRequest) do
-        GetPullRequest.run(%{repo: repo, pull_number: number}, access)
-      end
-    end
+    step "fetch_pr",
+      action: GetPullRequest,
+      params: %{repo: input(:repo), pull_number: input(:pull_number)}
 
     step "draft_slack",
          [

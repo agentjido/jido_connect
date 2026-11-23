@@ -19,3 +19,15 @@ repository, ref, commits, pusher, and delivery metadata when normalized from a
 verified delivery.
 
 Hosts own delivery dedupe and persistence.
+
+## Route a pull request to an Agent
+
+Select `github.webhook.pull_request` in the Agent's `connect do` binding and
+route that Signal to a Flow. The host looks up the selected Trigger with
+`Jido.Connect.Plugin.trigger/3`, verifies the request with
+`GitHub.Webhook.verify_delivery/4`, and uses the Trigger handler to build
+the Signal data. Send that Signal with the live binding context. The generated
+GitHub Action requests its credential lease when it runs.
+
+The [signed webhook lesson](../examples/00_start_here/00_05_github_webhook/README.md)
+shows the Agent, host entry point, and offline tests.

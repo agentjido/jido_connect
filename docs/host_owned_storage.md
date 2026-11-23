@@ -76,7 +76,8 @@ token or other secret as an ID.
 
 ## Host Policy
 
-Pass a policy callback when actor-level authorization matters:
+Set `policy: MyApp.Policy` on the Context to check actor-level access. A
+host can also pass an explicit policy option for a call.
 
 ```elixir
 policy = fn operation, params, context, connection ->
@@ -95,7 +96,9 @@ Jido.Connect.GitHub.Actions.ListIssues.run(params, %{
 ```
 
 Policies may be anonymous functions, modules exporting `authorize/4` or
-`authorize/5`, or `{module, function}` tuples. Denials return
+`authorize/5`, or `{module, function}` tuples. The Context accepts a module.
+An explicit policy takes precedence when it has a value. A missing or `nil`
+policy option uses the Context policy. Denials return
 `Jido.Connect.Error.AuthError` with `reason: :policy_denied`. Policy exceptions
 are normalized into `Jido.Connect.Error.ExecutionError` instead of escaping as
 raw exceptions.
@@ -117,25 +120,28 @@ be used but the host still needs to load the durable connection:
   )
 ```
 
-Generated Jido actions and sensors can receive a context with a
-`connection_selector` plus a host resolver:
+Generated Jido Actions and Sensors can use a Context with a selector and a
+host callback that receives the selector.
 
 ```elixir
-Jido.Connect.Slack.Actions.PostMessage.run(params, %{
-  integration_context: %Jido.Connect.Context{
-    tenant_id: "tenant_1",
-    actor: %{id: "user_1", type: :user},
-    connection_selector: selector
-  },
-  connection_resolver: &MyApp.Connections.resolve!/1,
-  credential_lease: lease
+context = Jido.Connect.Context.new!(%{
+  tenant_id: "tenant_1",
+  actor: %{id: "user_1", type: :user},
+  connection_selector: selector,
+  connection_resolver: {MyApp.Connections, :resolve},
+  policy: MyApp.Policy,
+  credential_resolver: MyApp.Credentials
 })
+
+Jido.Connect.Slack.Actions.PostMessage.run(params, context)
 ```
 
-The resolver returns a `Jido.Connect.Connection`. The host still mints the
-matching `CredentialLease` from its credential store. `CredentialLease.from_connection/3`
-is the preferred constructor because it copies provider, profile, tenant,
-owner, subject, and granted scopes from the durable connection.
+The connection resolver returns a `Jido.Connect.Connection`. An explicit
+`connection_resolver` option takes precedence and can use a function or a
+tuple with extra arguments. Core `invoke/4` and `poll/4` require a resolved
+connection. The host issues the matching `CredentialLease` from its
+credential store. `CredentialLease.from_connection/3` copies provider,
+profile, tenant, owner, subject, and granted scopes from the connection.
 
 Core then checks:
 
@@ -151,10 +157,13 @@ If a lease carries its own scopes, the effective scopes are the intersection of
 connection scopes and lease scopes. This lets hosts narrow a short-lived lease
 without weakening the durable connection grant.
 
-Direct actions and polling sensors accept a `Jido.Connect.CredentialResolver`
-module in trusted runtime options under `:credential_resolver`. Connect
-validates the operation input, connection tenant, profile, policy, and
-connection scopes before it calls `resolve_lease(context, operation_id, input)`.
+Direct Actions and polls accept a `Jido.Connect.CredentialResolver` module on
+the Context or in trusted runtime options under `:credential_resolver`.
+Connect selects the binding resolver, explicit resolver option, or Context
+resolver, in that order. It uses an explicitly supplied lease when the call
+has no resolver. Connect validates the operation input, connection tenant,
+profile, policy, and connection scopes before it calls
+`resolve_lease(context, operation_id, input)`.
 The callback must check the current grant for the actor and requested resource
 before it reads the secret. It returns `{:ok, %CredentialLease{}}` or
 `{:error, %Jido.Connect.Error.AuthError{}}`. Connect checks the returned lease
