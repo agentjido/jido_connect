@@ -2,6 +2,9 @@ defmodule Jido.Connect.Google.Calendar.ClientTest do
   use ExUnit.Case, async: false
 
   alias Jido.Connect.Google.Calendar.{AclRule, Calendar, Channel, Client, Event}
+  alias Jido.Connect.TestSupport.LiveSmoke
+
+  @fixture_root Path.expand("../../../..", __DIR__)
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -84,18 +87,11 @@ defmodule Jido.Connect.Google.Calendar.ClientTest do
       assert conn.query_params["timeMax"] == "2026-05-07T00:00:00Z"
       assert conn.query_params["fields"] =~ "nextSyncToken,items"
 
-      Req.Test.json(conn, %{
-        "items" => [
-          %{
-            "id" => "event123",
-            "status" => "confirmed",
-            "summary" => "Planning",
-            "start" => %{"dateTime" => "2026-05-06T09:00:00-05:00"},
-            "end" => %{"dateTime" => "2026-05-06T10:00:00-05:00"}
-          }
-        ],
-        "nextPageToken" => "events-next"
-      })
+      # Recorded from a loopback server with synthetic Calendar data.
+      Req.Test.json(
+        conn,
+        LiveSmoke.fixture!(:google_calendar, "events_page", root: @fixture_root)
+      )
     end)
 
     assert {:ok, %{events: [%Event{} = event], next_page_token: "events-next"}} =
