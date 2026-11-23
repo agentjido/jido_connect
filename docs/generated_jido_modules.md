@@ -30,7 +30,7 @@ For an Agent that uses multiple connectors, add `Jido.Connect.Plugin` once and
 declare named bindings in a `connect do` block. Select generated Actions and
 Trigger IDs on each binding. The host passes current resolver context under
 the binding names, and the Agent declares its own routes. See the
-[GitHub and Slack PR triage example](../examples/pr_triage/README.md).
+[Connect Agent lessons](../examples/00_start_here/README.md).
 
 Sensor modules implement `Jido.Connect.Sensor`. They expose `init/2` and
 `handle_event/2` callbacks without starting a process. The host applies the
