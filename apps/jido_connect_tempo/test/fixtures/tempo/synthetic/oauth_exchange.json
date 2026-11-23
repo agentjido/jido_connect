@@ -1,0 +1,14 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": [
+      "application/json"
+    ]
+  },
+  "body": {
+    "access_token": "[redacted]",
+    "refresh_token": "[redacted]",
+    "expires_in": 2591999,
+    "scope": "accounts:manage accounts:view activities:produce activities:view approvals:manage approvals:view audit:view papertrail:view periods:view plans:manage plans:view projects:manage projects:view rates:manage rates:view schemes:manage schemes:view teams:manage teams:view worklogs:manage worklogs:view"
+  }
+}

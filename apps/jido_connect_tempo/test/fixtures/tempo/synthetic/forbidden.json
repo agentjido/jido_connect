@@ -1,0 +1,15 @@
+{
+  "status": 403,
+  "headers": {
+    "content-type": [
+      "application/json"
+    ]
+  },
+  "body": {
+    "errors": [
+      {
+        "message": "You do not have permission to access Holiday Schemes"
+      }
+    ]
+  }
+}

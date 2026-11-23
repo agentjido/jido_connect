@@ -1,0 +1,15 @@
+{
+  "status": 400,
+  "headers": {
+    "content-type": [
+      "application/json"
+    ]
+  },
+  "body": {
+    "errors": [
+      {
+        "message": "Non valid date 'not-a-date': format must be yyyy-MM-dd"
+      }
+    ]
+  }
+}

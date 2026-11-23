@@ -1,0 +1,168 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": [
+      "application/json"
+    ]
+  },
+  "body": {
+    "metadata": {
+      "count": 50,
+      "offset": 0,
+      "limit": 50,
+      "next": "https://api.tempo.io/4/worklogs/user/account-1?from=2026-10-01&to=2026-10-31&offset=50&limit=50"
+    },
+    "results": [
+      {
+        "tempoWorklogId": 1
+      },
+      {
+        "tempoWorklogId": 2
+      },
+      {
+        "tempoWorklogId": 3
+      },
+      {
+        "tempoWorklogId": 4
+      },
+      {
+        "tempoWorklogId": 5
+      },
+      {
+        "tempoWorklogId": 6
+      },
+      {
+        "tempoWorklogId": 7
+      },
+      {
+        "tempoWorklogId": 8
+      },
+      {
+        "tempoWorklogId": 9
+      },
+      {
+        "tempoWorklogId": 10
+      },
+      {
+        "tempoWorklogId": 11
+      },
+      {
+        "tempoWorklogId": 12
+      },
+      {
+        "tempoWorklogId": 13
+      },
+      {
+        "tempoWorklogId": 14
+      },
+      {
+        "tempoWorklogId": 15
+      },
+      {
+        "tempoWorklogId": 16
+      },
+      {
+        "tempoWorklogId": 17
+      },
+      {
+        "tempoWorklogId": 18
+      },
+      {
+        "tempoWorklogId": 19
+      },
+      {
+        "tempoWorklogId": 20
+      },
+      {
+        "tempoWorklogId": 21
+      },
+      {
+        "tempoWorklogId": 22
+      },
+      {
+        "tempoWorklogId": 23
+      },
+      {
+        "tempoWorklogId": 24
+      },
+      {
+        "tempoWorklogId": 25
+      },
+      {
+        "tempoWorklogId": 26
+      },
+      {
+        "tempoWorklogId": 27
+      },
+      {
+        "tempoWorklogId": 28
+      },
+      {
+        "tempoWorklogId": 29
+      },
+      {
+        "tempoWorklogId": 30
+      },
+      {
+        "tempoWorklogId": 31
+      },
+      {
+        "tempoWorklogId": 32
+      },
+      {
+        "tempoWorklogId": 33
+      },
+      {
+        "tempoWorklogId": 34
+      },
+      {
+        "tempoWorklogId": 35
+      },
+      {
+        "tempoWorklogId": 36
+      },
+      {
+        "tempoWorklogId": 37
+      },
+      {
+        "tempoWorklogId": 38
+      },
+      {
+        "tempoWorklogId": 39
+      },
+      {
+        "tempoWorklogId": 40
+      },
+      {
+        "tempoWorklogId": 41
+      },
+      {
+        "tempoWorklogId": 42
+      },
+      {
+        "tempoWorklogId": 43
+      },
+      {
+        "tempoWorklogId": 44
+      },
+      {
+        "tempoWorklogId": 45
+      },
+      {
+        "tempoWorklogId": 46
+      },
+      {
+        "tempoWorklogId": 47
+      },
+      {
+        "tempoWorklogId": 48
+      },
+      {
+        "tempoWorklogId": 49
+      },
+      {
+        "tempoWorklogId": 50
+      }
+    ]
+  }
+}

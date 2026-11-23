@@ -1,0 +1,11 @@
+{
+  "status": 403,
+  "headers": {
+    "content-type": [
+      "application/json"
+    ]
+  },
+  "body": {
+    "message": "authorization code is invalid"
+  }
+}
