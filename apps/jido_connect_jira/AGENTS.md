@@ -2,7 +2,8 @@
 
 - Keep Jira-specific DSL, handlers, normalized structs, and tests in this
   package. Shared OAuth, transport, scope, and pagination helpers belong in
-  `jido_connect` core or in a future shared package.
+  `jido_connect` core; Atlassian concerns shared with Confluence, such as ADF,
+  belong in `jido_connect_atlassian`.
 - Keep Atlassian Cloud API concerns in focused client modules under
   `Jido.Connect.Jira.Client.*`.
 - Prefer handwritten Req clients using `Jido.Connect.Provider.Transport` for

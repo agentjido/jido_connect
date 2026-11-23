@@ -1,0 +1,35 @@
+{
+  "body": {
+    "items": [
+      {
+        "end": {
+          "dateTime": "2026-05-06T10:00:00-05:00"
+        },
+        "id": "event123",
+        "start": {
+          "dateTime": "2026-05-06T09:00:00-05:00"
+        },
+        "status": "confirmed",
+        "summary": "Planning"
+      }
+    ],
+    "nextPageToken": "events-next"
+  },
+  "headers": {
+    "connection": [
+      "close"
+    ],
+    "content-length": [
+      "197"
+    ],
+    "content-type": [
+      "application/json"
+    ]
+  },
+  "recorded_at": "2026-11-23",
+  "request": {
+    "method": "GET",
+    "path": "/v3/calendars/primary/events"
+  },
+  "status": 200
+}

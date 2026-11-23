@@ -4,6 +4,7 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   alias Jido.Connect.Data
 
   alias Jido.Connect.Jira.{
+    ADFText,
     Comment,
     FieldSchema,
     Issue,
@@ -18,17 +19,28 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   # Issue
   # ---------------------------------------------------------------------------
 
-  @doc "Normalizes a Jira issue into a stable struct."
+  @doc """
+  Normalizes a Jira issue into a stable struct.
+
+  The description is rendered with `Jido.Connect.Jira.ADFText`:
+  `description_unsupported_nodes` lists the ADF node and mark types skipped
+  while rendering it. If projection fails, `description_adf_error` gives the
+  reason and the remaining fields stay available.
+  """
   @spec issue(map()) :: {:ok, Issue.t()} | {:error, term()}
   def issue(payload) when is_map(payload) do
     fields = Data.get(payload, "fields") || %{}
+
+    {description, unsupported_nodes, adf_error} = ADFText.project(Data.get(fields, "description"))
 
     %{
       key: Data.get(payload, "key"),
       id: Data.get(payload, "id"),
       url: Data.get(payload, "self"),
       summary: Data.get(fields, "summary"),
-      description: normalize_description(Data.get(fields, "description")),
+      description: description,
+      description_unsupported_nodes: unsupported_nodes,
+      description_adf_error: adf_error,
       status: normalize_status(Data.get(fields, "status")),
       issue_type: normalize_issue_type(Data.get(fields, "issuetype")),
       project: normalize_project_brief(Data.get(fields, "project")),
@@ -112,12 +124,23 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
   # Comment
   # ---------------------------------------------------------------------------
 
-  @doc "Normalizes a Jira comment into a stable struct."
+  @doc """
+  Normalizes a Jira comment into a stable struct.
+
+  The body is rendered with `Jido.Connect.Jira.ADFText`:
+  `body_unsupported_nodes` lists the ADF node and mark types skipped while
+  rendering it. If projection fails, `body_adf_error` gives the reason and
+  the remaining fields stay available.
+  """
   @spec comment(map()) :: {:ok, Comment.t()} | {:error, term()}
   def comment(payload) when is_map(payload) do
+    {body, unsupported_nodes, adf_error} = ADFText.project(Data.get(payload, "body"))
+
     %{
       id: Data.get(payload, "id"),
-      body: normalize_description(Data.get(payload, "body")),
+      body: body,
+      body_unsupported_nodes: unsupported_nodes,
+      body_adf_error: adf_error,
       rendered_body: Data.get(payload, "renderedBody"),
       author: normalize_user(Data.get(payload, "author")),
       update_author: normalize_user(Data.get(payload, "updateAuthor")),
@@ -271,25 +294,4 @@ defmodule Jido.Connect.Jira.Client.Normalizer do
     }
     |> Data.compact()
   end
-
-  defp normalize_description(%{"type" => "doc", "content" => content} = _adf)
-       when is_list(content) do
-    content
-    |> extract_text_from_adf()
-    |> String.trim()
-  end
-
-  defp normalize_description(text) when is_binary(text), do: text
-  defp normalize_description(_), do: nil
-
-  defp extract_text_from_adf(nodes) when is_list(nodes) do
-    Enum.map_join(nodes, "", &extract_text_from_adf/1)
-  end
-
-  defp extract_text_from_adf(%{"content" => content}) when is_list(content) do
-    extract_text_from_adf(content)
-  end
-
-  defp extract_text_from_adf(%{"text" => text}) when is_binary(text), do: text
-  defp extract_text_from_adf(_), do: ""
 end

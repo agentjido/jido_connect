@@ -19,17 +19,51 @@ defmodule Jido.Connect.Jira.Webhook do
   - `comment_updated` — a comment was updated
   """
 
-  alias Jido.Connect.{Data, Error}
+  alias Jido.Connect.{Data, Error, Sanitizer, WebhookDelivery}
+  alias Jido.Connect.Jira.ADFText
 
   @supported_issue_events ~w(jira:issue_created jira:issue_updated)
   @supported_comment_events ~w(comment_created comment_updated)
   @supported_events @supported_issue_events ++ @supported_comment_events
+  @public_changelog_fields ~w(status priority)
+  @public_changelog_item_keys ~w(field field_type from from_string to to_string)
+  @max_public_changelog_items 50
 
   @doc """
   Returns the list of supported Jira webhook event types.
   """
   @spec supported_events() :: [String.t()]
   def supported_events, do: @supported_events
+
+  @doc """
+  Returns a sanitized public map of a Jira webhook delivery.
+
+  Attach the result of `normalize_event/1` with `WebhookDelivery.put_signal/2`.
+  For verified issue updates, this function includes the IDs and display
+  values of built-in status and priority changes in the public changelog.
+  It applies the standard transport limits to those values.
+  """
+  @spec to_public_map(WebhookDelivery.t()) :: map()
+  def to_public_map(%WebhookDelivery{provider: :jira} = delivery) do
+    public = WebhookDelivery.to_public_map(delivery)
+
+    with %WebhookDelivery{signature_state: :verified, normalized_signal: signal}
+         when is_map(signal) <- delivery,
+         "jira:issue_updated" <- Data.get(signal, "event_type"),
+         changelog when is_map(changelog) <- Data.get(signal, "changelog"),
+         items when is_list(items) <- Data.get(changelog, "items"),
+         %{"changelog" => %{"items" => _}} <- public.normalized_signal do
+      public_changelog =
+        items
+        |> Enum.take(@max_public_changelog_items)
+        |> Enum.flat_map(&public_changelog_item/1)
+        |> then(&Sanitizer.sanitize(%{items: &1}, :transport))
+
+      put_in(public, [:normalized_signal, "changelog"], public_changelog)
+    else
+      _other -> public
+    end
+  end
 
   @doc """
   Verifies the Jira webhook signature.
@@ -158,24 +192,7 @@ defmodule Jido.Connect.Jira.Webhook do
          )}
 
       true ->
-        signal =
-          %{
-            event_type: event_type,
-            change_type: comment_change_type(event_type),
-            comment_id: Data.get(comment_data, "id"),
-            comment_body: normalize_comment_body(Data.get(comment_data, "body")),
-            comment_created_at: Data.get(comment_data, "created"),
-            comment_updated_at: Data.get(comment_data, "updated"),
-            comment_author_id: get_in(comment_data, ["author", "accountId"]),
-            comment_author_name: get_in(comment_data, ["author", "displayName"]),
-            issue_id: Data.get(issue_data, "id"),
-            issue_key: Data.get(issue_data, "key"),
-            webhook_id: Data.get(payload, "webhookID"),
-            timestamp: Data.get(payload, "timestamp")
-          }
-          |> Data.compact()
-
-        {:ok, signal}
+        comment_signal(event_type, payload, comment_data, issue_data)
     end
   end
 
@@ -279,25 +296,48 @@ defmodule Jido.Connect.Jira.Webhook do
 
   defp normalize_changelog(_), do: nil
 
-  defp normalize_comment_body(%{"type" => "doc", "content" => content} = _adf)
-       when is_list(content) do
-    extract_text_from_adf(content)
-    |> String.trim()
+  defp public_changelog_item(item) when is_map(item) do
+    if Data.get(item, "field_type") == "jira" and
+         Data.get(item, "field") in @public_changelog_fields do
+      values =
+        for key <- @public_changelog_item_keys,
+            value = Data.get(item, key),
+            is_binary(value) or is_number(value),
+            into: %{},
+            do: {key, value}
+
+      [values]
+    else
+      []
+    end
   end
 
-  defp normalize_comment_body(text) when is_binary(text), do: text
-  defp normalize_comment_body(_), do: nil
+  defp public_changelog_item(_item), do: []
 
-  defp extract_text_from_adf(nodes) when is_list(nodes) do
-    Enum.map_join(nodes, "", &extract_text_from_adf/1)
+  defp comment_signal(event_type, payload, comment_data, issue_data) do
+    {body, unsupported_nodes, adf_error} = ADFText.project(Data.get(comment_data, "body"))
+
+    signal =
+      %{
+        event_type: event_type,
+        change_type: comment_change_type(event_type),
+        comment_id: Data.get(comment_data, "id"),
+        comment_body: body,
+        comment_body_unsupported_nodes: unsupported_nodes,
+        comment_body_adf_error: adf_error,
+        comment_created_at: Data.get(comment_data, "created"),
+        comment_updated_at: Data.get(comment_data, "updated"),
+        comment_author_id: get_in(comment_data, ["author", "accountId"]),
+        comment_author_name: get_in(comment_data, ["author", "displayName"]),
+        issue_id: Data.get(issue_data, "id"),
+        issue_key: Data.get(issue_data, "key"),
+        webhook_id: Data.get(payload, "webhookID"),
+        timestamp: Data.get(payload, "timestamp")
+      }
+      |> Data.compact()
+
+    {:ok, signal}
   end
-
-  defp extract_text_from_adf(%{"content" => content}) when is_list(content) do
-    extract_text_from_adf(content)
-  end
-
-  defp extract_text_from_adf(%{"text" => text}) when is_binary(text), do: text
-  defp extract_text_from_adf(_), do: ""
 
   # Constant-time string comparison to prevent timing attacks.
   defp secure_compare?(left, right) when byte_size(left) != byte_size(right), do: false

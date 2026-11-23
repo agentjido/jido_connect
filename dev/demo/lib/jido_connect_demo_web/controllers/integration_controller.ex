@@ -2,7 +2,7 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
   use Jido.Connect.DemoWeb, :controller
 
   alias Jido.Connect.{Data, Error}
-  alias Jido.Connect.Demo.{GitHubRuntime, GoogleRuntime, Ngrok, SlackRuntime, Store}
+  alias Jido.Connect.Demo.{Capture, GitHubRuntime, GoogleRuntime, Ngrok, SlackRuntime, Store}
   alias Jido.Connect.Google.OAuth, as: GoogleOAuth
   alias Jido.Connect.GitHub.{OAuth, Webhook}
   alias Jido.Connect.Slack.Webhook, as: SlackWebhook
@@ -529,6 +529,7 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
            SlackWebhook.verify_delivery(body, headers, slack_signing_secret(),
              seen_delivery_ids: known_delivery_ids()
            ),
+         _capture = Capture.slack(conn, headers),
          payload = delivery.payload,
          {:challenge, {:error, %Error.ProviderError{reason: :not_url_verification}}} <-
            {:challenge, SlackWebhook.url_verification_challenge(payload)} do
@@ -569,6 +570,7 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
 
     case SlackWebhook.verify_signature(body, headers, slack_signing_secret()) do
       :ok ->
+        Capture.slack(conn, headers)
         Store.put_result(:slack_interactivity, :captured, %{bytes: byte_size(body)})
         json(conn, %{ok: true})
 

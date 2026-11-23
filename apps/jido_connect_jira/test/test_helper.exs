@@ -58,6 +58,8 @@ defmodule Jido.Connect.Jira.MockClient do
        id: "10001",
        url: "https://example.atlassian.net/rest/api/3/issue/10001",
        summary: "Test issue",
+       description: "Issue text",
+       description_unsupported_nodes: ["mediaSingle"],
        status: %{name: "In Progress", id: "3"},
        issue_type: %{name: "Task", id: "10002", subtask: false},
        project: %{key: "PROJ", name: "Project", id: "10000"},
