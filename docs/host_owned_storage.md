@@ -151,6 +151,21 @@ If a lease carries its own scopes, the effective scopes are the intersection of
 connection scopes and lease scopes. This lets hosts narrow a short-lived lease
 without weakening the durable connection grant.
 
+Direct actions and polling sensors accept a `Jido.Connect.CredentialResolver`
+module in trusted runtime options under `:credential_resolver`. Connect
+validates the operation input, connection tenant, profile, policy, and
+connection scopes before it calls `resolve_lease(context, operation_id, input)`.
+The callback must check the current grant for the actor and requested resource
+before it reads the secret. It returns `{:ok, %CredentialLease{}}` or
+`{:error, %Jido.Connect.Error.AuthError{}}`. Connect checks the returned lease
+before it calls the provider.
+
+A durable turn can carry a grant reference. The resolver loads the grant and
+checks current authority each time it runs. Keep tokens and leases out of
+persisted turn context. A resolver denial ends the call, even when the caller
+also supplied `:credential_lease`. Prepared actions use an explicit lease
+because their approval snapshot binds the lease identity.
+
 Plugin availability accepts the same selector/resolver pattern, so UIs can
 show whether shared tenant or installation tools are available without exposing
 raw credentials.

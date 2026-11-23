@@ -6,6 +6,14 @@ change with each deliberate upstream update.
 
 ## Dependency record
 
+Selected on 2026-11-21:
+
+| Package | Requirement | Source |
+| --- | --- | --- |
+| `jido` | `== 3.0.0-beta.3` | Hex |
+| `zoi` | `~> 0.19.0` | Hex |
+| `req_llm` | Locked to `1.31.0` | Hex |
+
 Selected on 2026-11-08 for the Hozen GitHub collection candidate:
 
 | Package | Requirement | Source |
@@ -81,6 +89,13 @@ not import the affected Cowlib encoders. `mix hex.audit` now runs without an
 exception list.
 
 ## Verification
+
+Checks on 2026-11-21 with Jido 3.0.0-beta.3:
+
+- Umbrella `mix quality` passed. It compiled with warnings as errors and passed 4,263 tests.
+- Demo formatting and compilation with warnings as errors passed. All 21 demo tests passed.
+- `mix hex.audit` reported EEF-CVE-2026-117678 in the existing `idna` 7.1.0 lock. The current `jsv` requirement excludes `idna` 8.
+
 
 The Hozen GitHub collection candidate was checked locally on 2026-11-08:
 

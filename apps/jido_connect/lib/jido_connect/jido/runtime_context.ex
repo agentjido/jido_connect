@@ -73,18 +73,12 @@ defmodule Jido.Connect.Jido.RuntimeContext do
     do: {:ok, context}
 
   @doc false
-  def credential_lease(%{credential_lease: %Connect.CredentialLease{} = lease}),
-    do: {:ok, lease}
-
-  def credential_lease(_context), do: {:error, Error.credential_lease_required()}
-
-  @doc false
-  def runtime_opts(runtime_context, integration_context, lease, extra \\ %{}) do
+  def runtime_opts(runtime_context, integration_context, extra \\ %{}) do
     %{
       context: integration_context,
-      credential_lease: lease,
       policy_context: %{}
     }
+    |> Map.merge(Map.take(runtime_context, [:credential_resolver, :credential_lease]))
     |> Map.merge(RuntimeControls.from_context(runtime_context))
     |> Map.merge(extra)
   end

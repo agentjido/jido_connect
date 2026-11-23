@@ -137,8 +137,10 @@ defmodule Jido.Connect do
   Invokes an action through the core runtime boundary.
 
   `integration_ref` may be a provider module or `%Jido.Connect.Spec{}`. `opts`
-  must include `:context` and `:credential_lease`; both may be structs or maps
-  that coerce into `Jido.Connect.Context` and `Jido.Connect.CredentialLease`.
+  must include `:context` and either `:credential_lease` or
+  `:credential_resolver`. A trusted host can supply a module implementing
+  `Jido.Connect.CredentialResolver` to obtain a fresh lease for the parsed
+  action input. The resolver takes precedence when both options are present.
   """
   @spec invoke(integration_ref(), String.t(), map(), runtime_opts()) ::
           {:ok, map()} | {:error, Error.error()}
@@ -223,7 +225,7 @@ defmodule Jido.Connect do
   @doc """
   Executes one poll trigger through the core runtime boundary.
 
-  `opts` accepts the same `:context` and `:credential_lease` values as
+  `opts` accepts the same context and credential options as
   `invoke/4`, plus an optional `:checkpoint`.
   """
   @spec poll(integration_ref(), String.t(), map(), runtime_opts()) ::

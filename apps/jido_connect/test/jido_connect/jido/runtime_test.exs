@@ -17,6 +17,27 @@ defmodule Jido.Connect.Jido.RuntimeTest do
     def resolve(_selector), do: raise("tuple resolver exploded")
   end
 
+  defmodule LeaseResolver do
+    @behaviour Connect.CredentialResolver
+
+    @impl true
+    def resolve_lease(_context, _operation, %{repo: "denied/repo"}) do
+      {:error, Connect.Error.auth("sensitive resolver detail", reason: :policy_denied)}
+    end
+
+    def resolve_lease(_context, _operation, %{repo: "failure/repo"}) do
+      raise "sensitive resolver detail"
+    end
+
+    def resolve_lease(context, operation, input) do
+      send(context.metadata.test_pid, {:resolved, operation, input})
+
+      Connect.CredentialLease.from_connection(context.connection, %{},
+        expires_at: DateTime.add(DateTime.utc_now(), 60, :second)
+      )
+    end
+  end
+
   defmodule CaptureOptionsHandler do
     def run(input, %{context: %{metadata: %{test_pid: test_pid}}} = runtime) do
       send(test_pid, {:runtime_controls, runtime.provider_client, runtime.request_timeout_ms})
@@ -47,6 +68,75 @@ defmodule Jido.Connect.Jido.RuntimeTest do
              })
 
     assert_received {:runtime_controls, CaptureOptionsHandler, 5_432}
+  end
+
+  test "actions resolve a lease after validating input and authorizing the connection" do
+    projection = RuntimeFixtures.action_projection()
+    {context, lease} = RuntimeFixtures.context_and_lease()
+    context = %{context | metadata: %{test_pid: self()}}
+    opts = %{integration_context: context, credential_resolver: LeaseResolver}
+
+    assert {:ok, %{repo: "org/repo"}} =
+             Connect.JidoActionRuntime.run(projection, %{repo: "org/repo"}, opts)
+
+    assert_received {:resolved, "demo.repo.show", %{repo: "org/repo"}}
+
+    assert {:error, %Connect.Error.ValidationError{}} =
+             Connect.JidoActionRuntime.run(projection, %{repo: 42}, opts)
+
+    assert {:error, %Connect.Error.AuthError{reason: :connection_required}} =
+             Connect.JidoActionRuntime.run(projection, %{repo: "org/repo"}, %{
+               opts
+               | integration_context: %{context | tenant_id: "other_tenant"}
+             })
+
+    assert {:error, %Connect.Error.AuthError{reason: :policy_denied}} =
+             Connect.JidoActionRuntime.run(
+               projection,
+               %{repo: "org/repo"},
+               Map.put(opts, :policy, fn _, _, _, _ -> :deny end)
+             )
+
+    refute_received {:resolved, _, _}
+
+    assert {:error, %Connect.Error.AuthError{reason: :policy_denied, message: message}} =
+             Connect.JidoActionRuntime.run(
+               projection,
+               %{repo: "denied/repo"},
+               Map.put(opts, :credential_lease, lease)
+             )
+
+    assert message == "Credential resolution denied"
+
+    assert {:error,
+            %Connect.Error.ExecutionError{
+              phase: :credential_resolution,
+              details: %{operation_id: "demo.repo.show"},
+              message: "Credential resolver failed"
+            }} = Connect.JidoActionRuntime.run(projection, %{repo: "failure/repo"}, opts)
+  end
+
+  test "poll sensors resolve a fresh lease on each tick" do
+    sensor = RuntimeFixtures.sensor_projection()
+    {context, _lease} = RuntimeFixtures.context_and_lease()
+    context = %{context | metadata: %{test_pid: self()}}
+    opts = %{integration_context: context, credential_resolver: LeaseResolver}
+
+    assert {:ok, state, [{:schedule, 1_000}]} =
+             Connect.JidoSensorRuntime.init(sensor, %{repo: "org/repo"}, opts)
+
+    refute_received {:resolved, _, _}
+
+    assert {:ok, state, [{:emit, _signal}, {:schedule, 1_000}]} =
+             Connect.JidoSensorRuntime.handle_event(sensor, :tick, state)
+
+    assert_received {:resolved, "demo.repo.changed", %{repo: "org/repo"}}
+    refute Map.has_key?(state.context, :credential_lease)
+
+    assert {:ok, _state, [{:emit, _signal}, {:schedule, 1_000}]} =
+             Connect.JidoSensorRuntime.handle_event(sensor, :tick, state)
+
+    assert_received {:resolved, "demo.repo.changed", %{repo: "org/repo"}}
   end
 
   test "generated availability keeps host policy requirements" do

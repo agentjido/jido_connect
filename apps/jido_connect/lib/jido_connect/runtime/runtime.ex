@@ -67,10 +67,9 @@ defmodule Jido.Connect.Runtime do
     with {:ok, action} <- find_action(integration, action_id),
          {:ok, parsed_input} <- parse_schema(action.input_schema, input, :input),
          {:ok, context} <- fetch_context(opts),
-         {:ok, lease} <- fetch_credential_lease(opts),
          {:ok, request_timeout_ms} <- request_timeout_ms(opts),
          :ok <- ExecutionAuthorization.require_direct_allowed(action, context, opts),
-         :ok <- Authorization.authorize(action, parsed_input, context, lease, auth_opts(opts)),
+         {:ok, lease} <- fetch_execution_lease(opts, action, parsed_input, context),
          :ok <- CredentialLease.require_unexpired(lease),
          {:ok, output} <-
            run_action_handler(action, parsed_input, %{
@@ -180,8 +179,7 @@ defmodule Jido.Connect.Runtime do
     with {:ok, trigger} <- find_trigger(integration, trigger_id),
          {:ok, parsed_config} <- parse_schema(trigger.config_schema, config, :config),
          {:ok, context} <- fetch_context(opts),
-         {:ok, lease} <- fetch_credential_lease(opts),
-         :ok <- Authorization.authorize(trigger, parsed_config, context, lease, auth_opts(opts)),
+         {:ok, lease} <- fetch_execution_lease(opts, trigger, parsed_config, context),
          :ok <- CredentialLease.require_unexpired(lease),
          {:ok, result} <-
            run_poll_handler(trigger, parsed_config, %{
@@ -249,6 +247,19 @@ defmodule Jido.Connect.Runtime do
 
       :error ->
         {:error, Error.credential_lease_required()}
+    end
+  end
+
+  defp fetch_execution_lease(opts, operation, input, context) do
+    case fetch_option(opts, :credential_resolver) do
+      {:ok, resolver} ->
+        Authorization.resolve_lease(operation, input, context, resolver, auth_opts(opts))
+
+      :error ->
+        with {:ok, lease} <- fetch_credential_lease(opts),
+             :ok <- Authorization.authorize(operation, input, context, lease, auth_opts(opts)) do
+          {:ok, lease}
+        end
     end
   end
 

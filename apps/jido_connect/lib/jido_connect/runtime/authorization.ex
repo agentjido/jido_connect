@@ -13,6 +13,7 @@ defmodule Jido.Connect.Authorization do
     Connection,
     Context,
     CredentialLease,
+    CredentialResolver,
     Error,
     Policy,
     ScopeRequirements,
@@ -46,18 +47,29 @@ defmodule Jido.Connect.Authorization do
          :ok <- require_lease_connection(connection, lease),
          :ok <- require_supported_profile(operation, connection),
          :ok <- CredentialLease.validate_connection_binding(lease, connection),
-         :ok <-
-           Policy.authorize(
-             policy(opts),
-             operation,
-             input,
-             context,
-             connection,
-             policy_context(opts)
-           ),
+         :ok <- authorize_policy(operation, input, context, connection, opts),
          {:ok, required_scopes} <- required_scopes(operation, input, connection),
          :ok <- require_effective_scopes(connection, lease, required_scopes) do
       :ok
+    end
+  end
+
+  @doc false
+  def resolve_lease(operation, input, %Context{} = context, resolver, opts) do
+    with {:ok, connection} <- fetch_connection(context, operation),
+         :ok <- require_matching_tenant(context, connection, operation),
+         :ok <- require_connected(connection, operation),
+         :ok <- require_supported_profile(operation, connection),
+         :ok <- authorize_policy(operation, input, context, connection, opts),
+         {:ok, scopes} <- required_scopes(operation, input, connection),
+         :ok <- require_scopes(connection, connection.scopes, scopes),
+         {:ok, lease} <-
+           CredentialResolver.resolve(resolver, context, operation_id(operation), input),
+         :ok <- require_lease_connection(connection, lease),
+         :ok <- CredentialLease.validate_connection_binding(lease, connection),
+         :ok <- require_effective_scopes(connection, lease, scopes),
+         :ok <- CredentialLease.require_unexpired(lease) do
+      {:ok, lease}
     end
   end
 
@@ -134,6 +146,12 @@ defmodule Jido.Connect.Authorization do
     {:error, Error.connection_required(%{operation_id: operation_id(operation)})}
   end
 
+  defp require_matching_tenant(%Context{tenant_id: tenant}, %Connection{tenant_id: tenant}, _),
+    do: :ok
+
+  defp require_matching_tenant(_context, _connection, operation),
+    do: {:error, Error.connection_required(%{operation_id: operation_id(operation)})}
+
   defp require_connected(%Connection{status: :connected}, _operation), do: :ok
 
   defp require_connected(%Connection{} = connection, operation) do
@@ -165,13 +183,21 @@ defmodule Jido.Connect.Authorization do
   end
 
   defp require_effective_scopes(%Connection{} = connection, %CredentialLease{} = lease, scopes) do
-    missing_scopes = scopes -- CredentialLease.effective_scopes(lease, connection)
+    require_scopes(connection, CredentialLease.effective_scopes(lease, connection), scopes)
+  end
+
+  defp require_scopes(connection, available, required) do
+    missing_scopes = required -- available
 
     if missing_scopes == [] do
       :ok
     else
       {:error, Error.missing_scopes(connection.id, missing_scopes)}
     end
+  end
+
+  defp authorize_policy(operation, input, context, connection, opts) do
+    Policy.authorize(policy(opts), operation, input, context, connection, policy_context(opts))
   end
 
   defp policy(opts), do: get_option(opts, :policy)

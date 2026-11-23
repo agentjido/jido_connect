@@ -30,13 +30,12 @@ defmodule Jido.Connect.JidoSensorRuntime do
            RuntimeContext.resolve_connection(integration_context, context, projection, %{
              trigger_id: projection.trigger_id
            }),
-         {:ok, lease} <- RuntimeContext.credential_lease(context),
          {:ok, result} <-
            Connect.poll(
              projection.integration_module,
              projection.trigger_id,
              Map.get(state, :config, %{}),
-             RuntimeContext.runtime_opts(context, integration_context, lease, %{
+             RuntimeContext.runtime_opts(context, integration_context, %{
                checkpoint: Map.get(state, :checkpoint)
              })
            ) do

@@ -43,10 +43,7 @@ defmodule JidoConnectCore.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jido,
-       git: "https://github.com/mikehostetler/new_jido.git",
-       ref: "54fde0cf79aae9dcc2c00636d9846834abd06852",
-       override: true},
+      {:jido, "== 3.0.0-beta.3"},
       {:arbor_mcp, "== 2.0.0-rc.7"},
       {:jsv, "~> 0.26.2", override: true},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false},
@@ -56,10 +53,7 @@ defmodule JidoConnectCore.MixProject do
       {:splode, "~> 0.3.0"},
       {:spark, "~> 2.7"},
       {:telemetry, "~> 1.3"},
-      {:zoi,
-       git: "https://github.com/mikehostetler/zoi.git",
-       ref: "2fff2a23e23e7ac0b26f62f49bbc1b12f7818ac9",
-       override: true}
+      {:zoi, "~> 0.19.0"}
     ]
   end
 
