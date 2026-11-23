@@ -190,6 +190,8 @@ defmodule Jido.Connect.JiraTest do
 
     assert issue.key == "PROJ-123"
     assert issue.summary == "Test issue"
+    assert issue.description == "Issue text"
+    assert issue.description_unsupported_nodes == ["mediaSingle"]
     refute Map.has_key?(issue, :id)
     refute Map.has_key?(issue, :url)
     refute Map.has_key?(issue, :issue_type)
@@ -494,6 +496,9 @@ defmodule Jido.Connect.JiraTest do
     assert Enum.map(projection.output, & &1.name) == [
              :key,
              :summary,
+             :description,
+             :description_unsupported_nodes,
+             :description_adf_error,
              :status,
              :project,
              :assignee,

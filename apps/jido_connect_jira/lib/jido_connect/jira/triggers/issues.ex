@@ -87,6 +87,7 @@ defmodule Jido.Connect.Jira.Triggers.Issues do
         field(:comment_id, :string)
         field(:comment_body, :string)
         field(:comment_body_unsupported_nodes, {:array, :string})
+        field(:comment_body_adf_error, :string)
         field(:comment_created_at, :string)
         field(:comment_updated_at, :string)
         field(:comment_author_id, :string)

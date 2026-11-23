@@ -264,36 +264,28 @@ defmodule Jido.Connect.Jira.Webhook do
   defp normalize_changelog(_), do: nil
 
   defp comment_signal(event_type, payload, comment_data, issue_data) do
-    case ADFText.project(Data.get(comment_data, "body")) do
-      {:ok, body} ->
-        signal =
-          %{
-            event_type: event_type,
-            change_type: comment_change_type(event_type),
-            comment_id: Data.get(comment_data, "id"),
-            comment_body: ADFText.text(body),
-            comment_body_unsupported_nodes: ADFText.unsupported_nodes(body),
-            comment_created_at: Data.get(comment_data, "created"),
-            comment_updated_at: Data.get(comment_data, "updated"),
-            comment_author_id: get_in(comment_data, ["author", "accountId"]),
-            comment_author_name: get_in(comment_data, ["author", "displayName"]),
-            issue_id: Data.get(issue_data, "id"),
-            issue_key: Data.get(issue_data, "key"),
-            webhook_id: Data.get(payload, "webhookID"),
-            timestamp: Data.get(payload, "timestamp")
-          }
-          |> Data.compact()
+    {body, unsupported_nodes, adf_error} = ADFText.project(Data.get(comment_data, "body"))
 
-        {:ok, signal}
+    signal =
+      %{
+        event_type: event_type,
+        change_type: comment_change_type(event_type),
+        comment_id: Data.get(comment_data, "id"),
+        comment_body: body,
+        comment_body_unsupported_nodes: unsupported_nodes,
+        comment_body_adf_error: adf_error,
+        comment_created_at: Data.get(comment_data, "created"),
+        comment_updated_at: Data.get(comment_data, "updated"),
+        comment_author_id: get_in(comment_data, ["author", "accountId"]),
+        comment_author_name: get_in(comment_data, ["author", "displayName"]),
+        issue_id: Data.get(issue_data, "id"),
+        issue_key: Data.get(issue_data, "key"),
+        webhook_id: Data.get(payload, "webhookID"),
+        timestamp: Data.get(payload, "timestamp")
+      }
+      |> Data.compact()
 
-      {:error, %Error.ValidationError{reason: reason}} ->
-        {:error,
-         Error.provider("Jira webhook comment body is invalid",
-           provider: :jira,
-           reason: :invalid_webhook_event,
-           details: %{event_type: event_type, field: "comment.body", adf_reason: reason}
-         )}
-    end
+    {:ok, signal}
   end
 
   # Constant-time string comparison to prevent timing attacks.

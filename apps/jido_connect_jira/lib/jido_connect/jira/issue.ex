@@ -13,6 +13,7 @@ defmodule Jido.Connect.Jira.Issue do
               description: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               description_unsupported_nodes:
                 Zoi.list(Zoi.string()) |> Zoi.nullish() |> Zoi.optional(),
+              description_adf_error: Zoi.string() |> Zoi.nullish() |> Zoi.optional(),
               status: Status.schema() |> Zoi.nullish() |> Zoi.optional(),
               issue_type: Zoi.map() |> Zoi.nullish() |> Zoi.optional(),
               project: Zoi.map() |> Zoi.nullish() |> Zoi.optional(),

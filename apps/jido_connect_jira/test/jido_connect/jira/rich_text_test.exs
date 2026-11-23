@@ -1,7 +1,6 @@
 defmodule Jido.Connect.Jira.RichTextTest do
   use ExUnit.Case, async: true
 
-  alias Jido.Connect.Error
   alias Jido.Connect.Jira.Client.{Normalizer, Response}
   alias Jido.Connect.Jira.Webhook
 
@@ -144,40 +143,35 @@ defmodule Jido.Connect.Jira.RichTextTest do
       assert issue.description_unsupported_nodes == []
     end
 
-    test "leave both fields empty without a description" do
+    test "leave the description fields empty when Jira omits the description" do
       payload =
         update_in(fixture!("issue_common.json"), ["fields"], &Map.delete(&1, "description"))
 
       assert {:ok, issue} = Normalizer.issue(payload)
       assert issue.description == nil
       assert issue.description_unsupported_nodes == nil
+      assert issue.description_adf_error == nil
     end
 
-    test "fail explicitly on malformed content" do
+    test "omit malformed text and preserve the issue" do
       for description <- [@malformed, %{@adf | "content" => %{}}, 42] do
-        assert {:error, %Error.ValidationError{reason: :invalid_adf}} =
+        assert {:ok,
+                %{
+                  key: "PROJ-123",
+                  description: nil,
+                  description_unsupported_nodes: nil,
+                  description_adf_error: "invalid_adf"
+                }} =
                  Normalizer.issue(with_description(description))
       end
     end
 
-    test "make issue reads fail without exposing issue content" do
-      issue = with_description(@malformed)
+    test "keep issue reads and successful updates usable when ADF is malformed" do
+      response = {:ok, %{status: 200, body: with_description(@malformed)}}
 
-      for {handler, body, message} <- [
-            {&Response.handle_issue_response/1, issue, "Jira issue response was invalid"},
-            {&Response.handle_issue_search_response/1,
-             %{"issues" => [fixture!("issue_common.json"), issue]},
-             "Jira issue search response was invalid"}
-          ] do
-        assert {:error, %Error.ProviderError{} = error} =
-                 handler.({:ok, %{status: 200, body: body}})
-
-        assert error.message == message
-        assert error.reason == :invalid_response
-        assert error.delivery == :response_received
-        assert error.details == %{field: "description", adf_reason: :invalid_adf}
-        refute inspect(error) =~ "Hello world"
-        refute inspect(error) =~ "Implement user authentication flow"
+      for handler <- [&Response.handle_issue_response/1, &Response.handle_update_response/1] do
+        assert {:ok, %{key: "PROJ-123", description: nil, description_adf_error: "invalid_adf"}} =
+                 handler.(response)
       end
     end
 
@@ -185,12 +179,25 @@ defmodule Jido.Connect.Jira.RichTextTest do
       assert {:ok, %{description: @adf_text, description_unsupported_nodes: ["mediaSingle"]}} =
                Response.handle_issue_response({:ok, %{status: 200, body: with_description(@adf)}})
 
-      assert {:ok, %{issues: [%{description_unsupported_nodes: []}, %{description: @adf_text}]}} =
+      assert {:ok,
+              %{
+                issues: [
+                  %{description_unsupported_nodes: []},
+                  %{description: @adf_text},
+                  %{description: nil, description_adf_error: "invalid_adf"}
+                ]
+              }} =
                Response.handle_issue_search_response(
                  {:ok,
                   %{
                     status: 200,
-                    body: %{"issues" => [fixture!("issue_common.json"), with_description(@adf)]}
+                    body: %{
+                      "issues" => [
+                        fixture!("issue_common.json"),
+                        with_description(@adf),
+                        with_description(@malformed)
+                      ]
+                    }
                   }}
                )
     end
@@ -209,9 +216,13 @@ defmodule Jido.Connect.Jira.RichTextTest do
       assert comment.body_unsupported_nodes == []
     end
 
-    test "fail explicitly on malformed content" do
-      assert {:error, %Error.ValidationError{reason: :invalid_adf}} =
-               Normalizer.comment(with_body(@malformed))
+    test "keep the successful comment response when ADF is malformed" do
+      response = {:ok, %{status: 201, body: with_body(@malformed)}}
+
+      assert {:ok, %{id: id, body: nil, body_adf_error: "invalid_adf"}} =
+               Response.handle_comment_response(response)
+
+      assert id == fixture!("comment_common.json")["id"]
     end
   end
 
@@ -238,25 +249,28 @@ defmodule Jido.Connect.Jira.RichTextTest do
       assert signal.comment_body_unsupported_nodes == []
     end
 
-    test "a malformed comment body fails the event explicitly" do
+    test "a malformed comment body preserves the event and reports a reason" do
       payload = put_in(fixture!("webhook_comment_updated.json"), ["comment", "body"], @malformed)
 
-      assert {:error, %Error.ProviderError{} = error} = Webhook.normalize_event(payload)
-      assert error.reason == :invalid_webhook_event
+      assert {:ok,
+              %{
+                event_type: "comment_updated",
+                comment_id: comment_id,
+                comment_body_adf_error: "invalid_adf"
+              } = signal} = Webhook.normalize_event(payload)
 
-      assert error.details == %{
-               event_type: "comment_updated",
-               field: "comment.body",
-               adf_reason: :invalid_adf
-             }
+      assert comment_id == payload["comment"]["id"]
+      refute Map.has_key?(signal, :comment_body)
     end
 
-    test "jira.comment.changed declares comment_body_unsupported_nodes" do
+    test "jira.comment.changed declares the rich-text diagnostics" do
       trigger =
         Enum.find(Jido.Connect.Jira.integration().triggers, &(&1.id == "jira.comment.changed"))
 
       assert %{type: {:array, :string}} =
                Enum.find(trigger.signal, &(&1.name == :comment_body_unsupported_nodes))
+
+      assert %{type: :string} = Enum.find(trigger.signal, &(&1.name == :comment_body_adf_error))
     end
   end
 
