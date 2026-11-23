@@ -26,6 +26,12 @@ context. `Jido.Connect.Catalog.Plugin` is the runtime Plugin for catalog
 configuration. It does not install routes or inject credentials. Catalog routes
 are available as suggestions from `Jido.Connect.Catalog.Plugin.signal_routes/1`.
 
+For an Agent that uses multiple connectors, add `Jido.Connect.Plugin` once and
+declare named bindings in a `connect do` block. Select generated Actions and
+Trigger IDs on each binding. The host passes current resolver context under
+the binding names, and the Agent declares its own routes. See the
+[GitHub and Slack PR triage example](../examples/pr_triage/README.md).
+
 Sensor modules implement `Jido.Connect.Sensor`. They expose `init/2` and
 `handle_event/2` callbacks without starting a process. The host applies the
 returned schedule and emit instructions. A host that uses v3 SensorManager
