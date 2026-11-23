@@ -11,7 +11,7 @@ defmodule Jido.Connect.DemoWeb.CaptureTest do
     dir = tmp_dir("capture")
 
     put_env("SLACK_CAPTURE_DIR", dir)
-    put_env("JIRA_CAPTURE_DIR", dir)
+    File.chmod!(dir, 0o700)
     put_env("SLACK_SIGNING_SECRET", @secret)
     put_env("JIDO_CONNECT_DEMO_SECRET_DIR", tmp_dir("secrets"))
 
@@ -33,18 +33,21 @@ defmodule Jido.Connect.DemoWeb.CaptureTest do
     conn =
       conn
       |> put_req_header("content-type", "application/json")
+      |> put_req_header("authorization", "Bearer unused-fixture-value")
       |> put_req_header("x-slack-request-timestamp", timestamp)
       |> put_req_header("x-slack-signature", slack_signature(@secret, timestamp, body))
       |> post(~p"/integrations/slack/events", body)
 
     assert %{"ok" => true} = json_response(conn, 200)
 
-    assert [path] = Path.wildcard(Path.join(dir, "slack-events-*.json"))
+    assert [path] = Path.wildcard(Path.join(dir, "slack-*.json"))
     raw = path |> File.read!() |> Jason.decode!()
+    assert Bitwise.band(File.stat!(path).mode, 0o777) == 0o600
 
     assert raw["body"] == body
     assert raw["path"] == "/integrations/slack/events"
     assert raw["headers"]["x-slack-request-timestamp"] == timestamp
+    refute Map.has_key?(raw["headers"], "authorization")
 
     assert {:ok, %{delivery_id: "EvCapture1"}} =
              LiveSmoke.replay(path, webhook: Webhook, secret: @secret)
@@ -85,7 +88,7 @@ defmodule Jido.Connect.DemoWeb.CaptureTest do
       |> post(~p"/integrations/slack/interactivity", body)
 
     assert %{"ok" => true} = json_response(conn, 200)
-    assert [path] = Path.wildcard(Path.join(dir, "slack-interactivity-*.json"))
+    assert [path] = Path.wildcard(Path.join(dir, "slack-*.json"))
     assert Jason.decode!(File.read!(path))["body"] == body
 
     sanitized = LiveSmoke.sanitize_capture(path, secret: @secret)
@@ -101,32 +104,64 @@ defmodule Jido.Connect.DemoWeb.CaptureTest do
              )
   end
 
-  test "the Jira webhook route captures deliveries only in capture mode", %{conn: conn, dir: dir} do
-    body = ~s({"webhookEvent":"jira:issue_updated","user":{"emailAddress":"ada@corp.test"}})
+  test "rejects invalid signatures before writing capture files", %{dir: dir} do
+    for {path, body, content_type} <- [
+          {~p"/integrations/slack/events", ~s({"type":"event_callback"}), "application/json"},
+          {~p"/integrations/slack/interactivity", "payload=%7B%7D",
+           "application/x-www-form-urlencoded"}
+        ] do
+      timestamp = Integer.to_string(System.system_time(:second))
 
-    response =
-      conn
-      |> put_req_header("content-type", "application/json")
-      |> put_req_header("x-hub-signature", "sha256=" <> hmac("jira-secret", body))
-      |> post(~p"/integrations/jira/webhook", body)
+      response =
+        build_conn()
+        |> put_req_header("content-type", content_type)
+        |> put_req_header("x-slack-request-timestamp", timestamp)
+        |> put_req_header(
+          "x-slack-signature",
+          slack_signature("other-test-secret", timestamp, body)
+        )
+        |> post(path, body)
 
-    assert %{"ok" => true, "captured" => true} = json_response(response, 200)
-    assert [path] = Path.wildcard(Path.join(dir, "jira-webhook-*.json"))
+      assert %{"ok" => false} = json_response(response, 401)
+    end
 
-    sanitized = LiveSmoke.sanitize_capture(path, secret: "jira-secret")
-    refute sanitized["body"] =~ "ada@corp.test"
+    assert File.ls!(dir) == []
+  end
 
-    assert sanitized["headers"]["x-hub-signature"] ==
-             "sha256=" <> hmac(LiveSmoke.replay_secret(), sanitized["body"])
+  test "keeps existing captures when all slots are full", %{dir: dir} do
+    assert %{"ok" => true} = json_response(post_interactivity("payload=%7B%7D"), 200)
+    first = Path.join(dir, "slack-1.json")
+    original = File.read!(first)
 
-    System.delete_env("JIRA_CAPTURE_DIR")
+    for slot <- 2..20 do
+      File.write!(Path.join(dir, "slack-#{slot}.json"), "existing capture")
+    end
 
-    response =
-      build_conn()
-      |> put_req_header("content-type", "application/json")
-      |> post(~p"/integrations/jira/webhook", body)
+    assert %{"ok" => true} = json_response(post_interactivity("payload=%7B%22id%22%3A2%7D"), 200)
+    assert length(File.ls!(dir)) == 20
+    assert File.read!(first) == original
+  end
 
-    assert %{"ok" => false} = json_response(response, 404)
+  test "skips oversized captures and directories with group or other access", %{dir: dir} do
+    oversized = "payload=" <> String.duplicate("a", 256 * 1024)
+
+    assert %{"ok" => true} = json_response(post_interactivity(oversized), 200)
+    assert File.ls!(dir) == []
+
+    File.chmod!(dir, 0o755)
+
+    assert %{"ok" => true} = json_response(post_interactivity("payload=%7B%7D"), 200)
+    assert File.ls!(dir) == []
+  end
+
+  defp post_interactivity(body) do
+    timestamp = Integer.to_string(System.system_time(:second))
+
+    build_conn()
+    |> put_req_header("content-type", "application/x-www-form-urlencoded")
+    |> put_req_header("x-slack-request-timestamp", timestamp)
+    |> put_req_header("x-slack-signature", slack_signature(@secret, timestamp, body))
+    |> post(~p"/integrations/slack/interactivity", body)
   end
 
   defp slack_signature(secret, timestamp, body),

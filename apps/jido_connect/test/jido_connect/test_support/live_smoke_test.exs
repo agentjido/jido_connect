@@ -1046,6 +1046,26 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
                get("http://stub.test", "/v1/profile")
     end
 
+    test "refuses to replace an existing recorded fixture", %{tmp: tmp} do
+      base_url = start_stub([{200, %{"page" => 1}}, {200, %{"page" => 2}}])
+      target = {:jido_connect, @req_key}
+      path = Path.join(tmp, "test/fixtures/stub/recorded/profile.json")
+
+      with_env(%{"JIDO_CONNECT_RECORD" => "1"}, fn ->
+        put_req_options(retry: false)
+        :ok = LiveSmoke.record(target, :stub, "profile", root: tmp)
+        assert {:ok, %Req.Response{status: 200}} = get(base_url, "/v1/profile")
+        original = File.read!(path)
+
+        :ok = LiveSmoke.record(target, :stub, "profile", root: tmp)
+
+        assert %File.Error{reason: :eexist, path: ^path} =
+                 assert_raise(File.Error, fn -> get(base_url, "/v1/profile") end)
+
+        assert File.read!(path) == original
+      end)
+    end
+
     test "fails the recording when a credential value appears in the response", %{tmp: tmp} do
       token = "ya29.live-smoke-recorded-leak"
       base_url = start_stub([{200, %{"echo" => token}}])
@@ -1502,6 +1522,15 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
         LiveSmoke.write_capture!(capture, :slack, "event_callback", root: tmp, secret: "secret")
 
       assert path == Path.join(tmp, "test/fixtures/slack/captured/event_callback.json")
+
+      assert %File.Error{reason: :eexist, path: ^path} =
+               assert_raise(File.Error, fn ->
+                 LiveSmoke.write_capture!(capture, :slack, "event_callback",
+                   root: tmp,
+                   secret: "secret"
+                 )
+               end)
+
       assert {:ok, :verified} = LiveSmoke.replay(path, webhook: RecordingWebhook)
 
       assert_received {:verify_delivery, body, headers, secret, opts}

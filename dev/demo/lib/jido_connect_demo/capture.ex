@@ -1,58 +1,66 @@
 defmodule Jido.Connect.Demo.Capture do
-  @moduledoc """
-  Capture mode for inbound provider deliveries.
+  @moduledoc false
 
-  When `<PROVIDER>_CAPTURE_DIR` is set, such as `SLACK_CAPTURE_DIR` or
-  `JIRA_CAPTURE_DIR`, the provider's routes write the raw body and headers of
-  each request into that directory before handling it. Live smoke tests
-  sanitize and replay these files; see `docs/live_smoke_tests.md`.
+  import Bitwise, only: [band: 2]
 
-  Raw captures hold signatures and message content. Keep the directory
-  outside the repository.
-  """
+  @max_files 20
+  @max_file_bytes 256 * 1024
 
-  @doc "Writes the request to the provider's capture directory when capture mode is on."
-  @spec capture(Plug.Conn.t(), String.t()) :: {:ok, Path.t()} | :disabled
-  def capture(%Plug.Conn{} = conn, provider) when is_binary(provider) do
-    case capture_dir(provider) do
-      nil -> :disabled
-      dir -> {:ok, write!(conn, provider, dir)}
+  # Call only after Slack accepts the signature. Store just the headers that
+  # the fixture sanitizer and verifier need.
+  def slack(conn, signature_headers) do
+    case System.get_env("SLACK_CAPTURE_DIR") do
+      dir when is_binary(dir) and dir != "" -> capture(conn, signature_headers, Path.expand(dir))
+      _unset -> :disabled
     end
   end
 
-  @doc "Returns the expanded capture directory of a provider, or `nil` when capture is off."
-  @spec capture_dir(String.t()) :: Path.t() | nil
-  def capture_dir(provider) when is_binary(provider) do
-    case System.get_env("#{String.upcase(provider)}_CAPTURE_DIR") do
-      nil -> nil
-      "" -> nil
-      dir -> Path.expand(dir)
+  defp capture(conn, signature_headers, dir) do
+    with {:ok, %File.Stat{type: :directory, mode: mode}} when band(mode, 0o077) == 0 <-
+           File.lstat(dir),
+         body when byte_size(body) <= @max_file_bytes <- conn.assigns[:raw_body] || "",
+         {:ok, data} <- encode(conn, body, signature_headers),
+         true <- IO.iodata_length(data) < @max_file_bytes do
+      write_slot(dir, [data, "\n"], 1)
+    else
+      _unavailable -> :skipped
     end
   end
 
-  defp write!(conn, provider, dir) do
-    captured_at = System.system_time(:second)
-    route = List.last(conn.path_info, "root")
-    name = "#{provider}-#{route}-#{captured_at}-#{System.unique_integer([:positive])}.json"
-    path = Path.join(dir, name)
+  defp encode(conn, body, signature_headers) do
+    content_type = conn |> Plug.Conn.get_req_header("content-type") |> List.first()
 
-    capture = %{
-      "provider" => provider,
+    Jason.encode_to_iodata(%{
+      "provider" => "slack",
       "method" => conn.method,
       "path" => conn.request_path,
-      "captured_at" => captured_at,
-      "headers" => headers(conn.req_headers),
-      "body" => conn.assigns[:raw_body] || ""
-    }
-
-    File.mkdir_p!(dir)
-    File.write!(path, [Jason.encode_to_iodata!(capture, pretty: true), "\n"])
-    path
+      "captured_at" => System.system_time(:second),
+      "headers" => Map.put(signature_headers, "content-type", content_type),
+      "body" => body
+    })
   end
 
-  defp headers(req_headers) do
-    Enum.reduce(req_headers, %{}, fn {name, value}, headers ->
-      Map.update(headers, name, value, &(&1 <> ", " <> value))
-    end)
+  defp write_slot(_dir, _data, slot) when slot > @max_files, do: :skipped
+
+  defp write_slot(dir, data, slot) do
+    path = Path.join(dir, "slack-#{slot}.json")
+
+    case File.open(path, [:write, :binary, :exclusive]) do
+      {:ok, file} -> write_capture(file, path, data)
+      {:error, :eexist} -> write_slot(dir, data, slot + 1)
+      {:error, _reason} -> :skipped
+    end
+  end
+
+  defp write_capture(file, path, data) do
+    written = with :ok <- File.chmod(path, 0o600), do: IO.binwrite(file, data)
+    closed = File.close(file)
+
+    if written == :ok and closed == :ok do
+      :ok
+    else
+      File.rm(path)
+      :skipped
+    end
   end
 end

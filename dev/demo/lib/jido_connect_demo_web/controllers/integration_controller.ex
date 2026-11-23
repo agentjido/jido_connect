@@ -517,7 +517,6 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
   end
 
   def slack_events(conn, _params) do
-    Capture.capture(conn, "slack")
     body = conn.assigns[:raw_body] || ""
 
     headers = %{
@@ -530,6 +529,7 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
            SlackWebhook.verify_delivery(body, headers, slack_signing_secret(),
              seen_delivery_ids: known_delivery_ids()
            ),
+         _capture = Capture.slack(conn, headers),
          payload = delivery.payload,
          {:challenge, {:error, %Error.ProviderError{reason: :not_url_verification}}} <-
            {:challenge, SlackWebhook.url_verification_challenge(payload)} do
@@ -560,7 +560,6 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
   end
 
   def slack_interactivity(conn, _params) do
-    Capture.capture(conn, "slack")
     body = conn.assigns[:raw_body] || ""
 
     headers = %{
@@ -571,6 +570,7 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
 
     case SlackWebhook.verify_signature(body, headers, slack_signing_secret()) do
       :ok ->
+        Capture.slack(conn, headers)
         Store.put_result(:slack_interactivity, :captured, %{bytes: byte_size(body)})
         json(conn, %{ok: true})
 
@@ -578,18 +578,6 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
         conn
         |> put_status(:unauthorized)
         |> json(%{ok: false, error: inspect(reason)})
-    end
-  end
-
-  def jira_webhook(conn, _params) do
-    case Capture.capture(conn, "jira") do
-      {:ok, _path} ->
-        json(conn, %{ok: true, captured: true})
-
-      :disabled ->
-        conn
-        |> put_status(:not_found)
-        |> json(%{ok: false, error: "set JIRA_CAPTURE_DIR to capture Jira webhook deliveries"})
     end
   end
 

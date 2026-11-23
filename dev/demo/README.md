@@ -28,7 +28,6 @@ Useful routes:
 - `POST /integrations/github/webhook`
 - `POST /integrations/slack/events`
 - `POST /integrations/slack/interactivity`
-- `POST /integrations/jira/webhook` (capture mode only)
 
 Pair it with ngrok from the repo root:
 
@@ -36,6 +35,13 @@ Pair it with ngrok from the repo root:
 mix jido.connect.ngrok --port 4000
 ```
 
-Set `SLACK_CAPTURE_DIR` or `JIRA_CAPTURE_DIR` to write the raw body and headers
-of Slack or Jira deliveries into that directory for live smoke tests. See
-[Live smoke tests](../../docs/live_smoke_tests.md).
+Set `SLACK_CAPTURE_DIR` to a private directory outside the repository to
+capture verified Slack events and interactivity requests. Create the directory
+with `mktemp -d` or `mkdir -m 700` before you start the demo.
+
+The capture directory has 20 file slots. Each file holds up to 256 KiB,
+including the raw body and the headers needed for replay. When the directory
+is full or a capture exceeds the size limit, the demo continues to handle the
+request. Move the raw files out of the directory to free slots. Treat them as
+private and sanitize them before you commit fixtures.
+[Live smoke tests](../../docs/live_smoke_tests.md)

@@ -144,6 +144,7 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
   Req adapter until the test exits and writes each response, sanitized, to
   `test/fixtures/<provider>/recorded/<name>.json`; later responses of the same
   test go to `<name>.2.json`, `<name>.3.json` and so on.
+  Recording fails if the destination file already exists.
 
   Options are `:root` (default: the current directory), `:transform` and the
   sanitizer options of `sanitize/2`. Without `JIDO_CONNECT_RECORD=1` this
@@ -308,8 +309,8 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
   @doc """
   Sanitizes a capture and writes it to `test/fixtures/<provider>/captured/<name>.json`.
 
-  Returns the written path. Accepts `:root`, `:secret` and the options of
-  `sanitize/2`; see `sanitize_capture/2`.
+  Returns the written path. Raises if the file already exists. Accepts
+  `:root`, `:secret` and the options of `sanitize/2`; see `sanitize_capture/2`.
   """
   @spec write_capture!(map() | Path.t(), atom() | String.t(), String.t(), keyword()) :: Path.t()
   def write_capture!(capture, provider, name, opts \\ []) do
@@ -318,7 +319,7 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
     path = Path.join(dir, "#{name}.json")
 
     File.mkdir_p!(dir)
-    File.write!(path, [Jason.encode_to_iodata!(sanitized, pretty: true), "\n"])
+    File.write!(path, [Jason.encode_to_iodata!(sanitized, pretty: true), "\n"], [:exclusive])
     path
   end
 
