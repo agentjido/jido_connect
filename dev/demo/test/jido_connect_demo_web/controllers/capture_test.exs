@@ -3,6 +3,7 @@ defmodule Jido.Connect.DemoWeb.CaptureTest do
 
   alias Jido.Connect.Error.AuthError
   alias Jido.Connect.Slack.Webhook
+  alias Jido.Connect.Jira.Webhook, as: JiraWebhook
   alias Jido.Connect.TestSupport.LiveSmoke
 
   @secret "capture-test-signing-secret"
@@ -142,6 +143,19 @@ defmodule Jido.Connect.DemoWeb.CaptureTest do
     assert File.read!(first) == original
   end
 
+  test "a full batch moved into a subdirectory frees the slots", %{dir: dir} do
+    batch = Path.join(dir, "batch-1")
+    File.mkdir_p!(batch)
+
+    for slot <- 1..20 do
+      File.write!(Path.join(batch, "slack-#{slot}.json"), "earlier capture")
+    end
+
+    assert %{"ok" => true} = json_response(post_interactivity("payload=%7B%7D"), 200)
+    assert Enum.sort(File.ls!(dir)) == ["batch-1", "slack-1.json"]
+    assert length(File.ls!(batch)) == 20
+  end
+
   test "skips oversized captures and directories with group or other access", %{dir: dir} do
     oversized = "payload=" <> String.duplicate("a", 256 * 1024)
 
@@ -152,6 +166,46 @@ defmodule Jido.Connect.DemoWeb.CaptureTest do
 
     assert %{"ok" => true} = json_response(post_interactivity("payload=%7B%7D"), 200)
     assert File.ls!(dir) == []
+  end
+
+  test "captures a verified Jira delivery and nothing without a valid signature", %{conn: conn} do
+    dir = tmp_dir("jira-capture")
+    File.chmod!(dir, 0o700)
+    put_env("JIRA_CAPTURE_DIR", dir)
+    put_env("JIRA_WEBHOOK_SECRET", "jira-secret")
+    body = ~s({"webhookEvent":"jira:issue_updated","user":{"emailAddress":"ada@corp.test"}})
+
+    response = post_jira(conn, body, "sha256=" <> hmac("other-secret", body))
+    assert %{"ok" => false} = json_response(response, 401)
+    assert File.ls!(dir) == []
+
+    response = post_jira(build_conn(), body, "sha256=" <> hmac("jira-secret", body))
+    assert %{"ok" => true, "captured" => true} = json_response(response, 200)
+    assert File.ls!(dir) == ["jira-1.json"]
+
+    sanitized = LiveSmoke.sanitize_capture(Path.join(dir, "jira-1.json"), secret: "jira-secret")
+    refute sanitized["body"] =~ "ada@corp.test"
+
+    assert sanitized["headers"]["x-hub-signature"] ==
+             "sha256=" <> hmac(LiveSmoke.replay_secret(), sanitized["body"])
+
+    assert {:ok, %{delivery_id: "4711", event: "jira:issue_updated"}} =
+             LiveSmoke.replay(sanitized, webhook: JiraWebhook)
+
+    System.delete_env("JIRA_CAPTURE_DIR")
+
+    response = post_jira(build_conn(), body, "sha256=" <> hmac("jira-secret", body))
+    assert %{"ok" => false} = json_response(response, 404)
+    assert File.ls!(dir) == ["jira-1.json"]
+  end
+
+  defp post_jira(conn, body, signature) do
+    conn
+    |> put_req_header("content-type", "application/json")
+    |> put_req_header("x-hub-signature", signature)
+    |> put_req_header("x-atlassian-webhook-identifier", "4711")
+    |> put_req_header("x-atlassian-webhook-flow", "Primary")
+    |> post(~p"/integrations/jira/webhook", body)
   end
 
   defp post_interactivity(body) do

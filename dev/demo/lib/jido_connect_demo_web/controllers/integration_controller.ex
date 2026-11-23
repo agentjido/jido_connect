@@ -6,6 +6,7 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
   alias Jido.Connect.Google.OAuth, as: GoogleOAuth
   alias Jido.Connect.GitHub.{OAuth, Webhook}
   alias Jido.Connect.Slack.Webhook, as: SlackWebhook
+  alias Jido.Connect.Jira.Webhook, as: JiraWebhook
 
   def index(conn, _params) do
     json(conn, %{integrations: Jido.Connect.Demo.Integrations.api_index()})
@@ -578,6 +579,38 @@ defmodule Jido.Connect.DemoWeb.IntegrationController do
         conn
         |> put_status(:unauthorized)
         |> json(%{ok: false, error: inspect(reason)})
+    end
+  end
+
+  # Capture mode only: verifies the administrator webhook signature with
+  # `JIRA_WEBHOOK_SECRET` and writes the delivery to `JIRA_CAPTURE_DIR`, with
+  # the delivery identifier and flow that replay reads.
+  def jira_webhook(conn, _params) do
+    body = conn.assigns[:raw_body] || ""
+
+    headers =
+      Map.new(
+        ~w(x-hub-signature x-atlassian-webhook-identifier x-atlassian-webhook-flow),
+        &{&1, get_req_header(conn, &1) |> List.first()}
+      )
+
+    with secret when is_binary(secret) and secret != "" <- System.get_env("JIRA_WEBHOOK_SECRET"),
+         {:ok, _delivery} <- JiraWebhook.verify_delivery(body, headers, secret),
+         result when result in [:ok, :skipped] <- Capture.jira(conn, headers) do
+      json(conn, %{ok: true, captured: result == :ok})
+    else
+      {:error, reason} ->
+        conn
+        |> put_status(:unauthorized)
+        |> json(%{ok: false, error: inspect(reason)})
+
+      _unset ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{
+          ok: false,
+          error: "set JIRA_WEBHOOK_SECRET and JIRA_CAPTURE_DIR to capture deliveries"
+        })
     end
   end
 
