@@ -1,0 +1,56 @@
+{
+  "body": {
+    "error": {
+      "code": 400,
+      "errors": [
+        {
+          "domain": "global",
+          "message": "Invalid attachment token",
+          "reason": "invalidArgument"
+        }
+      ],
+      "message": "Invalid attachment token",
+      "status": "INVALID_ARGUMENT"
+    }
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 09:37:30 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/messages/1a18d6f033e25f43/attachments/jcl-unknown-attachment-id"
+  },
+  "status": 400
+}

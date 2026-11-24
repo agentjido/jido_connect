@@ -2,9 +2,24 @@ defmodule Jido.Connect.Gmail.ScopeResolver do
   @moduledoc """
   Resolves Gmail scopes.
 
-  Metadata reads prefer `gmail.metadata`, while accepting broader read or
-  modify grants that hosts may already have.
+  Metadata reads other than `google.gmail.labels.list` require
+  `gmail.metadata` only when the connection holds no broader grant. When it
+  holds `gmail.modify`, `gmail.readonly` or `https://mail.google.com/`, the
+  first of them in that order is required, so a lease narrowed to
+  `gmail.metadata` fails with missing scopes. The label list keeps
+  `gmail.metadata` whenever it is granted.
+
+  `google.gmail.messages.list` and `google.gmail.threads.list` also read the
+  action input. Gmail rejects the `q` parameter under `gmail.metadata`, so a
+  list with a non-empty `query` resolves like a content read: to
+  `gmail.modify`, `gmail.readonly` or `https://mail.google.com/` when one of
+  them is granted, otherwise to `gmail.readonly`. The rule follows what the
+  client sends as `q`. The client drops only a `nil` or empty query, so a
+  query of whitespace counts as a search. Without a query, or with a `nil` or
+  empty one, both list actions keep the metadata-read resolution.
   """
+
+  alias Jido.Connect.Data
 
   @metadata_scope "https://www.googleapis.com/auth/gmail.metadata"
   @readonly_scope "https://www.googleapis.com/auth/gmail.readonly"
@@ -32,7 +47,14 @@ defmodule Jido.Connect.Gmail.ScopeResolver do
     "google.gmail.label.delete"
   ]
   @content_read_actions [
-    "google.gmail.message.attachment.get"
+    "google.gmail.message.attachment.get",
+    "google.gmail.message.content.get",
+    "google.gmail.thread.content.get",
+    "google.gmail.message.attachment.content.get"
+  ]
+  @search_list_actions [
+    "google.gmail.messages.list",
+    "google.gmail.threads.list"
   ]
   @modify_actions [
     "google.gmail.message.labels.apply",
@@ -49,10 +71,14 @@ defmodule Jido.Connect.Gmail.ScopeResolver do
     "google.gmail.thread.delete"
   ]
 
-  def required_scopes(operation, _input, connection) do
-    operation
-    |> operation_id()
-    |> required_for_operation(connection)
+  def required_scopes(operation, input, connection) do
+    operation_id = operation_id(operation)
+
+    if operation_id in @search_list_actions and query_search?(input) do
+      content_read_scopes(connection)
+    else
+      required_for_operation(operation_id, connection)
+    end
   end
 
   defp required_for_operation(operation_id, %{scopes: scopes})
@@ -160,19 +186,9 @@ defmodule Jido.Connect.Gmail.ScopeResolver do
   defp required_for_operation(operation_id, _connection) when operation_id in @mail_actions,
     do: [@mail_scope]
 
-  defp required_for_operation(operation_id, %{scopes: scopes})
-       when operation_id in @content_read_actions and is_list(scopes) do
-    cond do
-      @modify_scope in scopes -> [@modify_scope]
-      @readonly_scope in scopes -> [@readonly_scope]
-      @mail_scope in scopes -> [@mail_scope]
-      true -> [@readonly_scope]
-    end
-  end
-
-  defp required_for_operation(operation_id, _connection)
+  defp required_for_operation(operation_id, connection)
        when operation_id in @content_read_actions,
-       do: [@readonly_scope]
+       do: content_read_scopes(connection)
 
   defp required_for_operation(_operation_id, %{scopes: scopes}) when is_list(scopes) do
     cond do
@@ -184,6 +200,24 @@ defmodule Jido.Connect.Gmail.ScopeResolver do
   end
 
   defp required_for_operation(_operation_id, _connection), do: [@metadata_scope]
+
+  defp content_read_scopes(%{scopes: scopes}) when is_list(scopes) do
+    cond do
+      @modify_scope in scopes -> [@modify_scope]
+      @readonly_scope in scopes -> [@readonly_scope]
+      @mail_scope in scopes -> [@mail_scope]
+      true -> [@readonly_scope]
+    end
+  end
+
+  defp content_read_scopes(_connection), do: [@readonly_scope]
+
+  defp query_search?(input) do
+    case Data.get(input, :query) do
+      query when is_binary(query) -> query != ""
+      _no_query -> false
+    end
+  end
 
   defp operation_id(%{id: id}), do: id
   defp operation_id(%{action_id: action_id}), do: action_id

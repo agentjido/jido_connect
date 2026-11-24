@@ -1,0 +1,46 @@
+{
+  "body": {
+    "data": "RnJvbTogT3BhcXVlIFNlbmRlciA8b3BhcXVlLnNlbmRlckBleGFtcGxlLm9yZz4NClRvOiBPcGFxdWUgUmVjaXBpZW50IDxvcGFxdWUucmVjaXBpZW50QGV4YW1wbGUub3JnPg0KU3ViamVjdDogamNsLWxpdmUgaGVhZGVycy1vbmx5IG9yaWdpbmFsDQpEYXRlOiBUaHUsIDI5IE9jdCAyMDI2IDIxOjIyOjQ2ICswMDAwDQpNZXNzYWdlLUlEOiA8amNsLWxpdmUtaGVhZGVycy1vbmx5LW9yaWdpbmFsLWE2NjQ3YjY1M2RiMkBqY2wtbGl2ZS5pbnZhbGlkPg0K",
+    "size": 258
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 10:56:58 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/messages/1a197b4b97e720cc/attachments/ANGjdJ91jcedV-ZsENJcFOsce3mD-MTQLRpJQzSGqlxJNrxXgefb3oy_qPFk-Zqz_sxR5dqIcewLMsD7VAbotCeg6nBNZzOptB4CB0m4cNXUpuPXZcTfFiPOUxqpjpJ1GZNuu8cGAKnkBGcrNZOztdPt9M7ZhsMNvE_4D0EmOfAi11zX9RynzpBCqYBYOxCuvyRiFl7bipIdnErLAKp5md56OazoKgKh5CM1DV5lRjBV452gdhcji0O-iFAE7EKA6R7MMvNsfHl2HiMJqs4l2_noW7YgF0L9JE4gmCrwaHxFrWN6wh5QPaD_4e1XQMtOByHB9CPPl-8ps2uOEZ4IwxNohrq_Fjtd4zSC4RK_sLyNcL4kb3kTXU3qq10f7A4"
+  },
+  "status": 200
+}

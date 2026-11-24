@@ -1,0 +1,52 @@
+{
+  "body": {
+    "id": "r-5113074141685300704",
+    "message": {
+      "id": "1a1a0bb277fed87f",
+      "labelIds": [
+        "DRAFT"
+      ],
+      "threadId": "1a1a0bb2286bb269"
+    }
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Tue, 03 Nov 2026 09:26:22 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-03",
+  "request": {
+    "method": "PUT",
+    "path": "/gmail/v1/users/me/drafts/r-5113074141685300704"
+  },
+  "status": 200
+}

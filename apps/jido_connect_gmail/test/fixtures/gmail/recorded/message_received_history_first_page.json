@@ -1,0 +1,69 @@
+{
+  "body": {
+    "history": [
+      {
+        "id": "17878",
+        "messages": [
+          {
+            "id": "1a19cc8b83a665ea",
+            "threadId": "1a19cc8b83a665ea"
+          }
+        ],
+        "messagesAdded": [
+          {
+            "message": {
+              "id": "1a19cc8b83a665ea",
+              "labelIds": [
+                "UNREAD",
+                "INBOX"
+              ],
+              "threadId": "1a19cc8b83a665ea"
+            }
+          }
+        ]
+      }
+    ],
+    "historyId": "17925",
+    "nextPageToken": "15893066855093273277"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 15:02:43 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/history"
+  },
+  "status": 200
+}

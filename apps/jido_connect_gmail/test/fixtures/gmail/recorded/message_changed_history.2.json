@@ -1,0 +1,80 @@
+{
+  "body": {
+    "history": [
+      {
+        "id": "15703",
+        "labelsAdded": [
+          {
+            "labelIds": [
+              "TRASH"
+            ],
+            "message": {
+              "id": "1a18d01153510f50",
+              "labelIds": [
+                "TRASH"
+              ],
+              "threadId": "1a18d01153510f50"
+            }
+          }
+        ],
+        "messages": [
+          {
+            "id": "1a18d01153510f50",
+            "threadId": "1a18d01153510f50"
+          }
+        ]
+      },
+      {
+        "id": "15704",
+        "messages": [
+          {
+            "id": "1a18d01153510f50",
+            "threadId": "1a18d01153510f50"
+          }
+        ]
+      }
+    ],
+    "historyId": "15752",
+    "nextPageToken": "02634012761366433495"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 12:14:49 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/history"
+  },
+  "status": 200
+}
