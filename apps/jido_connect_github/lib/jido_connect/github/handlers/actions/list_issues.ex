@@ -13,7 +13,7 @@ defmodule Jido.Connect.GitHub.Handlers.Actions.ListIssues do
   defp list_page(client, input, credentials) do
     token = Map.get(credentials, :access_token)
 
-    if function_exported?(client, :list_issues_page, 2) do
+    if Code.ensure_loaded?(client) and function_exported?(client, :list_issues_page, 2) do
       client.list_issues_page(
         %{
           repo: Map.fetch!(input, :repo),
