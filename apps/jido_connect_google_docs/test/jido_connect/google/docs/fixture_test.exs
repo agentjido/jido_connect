@@ -3,6 +3,7 @@ defmodule Jido.Connect.Google.Docs.FixtureTest do
 
   alias Jido.Connect.Google.Docs.Normalizer
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   test "normalizes common Google Docs document fixture" do
     payload = fixture!("document_common.json")
@@ -18,24 +19,16 @@ defmodule Jido.Connect.Google.Docs.FixtureTest do
     assert doc.tabs == []
   end
 
-  test "normalizes multi-tab Google Docs document fixture" do
-    payload = fixture!("document_tabs.json")
+  test "normalizes the recorded multi-tab document" do
+    payload = LiveSmoke.fixture!(:google_docs, "document_with_tabs_content")
 
     assert {:ok, doc} = Normalizer.document(payload)
-    assert doc.document_id == "doc_tabs456"
-    assert doc.title == "Multi-Tab Report"
-    assert doc.revision_id == "rev002"
+    assert doc.document_id == "1Ej83l690dmUeDhX90Suxdef_SR97A-Kleilmdg5G9_E"
+    assert doc.title == "jcl-live tabs"
     assert doc.body == nil
-    assert length(doc.tabs) == 2
 
-    [tab1, tab2] = doc.tabs
-    assert tab1.tab_id == "tab_summary"
-    assert tab1.title == "Summary"
-    assert tab1.body != nil
-
-    assert tab2.tab_id == "tab_details"
-    assert tab2.title == "Details"
-    assert tab2.body != nil
+    assert [%{tab_id: "t.0", title: "First"}, %{tab_id: "t.1mzp8ctna0b6", title: "Second"}] =
+             doc.tabs
   end
 
   test "normalizes minimal Google Docs document fixture" do
@@ -50,57 +43,54 @@ defmodule Jido.Connect.Google.Docs.FixtureTest do
     assert doc.tabs == []
   end
 
-  test "normalizes Google Docs batch update result fixture" do
-    payload = fixture!("batch_update_result.json")
+  test "normalizes the recorded batch update response" do
+    payload = LiveSmoke.fixture!(:google_docs, "batch_update_insert")
 
     assert {:ok, result} = Normalizer.batch_update_result(payload)
-    assert result.document_id == "doc_batch101"
-    assert result.replies == []
+
+    assert result == %{
+             document_id: "1t47PcdwCWroHLmzucoB5YxoFZRyUD9a8dymU8ju-pwE",
+             replies: [%{}, %{}],
+             write_control: %{
+               "requiredRevisionId" => payload["writeControl"]["requiredRevisionId"]
+             }
+           }
   end
 
-  test "normalizes batch update result with replies" do
-    payload = %{
-      "documentId" => "doc_reply_001",
-      "replies" => [
-        %{"insertText" => %{}},
-        %{"updateTextStyle" => %{}}
-      ]
-    }
+  test "normalizes a recorded document read placed inline in a batch update response" do
+    document = LiveSmoke.fixture!(:google_docs, "document_without_tabs_content")
 
-    assert {:ok, result} = Normalizer.batch_update_result(payload)
-    assert result.document_id == "doc_reply_001"
-    assert length(result.replies) == 2
+    payload =
+      :google_docs
+      |> LiveSmoke.fixture!("batch_update_insert")
+      |> Map.put("document", document)
+
+    assert {:ok, %{document: inline}} = Normalizer.batch_update_result(payload)
+    assert %{document_id: "1Ej83l690dmUeDhX90Suxdef_SR97A-Kleilmdg5G9_E", tabs: []} = inline
+    assert inline.body == document["body"]
   end
 
-  test "normalizes batch update result with inline document" do
-    payload = %{
-      "documentId" => "doc_inline_001",
-      "document" => %{
-        "documentId" => "doc_inline_001",
-        "title" => "Updated Doc"
-      },
-      "replies" => [%{"insertText" => %{}}]
-    }
+  test "normalizes a recorded tab from tabProperties and documentTab" do
+    %{"tabs" => [first | _rest]} = LiveSmoke.fixture!(:google_docs, "document_with_tabs_content")
 
-    assert {:ok, result} = Normalizer.batch_update_result(payload)
-    assert result.document_id == "doc_inline_001"
-    assert %{document_id: "doc_inline_001", title: "Updated Doc"} = result.document
-    assert length(result.replies) == 1
-  end
+    assert {:ok, tab} = Normalizer.tab(first)
+    assert tab.tab_id == "t.0"
+    assert tab.title == "First"
+    assert tab.body == first["documentTab"]["body"]
 
-  test "normalizes tab directly" do
-    payload = %{
-      "tabProperties" => %{
-        "id" => "tab_notes",
-        "title" => "Notes"
-      },
-      "body" => %{"content" => []}
-    }
-
-    assert {:ok, tab} = Normalizer.tab(payload)
-    assert tab.tab_id == "tab_notes"
-    assert tab.title == "Notes"
-    assert tab.body == %{"content" => []}
+    assert %{
+             "content" => [
+               %{"endIndex" => 1, "sectionBreak" => _},
+               %{
+                 "startIndex" => 1,
+                 "endIndex" => 22,
+                 "paragraph" => %{
+                   "elements" => [%{"textRun" => %{"content" => "jcl-marker-tab-first\n"}}]
+                 }
+               },
+               %{"startIndex" => 22, "endIndex" => 23}
+             ]
+           } = tab.body
   end
 
   test "normalizes document request" do

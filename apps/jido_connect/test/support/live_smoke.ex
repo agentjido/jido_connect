@@ -57,7 +57,7 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
                      GOOGLE_DRIVE_SHORTCUT_ID GOOGLE_DOCS_TABBED_DOCUMENT_ID
                      GOOGLE_DRIVE_STARRED_FILE_ID GOOGLE_DRIVE_FOLDER_ID
                      GOOGLE_DRIVE_WATCH_FOLDER_ID GOOGLE_DRIVE_UPLOAD_FOLDER_ID
-                     GOOGLE_DRIVE_EDIT_FILE_ID)
+                     GOOGLE_DRIVE_EDIT_FILE_ID GOOGLE_DOCS_SCRATCH_DOCUMENT_ID)
     },
     slack: %{credentials: ~w(SLACK_BOT_TOKEN SLACK_SIGNING_SECRET), settings: ~w(JIDO_PUBLIC_URL)},
     jira: %{credentials: ~w(JIRA_WEBHOOK_SECRET), settings: ~w(JIRA_SITE JIRA_EMAIL)},

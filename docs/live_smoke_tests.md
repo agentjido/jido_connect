@@ -154,3 +154,9 @@ also checks nonempty variables whose names end in `_TOKEN`, `_SECRET`,
 | `GOOGLE_DRIVE_WATCH_FOLDER_ID` | setting | Folder for externally added files |
 | `GOOGLE_DRIVE_UPLOAD_FOLDER_ID` | setting | Upload folder created by the app |
 | `GOOGLE_DRIVE_EDIT_FILE_ID` | setting | File that a write test may edit |
+
+### Google Docs
+
+| Variable | Kind | Use |
+| --- | --- | --- |
+| `GOOGLE_DOCS_SCRATCH_DOCUMENT_ID` | setting | Scratch document |

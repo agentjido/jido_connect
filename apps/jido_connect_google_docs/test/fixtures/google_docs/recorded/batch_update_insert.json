@@ -1,0 +1,60 @@
+{
+  "body": {
+    "commentUpdateState": "NO_UPDATES_REQUESTED",
+    "documentId": "1t47PcdwCWroHLmzucoB5YxoFZRyUD9a8dymU8ju-pwE",
+    "replies": [
+      {},
+      {}
+    ],
+    "suggestionResponses": [
+      {},
+      {}
+    ],
+    "writeControl": {
+      "requiredRevisionId": "AHj4eMTl5-7Idvu8RQvD5AvJUr6pDThFLQEoocsGE-2Ugmqvf2HQKoyIe6BaJsFX-Lqd4edIX8bjr18tMZKRK9ERdeni2kLHHzz1fNA3xqA"
+    }
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 12:40:56 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-l2-request-path": [
+      "l2-managed-5"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/v1/documents/1t47PcdwCWroHLmzucoB5YxoFZRyUD9a8dymU8ju-pwE:batchUpdate"
+  },
+  "status": 200
+}

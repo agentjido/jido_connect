@@ -15,6 +15,7 @@ defmodule Jido.Connect.Google.Docs.BatchUpdateRequest do
     "update_text_style" => "updateTextStyle",
     "update_paragraph_style" => "updateParagraphStyle",
     "create_paragraph_bullets" => "createParagraphBullets",
+    "delete_paragraph_bullets" => "deleteParagraphBullets",
     "insert_table" => "insertTable",
     "delete_table" => "deleteContentRange",
     "update_table_cell_style" => "updateTableCellStyle",

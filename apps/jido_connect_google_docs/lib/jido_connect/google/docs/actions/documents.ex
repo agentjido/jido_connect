@@ -37,7 +37,11 @@ defmodule Jido.Connect.Google.Docs.Actions.Documents do
 
         field(:include_tabs_content, :boolean,
           example: true,
-          description: "Populate the Document.tabs field instead of legacy text content fields."
+          description:
+            "true returns every tab in tabs, with nested tabs in child_tabs, and no legacy body. " <>
+              "false returns only the first tab in the legacy body, with tabs empty. " <>
+              "No default: the request carries includeTabsContent only when this is set, " <>
+              "and unset returns the same as false."
         )
       end
 
@@ -95,17 +99,31 @@ defmodule Jido.Connect.Google.Docs.Actions.Documents do
         field(:requests, {:array, :map},
           required?: true,
           description:
-            "List of batch update operations. Each map must contain exactly one operation key."
+            "1 to 100 batch update operations, applied in order. Each map must contain " <>
+              "exactly one operation key. Keys use Google's snake_case request names, such as " <>
+              "insert_text with location.index and location.tab_id, and are sent unchanged."
         )
 
         field(:write_control, :map,
-          description: "Optional write control for concurrency control."
+          description:
+            "Optional write control, sent as writeControl unchanged, such as " <>
+              "required_revision_id with the revision the batch expects."
         )
       end
 
       output do
+        field(:document_id, :string, description: "ID of the updated document.")
+
+        field(:write_control, :map,
+          description:
+            "Google's write control after the update, with the new revision in requiredRevisionId."
+        )
+
+        field(:replies, {:array, :map},
+          description: "One reply per request, in request order; empty for most requests."
+        )
+
         field(:document, :map)
-        field(:replies, {:array, :map})
       end
     end
   end

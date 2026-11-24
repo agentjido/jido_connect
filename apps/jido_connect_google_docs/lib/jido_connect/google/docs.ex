@@ -6,6 +6,11 @@ defmodule Jido.Connect.Google.Docs do
   Docs surface is implemented.
   """
 
+  # The scope resolver accepts `drive` for document reads when the connection
+  # holds neither Docs scope, so the profile lists it as optional. It is not a
+  # default scope; the host decides whether to request it.
+  @drive_read_scopes ["https://www.googleapis.com/auth/drive"]
+
   use Jido.Connect,
     fragments: [
       Jido.Connect.Google.Docs.Actions.Documents
@@ -44,11 +49,11 @@ defmodule Jido.Connect.Google.Docs do
 
       scopes(
         Jido.Connect.Google.Scopes.user_default() ++
-          Jido.Connect.Google.Scopes.product(:docs)
+          Jido.Connect.Google.Scopes.product(:docs) ++ @drive_read_scopes
       )
 
       default_scopes(Jido.Connect.Google.Scopes.user_default())
-      optional_scopes(Jido.Connect.Google.Scopes.product(:docs))
+      optional_scopes(Jido.Connect.Google.Scopes.product(:docs) ++ @drive_read_scopes)
       pkce?(true)
       refresh?(true)
       revoke?(true)
