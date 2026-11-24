@@ -1,7 +1,7 @@
 # MCP Client Bridge
 
-Core `jido_connect` uses ArborMCP `2.0.0-rc.6` for MCP client protocol and
-transports.
+Core `jido_connect` requires ArborMCP `2.0.0-rc.7` for the MCP client protocol
+and transports.
 The `release/3.0` branch is for maintainer development with Action v3.
 
 | Generated action | Required capability scope | Extra input |
@@ -31,17 +31,15 @@ approval records, and audit records.
 
 ## Install
 
-For this development candidate, use a checkout of `release/3.0`. The branch
-number is the Jido compatibility line; it is not a published Connect version.
-After a package release, the normal core dependency has this form:
+Check out `release/3.0`. In the host application's `mix.exs`, add the core app
+as a path dependency. Adjust the path to match your checkout.
 
 ```elixir
-def deps do
-  [
-    {:jido_connect, "~> 0.9"}
-  ]
-end
+{:jido_connect, path: "../jido_connect/apps/jido_connect"}
 ```
+
+Run `mix deps.get` in the host application. Mix installs the exact ArborMCP
+release candidate from the core app's dependency declaration.
 
 The host owns durable connections, credential storage, policy decisions,
 approval records, and audit records.
@@ -290,7 +288,7 @@ resource-read scopes. This also authorizes the reads ArborMCP makes during
 resynchronization. Filters accept at most 100 resource URIs. Start a new
 session to change its filter.
 
-ArborMCP 2.0.0-rc.6 rejects a modern server acknowledgment that adds notification
+ArborMCP rejects a modern server acknowledgment that adds notification
 categories or resource URIs. It checks the acknowledgment before reconnect
 resynchronization can read resources. Connect also keeps the original allowed
 filter and checks each event and snapshot before delivery. Equal and narrower
