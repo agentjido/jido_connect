@@ -123,8 +123,17 @@ runner that uses credentials from the host environment.
 
 ## Use a Connector in a Host Application
 
-The packages are not on Hex. Use an explicit checkout and path dependencies.
-For example, a host that needs GitHub can use:
+The packages are not on Hex. Check out the full Connect umbrella at the
+revision you want to use. In the host's `mix.exs`, use path dependencies
+directly to the app folders in that same checkout. Avoid paths through a
+symbolic link to the checkout.
+
+Use the full checkout because providers resolve their umbrella dependencies
+as sibling app paths. With separate sparse Git dependencies, Mix resolves
+those sibling paths separately from the host's Git dependencies and reports
+diverged dependencies.
+
+For example, a host next to a `jido_connect` checkout can use GitHub as follows:
 
 ```elixir
 def deps do
@@ -135,9 +144,14 @@ def deps do
 end
 ```
 
-Do not add connector packages that the host does not use. Connector packages
-self-register their integration modules through application metadata. An
-uninstalled connector is not compiled and does not appear in catalog discovery.
+For Google product connectors, also include `jido_connect_google` from
+the same checkout. See the [Google Forms](apps/jido_connect_google_forms/README.md#installation)
+and [Google Sheets](apps/jido_connect_google_sheets/README.md#installation)
+examples. Run `mix deps.get` and `mix compile` in the host application.
+
+An uninstalled connector is not compiled and does not appear in catalog
+discovery. Connector packages self-register their integration modules through
+application metadata.
 
 After the packages are published on Hex, the intended dependency form is:
 

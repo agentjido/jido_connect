@@ -9,24 +9,15 @@ surfaces are added.
 
 ## Installation
 
-```elixir
-def deps do
-  [
-    {:jido_connect, "~> 0.8"},
-    {:jido_connect_google, "~> 0.8"},
-    {:jido_connect_google_forms, "~> 0.8"}
-  ]
-end
-```
-
-For Git dependencies during local integration testing:
+Use path dependencies from [one Connect umbrella checkout](../../README.md#use-a-connector-in-a-host-application).
+This example assumes the host is next to the `jido_connect` checkout.
 
 ```elixir
 def deps do
   [
-    {:jido_connect_google_forms,
-     github: "agentjido/jido_connect",
-     sparse: "apps/jido_connect_google_forms"}
+    {:jido_connect, path: "../jido_connect/apps/jido_connect"},
+    {:jido_connect_google, path: "../jido_connect/apps/jido_connect_google"},
+    {:jido_connect_google_forms, path: "../jido_connect/apps/jido_connect_google_forms"}
   ]
 end
 ```
