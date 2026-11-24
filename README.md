@@ -65,7 +65,7 @@ For more detail, see [Architecture](docs/architecture.md),
 
 ## Packages
 
-The umbrella contains 41 Mix projects. Core `jido_connect` is at `0.9.0`. The
+The umbrella contains 42 Mix projects. Core `jido_connect` is at `0.9.0`. The
 connector packages remain at `0.8.0`.
 
 ### Core and shared foundations
@@ -73,6 +73,7 @@ connector packages remain at `0.8.0`.
 | Package | Purpose |
 | --- | --- |
 | `jido_connect` | Spark DSL, runtime contracts, authorization, catalog, generated modules, the MCP client bridge, telemetry, sanitization, and normalized errors |
+| `jido_connect_atlassian` | Shared Atlassian Document Format conversion for Jira and Confluence |
 | `jido_connect_google` | Shared Google OAuth, service-account, scope, transport, pagination, and checkpoint support |
 | `jido_connect_microsoft` | Shared Microsoft identity and Graph transport support |
 | `jido_connect_webhook` | Generic inbound webhook verification and normalization primitives |

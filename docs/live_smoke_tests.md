@@ -208,3 +208,16 @@ also checks nonempty variables whose names end in `_TOKEN`, `_SECRET`,
 | `SLACK_SECOND_USER_ID` | setting | Second human user |
 | `SLACK_CAPTURE_DIR` | setting | Capture directory of the demo host |
 | `SLACK_APP_ID` | setting | ID of the test app |
+
+## Provider setup
+
+Run one provider's live tests at a time with dedicated test data. Use the
+connector's tests to find the required resources. For Google Meet, prepare
+conference records, transcripts, and recordings before enabling the
+prepared-data checks. For Jira and Slack, keep raw captures outside the
+repository and convert them to sanitized replay fixtures before use.
+
+The demo can capture verified Jira administrator webhooks through
+`/integrations/jira/webhook`. Configure `JIRA_WEBHOOK_SECRET` in the demo
+environment. Leave capture disabled during normal operation. See the
+[demo guide](../dev/demo/README.md) for capture setup.
