@@ -27,6 +27,8 @@ defmodule Jido.Connect.Slack.ScopeResolver do
     "mpim" => "mpim:history"
   }
 
+  @history_scope_order ["channels:history", "groups:history", "im:history", "mpim:history"]
+
   @conversation_write_scopes %{
     "im" => "im:write",
     "mpim" => "mpim:write"
@@ -172,6 +174,26 @@ defmodule Jido.Connect.Slack.ScopeResolver do
     required_scopes(%{id: "slack.thread.replies"}, input, connection)
   end
 
+  # Without a channel and a type, as in availability checks, any one history
+  # scope of the connection is enough; a connection without one needs
+  # `channels:history`.
+  def required_scopes(%{id: "slack.conversation.history"}, input, connection) do
+    case {channel(input), supplied_conversation_type(input)} do
+      {nil, nil} ->
+        [held_history_scope(connection)]
+
+      _channel_or_type ->
+        input
+        |> requested_conversation_type()
+        |> then(&Map.get(@conversation_history_scopes, &1, "channels:history"))
+        |> List.wrap()
+    end
+  end
+
+  def required_scopes(%{action_id: "slack.conversation.history"}, input, connection) do
+    required_scopes(%{id: "slack.conversation.history"}, input, connection)
+  end
+
   def required_scopes(%{id: "slack.message.unread.list"}, input, _connection) do
     if channel(input) do
       type = requested_conversation_type(input)
@@ -203,6 +225,12 @@ defmodule Jido.Connect.Slack.ScopeResolver do
   end
 
   def required_scopes(operation, _input, _connection), do: Map.get(operation, :scopes, [])
+
+  defp held_history_scope(%{scopes: scopes}) when is_list(scopes) do
+    Enum.find(@history_scope_order, "channels:history", &(&1 in scopes))
+  end
+
+  defp held_history_scope(_connection), do: "channels:history"
 
   defp requested_types(input) do
     input

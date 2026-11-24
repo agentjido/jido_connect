@@ -1,0 +1,412 @@
+{
+  "body": {
+    "channel_actions_count": 0,
+    "channel_actions_ts": null,
+    "has_more": true,
+    "messages": [
+      {
+        "app_id": "A0CDHUBBHRC",
+        "blocks": [
+          {
+            "block_id": "VvTsG",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "Live test: capture self-test message.",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "bot_id": "B0CDHUEB8MC",
+        "bot_profile": {
+          "app_id": "A0CDHUBBHRC",
+          "deleted": false,
+          "icons": {
+            "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+            "image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+            "image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+          },
+          "id": "B0CDHUEB8MC",
+          "name": "Jido Connect Live Tests",
+          "team_id": "T0CEE692400",
+          "updated": 1793370597,
+          "user_id": "U0CDHUEBVEJ"
+        },
+        "team": "T0CEE692400",
+        "text": "Live test: capture self-test message.",
+        "ts": "1793373462.345279",
+        "type": "message",
+        "user": "U0CDHUEBVEJ"
+      },
+      {
+        "blocks": [
+          {
+            "block_id": "UIWjS",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "Live test: human message from the second user.",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "client_msg_id": "41dd7768-c13b-48e7-9470-e6adbcf2da32",
+        "team": "T0CEE692400",
+        "text": "Live test: human message from the second user.",
+        "ts": "1793373170.496259",
+        "type": "message",
+        "user": "U0CDEL6734M"
+      },
+      {
+        "blocks": [
+          {
+            "block_id": "KufnX",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "Live test: human file share",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "client_msg_id": "929e193b-74fe-427a-8aeb-c3024892f2d5",
+        "display_as_bot": false,
+        "edited": {
+          "ts": "1793373063.000000",
+          "user": "U0CDPFT1RDJ"
+        },
+        "files": [
+          {
+            "lines_more": 31,
+            "filetype": "markdown",
+            "preview_is_truncated": true,
+            "mode": "snippet",
+            "edit_link": "edit_link-1",
+            "public_url_shared": false,
+            "file_access": "visible",
+            "is_starred": false,
+            "preview_highlight": "preview_highlight-1",
+            "url_private": "https://files.slack.com/files-pri/T0CEE692400-F0CD50AUETZ/ticket-ws.md",
+            "url_private_download": "https://files.slack.com/files-pri/T0CEE692400-F0CD50AUETZ/download/ticket-ws.md",
+            "created": 1793373045,
+            "preview": "preview-1",
+            "is_modified_by_ai": false,
+            "external_type": "",
+            "mimetype": "text/plain",
+            "has_rich_preview": false,
+            "pretty_type": "Markdown (unbearbeitet)",
+            "name": "ticket-ws.md",
+            "id": "F0CD50AUETZ",
+            "display_as_bot": false,
+            "user": "U0CDPFT1RDJ",
+            "size": 3597,
+            "lines": 36,
+            "skipped_shares": true,
+            "permalink_public": "permalink_public-1",
+            "timestamp": 1793373045,
+            "user_team": "T0CEE692400",
+            "permalink": "permalink-1",
+            "title": "ticket-ws.md",
+            "is_external": false,
+            "username": "",
+            "editable": true,
+            "is_public": true
+          }
+        ],
+        "text": "Live test: human file share",
+        "ts": "1793373047.341389",
+        "type": "message",
+        "upload": false,
+        "user": "U0CDPFT1RDJ"
+      },
+      {
+        "blocks": [
+          {
+            "block_id": "xFBhg",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "Live test: human message from the authorizing user in the public channel.",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "client_msg_id": "332fb3b0-e61d-4026-b0fa-b55344851c27",
+        "team": "T0CEE692400",
+        "text": "Live test: human message from the authorizing user in the public channel.",
+        "ts": "1793373015.768129",
+        "type": "message",
+        "user": "U0CDPFT1RDJ"
+      },
+      {
+        "app_id": "A0CDHUBBHRC",
+        "blocks": [
+          {
+            "block_id": "HAGoF",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "Live test thread root. Replies follow below.",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "bot_id": "B0CDHUEB8MC",
+        "bot_profile": {
+          "app_id": "A0CDHUBBHRC",
+          "deleted": false,
+          "icons": {
+            "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+            "image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+            "image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+          },
+          "id": "B0CDHUEB8MC",
+          "name": "Jido Connect Live Tests",
+          "team_id": "T0CEE692400",
+          "updated": 1793370597,
+          "user_id": "U0CDHUEBVEJ"
+        },
+        "is_locked": false,
+        "latest_reply": "1793373203.070489",
+        "reply_count": 22,
+        "reply_users": [
+          "U0CDHUEBVEJ",
+          "U0CDPFT1RDJ",
+          "U0CDEL6734M"
+        ],
+        "reply_users_count": 3,
+        "subscribed": false,
+        "team": "T0CEE692400",
+        "text": "Live test thread root. Replies follow below.",
+        "thread_ts": "1793371034.447499",
+        "ts": "1793371034.447499",
+        "type": "message",
+        "user": "U0CDHUEBVEJ"
+      },
+      {
+        "app_id": "A0CDHUBBHRC",
+        "blocks": [
+          {
+            "block_id": "r+/2g",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "Live test: bot file upload.",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "bot_id": "B0CDHUEB8MC",
+        "display_as_bot": false,
+        "files": [
+          {
+            "lines_more": 0,
+            "filetype": "text",
+            "preview_is_truncated": false,
+            "mode": "snippet",
+            "edit_link": "edit_link-2",
+            "public_url_shared": false,
+            "file_access": "visible",
+            "is_starred": false,
+            "preview_highlight": "preview_highlight-2",
+            "url_private": "https://files.slack.com/files-pri/T0CEE692400-F0CD4JHBJ8P/live-test-bot.txt",
+            "url_private_download": "https://files.slack.com/files-pri/T0CEE692400-F0CD4JHBJ8P/download/live-test-bot.txt",
+            "created": 1793371032,
+            "preview": "preview-2",
+            "is_modified_by_ai": false,
+            "external_type": "",
+            "mimetype": "text/plain",
+            "has_rich_preview": false,
+            "pretty_type": "Klartext",
+            "name": "live-test-bot.txt",
+            "id": "F0CD4JHBJ8P",
+            "display_as_bot": false,
+            "user": "U0CDHUEBVEJ",
+            "size": 36,
+            "lines": 2,
+            "skipped_shares": true,
+            "permalink_public": "permalink_public-2",
+            "timestamp": 1793371032,
+            "user_team": "T0CEE692400",
+            "permalink": "permalink-2",
+            "title": "Live test bot file",
+            "is_external": false,
+            "username": "",
+            "editable": true,
+            "is_public": true
+          }
+        ],
+        "text": "Live test: bot file upload.",
+        "ts": "1793371033.743069",
+        "type": "message",
+        "upload": true,
+        "user": "U0CDHUEBVEJ"
+      },
+      {
+        "app_id": "A0CDHUBBHRC",
+        "blocks": [
+          {
+            "block_id": "UdOp",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "Live test: bot message after one edit.",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "bot_id": "B0CDHUEB8MC",
+        "bot_profile": {
+          "app_id": "A0CDHUBBHRC",
+          "deleted": false,
+          "icons": {
+            "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+            "image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+            "image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+          },
+          "id": "B0CDHUEB8MC",
+          "name": "Jido Connect Live Tests",
+          "team_id": "T0CEE692400",
+          "updated": 1793370597,
+          "user_id": "U0CDHUEBVEJ"
+        },
+        "edited": {
+          "ts": "1793371032.000000",
+          "user": "U0CDHUEBVEJ"
+        },
+        "team": "T0CEE692400",
+        "text": "Live test: bot message after one edit.",
+        "ts": "1793371031.138169",
+        "type": "message",
+        "user": "U0CDHUEBVEJ"
+      }
+    ],
+    "ok": true,
+    "pin_count": 0,
+    "response_metadata": {
+      "next_cursor": "bmV4dF90czoxNzkzMzcxMDIwODQ2ODY5"
+    }
+  },
+  "headers": {
+    "access-control-allow-headers": [
+      "slack-route, x-slack-version-ts, x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-b3-flags, x-background"
+    ],
+    "access-control-allow-origin": [
+      "*"
+    ],
+    "access-control-expose-headers": [
+      "x-slack-req-id, retry-after"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, quic=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, no-cache, no-store, must-revalidate"
+    ],
+    "content-length": [
+      "9031"
+    ],
+    "content-type": [
+      "application/json; charset=utf-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 07:36:14 GMT"
+    ],
+    "expires": [
+      "Sat, 26 Jul 1997 05:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "referrer-policy": [
+      "no-referrer"
+    ],
+    "server": [
+      "Apache"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-0d1eec8ecfe248dba,ingress-edge-fra-prod-03070070274398155"
+    ],
+    "x-backend": [
+      "api_normal"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-edge-backend": [
+      "envoy-www"
+    ],
+    "x-envoy-upstream-service-time": [
+      "125"
+    ],
+    "x-server": [
+      "slack-www-hhvm-api-iad-6mjrfi6e91vn"
+    ],
+    "x-slack-req-id": [
+      "bbb6dacb6b6179eb595517b39e2dec0a"
+    ],
+    "x-slack-unique-id": [
+      "b51bf671-5b42-43c9-93f0-fc1e710f5996"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/api/conversations.history"
+  },
+  "status": 200
+}

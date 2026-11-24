@@ -6,6 +6,7 @@ defmodule Jido.Connect.Slack.CatalogPacks do
   @reader_tools [
     "slack.message.unread.list",
     "slack.thread.replies",
+    "slack.conversation.history",
     "slack.presence.get",
     "slack.emoji.list"
   ]
@@ -25,7 +26,8 @@ defmodule Jido.Connect.Slack.CatalogPacks do
     Pack.new!(%{
       id: :slack_messages_reader,
       label: "Slack messages and presence reader",
-      description: "Read the reviewed Slack thread, unread-message, presence, and emoji surface.",
+      description:
+        "Read the reviewed Slack thread, conversation-history, unread-message, presence, and emoji surface.",
       filters: %{provider: :slack},
       allowed_tools: @reader_tools,
       metadata: %{package: :jido_connect_slack, risk: :read}

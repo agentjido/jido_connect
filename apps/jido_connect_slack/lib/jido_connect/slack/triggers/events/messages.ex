@@ -3,6 +3,16 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
 
   use Spark.Dsl.Fragment, of: Jido.Connect
 
+  # The subtypes the webhook normalizer accepts as new human messages.
+  @human_message_subtypes Jido.Connect.Slack.Webhook.Normalizer.human_message_subtypes()
+
+  @subtype "Slack's subtype of a new message a person writes: file_share for a message with files, thread_broadcast for a thread reply also sent to the channel. Plain messages have none."
+  @shared_messages "Messages shared natively into a direct message, one per attachment with is_share: channel and ts of the shared message, its author as user, its text and from_url. The person who shared them is the signal's user."
+  @file_ids "IDs of the files of a file_share message. File content and links are not part of the signal."
+  @views Jido.Connect.Slack.Webhook.View.views()
+  @view "Whose view the delivery comes from: bot when Slack names the bot's installation in the delivery's authorizations, user when it names the user token of a person who authorized the app. Absent when the delivery names no authorization."
+  @viewer "User ID of that authorization: the bot user in the bot view, the authorizing person in the user view. Slack names one installation even when several can see the message."
+
   triggers do
     webhook :app_mention do
       id "slack.event.app_mention"
@@ -45,7 +55,7 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
       data_classification :workspace_content
       label "Public channel message"
 
-      description "Receive Slack Events API message.channels callbacks for plain public channel messages."
+      description "Receive Slack Events API message.channels callbacks for new public channel messages: plain messages, file shares and broadcast thread replies."
 
       verification %{
         kind: :slack_signed_request,
@@ -72,6 +82,10 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
         field :ts, :string
         field :thread_ts, :string
         field :event_ts, :string
+        field :subtype, :string, enum: @human_message_subtypes, description: @subtype
+        field :file_ids, {:array, :string}, description: @file_ids
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -82,7 +96,7 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
       data_classification :workspace_content
       label "Private channel message"
 
-      description "Receive Slack Events API message.groups callbacks for plain private channel messages. Requires Slack groups:history for private channel history events."
+      description "Receive Slack Events API message.groups callbacks for new private channel messages: plain messages, file shares and broadcast thread replies. Requires Slack groups:history for private channel history events."
 
       verification %{
         kind: :slack_signed_request,
@@ -109,6 +123,10 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
         field :ts, :string
         field :thread_ts, :string
         field :event_ts, :string
+        field :subtype, :string, enum: @human_message_subtypes, description: @subtype
+        field :file_ids, {:array, :string}, description: @file_ids
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -119,7 +137,7 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
       data_classification :workspace_content
       label "Direct message"
 
-      description "Receive Slack Events API message.im callbacks for plain direct messages. Requires Slack im:history for direct message history events."
+      description "Receive Slack Events API message.im callbacks for new direct messages: plain messages, file shares, broadcast thread replies and messages shared into the DM. Requires Slack im:history for direct message history events."
 
       verification %{
         kind: :slack_signed_request,
@@ -150,6 +168,11 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
         field :event_ts, :string
         field :sender, :map
         field :conversation, :map
+        field :subtype, :string, enum: @human_message_subtypes, description: @subtype
+        field :file_ids, {:array, :string}, description: @file_ids
+        field :shared_messages, {:array, :map}, description: @shared_messages
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -160,7 +183,7 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
       data_classification :workspace_content
       label "Multi-person direct message"
 
-      description "Receive Slack Events API message.mpim callbacks for plain multi-person direct messages. Requires Slack mpim:history for multi-person direct message history events."
+      description "Receive Slack Events API message.mpim callbacks for new multi-person direct messages: plain messages, file shares, broadcast thread replies and messages shared into the conversation. Requires Slack mpim:history for multi-person direct message history events."
 
       verification %{
         kind: :slack_signed_request,
@@ -191,6 +214,11 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
         field :event_ts, :string
         field :sender, :map
         field :conversation, :map
+        field :subtype, :string, enum: @human_message_subtypes, description: @subtype
+        field :file_ids, {:array, :string}, description: @file_ids
+        field :shared_messages, {:array, :map}, description: @shared_messages
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
 
@@ -201,7 +229,7 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
       data_classification :workspace_content
       label "Thread reply"
 
-      description "Receive Slack Events API message callbacks for plain thread replies, excluding thread root messages."
+      description "Receive Slack Events API message callbacks for new thread replies, including broadcast replies and excluding thread root messages."
 
       verification %{
         kind: :slack_signed_request,
@@ -232,6 +260,11 @@ defmodule Jido.Connect.Slack.Triggers.Events.Messages do
         field :event_ts, :string
         field :sender, :map
         field :conversation, :map
+        field :subtype, :string, enum: @human_message_subtypes, description: @subtype
+        field :file_ids, {:array, :string}, description: @file_ids
+        field :shared_messages, {:array, :map}, description: @shared_messages
+        field :view, :string, enum: @views, description: @view
+        field :viewer, :string, description: @viewer
       end
     end
   end

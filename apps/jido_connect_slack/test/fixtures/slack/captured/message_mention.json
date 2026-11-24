@@ -1,0 +1,17 @@
+{
+  "body": "{\"api_app_id\":\"A0CDHUBBHRC\",\"authorizations\":[{\"enterprise_id\":null,\"is_bot\":true,\"is_enterprise_install\":false,\"team_id\":\"T0CEE692400\",\"user_id\":\"U0CDHUEBVEJ\"}],\"context_enterprise_id\":null,\"context_team_id\":\"T0CEE692400\",\"event\":{\"blocks\":[{\"block_id\":\"nhCfR\",\"elements\":[{\"elements\":[{\"type\":\"user\",\"user_id\":\"U0CDHUEBVEJ\"},{\"text\":\" app-mention Live capture for the Slack ingress tests of the jido_connect test workspace. This message is test data without personal content. It is deliberately longer than 512 bytes, so the tests can check that long text arrives in full. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. End of capture text.\",\"type\":\"text\"}],\"type\":\"rich_text_section\"}],\"type\":\"rich_text\"}],\"channel\":\"C0CEEB41FU0\",\"channel_type\":\"channel\",\"client_msg_id\":\"976a2321-124d-4061-bfb9-7dd0b786f358\",\"event_ts\":\"1793628489.450879\",\"team\":\"T0CEE692400\",\"text\":\"<@U0CDHUEBVEJ> app-mention Live capture for the Slack ingress tests of the jido_connect test workspace. This message is test data without personal content. It is deliberately longer than 512 bytes, so the tests can check that long text arrives in full. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. End of capture text.\",\"ts\":\"1793628489.450879\",\"type\":\"message\",\"user\":\"U0CDPFT1RDJ\"},\"event_context\":\"4-eyJldCI6Im1lc3NhZ2UiLCJ0aWQiOiJUMENFRTY5MjQwMCIsImFpZCI6IkEwQ0RIVUJCSFJDIiwiY2lkIjoiQzBDRUVCNDFGVTAifQ\",\"event_id\":\"Ev0CE6SU1YEM\",\"event_time\":1793628489,\"is_ext_shared_channel\":false,\"team_id\":\"T0CEE692400\",\"token\":\"[redacted]\",\"type\":\"event_callback\"}",
+  "captured_at": 1793628489,
+  "headers": {
+    "accept": "*/*",
+    "accept-encoding": "gzip,deflate",
+    "content-length": "2344",
+    "content-type": "application/json",
+    "host": "example.ngrok-free.dev",
+    "user-agent": "Slackbot 1.0 (+https://api.slack.com/robots)",
+    "x-slack-request-timestamp": "1793628489",
+    "x-slack-signature": "v0=66bf2a3ed4967c9ccb4dc726adc284f846e6ae2352422d00ce389fea65754d57"
+  },
+  "method": "POST",
+  "path": "/integrations/slack/events",
+  "provider": "slack"
+}

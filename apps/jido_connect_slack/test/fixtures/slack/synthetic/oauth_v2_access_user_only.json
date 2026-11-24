@@ -1,0 +1,29 @@
+{
+  "source": {
+    "kind": "synthetic",
+    "url": "https://docs.slack.dev/reference/methods/oauth.v2.access",
+    "section": "Response: Successful Sign in with Slack response.",
+    "retrieved_on": "2026-11-03",
+    "note": "Not a recording. Field names, nesting, types and values are Slack's example; the token value is a placeholder."
+  },
+  "request": {
+    "method": "POST",
+    "path": "/api/oauth.v2.access"
+  },
+  "status": 200,
+  "body": {
+    "ok": true,
+    "app_id": "A0118NQPZZC",
+    "authed_user": {
+      "id": "U065VRX1T0",
+      "scope": "identity.basic,identity.email,identity.avatar,identity.team",
+      "access_token": "xoxp-synthetic-user",
+      "token_type": "user"
+    },
+    "team": {
+      "id": "T024BE7LD"
+    },
+    "enterprise": null,
+    "is_enterprise_install": false
+  }
+}

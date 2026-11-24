@@ -1,0 +1,91 @@
+{
+  "body": {
+    "channel_actions_count": 0,
+    "channel_actions_ts": null,
+    "has_more": false,
+    "latest": "1000000000.000000",
+    "messages": [],
+    "ok": true,
+    "pin_count": 0
+  },
+  "headers": {
+    "access-control-allow-headers": [
+      "slack-route, x-slack-version-ts, x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-b3-flags, x-background"
+    ],
+    "access-control-allow-origin": [
+      "*"
+    ],
+    "access-control-expose-headers": [
+      "x-slack-req-id, retry-after"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, quic=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, no-cache, no-store, must-revalidate"
+    ],
+    "content-length": [
+      "137"
+    ],
+    "content-type": [
+      "application/json; charset=utf-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 07:36:14 GMT"
+    ],
+    "expires": [
+      "Sat, 26 Jul 1997 05:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "referrer-policy": [
+      "no-referrer"
+    ],
+    "server": [
+      "Apache"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-0fa7dee91c9dafd24,ingress-edge-fra-prod-03070070274398155"
+    ],
+    "x-backend": [
+      "api_control_with_overflow"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-edge-backend": [
+      "envoy-www"
+    ],
+    "x-envoy-upstream-service-time": [
+      "115"
+    ],
+    "x-server": [
+      "slack-www-hhvm-control-api-iad-kr4rel4xpdnz"
+    ],
+    "x-slack-req-id": [
+      "4baae8a0a117435f34e8ff495b6867be"
+    ],
+    "x-slack-unique-id": [
+      "a2bbc3be-654e-46dc-8168-9514a0f572ed"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/api/conversations.history"
+  },
+  "status": 200
+}

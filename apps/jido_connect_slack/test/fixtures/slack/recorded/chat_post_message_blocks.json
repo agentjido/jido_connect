@@ -1,0 +1,155 @@
+{
+  "body": {
+    "channel": "C0CEEB41FU0",
+    "message": {
+      "app_id": "A0CDHUBBHRC",
+      "blocks": [
+        {
+          "block_id": "bVQDy",
+          "text": {
+            "text": "Button check 1 from the jido_connect_slack live test: Approve or Reject.",
+            "type": "mrkdwn",
+            "verbatim": false
+          },
+          "type": "section"
+        },
+        {
+          "block_id": "jc_capture_decision_1",
+          "elements": [
+            {
+              "action_id": "jc_capture_approve",
+              "style": "primary",
+              "text": {
+                "emoji": true,
+                "text": "Approve",
+                "type": "plain_text"
+              },
+              "type": "button",
+              "value": "capture-1:approve"
+            },
+            {
+              "action_id": "jc_capture_reject",
+              "style": "danger",
+              "text": {
+                "emoji": true,
+                "text": "Reject",
+                "type": "plain_text"
+              },
+              "type": "button",
+              "value": "capture-1:reject"
+            }
+          ],
+          "type": "actions"
+        }
+      ],
+      "bot_id": "B0CDHUEB8MC",
+      "bot_profile": {
+        "app_id": "A0CDHUBBHRC",
+        "deleted": false,
+        "icons": {
+          "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+          "image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+          "image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+        },
+        "id": "B0CDHUEB8MC",
+        "name": "Jido Connect Live Tests",
+        "team_id": "T0CEE692400",
+        "updated": 1793370597,
+        "user_id": "U0CDHUEBVEJ"
+      },
+      "team": "T0CEE692400",
+      "text": "Button check 1 from the jido_connect_slack live test: Approve or Reject.",
+      "ts": "1793641236.240299",
+      "type": "message",
+      "user": "U0CDHUEBVEJ"
+    },
+    "ok": true,
+    "response_metadata": {
+      "warnings": [
+        "missing_charset"
+      ]
+    },
+    "ts": "1793641236.240299",
+    "warning": "missing_charset"
+  },
+  "headers": {
+    "access-control-allow-headers": [
+      "slack-route, x-slack-version-ts, x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-b3-flags, x-background"
+    ],
+    "access-control-allow-origin": [
+      "*"
+    ],
+    "access-control-expose-headers": [
+      "x-slack-req-id, retry-after"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, quic=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, no-cache, no-store, must-revalidate"
+    ],
+    "content-length": [
+      "1337"
+    ],
+    "content-type": [
+      "application/json; charset=utf-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 17:40:36 GMT"
+    ],
+    "expires": [
+      "Sat, 26 Jul 1997 05:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "referrer-policy": [
+      "no-referrer"
+    ],
+    "server": [
+      "Apache"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-04a640891c91c107a,ingress-edge-fra-prod-03cd33a28da8f4dda"
+    ],
+    "x-backend": [
+      "api_normal"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-edge-backend": [
+      "envoy-www"
+    ],
+    "x-envoy-upstream-service-time": [
+      "146"
+    ],
+    "x-server": [
+      "slack-www-hhvm-api-iad-d9s0oghn65c1"
+    ],
+    "x-slack-req-id": [
+      "9698fee7199c574b2adeb5f49c364591"
+    ],
+    "x-slack-unique-id": [
+      "226ed96c-4229-47af-91ac-297574948ffc"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/api/chat.postMessage"
+  },
+  "status": 200
+}

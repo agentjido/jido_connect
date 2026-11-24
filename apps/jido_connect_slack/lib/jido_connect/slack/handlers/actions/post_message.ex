@@ -8,7 +8,7 @@ defmodule Jido.Connect.Slack.Handlers.Actions.PostMessage do
          {:ok, message} <-
            client.post_message(
              input
-             |> Map.take([:channel, :text, :thread_ts, :reply_broadcast])
+             |> Map.take([:channel, :text, :thread_ts, :reply_broadcast, :blocks])
              |> Map.put_new(:reply_broadcast, false),
              Map.get(credentials, :access_token)
            ) do

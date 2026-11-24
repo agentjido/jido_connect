@@ -188,3 +188,36 @@ also checks nonempty variables whose names end in `_TOKEN`, `_SECRET`,
 | `JIRA_ISSUE_KEY` | setting | Test issue |
 | `JIRA_ISSUE_ID` | setting | Numeric ID of the test issue |
 | `JIRA_CAPTURE_DIR` | setting | Capture directory of the demo host |
+
+### Slack
+
+| Variable | Kind | Use |
+| --- | --- | --- |
+| `SLACK_USER_TOKEN` | credential | User token of the test user |
+| `SLACK_CONFIG_TOKEN` | credential | App configuration token of the test workspace, for `apps.manifest.validate`; expires 12 hours after it is issued |
+| `SLACK_CONFIG_REFRESH_TOKEN` | credential | Refresh token of that configuration token; `tooling.tokens.rotate` replaces both |
+| `SLACK_PUBLIC_CHANNEL_ID` | setting | Public channel |
+| `SLACK_PRIVATE_CHANNEL_ID` | setting | Private channel |
+| `SLACK_DM_CHANNEL_ID` | setting | Direct message |
+| `SLACK_MPIM_CHANNEL_ID` | setting | Group direct message |
+| `SLACK_NO_ACCESS_CHANNEL_ID` | setting | Channel the bot is not in |
+| `SLACK_THREAD_TS` | setting | Thread with replies over more than one page |
+| `SLACK_PRIVATE_THREAD_TS` | setting | Thread with seven bot replies in `SLACK_PRIVATE_CHANNEL_ID` |
+| `SLACK_DM_THREAD_TS` | setting | Thread with seven bot replies in `SLACK_DM_CHANNEL_ID` |
+| `SLACK_MPIM_THREAD_TS` | setting | Thread with seven bot replies in `SLACK_MPIM_CHANNEL_ID` |
+| `SLACK_SECOND_USER_ID` | setting | Second human user |
+| `SLACK_CAPTURE_DIR` | setting | Capture directory of the demo host |
+| `SLACK_APP_ID` | setting | ID of the test app |
+
+## Provider setup
+
+Run one provider's live tests at a time with dedicated test data. Use the
+connector's tests to find the required resources. For Google Meet, prepare
+conference records, transcripts, and recordings before enabling the
+prepared-data checks. For Jira and Slack, keep raw captures outside the
+repository and convert them to sanitized replay fixtures before use.
+
+The demo can capture verified Jira administrator webhooks through
+`/integrations/jira/webhook`. Configure `JIRA_WEBHOOK_SECRET` in the demo
+environment. Leave capture disabled during normal operation. See the
+[demo guide](../dev/demo/README.md) for capture setup.

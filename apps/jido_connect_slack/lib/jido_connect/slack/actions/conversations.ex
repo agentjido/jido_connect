@@ -3,6 +3,8 @@ defmodule Jido.Connect.Slack.Actions.Conversations do
 
   use Spark.Dsl.Fragment, of: Jido.Connect
 
+  @conversation_types Jido.Connect.Slack.Message.conversation_types()
+
   actions do
     action :list_channels do
       id "slack.channel.list"
@@ -73,6 +75,48 @@ defmodule Jido.Connect.Slack.Actions.Conversations do
         field :latest_reply, :string
         field :next_cursor, :string
         field :has_more, :boolean
+      end
+    end
+
+    action :get_conversation_history do
+      id "slack.conversation.history"
+      resource :conversation
+      verb :read
+      data_classification :message_content
+      label "Get conversation history"
+
+      description "Read one page of a Slack conversation's messages, newest first, with full text and source identity."
+
+      handler Jido.Connect.Slack.Handlers.Actions.GetConversationHistory
+      effect :read
+
+      access do
+        auth [:bot, :user], default: :bot
+        policies [:workspace_access]
+        scopes ["channels:history"], resolver: Jido.Connect.Slack.ScopeResolver
+      end
+
+      input do
+        field :channel, :string, required?: true, example: "C012AB3CD"
+
+        field :conversation_type, :string,
+          required?: true,
+          enum: @conversation_types,
+          description:
+            "Slack conversation type of the channel; selects the history scope where the channel ID leaves the type open, and is not sent to Slack."
+
+        field :cursor, :string, description: "next_cursor of the previous page."
+        field :oldest, :string, description: "Only messages after this Slack timestamp."
+        field :latest, :string, description: "Only messages before this Slack timestamp."
+        field :inclusive, :boolean, default: false
+        field :limit, :integer, default: 100, minimum: 1, maximum: 100
+      end
+
+      output do
+        field :messages, {:array, :map}
+        field :next_cursor, :string
+        field :has_more, :boolean
+        field :is_limited, :boolean
       end
     end
 
@@ -306,6 +350,11 @@ defmodule Jido.Connect.Slack.Actions.Conversations do
         field :users, {:array, :string}, description: "Slack user IDs for the DM or MPIM to open."
 
         field :channel, :string, description: "Existing Slack DM or MPIM channel ID to resume."
+
+        field :conversation_type, :string,
+          enum: ["im", "mpim"],
+          description:
+            "Slack conversation type to open or resume, for the scope check only; not sent to Slack. A G channel ID needs mpim:write and a D channel ID im:write, whatever the users and the type. Otherwise several users need mpim:write and one user without a channel im:write; for a C channel ID or no target, mpim needs mpim:write."
 
         field :return_im, :boolean, default: false
         field :prevent_creation, :boolean, default: false

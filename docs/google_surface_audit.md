@@ -198,6 +198,7 @@ Auth profiles: `user`
 | ID | Kind | Checkpoint | Dedupe | Scope | Signal |
 | --- | --- | --- | --- | --- | --- |
 | `google.gmail.message.received` | poll | `history_id` | `message_id` | `gmail.metadata` | `message_id`, `thread_id`, `history_id`, labels, snippet, headers, message |
+| `google.gmail.message.changed` | poll | `history_id` | `history_id`, `message_id`, `change_type` | `gmail.metadata` | `change_type`, `message_id`, `thread_id`, `history_id`, changed and current label IDs |
 | `google.gmail.mailbox.changed` | webhook | none | `history_id` | `gmail.metadata` | `email_address`, `history_id`, Pub/Sub delivery metadata |
 
 ### Catalog Packs

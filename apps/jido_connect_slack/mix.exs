@@ -16,6 +16,7 @@ defmodule JidoConnectSlack.MixProject do
       docs: docs(),
       source_url: "https://github.com/agentjido/jido_connect",
       test_coverage: test_coverage(),
+      test_ignore_filters: [~r/test\/support\//],
       deps: deps(),
       aliases: aliases()
     ]

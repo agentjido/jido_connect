@@ -1,0 +1,128 @@
+{
+  "body": {
+    "has_more": false,
+    "messages": [
+      {
+        "app_id": "A0CDHUBBHRC",
+        "blocks": [
+          {
+            "block_id": "AzkBg",
+            "elements": [
+              {
+                "elements": [
+                  {
+                    "text": "Line 01 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 02 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 03 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 04 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 05 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 06 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 07 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 08 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 09 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 10 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 11 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 12 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nEnd of the long message (public).",
+                    "type": "text"
+                  }
+                ],
+                "type": "rich_text_section"
+              }
+            ],
+            "type": "rich_text"
+          }
+        ],
+        "bot_id": "B0CDHUEB8MC",
+        "bot_profile": {
+          "app_id": "A0CDHUBBHRC",
+          "deleted": false,
+          "icons": {
+            "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+            "image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+            "image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+          },
+          "id": "B0CDHUEB8MC",
+          "name": "Jido Connect Live Tests",
+          "team_id": "T0CEE692400",
+          "updated": 1793370597,
+          "user_id": "U0CDHUEBVEJ"
+        },
+        "team": "T0CEE692400",
+        "text": "Line 01 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 02 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 03 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 04 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 05 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 06 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 07 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 08 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 09 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 10 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 11 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nLine 12 of the long live-test message in the public conversation: Umlaute äöü ß, Euro €, Dash –.\nEnd of the long message (public).",
+        "ts": "1793371020.846869",
+        "type": "message",
+        "user": "U0CDHUEBVEJ"
+      }
+    ],
+    "ok": true
+  },
+  "headers": {
+    "access-control-allow-headers": [
+      "slack-route, x-slack-version-ts, x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-b3-flags, x-background"
+    ],
+    "access-control-allow-origin": [
+      "*"
+    ],
+    "access-control-expose-headers": [
+      "x-slack-req-id, retry-after"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, quic=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, no-cache, no-store, must-revalidate"
+    ],
+    "content-length": [
+      "3877"
+    ],
+    "content-type": [
+      "application/json; charset=utf-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 11:34:39 GMT"
+    ],
+    "expires": [
+      "Sat, 26 Jul 1997 05:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "referrer-policy": [
+      "no-referrer"
+    ],
+    "server": [
+      "Apache"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-0f6e6434fb3685722,ingress-edge-fra-prod-0a7bab18105f3953c"
+    ],
+    "x-backend": [
+      "api_normal"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-edge-backend": [
+      "envoy-www"
+    ],
+    "x-envoy-upstream-service-time": [
+      "118"
+    ],
+    "x-server": [
+      "slack-www-hhvm-api-iad-biixgh5d0qzg"
+    ],
+    "x-slack-req-id": [
+      "275e35d75b2fdad1ded690acd383e0cc"
+    ],
+    "x-slack-unique-id": [
+      "46b3a261-734b-489f-a880-c7e8ac34ad8d"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/api/conversations.replies"
+  },
+  "status": 200
+}
