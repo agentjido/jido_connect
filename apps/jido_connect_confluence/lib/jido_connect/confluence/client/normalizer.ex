@@ -1,8 +1,9 @@
 defmodule Jido.Connect.Confluence.Client.Normalizer do
   @moduledoc "Strict normalization for Confluence Cloud space, page, and effect responses."
 
-  alias Jido.Connect.Data
-  alias Jido.Connect.Confluence.{ADF, Contract}
+  alias Jido.Connect.Atlassian.ADF
+  alias Jido.Connect.{Data, Error}
+  alias Jido.Connect.Confluence.Contract
 
   @identifier_max Contract.maximum_identifier_length()
   @title_max Contract.maximum_title_length()
@@ -62,32 +63,52 @@ defmodule Jido.Connect.Confluence.Client.Normalizer do
 
   def page_list(_body, _space, _context), do: :error
 
-  @spec page(map(), String.t(), pos_integer(), map()) :: {:ok, map()} | :error
+  @doc """
+  Normalizes a page read with an ADF body.
+
+  `context` carries the `account`, the validated tenant endpoint as
+  `site_url` and the unsupported-content policy as `on_unsupported`
+  (`:fail`, the default, or `:degrade`). With `:degrade` the result adds
+  `unsupported_nodes`.
+
+  A body that the projection rejects returns `{:error, details}`, where
+  `details` names the field and the projection's reason, such as
+  `:unsupported_adf_content` or `:adf_node_limit_exceeded`, and no content.
+  Any other invalid response returns `:error`.
+  """
+  @spec page(map(), String.t(), pos_integer(), map()) ::
+          {:ok, map()} | {:error, %{field: String.t(), adf_reason: atom()}} | :error
   def page(body, expected_id, max_characters, context)
       when is_map(body) and is_map(context) do
+    mode = Map.get(context, :on_unsupported, :fail)
+
     with {:ok, metadata} <- page_metadata(body, expected_id),
+         {:ok, url} <- page_url(body, context.site_url),
          {:ok, adf} <- adf_body(body),
-         {:ok, text} <- ADF.to_text(adf),
+         {:ok, %{text: text, unsupported_nodes: skipped}} <- project(adf, mode),
          true <- valid_account?(context.account),
          true <-
            is_integer(max_characters) and
              max_characters in 1..Contract.maximum_max_characters() do
       character_count = String.length(text)
 
-      {:ok,
-       %{
-         kind: "confluence_page",
-         account: context.account,
-         id: metadata.id,
-         title: metadata.title,
-         revision_id: Integer.to_string(metadata.version),
-         version: metadata.version,
-         space_id: metadata.space_id,
-         text: String.slice(text, 0, max_characters),
-         character_count: character_count,
-         truncated: character_count > max_characters
-       }}
+      page = %{
+        kind: "confluence_page",
+        account: context.account,
+        id: metadata.id,
+        title: metadata.title,
+        revision_id: Integer.to_string(metadata.version),
+        version: metadata.version,
+        space_id: metadata.space_id,
+        url: url,
+        text: String.slice(text, 0, max_characters),
+        character_count: character_count,
+        truncated: character_count > max_characters
+      }
+
+      {:ok, put_unsupported_nodes(page, mode, skipped)}
     else
+      {:error, %{adf_reason: _reason}} = projection_error -> projection_error
       _invalid -> :error
     end
   end
@@ -238,6 +259,34 @@ defmodule Jido.Connect.Confluence.Client.Normalizer do
   end
 
   defp normalize_page_item(_raw, _expected_space_id, _site_url), do: :error
+
+  # The URL joins the validated tenant endpoint and `webui`. A `base` that
+  # names any other root fails the page instead of being used or ignored.
+  defp page_url(raw, site_url) do
+    with links when is_map(links) <- Data.get(raw, :_links),
+         true <- Data.get(links, :base) in [nil, site_url] do
+      web_url(site_url, Data.get(links, :webui))
+    else
+      _invalid -> :error
+    end
+  end
+
+  # Keeps only the projection's reason. Its error details list node types,
+  # which page errors leave out.
+  defp project(adf, mode) do
+    case ADF.project(adf, on_unsupported: mode) do
+      {:ok, projection} ->
+        {:ok, projection}
+
+      {:error, %Error.ValidationError{reason: reason}} ->
+        {:error, %{field: "body", adf_reason: reason}}
+    end
+  end
+
+  defp put_unsupported_nodes(page, :degrade, skipped),
+    do: Map.put(page, :unsupported_nodes, skipped)
+
+  defp put_unsupported_nodes(page, :fail, _skipped), do: page
 
   defp adf_body(raw) do
     with body when is_map(body) <- Data.get(raw, :body),

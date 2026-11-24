@@ -24,7 +24,7 @@ defmodule Jido.Connect.Confluence.Client.Pages do
     with {:ok, input} <- Pages.validate_get(input) do
       request
       |> fetch_raw(input.id)
-      |> normalize_page(input.id, input.max_characters, request)
+      |> normalize_page(input, request)
     end
   end
 
@@ -158,19 +158,33 @@ defmodule Jido.Connect.Confluence.Client.Pages do
     Transport.handle_error_response(response, message: "Confluence page list request failed")
   end
 
-  defp normalize_page({:ok, %{status: status, body: body}}, id, max_characters, request)
+  defp normalize_page({:ok, %{status: status, body: body}}, input, request)
        when status in 200..299 and is_map(body) do
-    case Normalizer.page(body, id, max_characters, %{account: Request.account(request)}) do
-      {:ok, result} -> {:ok, result}
-      :error -> Transport.invalid_success_response("Confluence page response was invalid", body)
+    context = %{
+      account: Request.account(request),
+      site_url: request.endpoint,
+      on_unsupported: input.on_unsupported
+    }
+
+    case Normalizer.page(body, input.id, input.max_characters, context) do
+      {:ok, result} ->
+        {:ok, result}
+
+      {:error, details} ->
+        Transport.invalid_success_response("Confluence page response was invalid", body,
+          details: details
+        )
+
+      :error ->
+        Transport.invalid_success_response("Confluence page response was invalid", body)
     end
   end
 
-  defp normalize_page({:ok, %{status: status, body: body}}, _id, _maximum, _request)
+  defp normalize_page({:ok, %{status: status, body: body}}, _input, _request)
        when status in 200..299,
        do: Transport.invalid_success_response("Confluence page response was invalid", body)
 
-  defp normalize_page(response, _id, _maximum, _request) do
+  defp normalize_page(response, _input, _request) do
     Transport.handle_error_response(response, message: "Confluence page request failed")
   end
 

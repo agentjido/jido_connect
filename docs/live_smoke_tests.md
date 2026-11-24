@@ -168,3 +168,13 @@ also checks nonempty variables whose names end in `_TOKEN`, `_SECRET`,
 | `GOOGLE_MEET_CONFERENCE_RECORD` | setting | Past meeting with transcript and recording |
 | `GOOGLE_MEET_TRANSCRIPT` | setting | Transcript of that meeting |
 | `GOOGLE_MEET_RECORDING` | setting | Recording of that meeting |
+
+### Confluence
+
+| Variable | Kind | Use |
+| --- | --- | --- |
+| `CONFLUENCE_EMAIL` | setting | Test user for API token auth |
+| `CONFLUENCE_API_TOKEN` | credential | API token of the test user |
+| `CONFLUENCE_PAGE_ID` | setting | Plain page |
+| `CONFLUENCE_RICH_PAGE_ID` | setting | Page with images, a macro and an inline comment |
+| `CONFLUENCE_RESTRICTED_PAGE_ID` | setting | Page the test user cannot read |
