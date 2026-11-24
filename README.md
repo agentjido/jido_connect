@@ -113,6 +113,13 @@ mix quality
 `mix quality` checks formatting, compiles with warnings as errors, and runs the
 umbrella tests.
 
+## Agent Examples
+
+Follow the [Connect Agent examples](examples/README.md) to use the Jido v3
+`connect do` block with GitHub and Slack. Run the tests offline with
+`mix test.examples --warnings-as-errors`. Each lesson has an opt-in live
+runner that uses credentials from the host environment.
+
 ## Use a Connector in a Host Application
 
 The packages are not on Hex. Use an explicit checkout and path dependencies.
@@ -326,6 +333,7 @@ apps/                   Core, foundation, bridge, and connector packages
 config/                 Umbrella configuration
 dev/demo/               Local Phoenix host
 docs/                   Architecture and operation guides
+examples/               Runnable Jido v3 Agent lessons
 ```
 
 ## Contributing

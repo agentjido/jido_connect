@@ -18,6 +18,7 @@ defmodule JidoConnect.MixProject do
     [
       preferred_envs: [
         q: :test,
+        "test.examples": :test,
         quality: :test
       ]
     ]
@@ -37,6 +38,7 @@ defmodule JidoConnect.MixProject do
   defp aliases do
     [
       q: ["quality"],
+      "test.examples": "run examples/test.exs",
       quality: [
         "compile --warnings-as-errors",
         "format --check-formatted",

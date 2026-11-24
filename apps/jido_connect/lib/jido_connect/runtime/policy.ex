@@ -7,6 +7,8 @@ defmodule Jido.Connect.Policy do
   tenant, installation, or system connection. Policies can be passed to
   `Jido.Connect.invoke/4`, `Jido.Connect.poll/4`, and generated plugin
   availability as a function, module, or `{module, function}` tuple.
+  When the policy option is absent or `nil`, the runtime uses the policy
+  module from `Jido.Connect.Context`.
   """
 
   alias Jido.Connect.{Callback, Connection, Context, Error}
@@ -26,6 +28,11 @@ defmodule Jido.Connect.Policy do
   @doc "Applies a host-owned policy callback to a resolved connection."
   @spec authorize(policy(), operation(), map(), Context.t() | nil, Connection.t(), map()) ::
           :ok | {:error, Error.error()}
+  def authorize(nil, operation, input, %Context{policy: policy} = context, connection, attrs)
+      when not is_nil(policy) do
+    authorize(policy, operation, input, context, connection, attrs)
+  end
+
   def authorize(nil, operation, _input, _context, %Connection{} = connection, _policy_context) do
     if Map.get(operation, :host_policy_required?, false) do
       deny(:policy_required, operation, connection)

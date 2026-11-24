@@ -17,6 +17,13 @@ defmodule Jido.Connect.Jido.RuntimeTest do
     def resolve(_selector), do: raise("tuple resolver exploded")
   end
 
+  defmodule ConnectionResolver do
+    def resolve(_selector) do
+      {context, _lease} = RuntimeFixtures.context_and_lease()
+      context.connection
+    end
+  end
+
   defmodule LeaseResolver do
     @behaviour Connect.CredentialResolver
 
@@ -139,6 +146,90 @@ defmodule Jido.Connect.Jido.RuntimeTest do
     assert_received {:resolved, "demo.repo.changed", %{repo: "org/repo"}}
   end
 
+  test "direct invocation and polling use the context resolver and honor explicit options" do
+    spec = RuntimeFixtures.spec()
+    {context, lease} = RuntimeFixtures.context_and_lease()
+    context = %{context | credential_resolver: LeaseResolver, metadata: %{test_pid: self()}}
+    input = %{repo: "org/repo"}
+
+    assert {:ok, ^input} = Connect.invoke(spec, "demo.repo.show", input, context: context)
+    assert_received {:resolved, "demo.repo.show", ^input}
+
+    assert {:ok, %{signals: [^input], checkpoint: "next"}} =
+             Connect.poll(spec, "demo.repo.changed", input, context: context)
+
+    assert_received {:resolved, "demo.repo.changed", ^input}
+
+    assert {:error, %Connect.Error.AuthError{reason: :policy_denied}} =
+             Connect.invoke(spec, "demo.repo.show", %{repo: "denied/repo"},
+               context: context,
+               credential_lease: lease
+             )
+
+    assert {:error, %Connect.Error.ConfigError{key: :credential_resolver}} =
+             Connect.invoke(spec, "demo.repo.show", input,
+               context: context,
+               credential_resolver: nil
+             )
+
+    refute_received {:resolved, _, _}
+  end
+
+  test "a bare sensor context resolves its selector at each tick and keeps the checkpoint" do
+    sensor = %{
+      RuntimeFixtures.sensor_projection()
+      | integration_module: RuntimeFixtures.AdvancingIntegration
+    }
+
+    {resolved, _lease} = RuntimeFixtures.context_and_lease()
+    {:ok, selector} = Connect.ConnectionSelector.explicit(:demo, resolved.connection.id)
+
+    context = %{
+      resolved
+      | connection: nil,
+        connection_selector: selector,
+        connection_resolver: {ConnectionResolver, :resolve},
+        credential_resolver: LeaseResolver,
+        metadata: %{test_pid: self()}
+    }
+
+    input = %{repo: "org/repo"}
+
+    assert {:ok, state, [{:schedule, 1_000}]} =
+             Connect.JidoSensorRuntime.init(sensor, input, context)
+
+    assert {:ok, state, [{:emit, first_signal}, {:schedule, 1_000}]} =
+             Connect.JidoSensorRuntime.handle_event(sensor, :tick, state)
+
+    assert first_signal.data.repo == "org/repo:first"
+    assert_received {:resolved, "demo.repo.changed", ^input}
+
+    fresh_context = %{context | claims: %{refreshed: true}}
+    state = Connect.Sensor.replace_context(state, fresh_context)
+    assert state.context == fresh_context
+    assert state.checkpoint == "first"
+
+    assert {:ok, state, [{:emit, second_signal}, {:schedule, 1_000}]} =
+             Connect.JidoSensorRuntime.handle_event(sensor, :tick, state)
+
+    assert second_signal.data.repo == "org/repo:second"
+    assert_received {:resolved, "demo.repo.changed", ^input}
+
+    override = %{
+      integration_context: fresh_context,
+      connection_resolver: fn _selector -> %{resolved.connection | id: "other"} end
+    }
+
+    assert {:error, %Connect.Error.AuthError{reason: :connection_required}} =
+             Connect.JidoSensorRuntime.handle_event(
+               sensor,
+               :tick,
+               Connect.Sensor.replace_context(state, override)
+             )
+
+    refute_received {:resolved, _, _}
+  end
+
   test "generated availability keeps host policy requirements" do
     spec =
       RuntimeFixtures.spec(%{
@@ -254,6 +345,9 @@ defmodule Jido.Connect.Jido.RuntimeTest do
              Connect.JidoActionRuntime.run(projection, %{repo: "org/repo"}, %{
                integration_context: context
              })
+
+    assert {:error, %Connect.Error.AuthError{reason: :credential_lease_required}} =
+             Connect.JidoActionRuntime.run(projection, %{repo: "org/repo"}, context)
 
     raising_projection = %{projection | integration_module: RuntimeFixtures.RaisingIntegration}
 

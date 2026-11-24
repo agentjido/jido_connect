@@ -3,6 +3,31 @@ defmodule Jido.Connect.ContractsTest do
 
   alias Jido.Connect
 
+  test "context validates host callback references" do
+    attrs = %{
+      tenant_id: "tenant_1",
+      actor: %{id: "actor_1"},
+      policy: __MODULE__,
+      credential_resolver: __MODULE__,
+      connection_resolver: {__MODULE__, :resolve}
+    }
+
+    assert {:ok,
+            %Connect.Context{
+              policy: __MODULE__,
+              credential_resolver: __MODULE__,
+              connection_resolver: {__MODULE__, :resolve}
+            }} = Connect.Context.new(attrs)
+
+    for {field, value} <- [
+          policy: fn _op, _input, _context, _connection -> :ok end,
+          credential_resolver: "Resolver",
+          connection_resolver: {__MODULE__, :resolve, []}
+        ] do
+      assert {:error, _reason} = Connect.Context.new(Map.put(attrs, field, value))
+    end
+  end
+
   test "all public contract structs expose Zoi schemas and constructors" do
     field =
       Connect.Field.new!(%{

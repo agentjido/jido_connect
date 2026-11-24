@@ -6,6 +6,16 @@ change with each deliberate upstream update.
 
 ## Dependency record
 
+Selected on 2026-11-23 for CVE-2026-117678:
+
+| Package | Requirement | Source |
+| --- | --- | --- |
+| `jsv` | `~> 0.28.0`, locked to `0.28.1` | Hex |
+| `idna` | `~> 8.0`, locked to `8.0.0` | Hex |
+
+JSV 0.28 accepts `idna` 8. Core requires the fixed `idna` major to keep older
+consumer lockfiles from retaining an affected version.
+
 Selected on 2026-11-21:
 
 | Package | Requirement | Source |
@@ -90,11 +100,22 @@ exception list.
 
 ## Verification
 
+Checks on 2026-11-23 with JSV 0.28.1 and idna 8.0.0:
+
+- `mix hex.audit` found no retired packages or security advisories.
+- Umbrella `mix quality` passed 4,273 tests across 41 suites.
+- Core coverage passed with 283 tests and 82.53% coverage.
+- All eight offline Agent example tests passed. The signed GitHub delivery
+  requested one lease. Bad signatures, known delivery IDs, and denied
+  repositories stopped before the credential resolver ran.
+- The affected fixture demos passed. Demo formatting, compilation with
+  warnings as errors, and all 21 tests passed.
+
 Checks on 2026-11-21 with Jido 3.0.0-beta.3:
 
 - Umbrella `mix quality` passed. It compiled with warnings as errors and passed 4,263 tests.
 - Demo formatting and compilation with warnings as errors passed. All 21 demo tests passed.
-- `mix hex.audit` reported EEF-CVE-2026-117678 in the existing `idna` 7.1.0 lock. The current `jsv` requirement excludes `idna` 8.
+- `mix hex.audit` reported EEF-CVE-2026-117678 in the `idna` 7.1.0 lock. The JSV requirement at that point excluded `idna` 8.
 
 
 The Hozen GitHub collection candidate was checked locally on 2026-11-08:

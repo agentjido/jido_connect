@@ -5,7 +5,8 @@ defmodule Jido.Connect.CredentialResolver do
   Implementations must check current grants for the tenant, actor, connection,
   operation, and target before reading credential material. The runtime calls
   the resolver with parsed input and keeps the returned lease inside the call.
-  Hosts configure the resolver in runtime options, never in operation input.
+  Configure the resolver on an Agent's Connect binding, on
+  `Jido.Connect.Context`, or in trusted runtime options.
   """
 
   alias Jido.Connect.{Callback, Context, CredentialLease, Error}

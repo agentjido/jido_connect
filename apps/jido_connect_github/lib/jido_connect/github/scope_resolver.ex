@@ -44,6 +44,7 @@ defmodule Jido.Connect.GitHub.ScopeResolver do
       "github.pull_request_file.list" -> ["metadata:read", "pull_requests:read"]
       "github.issue.new" -> ["metadata:read", "issues:read"]
       "github.pull_request.updated" -> ["metadata:read", "pull_requests:read"]
+      "github.webhook.pull_request" -> ["metadata:read", "pull_requests:read"]
       _other -> Map.get(operation, :scopes, [])
     end
   end

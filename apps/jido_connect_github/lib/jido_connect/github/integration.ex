@@ -25,7 +25,8 @@ defmodule Jido.Connect.GitHub do
       Jido.Connect.GitHub.Actions.GitObjects,
       Jido.Connect.GitHub.Actions.IssueUpdates,
       Jido.Connect.GitHub.Actions.IssueComments,
-      Jido.Connect.GitHub.Triggers.Issues
+      Jido.Connect.GitHub.Triggers.Issues,
+      Jido.Connect.GitHub.Triggers.PullRequests
     ]
 
   defdelegate catalog_packs, to: Jido.Connect.GitHub.CatalogPacks, as: :all

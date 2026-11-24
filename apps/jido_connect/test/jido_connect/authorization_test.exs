@@ -107,6 +107,30 @@ defmodule Jido.Connect.AuthorizationTest do
              )
   end
 
+  test "context policy applies when the policy option is absent or nil" do
+    connection = connection()
+    context = %{context(connection) | policy: AllowPolicy}
+
+    lease =
+      CredentialLease.from_connection!(connection, %{},
+        expires_at: DateTime.add(DateTime.utc_now(), 60)
+      )
+
+    assert {:error, %Error.AuthError{reason: :policy_denied}} =
+             Authorization.authorize(operation(), %{}, context, lease)
+
+    assert {:error, %Error.AuthError{reason: :policy_denied}} =
+             Authorization.authorize(operation(), %{}, context, lease, policy: nil)
+
+    assert :ok =
+             Authorization.authorize(operation(), %{}, context, lease,
+               policy: fn _, _, _, _ -> :ok end
+             )
+
+    assert :disabled_by_policy =
+             Authorization.connection_availability(operation(), connection, %{}, context: context)
+  end
+
   test "lease scopes narrow durable connection scopes" do
     connection = connection(scopes: ["repo", "admin:org"])
     context = context(connection)

@@ -100,6 +100,29 @@ defmodule Jido.Connect.PreparedActionTest do
     refute_received {:handler_called, _repo}
   end
 
+  test "prepare and commit require an explicit lease even with a context resolver", state do
+    context = %{state.context | credential_resolver: __MODULE__}
+
+    assert {:error, %Connect.Error.AuthError{reason: :credential_lease_required}} =
+             Connect.prepare(state.spec, "demo.repo.show", state.input,
+               context: context,
+               binding_ref: "binding_1"
+             )
+
+    assert {:ok, prepared} = prepare(state)
+    opts = commit_opts(%{state | context: context}, %{plan_id: prepared.id})
+
+    assert {:error, %Connect.Error.AuthError{reason: :credential_lease_required}} =
+             Connect.commit(
+               state.spec,
+               prepared,
+               state.input,
+               Keyword.delete(opts, :credential_lease)
+             )
+
+    refute_received {:handler_called, _repo}
+  end
+
   test "commit loads an approval validator module from the code path", state do
     assert {:ok, prepared} = prepare(state)
     module = Module.concat(__MODULE__, "UnloadedApproval#{System.unique_integer([:positive])}")

@@ -45,7 +45,9 @@ defmodule JidoConnectCore.MixProject do
     [
       {:jido, "== 3.0.0-beta.3"},
       {:arbor_mcp, "== 2.0.0-rc.7"},
-      {:jsv, "~> 0.26.2", override: true},
+      {:jsv, "~> 0.28.0", override: true},
+      # Keep JSV callers on a release fixed for CVE-2026-117678.
+      {:idna, "~> 8.0"},
       {:ex_doc, "~> 0.40", only: :docs, runtime: false},
       {:jason, "~> 1.4"},
       {:req, "~> 0.6"},
