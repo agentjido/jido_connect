@@ -28,10 +28,11 @@ MIX_ENV=test mix do --app jido_connect_slack test --only live_smoke
 
 Set `JIDO_CONNECT_RECORD=1` to enable recording. In the test, call
 `LiveSmoke.record({app, req_options_key}, provider, name)` before the request.
-The recorder installs a temporary Req adapter. Keep the test and the requests
-in each recording session serial. The recorder writes the response status,
-sanitized path, headers and body into `test/fixtures/<provider>/recorded`.
-Each subsequent response gets a numbered file name. A recording fails if the
+The recorder installs a temporary Req adapter. Keep recording tests serial.
+The recorder writes the response status, sanitized path, headers and body into
+`test/fixtures/<provider>/recorded`. Each subsequent response gets a numbered
+file name; responses of one test that finish at the same time are written one
+after the other and numbered in that order. A recording fails if the
 destination already exists. To refresh a fixture, record with `:root` set to
 a temporary directory. Review the new files before replacing the old ones.
 Keep only the files that tests use.
@@ -57,7 +58,9 @@ repository. Load them into the shell for the test. Keep raw captures
 outside the repository. Use synthetic content wherever possible.
 
 The sanitizer removes sensitive headers and keys, replaces recognized
-identifiers, and checks for known values in several encodings. Opaque or
+identifiers, and checks for known values in several encodings, percent escapes
+in either case included. Learned names are never replaced inside email
+addresses or placeholders, and names longer than 200 bytes are not learned. Opaque or
 nested content can still contain private data. Review every request path,
 header and body before committing a fixture. Check encoded text, attachments,
 provider identifiers and tenant URLs. Remove files that the tests do not load.

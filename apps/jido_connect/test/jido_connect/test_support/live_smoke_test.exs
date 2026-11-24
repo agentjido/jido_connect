@@ -164,18 +164,20 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
              }
     end
 
-    test "redacts token fields and keeps Jira issue fields" do
+    test "redacts token fields and keeps Jira issue fields, unless keep_keys: drops them" do
       body = %{
         "access_token" => "ya29.secret",
         "nested" => [%{"refresh_token" => "1//secret", "ok" => true}],
-        "fields" => %{"summary" => "Broken build"}
+        "fields" => %{"summary" => "Broken build", "reporter" => "ada@corp.test"}
       }
 
       assert LiveSmoke.sanitize(body) == %{
                "access_token" => "[redacted]",
                "nested" => [%{"refresh_token" => "[redacted]", "ok" => true}],
-               "fields" => %{"summary" => "Broken build"}
+               "fields" => %{"summary" => "Broken build", "reporter" => "person-1@example.com"}
              }
+
+      assert LiveSmoke.sanitize(body, keep_keys: [])["fields"] == "[redacted]"
     end
 
     test "replaces email addresses and display names with stable placeholders" do
@@ -253,6 +255,139 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
                },
                "to" => "person-2@example.com, Person 3 <person-1@example.com>"
              }
+    end
+
+    test "replaces addresses and names in the map keys of fields: values" do
+      body = %{
+        "calendars" => %{"ada@corp.test" => %{"busy" => []}},
+        "owner" => %{"displayName" => "Ada Lovelace"},
+        "notes" => %{"Ada Lovelace" => "on leave"}
+      }
+
+      assert LiveSmoke.sanitize(body, fields: ["calendars", "notes"]) == %{
+               "calendars" => %{"person-1@example.com" => %{"busy" => []}},
+               "owner" => %{"displayName" => "Person 1"},
+               "notes" => %{"Person 1" => "notes-1"}
+             }
+    end
+
+    test "keeps addresses and placeholders whole when a name is a word of them" do
+      # Names are replaced in the text between addresses and placeholders, so
+      # a name such as "Person" or "example.com" cannot change either.
+      body = %{
+        "users" => [
+          %{"displayName" => "Person", "email" => "ada@corp.test"},
+          %{"displayName" => "example.com", "email" => "grace@corp.test"}
+        ],
+        "text" => "Person 3 wrote to ada@corp.test about example.com"
+      }
+
+      sanitized = LiveSmoke.sanitize(body)
+
+      assert sanitized == %{
+               "users" => [
+                 %{"displayName" => "Person 1", "email" => "person-1@example.com"},
+                 %{"displayName" => "Person 2", "email" => "person-2@example.com"}
+               ],
+               "text" => "Person 3 wrote to person-1@example.com about Person 2"
+             }
+
+      assert LiveSmoke.sanitize(sanitized) == sanitized
+
+      # A `<field>-<n>` placeholder stays whole, also outside its field.
+      fielded = %{"username" => "Text", "text" => "first", "reference" => "text-1"}
+
+      assert LiveSmoke.sanitize(fielded, fields: ["text"]) == %{
+               "username" => "Person 1",
+               "text" => "text-2",
+               "reference" => "text-1"
+             }
+    end
+
+    test "keeps account, user and host placeholders whole when a name is a word of them" do
+      # Invented IDs in the shape of an Atlassian account ID and a Google user ID.
+      account = "712020:0f1e2d3c-4b5a-6978-8a9b-0c1d2e3f4a5b"
+      user = "123456789012345678901"
+
+      body = %{
+        "people" => [
+          %{"displayName" => "account", "accountId" => account},
+          %{"displayName" => "user"},
+          %{"displayName" => "example"}
+        ],
+        "self" => "https://acme-live.atlassian.net/browse/KEY-1",
+        "participant" => "conferenceRecords/rec-1/participants/#{user}",
+        "text" => "account #{account} and user #{user} on acme-live.atlassian.net"
+      }
+
+      with_env(@no_sites, fn ->
+        sanitized = LiveSmoke.sanitize(body)
+
+        assert sanitized == %{
+                 "people" => [
+                   %{"displayName" => "Person 1", "accountId" => "account-1"},
+                   %{"displayName" => "Person 2"},
+                   %{"displayName" => "Person 3"}
+                 ],
+                 "self" => "https://example.atlassian.net/browse/KEY-1",
+                 "participant" => "conferenceRecords/rec-1/participants/user-1",
+                 "text" => "Person 1 account-1 and Person 2 user-1 on example.atlassian.net"
+               }
+
+        assert LiveSmoke.sanitize(sanitized) == sanitized
+      end)
+    end
+
+    test "replaces a name in any case, also where case folding differs" do
+      # Upper case maps to the plain sigma, the name ends in the final one.
+      body = %{"author" => %{"displayName" => "Σωκράτης"}, "note" => "ΣΩΚΡΆΤΗΣ wrote"}
+
+      assert LiveSmoke.sanitize(body) == %{
+               "author" => %{"displayName" => "Person 1"},
+               "note" => "Person 1 wrote"
+             }
+    end
+
+    test "replaces thousands of learned names" do
+      # As in a recording of the member list of a larger account.
+      members = for n <- 1..2_000, do: %{"real_name" => "Member #{n}", "id" => "U#{n}"}
+      body = %{"members" => members, "text" => "Member 1999 thanked Member 7"}
+
+      task = Task.async(fn -> LiveSmoke.sanitize(body) end)
+      sanitized = Task.await(task, 10_000)
+
+      refute inspect(sanitized, limit: :infinity) =~ "Member"
+      assert sanitized["text"] =~ ~r/^Person \d+ thanked Person \d+$/
+      assert LiveSmoke.sanitize(sanitized) == sanitized
+    end
+
+    test "learns no name longer than 200 bytes" do
+      # A paragraph in front of an address is no display name, and one regex
+      # over a very long name would not compile.
+      for size <- [201, 200_000] do
+        paragraph = String.duplicate("x", size)
+        body = %{"to" => paragraph <> " <ada@corp.test>", "note" => paragraph}
+
+        assert LiveSmoke.sanitize(body) == %{
+                 "to" => paragraph <> " <person-1@example.com>",
+                 "note" => paragraph
+               }
+      end
+    end
+
+    test "sanitizes long runs of spaces or address characters in linear time" do
+      # Each shape made an address pattern backtrack once per position.
+      long_address = String.duplicate("a", 16_000) <> "@corp.test, Bob <bob@corp.test>"
+
+      for {text, expected} <- [
+            {String.duplicate(" ", 20_000) <> "x <y", :same},
+            {String.duplicate("a", 200_000) <> "@x y.zz", :same},
+            {long_address, "person-1@example.com, Person 1 <person-2@example.com>"}
+          ] do
+        task = Task.async(fn -> LiveSmoke.sanitize(%{"note" => text}) end)
+        expected = if expected == :same, do: text, else: expected
+        assert Task.await(task, 2_000) == %{"note" => expected}
+      end
     end
 
     test "keeps keep_keys in form bodies and survives missing bodies and headers" do
@@ -947,16 +1082,34 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
     end
 
     test "fails when a credential variable's value appears, naming only the variable" do
-      token = "xoxb-live-smoke-leak-check"
+      token = "xoxb-live/smoke+leak=check"
+
+      # Percent escapes in either case, or only some of them, are found too.
+      leaks = [
+        token,
+        URI.encode_www_form(token),
+        "xoxb-live%2fsmoke%2bleak%3dcheck",
+        "xoxb-live%2Fsmoke+leak%3Dcheck",
+        Base.encode64(token)
+      ]
 
       with_env(%{"SLACK_BOT_TOKEN" => token}, fn ->
-        error =
-          assert_raise LeakError, fn ->
-            LiveSmoke.sanitize(%{"note" => "token is #{token}"})
-          end
+        for leaked <- leaks do
+          error =
+            assert_raise LeakError, fn ->
+              LiveSmoke.sanitize(%{"next" => "https://example.test/?t=#{leaked}"})
+            end
 
-        assert Exception.message(error) =~ "SLACK_BOT_TOKEN"
-        refute Exception.message(error) =~ token
+          assert Exception.message(error) =~ "SLACK_BOT_TOKEN"
+          refute Exception.message(error) =~ token
+        end
+      end)
+
+      # A form body writes a space as `+`, next to escapes in either case.
+      with_env(%{"SLACK_BOT_TOKEN" => "xoxb live/smoke"}, fn ->
+        assert_raise LeakError, ~r/SLACK_BOT_TOKEN/, fn ->
+          LiveSmoke.sanitize(%{"form" => "token=xoxb+live%2fsmoke"})
+        end
       end)
 
       refresh = "1//live-smoke-refresh"
@@ -1277,6 +1430,74 @@ defmodule Jido.Connect.TestSupport.LiveSmokeTest do
                "Hi Opaque Recipient,\r\nPerson 1, Person 3\r\n"
 
       assert LiveSmoke.fixture!(:stub, "opaque.2", root: tmp) == attachment
+    end
+
+    test "numbers responses that finish at the same time without losing one", %{tmp: tmp} do
+      base_url = start_stub([{200, %{"page" => "a"}}, {200, %{"page" => "b"}}])
+
+      # The transform holds each response for a moment, so the second one
+      # finishes while the first is still being written.
+      transform = fn _path, body ->
+        Process.sleep(100)
+        body
+      end
+
+      with_env(%{"JIDO_CONNECT_RECORD" => "1"}, fn ->
+        put_req_options(retry: false)
+
+        :ok =
+          LiveSmoke.record({:jido_connect, @req_key}, :stub, "parallel",
+            root: tmp,
+            transform: transform
+          )
+
+        ["/v1/a", "/v1/b"]
+        |> Enum.map(fn path -> Task.async(fn -> get(base_url, path) end) end)
+        |> Enum.each(&assert({:ok, %Req.Response{status: 200}} = Task.await(&1)))
+      end)
+
+      pages =
+        for name <- ["parallel", "parallel.2"],
+            do: LiveSmoke.fixture!(:stub, name, root: tmp)["page"]
+
+      assert Enum.sort(pages) == ["a", "b"]
+    end
+
+    test "keeps JSON numbers and booleans as the body", %{tmp: tmp} do
+      base_url = start_stub([{200, true}, {200, 42}])
+
+      with_env(%{"JIDO_CONNECT_RECORD" => "1"}, fn ->
+        put_req_options(retry: false)
+        :ok = LiveSmoke.record({:jido_connect, @req_key}, :stub, "scalar", root: tmp)
+        assert {:ok, %Req.Response{body: true}} = get(base_url, "/v1/flag")
+        assert {:ok, %Req.Response{body: 42}} = get(base_url, "/v1/count")
+      end)
+
+      assert LiveSmoke.fixture!(:stub, "scalar", root: tmp) == true
+      assert LiveSmoke.fixture!(:stub, "scalar.2", root: tmp) == 42
+    end
+
+    test "a transform that skips every response can start again under one name", %{tmp: tmp} do
+      # How provider helpers keep setup calls out of the fixtures: recording
+      # never replaces a file, and a skipped response writes none.
+      base_url = start_stub([{200, %{"page" => 1}}, {200, %{"page" => 2}}])
+      skip = fn _path, _body -> :skip end
+
+      with_env(%{"JIDO_CONNECT_RECORD" => "1"}, fn ->
+        put_req_options(retry: false)
+
+        for page <- [1, 2] do
+          :ok =
+            LiveSmoke.record({:jido_connect, @req_key}, :stub, "setup",
+              root: tmp,
+              transform: skip
+            )
+
+          assert {:ok, %Req.Response{body: %{"page" => ^page}}} = get(base_url, "/v1/setup")
+        end
+      end)
+
+      assert Path.wildcard(Path.join(tmp, "**/*.json")) == []
     end
 
     test "stores size and digest instead of a body that is not UTF-8", %{tmp: tmp} do

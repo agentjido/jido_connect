@@ -26,10 +26,14 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
   alias Jido.Connect.TestSupport.LiveSmoke.LeakError
 
   @email_pattern "[A-Za-z0-9._%+\\-]+@[A-Za-z0-9\\-]+(?:\\.[A-Za-z0-9\\-]+)*\\.[A-Za-z]{2,}"
-  @email Regex.compile!(@email_pattern)
-  # A value made only of `Name <address>` and bare address entries, as in mail headers.
-  @address_list ~r/^\s*(?:(?:(?:"[^"]*"|[^"<>,;:]*?)\s*<\s*#{@email_pattern}\s*>|#{@email_pattern})\s*(?:,\s*|$))+$/
-  @named_address ~r/(?:"([^"]+)"|([^"<>,;:\s][^"<>,;:]*?))\s*<\s*(#{@email_pattern})\s*>/
+  # Matching starts only where a local part starts, so a long run of
+  # local-part characters is scanned once, not once per position.
+  @email Regex.compile!("(?<![A-Za-z0-9._%+\\-])" <> @email_pattern)
+  # A value made only of `Name <address>` and bare address entries, as in mail
+  # headers. The possessive `*+` keeps long runs of spaces from backtracking.
+  @address_list ~r/^\s*+(?:(?:(?:"[^"]*"\s*+|[^"<>,;:]*)<\s*+#{@email_pattern}\s*+>|#{@email_pattern})\s*+(?:,\s*+|$))+$/
+  # One entry of such a list; matching starts only at the start of an entry.
+  @named_address ~r/(?:^|,)\s*+(?:"([^"]+)"|([^"<>,;:\s][^"<>,;:]*?))\s*+<\s*+(#{@email_pattern})\s*+>/
   @name_keys ~w(displayName display_name display_name_normalized real_name
                 real_name_normalized publicName fullName full_name first_name last_name
                 givenName familyName username user_name)
@@ -64,6 +68,20 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
   # host of that shape stays, and the leak guard refuses the output.
   @placeholder_shaped_host ~r/^(?:example(?:-\d+)?\.[a-z0-9.-]+|host-\d+\.example\.com)$/
   @project_number_placeholder "000000000000"
+  # Email addresses and the placeholders of names, account IDs, Google user IDs
+  # and hosts: the parts of a text that names are never replaced in, so a
+  # learned name such as "Person", "account" or "example.com" leaves addresses
+  # and placeholders whole. `<field>-<n>` placeholders of the configured
+  # fields join them per state.
+  @token "(?<![A-Za-z0-9._%+\\-])#{@email_pattern}|" <>
+           "(?<![A-Za-z0-9])(?:Person \\d+|account-\\d+|user-\\d+)(?![0-9])|" <>
+           "(?<![A-Za-z0-9.-])(?:#{@host_placeholder_pattern})(?![A-Za-z0-9-])"
+  # Names are replaced with one regex per block of learned names, longest
+  # first. One regex over thousands of names exceeds what PCRE compiles.
+  @names_per_pattern 100
+  # Longer text in a name position, such as a paragraph before `<address>`,
+  # is no display name.
+  @max_name_bytes 200
   @min_credential_bytes 8
   # Google user IDs, as in a Meet participant's `signedinUser.user` and in the
   # participant segment of its resource name. Only whole numeric segments of
@@ -93,6 +111,9 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
             hosts: %{},
             identifying: [],
             names: %{},
+            compiled_names: nil,
+            name_patterns: [],
+            tokens: nil,
             documentation_names: MapSet.new(),
             project_numbers: [],
             reserved: MapSet.new(),
@@ -137,16 +158,13 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
 
   @doc "Sanitizes a decoded JSON value."
   def value(value, state) do
-    state = reserve(value, state)
-
-    value
-    |> collect(state)
-    |> then(&replace(value, &1))
+    state = value |> reserve(state) |> then(&collect(value, &1)) |> compile_names()
+    replace(value, state)
   end
 
   @doc "Sanitizes free text such as a URL path or a header value."
   def text(text, state) when is_binary(text) do
-    state = text |> reserve(state) |> then(&collect(text, &1))
+    state = text |> reserve(state) |> then(&collect(text, &1)) |> compile_names()
     {replace_text(text, state), state}
   end
 
@@ -252,6 +270,8 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
   """
   def check_leaks!(value, %__MODULE__{} = state) do
     encoded = Jason.encode!(value)
+    form = String.replace(encoded, "+", " ")
+    texts = Enum.uniq([encoded, decode_escapes(encoded), decode_escapes(form)])
 
     learned =
       Enum.map(state.hosts, fn {host, _placeholder} -> {"a tenant host", host} end) ++
@@ -264,7 +284,7 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
       end)
 
     case Enum.find(state.credentials.() ++ guarded, fn {_name, secret} ->
-           leaked?(encoded, secret)
+           leaked?(texts, secret)
          end) do
       nil -> :ok
       {name, _secret} -> raise LeakError, variable: name
@@ -303,7 +323,7 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
 
   defp collect(text, state) when is_binary(text) do
     state =
-      if Regex.match?(@address_list, text) do
+      if String.contains?(text, "<") and Regex.match?(@address_list, text) do
         @named_address
         |> Regex.scan(text, capture: :all_but_first)
         |> Enum.reduce(state, fn [quoted, bare, address], state ->
@@ -445,7 +465,7 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
     name = String.trim(name)
 
     cond do
-      byte_size(name) < 3 or String.contains?(name, "@") or
+      byte_size(name) < 3 or byte_size(name) > @max_name_bytes or String.contains?(name, "@") or
           Regex.match?(@name_placeholder, name) ->
         state
 
@@ -494,8 +514,13 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
   defp redact?(key, state),
     do: Sanitizer.sensitive_key?(key) and to_string(key) not in state.keep_keys
 
-  defp replace_text(text, state) do
-    text = Regex.replace(@email, text, &Map.get(state.emails, String.downcase(&1), &1))
+  # Addresses become their placeholders, then hosts and IDs. Names come last
+  # and are replaced block by block, each time only in the parts between
+  # addresses and placeholders, so a placeholder written for one value is
+  # never matched by a name.
+  defp replace_text(text, state, name_patterns \\ nil) do
+    text =
+      between_tokens(text, state.tokens, &Map.get(state.emails, String.downcase(&1), &1), & &1)
 
     # Hosts before names, so a name that equals a host label leaves the host whole.
     text =
@@ -531,15 +556,64 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
         )
       end)
 
-    state.names
+    Enum.reduce(name_patterns || state.name_patterns, text, fn {pattern, block}, text ->
+      between_tokens(text, state.tokens, & &1, fn part ->
+        Regex.replace(pattern, part, &name_placeholder(&1, block))
+      end)
+    end)
+  end
+
+  defp between_tokens(text, tokens, on_token, on_part) do
+    tokens
+    |> Regex.split(text, include_captures: true)
+    |> Enum.with_index()
+    |> Enum.map_join(fn
+      {token, index} when rem(index, 2) == 1 -> on_token.(token)
+      {part, _index} -> on_part.(part)
+    end)
+  end
+
+  # Builds the token and name regexes after the names of a value are learned,
+  # and again only when new names were learned. Names are never removed.
+  defp compile_names(%__MODULE__{compiled_names: count, names: names} = state)
+       when count == map_size(names),
+       do: state
+
+  defp compile_names(state) do
+    fields =
+      Enum.map(state.fields, &"|(?<![A-Za-z0-9_.~-])#{Regex.escape(&1)}-\\d+(?![0-9])")
+
+    %{
+      state
+      | tokens: Regex.compile!(Enum.join([@token | fields])),
+        name_patterns: name_patterns(state.names),
+        compiled_names: map_size(state.names)
+    }
+  end
+
+  defp name_patterns(names) do
+    names
     |> Enum.sort_by(fn {name, _placeholder} -> -byte_size(name) end)
-    |> Enum.reduce(text, fn {name, placeholder}, text ->
+    |> Enum.chunk_every(@names_per_pattern)
+    |> Enum.map(fn block ->
+      alternatives = Enum.map_join(block, "|", fn {name, _placeholder} -> Regex.escape(name) end)
+
+      lookup =
+        Map.new(block, fn {name, placeholder} -> {:string.casefold(name), placeholder} end)
+
       # Whole words only, so a name such as "Admin" leaves "Administrator" alone.
-      Regex.replace(
-        ~r/(?<![\p{L}\p{N}])#{Regex.escape(name)}(?![\p{L}\p{N}])/iu,
-        text,
-        placeholder
-      )
+      {Regex.compile!("(?<![\\p{L}\\p{N}])(?:#{alternatives})(?![\\p{L}\\p{N}])", "iu"),
+       {lookup, block}}
+    end)
+  end
+
+  # The regex matches names ignoring case. Case folding finds the name in
+  # most cases; otherwise the block is searched for the name that matches.
+  defp name_placeholder(match, {lookup, block}) do
+    Map.get_lazy(lookup, :string.casefold(match), fn ->
+      Enum.find_value(block, match, fn {name, placeholder} ->
+        if Regex.match?(~r/\A#{Regex.escape(name)}\z/iu, match), do: placeholder
+      end)
     end)
   end
 
@@ -556,11 +630,16 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
   # learned value that the encoding happens to contain is replaced there.
   defp replace_base64(item, state) do
     emails = Map.reject(state.emails, fn {email, _placeholder} -> documentation?(email) end)
-    names = Map.drop(state.names, MapSet.to_list(state.documentation_names))
+
+    patterns =
+      if Enum.empty?(state.documentation_names),
+        do: state.name_patterns,
+        else:
+          state.names |> Map.drop(MapSet.to_list(state.documentation_names)) |> name_patterns()
 
     case decode_base64(item) do
       {:ok, text, encoding} ->
-        case replace_text(text, %{state | emails: emails, names: names}) do
+        case replace_text(text, %{state | emails: emails}, patterns) do
           ^text -> item
           sanitized -> encode_base64(sanitized, encoding)
         end
@@ -649,7 +728,7 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
     map
     |> Enum.map_reduce(state, fn {key, item}, state ->
       {item, state} = placeholder(item, field, state)
-      {{key, item}, state}
+      {{replace_key(key, state), item}, state}
     end)
     |> then(fn {pairs, state} -> {Map.new(pairs), state} end)
   end
@@ -702,18 +781,28 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Sanitize do
     {{key, item}, state}
   end
 
-  # Besides the raw value, look for the JSON, percent and Base64 encodings a
-  # value takes in URLs, form bodies and encoded payloads.
-  defp leaked?(encoded, secret) do
-    [
-      secret,
-      secret |> Jason.encode!() |> String.slice(1..-2//1),
-      URI.encode_www_form(secret),
-      URI.encode(secret, &URI.char_unreserved?/1)
-      | base64_cores(secret)
-    ]
-    |> Enum.uniq()
-    |> Enum.any?(&String.contains?(encoded, &1))
+  # Besides the raw value, look for the JSON, form and Base64 encodings a
+  # value takes in URLs, form bodies and encoded payloads. `texts` holds the
+  # output and its percent-decoded forms, with `+` kept or read as a space, so
+  # escapes in any case, and values only partly escaped, are found as well.
+  defp leaked?(texts, secret) do
+    candidates =
+      Enum.uniq([
+        secret,
+        secret |> Jason.encode!() |> String.slice(1..-2//1),
+        URI.encode_www_form(secret)
+        | base64_cores(secret)
+      ])
+
+    Enum.any?(texts, fn text -> Enum.any?(candidates, &String.contains?(text, &1)) end)
+  end
+
+  # Decodes every `%XX` escape and leaves anything else as it is, unlike
+  # `percent_decode/1`, which keeps a value with a malformed escape whole.
+  defp decode_escapes(text) do
+    Regex.replace(~r/%([0-9A-Fa-f]{2})/, text, fn _escape, hex ->
+      <<String.to_integer(hex, 16)>>
+    end)
   end
 
   # A value inside longer Base64 content starts at byte 0, 1 or 2 of a

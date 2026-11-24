@@ -29,15 +29,22 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Recorder do
     end
   end
 
+  # Requests of one test can finish at the same time. Each response reads the
+  # session, writes its file and stores the next number and placeholders under
+  # one lock, so no file is overwritten and no placeholder is lost. Errors such
+  # as `LeakError` still raise in the calling process.
   defp write_response({request, response}) do
+    :global.trans({__MODULE__, self()}, fn -> record(request, response) end, [node()])
+    {request, response}
+  end
+
+  defp record(request, response) do
     session = Agent.get(__MODULE__, & &1)
 
     case transform(session, request, response.body) do
       :skip -> :ok
       body -> write_fixture(session, request, %{response | body: body}, body !== response.body)
     end
-
-    {request, response}
   end
 
   defp write_fixture(session, request, response, transformed?) do
@@ -78,7 +85,8 @@ defmodule Jido.Connect.TestSupport.LiveSmoke.Recorder do
     |> Sanitize.fixture(sanitizer)
   end
 
-  defp body(body) when is_map(body) or is_list(body), do: %{"body" => body}
+  defp body(body) when is_map(body) or is_list(body) or is_number(body) or is_boolean(body),
+    do: %{"body" => body}
 
   defp body(body) when is_binary(body) do
     if String.valid?(body) do
