@@ -2,6 +2,7 @@ defmodule Jido.Connect.Jira.FixtureTest do
   use ExUnit.Case, async: true
 
   alias Jido.Connect.Jira.Client.Normalizer
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   describe "issue fixtures" do
     test "normalizes common issue fixture" do
@@ -48,24 +49,16 @@ defmodule Jido.Connect.Jira.FixtureTest do
       assert issue.priority[:name] == "Medium"
     end
 
-    test "normalizes issue search results fixture" do
-      payload = fixture!("issue_search_results.json")
+    test "normalizes a recorded enhanced-search page" do
+      payload = LiveSmoke.fixture!(:jira, "issue_context.4")
 
       assert {:ok, page} = Normalizer.pagination(payload)
-      assert page.start_at == 0
-      assert page.max_results == 50
-      assert page.total == 2
-      assert page.is_last == true
+      assert %{start_at: nil, max_results: nil, total: nil, is_last: false} = page
+      assert page.next_page_token == payload["nextPageToken"]
 
-      issues = payload["issues"]
-      assert length(issues) == 2
-
-      assert {:ok, first} = Normalizer.issue(Enum.at(issues, 0))
-      assert first.key == "PROJ-123"
-
-      assert {:ok, second} = Normalizer.issue(Enum.at(issues, 1))
-      assert second.key == "PROJ-124"
-      assert second.labels == ["frontend", "auth"]
+      assert [first, second] = payload["issues"]
+      assert {:ok, %{key: "JCL-1", id: "46096"}} = Normalizer.issue(first)
+      assert {:ok, %{key: "JCL-2", description: nil, due_date: nil}} = Normalizer.issue(second)
     end
   end
 

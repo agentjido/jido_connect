@@ -178,3 +178,13 @@ also checks nonempty variables whose names end in `_TOKEN`, `_SECRET`,
 | `CONFLUENCE_PAGE_ID` | setting | Plain page |
 | `CONFLUENCE_RICH_PAGE_ID` | setting | Page with images, a macro and an inline comment |
 | `CONFLUENCE_RESTRICTED_PAGE_ID` | setting | Page the test user cannot read |
+
+### Jira
+
+| Variable | Kind | Use |
+| --- | --- | --- |
+| `JIRA_API_TOKEN` | credential | API token of the test user |
+| `JIRA_PROJECT_KEY` | setting | Test project |
+| `JIRA_ISSUE_KEY` | setting | Test issue |
+| `JIRA_ISSUE_ID` | setting | Numeric ID of the test issue |
+| `JIRA_CAPTURE_DIR` | setting | Capture directory of the demo host |

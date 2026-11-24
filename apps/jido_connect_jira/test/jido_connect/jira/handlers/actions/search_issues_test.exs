@@ -9,26 +9,22 @@ defmodule Jido.Connect.Jira.Handlers.Actions.SearchIssuesTest do
       runtime = Jido.Connect.Jira.TestRuntime.build()
 
       assert {:ok, result} = SearchIssues.run(input, runtime)
-      assert length(result.issues) == 1
-      assert hd(result.issues).key == "PROJ-123"
-      assert result.total == 1
-      assert result.start_at == 0
-      assert result.max_results == 50
-      assert result.is_last == true
+      assert [%{key: "PROJ-123"}] = result.issues
+      assert %{next_page_token: "page-2", is_last: false, max_results: 50} = result
     end
 
-    test "passes pagination and field selection opts" do
+    test "passes the page token, page size and field selection" do
       input = %{
         jql: "project = PROJ ORDER BY updated DESC",
-        start_at: 0,
+        next_page_token: "page-2",
         max_results: 25,
         fields: ["summary", "status"]
       }
 
       runtime = Jido.Connect.Jira.TestRuntime.build()
 
-      assert {:ok, result} = SearchIssues.run(input, runtime)
-      assert result.issues != []
+      assert {:ok, %{is_last: true, next_page_token: nil, max_results: 25}} =
+               SearchIssues.run(input, runtime)
     end
   end
 end

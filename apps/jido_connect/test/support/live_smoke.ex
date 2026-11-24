@@ -61,7 +61,11 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
                      GOOGLE_MEET_CONFERENCE_RECORD GOOGLE_MEET_TRANSCRIPT GOOGLE_MEET_RECORDING)
     },
     slack: %{credentials: ~w(SLACK_BOT_TOKEN SLACK_SIGNING_SECRET), settings: ~w(JIDO_PUBLIC_URL)},
-    jira: %{credentials: ~w(JIRA_WEBHOOK_SECRET), settings: ~w(JIRA_SITE JIRA_EMAIL)},
+    jira: %{
+      credentials: ~w(JIRA_WEBHOOK_SECRET JIRA_API_TOKEN),
+      settings: ~w(JIRA_SITE JIRA_EMAIL JIRA_PROJECT_KEY JIRA_ISSUE_KEY JIRA_ISSUE_ID
+                     JIRA_CAPTURE_DIR)
+    },
     confluence: %{
       credentials: ~w(CONFLUENCE_API_TOKEN),
       settings: ~w(CONFLUENCE_SITE CONFLUENCE_EMAIL CONFLUENCE_PAGE_ID

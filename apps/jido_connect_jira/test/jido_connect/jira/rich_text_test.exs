@@ -1,8 +1,10 @@
 defmodule Jido.Connect.Jira.RichTextTest do
   use ExUnit.Case, async: true
 
+  alias Jido.Connect.WebhookDelivery
   alias Jido.Connect.Jira.Client.{Normalizer, Response}
-  alias Jido.Connect.Jira.Webhook
+  alias Jido.Connect.Jira.{CapturedDelivery, Webhook}
+  alias Jido.Connect.TestSupport.LiveSmoke
 
   # An ADF document composed of examples from Atlassian's document format
   # reference, in a `doc` root as on
@@ -191,13 +193,12 @@ defmodule Jido.Connect.Jira.RichTextTest do
                  {:ok,
                   %{
                     status: 200,
-                    body: %{
-                      "issues" => [
+                    body:
+                      search_page([
                         fixture!("issue_common.json"),
                         with_description(@adf),
                         with_description(@malformed)
-                      ]
-                    }
+                      ])
                   }}
                )
     end
@@ -228,18 +229,27 @@ defmodule Jido.Connect.Jira.RichTextTest do
 
   describe "comment webhook signals" do
     test "a comment_created delivery with an unsupported node yields its text and the skipped types" do
-      payload = put_in(fixture!("webhook_comment_created.json"), ["comment", "body"], @adf)
+      payload = put_in(CapturedDelivery.payload!("comment_created"), ["comment", "body"], @adf)
 
       assert {:ok, signal} = Webhook.normalize_event(payload)
       assert signal.change_type == "created"
       assert signal.comment_body == @adf_text
       assert signal.comment_body_unsupported_nodes == ["mediaSingle"]
+
+      body = Jason.encode!(payload)
+      headers = %{"x-hub-signature" => sign(body, "webhook-secret")}
+
+      assert {:ok, %WebhookDelivery{normalized_signal: delivered}} =
+               Webhook.verify_delivery(body, headers, "webhook-secret", [])
+
+      assert delivered.comment_body == @adf_text
+      assert delivered.comment_body_unsupported_nodes == ["mediaSingle"]
     end
 
     test "a plain-string body of an administrator webhook passes through" do
       payload =
         put_in(
-          fixture!("webhook_comment_created.json"),
+          CapturedDelivery.payload!("comment_created"),
           ["comment", "body"],
           "First version.\nSecond line"
         )
@@ -250,7 +260,8 @@ defmodule Jido.Connect.Jira.RichTextTest do
     end
 
     test "a malformed comment body preserves the event and reports a reason" do
-      payload = put_in(fixture!("webhook_comment_updated.json"), ["comment", "body"], @malformed)
+      payload =
+        put_in(CapturedDelivery.payload!("comment_updated"), ["comment", "body"], @malformed)
 
       assert {:ok,
               %{
@@ -278,6 +289,15 @@ defmodule Jido.Connect.Jira.RichTextTest do
     do: put_in(fixture!("issue_common.json"), ["fields", "description"], description)
 
   defp with_body(body), do: Map.put(fixture!("comment_common.json"), "body", body)
+
+  # The recorded last page of an enhanced search, `issue_context.6`, with
+  # other issues in it.
+  defp search_page(issues),
+    do: Map.put(LiveSmoke.fixture!(:jira, "issue_context.6"), "issues", issues)
+
+  defp sign(body, secret) do
+    "sha256=" <> (:hmac |> :crypto.mac(:sha256, secret, body) |> Base.encode16(case: :lower))
+  end
 
   defp fixture!(name) do
     __DIR__
