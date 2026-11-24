@@ -37,7 +37,11 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
   @variables %{
     google: %{
       credentials: ~w(GOOGLE_ACCESS_TOKEN GOOGLE_REFRESH_TOKEN),
-      settings: ~w(GOOGLE_CLIENT_ID GOOGLE_CALENDAR_ID GOOGLE_GMAIL_QUERY)
+      settings: ~w(GOOGLE_CLIENT_ID GOOGLE_CALENDAR_ID GOOGLE_GMAIL_QUERY
+                     GOOGLE_CALENDAR_EVENT_ID GOOGLE_CALENDAR_AGENDA_FILE_ID
+                     GOOGLE_CALENDAR_HANDOUT_URL GOOGLE_CALENDAR_CONFERENCE_ID
+                     GOOGLE_MEET_RECORDING_FILE_ID GOOGLE_MEET_NOTES_DOCUMENT_ID
+                     GOOGLE_TEST_USER GOOGLE_SEED_ATTENDEES)
     },
     slack: %{credentials: ~w(SLACK_BOT_TOKEN SLACK_SIGNING_SECRET), settings: ~w(JIDO_PUBLIC_URL)},
     jira: %{credentials: ~w(JIRA_WEBHOOK_SECRET), settings: ~w(JIRA_SITE JIRA_EMAIL)},

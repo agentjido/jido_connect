@@ -1,0 +1,93 @@
+{
+  "body": {
+    "attendees": [
+      {
+        "email": "person-1@example.com",
+        "organizer": true,
+        "responseStatus": "needsAction",
+        "self": true
+      }
+    ],
+    "attendeesOmitted": true,
+    "created": "2026-11-02T08:49:37.000Z",
+    "creator": {
+      "email": "person-1@example.com",
+      "self": true
+    },
+    "description": "jcl-live attendee list i53h623n",
+    "end": {
+      "dateTime": "2027-03-01T11:00:00+01:00",
+      "timeZone": "Europe/Berlin"
+    },
+    "etag": "\"3587218756737662\"",
+    "eventType": "default",
+    "htmlLink": "htmlLink-1",
+    "iCalUID": "person-2@example.com",
+    "id": "jclr1i53h623n",
+    "location": "jcl-live room",
+    "organizer": {
+      "email": "person-1@example.com",
+      "self": true
+    },
+    "reminders": {
+      "useDefault": true
+    },
+    "sequence": 0,
+    "start": {
+      "dateTime": "2027-03-01T10:00:00+01:00",
+      "timeZone": "Europe/Berlin"
+    },
+    "status": "confirmed",
+    "summary": "jcl-live attendees i53h623n",
+    "updated": "2026-11-02T08:49:38.368Z"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate, no-transform"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:49:38 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 08:49:38 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-l2-request-path": [
+      "l2-managed-14"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/calendar/v3/calendars/person-1@example.com/events/jclr1i53h623n"
+  },
+  "status": 200
+}
