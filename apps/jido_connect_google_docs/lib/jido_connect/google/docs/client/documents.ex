@@ -1,6 +1,7 @@
 defmodule Jido.Connect.Google.Docs.Client.Documents do
   @moduledoc "Google Docs document API boundary."
 
+  alias Jido.Connect.Google.Docs.BatchUpdateRequest
   alias Jido.Connect.Google.Docs.Client.{Response, Transport}
 
   def get_document(%{document_id: document_id} = params, access_token)
@@ -46,13 +47,20 @@ defmodule Jido.Connect.Google.Docs.Client.Documents do
   end
 
   defp batch_update_body(params) do
-    body = %{requests: Map.get(params, :requests)}
+    body = %{requests: Enum.map(params.requests, &encode_operation/1)}
 
     case Map.get(params, :write_control) do
       nil -> body
       write_control -> Map.put(body, :writeControl, write_control)
     end
   end
+
+  defp encode_operation(request) when is_map(request) and map_size(request) == 1 do
+    [{key, payload}] = Map.to_list(request)
+    %{BatchUpdateRequest.rest_operation_name(key) => payload}
+  end
+
+  defp encode_operation(request), do: request
 
   defp maybe_put(params, _key, nil), do: params
   defp maybe_put(params, key, value), do: Keyword.put(params, key, value)

@@ -2,6 +2,7 @@ defmodule Jido.Connect.Google.Docs.ClientTest do
   use ExUnit.Case, async: false
 
   alias Jido.Connect.Google.Docs.{Client, Document}
+  alias Jido.Connect.Google.Docs.Handlers.Actions.BatchUpdateDocument
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -154,6 +155,53 @@ defmodule Jido.Connect.Google.Docs.ClientTest do
 
     assert result.document_id == "doc_abc123"
     assert length(result.replies) == 1
+  end
+
+  test "batch update action encodes normalized operations through the default client" do
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.method == "POST"
+      assert conn.request_path == "/v1/documents/doc_abc123:batchUpdate"
+      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer synthetic-token"]
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "requests" => [
+                 %{"insertText" => %{"location" => %{"index" => 1}, "text" => "draft"}},
+                 %{
+                   "updateTextStyle" => %{
+                     "range" => %{"startIndex" => 1, "endIndex" => 6},
+                     "textStyle" => %{"bold" => true},
+                     "fields" => "bold"
+                   }
+                 },
+                 %{"deleteContentRange" => %{"range" => %{"startIndex" => 8, "endIndex" => 16}}}
+               ],
+               "writeControl" => %{"requiredRevisionId" => "rev001"}
+             }
+
+      Req.Test.json(conn, %{"documentId" => "doc_abc123", "replies" => [%{}, %{}, %{}]})
+    end)
+
+    assert {:ok, %{replies: [%{}, %{}, %{}]}} =
+             BatchUpdateDocument.run(
+               %{
+                 document_id: "doc_abc123",
+                 requests: [
+                   %{"insert_text" => %{"location" => %{"index" => 1}, "text" => "draft"}},
+                   %{
+                     update_text_style: %{
+                       range: %{startIndex: 1, endIndex: 6},
+                       textStyle: %{bold: true},
+                       fields: "bold"
+                     }
+                   },
+                   %{delete_table: %{range: %{startIndex: 8, endIndex: 16}}}
+                 ],
+                 write_control: %{requiredRevisionId: "rev001"}
+               },
+               %{credentials: %{access_token: "synthetic-token"}}
+             )
   end
 
   test "batch updates document without write control" do
