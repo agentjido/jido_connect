@@ -233,6 +233,168 @@ defmodule Jido.Connect.Gmail.CatalogPacksTest do
              )
   end
 
+  test "content pack is an opt-in read pack with metadata reads, message content and attachment content" do
+    pack = Gmail.content_pack()
+
+    assert pack.id == :google_gmail_content
+    assert pack.metadata.risk == :read
+    assert pack in Gmail.catalog_packs()
+
+    ids =
+      "gmail"
+      |> Catalog.search_tools(
+        modules: [Gmail],
+        packs: Gmail.catalog_packs(),
+        pack: :google_gmail_content
+      )
+      |> MapSet.new(& &1.tool.id)
+
+    assert ids ==
+             MapSet.new([
+               "google.gmail.profile.get",
+               "google.gmail.labels.list",
+               "google.gmail.messages.list",
+               "google.gmail.message.get",
+               "google.gmail.threads.list",
+               "google.gmail.thread.get",
+               "google.gmail.history.list",
+               "google.gmail.message.attachment.get",
+               "google.gmail.message.content.get",
+               "google.gmail.thread.content.get",
+               "google.gmail.message.attachment.content.get"
+             ])
+
+    for tool_id <- [
+          "google.gmail.message.attachment.get",
+          "google.gmail.message.content.get",
+          "google.gmail.thread.content.get",
+          "google.gmail.message.attachment.content.get"
+        ] do
+      assert {:ok, descriptor} =
+               Catalog.describe_tool(tool_id,
+                 modules: [Gmail],
+                 packs: Gmail.catalog_packs(),
+                 pack: :google_gmail_content
+               )
+
+      assert descriptor.tool.id == tool_id
+    end
+  end
+
+  test "only the content pack exposes the message and thread content reads" do
+    for pack <- Gmail.catalog_packs(), pack.id != :google_gmail_content do
+      refute "google.gmail.message.content.get" in pack.allowed_tools
+      refute "google.gmail.thread.content.get" in pack.allowed_tools
+    end
+  end
+
+  test "only the content pack exposes attachment content by MIME part" do
+    for pack <- Gmail.catalog_packs(), pack.id != :google_gmail_content do
+      refute "google.gmail.message.attachment.content.get" in pack.allowed_tools
+    end
+  end
+
+  test "content pack rejects send, mutation, and delete tools" do
+    for tool_id <- [
+          "google.gmail.message.send",
+          "google.gmail.draft.create",
+          "google.gmail.draft.update",
+          "google.gmail.draft.send",
+          "google.gmail.draft.delete",
+          "google.gmail.label.create",
+          "google.gmail.label.update",
+          "google.gmail.label.delete",
+          "google.gmail.message.labels.apply",
+          "google.gmail.messages.batch_modify",
+          "google.gmail.thread.modify",
+          "google.gmail.message.trash",
+          "google.gmail.message.untrash",
+          "google.gmail.thread.trash",
+          "google.gmail.thread.untrash",
+          "google.gmail.message.delete",
+          "google.gmail.messages.batch_delete",
+          "google.gmail.thread.delete",
+          "google.gmail.watch.start",
+          "google.gmail.watch.stop"
+        ] do
+      assert {:error, %Connect.Error.ValidationError{reason: :tool_not_in_pack}} =
+               Catalog.describe_tool(tool_id,
+                 modules: [Gmail],
+                 packs: Gmail.catalog_packs(),
+                 pack: :google_gmail_content
+               ),
+             "#{tool_id} must not be in the content pack"
+    end
+  end
+
+  test "existing packs keep their tools and risk" do
+    metadata_tools = [
+      "google.gmail.profile.get",
+      "google.gmail.labels.list",
+      "google.gmail.messages.list",
+      "google.gmail.message.get",
+      "google.gmail.threads.list",
+      "google.gmail.thread.get",
+      "google.gmail.history.list"
+    ]
+
+    assert Gmail.metadata_pack().allowed_tools == metadata_tools
+    assert Gmail.metadata_pack().metadata.risk == :read
+
+    assert Gmail.triage_pack().allowed_tools ==
+             metadata_tools ++
+               [
+                 "google.gmail.watch.start",
+                 "google.gmail.watch.stop",
+                 "google.gmail.label.get",
+                 "google.gmail.message.attachment.get",
+                 "google.gmail.label.create",
+                 "google.gmail.label.update",
+                 "google.gmail.message.labels.apply",
+                 "google.gmail.messages.batch_modify",
+                 "google.gmail.message.untrash",
+                 "google.gmail.thread.modify",
+                 "google.gmail.thread.untrash"
+               ]
+
+    assert Gmail.triage_pack().metadata.risk == :write
+
+    assert Gmail.send_pack().allowed_tools ==
+             metadata_tools ++
+               [
+                 "google.gmail.message.send",
+                 "google.gmail.drafts.list",
+                 "google.gmail.draft.get",
+                 "google.gmail.draft.create",
+                 "google.gmail.draft.update",
+                 "google.gmail.draft.send"
+               ]
+
+    assert Gmail.send_pack().metadata.risk == :write
+
+    assert Gmail.destructive_pack().allowed_tools ==
+             metadata_tools ++
+               [
+                 "google.gmail.draft.delete",
+                 "google.gmail.label.delete",
+                 "google.gmail.message.trash",
+                 "google.gmail.message.delete",
+                 "google.gmail.messages.batch_delete",
+                 "google.gmail.thread.trash",
+                 "google.gmail.thread.delete"
+               ]
+
+    assert Gmail.destructive_pack().metadata.risk == :destructive
+
+    assert Enum.map(Gmail.catalog_packs(), & &1.id) == [
+             :google_gmail_metadata,
+             :google_gmail_triage,
+             :google_gmail_send,
+             :google_gmail_destructive,
+             :google_gmail_content
+           ]
+  end
+
   test "pack restrictions apply to call_tool" do
     {context, lease} = context_and_lease(scopes: modify_scopes())
 

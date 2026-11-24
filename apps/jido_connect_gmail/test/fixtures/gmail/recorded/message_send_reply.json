@@ -1,0 +1,49 @@
+{
+  "body": {
+    "id": "1a1a0bb2f7aeacb1",
+    "labelIds": [
+      "SENT"
+    ],
+    "threadId": "1a1a0bb2a6f60c4f"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Tue, 03 Nov 2026 09:26:24 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-03",
+  "request": {
+    "method": "POST",
+    "path": "/gmail/v1/users/me/messages/send"
+  },
+  "status": 200
+}

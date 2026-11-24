@@ -1,0 +1,87 @@
+{
+  "body": {
+    "historyId": "22954",
+    "id": "1a18c255a2dc99b2",
+    "messages": [
+      {
+        "historyId": "22954",
+        "id": "1a18c255a2dc99b2",
+        "internalDate": "1793352621000",
+        "labelIds": [
+          "UNREAD",
+          "INBOX"
+        ],
+        "payload": {
+          "headers": [
+            {
+              "name": "Subject",
+              "value": "jcl-live archive pair"
+            }
+          ],
+          "partId": ""
+        },
+        "sizeEstimate": 478,
+        "threadId": "1a18c255a2dc99b2"
+      },
+      {
+        "historyId": "13286",
+        "id": "1a18c5c4a919c24d",
+        "internalDate": "1793356221000",
+        "labelIds": [
+          "INBOX"
+        ],
+        "payload": {
+          "headers": [
+            {
+              "name": "Subject",
+              "value": "Re: jcl-live archive pair"
+            }
+          ],
+          "partId": ""
+        },
+        "sizeEstimate": 611,
+        "threadId": "1a18c255a2dc99b2"
+      }
+    ]
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 17:34:20 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "GET",
+    "path": "/gmail/v1/users/me/threads/1a18c255a2dc99b2"
+  },
+  "status": 200
+}
