@@ -123,11 +123,14 @@ defmodule Jido.Connect.Gmail.Normalizer do
 
   @doc "Builds a body-safe summary of a Gmail MIME payload."
   def summarize_payload(payload) when is_map(payload) do
+    body = Data.get(payload, "body", %{})
+
     %{
       part_id: Data.get(payload, "partId"),
       mime_type: Data.get(payload, "mimeType"),
       filename: Data.get(payload, "filename"),
-      body_size: payload |> Data.get("body", %{}) |> Data.get("size") |> normalize_integer(),
+      attachment_id: Data.get(body, "attachmentId"),
+      body_size: body |> Data.get("size") |> normalize_integer(),
       headers: normalize_headers(Data.get(payload, "headers", [])),
       parts: payload |> Data.get("parts", []) |> summarize_parts()
     }

@@ -89,6 +89,49 @@ defmodule Jido.Connect.Gmail.NormalizerTest do
     refute inspect(thread) =~ "body-bytes"
   end
 
+  test "keeps attachment IDs in nested MIME summaries" do
+    assert {:ok, %Message{} = message} =
+             Normalizer.message(%{
+               "id" => "msg123",
+               "payload" => %{
+                 "mimeType" => "multipart/mixed",
+                 "parts" => [
+                   %{
+                     "mimeType" => "multipart/related",
+                     "parts" => [
+                       %{
+                         "partId" => "0.0",
+                         "filename" => "report.pdf",
+                         "mimeType" => "application/pdf",
+                         "body" => %{"attachmentId" => "att123", "size" => "42"}
+                       },
+                       %{
+                         "partId" => "0.1",
+                         "mimeType" => "text/plain",
+                         "body" => %{"size" => 4, "data" => "dGV4dA"}
+                       }
+                     ]
+                   }
+                 ]
+               }
+             })
+
+    assert [%{parts: [attachment, inline]}] = message.payload_summary.parts
+
+    assert %{
+             part_id: "0.0",
+             attachment_id: "att123",
+             filename: "report.pdf",
+             mime_type: "application/pdf",
+             body_size: 42
+           } = attachment
+
+    assert %{part_id: "0.1", body_size: 4} = inline
+    refute Map.has_key?(inline, :attachment_id)
+    refute Map.has_key?(inline, :body)
+    refute Map.has_key?(inline, :data)
+  end
+
   test "returns errors instead of raising for malformed nested thread messages" do
     assert {:error, _error} =
              Normalizer.thread(%{
