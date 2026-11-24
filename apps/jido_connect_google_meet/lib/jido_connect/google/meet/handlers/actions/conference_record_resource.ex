@@ -17,6 +17,7 @@ defmodule Jido.Connect.Google.Meet.Handlers.Actions.ConferenceRecordResource do
   def normalize_input(input, defaults \\ %{}) do
     ResourceHelpers.normalize_input(input, defaults, [
       :conference_record_name,
+      :participant_name,
       :page_token,
       :filter,
       :fields

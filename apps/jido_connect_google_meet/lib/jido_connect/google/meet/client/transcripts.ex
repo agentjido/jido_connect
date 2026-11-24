@@ -25,6 +25,17 @@ defmodule Jido.Connect.Google.Meet.Client.Transcripts do
     |> Response.handle_transcript_response()
   end
 
+  def list_transcript_entries(%{transcript_name: transcript_name} = params, access_token)
+      when is_binary(transcript_name) and is_binary(access_token) do
+    access_token
+    |> Transport.request()
+    |> Req.get(
+      url: "/v2/#{encode_resource_name(transcript_name)}/entries",
+      params: Params.artifact_list_params(params)
+    )
+    |> Response.handle_transcript_entry_list_response()
+  end
+
   defp encode_resource_name(name) do
     name
     |> String.split("/")
