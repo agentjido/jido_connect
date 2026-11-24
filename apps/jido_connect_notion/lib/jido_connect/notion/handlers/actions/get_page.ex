@@ -8,7 +8,7 @@ defmodule Jido.Connect.Notion.Handlers.Actions.GetPage do
          {:ok, page} <-
            client.get_page(
              Map.fetch!(input, :page_id),
-             Map.get(credentials, :api_key)
+             Map.get(credentials, :api_key) || Map.get(credentials, :access_token)
            ) do
       {:ok, %{page: page}}
     end
