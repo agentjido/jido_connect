@@ -6,6 +6,22 @@ defmodule Jido.Connect.Slack.AppManifest do
   URLs, and the scopes required by the first generated Slack actions. Event and
   interactivity URLs are opt-in so hosts can enable them after local routes are
   ready to answer Slack's verification requests.
+
+  Every manifest turns on the Messages tab of the app's App Home and keeps it
+  writable (`features.app_home`), so people can send the bot direct messages
+  and share messages into its DM. Without it, Slack offers no DM with the
+  app. The Home tab stays off, since the package publishes no Home view.
+
+  The user view is opt-in as well. `:user_scopes` lists the scopes of the
+  user token that the person who installs the app grants, under
+  `oauth_config.scopes.user`, and `:user_events` the events the app receives
+  through those user tokens, under `settings.event_subscriptions.user_events`.
+  For the authorizing user's messages these are `channels:history`,
+  `groups:history`, `im:history` and `mpim:history`, and `message.channels`,
+  `message.groups`, `message.im` and `message.mpim`. User events need
+  `include_events?: true`, which adds the events request URL, and Slack
+  rejects a user event whose scope `:user_scopes` lacks. Without the two
+  options the manifest has neither key.
   """
 
   @default_scopes [
@@ -38,6 +54,8 @@ defmodule Jido.Connect.Slack.AppManifest do
           | {:scopes, [String.t()]}
           | {:include_events?, boolean()}
           | {:include_interactivity?, boolean()}
+          | {:user_scopes, [String.t()]}
+          | {:user_events, [String.t()]}
 
   @doc """
   Builds a Slack manifest map for a public host URL.
@@ -59,6 +77,11 @@ defmodule Jido.Connect.Slack.AppManifest do
         bot_user: %{
           display_name: Keyword.get(opts, :bot_display_name, "Jido Connect"),
           always_online: false
+        },
+        app_home: %{
+          home_tab_enabled: false,
+          messages_tab_enabled: true,
+          messages_tab_read_only_enabled: false
         }
       },
       oauth_config: %{
@@ -75,6 +98,8 @@ defmodule Jido.Connect.Slack.AppManifest do
     }
     |> maybe_put_event_subscriptions(base_url, include_events?)
     |> maybe_put_interactivity(base_url, include_interactivity?)
+    |> maybe_put_user_scopes(Keyword.get(opts, :user_scopes, []))
+    |> maybe_put_user_events(Keyword.get(opts, :user_events, []), include_events?)
   end
 
   @doc """
@@ -120,6 +145,8 @@ defmodule Jido.Connect.Slack.AppManifest do
 
   defp maybe_put_event_subscriptions(manifest, _base_url, false), do: manifest
 
+  # No `scope_denied`: it belonged to workspace apps, which Slack retired in
+  # August 2021.
   defp maybe_put_event_subscriptions(manifest, base_url, true) do
     put_in(manifest, [:settings, :event_subscriptions], %{
       request_url: events_url(base_url),
@@ -143,11 +170,25 @@ defmodule Jido.Connect.Slack.AppManifest do
         "file_change",
         "app_uninstalled",
         "tokens_revoked",
-        "scope_denied",
         "reaction_added",
         "reaction_removed"
       ]
     })
+  end
+
+  defp maybe_put_user_scopes(manifest, []), do: manifest
+
+  defp maybe_put_user_scopes(manifest, scopes),
+    do: put_in(manifest, [:oauth_config, :scopes, :user], scopes)
+
+  defp maybe_put_user_events(manifest, [], _include_events?), do: manifest
+
+  defp maybe_put_user_events(manifest, events, true),
+    do: put_in(manifest, [:settings, :event_subscriptions, :user_events], events)
+
+  defp maybe_put_user_events(_manifest, _events, false) do
+    raise ArgumentError,
+          "user_events need include_events?: true, which adds the events request URL"
   end
 
   defp maybe_put_interactivity(manifest, _base_url, false), do: manifest

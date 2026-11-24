@@ -1,0 +1,95 @@
+{
+  "body": {
+    "error": "not_in_channel",
+    "ok": false,
+    "response_metadata": {
+      "warnings": [
+        "missing_charset"
+      ]
+    },
+    "warning": "missing_charset"
+  },
+  "headers": {
+    "access-control-allow-headers": [
+      "slack-route, x-slack-version-ts, x-b3-traceid, x-b3-spanid, x-b3-parentspanid, x-b3-sampled, x-b3-flags, x-background"
+    ],
+    "access-control-allow-origin": [
+      "*"
+    ],
+    "access-control-expose-headers": [
+      "x-slack-req-id, retry-after"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000, quic=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, no-cache, no-store, must-revalidate"
+    ],
+    "content-length": [
+      "118"
+    ],
+    "content-type": [
+      "application/json; charset=utf-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 10:06:16 GMT"
+    ],
+    "expires": [
+      "Sat, 26 Jul 1997 05:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "referrer-policy": [
+      "no-referrer"
+    ],
+    "server": [
+      "Apache"
+    ],
+    "strict-transport-security": [
+      "max-age=31536000; includeSubDomains; preload"
+    ],
+    "timing-allow-origin": [
+      "*"
+    ],
+    "vary": [
+      "Accept-Encoding"
+    ],
+    "via": [
+      "1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-07bd256b7f70c1a17,ingress-edge-fra-prod-0bf76cd98a736aa53"
+    ],
+    "x-backend": [
+      "api_normal"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-edge-backend": [
+      "envoy-www"
+    ],
+    "x-envoy-upstream-service-time": [
+      "108"
+    ],
+    "x-server": [
+      "slack-www-hhvm-api-iad-xpzmelepc5kh"
+    ],
+    "x-slack-failure": [
+      "not_in_channel"
+    ],
+    "x-slack-req-id": [
+      "9282597f5bb4b2b4b6774f972767fe74"
+    ],
+    "x-slack-unique-id": [
+      "4a135d0d-9f69-411f-af5b-092462155eb9"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/api/chat.postMessage"
+  },
+  "status": 200
+}

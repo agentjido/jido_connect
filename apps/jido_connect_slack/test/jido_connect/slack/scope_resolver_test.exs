@@ -41,6 +41,7 @@ defmodule Jido.Connect.Slack.ScopeResolverTest do
     "slack.conversation.invite" => @manage,
     "slack.conversation.kick" => @manage,
     "slack.thread.replies" => @history,
+    "slack.conversation.history" => @history,
     "slack.conversation.mark_read" => @mark
   }
 

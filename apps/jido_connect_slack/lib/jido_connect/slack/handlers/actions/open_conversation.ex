@@ -1,10 +1,11 @@
 defmodule Jido.Connect.Slack.Handlers.Actions.OpenConversation do
   @moduledoc false
 
-  alias Jido.Connect.{Data, Error}
+  alias Jido.Connect.Data
+  alias Jido.Connect.Slack.Handlers.ClientResolver
 
-  def run(input, %{credentials: credentials}) do
-    with {:ok, client} <- fetch_client(credentials),
+  def run(input, %{credentials: credentials} = context) do
+    with {:ok, client} <- ClientResolver.fetch(context, credentials),
          {:ok, result} <-
            client.open_conversation(
              Map.take(input, [:users, :channel, :return_im, :prevent_creation]),
@@ -18,11 +19,5 @@ defmodule Jido.Connect.Slack.Handlers.Actions.OpenConversation do
          conversation: conversation
        }}
     end
-  end
-
-  defp fetch_client(%{slack_client: client}) when is_atom(client), do: {:ok, client}
-
-  defp fetch_client(_credentials) do
-    {:error, Error.config("Slack client module is required", key: :slack_client)}
   end
 end

@@ -9,6 +9,7 @@ defmodule Jido.Connect.Slack.Client do
   alias Jido.Connect.Slack.Client
 
   defdelegate list_channels(params, access_token), to: Client.Conversations
+  defdelegate get_conversation_history(params, access_token), to: Client.Conversations
   defdelegate get_conversation_info(params, access_token), to: Client.Conversations
   defdelegate create_channel(params, access_token), to: Client.Conversations
   defdelegate archive_conversation(params, access_token), to: Client.Conversations

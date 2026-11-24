@@ -1,0 +1,17 @@
+{
+  "body": "{\"api_app_id\":\"A0CDHUBBHRC\",\"authorizations\":[{\"enterprise_id\":null,\"is_bot\":true,\"is_enterprise_install\":false,\"team_id\":\"T0CEE692400\",\"user_id\":\"U0CDHUEBVEJ\"}],\"context_enterprise_id\":null,\"context_team_id\":\"T0CEE692400\",\"event\":{\"attachments\":[{\"author_icon\":\"author_icon-1\",\"author_id\":\"U0CDPFT1RDJ\",\"author_link\":\"author_link-1\",\"author_name\":\"Person 1\",\"author_subname\":\"Person 1\",\"blocks\":[{\"block_id\":\"T2+CI\",\"elements\":[{\"elements\":[{\"text\":\"plain-public Live capture for the Slack ingress tests of the jido_connect test workspace. This message is test data without personal content. It is deliberately longer than 512 bytes, so the tests can check that long text arrives in full. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. End of capture text.\",\"type\":\"text\"}],\"type\":\"rich_text_section\"}],\"type\":\"rich_text\"}],\"channel_id\":\"C0CEEB41FU0\",\"channel_team\":\"T0CEE692400\",\"color\":\"D0D0D0\",\"fallback\":\"fallback-1\",\"footer\":\"Thread in Slack-Unterhaltung\",\"from_url\":\"from_url-1\",\"id\":1,\"is_msg_unfurl\":true,\"is_share\":true,\"is_thread_root_unfurl\":true,\"mrkdwn_in\":[\"text\"],\"text\":\"plain-public Live capture for the Slack ingress tests of the jido_connect test workspace. This message is test data without personal content. It is deliberately longer than 512 bytes, so the tests can check that long text arrives in full. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. End of capture text.\",\"ts\":\"1793627736.679599\"}],\"channel\":\"D0CD4G48UFR\",\"channel_type\":\"im\",\"client_msg_id\":\"661136fd-954b-4a91-87a9-4917bcb19893\",\"event_ts\":\"1793628518.622089\",\"team\":\"T0CEE692400\",\"text\":\"\",\"ts\":\"1793628518.622089\",\"type\":\"message\",\"user\":\"U0CDPFT1RDJ\"},\"event_context\":\"4-eyJldCI6Im1lc3NhZ2UiLCJ0aWQiOiJUMENFRTY5MjQwMCIsImFpZCI6IkEwQ0RIVUJCSFJDIiwiY2lkIjoiRDBDRDRHNDhVRlIifQ\",\"event_id\":\"Ev0CEZBJ89KJ\",\"event_time\":1793628518,\"is_ext_shared_channel\":false,\"team_id\":\"T0CEE692400\",\"token\":\"[redacted]\",\"type\":\"event_callback\"}",
+  "captured_at": 1793628519,
+  "headers": {
+    "accept": "*/*",
+    "accept-encoding": "gzip,deflate",
+    "content-length": "3800",
+    "content-type": "application/json",
+    "host": "example.ngrok-free.dev",
+    "user-agent": "Slackbot 1.0 (+https://api.slack.com/robots)",
+    "x-slack-request-timestamp": "1793628518",
+    "x-slack-signature": "v0=c4bd552ac30759449c91aac4a0ce1267d4efff96a943a857af13a864e6b7294c"
+  },
+  "method": "POST",
+  "path": "/integrations/slack/events",
+  "provider": "slack"
+}

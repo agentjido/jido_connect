@@ -188,3 +188,23 @@ also checks nonempty variables whose names end in `_TOKEN`, `_SECRET`,
 | `JIRA_ISSUE_KEY` | setting | Test issue |
 | `JIRA_ISSUE_ID` | setting | Numeric ID of the test issue |
 | `JIRA_CAPTURE_DIR` | setting | Capture directory of the demo host |
+
+### Slack
+
+| Variable | Kind | Use |
+| --- | --- | --- |
+| `SLACK_USER_TOKEN` | credential | User token of the test user |
+| `SLACK_CONFIG_TOKEN` | credential | App configuration token of the test workspace, for `apps.manifest.validate`; expires 12 hours after it is issued |
+| `SLACK_CONFIG_REFRESH_TOKEN` | credential | Refresh token of that configuration token; `tooling.tokens.rotate` replaces both |
+| `SLACK_PUBLIC_CHANNEL_ID` | setting | Public channel |
+| `SLACK_PRIVATE_CHANNEL_ID` | setting | Private channel |
+| `SLACK_DM_CHANNEL_ID` | setting | Direct message |
+| `SLACK_MPIM_CHANNEL_ID` | setting | Group direct message |
+| `SLACK_NO_ACCESS_CHANNEL_ID` | setting | Channel the bot is not in |
+| `SLACK_THREAD_TS` | setting | Thread with replies over more than one page |
+| `SLACK_PRIVATE_THREAD_TS` | setting | Thread with seven bot replies in `SLACK_PRIVATE_CHANNEL_ID` |
+| `SLACK_DM_THREAD_TS` | setting | Thread with seven bot replies in `SLACK_DM_CHANNEL_ID` |
+| `SLACK_MPIM_THREAD_TS` | setting | Thread with seven bot replies in `SLACK_MPIM_CHANNEL_ID` |
+| `SLACK_SECOND_USER_ID` | setting | Second human user |
+| `SLACK_CAPTURE_DIR` | setting | Capture directory of the demo host |
+| `SLACK_APP_ID` | setting | ID of the test app |
