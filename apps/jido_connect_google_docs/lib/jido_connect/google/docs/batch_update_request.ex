@@ -4,22 +4,24 @@ defmodule Jido.Connect.Google.Docs.BatchUpdateRequest do
 
   Each request in the `requests` list must contain exactly one operation.
   Supported operation keys provide safe schema boundaries for the most common
-  Google Docs batch update operations.
+  Google Docs batch update operations. For `delete_table`, supply a `range`
+  that covers the entire table, as for `delete_content_range`.
   """
 
-  @supported_operations MapSet.new(~w(
-    insert_text
-    delete_content_range
-    replace_all_text
-    update_text_style
-    update_paragraph_style
-    create_paragraph_bullets
-    insert_table
-    delete_table
-    update_table_cell_style
-    insert_inline_image
-    replace_image
-  ))
+  @operation_names %{
+    "insert_text" => "insertText",
+    "delete_content_range" => "deleteContentRange",
+    "replace_all_text" => "replaceAllText",
+    "update_text_style" => "updateTextStyle",
+    "update_paragraph_style" => "updateParagraphStyle",
+    "create_paragraph_bullets" => "createParagraphBullets",
+    "insert_table" => "insertTable",
+    "delete_table" => "deleteContentRange",
+    "update_table_cell_style" => "updateTableCellStyle",
+    "insert_inline_image" => "insertInlineImage",
+    "replace_image" => "replaceImage"
+  }
+  @supported_operations @operation_names |> Map.keys() |> MapSet.new()
 
   @max_requests 100
 
@@ -44,6 +46,13 @@ defmodule Jido.Connect.Google.Docs.BatchUpdateRequest do
 
   @doc "Returns the set of supported batch update operation keys."
   def supported_operations, do: @supported_operations
+
+  @doc false
+  def rest_operation_name(key) when is_atom(key) do
+    Map.get(@operation_names, Atom.to_string(key), key)
+  end
+
+  def rest_operation_name(key), do: Map.get(@operation_names, key, key)
 
   @doc "Returns the maximum allowed number of requests in a single batch."
   def max_requests, do: @max_requests
