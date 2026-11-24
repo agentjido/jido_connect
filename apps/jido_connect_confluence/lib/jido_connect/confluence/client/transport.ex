@@ -37,9 +37,19 @@ defmodule Jido.Connect.Confluence.Client.Transport do
      )}
   end
 
+  @doc """
+  Returns the invalid-response error for a successful response that failed
+  normalization. Its details carry a value-free summary of `body`, plus the
+  map in option `:details`, which must hold no content.
+  """
   @spec invalid_success_response(String.t(), term(), keyword()) ::
           {:error, Error.ProviderError.t()}
   def invalid_success_response(message, body, opts \\ []) do
+    details =
+      opts
+      |> Keyword.get(:details, %{})
+      |> Map.put(:body_summary, Sanitizer.provider_body_summary(body))
+
     {:error,
      Error.provider(message,
        provider: :confluence,
@@ -47,7 +57,7 @@ defmodule Jido.Connect.Confluence.Client.Transport do
        delivery: :response_received,
        mutation?: Keyword.get(opts, :mutation?, false),
        provider_idempotency?: false,
-       details: %{body_summary: Sanitizer.provider_body_summary(body)}
+       details: details
      )}
   end
 

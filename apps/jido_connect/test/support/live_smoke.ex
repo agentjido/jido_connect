@@ -62,7 +62,11 @@ defmodule Jido.Connect.TestSupport.LiveSmoke do
     },
     slack: %{credentials: ~w(SLACK_BOT_TOKEN SLACK_SIGNING_SECRET), settings: ~w(JIDO_PUBLIC_URL)},
     jira: %{credentials: ~w(JIRA_WEBHOOK_SECRET), settings: ~w(JIRA_SITE JIRA_EMAIL)},
-    confluence: %{credentials: [], settings: ~w(CONFLUENCE_SITE)},
+    confluence: %{
+      credentials: ~w(CONFLUENCE_API_TOKEN),
+      settings: ~w(CONFLUENCE_SITE CONFLUENCE_EMAIL CONFLUENCE_PAGE_ID
+                     CONFLUENCE_RICH_PAGE_ID CONFLUENCE_RESTRICTED_PAGE_ID)
+    },
     tempo: %{credentials: [], settings: ~w(TEMPO_OAUTH_REDIRECT_URI)}
   }
 
