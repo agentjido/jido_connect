@@ -1,0 +1,58 @@
+{
+  "body": null,
+  "body_bytes": 5242880,
+  "body_sha256": "2e7cab6314e9614b6f2da12630661c3038e5592025f6534ba5823c3b340a1cb6",
+  "headers": {
+    "access-control-allow-credentials": [
+      "true"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate"
+    ],
+    "content-disposition": [
+      "attachment"
+    ],
+    "content-length": [
+      "5242880"
+    ],
+    "content-type": [
+      "application/octet-stream"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 11:44:50 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 11:44:50 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "vary": [
+      "Origin, X-Origin"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-goog-hash": [
+      "crc32c=D5dXlQ=="
+    ],
+    "x-guploader-uploadid": [
+      "AFy3sg38BS2Bl2XTUCrCQgzuUOBlNbeAqB6X1FTOA3kRQAxRB-jz25sjSbSxPkpko4h8t5jG"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/1032rr5AjcMF91IXhDgSQer0kEAiibJG-"
+  },
+  "status": 200
+}

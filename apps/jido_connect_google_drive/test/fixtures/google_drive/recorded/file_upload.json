@@ -1,0 +1,80 @@
+{
+  "body": {
+    "createdTime": "2026-11-02T11:44:49.281Z",
+    "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/octet-stream",
+    "id": "1032rr5AjcMF91IXhDgSQer0kEAiibJG-",
+    "md5Checksum": "006a88ed7d5826af90d38dba4666fd89",
+    "mimeType": "application/octet-stream",
+    "modifiedTime": "2026-11-02T11:44:49.281Z",
+    "name": "jcl-live upload.bin",
+    "owners": [
+      {
+        "displayName": "Person 1",
+        "emailAddress": "person-1@example.com",
+        "kind": "drive#user",
+        "me": true,
+        "permissionId": "permissionId-1",
+        "photoLink": "photoLink-1"
+      }
+    ],
+    "parents": [
+      "115ptv8wqbkEFu-3aaOqGiRda0uPYH4I1"
+    ],
+    "shared": false,
+    "size": "5242880",
+    "starred": false,
+    "trashed": false,
+    "webContentLink": "https://drive.google.com/uc?id=1032rr5AjcMF91IXhDgSQer0kEAiibJG-&export=download",
+    "webViewLink": "https://drive.google.com/file/d/1032rr5AjcMF91IXhDgSQer0kEAiibJG-/view?usp=drivesdk"
+  },
+  "headers": {
+    "access-control-allow-credentials": [
+      "true"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "no-cache, no-store, max-age=0, must-revalidate"
+    ],
+    "content-length": [
+      "1039"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 11:44:49 GMT"
+    ],
+    "expires": [
+      "Mon, 01 Jan 1990 00:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "vary": [
+      "Origin, X-Origin"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-guploader-uploadid": [
+      "AFy3sg2L1_O95qyKOoGRzeSjsaVGibOOi4_51fCrLKqnYgmLIUgF4Iv5rADY3A8KtvdpW5zh"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "POST",
+    "path": "/upload/drive/v3/files"
+  },
+  "status": 200
+}

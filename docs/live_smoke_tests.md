@@ -140,3 +140,17 @@ also checks nonempty variables whose names end in `_TOKEN`, `_SECRET`,
 | `GOOGLE_GMAIL_DISPOSABLE_MESSAGE_ID` | setting | Message that a write test may delete |
 | `GOOGLE_GMAIL_ARCHIVE_MESSAGE_ID` | setting | One message of the two-message archive and label thread |
 | `GOOGLE_GMAIL_RECIPIENT` | setting | Second mailbox, controlled by the owner of the test data, that receives the mail of the send check |
+
+### Google Drive
+
+| Variable | Kind | Use |
+| --- | --- | --- |
+| `GOOGLE_DRIVE_ONLY_ACCESS_TOKEN` | credential | Access token narrowed to `drive`, minted per run from `GOOGLE_REFRESH_TOKEN` by a refresh with `scope=https://www.googleapis.com/auth/drive`; use it only when the `scope` field of the refresh response is exactly that scope |
+| `GOOGLE_DRIVE_SHARED_LINK_URL` | setting | Link to a link-shared file. The file in the test tenant has no resource key, so the live checks send the resource-key header only with a made-up key, for a missing file |
+| `GOOGLE_DRIVE_SHORTCUT_ID` | setting | Shortcut to that file |
+| `GOOGLE_DOCS_TABBED_DOCUMENT_ID` | setting | Document with nested tabs |
+| `GOOGLE_DRIVE_STARRED_FILE_ID` | setting | Starred file; its folder also holds exactly one unstarred file named `jcl-live unstarred.txt` |
+| `GOOGLE_DRIVE_FOLDER_ID` | setting | Folder with known direct children |
+| `GOOGLE_DRIVE_WATCH_FOLDER_ID` | setting | Folder for externally added files |
+| `GOOGLE_DRIVE_UPLOAD_FOLDER_ID` | setting | Upload folder created by the app |
+| `GOOGLE_DRIVE_EDIT_FILE_ID` | setting | File that a write test may edit |

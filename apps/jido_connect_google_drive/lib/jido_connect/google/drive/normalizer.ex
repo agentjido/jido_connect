@@ -18,10 +18,17 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
 
   @folder_mime_type "application/vnd.google-apps.folder"
 
-  @doc "Normalizes a Google Drive file payload."
+  @doc """
+  Normalizes a Google Drive file payload.
+
+  A shortcut's `shortcutDetails` become the `shortcut_target_*` fields; the
+  shortcut is not followed.
+  """
   @spec file(map()) :: {:ok, File.t()} | {:error, term()}
   def file(payload) when is_map(payload) do
     with {:ok, permissions} <- normalize_embedded_permissions(Data.get(payload, "permissions")) do
+      shortcut = Data.get(payload, "shortcutDetails")
+
       %{
         file_id: Data.get(payload, "id"),
         name: Data.get(payload, "name"),
@@ -41,6 +48,10 @@ defmodule Jido.Connect.Google.Drive.Normalizer do
         trashed?: Data.get(payload, "trashed", false),
         starred?: Data.get(payload, "starred", false),
         drive_id: Data.get(payload, "driveId"),
+        resource_key: Data.get(payload, "resourceKey"),
+        shortcut_target_id: Data.get(shortcut, "targetId"),
+        shortcut_target_mime_type: Data.get(shortcut, "targetMimeType"),
+        shortcut_target_resource_key: Data.get(shortcut, "targetResourceKey"),
         permissions: permissions
       }
       |> Data.compact()

@@ -6,6 +6,9 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
 
   @max_multipart_upload_bytes 5 * 1024 * 1024
   @max_base64_upload_bytes 4 * div(@max_multipart_upload_bytes + 2, 3)
+  @upload_too_large_message "Google Drive file uploads are limited to 5,242,880 bytes (5 MiB); larger files are not supported"
+  @google_workspace_upload_message "Google Drive file uploads do not accept Google Workspace MIME types (application/vnd.google-apps.*); pass the media type of the bytes"
+  @resource_key_header_token ~r/\A[A-Za-z0-9_-]+\z/
   @mime_type_regex ~r/\A[0-9A-Za-z][!#$%&'*+\-.^_`|~0-9A-Za-z]*\/[0-9A-Za-z][!#$%&'*+\-.^_`|~0-9A-Za-z]*\z/
 
   @default_change_fields [
@@ -100,7 +103,7 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
       :ok
     else
       {:error,
-       Error.validation("Google Drive multipart uploads must be 5 MiB or smaller",
+       Error.validation(@upload_too_large_message,
          reason: :upload_too_large,
          subject: :content,
          details: %{
@@ -115,7 +118,7 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
   def validate_file_upload_base64_size(content_base64) when is_binary(content_base64) do
     if oversized_base64_content?(content_base64, 0) do
       {:error,
-       Error.validation("Google Drive multipart uploads must be 5 MiB or smaller",
+       Error.validation(@upload_too_large_message,
          reason: :upload_too_large,
          subject: :content_base64,
          details: %{
@@ -128,12 +131,27 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
     end
   end
 
-  @doc "Validates the media MIME type for a Google Drive multipart upload."
+  @doc """
+  Validates the media MIME type for a Google Drive multipart upload.
+
+  Google Workspace types (`application/vnd.google-apps.*`, in any case) are
+  rejected: Drive answered uploads typed as a document, a spreadsheet or Apps
+  Script JSON with 400 and turned a folder-typed upload into an empty folder.
+  """
   def validate_file_upload_mime_type(mime_type) when is_binary(mime_type) do
-    if Regex.match?(@mime_type_regex, mime_type) and not String.contains?(mime_type, "*") do
-      :ok
-    else
-      invalid_file_upload_mime_type()
+    cond do
+      not Regex.match?(@mime_type_regex, mime_type) or String.contains?(mime_type, "*") ->
+        invalid_file_upload_mime_type()
+
+      mime_type |> String.downcase() |> String.starts_with?("application/vnd.google-apps.") ->
+        {:error,
+         Error.validation(@google_workspace_upload_message,
+           reason: :unsupported_mime_type,
+           subject: :mime_type
+         )}
+
+      true ->
+        :ok
     end
   end
 
@@ -262,6 +280,63 @@ defmodule Jido.Connect.Google.Drive.Client.Params do
       supportsAllDrives: Data.get(params, :supports_all_drives)
     }
     |> Data.compact()
+  end
+
+  @doc "Builds query params for the size read that precedes a download with `max_bytes`."
+  def file_size_params(params) do
+    %{
+      fields: "size,mimeType",
+      supportsAllDrives: Data.get(params, :supports_all_drives)
+    }
+    |> Data.compact()
+  end
+
+  @doc """
+  Builds the `X-Goog-Drive-Resource-Keys` header for a request on one file.
+
+  Returns `{:ok, [{"x-goog-drive-resource-keys", "<fileId>/<resourceKey>"}]}`
+  when `params` carry a `:resource_key`, and `{:ok, []}` when the key is absent
+  or `""`. The header separates pairs with `,` and ID from key with `/`, so a
+  key or file ID with characters other than letters, digits, `-` and `_`
+  returns a validation error before any request. The error does not contain
+  the key. The key travels only in this header, never in the query string.
+  """
+  def resource_key_headers(params) do
+    case Data.get(params, :resource_key) do
+      key when key in [nil, ""] ->
+        {:ok, []}
+
+      key ->
+        file_id = Data.get(params, :file_id)
+
+        with :ok <- resource_key_header_token(key, :resource_key),
+             :ok <- resource_key_header_token(file_id, :file_id) do
+          {:ok, [{"x-goog-drive-resource-keys", "#{file_id}/#{key}"}]}
+        end
+    end
+  end
+
+  defp resource_key_header_token(value, subject) do
+    if is_binary(value) and Regex.match?(@resource_key_header_token, value),
+      do: :ok,
+      else: invalid_resource_key_header(subject)
+  end
+
+  defp invalid_resource_key_header(:resource_key) do
+    {:error,
+     Error.validation("Google Drive resource key must contain only letters, digits, - and _",
+       reason: :invalid_resource_key,
+       subject: :resource_key
+     )}
+  end
+
+  defp invalid_resource_key_header(:file_id) do
+    {:error,
+     Error.validation(
+       "Google Drive file ID sent with a resource key must contain only letters, digits, - and _",
+       reason: :invalid_file_id,
+       subject: :file_id
+     )}
   end
 
   @doc "Builds query params for file deletes."

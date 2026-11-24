@@ -100,11 +100,12 @@ defmodule Jido.Connect.Google.Drive.Handlers.Triggers.FileChangedPoller do
             Map.get(signal, :change_type),
             Map.get(signal, :file_id),
             Map.get(signal, :drive_id),
+            Map.get(signal, :removed),
             Map.get(signal, :time)
           }
 
         cond do
-          key == {nil, nil, nil, nil} ->
+          match?({nil, nil, nil, _removed, nil}, key) ->
             {seen, acc}
 
           MapSet.member?(seen, key) ->
@@ -128,10 +129,10 @@ defmodule Jido.Connect.Google.Drive.Handlers.Triggers.FileChangedPoller do
   defp public_map(list) when is_list(list), do: Enum.map(list, &public_map/1)
 
   defp public_map(map) when is_map(map) do
-    map
-    |> Map.update(:owners, [], &public_map/1)
-    |> Map.update(:permissions, [], &public_map/1)
-    |> Map.update(:file, nil, &public_map/1)
+    Map.new(map, fn
+      {:permissions, permissions} -> {:permissions, public_map(permissions)}
+      entry -> entry
+    end)
   end
 
   defp public_map(value), do: value
