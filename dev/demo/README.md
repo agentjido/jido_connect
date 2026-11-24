@@ -28,6 +28,7 @@ Useful routes:
 - `POST /integrations/github/webhook`
 - `POST /integrations/slack/events`
 - `POST /integrations/slack/interactivity`
+- `POST /integrations/jira/webhook` (capture mode only)
 
 Pair it with ngrok from the repo root:
 
@@ -36,7 +37,9 @@ mix jido.connect.ngrok --port 4000
 ```
 
 Set `SLACK_CAPTURE_DIR` to a private directory outside the repository to
-capture verified Slack events and interactivity requests. Create the directory
+capture verified Slack events and interactivity requests. `JIRA_CAPTURE_DIR`
+with `JIRA_WEBHOOK_SECRET` does the same for Jira administrator webhook
+deliveries; the Jira route exists only for capturing. Create the directory
 with `mktemp -d` or `mkdir -m 700` before you start the demo.
 
 The capture directory has 20 file slots. Each file holds up to 256 KiB,

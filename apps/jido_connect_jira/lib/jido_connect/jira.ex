@@ -22,11 +22,43 @@ defmodule Jido.Connect.Jira do
 
   - `read:jira-work` / `write:jira-work`
   - `read:jira-users` / `read:jira-configuration`
+
+  ## Issue Reads
+
+  `jira.issue.get` accepts an issue key or a numeric issue ID and returns the
+  issue's `id`, `url` (the API `self` URL), project, assignee, status, the
+  plain-text `description` with `description_unsupported_nodes` and the
+  date-only `due_date`. Fields that Jira returns as `null` are absent from the
+  output; `missing_fields` lists the requested Jira field keys that the
+  response does not contain at all. The selectors `*all` and `*navigable`
+  count only the issue fields the connector reads; custom fields behind them
+  and other `*` selectors are not checked.
+
+  ## Issue Comments
+
+  `jira.issue.comment.list` returns one page of an issue's comments, oldest
+  first, with the plain-text body, the original ADF, authors, timestamps and
+  visibility. Pass `next_start_at` as `start_at` until `is_last` is `true`.
+  Jira's comment pages carry no last-page flag, so `is_last` comes from
+  `total`, and `next_start_at` is absent on the last page.
+
+  ## Issue Search
+
+  `jira.issue.search` uses Jira's enhanced JQL search,
+  `POST /rest/api/3/search/jql`, because Atlassian removed
+  `POST /rest/api/3/search`. Each call returns one page: pass the page's
+  `next_page_token` to the next call until `is_last` is `true`. A page can be
+  empty while `is_last` is `false`.
+
+  Deprecated for one release and removed in the next: the input `start_at`
+  accepts only `0`, and the outputs `total` and `start_at` are declared but
+  never returned, because enhanced search has neither offsets nor a total.
   """
 
   use Jido.Connect,
     fragments: [
       Jido.Connect.Jira.Actions.Issues,
+      Jido.Connect.Jira.Actions.Comments,
       Jido.Connect.Jira.Actions.Projects,
       Jido.Connect.Jira.Actions.Metadata,
       Jido.Connect.Jira.Actions.Boards,
