@@ -2334,6 +2334,50 @@ defmodule Jido.Connect.GitHubTest do
              )
   end
 
+  test "invokes GitHub list issues with pagination on the first call to an unloaded client" do
+    {context, lease} = context_and_lease(github_client: Connect.GitHub.Client)
+
+    # Use a fresh VM so test order and coverage instrumentation cannot load the client first.
+    {:ok, peer, _node} =
+      :peer.start(%{connection: :standard_io, args: [~c"+S", ~c"2", ~c"-pa" | :code.get_path()]})
+
+    on_exit(fn -> :peer.stop(peer) end)
+
+    probe =
+      quote do
+        import ExUnit.Assertions
+
+        {:ok, _apps} = Application.ensure_all_started(:jido_connect_github)
+        Application.put_env(:jido_connect_github, :github_req_options, plug: {Req.Test, :issues})
+        test_pid = self()
+
+        Req.Test.expect(:issues, fn conn ->
+          assert conn.method == "GET"
+          assert conn.request_path == "/repos/org/repo/issues"
+          send(test_pid, {:issue_list_query, URI.decode_query(conn.query_string)})
+          Req.Test.json(conn, [])
+        end)
+
+        assert :code.is_loaded(Connect.GitHub.Client) == false
+
+        assert {:ok,
+                %{issues: [], page: %{number: 2, per_page: 10, item_count: 0, complete: true}}} =
+                 Connect.invoke(
+                   Connect.GitHub.integration(),
+                   "github.issue.list",
+                   %{repo: "org/repo", page: 2, per_page: 10},
+                   context: var!(context),
+                   credential_lease: var!(lease)
+                 )
+
+        assert_received {:issue_list_query, %{"page" => "2", "per_page" => "10"}}
+        Req.Test.verify!()
+      end
+
+    assert {:ok, _binding} =
+             :peer.call(peer, Code, :eval_quoted, [probe, [context: context, lease: lease]])
+  end
+
   test "invokes GitHub read file action through injected client and lease" do
     {context, lease} = context_and_lease()
 
@@ -3914,6 +3958,7 @@ defmodule Jido.Connect.GitHubTest do
     profile = Keyword.get(opts, :profile, :user)
     scopes = Keyword.get(opts, :scopes, default_scopes(profile))
     lease_metadata = Keyword.get(opts, :lease_metadata, %{})
+    github_client = Keyword.get(opts, :github_client, FakeGitHubClient)
 
     connection =
       Connect.Connection.new!(%{
@@ -3938,7 +3983,7 @@ defmodule Jido.Connect.GitHubTest do
       Connect.CredentialLease.new!(%{
         connection_id: "conn_1",
         expires_at: DateTime.add(DateTime.utc_now(), 300, :second),
-        fields: %{access_token: "token", github_client: FakeGitHubClient},
+        fields: %{access_token: "token", github_client: github_client},
         metadata: lease_metadata,
         profile: profile
       })
