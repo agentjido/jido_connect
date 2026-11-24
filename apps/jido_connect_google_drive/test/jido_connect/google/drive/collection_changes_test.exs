@@ -9,7 +9,7 @@ defmodule Jido.Connect.Google.Drive.CollectionChangesTest do
   alias Jido.Connect.Google.Drive.Handlers.Triggers.CollectionChangesPoller
 
   defmodule FakeDriveClient do
-    @collection_lookup_fields "id,mimeType,driveId"
+    @collection_lookup_fields "id,name,mimeType,driveId"
 
     def get_file(
           %{

@@ -1,0 +1,50 @@
+{
+  "body": "﻿jcl-live edit target\r\njcl-marker-edit-initial\r\njcl-live-edit-9d713e4c6e6f",
+  "headers": {
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate"
+    ],
+    "content-disposition": [
+      "attachment"
+    ],
+    "content-length": [
+      "76"
+    ],
+    "content-type": [
+      "text/plain"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 13:52:20 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 13:52:20 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "vary": [
+      "Origin, X-Origin"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-guploader-uploadid": [
+      "AFy3sg3IoDzYGrUnNsQKilujSj2DgbkLzlgNwk6Qz-620da5Mzu-vfPQlOU1tKCmplY2OR9_"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/1uN0Z0Pf8rvP1ewCITuP9mS9fLdlyweoJ1zihNsneFLk/export"
+  },
+  "status": 200
+}

@@ -1,0 +1,58 @@
+{
+  "body": null,
+  "body_bytes": 7703374,
+  "body_sha256": "b0951a75d7deea2555a734efc497a43741f39181d31cb0da41ad84d8dbfe0ce2",
+  "headers": {
+    "access-control-allow-credentials": [
+      "true"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate"
+    ],
+    "content-disposition": [
+      "attachment"
+    ],
+    "content-length": [
+      "7703374"
+    ],
+    "content-type": [
+      "video/mp4"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 10:22:16 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 10:22:16 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "vary": [
+      "Origin, X-Origin"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-goog-hash": [
+      "crc32c=wVL9wQ=="
+    ],
+    "x-guploader-uploadid": [
+      "AFy3sg2O8Xu7O5XnrXPr6UwN-Jn9yJHITir-yzHsqT3IVuZQzPi2CiSo3FAsCWxiL1WIJqCOgRsvaVk"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/1XXsU_Na3ZfzaeDj5OyYOLLV7SwyDYev3"
+  },
+  "status": 200
+}

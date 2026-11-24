@@ -16,7 +16,14 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     Revision
   }
 
-  alias Jido.Connect.Google.Drive.Client.Response
+  alias Jido.Connect.TestSupport.LiveSmoke
+
+  # The starred file and its unstarred twin of the test account, and the query
+  # the live test listed them with, one file per page.
+  @starred_file_id "1JphxvbpUOuOhN326OEz9UnJqtAy99n4l"
+  @unstarred_file_id "1cihn1Qw5ruqogYtAdjOkPWeA3f2KhwK-"
+  @selection_query "'18wQ5cSzJVV4Hpxmx_okyZi1-Oo1T10wy' in parents and trashed = false " <>
+                     "and (name = 'jcl-live starred.txt' or name = 'jcl-live unstarred.txt')"
 
   setup {Req.Test, :verify_on_exit!}
 
@@ -35,36 +42,58 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     end)
   end
 
+  # Drive sent `modifiedTime` for both files of the recorded listing. This test
+  # removes it from the unstarred file on the first page, so the first file has
+  # no modification time and the starred file on the second page keeps its own.
   test "lists files" do
-    Req.Test.stub(__MODULE__, fn conn ->
-      assert conn.method == "GET"
-      assert conn.request_path == "/v3/files"
-      assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
-      assert conn.query_params["q"] == "mimeType = 'application/pdf'"
-      assert conn.query_params["pageSize"] == "10"
-      assert conn.query_params["spaces"] == "drive"
+    first_page =
+      update_in(
+        LiveSmoke.fixture!(:google_drive, "files_list_starred"),
+        ["files", Access.at(0)],
+        &Map.delete(&1, "modifiedTime")
+      )
 
-      Req.Test.json(conn, %{
-        "files" => [
-          %{
-            "id" => "file123",
-            "name" => "Budget.pdf",
-            "mimeType" => "application/pdf",
-            "parents" => ["folder123"]
-          }
-        ],
-        "nextPageToken" => "next"
-      })
-    end)
+    final_page = LiveSmoke.fixture!(:google_drive, "files_list_starred.2")
+    page_token = first_page["nextPageToken"]
 
-    assert {:ok, %{files: [%File{} = file], next_page_token: "next"}} =
-             Client.list_files(
-               %{query: "mimeType = 'application/pdf'", page_size: 10, spaces: "drive"},
-               "token"
-             )
+    for {body, expected_page_token} <- [{first_page, nil}, {final_page, page_token}] do
+      Req.Test.expect(__MODULE__, fn conn ->
+        assert conn.method == "GET"
+        assert conn.request_path == "/v3/files"
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer token"]
+        assert conn.query_params["q"] == @selection_query
+        assert conn.query_params["pageSize"] == "1"
+        assert conn.query_params["spaces"] == "drive"
+        assert conn.query_params["pageToken"] == expected_page_token
+        assert conn.query_params["fields"] == Fields.file_list()
+        refute Map.has_key?(conn.query_params, "alt")
 
-    assert file.file_id == "file123"
-    assert file.name == "Budget.pdf"
+        Req.Test.json(conn, body)
+      end)
+    end
+
+    input = %{query: @selection_query, page_size: 1, spaces: "drive"}
+
+    assert {:ok, %{files: [%File{} = unstarred], next_page_token: ^page_token}} =
+             Client.list_files(input, "token")
+
+    assert {:ok, %{files: [%File{} = starred]} = final} =
+             Client.list_files(Map.put(input, :page_token, page_token), "token")
+
+    refute Map.has_key?(final, :next_page_token)
+
+    assert %File{
+             file_id: @unstarred_file_id,
+             starred?: false,
+             created_time: "2026-10-30T15:29:47.460Z",
+             modified_time: nil
+           } = unstarred
+
+    assert %File{
+             file_id: @starred_file_id,
+             starred?: true,
+             modified_time: "2026-10-30T15:29:45.332Z"
+           } = starred
   end
 
   test "passes permission-aware file fields and normalizes embedded permissions" do
@@ -119,7 +148,7 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
 
       Req.Test.json(conn, %{
         "files" => [
-          %{"id" => "file123"}
+          %{"name" => "Budget.pdf"}
         ]
       })
     end)
@@ -132,23 +161,25 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
   end
 
   test "gets file metadata" do
-    Req.Test.stub(__MODULE__, fn conn ->
-      assert conn.method == "GET"
-      assert conn.request_path == "/v3/files/file123"
-      assert conn.query_params["fields"] =~ "id,name,mimeType"
+    assert "starred" in String.split(Fields.file_metadata(), ",")
+    assert "modifiedTime" in String.split(Fields.file_metadata(), ",")
 
-      Req.Test.json(conn, %{
-        "id" => "file123",
-        "name" => "Budget.pdf",
-        "mimeType" => "application/pdf"
-      })
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/#{@starred_file_id}"
+      assert conn.query_params["fields"] == Fields.file_metadata()
+      refute Map.has_key?(conn.query_params, "alt")
+
+      Req.Test.json(conn, LiveSmoke.fixture!(:google_drive, "file_get_starred"))
     end)
 
     assert {:ok, %File{} = file} =
-             Client.get_file(%{file_id: "file123", supports_all_drives: false}, "token")
+             Client.get_file(%{file_id: @starred_file_id, supports_all_drives: false}, "token")
 
-    assert file.file_id == "file123"
-    assert file.name == "Budget.pdf"
+    assert file.file_id == @starred_file_id
+    assert file.name == "jcl-live starred.txt"
+    assert file.starred? == true
+    assert file.modified_time == "2026-10-30T15:29:45.332Z"
   end
 
   test "gets Drive about metadata" do
@@ -213,7 +244,7 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
       assert conn.request_path == "/v3/files/file123"
 
       Req.Test.json(conn, %{
-        "id" => "file123"
+        "name" => "Budget.pdf"
       })
     end)
 
@@ -381,6 +412,35 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     assert file.file_id == "image123"
   end
 
+  test "uploads exactly 5,242,880 bytes, the multipart limit, unchanged" do
+    # Every byte value, 20,480 times: the content of the recorded live upload.
+    content = :binary.copy(:binary.list_to_bin(Enum.to_list(0..255)), 20_480)
+
+    Req.Test.expect(__MODULE__, fn conn ->
+      assert conn.request_path == "/upload/drive/v3/files"
+
+      ["multipart/related; boundary=" <> boundary] =
+        Plug.Conn.get_req_header(conn, "content-type")
+
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert [_metadata, media] =
+               String.split(body, "Content-Type: application/octet-stream\r\n\r\n", parts: 2)
+
+      # Compared by digest, so a mismatch does not print 5 MiB.
+      assert :crypto.hash(:sha256, media) ==
+               :crypto.hash(:sha256, content <> "\r\n--#{boundary}--\r\n")
+
+      Req.Test.json(conn, LiveSmoke.fixture!(:google_drive, "file_upload"))
+    end)
+
+    assert {:ok, %File{} = file} =
+             Client.upload_file(%{name: "jcl-live upload.bin", content: content}, "token")
+
+    assert file.size == 5_242_880
+    assert file.md5_checksum == Base.encode16(:crypto.hash(:md5, content), case: :lower)
+  end
+
   test "rejects multipart uploads larger than 5 MiB before sending a request" do
     content = :binary.copy(<<0>>, 5 * 1024 * 1024 + 1)
 
@@ -389,7 +449,10 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
               reason: :upload_too_large,
               subject: :content,
               details: %{actual_bytes: 5_242_881, max_bytes: 5_242_880}
-            }} = Client.upload_file(%{name: "large.bin", content: content}, "token")
+            } = error} = Client.upload_file(%{name: "large.bin", content: content}, "token")
+
+    assert error.message =~ "5,242,880 bytes"
+    assert error.message =~ "larger files are not supported"
   end
 
   test "rejects invalid upload MIME types before sending a request" do
@@ -414,6 +477,22 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
             }} =
              Client.upload_file(
                %{name: "report.txt", content: "hello", mime_type: "*/*"},
+               "token"
+             )
+  end
+
+  test "rejects Google Workspace upload MIME types before sending a request" do
+    assert {:error,
+            %Jido.Connect.Error.ValidationError{
+              reason: :unsupported_mime_type,
+              subject: :mime_type
+            }} =
+             Client.upload_file(
+               %{
+                 name: "report",
+                 content: "hello",
+                 mime_type: "application/vnd.google-apps.document"
+               },
                "token"
              )
   end
@@ -532,31 +611,34 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     assert content.binary == false
   end
 
-  test "normalizes parsed row payload for exported files" do
-    rows = [
-      ["Domaines", "Problemes"],
-      ["SAV", "Tracabilite des demandes clients"],
-      ["Production", "Pas de suivi en temps reel"]
-    ]
+  # Drive sends an Apps Script project's JSON export as
+  # application/vnd.google-apps.script+json, a type Req would decode into a
+  # map.
+  test "exports an Apps Script project as the bytes Drive sent" do
+    recorded = recorded_download!("file_export_apps_script")
+    body = recorded["body"]
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.request_path == "/v3/files/file123/export"
+      assert conn.query_params["mimeType"] == "application/vnd.google-apps.script+json"
+
+      replay_download(conn, recorded, body)
+    end)
 
     assert {:ok, content} =
-             Response.handle_file_content_response(
-               {:ok,
-                %{
-                  status: 200,
-                  body: rows,
-                  headers: %{"content-type" => "text/csv"}
-                }},
-               %{file_id: "file123", mime_type: "text/csv"}
+             Client.export_file(
+               %{file_id: "file123", mime_type: "application/vnd.google-apps.script+json"},
+               "token"
              )
 
-    assert content.file_id == "file123"
-    assert content.mime_type == "text/csv"
-    assert content.content == rows
-    assert content.size == length(rows)
-    assert content.encoding == "rows"
-    assert content.binary == false
-    refute Map.has_key?(content, :content_base64)
+    assert content == %{
+             file_id: "file123",
+             mime_type: "application/vnd.google-apps.script+json",
+             size: byte_size(body),
+             content: body,
+             encoding: "utf-8",
+             binary: false
+           }
   end
 
   test "downloads binary files" do
@@ -567,6 +649,7 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
       assert conn.query_params["supportsAllDrives"] == "true"
       assert Plug.Conn.get_req_header(conn, "accept") == ["*/*"]
 
+      # Plug appends `; charset=utf-8`, which the MIME type drops.
       conn
       |> Plug.Conn.put_resp_content_type("application/pdf")
       |> Plug.Conn.resp(200, <<0, 1, 2>>)
@@ -578,9 +661,283 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
     assert content.file_id == "file123"
     assert content.mime_type == "application/pdf"
     assert content.content_base64 == "AAEC"
+    assert content.size == 3
     assert content.encoding == "base64"
     assert content.binary == true
   end
+
+  test "downloads a recording's MP4 bytes as base64 with their byte count" do
+    # The recorded download of the test meeting's MP4 keeps its headers and
+    # byte count but not its bytes. The body here is the head of an MP4 file:
+    # an `ftyp` box whose size field begins with NUL bytes, then a `free` box
+    # that holds "ä", two bytes but one character.
+    recorded = recorded_download!("file_download_recording")
+    ftyp = <<0, 0, 0, 24, "ftyp", "isom", 0, 0, 2, 0, "isom", "mp41">>
+    body = ftyp <> <<0, 0, 0, 10, "free", 0xC3, 0xA4>>
+
+    # Valid UTF-8, so only the NUL bytes keep it out of `content`.
+    assert String.valid?(body)
+    assert String.length(body) < byte_size(body)
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.method == "GET"
+      assert conn.request_path == "/v3/files/file123"
+      assert conn.query_params["alt"] == "media"
+      assert conn.query_params["supportsAllDrives"] == "true"
+      assert Plug.Conn.get_req_header(conn, "accept") == ["*/*"]
+
+      replay_download(conn, recorded, body)
+    end)
+
+    assert {:ok, content} =
+             Client.download_file(%{file_id: "file123", supports_all_drives: true}, "token")
+
+    assert content.file_id == "file123"
+    assert content.mime_type == "video/mp4"
+    assert Base.decode64!(content.content_base64) == body
+    assert content.size == byte_size(body)
+    assert content.encoding == "base64"
+    assert content.binary == true
+    refute Map.has_key?(content, :content)
+  end
+
+  test "downloads a UTF-8 text file unchanged with its byte count" do
+    recorded = recorded_download!("file_download")
+    body = recorded["body"]
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      assert conn.request_path == "/v3/files/file123"
+      assert conn.query_params == %{"alt" => "media"}
+
+      replay_download(conn, recorded, body)
+    end)
+
+    assert {:ok, content} = Client.download_file(%{file_id: "file123"}, "token")
+
+    assert content.mime_type == "text/plain"
+    assert content.content == body
+    assert content.size == byte_size(body)
+    assert content.encoding == "utf-8"
+    assert content.binary == false
+    refute Map.has_key?(content, :content_base64)
+  end
+
+  # Drive sent both JSON files as `application/json`. Their bytes change when
+  # they are decoded and encoded again, so only the recorded bytes match.
+  for kind <- ["object", "array"] do
+    test "downloads a JSON #{kind} file as its exact bytes with their byte count" do
+      recorded = recorded_download!("file_download_json_#{unquote(kind)}")
+      body = recorded["body"]
+      [content_length] = recorded["headers"]["content-length"]
+
+      refute Jason.encode!(Jason.decode!(body)) == body
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert conn.request_path == "/v3/files/file123"
+        assert conn.query_params == %{"alt" => "media"}
+
+        replay_download(conn, recorded, body)
+      end)
+
+      assert {:ok, content} = Client.download_file(%{file_id: "file123"}, "token")
+
+      assert content == %{
+               file_id: "file123",
+               mime_type: "application/json",
+               size: String.to_integer(content_length),
+               content: body,
+               encoding: "utf-8",
+               binary: false
+             }
+    end
+  end
+
+  test "a failed download keeps Google's error message" do
+    recorded = recorded_download!("file_download_not_found")
+    %{"error" => %{"message" => message}} = recorded["body"]
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      replay_download(conn, recorded, Jason.encode!(recorded["body"]))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{provider: :google, status: 404} = error} =
+             Client.download_file(%{file_id: "file123"}, "token")
+
+    assert error.details.message == message
+  end
+
+  # The recorded error body cut off after half its bytes, as a dropped
+  # connection leaves it: the content type still says JSON, the body no
+  # longer decodes.
+  test "a failed download with a truncated JSON error body keeps the raw body" do
+    recorded = recorded_download!("file_download_not_found")
+    encoded = Jason.encode!(recorded["body"])
+    truncated = binary_part(encoded, 0, div(byte_size(encoded), 2))
+
+    assert {:error, %Jason.DecodeError{}} = Jason.decode(truncated)
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      replay_download(conn, recorded, truncated)
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{provider: :google, status: 404} = error} =
+             Client.download_file(%{file_id: "file123"}, "token")
+
+    assert error.details.body_summary == %{type: :binary, bytes: byte_size(truncated)}
+  end
+
+  # The recorded 404 with its content type replaced by text/plain or removed.
+  # The body is still Google's valid JSON error, so only the missing JSON
+  # media type keeps it raw.
+  for {label, content_type} <- [
+        {"a text/plain content type", "text/plain; charset=UTF-8"},
+        {"no content type", nil}
+      ] do
+    test "a failed download with #{label} keeps the raw body" do
+      recorded =
+        "file_download_not_found"
+        |> recorded_download!()
+        |> with_content_type(unquote(content_type))
+
+      body = Jason.encode!(recorded["body"])
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        replay_download(conn, recorded, body)
+      end)
+
+      assert {:error, %Jido.Connect.Error.ProviderError{provider: :google, status: 404} = error} =
+               Client.download_file(%{file_id: "file123"}, "token")
+
+      assert error.details.body_summary == %{type: :binary, bytes: byte_size(body)}
+    end
+  end
+
+  # The recorded 404 with its content type replaced by a structured JSON
+  # media type, which ends in +json instead of being application/json.
+  test "a failed download with a +json content type keeps Google's error message" do
+    recorded =
+      "file_download_not_found"
+      |> recorded_download!()
+      |> with_content_type("application/problem+json")
+
+    %{"error" => %{"message" => message}} = recorded["body"]
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      replay_download(conn, recorded, Jason.encode!(recorded["body"]))
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{provider: :google, status: 404} = error} =
+             Client.download_file(%{file_id: "file123"}, "token")
+
+    assert error.details.message == message
+  end
+
+  # The recorded 404s of a download and of an export with only their content
+  # type changed, so the body stays Google's valid JSON error and the media
+  # type alone decides whether the error keeps Google's message. Media types
+  # ignore case. A type is JSON as application/json or with a +json suffix;
+  # application/x-ndjson ends in json without one.
+  content_type_cases = [
+    {"an upper-case JSON content type", "APPLICATION/JSON; charset=UTF-8", :message},
+    {"an upper-case +json content type", "Application/Problem+JSON", :message},
+    {"an application/x-ndjson content type", "application/x-ndjson", :raw}
+  ]
+
+  # The cases the download tests above cover, for an export.
+  export_cases = [
+    {"its recorded JSON content type", "application/json; charset=UTF-8", :message},
+    {"a +json content type", "application/problem+json", :message},
+    {"a text/plain content type", "text/plain; charset=UTF-8", :raw},
+    {"no content type", nil, :raw}
+  ]
+
+  for {operation, cases} <- [
+        download: content_type_cases,
+        export: export_cases ++ content_type_cases
+      ],
+      {label, content_type, outcome} <- cases do
+    kept = if outcome == :message, do: "Google's error message", else: "the raw body"
+
+    test "a failed #{operation} with #{label} keeps #{kept}" do
+      recorded =
+        unquote(operation)
+        |> not_found_recording()
+        |> with_content_type(unquote(content_type))
+
+      body = Jason.encode!(recorded["body"])
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        replay_download(conn, recorded, body)
+      end)
+
+      assert {:error, %Jido.Connect.Error.ProviderError{provider: :google, status: 404} = error} =
+               request_content(unquote(operation))
+
+      case unquote(outcome) do
+        :message ->
+          assert error.details.message == recorded["body"]["error"]["message"]
+
+        :raw ->
+          assert error.details.body_summary == %{type: :binary, bytes: byte_size(body)}
+      end
+    end
+  end
+
+  # The recorded export error cut off after half its bytes.
+  test "a failed export with a truncated JSON error body keeps the raw body" do
+    recorded = not_found_recording(:export)
+    encoded = Jason.encode!(recorded["body"])
+    truncated = binary_part(encoded, 0, div(byte_size(encoded), 2))
+
+    assert {:error, %Jason.DecodeError{}} = Jason.decode(truncated)
+
+    Req.Test.stub(__MODULE__, fn conn ->
+      replay_download(conn, recorded, truncated)
+    end)
+
+    assert {:error, %Jido.Connect.Error.ProviderError{provider: :google, status: 404} = error} =
+             request_content(:export)
+
+    assert error.details.body_summary == %{type: :binary, bytes: byte_size(truncated)}
+  end
+
+  defp not_found_recording(:download), do: recorded_download!("file_download_not_found")
+  defp not_found_recording(:export), do: recorded_download!("file_export_not_found")
+
+  defp request_content(:download), do: Client.download_file(%{file_id: "file123"}, "token")
+
+  defp request_content(:export),
+    do: Client.export_file(%{file_id: "file123", mime_type: "text/plain"}, "token")
+
+  # The replay needs the recorded status and headers, and the change test the
+  # recorded request path, which `LiveSmoke.fixture!/2` leaves out, so this
+  # loads the whole recording.
+  defp recorded_download!(name) do
+    Jido.Connect.Google.TestSupport.ConnectorContracts.google_fixture!(
+      :google_drive,
+      "recorded/#{name}.json",
+      __DIR__
+    )
+  end
+
+  # Answers with the recorded status and headers around `body`, leaving out
+  # the length and checksum headers of the recorded bytes.
+  defp replay_download(conn, recorded, body) do
+    headers =
+      for {name, values} <- Map.drop(recorded["headers"], ["content-length", "x-goog-hash"]),
+          do: {name, Enum.join(values, ", ")}
+
+    conn
+    |> Plug.Conn.merge_resp_headers(headers)
+    |> Plug.Conn.resp(recorded["status"], body)
+  end
+
+  # Replaces the recorded content type; nil removes the header.
+  defp with_content_type(recorded, nil),
+    do: update_in(recorded["headers"], &Map.delete(&1, "content-type"))
+
+  defp with_content_type(recorded, content_type),
+    do: put_in(recorded["headers"]["content-type"], [content_type])
 
   test "deletes files" do
     Req.Test.stub(__MODULE__, fn conn ->
@@ -1229,6 +1586,18 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
   end
 
   test "lists file changes" do
+    # The live change log after an edit of a Google Doc, under the client's
+    # default change fields, with each file's full metadata. Drive may log
+    # other changes on the same page; the live test finds the edited document
+    # among them and exports it next, so the export's recorded path names it.
+    %{"request" => %{"path" => export_path}} = recorded_download!("file_export_edited")
+    ["", "drive", "v3", "files", file_id, "export"] = String.split(export_path, "/")
+
+    %{"changes" => recorded_changes, "newStartPageToken" => new_start_page_token} =
+      page = LiveSmoke.fixture!(:google_drive, "file_changed_edited")
+
+    %{"file" => recorded_file} = Enum.find(recorded_changes, &(&1["fileId"] == file_id))
+
     Req.Test.stub(__MODULE__, fn conn ->
       assert conn.method == "GET"
       assert conn.request_path == "/v3/changes"
@@ -1238,25 +1607,10 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
       assert conn.query_params["fields"] =~ "newStartPageToken,changes"
       refute conn.query_params["fields"] =~ "changeId"
 
-      Req.Test.json(conn, %{
-        "changes" => [
-          %{
-            "fileId" => "file123",
-            "removed" => false,
-            "time" => "2026-05-05T12:00:00Z",
-            "changeType" => "file",
-            "file" => %{
-              "id" => "file123",
-              "name" => "Budget.pdf",
-              "mimeType" => "application/pdf"
-            }
-          }
-        ],
-        "newStartPageToken" => "next-token"
-      })
+      Req.Test.json(conn, page)
     end)
 
-    assert {:ok, %{changes: [%Change{} = change], new_start_page_token: "next-token"}} =
+    assert {:ok, %{changes: changes, new_start_page_token: ^new_start_page_token}} =
              Client.list_changes(
                %{
                  page_token: "start-token",
@@ -1266,7 +1620,11 @@ defmodule Jido.Connect.Google.Drive.ClientTest do
                "token"
              )
 
-    assert change.file.file_id == "file123"
+    assert length(changes) == length(recorded_changes)
+    assert %Change{} = change = Enum.find(changes, &(&1.file_id == file_id))
+    assert change.file.file_id == file_id
+    assert change.file.mime_type == recorded_file["mimeType"]
+    assert change.file.modified_time == recorded_file["modifiedTime"]
   end
 
   test "starts a changes watch channel" do

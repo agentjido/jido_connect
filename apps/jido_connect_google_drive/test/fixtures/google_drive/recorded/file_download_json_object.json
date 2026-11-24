@@ -1,0 +1,56 @@
+{
+  "body": "{\"jcl\": \"live-json\", \"b\": 1, \"a\": [2.50, true, null], \"path\": \"a\\/b\", \"text\": \"ä\"}\n",
+  "headers": {
+    "access-control-allow-credentials": [
+      "true"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate"
+    ],
+    "content-disposition": [
+      "attachment"
+    ],
+    "content-length": [
+      "84"
+    ],
+    "content-type": [
+      "application/json"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 15:50:34 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 15:50:34 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "vary": [
+      "Origin, X-Origin"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-goog-hash": [
+      "crc32c=EVvB6A=="
+    ],
+    "x-guploader-uploadid": [
+      "AFy3sg21PlAMy2gtQIRLgOcFg4A20YCMJzklYHhFSiKuqDJeNpI9esV9v2G54_XzYlmWDDrc"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/1r9c6fbHkyGHPqEpDisffT5WSBuLNo8A6"
+  },
+  "status": 200
+}

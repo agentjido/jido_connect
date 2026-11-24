@@ -1,0 +1,56 @@
+{
+  "body": "link-shared fixture\n",
+  "headers": {
+    "access-control-allow-credentials": [
+      "true"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate"
+    ],
+    "content-disposition": [
+      "attachment"
+    ],
+    "content-length": [
+      "20"
+    ],
+    "content-type": [
+      "text/plain"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 14:50:14 GMT"
+    ],
+    "expires": [
+      "Fri, 06 Nov 2026 14:50:14 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "vary": [
+      "Origin, X-Origin"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-goog-hash": [
+      "crc32c=kgckVQ=="
+    ],
+    "x-guploader-uploadid": [
+      "AFy3sg3zkuJ_BOW0EwdkxW4yMbV1F1T5Q8vz9SQztFqsGKhmgpzHyqDSyfix0F8YuY_dqsMBAPhvKNw"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/1IDOut2ayPl-ubqUf9LlQRbmQV76nve9x"
+  },
+  "status": 200
+}

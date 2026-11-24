@@ -1,0 +1,78 @@
+{
+  "body": {
+    "createdTime": "2026-10-30T15:29:48.143Z",
+    "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.shortcut",
+    "id": "1oHPs5PO_okRteaz1Ix_jQvlQLQg1dT-w",
+    "mimeType": "application/vnd.google-apps.shortcut",
+    "modifiedTime": "2026-10-30T15:29:48.143Z",
+    "name": "jcl-live shortcut",
+    "owners": [
+      {
+        "displayName": "Person 1",
+        "emailAddress": "person-1@example.com",
+        "kind": "drive#user",
+        "me": true,
+        "permissionId": "permissionId-1",
+        "photoLink": "photoLink-1"
+      }
+    ],
+    "parents": [
+      "18wQ5cSzJVV4Hpxmx_okyZi1-Oo1T10wy"
+    ],
+    "shared": false,
+    "shortcutDetails": {
+      "targetId": "1IDOut2ayPl-ubqUf9LlQRbmQV76nve9x",
+      "targetMimeType": "text/plain"
+    },
+    "starred": false,
+    "trashed": false,
+    "webViewLink": "https://drive.google.com/file/d/1oHPs5PO_okRteaz1Ix_jQvlQLQg1dT-w/view?usp=drivesdk"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "no-cache, no-store, max-age=0, must-revalidate"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 06:34:48 GMT"
+    ],
+    "expires": [
+      "Mon, 01 Jan 1990 00:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Origin, X-Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/1oHPs5PO_okRteaz1Ix_jQvlQLQg1dT-w"
+  },
+  "status": 200
+}

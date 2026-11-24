@@ -1,0 +1,61 @@
+{
+  "body": {
+    "error": {
+      "code": 404,
+      "errors": [
+        {
+          "domain": "global",
+          "location": "fileId",
+          "locationType": "parameter",
+          "message": "File not found: 1JclLiveSmokeMissingFile000000000.",
+          "reason": "notFound"
+        }
+      ],
+      "message": "File not found: 1JclLiveSmokeMissingFile000000000."
+    }
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 06:34:47 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 06:34:47 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Origin, X-Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/1JclLiveSmokeMissingFile000000000"
+  },
+  "status": 404
+}

@@ -1,0 +1,78 @@
+{
+  "body": {
+    "createdTime": "2026-10-30T15:29:45.332Z",
+    "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/text/plain",
+    "id": "1JphxvbpUOuOhN326OEz9UnJqtAy99n4l",
+    "md5Checksum": "90c617642757961b1b6a33e5aba7d370",
+    "mimeType": "text/plain",
+    "modifiedTime": "2026-10-30T15:29:45.332Z",
+    "name": "jcl-live starred.txt",
+    "owners": [
+      {
+        "displayName": "Person 1",
+        "emailAddress": "person-1@example.com",
+        "kind": "drive#user",
+        "me": true,
+        "permissionId": "permissionId-1",
+        "photoLink": "photoLink-1"
+      }
+    ],
+    "parents": [
+      "18wQ5cSzJVV4Hpxmx_okyZi1-Oo1T10wy"
+    ],
+    "shared": false,
+    "size": "16",
+    "starred": true,
+    "thumbnailLink": "thumbnailLink-1",
+    "trashed": false,
+    "webContentLink": "https://drive.google.com/uc?id=1JphxvbpUOuOhN326OEz9UnJqtAy99n4l&export=download",
+    "webViewLink": "https://drive.google.com/file/d/1JphxvbpUOuOhN326OEz9UnJqtAy99n4l/view?usp=drivesdk"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "no-cache, no-store, max-age=0, must-revalidate"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 13:53:05 GMT"
+    ],
+    "expires": [
+      "Mon, 01 Jan 1990 00:00:00 GMT"
+    ],
+    "pragma": [
+      "no-cache"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "Origin, X-Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/drive/v3/files/1JphxvbpUOuOhN326OEz9UnJqtAy99n4l"
+  },
+  "status": 200
+}

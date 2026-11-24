@@ -15,10 +15,10 @@ defmodule Jido.Connect.Google.Drive.FieldsTest do
     assert Fields.about_metadata() =~ "user,storageQuota,importFormats"
 
     assert Fields.file_list() ==
-             "nextPageToken,files(#{Fields.file_metadata()})"
+             "nextPageToken,incompleteSearch,files(#{Fields.file_metadata()})"
 
     assert Fields.file_list_with_permissions() ==
-             "nextPageToken,files(#{Fields.file_with_permissions()})"
+             "nextPageToken,incompleteSearch,files(#{Fields.file_with_permissions()})"
 
     assert Fields.permission_list() ==
              "nextPageToken,permissions(#{Fields.permission_metadata()})"
@@ -49,5 +49,14 @@ defmodule Jido.Connect.Google.Drive.FieldsTest do
     assert Fields.shared_drive_presets().default == Fields.shared_drive_metadata()
     assert Fields.shared_drive_list_presets().default == Fields.shared_drive_list()
     assert Fields.about_presets().default == Fields.about_metadata()
+  end
+
+  test "file metadata requests the resource key and shortcut target fields" do
+    fields = String.split(Fields.file_metadata(), ",", trim: true)
+
+    assert "resourceKey" in fields
+    assert Fields.file_metadata() =~ "shortcutDetails(targetId,targetMimeType,targetResourceKey)"
+    assert Fields.file_with_permissions() =~ "resourceKey"
+    assert Fields.file_list() =~ "shortcutDetails(targetId,targetMimeType,targetResourceKey)"
   end
 end

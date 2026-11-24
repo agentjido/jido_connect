@@ -16,7 +16,8 @@ defmodule Jido.Connect.Google.Drive.Client.Response do
       {:ok,
        %{
          files: files,
-         next_page_token: Data.get(body, "nextPageToken")
+         next_page_token: Data.get(body, "nextPageToken"),
+         incomplete_search: Data.get(body, "incompleteSearch")
        }
        |> Data.compact()}
     end
@@ -56,11 +57,6 @@ defmodule Jido.Connect.Google.Drive.Client.Response do
   def handle_file_content_response({:ok, %{status: status, body: body, headers: headers}}, params)
       when status in 200..299 and is_binary(body) do
     {:ok, normalize_file_content(body, headers, params)}
-  end
-
-  def handle_file_content_response({:ok, %{status: status, body: body, headers: headers}}, params)
-      when status in 200..299 and is_list(body) do
-    {:ok, normalize_file_content_rows(body, headers, params)}
   end
 
   def handle_file_content_response({:ok, %{status: status, body: body}}, _params)
@@ -467,19 +463,6 @@ defmodule Jido.Connect.Google.Drive.Client.Response do
 
     base
     |> Map.merge(content)
-    |> Data.compact()
-  end
-
-  defp normalize_file_content_rows(body, headers, params) do
-    %{
-      file_id: Data.get(params, :file_id),
-      mime_type: Data.get(params, :mime_type) || response_mime_type(headers),
-      size: length(body),
-      content: body,
-      content_base64: nil,
-      encoding: "rows",
-      binary: false
-    }
     |> Data.compact()
   end
 

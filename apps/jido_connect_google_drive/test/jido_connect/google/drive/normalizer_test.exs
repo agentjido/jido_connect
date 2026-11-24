@@ -16,6 +16,11 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
   }
 
   alias Jido.Connect.Google.TestSupport.ConnectorContracts
+  alias Jido.Connect.TestSupport.LiveSmoke
+
+  @shared_file_id "1IDOut2ayPl-ubqUf9LlQRbmQV76nve9x"
+  @starred_file_id "1JphxvbpUOuOhN326OEz9UnJqtAy99n4l"
+  @unstarred_file_id "1cihn1Qw5ruqogYtAdjOkPWeA3f2KhwK-"
 
   test "normalizes file payloads" do
     assert {:ok, %File{} = file} =
@@ -253,7 +258,7 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
     assert {:error, _error} =
              Normalizer.change(%{
                "fileId" => "file123",
-               "file" => %{"id" => "file123"}
+               "file" => %{"name" => "Budget.pdf"}
              })
   end
 
@@ -350,4 +355,122 @@ defmodule Jido.Connect.Google.Drive.NormalizerTest do
 
     assert {:error, _error} = SharedDrive.new(%{shared_drive_id: "drive123"})
   end
+
+  describe "file resolution fields" do
+    # The test tenant has no file with a resource key, so the recorded
+    # response lacks `resourceKey`; this test adds one to the recorded body.
+    test "maps resourceKey to resource_key" do
+      payload =
+        "file_get_shared_link"
+        |> recorded()
+        |> Map.put("resourceKey", "0-AbCdEf_GhIjKl12345")
+
+      assert {:ok, %File{file_id: @shared_file_id, resource_key: "0-AbCdEf_GhIjKl12345"}} =
+               Normalizer.file(payload)
+    end
+
+    test "leaves resource_key and shortcut targets absent when Drive omits them" do
+      payload = recorded("file_get_shared_link")
+      refute Map.has_key?(payload, "resourceKey")
+      refute Map.has_key?(payload, "shortcutDetails")
+
+      assert {:ok,
+              %File{
+                file_id: @shared_file_id,
+                resource_key: nil,
+                shortcut_target_id: nil,
+                shortcut_target_mime_type: nil,
+                shortcut_target_resource_key: nil,
+                metadata: metadata
+              }} = Normalizer.file(payload)
+
+      assert metadata == %{}
+    end
+
+    test "maps shortcutDetails to the shortcut target fields" do
+      payload = recorded("file_get_shortcut")
+
+      assert {:ok,
+              %File{
+                file_id: "1oHPs5PO_okRteaz1Ix_jQvlQLQg1dT-w",
+                mime_type: "application/vnd.google-apps.shortcut",
+                shortcut_target_id: @shared_file_id,
+                shortcut_target_mime_type: "text/plain",
+                shortcut_target_resource_key: nil
+              }} = Normalizer.file(payload)
+    end
+
+    # The recorded shortcut points at a file without a resource key; this test
+    # adds `targetResourceKey` to the recorded `shortcutDetails`.
+    test "maps targetResourceKey to shortcut_target_resource_key" do
+      payload =
+        "file_get_shortcut"
+        |> recorded()
+        |> put_in(["shortcutDetails", "targetResourceKey"], "0-AbCdEf_GhIjKl12345")
+
+      assert {:ok,
+              %File{
+                shortcut_target_id: @shared_file_id,
+                shortcut_target_resource_key: "0-AbCdEf_GhIjKl12345"
+              }} = Normalizer.file(payload)
+    end
+  end
+
+  describe "selection metadata" do
+    test "keeps Drive's starred flag for a starred and an unstarred file" do
+      assert {:ok, %File{file_id: @starred_file_id, starred?: true}} =
+               Normalizer.file(recorded("file_get_starred"))
+
+      assert {:ok, %File{file_id: @unstarred_file_id, starred?: false}} =
+               Normalizer.file(recorded("file_get_unstarred"))
+    end
+
+    # Drive omits `starred` when a caller-supplied projection does not name it,
+    # as in the recorded `files_list_caller_fields`. The second case removes
+    # `starred` from the recorded starred file.
+    test "reads an omitted starred flag as false" do
+      %{"files" => [unprojected | _]} = recorded("files_list_caller_fields")
+      refute Map.has_key?(unprojected, "starred")
+
+      assert {:ok, %File{starred?: false}} = Normalizer.file(unprojected)
+
+      starred_without_flag = Map.delete(recorded("file_get_starred"), "starred")
+
+      assert {:ok, %File{file_id: @starred_file_id, starred?: false}} =
+               Normalizer.file(starred_without_flag)
+    end
+
+    # The link-shared file's `modifiedTime` differs from its `createdTime`. Only
+    # read-only live tests record it, so its times stay put across recordings,
+    # unlike those of the Google Doc that the edit test changes on every run.
+    test "returns modifiedTime unchanged and keeps it apart from createdTime" do
+      assert {:ok,
+              %File{
+                file_id: @shared_file_id,
+                created_time: "2026-10-30T15:29:29.413Z",
+                modified_time: "2026-10-30T15:29:30.508Z"
+              }} = Normalizer.file(recorded("file_get_shared_link"))
+    end
+
+    # The recorded `files_list_caller_fields` lacks both timestamps. The second
+    # case removes `modifiedTime` from the recorded link-shared file and keeps
+    # its `createdTime`.
+    test "leaves modified_time nil when Drive omits modifiedTime" do
+      %{"files" => [unprojected | _]} = recorded("files_list_caller_fields")
+      refute Map.has_key?(unprojected, "modifiedTime")
+
+      assert {:ok, %File{modified_time: nil}} = Normalizer.file(unprojected)
+
+      without_modified_time = Map.delete(recorded("file_get_shared_link"), "modifiedTime")
+
+      assert {:ok,
+              %File{
+                file_id: @shared_file_id,
+                created_time: "2026-10-30T15:29:29.413Z",
+                modified_time: nil
+              }} = Normalizer.file(without_modified_time)
+    end
+  end
+
+  defp recorded(name), do: LiveSmoke.fixture!(:google_drive, name)
 end
