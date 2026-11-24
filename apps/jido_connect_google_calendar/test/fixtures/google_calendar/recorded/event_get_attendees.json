@@ -1,0 +1,312 @@
+{
+  "body": {
+    "attendees": [
+      {
+        "email": "person-1@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-2@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-3@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-4@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-5@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-6@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "additionalGuests": 2,
+        "comment": "jcl-live comment 50",
+        "displayName": "Person 1",
+        "email": "person-7@example.com",
+        "optional": true,
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-8@example.com",
+        "organizer": true,
+        "responseStatus": "needsAction",
+        "self": true
+      },
+      {
+        "email": "person-9@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-10@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-11@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-12@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-13@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-14@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "additionalGuests": 2,
+        "comment": "jcl-live comment 30",
+        "displayName": "Person 2",
+        "email": "person-15@example.com",
+        "optional": true,
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-16@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-17@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-18@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "additionalGuests": 2,
+        "comment": "jcl-live comment 40",
+        "displayName": "Person 3",
+        "email": "person-19@example.com",
+        "optional": true,
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-20@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-21@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-22@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-23@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-24@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-25@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-26@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-27@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "additionalGuests": 2,
+        "comment": "jcl-live comment 10",
+        "displayName": "Person 4",
+        "email": "person-28@example.com",
+        "optional": true,
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-29@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-30@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-31@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-32@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-33@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "additionalGuests": 2,
+        "comment": "jcl-live comment 20",
+        "displayName": "Person 5",
+        "email": "person-34@example.com",
+        "optional": true,
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-35@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-36@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-37@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-38@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-39@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-40@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-41@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-42@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-43@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-44@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-45@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-46@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-47@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-48@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-49@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-50@example.com",
+        "responseStatus": "needsAction"
+      },
+      {
+        "email": "person-51@example.com",
+        "responseStatus": "needsAction"
+      }
+    ],
+    "created": "2026-11-02T08:49:37.000Z",
+    "creator": {
+      "email": "person-8@example.com",
+      "self": true
+    },
+    "description": "jcl-live attendee list i53h623n",
+    "end": {
+      "dateTime": "2027-03-01T11:00:00+01:00",
+      "timeZone": "Europe/Berlin"
+    },
+    "etag": "\"3587218756737662\"",
+    "eventType": "default",
+    "htmlLink": "htmlLink-1",
+    "iCalUID": "person-52@example.com",
+    "id": "jclr1i53h623n",
+    "location": "jcl-live room",
+    "organizer": {
+      "email": "person-8@example.com",
+      "self": true
+    },
+    "reminders": {
+      "useDefault": true
+    },
+    "sequence": 0,
+    "start": {
+      "dateTime": "2027-03-01T10:00:00+01:00",
+      "timeZone": "Europe/Berlin"
+    },
+    "status": "confirmed",
+    "summary": "jcl-live attendees i53h623n",
+    "updated": "2026-11-02T08:49:38.368Z"
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate, no-transform"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:49:38 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 08:49:38 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-l2-request-path": [
+      "l2-managed-14"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/calendar/v3/calendars/person-8@example.com/events/jclr1i53h623n"
+  },
+  "status": 200
+}

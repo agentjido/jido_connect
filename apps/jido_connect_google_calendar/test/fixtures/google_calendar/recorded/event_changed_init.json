@@ -1,0 +1,2385 @@
+{
+  "body": {
+    "items": [
+      {
+        "created": "2026-10-30T15:30:50.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-11-09T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586748500717886\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-1",
+        "iCalUID": "person-2@example.com",
+        "id": "1ebsebvq82pck974thm0p26gt4",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-11-09T09:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live timed Berlin",
+        "updated": "2026-10-30T15:30:50.358Z"
+      },
+      {
+        "created": "2026-10-30T15:30:50.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-11-09T20:30:00+01:00",
+          "timeZone": "America/New_York"
+        },
+        "etag": "\"3586748501528318\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-2",
+        "iCalUID": "person-3@example.com",
+        "id": "fhjk89det8ks8vm3bmcvgrmcdg",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-11-09T20:00:00+01:00",
+          "timeZone": "America/New_York"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live timed New York",
+        "updated": "2026-10-30T15:30:50.764Z"
+      },
+      {
+        "created": "2026-10-30T15:30:51.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-11-10T07:45:00+01:00",
+          "timeZone": "Asia/Kolkata"
+        },
+        "etag": "\"3586748502303838\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-3",
+        "iCalUID": "person-4@example.com",
+        "id": "o4prn3524jfqjj1ngv0ta85is8",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-11-10T07:00:00+01:00",
+          "timeZone": "Asia/Kolkata"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live timed Kolkata",
+        "updated": "2026-10-30T15:30:51.151Z"
+      },
+      {
+        "created": "2026-10-30T15:30:51.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-11-11T00:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586748503162078\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-4",
+        "iCalUID": "person-5@example.com",
+        "id": "4cm9i3vrhmitg805mke6tkl43k",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-11-10T23:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live across midnight",
+        "updated": "2026-10-30T15:30:51.581Z"
+      },
+      {
+        "created": "2026-10-30T15:30:51.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "date": "2026-11-12"
+        },
+        "etag": "\"3586748503869278\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-5",
+        "iCalUID": "person-6@example.com",
+        "id": "eedu74patjrf0ctmm6ndmt2o0s",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "overrides": [
+            {
+              "method": "popup",
+              "minutes": 10
+            }
+          ],
+          "useDefault": false
+        },
+        "sequence": 0,
+        "start": {
+          "date": "2026-11-11"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live all-day",
+        "updated": "2026-10-30T15:30:51.934Z"
+      },
+      {
+        "created": "2026-10-30T15:30:52.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "date": "2026-11-15"
+        },
+        "etag": "\"3586748504595902\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-6",
+        "iCalUID": "person-7@example.com",
+        "id": "jeal1bl7ksdu0em0miebsgsgjs",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "overrides": [
+            {
+              "method": "popup",
+              "minutes": 10
+            }
+          ],
+          "useDefault": false
+        },
+        "sequence": 0,
+        "start": {
+          "date": "2026-11-12"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live multi-day",
+        "updated": "2026-10-30T15:30:52.297Z"
+      },
+      {
+        "created": "2026-10-30T15:30:52.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-11-09T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586748506855966\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-7",
+        "iCalUID": "person-8@example.com",
+        "id": "v5omtsjvsa9lrul21cen00t1fo_20261109T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2026-11-09T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "v5omtsjvsa9lrul21cen00t1fo",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-11-09T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live weekly",
+        "updated": "2026-10-30T15:30:53.427Z"
+      },
+      {
+        "created": "2026-10-30T15:30:52.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-11-23T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586748506855966\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-8",
+        "iCalUID": "person-8@example.com",
+        "id": "v5omtsjvsa9lrul21cen00t1fo_20261123T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2026-11-23T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "v5omtsjvsa9lrul21cen00t1fo",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-11-23T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live weekly",
+        "updated": "2026-10-30T15:30:53.427Z"
+      },
+      {
+        "created": "2026-10-30T15:30:52.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-11-30T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586748506855966\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-9",
+        "iCalUID": "person-8@example.com",
+        "id": "v5omtsjvsa9lrul21cen00t1fo_20261130T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2026-11-30T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "v5omtsjvsa9lrul21cen00t1fo",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-11-30T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live weekly",
+        "updated": "2026-10-30T15:30:53.427Z"
+      },
+      {
+        "created": "2026-10-30T15:30:52.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-12-07T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586748506855966\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-10",
+        "iCalUID": "person-8@example.com",
+        "id": "v5omtsjvsa9lrul21cen00t1fo_20261207T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2026-12-07T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "v5omtsjvsa9lrul21cen00t1fo",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-12-07T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live weekly",
+        "updated": "2026-10-30T15:30:53.427Z"
+      },
+      {
+        "created": "2026-10-30T15:30:52.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-12-14T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586748506855966\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-11",
+        "iCalUID": "person-8@example.com",
+        "id": "v5omtsjvsa9lrul21cen00t1fo_20261214T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2026-12-14T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "v5omtsjvsa9lrul21cen00t1fo",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-12-14T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live weekly",
+        "updated": "2026-10-30T15:30:53.427Z"
+      },
+      {
+        "created": "2026-10-30T15:30:52.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-11-16T09:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586748506855966\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-12",
+        "iCalUID": "person-8@example.com",
+        "id": "v5omtsjvsa9lrul21cen00t1fo_20261116T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2026-11-16T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "v5omtsjvsa9lrul21cen00t1fo",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2026-11-16T09:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live weekly",
+        "updated": "2026-10-30T15:30:53.427Z"
+      },
+      {
+        "attachments": [
+          {
+            "fileUrl": "https://drive.google.com/file/d/1nez1Lc_Comf4uYXPg4ZAGpHuW0C8REQy/view?usp=drivesdk&jcl=a%20b",
+            "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/text/plain",
+            "mimeType": "text/plain",
+            "title": "jcl-live handout.txt"
+          },
+          {
+            "fileId": "1XXsU_Na3ZfzaeDj5OyYOLLV7SwyDYev3",
+            "fileUrl": "https://drive.google.com/file/d/1XXsU_Na3ZfzaeDj5OyYOLLV7SwyDYev3/view?usp=drive_web",
+            "iconLink": "https://drive-thirdparty.googleusercontent.com/32/type/video/mp4",
+            "mimeType": "video/mp4",
+            "title": "jcl-live meeting with transcript - 2026/10/30 18:18 CET – Recording"
+          },
+          {
+            "fileId": "1zzz7BZxoL4EsIUhh5W8ClPYNQsyjLd82Um9z0Vz4eYU",
+            "fileUrl": "https://docs.google.com/document/d/1zzz7BZxoL4EsIUhh5W8ClPYNQsyjLd82Um9z0Vz4eYU/edit?usp=meet_tnfm_calendar",
+            "iconLink": "https://drive-thirdparty.googleusercontent.com/32/type/application/vnd.google-apps.document",
+            "mimeType": "application/vnd.google-apps.document",
+            "title": "Notizen von Gemini"
+          },
+          {
+            "fileId": "1FRWevyoWXcVrNX8KgkIRbt6CCtS1Jmck4DM95IAregM",
+            "fileUrl": "https://docs.google.com/document/d/1FRWevyoWXcVrNX8KgkIRbt6CCtS1Jmck4DM95IAregM/edit?usp=meet_tnfm_calendar",
+            "iconLink": "https://drive-thirdparty.googleusercontent.com/32/type/application/vnd.google-apps.document",
+            "mimeType": "application/vnd.google-apps.document",
+            "title": "Notizen von Gemini"
+          },
+          {
+            "fileId": "1i5aMCLZPDfy6fwljuDgz0IJiPM_ZuEBzNO2d1eBDBxM",
+            "fileUrl": "https://docs.google.com/document/d/1i5aMCLZPDfy6fwljuDgz0IJiPM_ZuEBzNO2d1eBDBxM/edit?usp=drivesdk",
+            "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.document",
+            "mimeType": "application/vnd.google-apps.document",
+            "title": "jcl-live agenda"
+          }
+        ],
+        "attendees": [
+          {
+            "email": "person-1@example.com",
+            "organizer": true,
+            "responseStatus": "needsAction",
+            "self": true
+          },
+          {
+            "email": "person-9@example.com",
+            "responseStatus": "needsAction"
+          }
+        ],
+        "conferenceData": {
+          "conferenceId": "sof-qtak-vtd",
+          "conferenceSolution": {
+            "iconUri": "https://fonts.gstatic.com/s/i/productlogos/meet_2020q4/v6/web-512dp/logo_meet_2020q4_color_2x_web_512dp.png",
+            "key": {
+              "type": "hangoutsMeet"
+            },
+            "name": "Google Meet"
+          },
+          "createRequest": {
+            "conferenceSolutionKey": {
+              "type": "hangoutsMeet"
+            },
+            "requestId": "df9146719eed4d65980b5fdb51a23358",
+            "status": {
+              "statusCode": "success"
+            }
+          },
+          "entryPoints": [
+            {
+              "entryPointType": "video",
+              "label": "meet.google.com/sof-qtak-vtd",
+              "uri": "uri-1"
+            },
+            {
+              "entryPointType": "more",
+              "pin": "pin-1",
+              "uri": "uri-2"
+            },
+            {
+              "entryPointType": "phone",
+              "label": "+1 612-315-9773",
+              "pin": "pin-2",
+              "regionCode": "US",
+              "uri": "uri-3"
+            }
+          ]
+        },
+        "created": "2026-10-30T16:52:02.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "description": "<b>jcl-live Besprechung</b> mit Transkript, Aufnahme und Gemini-Notizen.<br>Grüße aus Köln: „Zitat“ – Maß, Größe, Übergabe; Treffpunkt 東京 Büro.<br><a href=\"https://example.org/jcl-live?a=1&b=2\">Link mit Query a=1&amp;b=2</a><br>1. Tagesordnungspunkt 1: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>2. Tagesordnungspunkt 2: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>3. Tagesordnungspunkt 3: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>4. Tagesordnungspunkt 4: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>5. Tagesordnungspunkt 5: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>6. Tagesordnungspunkt 6: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>7. Tagesordnungspunkt 7: Prüfung der Felder für Beschreibung, Teilnehmende und Anhänge.<br>Ende der Beschreibung, Marker jcl-marker-event-description.",
+        "end": {
+          "dateTime": "2026-10-30T18:40:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586762208138590\"",
+        "eventType": "default",
+        "hangoutLink": "https://meet.google.com/sof-qtak-vtd",
+        "htmlLink": "htmlLink-13",
+        "iCalUID": "person-10@example.com",
+        "id": "ndvt3dobe2f7dac8l940ha6iug",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-10-30T17:55:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live meeting with transcript",
+        "updated": "2026-10-30T17:25:04.069Z"
+      },
+      {
+        "attendees": [
+          {
+            "email": "person-1@example.com",
+            "organizer": true,
+            "responseStatus": "needsAction",
+            "self": true
+          },
+          {
+            "email": "person-9@example.com",
+            "responseStatus": "needsAction"
+          }
+        ],
+        "conferenceData": {
+          "conferenceId": "grs-xqsd-qrf",
+          "conferenceSolution": {
+            "iconUri": "https://fonts.gstatic.com/s/i/productlogos/meet_2020q4/v6/web-512dp/logo_meet_2020q4_color_2x_web_512dp.png",
+            "key": {
+              "type": "hangoutsMeet"
+            },
+            "name": "Google Meet"
+          },
+          "createRequest": {
+            "conferenceSolutionKey": {
+              "type": "hangoutsMeet"
+            },
+            "requestId": "3a0d8e508df246118e2906b0a4c79792",
+            "status": {
+              "statusCode": "success"
+            }
+          },
+          "entryPoints": [
+            {
+              "entryPointType": "video",
+              "label": "meet.google.com/grs-xqsd-qrf",
+              "uri": "uri-4"
+            },
+            {
+              "entryPointType": "more",
+              "pin": "pin-3",
+              "uri": "uri-5"
+            },
+            {
+              "entryPointType": "phone",
+              "label": "+1 443-671-8028",
+              "pin": "pin-4",
+              "regionCode": "US",
+              "uri": "uri-6"
+            }
+          ]
+        },
+        "created": "2026-10-30T15:30:53.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2026-11-02T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3586967904371678\"",
+        "eventType": "default",
+        "hangoutLink": "https://meet.google.com/grs-xqsd-qrf",
+        "htmlLink": "htmlLink-14",
+        "iCalUID": "person-11@example.com",
+        "id": "q8lbl2gpsl56kv74103o95ej24",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2026-11-02T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live poll meeting",
+        "updated": "2026-10-31T21:59:12.185Z"
+      },
+      {
+        "created": "2026-11-02T07:35:53.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-05T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587209909122558\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-15",
+        "iCalUID": "person-12@example.com",
+        "id": "jcle2ssmgksjdm",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-05T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live removed smgksjdm",
+        "updated": "2026-11-02T07:35:54.561Z"
+      },
+      {
+        "created": "2026-11-02T07:35:53.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-11T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587209911952926\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-16",
+        "iCalUID": "person-13@example.com",
+        "id": "jcle2rsmgksjdm_20270111T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rsmgksjdm",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series smgksjdm",
+        "updated": "2026-11-02T07:35:55.976Z"
+      },
+      {
+        "created": "2026-11-02T07:35:53.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-25T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587209911952926\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-17",
+        "iCalUID": "person-13@example.com",
+        "id": "jcle2rsmgksjdm_20270125T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rsmgksjdm",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series smgksjdm",
+        "updated": "2026-11-02T07:35:55.976Z"
+      },
+      {
+        "created": "2026-11-02T07:35:53.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-18T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587209911952926\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-18",
+        "iCalUID": "person-13@example.com",
+        "id": "jcle2rsmgksjdm_20270118T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rsmgksjdm",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series smgksjdm",
+        "updated": "2026-11-02T07:35:55.976Z"
+      },
+      {
+        "created": "2026-11-02T07:35:57.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-04T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587209916447166\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-19",
+        "iCalUID": "person-14@example.com",
+        "id": "jcle1h5j2si74",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-04T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live poll h5j2si74 edited",
+        "updated": "2026-11-02T07:35:58.223Z"
+      },
+      {
+        "created": "2026-11-02T07:37:01.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-05T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210046459934\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-20",
+        "iCalUID": "person-15@example.com",
+        "id": "jcle2s4qh9ijgc",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-05T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live removed 4qh9ijgc",
+        "updated": "2026-11-02T07:37:03.229Z"
+      },
+      {
+        "created": "2026-11-02T07:37:01.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-11T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210048831422\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-21",
+        "iCalUID": "person-16@example.com",
+        "id": "jcle2r4qh9ijgc_20270111T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2r4qh9ijgc",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series 4qh9ijgc",
+        "updated": "2026-11-02T07:37:04.415Z"
+      },
+      {
+        "created": "2026-11-02T07:37:01.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-25T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210048831422\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-22",
+        "iCalUID": "person-16@example.com",
+        "id": "jcle2r4qh9ijgc_20270125T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2r4qh9ijgc",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series 4qh9ijgc",
+        "updated": "2026-11-02T07:37:04.415Z"
+      },
+      {
+        "created": "2026-11-02T07:37:01.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-18T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210048831422\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-23",
+        "iCalUID": "person-16@example.com",
+        "id": "jcle2r4qh9ijgc_20270118T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2r4qh9ijgc",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series 4qh9ijgc",
+        "updated": "2026-11-02T07:37:04.415Z"
+      },
+      {
+        "created": "2026-11-02T07:37:05.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-04T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210054091166\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-24",
+        "iCalUID": "person-17@example.com",
+        "id": "jcle1f8ao63rv",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-04T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live poll f8ao63rv edited",
+        "updated": "2026-11-02T07:37:07.045Z"
+      },
+      {
+        "created": "2026-11-02T07:37:17.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-05T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210077547358\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-25",
+        "iCalUID": "person-18@example.com",
+        "id": "jcle2sclot94kb",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-05T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live removed clot94kb",
+        "updated": "2026-11-02T07:37:18.773Z"
+      },
+      {
+        "created": "2026-11-02T07:37:17.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-11T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210079780350\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-26",
+        "iCalUID": "person-19@example.com",
+        "id": "jcle2rclot94kb_20270111T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rclot94kb",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series clot94kb",
+        "updated": "2026-11-02T07:37:19.890Z"
+      },
+      {
+        "created": "2026-11-02T07:37:17.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-25T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210079780350\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-27",
+        "iCalUID": "person-19@example.com",
+        "id": "jcle2rclot94kb_20270125T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rclot94kb",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series clot94kb",
+        "updated": "2026-11-02T07:37:19.890Z"
+      },
+      {
+        "created": "2026-11-02T07:37:17.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-18T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210079780350\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-28",
+        "iCalUID": "person-19@example.com",
+        "id": "jcle2rclot94kb_20270118T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rclot94kb",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series clot94kb",
+        "updated": "2026-11-02T07:37:19.890Z"
+      },
+      {
+        "created": "2026-11-02T07:37:20.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-04T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210082595838\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-29",
+        "iCalUID": "person-20@example.com",
+        "id": "jcle1tqq28la8",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-04T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live poll tqq28la8 edited",
+        "updated": "2026-11-02T07:37:21.297Z"
+      },
+      {
+        "created": "2026-11-02T07:38:43.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-02-01T11:15:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210249406654\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-30",
+        "iCalUID": "person-21@example.com",
+        "id": "jcls1tdfrrks0i",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-02-01T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create timed dfrrks0i",
+        "updated": "2026-11-02T07:38:44.703Z"
+      },
+      {
+        "created": "2026-11-02T07:38:43.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "date": "2027-02-03"
+        },
+        "etag": "\"3587210249991294\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-31",
+        "iCalUID": "person-22@example.com",
+        "id": "jcls1adfrrks0i",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "overrides": [
+            {
+              "method": "popup",
+              "minutes": 10
+            }
+          ],
+          "useDefault": false
+        },
+        "sequence": 1,
+        "start": {
+          "date": "2027-02-02"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create all-day dfrrks0i",
+        "updated": "2026-11-02T07:38:44.995Z"
+      },
+      {
+        "created": "2026-11-02T07:38:59.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-02-01T11:15:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210281435102\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-32",
+        "iCalUID": "person-23@example.com",
+        "id": "jcls1tgi2pdtrl",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-02-01T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create timed gi2pdtrl",
+        "updated": "2026-11-02T07:39:00.717Z"
+      },
+      {
+        "created": "2026-11-02T07:39:00.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "date": "2027-02-03"
+        },
+        "etag": "\"3587210282196894\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-33",
+        "iCalUID": "person-24@example.com",
+        "id": "jcls1agi2pdtrl",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "overrides": [
+            {
+              "method": "popup",
+              "minutes": 10
+            }
+          ],
+          "useDefault": false
+        },
+        "sequence": 1,
+        "start": {
+          "date": "2027-02-02"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create all-day gi2pdtrl",
+        "updated": "2026-11-02T07:39:01.098Z"
+      },
+      {
+        "created": "2026-11-02T07:39:23.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-02-01T11:15:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210329955390\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-34",
+        "iCalUID": "person-25@example.com",
+        "id": "jcls1to9jqk3sb",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-02-01T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create timed o9jqk3sb",
+        "updated": "2026-11-02T07:39:24.977Z"
+      },
+      {
+        "created": "2026-11-02T07:39:24.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "date": "2027-02-03"
+        },
+        "etag": "\"3587210330520030\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-35",
+        "iCalUID": "person-26@example.com",
+        "id": "jcls1ao9jqk3sb",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "overrides": [
+            {
+              "method": "popup",
+              "minutes": 10
+            }
+          ],
+          "useDefault": false
+        },
+        "sequence": 1,
+        "start": {
+          "date": "2027-02-02"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create all-day o9jqk3sb",
+        "updated": "2026-11-02T07:39:25.260Z"
+      },
+      {
+        "created": "2026-11-02T07:39:27.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-04T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210337058814\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-36",
+        "iCalUID": "person-27@example.com",
+        "id": "jcle15br4082v",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-04T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live poll 5br4082v edited",
+        "updated": "2026-11-02T07:39:28.529Z"
+      },
+      {
+        "created": "2026-11-02T07:39:28.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-05T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210340622910\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-37",
+        "iCalUID": "person-28@example.com",
+        "id": "jcle2s318bjre4",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-05T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live removed 318bjre4",
+        "updated": "2026-11-02T07:39:30.311Z"
+      },
+      {
+        "created": "2026-11-02T07:39:29.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-11T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210343136030\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-38",
+        "iCalUID": "person-29@example.com",
+        "id": "jcle2r318bjre4_20270111T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2r318bjre4",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series 318bjre4",
+        "updated": "2026-11-02T07:39:31.568Z"
+      },
+      {
+        "created": "2026-11-02T07:39:29.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-25T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210343136030\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-39",
+        "iCalUID": "person-29@example.com",
+        "id": "jcle2r318bjre4_20270125T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2r318bjre4",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series 318bjre4",
+        "updated": "2026-11-02T07:39:31.568Z"
+      },
+      {
+        "created": "2026-11-02T07:39:29.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-18T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210343136030\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-40",
+        "iCalUID": "person-29@example.com",
+        "id": "jcle2r318bjre4_20270118T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2r318bjre4",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series 318bjre4",
+        "updated": "2026-11-02T07:39:31.568Z"
+      },
+      {
+        "created": "2026-11-02T07:40:14.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-02-01T11:15:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210430314942\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-41",
+        "iCalUID": "person-30@example.com",
+        "id": "jcls1tbds5iubl",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-02-01T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create timed bds5iubl",
+        "updated": "2026-11-02T07:40:15.157Z"
+      },
+      {
+        "created": "2026-11-02T07:40:14.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "date": "2027-02-03"
+        },
+        "etag": "\"3587210430937662\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-42",
+        "iCalUID": "person-31@example.com",
+        "id": "jcls1abds5iubl",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "overrides": [
+            {
+              "method": "popup",
+              "minutes": 10
+            }
+          ],
+          "useDefault": false
+        },
+        "sequence": 1,
+        "start": {
+          "date": "2027-02-02"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create all-day bds5iubl",
+        "updated": "2026-11-02T07:40:15.468Z"
+      },
+      {
+        "created": "2026-11-02T07:40:16.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-05T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210436168158\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-43",
+        "iCalUID": "person-32@example.com",
+        "id": "jcle2sevphm946",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-05T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live removed evphm946",
+        "updated": "2026-11-02T07:40:18.084Z"
+      },
+      {
+        "created": "2026-11-02T07:40:17.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-11T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210438419678\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-44",
+        "iCalUID": "person-33@example.com",
+        "id": "jcle2revphm946_20270111T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2revphm946",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series evphm946",
+        "updated": "2026-11-02T07:40:19.209Z"
+      },
+      {
+        "created": "2026-11-02T07:40:17.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-25T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210438419678\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-45",
+        "iCalUID": "person-33@example.com",
+        "id": "jcle2revphm946_20270125T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2revphm946",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series evphm946",
+        "updated": "2026-11-02T07:40:19.209Z"
+      },
+      {
+        "created": "2026-11-02T07:40:17.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-18T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210438419678\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-46",
+        "iCalUID": "person-33@example.com",
+        "id": "jcle2revphm946_20270118T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2revphm946",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series evphm946",
+        "updated": "2026-11-02T07:40:19.209Z"
+      },
+      {
+        "created": "2026-11-02T07:40:20.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-04T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210442871998\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-47",
+        "iCalUID": "person-34@example.com",
+        "id": "jcle1vs8bf484",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-04T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live poll vs8bf484 edited",
+        "updated": "2026-11-02T07:40:21.435Z"
+      },
+      {
+        "created": "2026-11-02T07:42:47.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-02-01T11:15:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210737526046\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-48",
+        "iCalUID": "person-35@example.com",
+        "id": "jcls1tq4irrt2f",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-02-01T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create timed q4irrt2f",
+        "updated": "2026-11-02T07:42:48.763Z"
+      },
+      {
+        "created": "2026-11-02T07:42:48.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "date": "2027-02-03"
+        },
+        "etag": "\"3587210738360222\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-49",
+        "iCalUID": "person-36@example.com",
+        "id": "jcls1aq4irrt2f",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "overrides": [
+            {
+              "method": "popup",
+              "minutes": 10
+            }
+          ],
+          "useDefault": false
+        },
+        "sequence": 1,
+        "start": {
+          "date": "2027-02-02"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create all-day q4irrt2f",
+        "updated": "2026-11-02T07:42:49.180Z"
+      },
+      {
+        "created": "2026-11-02T07:42:50.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-05T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210743352574\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-50",
+        "iCalUID": "person-37@example.com",
+        "id": "jcle2sv5pmprgd",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-05T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live removed v5pmprgd",
+        "updated": "2026-11-02T07:42:51.676Z"
+      },
+      {
+        "created": "2026-11-02T07:42:50.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-11T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210745439998\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-51",
+        "iCalUID": "person-38@example.com",
+        "id": "jcle2rv5pmprgd_20270111T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rv5pmprgd",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series v5pmprgd",
+        "updated": "2026-11-02T07:42:52.719Z"
+      },
+      {
+        "created": "2026-11-02T07:42:50.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-25T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210745439998\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-52",
+        "iCalUID": "person-38@example.com",
+        "id": "jcle2rv5pmprgd_20270125T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rv5pmprgd",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series v5pmprgd",
+        "updated": "2026-11-02T07:42:52.719Z"
+      },
+      {
+        "created": "2026-11-02T07:42:50.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-18T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210745439998\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-53",
+        "iCalUID": "person-38@example.com",
+        "id": "jcle2rv5pmprgd_20270118T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rv5pmprgd",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series v5pmprgd",
+        "updated": "2026-11-02T07:42:52.719Z"
+      },
+      {
+        "created": "2026-11-02T07:42:53.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-04T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587210749824606\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-54",
+        "iCalUID": "person-39@example.com",
+        "id": "jcle1r8t7hfsd",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-04T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live poll r8t7hfsd edited",
+        "updated": "2026-11-02T07:42:54.912Z"
+      },
+      {
+        "created": "2026-11-02T07:49:03.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-02-01T11:15:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587211489146558\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-55",
+        "iCalUID": "person-40@example.com",
+        "id": "jcls1t855ij4in",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-02-01T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create timed 855ij4in",
+        "updated": "2026-11-02T07:49:04.573Z"
+      },
+      {
+        "created": "2026-11-02T07:49:03.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "date": "2027-02-03"
+        },
+        "etag": "\"3587211489712510\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-56",
+        "iCalUID": "person-41@example.com",
+        "id": "jcls1a855ij4in",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "overrides": [
+            {
+              "method": "popup",
+              "minutes": 10
+            }
+          ],
+          "useDefault": false
+        },
+        "sequence": 1,
+        "start": {
+          "date": "2027-02-02"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create all-day 855ij4in",
+        "updated": "2026-11-02T07:49:04.856Z"
+      },
+      {
+        "created": "2026-11-02T07:49:06.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-04T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587211496088446\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-57",
+        "iCalUID": "person-42@example.com",
+        "id": "jcle1c0b82ojm",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-04T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live poll c0b82ojm edited",
+        "updated": "2026-11-02T07:49:08.044Z"
+      },
+      {
+        "created": "2026-11-02T07:49:08.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-05T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587211499313406\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-58",
+        "iCalUID": "person-43@example.com",
+        "id": "jcle2svdissg70",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-05T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live removed vdissg70",
+        "updated": "2026-11-02T07:49:09.656Z"
+      },
+      {
+        "created": "2026-11-02T07:49:08.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-11T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587211501478270\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-59",
+        "iCalUID": "person-44@example.com",
+        "id": "jcle2rvdissg70_20270111T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rvdissg70",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-11T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series vdissg70",
+        "updated": "2026-11-02T07:49:10.739Z"
+      },
+      {
+        "created": "2026-11-02T07:49:08.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-25T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587211501478270\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-60",
+        "iCalUID": "person-44@example.com",
+        "id": "jcle2rvdissg70_20270125T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rvdissg70",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-25T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series vdissg70",
+        "updated": "2026-11-02T07:49:10.739Z"
+      },
+      {
+        "created": "2026-11-02T07:49:08.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-01-18T08:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587211501478270\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-61",
+        "iCalUID": "person-44@example.com",
+        "id": "jcle2rvdissg70_20270118T070000Z",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "originalStartTime": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "recurringEventId": "jcle2rvdissg70",
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-01-18T08:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live series vdissg70",
+        "updated": "2026-11-02T07:49:10.739Z"
+      },
+      {
+        "created": "2026-11-02T08:15:29.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-02-01T11:15:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587214660864926\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-62",
+        "iCalUID": "person-45@example.com",
+        "id": "jcls1tkaq2bd4g",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-02-01T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create timed kaq2bd4g",
+        "updated": "2026-11-02T08:15:30.432Z"
+      },
+      {
+        "created": "2026-11-02T08:15:29.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "date": "2027-02-03"
+        },
+        "etag": "\"3587214661402718\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-63",
+        "iCalUID": "person-46@example.com",
+        "id": "jcls1akaq2bd4g",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "overrides": [
+            {
+              "method": "popup",
+              "minutes": 10
+            }
+          ],
+          "useDefault": false
+        },
+        "sequence": 1,
+        "start": {
+          "date": "2027-02-02"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create all-day kaq2bd4g",
+        "updated": "2026-11-02T08:15:30.701Z"
+      },
+      {
+        "created": "2026-11-02T08:18:04.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-02-01T11:15:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587214973408862\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-64",
+        "iCalUID": "person-47@example.com",
+        "id": "jcls1totf4p0uv",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 1,
+        "start": {
+          "dateTime": "2027-02-01T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create timed otf4p0uv",
+        "updated": "2026-11-02T08:18:06.704Z"
+      },
+      {
+        "created": "2026-11-02T08:18:05.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "date": "2027-02-03"
+        },
+        "etag": "\"3587214974087134\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-65",
+        "iCalUID": "person-48@example.com",
+        "id": "jcls1aotf4p0uv",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "overrides": [
+            {
+              "method": "popup",
+              "minutes": 10
+            }
+          ],
+          "useDefault": false
+        },
+        "sequence": 1,
+        "start": {
+          "date": "2027-02-02"
+        },
+        "status": "cancelled",
+        "summary": "jcl-live create all-day otf4p0uv",
+        "updated": "2026-11-02T08:18:07.043Z"
+      }
+    ],
+    "nextSyncToken": "CO_vhsns6JcDEO_vhsns6JcDGAUgnP_l4AMonP_l4AM="
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate, no-transform"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:18:08 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 08:18:08 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-l2-request-path": [
+      "l2-managed-14"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/calendar/v3/calendars/person-1@example.com/events"
+  },
+  "status": 200
+}

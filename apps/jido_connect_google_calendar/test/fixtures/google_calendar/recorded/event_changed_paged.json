@@ -1,0 +1,118 @@
+{
+  "body": {
+    "items": [
+      {
+        "created": "2026-11-02T08:49:33.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-03-03T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587218747725406\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-1",
+        "iCalUID": "person-2@example.com",
+        "id": "jclr3ase6jte6l",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2027-03-03T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live paged se6jte6l",
+        "updated": "2026-11-02T08:49:33.862Z"
+      },
+      {
+        "created": "2026-11-02T08:49:34.000Z",
+        "creator": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "end": {
+          "dateTime": "2027-03-04T10:30:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "etag": "\"3587218748328926\"",
+        "eventType": "default",
+        "htmlLink": "htmlLink-2",
+        "iCalUID": "person-3@example.com",
+        "id": "jclr3bse6jte6l",
+        "organizer": {
+          "email": "person-1@example.com",
+          "self": true
+        },
+        "reminders": {
+          "useDefault": true
+        },
+        "sequence": 0,
+        "start": {
+          "dateTime": "2027-03-04T10:00:00+01:00",
+          "timeZone": "Europe/Berlin"
+        },
+        "status": "confirmed",
+        "summary": "jcl-live paged se6jte6l",
+        "updated": "2026-11-02T08:49:34.164Z"
+      }
+    ],
+    "nextPageToken": "CjMKIwohCgsInp2h1wYQmIO2ThISChAKDmpjbHIzYnNlNmp0ZTZsGgwInp2h1wYQsLbKnwLAPgE="
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "cache-control": [
+      "private, max-age=0, must-revalidate, no-transform"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:49:34 GMT"
+    ],
+    "expires": [
+      "Mon, 02 Nov 2026 08:49:34 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-l2-request-path": [
+      "l2-managed-14"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/calendar/v3/calendars/person-1@example.com/events"
+  },
+  "status": 200
+}

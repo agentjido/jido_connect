@@ -103,3 +103,16 @@ also checks nonempty variables whose names end in `_TOKEN`, `_SECRET`,
 | `CONFLUENCE_LIVE_DESTRUCTIVE` | Explicitly enables Confluence live writes |
 | `TEMPO_OAUTH_REDIRECT_URI` | Tempo test OAuth callback URL |
 | `TEMPO_LIVE_DESTRUCTIVE` | Explicitly enables Tempo live writes |
+
+### Google Calendar
+
+| Variable | Kind | Use |
+| --- | --- | --- |
+| `GOOGLE_CALENDAR_EVENT_ID` | setting | Meeting with a 963-byte description, the test user and `GOOGLE_SEED_ATTENDEES` as attendees, an agenda and a handout attachment, and Meet data |
+| `GOOGLE_CALENDAR_AGENDA_FILE_ID` | setting | Google Docs agenda attached to that event |
+| `GOOGLE_CALENDAR_HANDOUT_URL` | setting | URL-only attachment of that event, ending in `&jcl=a%20b` |
+| `GOOGLE_CALENDAR_CONFERENCE_ID` | setting | Meet conference ID of that event |
+| `GOOGLE_MEET_RECORDING_FILE_ID` | setting | Drive file of that recording, also attached to `GOOGLE_CALENDAR_EVENT_ID` |
+| `GOOGLE_MEET_NOTES_DOCUMENT_ID` | setting | Gemini notes document of that meeting, attached to `GOOGLE_CALENDAR_EVENT_ID`; in the test tenant Meet writes the transcript as a tab of it, so it is also the transcript's document. Where transcript and notes are separate documents, the Drive export test needs the notes document |
+| `GOOGLE_TEST_USER` | setting | Seed input: the test user |
+| `GOOGLE_SEED_ATTENDEES` | setting | Seed input: attendees for seeded events |
