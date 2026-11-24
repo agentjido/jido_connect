@@ -160,3 +160,11 @@ also checks nonempty variables whose names end in `_TOKEN`, `_SECRET`,
 | Variable | Kind | Use |
 | --- | --- | --- |
 | `GOOGLE_DOCS_SCRATCH_DOCUMENT_ID` | setting | Scratch document |
+
+### Google Meet
+
+| Variable | Kind | Use |
+| --- | --- | --- |
+| `GOOGLE_MEET_CONFERENCE_RECORD` | setting | Past meeting with transcript and recording |
+| `GOOGLE_MEET_TRANSCRIPT` | setting | Transcript of that meeting |
+| `GOOGLE_MEET_RECORDING` | setting | Recording of that meeting |

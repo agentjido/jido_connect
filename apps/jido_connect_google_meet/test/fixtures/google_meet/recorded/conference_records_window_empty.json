@@ -1,0 +1,46 @@
+{
+  "body": {},
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Mon, 02 Nov 2026 08:45:27 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "server-timing": [
+      "gfet4t7; dur=412"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-02",
+  "request": {
+    "method": "GET",
+    "path": "/v2/conferenceRecords"
+  },
+  "status": 200
+}

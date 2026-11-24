@@ -1,5 +1,25 @@
 defmodule Jido.Connect.Google.Meet.Participant do
-  @moduledoc "Normalized Google Meet conference participant metadata."
+  @moduledoc """
+  Normalized Google Meet conference participant metadata.
+
+  `participant_name` is the resource name
+  `conferenceRecords/<record>/participants/<participant>` that a transcript
+  entry names as its speaker. Google sends exactly one user kind per
+  participant, and `user_type` names it:
+
+  - `"signed_in_user"`: a signed-in Google user. `user` is the user's
+    resource name `users/<id>`, and `signed_in_user` holds the raw
+    `signedinUser` map.
+  - `"anonymous_user"`: a participant without a Google account.
+    `anonymous_user` holds the raw `anonymousUser` map.
+  - `"phone_user"`: a participant who dialed in. `phone_user` holds the raw
+    `phoneUser` map.
+
+  `display_name` is the `displayName` of that user kind. `user_type`, `user`
+  and `display_name` are `nil` when the response leaves the user kind out, as
+  under a `fields` projection. `earliest_start_time` and `latest_end_time` are
+  the first join and the last leave of the participant in the conference.
+  """
 
   @schema Zoi.struct(
             __MODULE__,

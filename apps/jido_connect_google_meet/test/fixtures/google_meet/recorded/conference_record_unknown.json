@@ -1,0 +1,52 @@
+{
+  "body": {
+    "error": {
+      "code": 403,
+      "message": "Permission denied on resource Conference (or it might not exist)",
+      "status": "PERMISSION_DENIED"
+    }
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 14:56:53 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "server-timing": [
+      "gfet4t7; dur=140"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "GET",
+    "path": "/v2/conferenceRecords/tzT2Egxvkox7JrzCoRAODxIUOBEQAjIGCIoCIAAYAwg"
+  },
+  "status": 403
+}

@@ -1,0 +1,63 @@
+{
+  "body": {
+    "error": {
+      "code": 400,
+      "details": [
+        {
+          "@type": "type.googleapis.com/google.rpc.BadRequest",
+          "fieldViolations": [
+            {
+              "description": "Invalid conference id",
+              "field": "name"
+            }
+          ]
+        }
+      ],
+      "message": "Invalid conference id",
+      "status": "INVALID_ARGUMENT"
+    }
+  },
+  "headers": {
+    "accept-ranges": [
+      "none"
+    ],
+    "alt-svc": [
+      "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+    ],
+    "content-type": [
+      "application/json; charset=UTF-8"
+    ],
+    "date": [
+      "Fri, 06 Nov 2026 14:48:28 GMT"
+    ],
+    "server": [
+      "ESF"
+    ],
+    "server-timing": [
+      "gfet4t7; dur=105"
+    ],
+    "transfer-encoding": [
+      "chunked"
+    ],
+    "vary": [
+      "X-Origin",
+      "Referer",
+      "Origin,Accept-Encoding"
+    ],
+    "x-content-type-options": [
+      "nosniff"
+    ],
+    "x-frame-options": [
+      "SAMEORIGIN"
+    ],
+    "x-xss-protection": [
+      "0"
+    ]
+  },
+  "recorded_at": "2026-11-06",
+  "request": {
+    "method": "GET",
+    "path": "/v2/conferenceRecords/not-a-conference/participants"
+  },
+  "status": 400
+}
